@@ -68,6 +68,9 @@ const PORTFOLIO_LOCALE_MESSAGES = Object.freeze({
     'portfolio.graph.flat': 'Flat',
     'portfolio.graph.flatTitle': 'Toggle flat graph mode',
     'portfolio.graph.pathTitle': 'Use {label} connection paths',
+    'portfolio.graph.action.content': 'Content',
+    'portfolio.graph.action.branch': 'Branch',
+    'portfolio.graph.action.open': 'Open link',
   },
   ru: {
     'portfolio.page.title': 'Vladimir Matiasevich | Lead Engineer / R&D / Agentic AI',
@@ -112,6 +115,9 @@ const PORTFOLIO_LOCALE_MESSAGES = Object.freeze({
     'portfolio.graph.flat': 'Flat',
     'portfolio.graph.flatTitle': 'Переключить flat-режим графа',
     'portfolio.graph.pathTitle': 'Использовать линии связи: {label}',
+    'portfolio.graph.action.content': 'Контент',
+    'portfolio.graph.action.branch': 'Ветка',
+    'portfolio.graph.action.open': 'Открыть ссылку',
   },
   es: {
     'portfolio.page.title': 'Vladimir Matiasevich | Ingeniero líder / I+D / IA agéntica',
@@ -156,6 +162,9 @@ const PORTFOLIO_LOCALE_MESSAGES = Object.freeze({
     'portfolio.graph.flat': 'Flat',
     'portfolio.graph.flatTitle': 'Alternar modo flat del grafo',
     'portfolio.graph.pathTitle': 'Usar conexiones {label}',
+    'portfolio.graph.action.content': 'Contenido',
+    'portfolio.graph.action.branch': 'Rama',
+    'portfolio.graph.action.open': 'Abrir enlace',
   },
 });
 
@@ -536,6 +545,20 @@ const GRAPH_PATH_STYLES = [
   { style: 'straight', label: 'Straight', icon: 'trending_flat' },
 ];
 
+const GRAPH_ACTION_PATHS = Object.freeze({
+  article: 'M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM13 9V3.5L18.5 9H13zM8 13h8v2H8v-2zm0 4h8v2H8v-2z',
+  branch: 'M12 2l2 4h-4l2-4zm0 20l-2-4h4l-2 4zm10-10l-4 2v-4l4 2zM2 12l4-2v4l-4-2zm10-4a4 4 0 100 8 4 4 0 000-8z',
+  open: 'M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5V5z',
+});
+
+function createPortfolioNodeActionItems() {
+  return [
+    { action: 'content', label: tPortfolio('graph.action.content'), path: GRAPH_ACTION_PATHS.article },
+    { action: 'branch', label: tPortfolio('graph.action.branch'), path: GRAPH_ACTION_PATHS.branch },
+    { action: 'open', label: tPortfolio('graph.action.open'), path: GRAPH_ACTION_PATHS.open },
+  ];
+}
+
 function getCurrentGraphViewMode() {
   if (typeof location === 'undefined') return 'structured';
   return resolveInitialGraphViewMode(new URLSearchParams(location.search));
@@ -913,7 +936,11 @@ class PortfolioTreePanel extends HTMLElement {
         defaultExpandedIds: defaultExpandedTreeIds,
         onSelect: (item) => {
           let id = resolveTreeSelection(item);
-          if (id) portfolioRuntime.select(id, { focus: true });
+          if (id) {
+            portfolioRuntime.select(id, { focus: true });
+            let layout = /** @type {any} */ (this.closest('panel-layout'));
+            layout?.closeDrawer?.('start');
+          }
         },
       });
       portfolioRuntime.setTree(panel);
@@ -931,6 +958,7 @@ class PortfolioGraphPanel extends HTMLElement {
   flatGraph = null;
   /** @type {any} */
   graphController = null;
+  _orientationParallaxRequested = false;
 
   connectedCallback() {
     if (this._ready) return;
@@ -971,6 +999,8 @@ class PortfolioGraphPanel extends HTMLElement {
     this.applyGraphViewMode();
     canvas.setPanels(false);
     canvas.setViewportLocked(false);
+    flatGraph?.setActionItems?.(createPortfolioNodeActionItems());
+    flatGraph?.addEventListener('pointerdown', () => this.enableFlatGraphOrientationParallax(), { once: true });
     this.applyPathStyle();
     setNodePositions(canvas, projects);
     canvas.addEventListener('selection-changed', (event) => {
@@ -991,6 +1021,7 @@ class PortfolioGraphPanel extends HTMLElement {
         portfolioRuntime.select(id, { focus: false });
       }
     });
+    flatGraph?.addEventListener('toolbar-action', (event) => this.onFlatGraphToolbarAction(event));
     this.addEventListener('panel-menu-action', (event) => this.onPanelMenuAction(event));
 
     requestAnimationFrame(() => {
@@ -1000,6 +1031,44 @@ class PortfolioGraphPanel extends HTMLElement {
       portfolioRuntime.setGraphController(this.graphController);
       this.syncPanelMenuActions();
     });
+  }
+
+  onFlatGraphToolbarAction(event) {
+    let action = event.detail?.action || '';
+    let id = resolveFlatGraphSelection(event.detail?.nodeId || '');
+    if (!id) return;
+    let entry = portfolioRuntime.entries.get(id);
+    if (!entry) return;
+
+    if (action === 'open') {
+      if (entry.href && typeof globalThis.open === 'function') {
+        globalThis.open(entry.href, '_blank', 'noopener');
+        return;
+      }
+      portfolioRuntime.select(id, { focus: false });
+      return;
+    }
+
+    if (action === 'branch') {
+      portfolioRuntime.select(id, { focus: true });
+      return;
+    }
+
+    if (action === 'content') {
+      portfolioRuntime.select(id, { focus: false });
+    }
+  }
+
+  async enableFlatGraphOrientationParallax() {
+    if (this._orientationParallaxRequested) return;
+    this._orientationParallaxRequested = true;
+    let result = await this.flatGraph?.enableDeviceOrientationParallax?.({
+      strength: 28,
+      maxTilt: 32,
+    });
+    if (result && !result.enabled) {
+      this.flatGraph?.setAttribute?.('data-orientation-parallax', result.reason || result.permission || 'disabled');
+    }
   }
 
   applyGraphMode() {
