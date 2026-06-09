@@ -816,34 +816,39 @@ const portfolioRuntime = {
 
 function createPortfolioLayoutTree() {
   let treePanel = LayoutTree.createPanel('portfolio-tree', {}, {
-    importance: 84,
+    importance: 76,
     minInlineSize: 220,
     minBlockSize: 180,
     collapse: 'auto',
+    mobileDock: 'start',
   });
   let graphPanel = LayoutTree.createPanel('portfolio-graph', {}, {
-    importance: 100,
+    importance: 88,
     minInlineSize: 420,
     minBlockSize: 320,
     collapse: 'manual',
+    mobileDock: 'end',
   });
   let viewerPanel = LayoutTree.createPanel('portfolio-viewer', {}, {
-    importance: 72,
+    importance: 100,
     minInlineSize: 320,
     minBlockSize: 240,
-    collapse: 'auto',
+    collapse: 'never',
+    mobileDock: 'primary',
   });
   let contentSplit = LayoutTree.createSplit('horizontal', viewerPanel, graphPanel, 0.32, {
     importance: 90,
     minInlineSize: 740,
     minBlockSize: 320,
     collapse: 'never',
+    responsiveMode: 'drawer',
   });
   return LayoutTree.createSplit('horizontal', treePanel, contentSplit, 0.22, {
     importance: 90,
     minInlineSize: 960,
     minBlockSize: 420,
     collapse: 'never',
+    responsiveMode: 'drawer',
   });
 }
 
@@ -1107,9 +1112,9 @@ class PortfolioWorkspace extends HTMLElement {
         min-panel-size="150"
         min-panel-inline-size="220"
         min-panel-block-size="180"
-        responsive-mode="preserve"
-        overflow-mode="collapse"
-        auto-collapse="false"></panel-layout>
+        responsive-mode="drawer"
+        responsive-breakpoint="760"
+        overflow-mode="collapse"></panel-layout>
     `;
     let layout = /** @type {any} */ (this.querySelector('panel-layout'));
     if (!layout) return;
@@ -1117,32 +1122,32 @@ class PortfolioWorkspace extends HTMLElement {
       title: tPortfolio('panel.materials'),
       icon: 'folder',
       component: 'portfolio-tree-panel',
-      behavior: { importance: 84, minInlineSize: 220, collapse: 'auto' },
+      behavior: { importance: 76, minInlineSize: 220, collapse: 'auto', mobileDock: 'start' },
     });
     layout.registerPanelType('portfolio-graph', {
       title: tPortfolio('panel.graph'),
       icon: 'hub',
       component: 'portfolio-graph-panel',
-      behavior: { importance: 100, minInlineSize: 420, collapse: 'manual' },
+      behavior: { importance: 88, minInlineSize: 420, collapse: 'manual', mobileDock: 'end' },
       menuActions: createGraphPanelMenuActions(),
     });
     layout.registerPanelType('portfolio-viewer', {
       title: tPortfolio('panel.content'),
       icon: 'article',
       component: 'portfolio-viewer-panel',
-      behavior: { importance: 72, minInlineSize: 320, collapse: 'auto' },
+      behavior: { importance: 100, minInlineSize: 320, collapse: 'never', mobileDock: 'primary' },
     });
     layout.registerPanelType('portfolio-theme', {
       title: tPortfolio('panel.theme'),
       icon: 'palette',
       component: 'portfolio-theme-panel',
-      behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual' },
+      behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end' },
     });
     this._onThemeOpenFull = () => {
       layout.openPanel('portfolio-theme', {
         direction: 'horizontal',
         ratio: 0.72,
-        behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual' },
+        behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end' },
         source: 'cascade-theme-widget',
         uiInvoked: true,
       });
