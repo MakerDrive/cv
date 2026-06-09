@@ -958,14 +958,18 @@ class PortfolioGraphPanel extends HTMLElement {
   flatGraph = null;
   /** @type {any} */
   graphController = null;
-  _orientationParallaxRequested = false;
 
   connectedCallback() {
     if (this._ready) return;
     this._ready = true;
     this.innerHTML = /*html*/ `
       <node-canvas class="portfolio-canvas"></node-canvas>
-      <canvas-graph class="portfolio-flat-graph" hidden></canvas-graph>
+      <canvas-graph
+        class="portfolio-flat-graph"
+        device-orientation-parallax
+        device-orientation-parallax-strength="28"
+        device-orientation-parallax-max-tilt="32"
+        hidden></canvas-graph>
     `;
     let canvas = /** @type {any} */ (this.querySelector('node-canvas'));
     let flatGraph = /** @type {any} */ (this.querySelector('canvas-graph'));
@@ -1000,7 +1004,6 @@ class PortfolioGraphPanel extends HTMLElement {
     canvas.setPanels(false);
     canvas.setViewportLocked(false);
     flatGraph?.setActionItems?.(createPortfolioNodeActionItems());
-    flatGraph?.addEventListener('pointerdown', () => this.enableFlatGraphOrientationParallax(), { once: true });
     this.applyPathStyle();
     setNodePositions(canvas, projects);
     canvas.addEventListener('selection-changed', (event) => {
@@ -1022,6 +1025,7 @@ class PortfolioGraphPanel extends HTMLElement {
       }
     });
     flatGraph?.addEventListener('toolbar-action', (event) => this.onFlatGraphToolbarAction(event));
+    flatGraph?.addEventListener('orientation-parallax-status', (event) => this.onFlatGraphOrientationParallaxStatus(event));
     this.addEventListener('panel-menu-action', (event) => this.onPanelMenuAction(event));
 
     requestAnimationFrame(() => {
@@ -1059,16 +1063,12 @@ class PortfolioGraphPanel extends HTMLElement {
     }
   }
 
-  async enableFlatGraphOrientationParallax() {
-    if (this._orientationParallaxRequested) return;
-    this._orientationParallaxRequested = true;
-    let result = await this.flatGraph?.enableDeviceOrientationParallax?.({
-      strength: 28,
-      maxTilt: 32,
-    });
-    if (result && !result.enabled) {
-      this.flatGraph?.setAttribute?.('data-orientation-parallax', result.reason || result.permission || 'disabled');
-    }
+  onFlatGraphOrientationParallaxStatus(event) {
+    let detail = event.detail || {};
+    this.flatGraph?.setAttribute?.(
+      'data-orientation-parallax',
+      detail.enabled ? 'enabled' : detail.reason || detail.permission || 'disabled'
+    );
   }
 
   applyGraphMode() {
