@@ -22,13 +22,14 @@
     "test": "npm run check:types",
     "check:types": "npx tsc --noEmit",
     "copy-robots": "cp ./src/static-pages/robots.txt ./dist/robots.txt",
+    "copy-404": "cp ./dist/index.html ./dist/404.html",
     "write-material-symbols-css": "node ./scripts/write-material-symbols-css.js",
-    "build": "npx jsda build && npm run copy-robots && npm run write-material-symbols-css"
+    "build": "npx jsda build && npm run copy-robots && npm run copy-404 && npm run write-material-symbols-css"
   },
   "dependencies": {
     "@symbiotejs/symbiote": "3.8.0-webmcp.2",
     "jsda-kit": "1.5.3",
-    "symbiote-ui": "0.3.0-alpha.41"
+    "symbiote-ui": "^0.3.0-alpha.42"
   },
   "overrides": {
     "@symbiotejs/symbiote": "$@symbiotejs/symbiote",
