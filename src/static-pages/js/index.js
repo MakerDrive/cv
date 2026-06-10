@@ -614,11 +614,17 @@ function normalizeRoutePath(path) {
     .replace(/\/index$/, '');
 }
 
-function getPortfolioBasePath() {
+function _resolveBasePath() {
   if (typeof document === 'undefined' || typeof location === 'undefined') return '/';
-  let base = document.querySelector('base')?.href || './';
+  let base = document.querySelector('base')?.getAttribute('href') || './';
   let pathname = new URL(base, location.href).pathname;
   return pathname.endsWith('/') ? pathname : `${pathname}/`;
+}
+
+const _cachedBasePath = _resolveBasePath();
+
+function getPortfolioBasePath() {
+  return _cachedBasePath;
 }
 
 function getInitialPortfolioSelection() {
