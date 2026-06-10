@@ -560,6 +560,16 @@ const flatGroupSelection = new Map([
   ['group/pulse', 'pulse/index'],
   ['group/skills', 'skills/index'],
 ]);
+const portfolioRouteById = new Map(
+  [...portfolioEntries.keys()].map((id) => [
+    id,
+    id.endsWith('/index') ? id.slice(0, -'/index'.length) : id,
+  ])
+);
+const portfolioIdByRoute = new Map(
+  [...portfolioRouteById.entries()].map(([id, route]) => [route, id])
+);
+portfolioIdByRoute.set('', 'profile/photo');
 const directoryEntryIds = new Set([
   'projects/index',
   'pulse/index',
@@ -596,6 +606,36 @@ function createPortfolioNodeActionItems() {
 function getCurrentGraphViewMode() {
   if (typeof location === 'undefined') return 'structured';
   return resolveInitialGraphViewMode(new URLSearchParams(location.search));
+}
+
+function normalizeRoutePath(path) {
+  return String(path || '')
+    .replace(/^\/+|\/+$/g, '')
+    .replace(/\/index$/, '');
+}
+
+function getPortfolioBasePath() {
+  if (typeof document === 'undefined' || typeof location === 'undefined') return '/';
+  let base = document.querySelector('base')?.href || './';
+  let pathname = new URL(base, location.href).pathname;
+  return pathname.endsWith('/') ? pathname : `${pathname}/`;
+}
+
+function getInitialPortfolioSelection() {
+  if (typeof location === 'undefined') return 'profile/photo';
+  let basePath = getPortfolioBasePath();
+  let pathname = location.pathname;
+  let relativePath = pathname.startsWith(basePath)
+    ? pathname.slice(basePath.length)
+    : pathname.replace(/^\/+/, '');
+  let route = normalizeRoutePath(decodeURIComponent(relativePath));
+  return portfolioIdByRoute.get(route) || 'profile/photo';
+}
+
+function getPortfolioPath(id) {
+  let route = portfolioRouteById.get(id) || '';
+  let basePath = getPortfolioBasePath();
+  return route ? `${basePath}${route}/`.replace(/\/{2,}/g, '/') : basePath;
 }
 
 function createGraphPanelMenuActions({
@@ -771,7 +811,7 @@ function createPortfolioFlatGraphModel() {
 const portfolioRuntime = {
   entries: portfolioEntries,
   treeItems: portfolioTreeItems,
-  selectedId: 'profile/photo',
+  selectedId: getInitialPortfolioSelection(),
   graphMode: getCurrentGraphViewMode(),
   /** @type {any} */
   tree: null,
@@ -806,9 +846,10 @@ const portfolioRuntime = {
     this.syncViewer();
   },
 
-  select(id, { focus = false } = {}) {
+  select(id, { focus = false, updateUrl = true } = {}) {
     if (!this.entries.has(id)) return;
     this.selectedId = id;
+    if (updateUrl) this.syncUrl();
     this.syncTree();
     this.syncViewer();
     this.syncCanvas({ focus });
@@ -869,7 +910,25 @@ const portfolioRuntime = {
       select: entry.id,
     });
   },
+
+  syncUrl() {
+    if (typeof location === 'undefined' || typeof history === 'undefined') return;
+    let nextUrl = new URL(location.href);
+    nextUrl.pathname = getPortfolioPath(this.selectedId);
+    if (nextUrl.href !== location.href) {
+      history.pushState({ selectedId: this.selectedId }, '', nextUrl);
+    }
+  },
 };
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('popstate', () => {
+    let id = getInitialPortfolioSelection();
+    if (id && id !== portfolioRuntime.selectedId) {
+      portfolioRuntime.select(id, { focus: true, updateUrl: false });
+    }
+  });
+}
 
 function createPortfolioLayoutTree() {
   let treePanel = LayoutTree.createPanel('portfolio-tree', {}, {
