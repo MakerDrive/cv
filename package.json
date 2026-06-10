@@ -22,7 +22,7 @@
     "test": "npm run check:types",
     "check:types": "npx tsc --noEmit",
     "copy-robots": "cp ./src/static-pages/robots.txt ./dist/robots.txt",
-    "copy-404": "cp ./dist/index.html ./dist/404.html",
+    "copy-404": "sed 's|<base href=[^>]*>|<base href=/cv/>|' ./dist/index.html > ./dist/404.html",
     "write-material-symbols-css": "node ./scripts/write-material-symbols-css.js",
     "build": "npx jsda build && npm run copy-robots && npm run copy-404 && npm run write-material-symbols-css"
   },
