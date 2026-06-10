@@ -33,24 +33,35 @@ body:has(.pulse-screen) header {
   font-size: clamp(0.86rem, 2.2vw, 1.05rem);
   gap: var(--gap-mid);
   padding-inline: var(--gap-max);
+  z-index: var(--pulse-header-z, 20020);
 }
 
 .pulse-header-title {
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.pulse-header-menu-button {
+  display: none;
+}
+
 .pulse-theme-widget {
   flex: 0 0 auto;
   margin-inline-start: auto;
-  --sn-theme-widget-z: 1001;
+  --sn-theme-widget-z: var(--pulse-theme-widget-z, 20030);
 }
 
 .pulse-theme-widget .ctw-trigger {
   display: inline-flex;
+}
+
+.pulse-header-menu-button,
+.pulse-theme-widget .ctw-trigger {
   align-items: center;
+  justify-content: center;
   gap: 6px;
   min-height: 30px;
   padding: 4px 9px;
@@ -62,6 +73,13 @@ body:has(.pulse-screen) header {
   cursor: pointer;
 }
 
+.pulse-header-menu-button .material-symbols-outlined {
+  font-size: var(--sn-shell-menu-action-icon-size, var(--sn-layout-header-icon-size, 16px));
+  line-height: 1;
+}
+
+.pulse-header-menu-button:hover,
+.pulse-header-menu-button:focus-visible,
 .pulse-theme-widget .ctw-trigger:hover,
 .pulse-theme-widget .ctw-trigger[active] {
   background: var(--sn-button-hover-bg, var(--sn-node-hover, #e5e7eb));
@@ -315,6 +333,23 @@ footer a {
 @media (max-width: 520px) {
   header {
     font-size: 1rem;
+  }
+
+  body:has(.pulse-screen) header {
+    gap: var(--sn-layout-header-gap, 2px);
+  }
+
+  .pulse-header-menu-button {
+    display: inline-flex;
+  }
+
+  .pulse-header-menu-button,
+  .pulse-theme-widget .ctw-trigger {
+    inline-size: var(--pulse-header-action-size, 44px);
+    block-size: var(--pulse-header-action-size, 44px);
+    min-inline-size: var(--pulse-header-action-size, 44px);
+    min-block-size: var(--pulse-header-action-size, 44px);
+    padding: 0;
   }
 
   .pulse-header-title {

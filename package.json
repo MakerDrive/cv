@@ -28,7 +28,7 @@
   "dependencies": {
     "@symbiotejs/symbiote": "3.8.0-webmcp.2",
     "jsda-kit": "1.5.3",
-    "symbiote-ui": "0.3.0-alpha.40"
+    "symbiote-ui": "0.3.0-alpha.41"
   },
   "overrides": {
     "@symbiotejs/symbiote": "$@symbiotejs/symbiote",

@@ -61,6 +61,7 @@ const PORTFOLIO_LOCALE_MESSAGES = Object.freeze({
     'portfolio.panel.graph': 'Graph',
     'portfolio.panel.content': 'Content',
     'portfolio.panel.theme': 'Theme',
+    'portfolio.header.openMaterials': 'Open materials',
     'portfolio.graph.fit': 'Fit',
     'portfolio.graph.fitTitle': 'Fit graph into panel',
     'portfolio.graph.edit': 'Edit',
@@ -108,6 +109,7 @@ const PORTFOLIO_LOCALE_MESSAGES = Object.freeze({
     'portfolio.panel.graph': 'Граф',
     'portfolio.panel.content': 'Контент',
     'portfolio.panel.theme': 'Тема',
+    'portfolio.header.openMaterials': 'Открыть материалы',
     'portfolio.graph.fit': 'Вписать',
     'portfolio.graph.fitTitle': 'Вписать граф в панель',
     'portfolio.graph.edit': 'Правка',
@@ -155,6 +157,7 @@ const PORTFOLIO_LOCALE_MESSAGES = Object.freeze({
     'portfolio.panel.graph': 'Grafo',
     'portfolio.panel.content': 'Contenido',
     'portfolio.panel.theme': 'Tema',
+    'portfolio.header.openMaterials': 'Abrir materiales',
     'portfolio.graph.fit': 'Ajustar',
     'portfolio.graph.fitTitle': 'Ajustar el grafo al panel',
     'portfolio.graph.edit': 'Editar',
@@ -179,6 +182,32 @@ function tPortfolio(key, params = {}) {
 
 document.title = tPortfolio('page.title');
 document.querySelector('.pulse-header-title')?.replaceChildren(tPortfolio('page.title'));
+let headerMenuButton = document.querySelector('.pulse-header-menu-button');
+headerMenuButton?.setAttribute('aria-label', tPortfolio('header.openMaterials'));
+headerMenuButton?.setAttribute('title', tPortfolio('header.openMaterials'));
+function openMaterialsDrawerFromHeader() {
+  let handle = document.querySelector('.portfolio-layout .layout-drawer-handle-stack-start [data-drawer-panel-id]');
+  if (handle instanceof HTMLElement) {
+    if (handle.getAttribute('aria-expanded') !== 'true') {
+      handle.click();
+    }
+    return;
+  }
+  document.dispatchEvent(new CustomEvent('portfolio-open-materials', {
+    detail: { source: 'portfolio-header' },
+  }));
+}
+headerMenuButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  openMaterialsDrawerFromHeader();
+});
+document.addEventListener('click', (event) => {
+  let target = event.target;
+  if (!(target instanceof Element) || !target.closest('.pulse-header-menu-button')) return;
+  event.preventDefault();
+  openMaterialsDrawerFromHeader();
+});
 document.querySelector('.pulse-screen')?.setAttribute('aria-label', tPortfolio('page.aria'));
 
 configureMaterialSymbols({
@@ -484,26 +513,31 @@ function createTreeItems(projectItems, pulseItems) {
   });
 }
 
-function setNodePositions(canvas, projectItems) {
-  let positions = {
-    'profile/photo': [0, 0],
-    'bio/about': [340, -170],
-    'projects/index': [340, 78],
-    'pulse/index': [340, 336],
-    'skills/index': [-330, 68],
-    'skills/agentic-ai': [-710, -160],
-    'skills/product-ui': [-720, 60],
-    'skills/automation': [-700, 280],
+function createStructuredGraphGroups(projectItems) {
+  return {
+    biography: ['profile/photo', 'bio/about'],
+    skills: ['skills/index', ...skillEntries.map((skill) => skill.id)],
+    projects: ['projects/index', ...projectItems.map((project) => `projects/${project.slug}`)],
+    pulse: ['pulse/index', ...projectItems.map((project) => `pulse/${project.slug}`)],
   };
+}
 
-  projectItems.forEach((project, index) => {
-    positions[`projects/${project.slug}`] = [760, -300 + index * 168];
-    positions[`pulse/${project.slug}`] = [1180, -250 + index * 132];
+function setNodePositions(canvas, projectItems) {
+  canvas.autoLayout({
+    groups: createStructuredGraphGroups(projectItems),
+    direction: 'LR',
+    startX: 0,
+    startY: 0,
+    gapX: 120,
+    gapY: 56,
+    maxLayerRows: 4,
+    fit: true,
+    overlap: {
+      paddingX: 40,
+      paddingY: 32,
+      passes: 16,
+    },
   });
-
-  for (let [id, [x, y]] of Object.entries(positions)) {
-    canvas.setNodePosition(id, x, y);
-  }
 }
 
 const portfolioEntries = new Map(createPortfolioEntries().map((entry) => [entry.id, entry]));
@@ -851,6 +885,7 @@ function createPortfolioLayoutTree() {
     minBlockSize: 320,
     collapse: 'manual',
     mobileDock: 'end',
+    swipeControl: 'island',
   });
   let viewerPanel = LayoutTree.createPanel('portfolio-viewer', {}, {
     importance: 100,
@@ -864,14 +899,14 @@ function createPortfolioLayoutTree() {
     minInlineSize: 740,
     minBlockSize: 320,
     collapse: 'never',
-    responsiveMode: 'drawer',
+    responsiveMode: 'swipe',
   });
   return LayoutTree.createSplit('horizontal', treePanel, contentSplit, 0.22, {
     importance: 90,
     minInlineSize: 960,
     minBlockSize: 420,
     collapse: 'never',
-    responsiveMode: 'drawer',
+    responsiveMode: 'swipe',
   });
 }
 
@@ -1181,7 +1216,7 @@ class PortfolioWorkspace extends HTMLElement {
         min-panel-size="150"
         min-panel-inline-size="220"
         min-panel-block-size="180"
-        responsive-mode="drawer"
+        responsive-mode="swipe"
         responsive-breakpoint="760"
         overflow-mode="collapse"></panel-layout>
     `;
@@ -1197,7 +1232,7 @@ class PortfolioWorkspace extends HTMLElement {
       title: tPortfolio('panel.graph'),
       icon: 'hub',
       component: 'portfolio-graph-panel',
-      behavior: { importance: 88, minInlineSize: 420, collapse: 'manual', mobileDock: 'end' },
+      behavior: { importance: 88, minInlineSize: 420, collapse: 'manual', mobileDock: 'end', swipeControl: 'island' },
       menuActions: createGraphPanelMenuActions(),
     });
     layout.registerPanelType('portfolio-viewer', {
@@ -1221,13 +1256,23 @@ class PortfolioWorkspace extends HTMLElement {
         uiInvoked: true,
       });
     };
+    this._onOpenMaterials = () => {
+      let handle = layout.querySelector('.layout-drawer-handle-stack-start [data-drawer-panel-id]');
+      if (handle && handle.getAttribute('aria-expanded') !== 'true') {
+        handle.click();
+      }
+    };
     document.addEventListener('cascade-theme-open-full', this._onThemeOpenFull);
+    document.addEventListener('portfolio-open-materials', this._onOpenMaterials);
     layout.setLayout(createPortfolioLayoutTree());
   }
 
   disconnectedCallback() {
     if (this._onThemeOpenFull) {
       document.removeEventListener('cascade-theme-open-full', this._onThemeOpenFull);
+    }
+    if (this._onOpenMaterials) {
+      document.removeEventListener('portfolio-open-materials', this._onOpenMaterials);
     }
   }
 }

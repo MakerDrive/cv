@@ -7,6 +7,9 @@ export default await getPage({
   TITLE: 'Vladimir Matiasevich | Lead Engineer / R&D / Agentic AI',
   BODY_ATTRS: 'data-side-panel="off"',
   HEADER_CONTENT: /*html*/ `
+    <button class="pulse-header-menu-button" type="button" aria-label="Open materials" title="Open materials">
+      <span class="material-symbols-outlined" aria-hidden="true">folder</span>
+    </button>
     <span class="pulse-header-title">Vladimir Matiasevich | Lead Engineer / R&D / Agentic AI</span>
     <cascade-theme-widget
       class="pulse-theme-widget"
