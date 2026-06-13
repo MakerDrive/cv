@@ -835,12 +835,12 @@ const portfolioRuntime = {
 
   setCanvas(canvas) {
     this.canvas = canvas;
-    this.syncCanvas({ focus: true });
+    this.syncCanvas({ focus: true, focusScope: 'group' });
   },
 
   setGraphController(controller) {
     this.graphController = controller;
-    this.syncCanvas({ focus: true });
+    this.syncCanvas({ focus: true, focusScope: 'group' });
   },
 
   setGraphMode(mode) {
@@ -852,13 +852,13 @@ const portfolioRuntime = {
     this.syncViewer();
   },
 
-  select(id, { focus = false, updateUrl = true } = {}) {
+  select(id, { focus = false, updateUrl = true, focusScope = 'node' } = {}) {
     if (!this.entries.has(id)) return;
     this.selectedId = id;
     if (updateUrl) this.syncUrl();
     this.syncTree();
     this.syncViewer();
-    this.syncCanvas({ focus });
+    this.syncCanvas({ focus, focusScope });
   },
 
   getSelectedEntry() {
@@ -885,17 +885,20 @@ const portfolioRuntime = {
     if (this.viewer.$) this.viewer.$.showGraphAction = false;
   },
 
-  syncCanvas({ focus = false } = {}) {
+  syncCanvas({ focus = false, focusScope = 'node' } = {}) {
     let entry = this.getSelectedEntry();
     if (!entry) return;
     if (!focus) return;
+    let useGroupFocus = focusScope === 'group';
+    let structuredNodeIds = useGroupFocus ? entry.focusIds || [entry.id] : [entry.id];
+    let flatFocusId = getFlatGraphFocusId(entry);
+    let flatNodeIds = useGroupFocus ? getFlatGraphFocusIds(entry) : flatFocusId ? [flatFocusId] : [];
     if (this.graphController) {
-      let structuredNodeIds = entry.focusIds || [entry.id];
       this.graphController.focusNode({
         nodeId: entry.id,
         structuredNodeIds,
-        flatNodeId: getFlatGraphFocusId(entry),
-        flatNodeIds: getFlatGraphFocusIds(entry),
+        flatNodeId: flatFocusId,
+        flatNodeIds,
         structuredOptions: {
           padding: 56,
           maxZoom: structuredNodeIds.length > 1 ? 1 : 0.92,
@@ -910,9 +913,9 @@ const portfolioRuntime = {
       return;
     }
     if (!this.canvas) return;
-    this.canvas.focusNodes?.(entry.focusIds || [entry.id], {
+    this.canvas.focusNodes?.(structuredNodeIds, {
       padding: 56,
-      maxZoom: entry.focusIds?.length > 1 ? 1 : 0.92,
+      maxZoom: structuredNodeIds.length > 1 ? 1 : 0.92,
       select: entry.id,
     });
   },
@@ -1154,7 +1157,7 @@ class PortfolioGraphPanel extends HTMLElement {
     }
 
     if (action === 'branch') {
-      portfolioRuntime.select(id, { focus: true });
+      portfolioRuntime.select(id, { focus: true, focusScope: 'group' });
       return;
     }
 
@@ -1182,7 +1185,7 @@ class PortfolioGraphPanel extends HTMLElement {
     portfolioRuntime.setGraphMode(mode);
     this.setAttribute('data-mode', mode);
     this.graphController?.setMode(mode, { notify: false });
-    portfolioRuntime.syncCanvas({ focus: true });
+    portfolioRuntime.syncCanvas({ focus: true, focusScope: 'group' });
   }
 
   setGraphViewMode(flatMode) {
