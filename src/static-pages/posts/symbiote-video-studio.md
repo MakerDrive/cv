@@ -6,7 +6,7 @@ summary: AI-assisted video editing workspace for creators and production teams.
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://rnd-pro.com/projects/svs/
-linkLabel: Learn more
+linkLabel: View project
 ---
 
 # Symbiote Video Studio

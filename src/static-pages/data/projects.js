@@ -31,7 +31,7 @@ function parseFrontmatter(filePath) {
     image: meta.image || '',
     alt: meta.alt || meta.title || slug,
     href: meta.href || '',
-    linkLabel: meta.linkLabel || 'Learn more',
+    linkLabel: meta.linkLabel || 'View project',
   };
 }
 

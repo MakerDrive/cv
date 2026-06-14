@@ -6,7 +6,7 @@ summary: Robotic photogrammetry workflow for creating detailed 3D models of art 
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://rnd-pro.com/pulse/autobox-v1/
-linkLabel: Learn more
+linkLabel: View project
 ---
 
 # AUTOBOX v1

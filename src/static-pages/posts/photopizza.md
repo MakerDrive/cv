@@ -6,7 +6,7 @@ summary: Open-source 360-degree turntable for product photography, photogrammetr
 image: https://rnd-pro.com/svg/photopizza/index.svg
 alt: PhotoPizza DIY
 href: https://rnd-pro.com/projects/photopizza/
-linkLabel: Learn more
+linkLabel: View project
 ---
 
 # PhotoPizza

@@ -6,7 +6,7 @@ summary: Cloud platform for publishing interactive media such as 360-degree obje
 image: https://rnd-pro.com/svg/megavisor/index.svg
 alt: MEGAVISOR
 href: https://rnd-pro.com/projects/megavisor/
-linkLabel: Learn more
+linkLabel: View project
 ---
 
 # MEGAVISOR

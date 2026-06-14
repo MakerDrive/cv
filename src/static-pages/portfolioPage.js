@@ -11,7 +11,7 @@ export async function getPortfolioPage({
     TITLE: 'Vladimir Matiasevich | Lead Engineer / R&D / Agentic AI',
     BODY_ATTRS: 'data-side-panel="off"',
     HEADER_CONTENT: /*html*/ `
-      <button class="pulse-header-menu-button" type="button" aria-label="Open materials" title="Open materials">
+      <button class="pulse-header-menu-button" type="button" aria-label="Open portfolio navigation" title="Open portfolio navigation">
         <span class="material-symbols-outlined" aria-hidden="true">folder</span>
       </button>
       <span class="pulse-header-title">Vladimir Matiasevich | Lead Engineer / R&D / Agentic AI</span>
@@ -28,7 +28,7 @@ export async function getPortfolioPage({
     `,
     FOOTER_CONTENT: /*html*/ `
       <span>Built with JSDA and symbiote-ui</span>
-      <a href="https://github.com/MakerDrive/cv">Source</a>
+      <a href="https://github.com/MakerDrive/cv">GitHub source</a>
     `,
     SIDE_PANEL_ATTRS: 'disabled hidden',
   });

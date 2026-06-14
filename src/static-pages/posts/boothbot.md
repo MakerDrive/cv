@@ -6,7 +6,7 @@ summary: Automated product-photo booth for e-commerce catalogs, wine boutiques, 
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://rnd-pro.com/projects/boothbot/
-linkLabel: Learn more
+linkLabel: View project
 ---
 
 # BoothBot

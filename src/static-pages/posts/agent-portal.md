@@ -6,7 +6,7 @@ summary: AI-assisted engineering workspace that combines project context, model 
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://rnd-pro.com/projects/agent-portal/
-linkLabel: Learn more
+linkLabel: View project
 ---
 
 # Agent Portal

@@ -6,7 +6,7 @@ summary: 3D scanning and 360-degree product photography equipment designed to re
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://rnd-pro.com/pulse/complex-scan/
-linkLabel: Learn more
+linkLabel: View project
 ---
 
 # ComplexScan

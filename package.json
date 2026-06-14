@@ -19,8 +19,9 @@
   "author": "MakerDrive",
   "type": "module",
   "scripts": {
-    "test": "npm run check:types",
+    "test": "npm run check:types && npm run test:unit",
     "check:types": "npx tsc --noEmit",
+    "test:unit": "node --test test/unit/*.test.js",
     "copy-robots": "cp ./src/static-pages/robots.txt ./dist/robots.txt",
     "copy-404": "sed 's|<base href=[^>]*>|<base href=/cv/>|' ./dist/index.html > ./dist/404.html",
     "write-material-symbols-css": "node ./scripts/write-material-symbols-css.js",
