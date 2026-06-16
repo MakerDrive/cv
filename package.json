@@ -32,7 +32,7 @@
   "dependencies": {
     "@symbiotejs/symbiote": "3.8.0-webmcp.2",
     "jsda-kit": "1.5.3",
-    "symbiote-ui": "git+https://github.com/rnd-pro/symbiote-ui.git#061ac6f20329bf23743246544a01627c081f2e9a"
+    "symbiote-ui": "https://github.com/rnd-pro/symbiote-ui/archive/061ac6fdd0ebd10cb877108ee929e7ca414a9164.tar.gz"
   },
   "overrides": {
     "@symbiotejs/symbiote": "$@symbiotejs/symbiote",
