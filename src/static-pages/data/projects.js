@@ -3,6 +3,18 @@ import path from 'node:path';
 
 const projectsDir = path.resolve('src/static-pages/posts');
 
+function parseProjectLinks(value = '') {
+  return value
+    .split(';')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const [label = '', href = '', summary = ''] = item.split('|').map((part) => part.trim());
+      return { label, href, summary };
+    })
+    .filter((item) => item.label && item.href);
+}
+
 function parseFrontmatter(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   const match = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
@@ -32,6 +44,7 @@ function parseFrontmatter(filePath) {
     alt: meta.alt || meta.title || slug,
     href: meta.href || '',
     linkLabel: meta.linkLabel || 'View project',
+    links: parseProjectLinks(meta.links),
   };
 }
 

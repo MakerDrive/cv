@@ -7,6 +7,7 @@ image: https://rnd-pro.com/svg/photopizza/index.svg
 alt: PhotoPizza DIY
 href: https://rnd-pro.com/projects/photopizza/
 linkLabel: View project
+links: PhotoPizza|https://www.youtube.com/@PhotoPizza|YouTube channel with product updates and demos
 ---
 
 # PhotoPizza

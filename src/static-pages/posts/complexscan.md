@@ -7,6 +7,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://rnd-pro.com/pulse/complex-scan/
 linkLabel: View project
+links: PHOTOGRAMMETRY|https://www.youtube.com/@PHOTOGRAMMETRY|YouTube channel with photogrammetry and capture workflow demos
 ---
 
 # ComplexScan

@@ -10,6 +10,13 @@ body {
 
 body:has(.pulse-screen) {
   padding-left: 0;
+  --pulse-workspace-block-size: calc(100vh - var(--calc-top-pan-height));
+}
+
+@supports (height: 100dvh) {
+  body:has(.pulse-screen) {
+    --pulse-workspace-block-size: calc(100dvh - var(--calc-top-pan-height));
+  }
 }
 
 side-panel[disabled],
@@ -87,14 +94,14 @@ body:has(.pulse-screen) header {
 
 main > article {
   max-width: none;
-  min-height: calc(100vh - var(--calc-top-pan-height));
+  min-height: var(--pulse-workspace-block-size);
   padding: 0;
 }
 
 .pulse-screen {
   position: relative;
   display: block;
-  min-height: calc(100vh - var(--calc-top-pan-height));
+  min-height: var(--pulse-workspace-block-size);
   overflow: hidden;
   background: var(--sn-bg, #f3f5f8);
 }
@@ -104,7 +111,7 @@ main > article {
   min-width: 0;
   min-height: 0;
   width: 100%;
-  height: calc(100vh - var(--calc-top-pan-height));
+  height: var(--pulse-workspace-block-size);
   background: var(--sn-bg, #f3f5f8);
   color: var(--sn-text, #1f2937);
 }
@@ -132,6 +139,32 @@ portfolio-viewer-panel,
 portfolio-theme-panel {
   inline-size: 100%;
   block-size: 100%;
+}
+
+portfolio-graph-panel {
+  position: relative;
+}
+
+portfolio-graph-panel[data-loading]::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 30px;
+  block-size: 30px;
+  margin: -15px 0 0 -15px;
+  border: 2px solid color-mix(in oklab, var(--sn-text, #f0f0f0) 22%, transparent);
+  border-block-start-color: var(--sn-node-selected, #4a9eff);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+  animation: portfolio-graph-loading-spin 0.72s linear infinite;
+}
+
+@keyframes portfolio-graph-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .portfolio-layout layout-node .panel-content {
@@ -321,12 +354,12 @@ footer a {
   }
 
   .pulse-screen {
-    min-height: calc(100vh - var(--calc-top-pan-height));
+    min-height: var(--pulse-workspace-block-size);
   }
 
   .pulse-workspace {
     height: auto;
-    min-height: calc(100vh - var(--calc-top-pan-height));
+    min-height: var(--pulse-workspace-block-size);
   }
 }
 
@@ -336,7 +369,8 @@ footer a {
   }
 
   body:has(.pulse-screen) header {
-    gap: var(--sn-layout-header-gap, 2px);
+    gap: var(--pulse-mobile-header-gap, 10px);
+    padding-inline: var(--sn-layout-header-padding-inline, 14px);
   }
 
   .pulse-header-menu-button {

@@ -3,6 +3,15 @@ if (!document.querySelector('side-panel[disabled]')) {
 }
 
 import { socialLinks } from '../data/socialLinks.js';
+import { PORTFOLIO_LOCALE_MESSAGES } from '../data/portfolioTranslations.js';
+import {
+  PORTFOLIO_GRAPH_PANEL_IMPORTANCE,
+  PORTFOLIO_GRAPH_PANEL_MIN_INLINE_SIZE,
+  PORTFOLIO_LAYOUT_MIN_INLINE_SIZE,
+  PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT,
+  PORTFOLIO_TREE_PANEL_IMPORTANCE,
+  PORTFOLIO_TREE_PANEL_MIN_INLINE_SIZE,
+} from '../data/portfolioLayoutConfig.js';
 import {
   CASCADE_THEME_DEFAULTS,
   Connection,
@@ -17,6 +26,7 @@ import {
   configureMaterialSymbols,
   createGraphViewModeController,
   configureBrowserLocalization,
+  ensureMaterialSymbols,
   highlightTreePath,
   resolveInitialGraphViewMode,
   setTreeItems,
@@ -24,204 +34,6 @@ import {
   showTree,
   translate,
 } from 'symbiote-ui/ui';
-
-const PORTFOLIO_LOCALE_MESSAGES = Object.freeze({
-  en: {
-    'portfolio.page.title': 'Vladimir Matiasevich | Lead Engineer / R&D / Agentic AI',
-    'portfolio.page.aria': 'Vladimir Matiasevich portfolio',
-    'portfolio.skill.agenticAi.label': 'Agentic AI',
-    'portfolio.skill.agenticAi.summary': 'Agent workflows, context systems, model routing, and tools that help teams build software with AI.',
-    'portfolio.skill.productUi.label': 'Product UI',
-    'portfolio.skill.productUi.summary': 'Interfaces for editors, dashboards, media tools, design systems, and Web Components.',
-    'portfolio.skill.automation.label': 'Automation / Capture',
-    'portfolio.skill.automation.summary': 'Robotics, scanning, 360 capture, and product-photo automation for physical workflows.',
-    'portfolio.profile.summary': 'Lead engineer focused on agentic AI, product interfaces, media systems, and capture automation.',
-    'portfolio.profile.details': 'I build practical software and hardware-backed workflows from R&D ideas: developer tools, media workspaces, cloud publishing, and automated capture systems.',
-    'portfolio.profile.avatarAlt': 'Vladimir Matiasevich portrait',
-    'portfolio.profile.links': 'Public profiles',
-    'portfolio.bio.label': 'Profile',
-    'portfolio.bio.about': 'Summary',
-    'portfolio.bio.summary': 'Full-stack engineer turning R&D work into practical products.',
-    'portfolio.bio.details': 'I work across AI-assisted developer tools, media products, cloud publishing, and hardware-driven capture systems.',
-    'portfolio.projects.label': 'Projects',
-    'portfolio.projects.overview': 'Selected work',
-    'portfolio.projects.summary': 'Selected product and R&D work.',
-    'portfolio.projects.details': 'A compact map of shipped products, prototypes, and long-running experiments.',
-    'portfolio.pulse.label': 'Lab notes',
-    'portfolio.pulse.overview': 'Lab overview',
-    'portfolio.pulse.summary': 'Playground tests, technical observations, and short R&D notes.',
-    'portfolio.pulse.details': 'A working journal for experiments, prototype results, implementation notes, and conclusions that do not need to become full project case studies.',
-    'portfolio.social.facebook.summary': 'Personal profile and public updates',
-    'portfolio.social.linkedin.summary': 'Professional profile and work history',
-    'portfolio.social.youtube.summary': 'Video demos and project notes',
-    'portfolio.social.github.summary': 'Code, open-source work, and project repositories',
-    'portfolio.social.instagram.summary': 'Personal photos',
-    'portfolio.skills.label': 'Skills',
-    'portfolio.skills.overview': 'Skill overview',
-    'portfolio.skills.summary': 'Core areas behind the project work.',
-    'portfolio.skills.details': 'A compact view of the capabilities that recur across the projects.',
-    'portfolio.skill.details': 'A practical skill area represented through related projects.',
-    'portfolio.node.fallback': 'Portfolio item.',
-    'portfolio.markdown.related': 'Related',
-    'portfolio.link.learnMore': 'View project',
-    'portfolio.tree.filter': 'Filter portfolio',
-    'portfolio.tree.collapse': 'Collapse All Folders',
-    'portfolio.panel.materials': 'Portfolio',
-    'portfolio.panel.graph': 'Project map',
-    'portfolio.panel.content': 'Details',
-    'portfolio.panel.theme': 'Appearance',
-    'portfolio.header.openMaterials': 'Open portfolio navigation',
-    'portfolio.graph.fit': 'Fit view',
-    'portfolio.graph.fitTitle': 'Fit graph into panel',
-    'portfolio.graph.edit': 'Arrange',
-    'portfolio.graph.editTitle': 'Toggle graph arrangement',
-    'portfolio.graph.flat': 'Map view',
-    'portfolio.graph.flatTitle': 'Toggle map view',
-    'portfolio.graph.pathTitle': 'Use {label} connection paths',
-    'portfolio.graph.action.content': 'Details',
-    'portfolio.graph.action.branch': 'Focus',
-    'portfolio.graph.action.open': 'Visit',
-    'portfolio.graph.groupSummary': '{label} section',
-    'portfolio.entry.type.profile': 'Profile',
-    'portfolio.entry.type.summary': 'Summary',
-    'portfolio.entry.type.projects': 'Projects',
-    'portfolio.entry.type.project': 'Project',
-    'portfolio.entry.type.notes': 'Lab notes',
-    'portfolio.entry.type.note': 'Lab note',
-    'portfolio.entry.type.skills': 'Skills',
-    'portfolio.entry.type.skill': 'Skill',
-  },
-  ru: {
-    'portfolio.page.title': 'Vladimir Matiasevich | Lead Engineer / R&D / Agentic AI',
-    'portfolio.page.aria': 'Портфолио Владимира Матиясевича',
-    'portfolio.skill.agenticAi.label': 'Агентный ИИ',
-    'portfolio.skill.agenticAi.summary': 'Агентные workflow, контекстные системы, маршрутизация моделей и инструменты для разработки с AI.',
-    'portfolio.skill.productUi.label': 'Продуктовый UI',
-    'portfolio.skill.productUi.summary': 'Интерфейсы для редакторов, дашбордов, медиа-инструментов, дизайн-систем и Web Components.',
-    'portfolio.skill.automation.label': 'Автоматизация / съёмка',
-    'portfolio.skill.automation.summary': 'Робототехника, сканирование, 360-съёмка и автоматизация product-photo процессов.',
-    'portfolio.profile.summary': 'Lead engineer с фокусом на агентный ИИ, продуктовые интерфейсы, медиа-системы и автоматизацию съёмки.',
-    'portfolio.profile.details': 'Превращаю R&D-идеи в практичные software и hardware-backed workflow: developer tools, media workspaces, cloud publishing и автоматизированные системы съёмки.',
-    'portfolio.profile.avatarAlt': 'Портрет Владимира Матиясевича',
-    'portfolio.profile.links': 'Публичные профили',
-    'portfolio.bio.label': 'Профиль',
-    'portfolio.bio.about': 'Кратко',
-    'portfolio.bio.summary': 'Full-stack инженер, который превращает R&D-задачи в практичные продукты.',
-    'portfolio.bio.details': 'Работаю с AI-инструментами для разработки, медиа-продуктами, cloud publishing и аппаратными системами съёмки.',
-    'portfolio.projects.label': 'Проекты',
-    'portfolio.projects.overview': 'Избранные работы',
-    'portfolio.projects.summary': 'Избранные продуктовые и R&D-проекты.',
-    'portfolio.projects.details': 'Краткая карта продуктов, прототипов и долгосрочных экспериментов.',
-    'portfolio.pulse.label': 'Lab notes',
-    'portfolio.pulse.overview': 'Обзор Lab notes',
-    'portfolio.pulse.summary': 'Playground-тесты, технические наблюдения и короткие R&D-заметки.',
-    'portfolio.pulse.details': 'Рабочий журнал для экспериментов, результатов прототипов, implementation notes и выводов, которые не обязательно превращать в полноценные кейсы.',
-    'portfolio.social.facebook.summary': 'Личный профиль и публичные обновления',
-    'portfolio.social.linkedin.summary': 'Профессиональный профиль и опыт работы',
-    'portfolio.social.youtube.summary': 'Видео-демо и заметки о проектах',
-    'portfolio.social.github.summary': 'Код, open-source работа и проектные репозитории',
-    'portfolio.social.instagram.summary': 'Личные фотографии',
-    'portfolio.skills.label': 'Навыки',
-    'portfolio.skills.overview': 'Обзор навыков',
-    'portfolio.skills.summary': 'Ключевые направления работы.',
-    'portfolio.skills.details': 'Краткий обзор компетенций, которые повторяются в разных проектах.',
-    'portfolio.skill.details': 'Практическое направление, показанное через связанные проекты.',
-    'portfolio.node.fallback': 'Материал портфолио.',
-    'portfolio.markdown.related': 'Связано',
-    'portfolio.link.learnMore': 'Смотреть проект',
-    'portfolio.tree.filter': 'Фильтр портфолио',
-    'portfolio.tree.collapse': 'Свернуть все папки',
-    'portfolio.panel.materials': 'Портфолио',
-    'portfolio.panel.graph': 'Карта проектов',
-    'portfolio.panel.content': 'Описание',
-    'portfolio.panel.theme': 'Внешний вид',
-    'portfolio.header.openMaterials': 'Открыть навигацию портфолио',
-    'portfolio.graph.fit': 'Вписать вид',
-    'portfolio.graph.fitTitle': 'Вписать граф в панель',
-    'portfolio.graph.edit': 'Раскладка',
-    'portfolio.graph.editTitle': 'Переключить настройку раскладки',
-    'portfolio.graph.flat': 'Карта',
-    'portfolio.graph.flatTitle': 'Переключить режим карты',
-    'portfolio.graph.pathTitle': 'Использовать линии связи: {label}',
-    'portfolio.graph.action.content': 'Описание',
-    'portfolio.graph.action.branch': 'Фокус',
-    'portfolio.graph.action.open': 'Перейти',
-    'portfolio.graph.groupSummary': '{label}: раздел',
-    'portfolio.entry.type.profile': 'Профиль',
-    'portfolio.entry.type.summary': 'Кратко',
-    'portfolio.entry.type.projects': 'Проекты',
-    'portfolio.entry.type.project': 'Проект',
-    'portfolio.entry.type.notes': 'Lab notes',
-    'portfolio.entry.type.note': 'Lab note',
-    'portfolio.entry.type.skills': 'Навыки',
-    'portfolio.entry.type.skill': 'Навык',
-  },
-  es: {
-    'portfolio.page.title': 'Vladimir Matiasevich | Ingeniero líder / I+D / IA agéntica',
-    'portfolio.page.aria': 'Portafolio de Vladimir Matiasevich',
-    'portfolio.skill.agenticAi.label': 'IA agéntica',
-    'portfolio.skill.agenticAi.summary': 'Flujos con agentes, sistemas de contexto, enrutamiento de modelos y herramientas para crear software con IA.',
-    'portfolio.skill.productUi.label': 'UI de producto',
-    'portfolio.skill.productUi.summary': 'Interfaces para editores, paneles, herramientas multimedia, sistemas de diseño y Web Components.',
-    'portfolio.skill.automation.label': 'Automatización / captura',
-    'portfolio.skill.automation.summary': 'Robótica, escaneo, captura 360 y automatización fotográfica para flujos físicos.',
-    'portfolio.profile.summary': 'Ingeniero líder enfocado en IA agéntica, interfaces de producto, sistemas multimedia y automatización de captura.',
-    'portfolio.profile.details': 'Convierto ideas de I+D en workflows prácticos de software y hardware: developer tools, media workspaces, cloud publishing y sistemas de captura automatizada.',
-    'portfolio.profile.avatarAlt': 'Retrato de Vladimir Matiasevich',
-    'portfolio.profile.links': 'Perfiles públicos',
-    'portfolio.bio.label': 'Perfil',
-    'portfolio.bio.about': 'Resumen',
-    'portfolio.bio.summary': 'Ingeniero full-stack que convierte trabajo de I+D en productos prácticos.',
-    'portfolio.bio.details': 'Trabajo con herramientas de desarrollo asistidas por IA, productos multimedia, publicación cloud y sistemas de captura con hardware.',
-    'portfolio.projects.label': 'Proyectos',
-    'portfolio.projects.overview': 'Trabajo seleccionado',
-    'portfolio.projects.summary': 'Trabajo seleccionado de producto e I+D.',
-    'portfolio.projects.details': 'Un mapa compacto de productos publicados, prototipos y experimentos de largo recorrido.',
-    'portfolio.pulse.label': 'Lab notes',
-    'portfolio.pulse.overview': 'Resumen de Lab notes',
-    'portfolio.pulse.summary': 'Pruebas de playground, observaciones técnicas y notas breves de I+D.',
-    'portfolio.pulse.details': 'Un diario de trabajo para experimentos, resultados de prototipos, notas de implementación y conclusiones que no necesitan convertirse en casos completos.',
-    'portfolio.social.facebook.summary': 'Perfil personal y actualizaciones públicas',
-    'portfolio.social.linkedin.summary': 'Perfil profesional y trayectoria',
-    'portfolio.social.youtube.summary': 'Demos en video y notas de proyectos',
-    'portfolio.social.github.summary': 'Código open-source y repositorios de proyectos',
-    'portfolio.social.instagram.summary': 'Fotos personales',
-    'portfolio.skills.label': 'Habilidades',
-    'portfolio.skills.overview': 'Resumen de habilidades',
-    'portfolio.skills.summary': 'Áreas centrales detrás del trabajo de proyecto.',
-    'portfolio.skills.details': 'Una vista compacta de capacidades que aparecen en distintos proyectos.',
-    'portfolio.skill.details': 'Un área práctica representada por proyectos relacionados.',
-    'portfolio.node.fallback': 'Elemento de portafolio.',
-    'portfolio.markdown.related': 'Relacionado',
-    'portfolio.link.learnMore': 'Ver proyecto',
-    'portfolio.tree.filter': 'Filtrar portafolio',
-    'portfolio.tree.collapse': 'Contraer todas las carpetas',
-    'portfolio.panel.materials': 'Portafolio',
-    'portfolio.panel.graph': 'Mapa de proyectos',
-    'portfolio.panel.content': 'Detalle',
-    'portfolio.panel.theme': 'Apariencia',
-    'portfolio.header.openMaterials': 'Abrir navegación del portafolio',
-    'portfolio.graph.fit': 'Ajustar vista',
-    'portfolio.graph.fitTitle': 'Ajustar el grafo al panel',
-    'portfolio.graph.edit': 'Organizar',
-    'portfolio.graph.editTitle': 'Alternar organización del mapa',
-    'portfolio.graph.flat': 'Mapa',
-    'portfolio.graph.flatTitle': 'Alternar vista de mapa',
-    'portfolio.graph.pathTitle': 'Usar conexiones {label}',
-    'portfolio.graph.action.content': 'Detalle',
-    'portfolio.graph.action.branch': 'Enfocar',
-    'portfolio.graph.action.open': 'Visitar',
-    'portfolio.graph.groupSummary': 'Sección {label}',
-    'portfolio.entry.type.profile': 'Perfil',
-    'portfolio.entry.type.summary': 'Resumen',
-    'portfolio.entry.type.projects': 'Proyectos',
-    'portfolio.entry.type.project': 'Proyecto',
-    'portfolio.entry.type.notes': 'Lab notes',
-    'portfolio.entry.type.note': 'Lab note',
-    'portfolio.entry.type.skills': 'Habilidades',
-    'portfolio.entry.type.skill': 'Habilidad',
-  },
-});
 
 configureBrowserLocalization({
   force: true,
@@ -238,13 +50,6 @@ let headerMenuButton = document.querySelector('.pulse-header-menu-button');
 headerMenuButton?.setAttribute('aria-label', tPortfolio('header.openMaterials'));
 headerMenuButton?.setAttribute('title', tPortfolio('header.openMaterials'));
 function openMaterialsDrawerFromHeader() {
-  let handle = document.querySelector('.portfolio-layout .layout-drawer-handle-stack-start [data-drawer-panel-id]');
-  if (handle instanceof HTMLElement) {
-    if (handle.getAttribute('aria-expanded') !== 'true') {
-      handle.click();
-    }
-    return;
-  }
   document.dispatchEvent(new CustomEvent('portfolio-open-materials', {
     detail: { source: 'portfolio-header' },
   }));
@@ -465,6 +270,8 @@ function createPortfolioEntries() {
       summary: project.summary,
       href: project.href,
       linkLabel: getProjectLinkLabel(project),
+      linksTitle: tPortfolio('project.links'),
+      links: project.links,
       related: relatedSkillIds.map((id) => skillEntries.find((skill) => skill.id === id)?.label),
       focusIds: ['projects/index', `projects/${project.slug}`, ...relatedSkillIds],
       params: {
@@ -672,6 +479,50 @@ const GRAPH_ACTION_PATHS = Object.freeze({
   branch: 'M12 2l2 4h-4l2-4zm0 20l-2-4h4l-2 4zm10-10l-4 2v-4l4 2zM2 12l4-2v4l-4-2zm10-4a4 4 0 100 8 4 4 0 000-8z',
   open: 'M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7zM5 5h5V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-5h-2v5H5V5z',
 });
+
+function collectTreeIconNames(items, result = new Set()) {
+  for (let item of items || []) {
+    if (item?.icon) result.add(item.icon);
+    collectTreeIconNames(item?.children, result);
+  }
+  return result;
+}
+
+function preloadPortfolioIcons() {
+  let iconNames = collectTreeIconNames(portfolioTreeItems, new Set([
+    'account_tree',
+    'article',
+    'center_focus_strong',
+    'chevron_left',
+    'chevron_right',
+    'close',
+    'code',
+    'content_copy',
+    'dashboard',
+    'delete',
+    'edit',
+    'folder',
+    'fullscreen',
+    'fullscreen_exit',
+    'hub',
+    'keyboard_arrow_down',
+    'more_horiz',
+    'palette',
+    'person',
+    'visibility_off',
+    'web_asset',
+    'work',
+  ]));
+  for (let entry of portfolioEntries.values()) {
+    if (entry.icon) iconNames.add(entry.icon);
+  }
+  for (let item of GRAPH_PATH_STYLES) {
+    iconNames.add(item.icon);
+  }
+  ensureMaterialSymbols([...iconNames]);
+}
+
+preloadPortfolioIcons();
 
 function createPortfolioNodeActionItems() {
   return [
@@ -913,12 +764,12 @@ const portfolioRuntime = {
 
   setCanvas(canvas) {
     this.canvas = canvas;
-    this.syncCanvas({ focus: true, focusScope: 'group' });
+    this.syncCanvas({ focus: true, focusScope: 'node' });
   },
 
   setGraphController(controller) {
     this.graphController = controller;
-    this.syncCanvas({ focus: true, focusScope: 'group' });
+    this.syncCanvas({ focus: true, focusScope: 'node' });
   },
 
   setGraphMode(mode) {
@@ -968,18 +819,25 @@ const portfolioRuntime = {
     if (!entry) return;
     if (!focus) return;
     let useGroupFocus = focusScope === 'group';
-    let structuredNodeIds = useGroupFocus ? entry.focusIds || [entry.id] : [entry.id];
+    let useNodeFitFocus = focusScope === 'node-fit';
+    let structuredFocusTarget = useGroupFocus
+      ? entry.focusIds || [entry.id]
+      : useNodeFitFocus
+        ? [entry.id]
+        : entry.id;
     let flatFocusId = getFlatGraphFocusId(entry);
     let flatNodeIds = useGroupFocus ? getFlatGraphFocusIds(entry) : flatFocusId ? [flatFocusId] : [];
     if (this.graphController) {
       this.graphController.focusNode({
         nodeId: entry.id,
-        structuredNodeIds,
+        structuredNodeIds: structuredFocusTarget,
         flatNodeId: flatFocusId,
         flatNodeIds,
         structuredOptions: {
           padding: 56,
-          maxZoom: structuredNodeIds.length > 1 ? 1 : 0.92,
+          maxZoom: useNodeFitFocus
+            ? 0.8
+            : Array.isArray(structuredFocusTarget) && structuredFocusTarget.length > 1 ? 1 : 0.92,
           select: entry.id,
         },
         flatOptions: {
@@ -991,9 +849,11 @@ const portfolioRuntime = {
       return;
     }
     if (!this.canvas) return;
-    this.canvas.focusNodes?.(structuredNodeIds, {
+    this.canvas.focusNodes?.(structuredFocusTarget, {
       padding: 56,
-      maxZoom: structuredNodeIds.length > 1 ? 1 : 0.92,
+      maxZoom: useNodeFitFocus
+        ? 0.8
+        : Array.isArray(structuredFocusTarget) && structuredFocusTarget.length > 1 ? 1 : 0.92,
       select: entry.id,
     });
   },
@@ -1019,19 +879,20 @@ if (typeof window !== 'undefined') {
 
 function createPortfolioLayoutTree() {
   let treePanel = LayoutTree.createPanel('portfolio-tree', {}, {
-    importance: 76,
-    minInlineSize: 220,
+    importance: PORTFOLIO_TREE_PANEL_IMPORTANCE,
+    minInlineSize: PORTFOLIO_TREE_PANEL_MIN_INLINE_SIZE,
     minBlockSize: 180,
     collapse: 'auto',
     mobileDock: 'start',
+    swipeControl: 'rail',
   });
   let graphPanel = LayoutTree.createPanel('portfolio-graph', {}, {
-    importance: 88,
-    minInlineSize: 420,
+    importance: PORTFOLIO_GRAPH_PANEL_IMPORTANCE,
+    minInlineSize: PORTFOLIO_GRAPH_PANEL_MIN_INLINE_SIZE,
     minBlockSize: 320,
-    collapse: 'manual',
+    collapse: 'auto',
     mobileDock: 'end',
-    swipeControl: 'island',
+    swipeControl: 'rail',
   });
   let viewerPanel = LayoutTree.createPanel('portfolio-viewer', {}, {
     importance: 100,
@@ -1049,7 +910,7 @@ function createPortfolioLayoutTree() {
   });
   return LayoutTree.createSplit('horizontal', treePanel, contentSplit, 0.22, {
     importance: 90,
-    minInlineSize: 960,
+    minInlineSize: PORTFOLIO_LAYOUT_MIN_INLINE_SIZE,
     minBlockSize: 420,
     collapse: 'never',
     responsiveMode: 'swipe',
@@ -1141,58 +1002,395 @@ class PortfolioGraphPanel extends HTMLElement {
   graphController = null;
 
   connectedCallback() {
-    if (this._ready) return;
+    if (this._ready) {
+      this.observeGraphPanelVisibility();
+      return;
+    }
     this._ready = true;
-    this.innerHTML = /*html*/ `
-      <node-canvas class="portfolio-canvas"></node-canvas>
-      <canvas-graph
-        class="portfolio-flat-graph"
-        device-orientation-parallax
-        device-orientation-parallax-strength="28"
-        device-orientation-parallax-max-tilt="32"
-        hidden></canvas-graph>
-    `;
-    let canvas = /** @type {any} */ (this.querySelector('node-canvas'));
-    let flatGraph = /** @type {any} */ (this.querySelector('canvas-graph'));
-    if (!canvas) return;
-
-    this.canvas = canvas;
-    this.flatGraph = flatGraph;
+    this.observeGraphPanelVisibility();
     Promise.all([
       customElements.whenDefined('node-canvas'),
       customElements.whenDefined('canvas-graph'),
     ]).then(() => this.initializeGraphCanvases());
   }
 
+  disconnectedCallback() {
+    this._graphResizeObserver?.disconnect?.();
+    this._graphResizeObserver = null;
+    this._graphDrawerObserver?.disconnect?.();
+    this._graphDrawerObserver = null;
+    this.cancelVisibleGraphFocus();
+    this.cancelDeferredVisibleGraphFocus();
+    this._graphWasVisible = false;
+    this._graphVisibleFocusUntil = 0;
+    this.cancelStructuredGraphBinding();
+    this.cancelStructuredPathUpgrade({ clear: true });
+    this.canvas?.suspendLayout?.({ reason: 'panel-disconnected' });
+    this.flatGraph?.suspendLayout?.({ reason: 'panel-disconnected' });
+  }
+
+  observeGraphPanelVisibility() {
+    if (!this.isConnected || this._graphResizeObserver) return;
+    this.observeGraphDrawerState();
+    let ResizeObserverCtor = globalThis.ResizeObserver;
+    if (typeof ResizeObserverCtor !== 'function') {
+      this.scheduleVisibleGraphFocus();
+      return;
+    }
+    this._graphResizeObserver = new ResizeObserverCtor(() => this.scheduleVisibleGraphFocus());
+    this._graphResizeObserver.observe(this);
+    this.scheduleVisibleGraphFocus();
+  }
+
+  observeGraphDrawerState() {
+    if (this._graphDrawerObserver) return;
+    let MutationObserverCtor = globalThis.MutationObserver;
+    let drawerNode = this.closest?.('layout-node');
+    if (typeof MutationObserverCtor !== 'function' || !drawerNode) return;
+    this._graphDrawerObserver = new MutationObserverCtor(() => {
+      this._graphWasVisible = false;
+      this.scheduleVisibleGraphFocus();
+    });
+    this._graphDrawerObserver.observe(drawerNode, {
+      attributes: true,
+      attributeFilter: ['drawer-open', 'drawer-expanded', 'drawer-rail-collapsed', 'style'],
+    });
+  }
+
+  scheduleVisibleGraphFocus() {
+    if (this._visibleGraphFocusFrame) return;
+    let scheduleFrame = globalThis.requestAnimationFrame || globalThis.setTimeout;
+    this._visibleGraphFocusFrame = scheduleFrame(() => {
+      this._visibleGraphFocusFrame = 0;
+      this.focusGraphAfterVisibleResize();
+    });
+  }
+
+  cancelVisibleGraphFocus() {
+    if (!this._visibleGraphFocusFrame) return;
+    let cancelFrame = globalThis.cancelAnimationFrame || globalThis.clearTimeout;
+    cancelFrame?.(this._visibleGraphFocusFrame);
+    this._visibleGraphFocusFrame = 0;
+  }
+
+  scheduleDeferredVisibleGraphFocus() {
+    let setTimer = globalThis.setTimeout;
+    if (typeof setTimer !== 'function') return;
+    this.cancelDeferredVisibleGraphFocus();
+    this._deferredGraphFocusTimer = setTimer(() => {
+      this._deferredGraphFocusTimer = 0;
+      this._graphVisibleFocusUntil = 0;
+      if (this.isGraphPanelVisible()) {
+        this.focusVisibleGraphNow();
+        this.scheduleStructuredPathUpgrade();
+      }
+    }, 360);
+  }
+
+  cancelDeferredVisibleGraphFocus() {
+    if (!this._deferredGraphFocusTimer) return;
+    globalThis.clearTimeout?.(this._deferredGraphFocusTimer);
+    this._deferredGraphFocusTimer = 0;
+  }
+
+  isGraphPanelVisible() {
+    let rect = this.getBoundingClientRect?.();
+    if (!rect || rect.width < 128 || rect.height < 128) return false;
+
+    let drawerNode = this.closest?.('layout-node');
+    if (!drawerNode) return true;
+    if (drawerNode.hasAttribute('drawer-rail-collapsed')) return false;
+    if (
+      drawerNode.hasAttribute('drawer-rail')
+      && !drawerNode.hasAttribute('drawer-open')
+      && !drawerNode.hasAttribute('drawer-expanded')
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  focusGraphAfterVisibleResize() {
+    if (!this.isGraphPanelVisible()) {
+      this._graphWasVisible = false;
+      this._graphVisibleFocusUntil = 0;
+      this.cancelDeferredVisibleGraphFocus();
+      return;
+    }
+    if (!this._graphReady) return;
+    if (!this.flatMode && !this._structuredBound) {
+      this.scheduleStructuredGraphBinding();
+    }
+
+    let now = globalThis.performance?.now?.() || Date.now();
+    if (!this._graphWasVisible) {
+      this._graphWasVisible = true;
+      this._graphVisibleFocusUntil = now + 600;
+      this.focusVisibleGraphNow();
+      this.scheduleDeferredVisibleGraphFocus();
+      this.scheduleStructuredPathUpgrade();
+      return;
+    }
+
+    if (this._graphVisibleFocusUntil && now <= this._graphVisibleFocusUntil) {
+      this.focusVisibleGraphNow();
+      this.scheduleDeferredVisibleGraphFocus();
+      this.scheduleStructuredPathUpgrade();
+    }
+  }
+
+  focusVisibleGraphNow() {
+    this.canvas?.refreshConnections?.();
+    portfolioRuntime.syncCanvas({ focus: true, focusScope: 'node-fit' });
+  }
+
   initializeGraphCanvases() {
     if (this._graphReady) return;
     this._graphReady = true;
-    let canvas = this.canvas;
-    let flatGraph = this.flatGraph;
-    if (!canvas) return;
-
     this.graphController = createGraphViewModeController({
-      structuredCanvas: canvas,
-      flatGraph,
       mode: this.flatMode ? 'flat' : 'structured',
       pathStyle: this.pathStyle,
-      structuredEditor: createPortfolioEditor(),
-      flatModel: createPortfolioFlatGraphModel(),
       flatPath: null,
     });
+    this.ensureActiveGraphRenderer();
     this.applyGraphMode();
     this.applyGraphViewMode();
+    this.applyPathStyle();
+    this.addEventListener('panel-menu-action', (event) => this.onPanelMenuAction(event));
+
+    requestAnimationFrame(() => {
+      portfolioRuntime.setGraphMode(this.flatMode ? 'flat' : 'structured');
+      portfolioRuntime.setCanvas(this.canvas);
+      portfolioRuntime.setGraphController(this.graphController);
+      this.scheduleVisibleGraphFocus();
+      this.syncPanelMenuActions();
+    });
+  }
+
+  ensureActiveGraphRenderer() {
+    return this.ensureGraphRenderer(this.flatMode ? 'flat' : 'structured');
+  }
+
+  ensureGraphRenderer(mode) {
+    if (mode === 'flat') {
+      this.ensureFlatGraphRenderer();
+      return this.flatGraph;
+    }
+    this.ensureStructuredGraphRenderer();
+    return this.canvas;
+  }
+
+  ensureStructuredGraphRenderer() {
+    if (this.canvas) return this.canvas;
+    let canvas = /** @type {any} */ (document.createElement('node-canvas'));
+    canvas.className = 'portfolio-canvas';
+    if (this.firstChild) {
+      this.insertBefore(canvas, this.firstChild);
+    } else {
+      this.append(canvas);
+    }
+    this.canvas = canvas;
     canvas.setPanels(false);
     canvas.setViewportLocked(false);
-    flatGraph?.setActionItems?.(createPortfolioNodeActionItems());
-    this.applyPathStyle();
-    setNodePositions(canvas, projects);
+    this.setStructuredGraphLoading(!this._structuredBound && !this.flatMode);
+    this.applyGraphMode();
+    this.graphController?.connect?.({
+      structuredCanvas: canvas,
+      mode: this.flatMode ? 'flat' : 'structured',
+    });
     canvas.addEventListener('selection-changed', (event) => {
       let [id] = event.detail?.nodes || [];
       if (id && id !== portfolioRuntime.selectedId) {
         portfolioRuntime.select(id, { focus: false });
       }
     });
+    canvas.addEventListener('toolbar-action', (event) => this.onStructuredGraphToolbarAction(event));
+    this.scheduleStructuredGraphBinding();
+    return canvas;
+  }
+
+  scheduleStructuredGraphBinding() {
+    if (
+      this._structuredBound
+      || this._structuredBindingTimer
+      || this._structuredBindingFrame
+      || this._structuredBindingIdleFrame
+      || !this.canvas
+    ) return;
+    if (!this.isGraphPanelVisible()) {
+      this.setStructuredGraphLoading(false);
+      return;
+    }
+    this._structuredBindingTimer = globalThis.setTimeout(() => {
+      this._structuredBindingTimer = 0;
+      if (this.flatMode || !this.canvas || this._structuredBound) return;
+      this.queueStructuredGraphBinding();
+    }, 450);
+  }
+
+  queueStructuredGraphBinding() {
+    if (this._structuredBindingFrame || this._structuredBindingIdleFrame) return;
+    this.setStructuredGraphLoading(true);
+    let callback = () => {
+      this._structuredBindingFrame = 0;
+      this._structuredBindingIdleFrame = 0;
+      this.bindStructuredGraphRenderer();
+    };
+    if (typeof globalThis.requestIdleCallback === 'function') {
+      this._structuredBindingIdleFrame = globalThis.requestIdleCallback(callback, { timeout: 600 });
+      return;
+    }
+    this._structuredBindingFrame = globalThis.setTimeout(callback, 0);
+  }
+
+  cancelStructuredGraphBinding() {
+    if (this._structuredBindingTimer) {
+      globalThis.clearTimeout?.(this._structuredBindingTimer);
+      this._structuredBindingTimer = 0;
+    }
+    if (this._structuredBindingFrame) {
+      globalThis.clearTimeout?.(this._structuredBindingFrame);
+      this._structuredBindingFrame = 0;
+    }
+    if (this._structuredBindingIdleFrame) {
+      globalThis.cancelIdleCallback?.(this._structuredBindingIdleFrame);
+      this._structuredBindingIdleFrame = 0;
+    }
+  }
+
+  bindStructuredGraphRenderer() {
+    if (this._structuredBound || this.flatMode || !this.canvas) return;
+    if (!this.isGraphPanelVisible()) {
+      this.setStructuredGraphLoading(false);
+      return;
+    }
+    this.setStructuredGraphLoading(true);
+    this.setStructuredStartupPath(true);
+    try {
+      let editor = this._structuredEditor || createPortfolioEditor();
+      this._structuredEditor = editor;
+      this.graphController?.setStructuredEditor?.(editor);
+      setNodePositions(this.canvas, projects);
+      this.canvas.refreshConnections?.();
+      this.canvas._layoutReleasedDom = false;
+      this._structuredBound = true;
+      portfolioRuntime.syncCanvas({ focus: true, focusScope: 'group' });
+      this.scheduleStructuredPathUpgrade();
+    } finally {
+      this.setStructuredGraphLoading(false);
+    }
+  }
+
+  setStructuredGraphLoading(active) {
+    this.toggleAttribute('data-loading', Boolean(active));
+    this.setAttribute('aria-busy', active ? 'true' : 'false');
+  }
+
+  setStructuredStartupPath(active) {
+    if (!this.canvas) return;
+    let useStraight = Boolean(active && this.pathStyle !== 'straight' && !this.flatMode);
+    let connectionIds = useStraight ? this.getStructuredConnectionIds() : null;
+    this.canvas.setTransientPathStyle?.(
+      useStraight ? 'straight' : '',
+      'portfolio-startup',
+      connectionIds?.length ? { connectionIds } : {}
+    );
+  }
+
+  getStructuredConnectionIds() {
+    let connections = this._structuredEditor?.getConnections?.() || [];
+    return connections.map((conn) => conn.id).filter(Boolean);
+  }
+
+  scheduleStructuredPathUpgrade() {
+    this.cancelStructuredPathUpgrade();
+    if (!this.canvas || this.flatMode || this.pathStyle === 'straight') {
+      this.setStructuredStartupPath(false);
+      return;
+    }
+    if (!this.isGraphPanelVisible()) return;
+    this.setStructuredStartupPath(true);
+    let requestFrame = globalThis.requestAnimationFrame || ((callback) => globalThis.setTimeout(callback, 16));
+    this._structuredPathUpgradeFrame = requestFrame(() => {
+      this._structuredPathUpgradeFrame = requestFrame(() => {
+        this._structuredPathUpgradeFrame = 0;
+        this._structuredPathUpgradeTimer = globalThis.setTimeout?.(() => {
+          this._structuredPathUpgradeTimer = 0;
+          if (!this.canvas || this.flatMode || this.pathStyle === 'straight' || !this.isGraphPanelVisible()) {
+            this.setStructuredStartupPath(false);
+            return;
+          }
+          this.upgradeStructuredPathsInChunks();
+        }, 160);
+      });
+    });
+  }
+
+  upgradeStructuredPathsInChunks() {
+    if (!this.canvas || this.flatMode || this.pathStyle === 'straight') {
+      this.setStructuredStartupPath(false);
+      return;
+    }
+    let remaining = new Set(this.getStructuredConnectionIds());
+    if (!remaining.size) {
+      this.setStructuredStartupPath(false);
+      return;
+    }
+    let requestFrame = globalThis.requestAnimationFrame || ((callback) => globalThis.setTimeout(callback, 16));
+    let chunkSize = 8;
+    let step = () => {
+      if (!this.canvas || this.flatMode || this.pathStyle === 'straight' || !this.isGraphPanelVisible()) {
+        this.setStructuredStartupPath(false);
+        return;
+      }
+      let chunk = [...remaining].slice(0, chunkSize);
+      for (let connId of chunk) remaining.delete(connId);
+      if (remaining.size) {
+        this.canvas.setTransientPathStyle?.('straight', 'portfolio-startup', {
+          connectionIds: remaining,
+        });
+        this._structuredPathUpgradeFrame = requestFrame(step);
+        return;
+      }
+      this.setStructuredStartupPath(false);
+      this._structuredPathUpgradeFrame = 0;
+    };
+    this._structuredPathUpgradeFrame = requestFrame(step);
+  }
+
+  cancelStructuredPathUpgrade({ clear = false } = {}) {
+    if (this._structuredPathUpgradeFrame) {
+      let cancelFrame = globalThis.cancelAnimationFrame || globalThis.clearTimeout;
+      cancelFrame?.(this._structuredPathUpgradeFrame);
+      this._structuredPathUpgradeFrame = 0;
+    }
+    if (this._structuredPathUpgradeTimer) {
+      globalThis.clearTimeout?.(this._structuredPathUpgradeTimer);
+      this._structuredPathUpgradeTimer = 0;
+    }
+    if (clear) {
+      this.setStructuredStartupPath(false);
+    }
+  }
+
+  ensureFlatGraphRenderer() {
+    if (this.flatGraph) return this.flatGraph;
+    let flatGraph = /** @type {any} */ (document.createElement('canvas-graph'));
+    flatGraph.className = 'portfolio-flat-graph';
+    flatGraph.setAttribute('device-orientation-parallax', '');
+    flatGraph.setAttribute('device-orientation-parallax-strength', '28');
+    flatGraph.setAttribute('device-orientation-parallax-max-tilt', '32');
+    this.append(flatGraph);
+    this.flatGraph = flatGraph;
+    let flatModel = this._flatModel || createPortfolioFlatGraphModel();
+    this._flatModel = flatModel;
+    this.graphController?.connect?.({
+      flatGraph,
+      flatModel,
+      flatPath: null,
+      mode: this.flatMode ? 'flat' : 'structured',
+    });
+    flatGraph.setActionItems?.(createPortfolioNodeActionItems());
     flatGraph?.addEventListener('file-selected', (event) => {
       let id = resolveFlatGraphSelection(event.detail?.path || '');
       if (id && id !== portfolioRuntime.selectedId) {
@@ -1207,15 +1405,22 @@ class PortfolioGraphPanel extends HTMLElement {
     });
     flatGraph?.addEventListener('toolbar-action', (event) => this.onFlatGraphToolbarAction(event));
     flatGraph?.addEventListener('orientation-parallax-status', (event) => this.onFlatGraphOrientationParallaxStatus(event));
-    this.addEventListener('panel-menu-action', (event) => this.onPanelMenuAction(event));
+    return flatGraph;
+  }
 
-    requestAnimationFrame(() => {
-      canvas.refreshConnections();
-      portfolioRuntime.setGraphMode(this.flatMode ? 'flat' : 'structured');
-      portfolioRuntime.setCanvas(canvas);
-      portfolioRuntime.setGraphController(this.graphController);
-      this.syncPanelMenuActions();
-    });
+  onStructuredGraphToolbarAction(event) {
+    let action = event.detail?.action || '';
+    let id = event.detail?.nodeId || '';
+    if (!portfolioRuntime.entries.has(id)) return;
+
+    if (action === 'explore') {
+      portfolioRuntime.select(id, { focus: true, focusScope: 'group' });
+      return;
+    }
+
+    if (action === 'view-code') {
+      portfolioRuntime.select(id, { focus: false });
+    }
   }
 
   onFlatGraphToolbarAction(event) {
@@ -1260,9 +1465,21 @@ class PortfolioGraphPanel extends HTMLElement {
 
   applyGraphViewMode() {
     let mode = this.flatMode ? 'flat' : 'structured';
+    this.ensureGraphRenderer(mode);
     portfolioRuntime.setGraphMode(mode);
     this.setAttribute('data-mode', mode);
     this.graphController?.setMode(mode, { notify: false });
+    if (mode === 'structured') {
+      this.scheduleStructuredGraphBinding();
+      if (this._structuredBound) this.scheduleStructuredPathUpgrade();
+    } else {
+      this.cancelStructuredGraphBinding();
+      this.cancelStructuredPathUpgrade({ clear: true });
+      this.setStructuredGraphLoading(false);
+      if (this.canvas?._layoutReleasedDom) {
+        this._structuredBound = false;
+      }
+    }
     portfolioRuntime.syncCanvas({ focus: true, focusScope: 'group' });
   }
 
@@ -1290,6 +1507,11 @@ class PortfolioGraphPanel extends HTMLElement {
   applyPathStyle() {
     if (this.graphController) {
       this.graphController.setPathStyle(this.pathStyle);
+      if (this.pathStyle === 'straight') {
+        this.cancelStructuredPathUpgrade({ clear: true });
+      } else if (this._structuredBound && !this.flatMode) {
+        this.scheduleStructuredPathUpgrade();
+      }
       return;
     }
     this.canvas?.setPathStyle?.(this.pathStyle);
@@ -1363,7 +1585,8 @@ class PortfolioWorkspace extends HTMLElement {
         min-panel-inline-size="220"
         min-panel-block-size="180"
         responsive-mode="swipe"
-        responsive-breakpoint="760"
+        responsive-breakpoint="${PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT}"
+        swipe-control="rail"
         overflow-mode="collapse"></panel-layout>
     `;
     let layout = /** @type {any} */ (this.querySelector('panel-layout'));
@@ -1372,13 +1595,25 @@ class PortfolioWorkspace extends HTMLElement {
       title: tPortfolio('panel.materials'),
       icon: 'folder',
       component: 'portfolio-tree-panel',
-      behavior: { importance: 76, minInlineSize: 220, collapse: 'auto', mobileDock: 'start' },
+      behavior: {
+        importance: PORTFOLIO_TREE_PANEL_IMPORTANCE,
+        minInlineSize: PORTFOLIO_TREE_PANEL_MIN_INLINE_SIZE,
+        collapse: 'auto',
+        mobileDock: 'start',
+        swipeControl: 'rail',
+      },
     });
     layout.registerPanelType('portfolio-graph', {
       title: tPortfolio('panel.graph'),
       icon: 'hub',
       component: 'portfolio-graph-panel',
-      behavior: { importance: 88, minInlineSize: 420, collapse: 'manual', mobileDock: 'end', swipeControl: 'island' },
+      behavior: {
+        importance: PORTFOLIO_GRAPH_PANEL_IMPORTANCE,
+        minInlineSize: PORTFOLIO_GRAPH_PANEL_MIN_INLINE_SIZE,
+        collapse: 'auto',
+        mobileDock: 'end',
+        swipeControl: 'rail',
+      },
       menuActions: createGraphPanelMenuActions(),
     });
     layout.registerPanelType('portfolio-viewer', {
@@ -1391,20 +1626,24 @@ class PortfolioWorkspace extends HTMLElement {
       title: tPortfolio('panel.theme'),
       icon: 'palette',
       component: 'portfolio-theme-panel',
-      behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end' },
+      behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end', swipeControl: 'rail' },
     });
     this._onThemeOpenFull = () => {
       layout.openPanel('portfolio-theme', {
         direction: 'horizontal',
         ratio: 0.72,
-        behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end' },
+        behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end', swipeControl: 'rail' },
         source: 'cascade-theme-widget',
         uiInvoked: true,
       });
     };
     this._onOpenMaterials = () => {
+      if (typeof layout.toggleDrawer === 'function' && layout.hasAttribute('drawer-mode-active')) {
+        layout.toggleDrawer('start');
+        return;
+      }
       let handle = layout.querySelector('.layout-drawer-handle-stack-start [data-drawer-panel-id]');
-      if (handle && handle.getAttribute('aria-expanded') !== 'true') {
+      if (handle) {
         handle.click();
       }
     };
