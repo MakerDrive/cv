@@ -78,6 +78,7 @@ applyCascadeTheme(document.documentElement, CASCADE_THEME_DEFAULTS);
 
 const THEME_STORAGE_KEY = 'symbiote-ui:cascade-theme-editor';
 const THEME_TARGET_SELECTOR = ':root';
+const TREE_STORAGE_KEY = 'cv-portfolio-materials-tree-v1';
 const projectsElement = document.getElementById('pulse-projects-data');
 const projects = projectsElement ? JSON.parse(projectsElement.textContent || '[]') : [];
 const INITIAL_FOCUS_IDS = [
@@ -802,6 +803,31 @@ const portfolioRuntime = {
     highlightTreePath({ ref: { panel: this.tree } }, this.selectedId, { scroll: true });
   },
 
+  resetTreeState() {
+    try {
+      globalThis.localStorage?.removeItem?.(TREE_STORAGE_KEY);
+    } catch {
+      // Storage can be unavailable in private or embedded browsing contexts.
+    }
+    if (this.tree) {
+      this.tree.filterText = '';
+      this.tree.defaultExpandedIds = defaultExpandedTreeIds;
+      this.tree.expandedIds = defaultExpandedTreeIds;
+    }
+    this.syncTree();
+  },
+
+  resetGraphState() {
+    let graphPanel = /** @type {any} */ (document.querySelector('portfolio-graph-panel'));
+    graphPanel?.resetVisualState?.();
+    this.syncCanvas({ focus: true, focusScope: 'group' });
+  },
+
+  resetVisualState() {
+    this.resetTreeState();
+    this.resetGraphState();
+  },
+
   syncViewer() {
     let entry = this.getSelectedEntry();
     if (!entry || !this.viewer?.showFile) return;
@@ -974,7 +1000,7 @@ class PortfolioTreePanel extends HTMLElement {
       customElements.whenDefined('sn-tree-view'),
     ]).then(() => {
       setupTreePanel(this, {
-        storageKey: 'cv-portfolio-materials-tree-v1',
+        storageKey: TREE_STORAGE_KEY,
         defaultExpandedIds: defaultExpandedTreeIds,
         onSelect: (item) => {
           let id = resolveTreeSelection(item);
@@ -1518,6 +1544,19 @@ class PortfolioGraphPanel extends HTMLElement {
     this.canvas?.refreshConnections?.();
   }
 
+  resetVisualState() {
+    this.editable = true;
+    this.pathStyle = 'pcb';
+    this.applyGraphMode();
+    this.applyPathStyle();
+    this._graphWasVisible = false;
+    this._graphVisibleFocusUntil = 0;
+    this.canvas?.refreshConnections?.();
+    this.graphController?.fitView?.();
+    this.scheduleVisibleGraphFocus();
+    this.syncPanelMenuActions();
+  }
+
   syncPanelMenuActions() {
     this.dispatchEvent(new CustomEvent('panel-menu-actions', {
       bubbles: true,
@@ -1647,9 +1686,25 @@ class PortfolioWorkspace extends HTMLElement {
         handle.click();
       }
     };
+    this._onThemeReset = (event) => {
+      if (event.detail?.source !== 'reset') return;
+      this.resetVisualState();
+    };
     document.addEventListener('cascade-theme-open-full', this._onThemeOpenFull);
     document.addEventListener('portfolio-open-materials', this._onOpenMaterials);
+    document.addEventListener('cascade-theme-change', this._onThemeReset);
     layout.setLayout(createPortfolioLayoutTree());
+  }
+
+  resetVisualState() {
+    let layout = /** @type {any} */ (this.querySelector('panel-layout'));
+    layout?.closeDrawer?.('all');
+    layout?.setLayout?.(createPortfolioLayoutTree());
+    layout?.closeDrawer?.('all');
+    portfolioRuntime.resetVisualState();
+    requestAnimationFrame(() => {
+      portfolioRuntime.resetVisualState();
+    });
   }
 
   disconnectedCallback() {
@@ -1658,6 +1713,9 @@ class PortfolioWorkspace extends HTMLElement {
     }
     if (this._onOpenMaterials) {
       document.removeEventListener('portfolio-open-materials', this._onOpenMaterials);
+    }
+    if (this._onThemeReset) {
+      document.removeEventListener('cascade-theme-change', this._onThemeReset);
     }
   }
 }

@@ -78,6 +78,20 @@ test('portfolio mobile header toggles the file navigation drawer through layout 
   assert.doesNotMatch(source, /document\.querySelector\('\\.portfolio-layout \\.layout-drawer-handle-stack-start/);
 });
 
+test('portfolio theme reset restores visual layout state', async () => {
+  let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
+
+  assert.match(source, /const TREE_STORAGE_KEY = 'cv-portfolio-materials-tree-v1';/);
+  assert.match(source, /document\.addEventListener\('cascade-theme-change', this\._onThemeReset\);/);
+  assert.match(source, /if \(event\.detail\?\.source !== 'reset'\) return;/);
+  assert.match(source, /layout\?\.setLayout\?\.\(createPortfolioLayoutTree\(\)\);/);
+  assert.match(source, /globalThis\.localStorage\?\.removeItem\?\.\(TREE_STORAGE_KEY\);/);
+  assert.match(source, /this\.tree\.expandedIds = defaultExpandedTreeIds;/);
+  assert.match(source, /graphPanel\?\.resetVisualState\?\.\(\);/);
+  assert.match(source, /this\.pathStyle = 'pcb';/);
+  assert.match(source, /this\.graphController\?\.fitView\?\.\(\);/);
+});
+
 test('portfolio mobile workspace uses dynamic viewport height when available', async () => {
   let source = await readFile(new URL('../../src/static-pages/css/index.css.js', import.meta.url), 'utf8');
 
