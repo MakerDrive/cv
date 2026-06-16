@@ -6,6 +6,16 @@ import ICONS_LINK from '../icons/link.html.js';
 const template = fs.readFileSync('./src/static-pages/page.tpl.html', 'utf8');
 const importmap = getImportMap();
 
+function getAssetVersion() {
+  return String(process.env.CV_ASSET_VERSION || process.env.GITHUB_SHA || '').trim();
+}
+
+function versionAssetPath(path) {
+  let version = getAssetVersion();
+  if (!version || path.includes('?') || path.startsWith('http')) return path;
+  return `${path}?v=${encodeURIComponent(version.slice(0, 12))}`;
+}
+
 function getPackageVersion(packageName) {
   try {
     let packageJson = JSON.parse(
@@ -70,11 +80,13 @@ export async function getPage(pageData) {
     TITLE: pageData.TITLE,
     BODY_ATTRS: pageData.BODY_ATTRS || '',
     BASE_PATH: pageData.BASE_PATH || './',
-    CSS_PATH: pageData.CSS_PATH || 'css/index.css',
-    JS_PATH: pageData.JS_PATH || 'js/index.js',
+    CSS_PATH: versionAssetPath(pageData.CSS_PATH || 'css/index.css'),
+    JS_PATH: versionAssetPath(pageData.JS_PATH || 'js/index.js'),
     HEADER_CONTENT: pageData.HEADER_CONTENT,
     CONTENT: pageData.CONTENT || await md(pageData.MD_URL),
     FOOTER_CONTENT: pageData.FOOTER_CONTENT || `JSDA Template &copy; ${new Date().getFullYear()}`,
     SIDE_PANEL_ATTRS: pageData.SIDE_PANEL_ATTRS || '',
   });
 };
+
+export { versionAssetPath };

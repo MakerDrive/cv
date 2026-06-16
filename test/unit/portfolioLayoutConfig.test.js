@@ -10,6 +10,7 @@ import {
   PORTFOLIO_TREE_PANEL_IMPORTANCE,
   PORTFOLIO_TREE_PANEL_MIN_INLINE_SIZE,
 } from '../../src/static-pages/data/portfolioLayoutConfig.js';
+import { versionAssetPath } from '../../src/static-pages/getPage.js';
 
 test('portfolio layout keeps drawer mode below desktop auto-collapse widths', () => {
   assert.ok(PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT < PORTFOLIO_LAYOUT_MIN_INLINE_SIZE);
@@ -108,4 +109,34 @@ test('portfolio static build publishes the graph force worker asset', async () =
   assert.match(pkg.scripts['copy-force-worker'], /symbiote-ui\/canvas\/ForceWorker\.js/);
   assert.match(pkg.scripts['copy-force-worker'], /dist\/js\/ForceWorker\.js/);
   assert.match(pkg.scripts.build, /copy-force-worker/);
+});
+
+test('portfolio static pages version local CSS and JS assets', () => {
+  let previousVersion = process.env.CV_ASSET_VERSION;
+  let previousGithubSha = process.env.GITHUB_SHA;
+
+  try {
+    delete process.env.GITHUB_SHA;
+    process.env.CV_ASSET_VERSION = 'abcdef1234567890';
+
+    assert.equal(versionAssetPath('js/index.js'), 'js/index.js?v=abcdef123456');
+    assert.equal(versionAssetPath('css/index.css'), 'css/index.css?v=abcdef123456');
+    assert.equal(versionAssetPath('js/index.js?v=current'), 'js/index.js?v=current');
+    assert.equal(versionAssetPath('https://example.com/index.js'), 'https://example.com/index.js');
+
+    delete process.env.CV_ASSET_VERSION;
+    assert.equal(versionAssetPath('js/index.js'), 'js/index.js');
+  } finally {
+    if (previousVersion === undefined) {
+      delete process.env.CV_ASSET_VERSION;
+    } else {
+      process.env.CV_ASSET_VERSION = previousVersion;
+    }
+
+    if (previousGithubSha === undefined) {
+      delete process.env.GITHUB_SHA;
+    } else {
+      process.env.GITHUB_SHA = previousGithubSha;
+    }
+  }
 });
