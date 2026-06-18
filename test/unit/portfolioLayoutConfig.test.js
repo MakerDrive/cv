@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import {
+  PORTFOLIO_DEFAULT_GRAPH_VIEW_MODE,
   PORTFOLIO_GRAPH_PANEL_IMPORTANCE,
   PORTFOLIO_GRAPH_PANEL_MIN_INLINE_SIZE,
   PORTFOLIO_LAYOUT_MIN_INLINE_SIZE,
@@ -20,6 +21,17 @@ test('portfolio layout keeps drawer mode below desktop auto-collapse widths', ()
 test('portfolio auto-collapse prefers graph before file navigation', () => {
   assert.ok(PORTFOLIO_GRAPH_PANEL_IMPORTANCE < PORTFOLIO_TREE_PANEL_IMPORTANCE);
   assert.ok(PORTFOLIO_GRAPH_PANEL_MIN_INLINE_SIZE > PORTFOLIO_TREE_PANEL_MIN_INLINE_SIZE);
+});
+
+test('portfolio graph defaults to flat mode', async () => {
+  let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
+
+  assert.equal(PORTFOLIO_DEFAULT_GRAPH_VIEW_MODE, 'flat');
+  assert.match(source, /if \(typeof location === 'undefined'\) return PORTFOLIO_DEFAULT_GRAPH_VIEW_MODE;/);
+  assert.match(source, /if \(!modeParam\) return PORTFOLIO_DEFAULT_GRAPH_VIEW_MODE;/);
+  assert.match(source, /if \(modeParam === 'structured'\) return 'structured';/);
+  assert.match(source, /if \(this\.flatMode\) {\s*nextUrl\.searchParams\.delete\('mode'\);/);
+  assert.match(source, /} else {\s*nextUrl\.searchParams\.set\('mode', 'structured'\);/);
 });
 
 test('portfolio initial graph load focuses the selected node', async () => {

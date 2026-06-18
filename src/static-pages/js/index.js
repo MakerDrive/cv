@@ -5,6 +5,7 @@ if (!document.querySelector('side-panel[disabled]')) {
 import { socialLinks } from '../data/socialLinks.js';
 import { PORTFOLIO_LOCALE_MESSAGES } from '../data/portfolioTranslations.js';
 import {
+  PORTFOLIO_DEFAULT_GRAPH_VIEW_MODE,
   PORTFOLIO_GRAPH_PANEL_IMPORTANCE,
   PORTFOLIO_GRAPH_PANEL_MIN_INLINE_SIZE,
   PORTFOLIO_LAYOUT_MIN_INLINE_SIZE,
@@ -94,6 +95,13 @@ const relationSocket = new Socket('portfolio', {
 
 const skillEntries = [
   {
+    id: 'skills/rnd-engineering',
+    label: tPortfolio('skill.rnd.label'),
+    icon: 'science',
+    category: 'server',
+    summary: tPortfolio('skill.rnd.summary'),
+  },
+  {
     id: 'skills/agentic-ai',
     label: tPortfolio('skill.agenticAi.label'),
     icon: 'account_tree',
@@ -108,23 +116,27 @@ const skillEntries = [
     summary: tPortfolio('skill.productUi.summary'),
   },
   {
-    id: 'skills/automation',
-    label: tPortfolio('skill.automation.label'),
+    id: 'skills/hardware-capture',
+    label: tPortfolio('skill.hardwareCapture.label'),
     icon: 'precision_manufacturing',
     category: 'instance',
-    summary: tPortfolio('skill.automation.summary'),
+    summary: tPortfolio('skill.hardwareCapture.summary'),
   },
 ];
 
 function getSkillIdsForProject(project) {
   let text = `${project.title} ${project.summary}`.toLowerCase();
-  let result = [];
-  if (/agent|ai|portal|cloud|publishing|megavisor/.test(text)) result.push('skills/agentic-ai');
-  if (/video|editor|ui|media|studio|interface|publishing/.test(text)) result.push('skills/product-ui');
-  if (/robot|scan|360|photo|capture|turntable|hardware|photogrammetry/.test(text)) {
-    result.push('skills/automation');
+  let result = ['skills/rnd-engineering'];
+  if (/agent|agentic|mcp|model routing|ai-assisted|code-intelligence|developer/.test(text)) {
+    result.push('skills/agentic-ai');
   }
-  return result.length > 0 ? result : ['skills/product-ui'];
+  if (/video|editor|ui|media|studio|interface|publishing|workspace|web component/.test(text)) {
+    result.push('skills/product-ui');
+  }
+  if (/robot|scan|360|photo|capture|turntable|hardware|photogrammetry|booth|equipment|3d/.test(text)) {
+    result.push('skills/hardware-capture');
+  }
+  return result;
 }
 
 function getProjectLinkLabel(project) {
@@ -534,8 +546,12 @@ function createPortfolioNodeActionItems() {
 }
 
 function getCurrentGraphViewMode() {
-  if (typeof location === 'undefined') return 'structured';
-  return resolveInitialGraphViewMode(new URLSearchParams(location.search));
+  if (typeof location === 'undefined') return PORTFOLIO_DEFAULT_GRAPH_VIEW_MODE;
+  let urlParams = new URLSearchParams(location.search);
+  let modeParam = urlParams.get('mode');
+  if (!modeParam) return PORTFOLIO_DEFAULT_GRAPH_VIEW_MODE;
+  if (modeParam === 'structured') return 'structured';
+  return resolveInitialGraphViewMode(urlParams);
 }
 
 function normalizeRoutePath(path) {
@@ -1515,9 +1531,9 @@ class PortfolioGraphPanel extends HTMLElement {
     if (typeof location !== 'undefined' && typeof history !== 'undefined') {
       let nextUrl = new URL(location.href);
       if (this.flatMode) {
-        nextUrl.searchParams.set('mode', 'flat');
-      } else {
         nextUrl.searchParams.delete('mode');
+      } else {
+        nextUrl.searchParams.set('mode', 'structured');
       }
       if (nextUrl.href !== location.href) {
         history.replaceState(history.state, '', nextUrl);

@@ -21,7 +21,7 @@ const MOBILE_VIEWPORT = Object.freeze({
 });
 
 const FLAT_ROUTE = '/cv/?mode=flat&resource-test=mobile-flat';
-const STRUCTURED_ROUTE = '/cv/?resource-test=mobile-structured';
+const STRUCTURED_ROUTE = '/cv/?mode=structured&resource-test=mobile-structured';
 const EXTERNAL_TEST_URL = process.env.CV_RESOURCE_TEST_URL || '';
 const VERBOSE_OUTPUT = process.env.CV_RESOURCE_TEST_VERBOSE === '1';
 
