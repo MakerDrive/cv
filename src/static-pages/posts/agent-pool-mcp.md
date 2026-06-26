@@ -2,7 +2,7 @@
 title: Agent Pool MCP
 order: 10
 kicker: Author project
-summary: MCP server for multi-agent task delegation, CLI orchestration, and Agent Portal routing.
+summary: Multi-agent runtime for delegating CLI work, tracking ownership, and returning structured execution state.
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://github.com/rnd-pro/agent-pool-mcp
@@ -12,4 +12,4 @@ links: GitHub|https://github.com/rnd-pro/agent-pool-mcp|Public source repository
 
 # Agent Pool MCP
 
-Runtime layer for delegating work across CLI agents, tracking task execution, and routing agent sessions through a shared MCP interface.
+Runtime layer for R&D on multi-agent execution: delegating work across CLI agents, keeping task ownership visible, tracking process state, and routing agent sessions through a shared MCP interface.

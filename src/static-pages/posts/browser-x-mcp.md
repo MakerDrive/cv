@@ -2,7 +2,7 @@
 title: Browser X MCP
 order: 11
 kicker: Author project
-summary: MCP server for browser automation, form testing, element extraction, and structured browser operation logs.
+summary: Browser automation R&D for making page inspection, form workflows, and UI-test evidence usable by agents.
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://github.com/rnd-pro/browser-x-mcp
@@ -12,4 +12,4 @@ links: GitHub|https://github.com/rnd-pro/browser-x-mcp|Public source repository;
 
 # Browser X MCP
 
-Browser automation server for AI agents that need reliable page inspection, form workflows, and repeatable web UI checks.
+Browser automation server for AI agents: page inspection, form workflows, repeatable UI checks, structured operation logs, and browser-state evidence.

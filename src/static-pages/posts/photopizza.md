@@ -2,7 +2,7 @@
 title: PhotoPizza
 order: 6
 kicker: Selected project
-summary: Open-source 360-degree turntable for product photography, photogrammetry, and AI dataset capture.
+summary: Motorized 360 turntable invented inside MEGAVISOR, then developed as an open-source PhotoPizza project for photography, video, and photogrammetry.
 image: https://rnd-pro.com/svg/photopizza/index.svg
 alt: PhotoPizza DIY
 href: https://rnd-pro.com/projects/photopizza/
@@ -12,4 +12,10 @@ links: PhotoPizza|https://www.youtube.com/@PhotoPizza|YouTube channel with produ
 
 # PhotoPizza
 
-DIY turntable platform for repeatable product capture, photogrammetry experiments, and visual dataset production.
+I originally invented PhotoPizza inside the MEGAVISOR project, where we needed an affordable, fast, and repeatable way to shoot interactive 360-degree product media.
+
+After MEGAVISOR, I continued developing it as an open-source hardware and software project: Arduino and NEMA 17 mechanics in the first versions, then an ESP32/Espruino control block with Wi-Fi and a browser-based control app.
+
+The project covered concept, mechanics, electronics, firmware, UI, documentation, photography, video, and 3D scanning workflows. It also scaled from accessible DIY builds to heavier versions such as PhotoPizza D1200 for large objects.
+
+PhotoPizza became the base for later professional scanning experiments, including ComplexScan and AUTOBOX, and gave the ecosystem a practical test platform for motion control, camera sync, lighting checks, capture settings, 360 video, and photogrammetry.

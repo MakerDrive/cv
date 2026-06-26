@@ -2,7 +2,7 @@
 title: MEGAVISOR
 order: 7
 kicker: Selected project
-summary: Cloud platform for publishing interactive media such as 360-degree objects, virtual tours, and rich product presentations.
+summary: Co-founded product media platform combining cloud publishing, 360-degree capture workflows, shooting automation, and custom lighting hardware.
 image: https://rnd-pro.com/svg/megavisor/index.svg
 alt: MEGAVISOR
 href: https://rnd-pro.com/projects/megavisor/
@@ -11,4 +11,14 @@ linkLabel: View project
 
 # MEGAVISOR
 
-Publishing platform for presenting interactive media online, from 360-degree product objects to virtual tours and visual stories.
+I worked as co-founder and technical director, owning the capture-side R&D around the cloud publishing product.
+
+My work covered the shooting process: inventing the 360-degree product photography workflow, developing automation for repeatable capture, creating lighting devices for product shoots, and defining the practical production technology.
+
+I also led photographers and on-site shoots at customer warehouses, turning the capture setup into a field workflow that could run with real inventory and client constraints.
+
+PhotoPizza was born inside this work: I invented the motorized turntable for MEGAVISOR's affordable, repeatable 360-degree product capture process. After MEGAVISOR, I continued it independently as an open-source hardware and software project.
+
+MEGAVISOR belongs in the product-platform line because the hardware and shooting process served a larger portal: cloud publishing, client-facing interactive media, and production operations.
+
+The project was founded by me and my brother Alex. Alex focused on the cloud product itself and led the development group building the online platform.

@@ -2,7 +2,7 @@
 title: Symbiote Video Studio
 order: 2
 kicker: Selected project
-summary: AI-assisted video editing workspace for creators and production teams.
+summary: R&D video workspace for testing how AI can assist editing, media structure, and production workflows.
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://rnd-pro.com/projects/svs/
@@ -11,4 +11,4 @@ linkLabel: View project
 
 # Symbiote Video Studio
 
-Video production workspace focused on faster editing, structured media workflows, and practical AI assistance.
+Prototype-driven video production environment for turning rough media processes into faster, structured editing tools with practical AI assistance.

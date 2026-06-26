@@ -1,8 +1,8 @@
 ---
 title: Symbiote Engine
-order: 17
+order: 16
 kicker: Author project
-summary: Universal node-based execution engine for Symbiote workflows.
+summary: Execution engine for researching reusable workflow graphs and automation blocks in the active Symbiote Workspace / UI / Engine line.
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://github.com/rnd-pro/symbiote-engine
@@ -12,4 +12,6 @@ links: GitHub|https://github.com/rnd-pro/symbiote-engine|Public source repositor
 
 # Symbiote Engine
 
-Node-based workflow runtime for composing executable graph flows and reusable automation blocks in the Symbiote ecosystem.
+Execution runtime for composing reusable workflow graphs and automation blocks in the active RND-PRO Symbiote line.
+
+The R&D focus is making visual workflow structure executable enough for automation while keeping it understandable at the product level. It connects directly with Symbiote Workspace as the product surface and Symbiote UI as the controllable interface layer.

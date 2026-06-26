@@ -94,7 +94,8 @@ test('portfolio mobile header toggles the file navigation drawer through layout 
 test('portfolio theme reset restores visual layout state', async () => {
   let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
 
-  assert.match(source, /const TREE_STORAGE_KEY = 'cv-portfolio-materials-tree-v1';/);
+  assert.match(source, /const TREE_STORAGE_KEY = `cv-portfolio-materials-tree-v4:\$\{portfolioLocalization\.locale\}`;/);
+  assert.match(source, /const projectTreeGroupDirectoryIds = PROJECT_TREE_GROUPS\.map/);
   assert.match(source, /document\.addEventListener\('cascade-theme-change', this\._onThemeReset\);/);
   assert.match(source, /if \(event\.detail\?\.source !== 'reset'\) return;/);
   assert.match(source, /layout\?\.setLayout\?\.\(createPortfolioLayoutTree\(\)\);/);
@@ -151,4 +152,13 @@ test('portfolio static pages version local CSS and JS assets', () => {
       process.env.GITHUB_SHA = previousGithubSha;
     }
   }
+});
+
+test('portfolio import map resolves Symbiote package exports used by symbiote-ui', async () => {
+  let source = await readFile(new URL('../../src/static-pages/getPage.js', import.meta.url), 'utf8');
+
+  assert.match(
+    source,
+    /'@symbiotejs\/symbiote\/utils': `\$\{symbioteBaseUrl\}\/utils\/index\.js`/
+  );
 });

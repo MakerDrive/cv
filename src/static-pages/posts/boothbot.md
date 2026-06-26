@@ -2,7 +2,7 @@
 title: BoothBot
 order: 5
 kicker: Selected project
-summary: Automated product-photo booth for e-commerce catalogs, wine boutiques, and restaurant product teams.
+summary: Commercial capture-automation project for wine bottles: warehouse equipment, controlled lighting, motorized camera, and catalog photo processing.
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://rnd-pro.com/projects/boothbot/
@@ -11,4 +11,8 @@ linkLabel: View project
 
 # BoothBot
 
-Product photography automation for teams that need consistent catalog images without a full studio setup.
+I built BoothBot as a commercial automation project for a client who needed repeatable product photos of wine bottles directly in the warehouse.
+
+The system combined a compact booth, controlled light-matrix panels, a motorized camera setup, capture presets, and an automated photo-processing workflow for catalog images. Non-photographer staff could create consistent catalog-ready photos on the warehouse floor.
+
+The equipment worked on the customer's warehouse floor, so the R&D challenge was practical: stable light, repeatable framing, reliable operation by office/warehouse staff, compact construction, and a pipeline from shooting to processed catalog assets.

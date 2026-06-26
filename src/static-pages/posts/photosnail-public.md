@@ -2,7 +2,7 @@
 title: PhotoSnail Public
 order: 19
 kicker: Author project
-summary: Public web project from the PhotoSnail ecosystem for early product and media presentation work.
+summary: Early PhotoSnail web project around motion-control camera systems and media presentation experiments.
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: RND-PRO logo
 href: https://github.com/PhotoSnail/public
@@ -12,4 +12,4 @@ links: GitHub|https://github.com/PhotoSnail/public|Public source repository
 
 # PhotoSnail Public
 
-Early public web project connected to PhotoSnail product and media presentation experiments.
+Early public web project connected to PhotoSnail R&D: motion-control camera systems, object tracking ideas, and media presentation experiments around automated shooting.

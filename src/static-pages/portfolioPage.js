@@ -8,13 +8,18 @@ export async function getPortfolioPage({
 } = {}) {
   return getPage({
     BASE_PATH: basePath,
-    TITLE: 'Vladimir Matiasevich | Lead Engineer / R&D / Agentic AI',
+    TITLE: 'Vladimir Matiasevich | Lead Engineer / R&D / AI Tooling',
     BODY_ATTRS: 'data-side-panel="off"',
     HEADER_CONTENT: /*html*/ `
       <button class="pulse-header-menu-button" type="button" aria-label="Open portfolio navigation" title="Open portfolio navigation">
         <span class="material-symbols-outlined" aria-hidden="true">folder</span>
       </button>
-      <span class="pulse-header-title">Vladimir Matiasevich | Lead Engineer / R&D / Agentic AI</span>
+      <span class="pulse-header-title">Vladimir Matiasevich | Lead Engineer / R&D / AI Tooling</span>
+      <sn-segmented-control class="pulse-locale-toggle" name="portfolio-locale" aria-label="Portfolio language">
+        <button type="button" value="en">EN</button>
+        <button type="button" value="ru">RU</button>
+        <button type="button" value="es">ES</button>
+      </sn-segmented-control>
       <cascade-theme-widget
         class="pulse-theme-widget"
         storage-key="symbiote-ui:cascade-theme-editor"

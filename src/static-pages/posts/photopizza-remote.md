@@ -2,7 +2,7 @@
 title: PhotoPizza Remote
 order: 18
 kicker: Author project
-summary: Web remote interface for controlling PhotoPizza capture workflows from a browser-based UI.
+summary: Browser control interface for PhotoPizza capture workflows and field operation of the turntable.
 image: https://rnd-pro.com/svg/photopizza/index.svg
 alt: PhotoPizza
 href: https://github.com/PhotoPizza/remote
@@ -12,4 +12,4 @@ links: GitHub|https://github.com/PhotoPizza/remote|Public source repository
 
 # PhotoPizza Remote
 
-Browser-based remote control interface for the PhotoPizza ecosystem, focused on practical capture workflow operation.
+Browser-based remote control interface for the PhotoPizza ecosystem, focused on making capture settings, turntable operation, and field workflow control practical outside the lab.

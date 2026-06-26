@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import WebSocket from 'ws';
+import { loadProjectEntries } from '../../src/static-pages/data/projects.js';
+import { PROJECT_TRANSLATIONS } from '../../src/static-pages/data/projectTranslations.js';
 
 const ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const DIST_DIR = path.join(ROOT, 'dist');
@@ -24,6 +26,7 @@ const FLAT_ROUTE = '/cv/?mode=flat&resource-test=mobile-flat';
 const STRUCTURED_ROUTE = '/cv/?mode=structured&resource-test=mobile-structured';
 const EXTERNAL_TEST_URL = process.env.CV_RESOURCE_TEST_URL || '';
 const VERBOSE_OUTPUT = process.env.CV_RESOURCE_TEST_VERBOSE === '1';
+const PROJECTS = loadProjectEntries();
 
 const MIME_TYPES = new Map([
   ['.css', 'text/css; charset=utf-8'],
@@ -505,6 +508,256 @@ async function getGraphInternals(cdp, label) {
   }, { label: `graph internals: ${label}`, timeoutMs: 10_000 });
   return result.result.value;
 }
+
+async function getLocaleState(cdp, label) {
+  let result = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const toggle = document.querySelector('.pulse-locale-toggle');
+      const selected = toggle?.querySelector('[aria-checked="true"]');
+      const flatGraph = document.querySelector('canvas-graph');
+      const graphNode = flatGraph?.nodes?.find?.((node) => node.id === 'profile/photo')
+        || { id: 'profile/photo', label: 'Vladimir Matiasevich', type: 'data' };
+      return {
+        label: ${JSON.stringify(label)},
+        lang: document.documentElement.lang,
+        locale: document.documentElement.dataset.locale || '',
+        url: location.href,
+        title: document.title,
+        toggleValue: toggle?.getAttribute('value') || '',
+        selectedValue: selected?.getAttribute('value') || '',
+        storedLocale: localStorage.getItem('cv-portfolio-locale') || '',
+        themeText: document.querySelector('.pulse-theme-widget .ctw-trigger-label')?.textContent?.trim() || '',
+        themeTitle: document.querySelector('.pulse-theme-widget .ctw-trigger')?.getAttribute('title') || '',
+        panelActionTitle: document.querySelector('.panel-menu-toggle')?.getAttribute('title') || '',
+        treeAria: document.querySelector('sn-tree-panel.portfolio-tree')?.getAttribute('aria-label') || '',
+        layoutMenuText: document.querySelector('[data-menu-group="layout"] .panel-menu-row-label')?.textContent?.trim() || '',
+        layoutSplitText: document.querySelector('[data-menu-action-id="layout:split-horizontal"] .panel-menu-action-label')?.textContent?.trim() || '',
+        pathMenuText: document.querySelector('[data-menu-group="path"] .panel-menu-row-label')?.textContent?.trim() || '',
+        pathActionText: document.querySelector('[data-menu-action-id="path:pcb"] .panel-menu-action-label')?.textContent?.trim() || '',
+        flatInfoText: flatGraph && graphNode && typeof flatGraph._buildInfoLines === 'function'
+          ? flatGraph._buildInfoLines(graphNode).join('\\n')
+          : '',
+      };
+    })()`,
+  }, { label: `locale state: ${label}`, timeoutMs: 10_000 });
+  return result.result.value;
+}
+
+async function getVisiblePortfolioText(cdp, label) {
+  let result = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => ({
+      label: ${JSON.stringify(label)},
+      lang: document.documentElement.lang,
+      locale: document.documentElement.dataset.locale || '',
+      url: location.href,
+      text: [
+        document.body.innerText || '',
+        document.querySelector('sn-tree-panel.portfolio-tree')?.textContent || '',
+      ].join(' ').replace(/\\s+/g, ' ').trim(),
+    }))()`,
+  }, { label: `visible portfolio text: ${label}`, timeoutMs: 10_000 });
+  return result.result.value;
+}
+
+// Covers the custom element and reload path that cannot be exercised from static source checks.
+test('portfolio language toggle persists locale through the rendered shell', {
+  timeout: 60_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('language toggle smoke uses local deterministic routes');
+  let page = await createMobilePage(t);
+  if (!page) return;
+  let { cdp, server } = page;
+
+  await navigate(cdp, `${server.origin}/cv/?lang=ru&resource-test=language`, {
+    expectedMode: 'flat',
+  });
+  let ruState = await getLocaleState(cdp, 'initial-ru');
+  assert.equal(ruState.lang, 'ru');
+  assert.equal(ruState.locale, 'ru');
+  assert.equal(ruState.toggleValue, 'ru');
+  assert.equal(ruState.selectedValue, 'ru');
+  assert.match(ruState.title, /Владимир Матиясевич/);
+  assert.equal(ruState.themeText, 'Внешний вид');
+  assert.equal(ruState.themeTitle, 'Настройки внешнего вида');
+  assert.equal(ruState.panelActionTitle, 'Действия панели');
+  assert.equal(ruState.treeAria, 'Навигация портфолио');
+  assert.equal(ruState.layoutMenuText, 'Раскладка');
+  assert.equal(ruState.layoutSplitText, 'Разделить по горизонтали');
+  assert.equal(ruState.pathMenuText, 'Связи');
+  assert.equal(ruState.pathActionText, 'Маршрутные');
+  assert.match(ruState.flatInfoText, /Тип: Данные/);
+  assert.match(ruState.flatInfoText, /Связи: \d+/);
+
+  let load = waitForEvent(cdp, 'Page.loadEventFired', () => true, 15_000);
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('.pulse-locale-toggle button[value="es"]')?.click()`,
+  }, { label: 'click spanish locale', timeoutMs: 5_000 });
+  await load;
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve) => {
+      const started = performance.now();
+      const tick = () => {
+        const ready = document.documentElement.lang === 'es'
+          && document.querySelector('portfolio-graph-panel')?.dataset.mode === 'flat';
+        if (ready || performance.now() - started > 8000) {
+          resolve(Boolean(ready));
+        } else {
+          setTimeout(tick, 50);
+        }
+      };
+      tick();
+    })`,
+  }, { label: 'wait for spanish locale reload', timeoutMs: 10_000 });
+
+  let esState = await getLocaleState(cdp, 'after-es-toggle');
+  assert.equal(esState.lang, 'es');
+  assert.equal(esState.locale, 'es');
+  assert.equal(esState.toggleValue, 'es');
+  assert.equal(esState.selectedValue, 'es');
+  assert.equal(esState.storedLocale, 'es');
+  assert.match(esState.url, /[?&]lang=es(?:&|$)/);
+  assert.match(esState.title, /Ingeniero líder/);
+  assert.equal(esState.themeText, 'Apariencia');
+  assert.equal(esState.themeTitle, 'Controles de apariencia');
+  assert.equal(esState.panelActionTitle, 'Acciones del panel');
+  assert.equal(esState.treeAria, 'Navegación del portafolio');
+  assert.equal(esState.layoutMenuText, 'Diseño');
+  assert.equal(esState.layoutSplitText, 'Dividir horizontal');
+  assert.equal(esState.pathMenuText, 'Conexiones');
+  assert.equal(esState.pathActionText, 'Enrutadas');
+  assert.match(esState.flatInfoText, /Tipo: Datos/);
+  assert.match(esState.flatInfoText, /Conexiones: \d+/);
+
+  await navigate(cdp, `${server.origin}/cv/?resource-test=language-stored`, {
+    expectedMode: 'flat',
+  });
+  let storedState = await getLocaleState(cdp, 'stored-es');
+  assert.equal(storedState.lang, 'es');
+  assert.equal(storedState.locale, 'es');
+  assert.equal(storedState.toggleValue, 'es');
+  assert.equal(storedState.selectedValue, 'es');
+  assert.equal(storedState.storedLocale, 'es');
+  assert.doesNotMatch(storedState.url, /[?&]lang=/);
+  assert.match(storedState.title, /Ingeniero líder/);
+  assert.equal(storedState.themeText, 'Apariencia');
+  assert.equal(storedState.panelActionTitle, 'Acciones del panel');
+});
+
+test('portfolio project and section routes localize visible content', {
+  timeout: 120_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('localized project audit uses local deterministic routes');
+  let page = await createMobilePage(t);
+  if (!page) return;
+  let { cdp, server } = page;
+
+  let routeChecks = [
+    {
+      locale: 'ru',
+      path: '/cv/?lang=ru&mode=flat&resource-test=locale-audit-root',
+      include: ['Навигация портфолио', 'ИИ-инструменты', 'Продуктовые платформы', 'Hardware'],
+      exclude: ['Portfolio navigation', 'AI Tooling', 'Product Platforms'],
+    },
+    {
+      locale: 'ru',
+      path: '/cv/skills/?lang=ru&mode=flat&resource-test=locale-audit-skills',
+      include: ['Обзор навыков', 'R&D как центральный навык'],
+      exclude: ['Skill overview', 'R&D as the central skill'],
+    },
+    {
+      locale: 'ru',
+      path: '/cv/pulse/?lang=ru&mode=flat&resource-test=locale-audit-pulse',
+      include: ['Обзор Lab notes', 'Рабочий журнал'],
+      exclude: ['Lab overview', 'A working journal'],
+    },
+    {
+      locale: 'es',
+      path: '/cv/?lang=es&mode=flat&resource-test=locale-audit-root',
+      include: ['Navegación del portafolio', 'Herramientas de IA', 'Plataformas de producto', 'Hardware'],
+      exclude: ['Portfolio navigation', 'AI Tooling', 'Product Platforms'],
+    },
+    {
+      locale: 'es',
+      path: '/cv/skills/?lang=es&mode=flat&resource-test=locale-audit-skills',
+      include: ['Resumen de habilidades', 'I+D como habilidad central'],
+      exclude: ['Skill overview', 'R&D as the central skill'],
+    },
+    {
+      locale: 'es',
+      path: '/cv/pulse/?lang=es&mode=flat&resource-test=locale-audit-pulse',
+      include: ['Resumen de Lab notes', 'Un diario de trabajo'],
+      exclude: ['Lab overview', 'A working journal'],
+    },
+  ];
+
+  for (let check of routeChecks) {
+    await navigate(cdp, `${server.origin}${check.path}`, { expectedMode: 'flat' });
+    let visible = await getVisiblePortfolioText(cdp, `${check.locale}:${check.path}`);
+    assert.equal(visible.lang, check.locale);
+    assert.equal(visible.locale, check.locale);
+    for (let item of check.include) {
+      assert.ok(visible.text.includes(item), `${check.path} should include ${item}`);
+    }
+    for (let item of check.exclude) {
+      assert.equal(visible.text.includes(item), false, `${check.path} should not include ${item}`);
+    }
+  }
+
+  let metadata = {
+    ru: {
+      selected: 'Избранный проект',
+      author: 'Авторский проект',
+      viewProject: 'Смотреть проект',
+      viewRepository: 'Смотреть репозиторий',
+    },
+    es: {
+      selected: 'Proyecto destacado',
+      author: 'Proyecto propio',
+      viewProject: 'Ver proyecto',
+      viewRepository: 'Ver repositorio',
+    },
+  };
+
+  for (let locale of ['ru', 'es']) {
+    for (let project of PROJECTS) {
+      await navigate(
+        cdp,
+        `${server.origin}/cv/projects/${project.slug}/?lang=${locale}&mode=flat&resource-test=locale-audit-project`,
+        { expectedMode: 'flat', readyTimeoutMs: 20_000 }
+      );
+      let visible = await getVisiblePortfolioText(cdp, `${locale}:${project.slug}`);
+      let translation = PROJECT_TRANSLATIONS[locale][project.slug];
+      assert.equal(visible.lang, locale);
+      assert.equal(visible.locale, locale);
+      assert.ok(visible.text.includes(translation.summary), `${locale}:${project.slug}:summary`);
+      for (let paragraph of translation.details.split('\n\n')) {
+        assert.ok(visible.text.includes(paragraph), `${locale}:${project.slug}:details`);
+      }
+
+      if (project.kicker === 'Selected project') {
+        assert.ok(visible.text.includes(metadata[locale].selected), `${locale}:${project.slug}:selected`);
+      }
+      if (project.kicker === 'Author project') {
+        assert.ok(visible.text.includes(metadata[locale].author), `${locale}:${project.slug}:author`);
+      }
+      if (project.linkLabel === 'View project') {
+        assert.ok(visible.text.includes(metadata[locale].viewProject), `${locale}:${project.slug}:viewProject`);
+      }
+      if (project.linkLabel === 'View repository') {
+        assert.ok(visible.text.includes(metadata[locale].viewRepository), `${locale}:${project.slug}:viewRepository`);
+      }
+
+      assert.equal(visible.text.includes(project.summary), false, `${locale}:${project.slug}:rawSummary`);
+      for (let paragraph of project.details.split('\n\n').filter(Boolean)) {
+        assert.equal(visible.text.includes(paragraph), false, `${locale}:${project.slug}:rawDetails`);
+      }
+    }
+  }
+});
 
 test('portfolio mobile graph modes expose their initial resource profiles', {
   timeout: 120_000,

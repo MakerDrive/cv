@@ -15,6 +15,12 @@ function parseProjectLinks(value = '') {
     .filter((item) => item.label && item.href);
 }
 
+function parseProjectDetails(value = '') {
+  return value
+    .replace(/^\s*#\s+.+(?:\n|$)/, '')
+    .trim();
+}
+
 function parseFrontmatter(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   const match = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
@@ -33,6 +39,7 @@ function parseFrontmatter(filePath) {
 
   const order = Number.parseInt(meta.order, 10);
   const slug = path.basename(filePath, '.md');
+  const details = parseProjectDetails(match[2]);
   return {
     slug,
     order: Number.isFinite(order) ? order : null,
@@ -45,6 +52,7 @@ function parseFrontmatter(filePath) {
     href: meta.href || '',
     linkLabel: meta.linkLabel || 'View project',
     links: parseProjectLinks(meta.links),
+    details,
   };
 }
 

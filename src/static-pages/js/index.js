@@ -4,6 +4,8 @@ if (!document.querySelector('side-panel[disabled]')) {
 
 import { socialLinks } from '../data/socialLinks.js';
 import { PORTFOLIO_LOCALE_MESSAGES } from '../data/portfolioTranslations.js';
+import { PROJECT_TRANSLATIONS } from '../data/projectTranslations.js';
+import { PROJECT_PULSE_NOTES } from '../data/projectPulseNotes.js';
 import {
   PORTFOLIO_DEFAULT_GRAPH_VIEW_MODE,
   PORTFOLIO_GRAPH_PANEL_IMPORTANCE,
@@ -36,29 +38,303 @@ import {
   translate,
 } from 'symbiote-ui/ui';
 
-configureBrowserLocalization({
+const PORTFOLIO_LOCALE_STORAGE_KEY = 'cv-portfolio-locale';
+const PORTFOLIO_SUPPORTED_LOCALES = ['en', 'ru', 'es'];
+const PORTFOLIO_PROFILE_AGE = 41;
+const PORTFOLIO_PDF_DOWNLOADS = Object.freeze([
+  { locale: 'en', href: 'downloads/vladimir-matiasevich-cv-en.pdf' },
+  { locale: 'ru', href: 'downloads/vladimir-matiasevich-cv-ru.pdf' },
+  { locale: 'es', href: 'downloads/vladimir-matiasevich-cv-es.pdf' },
+]);
+
+function normalizePortfolioLocale(value) {
+  let locale = String(value || '').trim().toLowerCase();
+  return PORTFOLIO_SUPPORTED_LOCALES.includes(locale) ? locale : '';
+}
+
+function getStoredPortfolioLocale() {
+  try {
+    let storage = globalThis.localStorage;
+    return normalizePortfolioLocale(storage?.getItem?.(PORTFOLIO_LOCALE_STORAGE_KEY));
+  } catch {
+    return '';
+  }
+}
+
+function setStoredPortfolioLocale(locale) {
+  try {
+    globalThis.localStorage?.setItem?.(PORTFOLIO_LOCALE_STORAGE_KEY, locale);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function getQueryPortfolioLocale() {
+  if (typeof location === 'undefined') return '';
+  let urlParams = new URLSearchParams(location.search);
+  return normalizePortfolioLocale(urlParams.get('lang'));
+}
+
+function getInitialPortfolioLocale() {
+  return getQueryPortfolioLocale() || getStoredPortfolioLocale();
+}
+
+function applyPortfolioDocumentLocale(locale) {
+  let html = document.documentElement;
+  html.lang = locale;
+  html.dataset.locale = locale;
+}
+
+let initialPortfolioLocale = getInitialPortfolioLocale();
+let portfolioLocalization = configureBrowserLocalization({
   force: true,
   messages: PORTFOLIO_LOCALE_MESSAGES,
+  ...(initialPortfolioLocale ? { locale: initialPortfolioLocale, explicit: true } : {}),
 });
+applyPortfolioDocumentLocale(portfolioLocalization.locale);
 
 function tPortfolio(key, params = {}) {
   return translate(`portfolio.${key}`, params);
 }
 
+function getProfileAgeText() {
+  return tPortfolio('profile.age', { age: PORTFOLIO_PROFILE_AGE });
+}
+
+function getProfileSections() {
+  return [
+    {
+      title: tPortfolio('profile.factsTitle'),
+      body: getProfileAgeText(),
+    },
+    {
+      title: tPortfolio('experience.title'),
+      items: [
+        {
+          label: tPortfolio('experience.rnd.label'),
+          details: tPortfolio('experience.rnd.details'),
+        },
+        {
+          label: tPortfolio('experience.programming.label'),
+          details: tPortfolio('experience.programming.details'),
+        },
+      ],
+    },
+  ];
+}
+
+const THEME_CONTROL_LABEL_GETTERS = Object.freeze({
+  brightness: () => tPortfolio('theme.control.brightness'),
+  contrast: () => tPortfolio('theme.control.contrast'),
+  chroma: () => tPortfolio('theme.control.chroma'),
+  hue: () => tPortfolio('theme.control.hue'),
+  pattern: () => tPortfolio('theme.control.pattern'),
+});
+const CANVAS_GRAPH_TYPE_LABEL_GETTERS = Object.freeze({
+  data: () => tPortfolio('graph.type.data'),
+  action: () => tPortfolio('graph.type.action'),
+  output: () => tPortfolio('graph.type.output'),
+  config: () => tPortfolio('graph.type.config'),
+  external: () => tPortfolio('graph.type.external'),
+  style: () => tPortfolio('graph.type.style'),
+  docs: () => tPortfolio('graph.type.docs'),
+  asset: () => tPortfolio('graph.type.asset'),
+  group: () => tPortfolio('graph.type.group'),
+});
+const PANEL_MENU_GROUP_LABEL_GETTERS = Object.freeze({
+  layout: () => tPortfolio('layout.menu.layout'),
+  path: () => tPortfolio('layout.menu.connections'),
+  graph: () => tPortfolio('layout.menu.graph'),
+  panel: () => tPortfolio('layout.menu.panel'),
+});
+const PANEL_MENU_ACTION_LABEL_GETTERS = Object.freeze({
+  'layout:split-horizontal': () => [tPortfolio('layout.action.splitHorizontal'), tPortfolio('layout.action.splitHorizontalTitle')],
+  'layout:split-vertical': () => [tPortfolio('layout.action.splitVertical'), tPortfolio('layout.action.splitVerticalTitle')],
+  'layout:duplicate': () => [tPortfolio('layout.action.duplicate'), tPortfolio('layout.action.duplicateTitle')],
+  'layout:collapse-toggle': () => [tPortfolio('layout.action.collapse'), tPortfolio('layout.action.collapseTitle')],
+  'layout:remove': () => [tPortfolio('layout.action.remove'), tPortfolio('layout.action.removeTitle')],
+  'layout:close-ui-panel': () => [tPortfolio('layout.action.close'), tPortfolio('layout.action.closeTitle')],
+  'layout:remove-ui-panel': () => [tPortfolio('layout.action.removeTemporary'), tPortfolio('layout.action.removeTemporaryTitle')],
+});
+let portfolioChromeLocalizationFrame = 0;
+let portfolioChromeObserver = null;
+
+function setLocalizedText(element, value) {
+  if (element && element.textContent !== value) element.textContent = value;
+}
+
+function setLocalizedAttribute(element, name, value) {
+  if (element && element.getAttribute(name) !== value) element.setAttribute(name, value);
+}
+
+function setLocalizedButtonChrome(element, label) {
+  setLocalizedAttribute(element, 'title', label);
+  setLocalizedAttribute(element, 'aria-label', label);
+}
+
+function localizePortfolioThemeWidget() {
+  for (let widget of document.querySelectorAll('cascade-theme-widget')) {
+    let triggerLabel = widget.querySelector('.ctw-trigger-label');
+    let trigger = widget.querySelector('.ctw-trigger');
+    setLocalizedText(triggerLabel, tPortfolio('panel.theme'));
+    setLocalizedButtonChrome(trigger, tPortfolio('theme.quickControls'));
+  }
+
+  for (let popover of document.querySelectorAll('.ctw-popover')) {
+    setLocalizedAttribute(popover, 'aria-label', tPortfolio('theme.quickControls'));
+    setLocalizedText(popover.querySelector('.ctw-header strong'), tPortfolio('panel.theme'));
+    setLocalizedButtonChrome(popover.querySelector('[data-action="copy"]'), tPortfolio('theme.copy'));
+    setLocalizedButtonChrome(popover.querySelector('[data-action="reset"]'), tPortfolio('theme.reset'));
+    setLocalizedButtonChrome(popover.querySelector('[data-action="open-full"]'), tPortfolio('theme.openFull'));
+    setLocalizedAttribute(popover.querySelector('.ctw-mode'), 'aria-label', tPortfolio('theme.mode'));
+    setLocalizedText(popover.querySelector('[data-theme-mode="dark"]'), tPortfolio('theme.dark'));
+    setLocalizedText(popover.querySelector('[data-theme-mode="light"]'), tPortfolio('theme.light'));
+
+    for (let [controlName, getLabel] of Object.entries(THEME_CONTROL_LABEL_GETTERS)) {
+      setLocalizedText(popover.querySelector(`label[for="ctw-${controlName}"]`), getLabel());
+    }
+  }
+}
+
+function localizePortfolioLayoutChrome() {
+  for (let button of document.querySelectorAll('.panel-menu-toggle')) {
+    setLocalizedButtonChrome(button, tPortfolio('layout.panelActions'));
+  }
+  for (let panel of document.querySelectorAll('sn-tree-panel.portfolio-tree')) {
+    setLocalizedAttribute(panel, 'aria-label', tPortfolio('tree.navigation'));
+    setLocalizedAttribute(panel, 'title', tPortfolio('tree.navigation'));
+  }
+  for (let [groupId, getLabel] of Object.entries(PANEL_MENU_GROUP_LABEL_GETTERS)) {
+    for (let row of document.querySelectorAll(`[data-menu-group="${groupId}"]`)) {
+      setLocalizedText(row.querySelector('.panel-menu-row-label'), getLabel());
+    }
+  }
+  for (let [actionId, getLabels] of Object.entries(PANEL_MENU_ACTION_LABEL_GETTERS)) {
+    let [label, title] = getLabels();
+    for (let button of document.querySelectorAll(`[data-menu-action-id="${actionId}"]`)) {
+      setLocalizedText(button.querySelector('.panel-menu-action-label'), label);
+      setLocalizedButtonChrome(button, title);
+    }
+  }
+}
+
+function localizePortfolioChrome() {
+  localizePortfolioThemeWidget();
+  localizePortfolioLayoutChrome();
+}
+
+function schedulePortfolioChromeLocalization() {
+  if (portfolioChromeLocalizationFrame) return;
+  let scheduleFrame = globalThis.requestAnimationFrame || globalThis.setTimeout;
+  portfolioChromeLocalizationFrame = scheduleFrame(() => {
+    portfolioChromeLocalizationFrame = 0;
+    localizePortfolioChrome();
+  });
+}
+
+function startPortfolioChromeLocalization() {
+  localizePortfolioChrome();
+  for (let tagName of ['cascade-theme-widget', 'panel-layout', 'sn-tree-panel']) {
+    customElements.whenDefined(tagName).then(schedulePortfolioChromeLocalization).catch(() => {});
+  }
+  document.addEventListener('cascade-theme-change', schedulePortfolioChromeLocalization);
+  document.addEventListener('cascade-theme-open-full', schedulePortfolioChromeLocalization);
+  if (typeof MutationObserver !== 'function' || portfolioChromeObserver || !document.body) return;
+  portfolioChromeObserver = new MutationObserver(schedulePortfolioChromeLocalization);
+  portfolioChromeObserver.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['aria-label', 'class', 'hidden', 'title'],
+    childList: true,
+    subtree: true,
+  });
+}
+
+function getPortfolioCanvasGraphTypeLabel(type) {
+  return CANVAS_GRAPH_TYPE_LABEL_GETTERS[type]?.() || type;
+}
+
+function buildPortfolioFlatGraphInfoLines(graph, node) {
+  let lines = [];
+  lines.push(node.label);
+  if (node.id !== node.label) lines.push(node.id);
+  lines.push('');
+  lines.push(`${tPortfolio('graph.info.type')}: ${getPortfolioCanvasGraphTypeLabel(node.type)}`);
+
+  let connections = graph.adjMap?.get?.(node.id)?.size || 0;
+  if (connections > 0) lines.push(`${tPortfolio('graph.info.connections')}: ${connections}`);
+  if (node.children?.length > 0) lines.push(`${tPortfolio('graph.info.children')}: ${node.children.length}`);
+  if (Array.isArray(node.exports) && node.exports.length > 0) {
+    lines.push('');
+    lines.push(`${tPortfolio('graph.info.exports')}:`);
+    for (let item of node.exports.slice(0, 8)) lines.push(`  ${item}`);
+    if (node.exports.length > 8) lines.push(`  ... +${node.exports.length - 8}`);
+  }
+  if (node.lines) lines.push(`${tPortfolio('graph.info.lines')}: ${node.lines}`);
+  return lines;
+}
+
+function getSocialLinkSummary(summaryKey) {
+  switch (summaryKey) {
+    case 'social.facebook.summary':
+      return tPortfolio('social.facebook.summary');
+    case 'social.github.summary':
+      return tPortfolio('social.github.summary');
+    case 'social.instagram.summary':
+      return tPortfolio('social.instagram.summary');
+    case 'social.linkedin.summary':
+      return tPortfolio('social.linkedin.summary');
+    case 'social.youtube.summary':
+      return tPortfolio('social.youtube.summary');
+    default:
+      return '';
+  }
+}
+
+function getPortfolioPdfDownloadLabel(locale) {
+  switch (locale) {
+    case 'en':
+      return tPortfolio('pdf.en');
+    case 'ru':
+      return tPortfolio('pdf.ru');
+    case 'es':
+      return tPortfolio('pdf.es');
+    default:
+      return tPortfolio('pdf.downloads');
+  }
+}
+
 document.title = tPortfolio('page.title');
 document.querySelector('.pulse-header-title')?.replaceChildren(tPortfolio('page.title'));
+let localeToggle = document.querySelector('.pulse-locale-toggle');
 let headerMenuButton = document.querySelector('.pulse-header-menu-button');
 headerMenuButton?.setAttribute('aria-label', tPortfolio('header.openMaterials'));
 headerMenuButton?.setAttribute('title', tPortfolio('header.openMaterials'));
+localeToggle?.setAttribute('aria-label', tPortfolio('header.language'));
+localeToggle?.setAttribute('title', tPortfolio('header.language'));
+localeToggle?.setAttribute('value', portfolioLocalization.locale);
 function openMaterialsDrawerFromHeader() {
   document.dispatchEvent(new CustomEvent('portfolio-open-materials', {
     detail: { source: 'portfolio-header' },
   }));
 }
+function setPortfolioLocale(locale) {
+  locale = normalizePortfolioLocale(locale);
+  if (!locale || locale === portfolioLocalization.locale) return;
+  setStoredPortfolioLocale(locale);
+  if (typeof location === 'undefined') return;
+
+  let nextUrl = new URL(location.href);
+  nextUrl.searchParams.set('lang', locale);
+  globalThis.location.assign(nextUrl.href);
+}
 headerMenuButton?.addEventListener('click', (event) => {
   event.preventDefault();
   event.stopPropagation();
   openMaterialsDrawerFromHeader();
+});
+localeToggle?.addEventListener('sn-segmented-change', (event) => {
+  setPortfolioLocale(event.detail?.value);
 });
 document.addEventListener('click', (event) => {
   let target = event.target;
@@ -76,10 +352,11 @@ configureMaterialSymbols({
 });
 
 applyCascadeTheme(document.documentElement, CASCADE_THEME_DEFAULTS);
+startPortfolioChromeLocalization();
 
 const THEME_STORAGE_KEY = 'symbiote-ui:cascade-theme-editor';
 const THEME_TARGET_SELECTOR = ':root';
-const TREE_STORAGE_KEY = 'cv-portfolio-materials-tree-v1';
+const TREE_STORAGE_KEY = `cv-portfolio-materials-tree-v4:${portfolioLocalization.locale}`;
 const projectsElement = document.getElementById('pulse-projects-data');
 const projects = projectsElement ? JSON.parse(projectsElement.textContent || '[]') : [];
 const INITIAL_FOCUS_IDS = [
@@ -124,13 +401,80 @@ const skillEntries = [
   },
 ];
 
+const PROJECT_TREE_GROUPS = [
+  {
+    id: 'agentic-ai',
+    label: tPortfolio('skill.agenticAi.label'),
+    treeLabel: tPortfolio('projectGroup.agenticAi.label'),
+    icon: 'account_tree',
+    skillId: 'skills/agentic-ai',
+    slugs: new Set([
+      'agent-portal',
+      'mcp-agent-portal',
+      'project-graph-mcp',
+      'agent-pool-mcp',
+      'browser-x-mcp',
+      'context-x-mcp',
+      'terminal-x-mcp',
+      'symbiote-workspace',
+      'symbiote-engine',
+    ]),
+  },
+  {
+    id: 'product-ui',
+    label: tPortfolio('skill.productUi.label'),
+    treeLabel: tPortfolio('projectGroup.productUi.label'),
+    icon: 'web_asset',
+    skillId: 'skills/product-ui',
+    slugs: new Set([
+      'symbiote-video-studio',
+      'megavisor',
+      'lifecycle-messaging-platform',
+      'symbiote-ui',
+      'photopizza-remote',
+      'photosnail-public',
+    ]),
+  },
+  {
+    id: 'archive',
+    label: tPortfolio('projectGroup.archive.label'),
+    treeLabel: tPortfolio('projectGroup.archive.label'),
+    icon: 'history',
+    skillId: 'skills/rnd-engineering',
+    slugs: new Set([
+      'symbiote-node',
+    ]),
+  },
+  {
+    id: 'hardware-capture',
+    label: tPortfolio('skill.hardwareCapture.label'),
+    treeLabel: tPortfolio('projectGroup.hardware.label'),
+    icon: 'precision_manufacturing',
+    skillId: 'skills/hardware-capture',
+    slugs: new Set([
+      'autobox-v1',
+      'complexscan',
+      'boothbot',
+      'photopizza',
+    ]),
+  },
+];
+
+function getProjectTreeGroup(project) {
+  return PROJECT_TREE_GROUPS.find((group) => group.slugs.has(project.slug)) || PROJECT_TREE_GROUPS[0];
+}
+
+function getProjectTreeGroupLabel(group) {
+  return group.treeLabel || group.label;
+}
+
 function getSkillIdsForProject(project) {
   let text = `${project.title} ${project.summary}`.toLowerCase();
   let result = ['skills/rnd-engineering'];
   if (/agent|agentic|mcp|model routing|ai-assisted|code-intelligence|developer/.test(text)) {
     result.push('skills/agentic-ai');
   }
-  if (/video|editor|ui|media|studio|interface|publishing|workspace|web component/.test(text)) {
+  if (/video|editor|ui|media|studio|interface|publishing|workspace|web component|platform|marketing|campaign|customer|crm/.test(text)) {
     result.push('skills/product-ui');
   }
   if (/robot|scan|360|photo|capture|turntable|hardware|photogrammetry|booth|equipment|3d/.test(text)) {
@@ -139,11 +483,101 @@ function getSkillIdsForProject(project) {
   return result;
 }
 
+const PROJECT_LINK_SUMMARY_GETTERS = Object.freeze({
+  'Public source repository': () => tPortfolio('project.linkSummary.publicSourceRepository'),
+  'Published npm package': () => tPortfolio('project.linkSummary.publishedNpmPackage'),
+  'YouTube channel with photogrammetry and capture workflow demos': () => tPortfolio('project.linkSummary.youtubePhotogrammetry'),
+  'YouTube channel with product updates and demos': () => tPortfolio('project.linkSummary.youtubeProductUpdates'),
+});
+
+const PROJECT_PULSE_RELATIONS = Object.freeze({
+  'agent-portal': ['mcp-agent-portal', 'project-graph-mcp', 'agent-pool-mcp', 'browser-x-mcp', 'context-x-mcp', 'terminal-x-mcp', 'symbiote-workspace', 'symbiote-ui'],
+  'symbiote-video-studio': ['symbiote-ui', 'symbiote-workspace', 'lifecycle-messaging-platform'],
+  'autobox-v1': ['photopizza', 'complexscan', 'megavisor'],
+  complexscan: ['photopizza', 'autobox-v1'],
+  boothbot: ['megavisor', 'photopizza', 'complexscan'],
+  photopizza: ['megavisor', 'complexscan', 'autobox-v1', 'photopizza-remote', 'photosnail-public'],
+  megavisor: ['photopizza', 'boothbot', 'complexscan'],
+  'mcp-agent-portal': ['agent-portal', 'browser-x-mcp', 'context-x-mcp', 'terminal-x-mcp'],
+  'project-graph-mcp': ['agent-portal', 'context-x-mcp', 'agent-pool-mcp'],
+  'agent-pool-mcp': ['agent-portal', 'project-graph-mcp', 'terminal-x-mcp'],
+  'browser-x-mcp': ['agent-portal', 'mcp-agent-portal', 'context-x-mcp'],
+  'context-x-mcp': ['agent-portal', 'project-graph-mcp', 'browser-x-mcp'],
+  'terminal-x-mcp': ['agent-portal', 'agent-pool-mcp', 'mcp-agent-portal'],
+  'symbiote-workspace': ['agent-portal', 'symbiote-ui', 'symbiote-engine'],
+  'symbiote-ui': ['agent-portal', 'symbiote-workspace', 'symbiote-engine', 'symbiote-video-studio'],
+  'symbiote-node': ['symbiote-ui', 'symbiote-engine', 'symbiote-workspace'],
+  'symbiote-engine': ['symbiote-ui', 'symbiote-workspace'],
+  'photopizza-remote': ['photopizza', 'complexscan'],
+  'photosnail-public': ['photopizza', 'megavisor'],
+  'lifecycle-messaging-platform': ['agent-portal', 'symbiote-video-studio', 'symbiote-ui'],
+});
+
+function getProjectTranslation(project) {
+  return PROJECT_TRANSLATIONS[portfolioLocalization.locale]?.[project.slug] || {};
+}
+
+function getProjectKicker(project) {
+  let translation = getProjectTranslation(project);
+  if (translation.kicker) return translation.kicker;
+
+  let kicker = String(project?.kicker || '').trim();
+  if (kicker === 'Selected project') return tPortfolio('project.kicker.selected');
+  if (kicker === 'Author project') return tPortfolio('project.kicker.author');
+  return kicker || project?.date || '';
+}
+
+function getProjectSummary(project) {
+  return getProjectTranslation(project).summary || project.summary || '';
+}
+
+function getProjectDetails(project) {
+  return getProjectTranslation(project).details || project.details || '';
+}
+
+function getProjectPulseNote(project) {
+  return PROJECT_PULSE_NOTES[portfolioLocalization.locale]?.[project.slug]
+    || PROJECT_PULSE_NOTES.en[project.slug]
+    || {};
+}
+
+function getProjectPulseSummary(project) {
+  return getProjectPulseNote(project).summary || getProjectSummary(project);
+}
+
+function getProjectPulseDetails(project) {
+  return getProjectPulseNote(project).details || getProjectDetails(project);
+}
+
 function getProjectLinkLabel(project) {
   let label = String(project?.linkLabel || '').trim();
-  return !label || label === 'View project'
-    ? tPortfolio('link.learnMore')
-    : label;
+  if (!label || label === 'View project') return tPortfolio('link.learnMore');
+  if (label === 'View repository') return tPortfolio('link.viewRepository');
+  return label;
+}
+
+function getProjectLinkSummary(summary) {
+  return PROJECT_LINK_SUMMARY_GETTERS[summary]?.() || summary;
+}
+
+function getProjectLinks(project) {
+  return (project.links || []).map((item) => ({
+    ...item,
+    summary: getProjectLinkSummary(item.summary),
+  }));
+}
+
+function getPortfolioRouteFromId(id) {
+  return String(id || '').endsWith('/index') ? String(id).slice(0, -'/index'.length) : String(id || '');
+}
+
+function getPortfolioSearchSuffix() {
+  return `?lang=${portfolioLocalization.locale}`;
+}
+
+function getPortfolioEntryHref(id) {
+  let route = getPortfolioRouteFromId(id);
+  return route ? `${route}/${getPortfolioSearchSuffix()}` : `.${getPortfolioSearchSuffix()}`;
 }
 
 function createMarkdown(entry) {
@@ -154,6 +588,21 @@ function createMarkdown(entry) {
   lines.push(entry.summary || tPortfolio('node.fallback'), '');
   if (entry.details) {
     lines.push(entry.details, '');
+  }
+  if (entry.sections?.length) {
+    for (let section of entry.sections) {
+      lines.push(`## ${section.title}`, '');
+      if (section.body) lines.push(section.body, '');
+      for (let item of section.items || []) {
+        lines.push(`**${item.label}**`, '', item.details, '');
+      }
+    }
+  }
+  if (entry.downloads?.length) {
+    lines.push(`## ${entry.downloadsTitle || tPortfolio('pdf.downloads')}`, '');
+    for (let item of entry.downloads) {
+      lines.push(`[${item.label}](${item.href})`, '');
+    }
   }
   if (entry.links?.length) {
     lines.push(`## ${entry.linksTitle || tPortfolio('profile.links')}`, '');
@@ -166,7 +615,15 @@ function createMarkdown(entry) {
   }
   if (entry.related?.length) {
     lines.push(`## ${tPortfolio('markdown.related')}`, '');
+    for (let item of entry.relatedLinks || []) {
+      lines.push(`- [${item.label}](${item.href})`);
+    }
     for (let item of entry.related) lines.push(`- ${item}`);
+  } else if (entry.relatedLinks?.length) {
+    lines.push(`## ${tPortfolio('markdown.related')}`, '');
+    for (let item of entry.relatedLinks) {
+      lines.push(`- [${item.label}](${item.href})`);
+    }
   }
   return lines.join('\n').trim();
 }
@@ -184,6 +641,7 @@ function makeEntry(entry) {
 }
 
 function createPortfolioEntries() {
+  let projectTitleBySlug = new Map(projects.map((project) => [project.slug, project.title]));
   let entries = [
     makeEntry({
       id: 'profile/photo',
@@ -195,10 +653,16 @@ function createPortfolioEntries() {
       icon: 'person',
       summary: tPortfolio('profile.summary'),
       details: tPortfolio('profile.details'),
+      sections: getProfileSections(),
+      downloadsTitle: tPortfolio('pdf.downloads'),
+      downloads: PORTFOLIO_PDF_DOWNLOADS.map((item) => ({
+        href: item.href,
+        label: getPortfolioPdfDownloadLabel(item.locale),
+      })),
       linksTitle: tPortfolio('profile.links'),
       links: socialLinks.map((item) => ({
         ...item,
-        summary: tPortfolio(item.summaryKey),
+        summary: getSocialLinkSummary(item.summaryKey),
       })),
       focusIds: INITIAL_FOCUS_IDS,
       params: {
@@ -272,6 +736,13 @@ function createPortfolioEntries() {
 
   for (let project of projects) {
     let relatedSkillIds = getSkillIdsForProject(project);
+    let projectKicker = getProjectKicker(project);
+    let projectSummary = getProjectSummary(project);
+    let projectDetails = getProjectDetails(project);
+    let projectPulseSummary = getProjectPulseSummary(project);
+    let projectPulseDetails = getProjectPulseDetails(project);
+    let projectLinkLabel = getProjectLinkLabel(project);
+    let projectLinks = getProjectLinks(project);
     entries.push(makeEntry({
       id: `projects/${project.slug}`,
       label: project.title,
@@ -279,21 +750,34 @@ function createPortfolioEntries() {
       displayType: tPortfolio('entry.type.project'),
       category: 'data',
       icon: 'work',
-      kicker: project.kicker || project.date,
-      summary: project.summary,
+      kicker: projectKicker,
+      summary: projectSummary,
+      details: projectDetails,
       href: project.href,
-      linkLabel: getProjectLinkLabel(project),
+      linkLabel: projectLinkLabel,
       linksTitle: tPortfolio('project.links'),
-      links: project.links,
-      related: relatedSkillIds.map((id) => skillEntries.find((skill) => skill.id === id)?.label),
+      links: projectLinks,
+      relatedLinks: [
+        {
+          label: `${tPortfolio('entry.type.note')}: ${project.title}`,
+          href: getPortfolioEntryHref(`pulse/${project.slug}`),
+        },
+        ...relatedSkillIds
+          .map((id) => skillEntries.find((skill) => skill.id === id))
+          .filter(Boolean)
+          .map((skill) => ({
+            label: skill.label,
+            href: getPortfolioEntryHref(skill.id),
+          })),
+      ],
       focusIds: ['projects/index', `projects/${project.slug}`, ...relatedSkillIds],
       params: {
-        kicker: project.kicker || project.date,
-        summary: project.summary,
+        kicker: projectKicker,
+        summary: projectSummary,
         image: project.image,
         imageAlt: project.alt,
         href: project.href,
-        linkLabel: getProjectLinkLabel(project),
+        linkLabel: projectLinkLabel,
       },
     }));
     entries.push(makeEntry({
@@ -304,10 +788,22 @@ function createPortfolioEntries() {
       category: 'module',
       icon: 'article',
       kicker: tPortfolio('pulse.label'),
-      summary: project.summary,
+      summary: projectPulseSummary,
+      details: projectPulseDetails,
       href: project.href,
-      linkLabel: getProjectLinkLabel(project),
-      related: [project.title],
+      linkLabel: projectLinkLabel,
+      relatedLinks: [
+        {
+          label: `${tPortfolio('entry.type.project')}: ${project.title}`,
+          href: getPortfolioEntryHref(`projects/${project.slug}`),
+        },
+        ...(PROJECT_PULSE_RELATIONS[project.slug] || [])
+          .filter((slug) => projectTitleBySlug.has(slug))
+          .map((slug) => ({
+            label: `${tPortfolio('entry.type.note')}: ${projectTitleBySlug.get(slug)}`,
+            href: getPortfolioEntryHref(`pulse/${slug}`),
+          })),
+      ],
       focusIds: ['pulse/index', `pulse/${project.slug}`, `projects/${project.slug}`],
     }));
   }
@@ -365,7 +861,7 @@ function createTreeItems(projectItems, pulseItems) {
     },
     ...projectItems.map((project) => ({
       id: `projects/${project.slug}`,
-      path: `${tPortfolio('projects.label')}/${resourcePathSegment(project.title)}.md`,
+      path: `${tPortfolio('projects.label')}/${resourcePathSegment(getProjectTreeGroupLabel(getProjectTreeGroup(project)))}/${resourcePathSegment(project.title)}.md`,
       label: project.title,
       icon: 'work',
       kind: 'project',
@@ -440,9 +936,13 @@ function setNodePositions(canvas, projectItems) {
 
 const portfolioEntries = new Map(createPortfolioEntries().map((entry) => [entry.id, entry]));
 const portfolioTreeItems = createTreeItems(projects, projects);
+const projectTreeGroupDirectoryIds = PROJECT_TREE_GROUPS.map((group) => (
+  `${tPortfolio('projects.label')}/${resourcePathSegment(getProjectTreeGroupLabel(group))}`
+));
 const defaultExpandedTreeIds = [
   tPortfolio('bio.label'),
   tPortfolio('projects.label'),
+  ...projectTreeGroupDirectoryIds,
   tPortfolio('pulse.label'),
   tPortfolio('skills.label'),
 ];
@@ -452,6 +952,12 @@ const treeDirectorySelection = new Map([
   [tPortfolio('pulse.label'), 'pulse/index'],
   [tPortfolio('skills.label'), 'skills/index'],
 ]);
+for (let group of PROJECT_TREE_GROUPS) {
+  treeDirectorySelection.set(
+    `${tPortfolio('projects.label')}/${resourcePathSegment(getProjectTreeGroupLabel(group))}`,
+    group.skillId
+  );
+}
 const flatGroupSelection = new Map([
   ['group/biography', 'profile/photo'],
   ['group/projects', 'projects/index'],
@@ -481,10 +987,10 @@ const flatGraphGroups = [
 ];
 
 const GRAPH_PATH_STYLES = [
-  { style: 'pcb', label: 'Routed', icon: 'route' },
-  { style: 'orthogonal', label: 'Right angles', icon: 'account_tree' },
-  { style: 'bezier', label: 'Curved', icon: 'gesture' },
-  { style: 'straight', label: 'Straight', icon: 'trending_flat' },
+  { style: 'pcb', label: tPortfolio('graph.path.pcb'), icon: 'route' },
+  { style: 'orthogonal', label: tPortfolio('graph.path.orthogonal'), icon: 'account_tree' },
+  { style: 'bezier', label: tPortfolio('graph.path.bezier'), icon: 'gesture' },
+  { style: 'straight', label: tPortfolio('graph.path.straight'), icon: 'trending_flat' },
 ];
 
 const GRAPH_ACTION_PATHS = Object.freeze({
@@ -1006,6 +1512,8 @@ class PortfolioTreePanel extends HTMLElement {
     this.innerHTML = /*html*/ `
       <sn-tree-panel
         class="portfolio-tree"
+        title="${tPortfolio('tree.navigation')}"
+        aria-label="${tPortfolio('tree.navigation')}"
         filter-placeholder="${tPortfolio('tree.filter')}"
         collapse-title="${tPortfolio('tree.collapse')}"></sn-tree-panel>
     `;
@@ -1424,6 +1932,7 @@ class PortfolioGraphPanel extends HTMLElement {
     flatGraph.setAttribute('device-orientation-parallax-max-tilt', '32');
     this.append(flatGraph);
     this.flatGraph = flatGraph;
+    flatGraph._buildInfoLines = (node) => buildPortfolioFlatGraphInfoLines(flatGraph, node);
     let flatModel = this._flatModel || createPortfolioFlatGraphModel();
     this._flatModel = flatModel;
     this.graphController?.connect?.({

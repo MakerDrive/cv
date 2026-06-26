@@ -57,8 +57,26 @@ body:has(.pulse-screen) header {
 
 .pulse-theme-widget {
   flex: 0 0 auto;
-  margin-inline-start: auto;
+  margin-inline-start: 0;
   --sn-theme-widget-z: var(--pulse-theme-widget-z, 20030);
+}
+
+.pulse-locale-toggle {
+  flex: 0 0 auto;
+  --sn-segmented-radius: var(--sn-button-radius, 6px);
+  --sn-segmented-font-size: 0.72rem;
+  --sn-segmented-padding: 4px 8px;
+  --sn-segmented-item-min-height: 28px;
+  --sn-segmented-selected-bg: var(--sn-node-selected, #0056b3);
+}
+
+.pulse-locale-toggle > button {
+  min-inline-size: 32px;
+  letter-spacing: 0;
+}
+
+.pulse-locale-toggle > slot {
+  display: none;
 }
 
 .pulse-theme-widget .ctw-trigger {
@@ -384,6 +402,15 @@ footer a {
     min-inline-size: var(--pulse-header-action-size, 44px);
     min-block-size: var(--pulse-header-action-size, 44px);
     padding: 0;
+  }
+
+  .pulse-locale-toggle {
+    --sn-segmented-padding: 4px 7px;
+    --sn-segmented-item-min-height: 32px;
+  }
+
+  .pulse-locale-toggle > button {
+    min-inline-size: 30px;
   }
 
   .pulse-header-title {

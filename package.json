@@ -27,12 +27,14 @@
     "copy-404": "sed 's|<base href=[^>]*>|<base href=/cv/>|' ./dist/index.html > ./dist/404.html",
     "copy-force-worker": "mkdir -p ./dist/js && cp ./node_modules/symbiote-ui/canvas/ForceWorker.js ./dist/js/ForceWorker.js",
     "write-material-symbols-css": "node ./scripts/write-material-symbols-css.js",
-    "build": "npx jsda build && npm run copy-robots && npm run copy-404 && npm run write-material-symbols-css && npm run copy-force-worker"
+    "generate-pdfs": "node ./scripts/generate-portfolio-pdfs.js",
+    "generate-llms": "node ./scripts/generate-llms-txt.js",
+    "build": "npx jsda build && npm run copy-robots && npm run copy-404 && npm run write-material-symbols-css && npm run copy-force-worker && npm run generate-pdfs && npm run generate-llms"
   },
   "dependencies": {
     "@symbiotejs/symbiote": "3.8.0-webmcp.2",
     "jsda-kit": "1.5.3",
-    "symbiote-ui": "https://github.com/rnd-pro/symbiote-ui/archive/f92641ddc62c7bafce6a698ff87763cc088c1031.tar.gz"
+    "symbiote-ui": "0.3.0-alpha.47"
   },
   "overrides": {
     "@symbiotejs/symbiote": "$@symbiotejs/symbiote",
@@ -42,6 +44,7 @@
   "devDependencies": {
     "@types/node": "^24.13.2",
     "cloud-images-toolkit": "^1.3.2",
+    "pdfkit": "^0.19.1",
     "typescript": "^6.0.3"
   }
 }

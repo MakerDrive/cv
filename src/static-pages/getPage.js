@@ -35,6 +35,7 @@ function getImportMap() {
   let imports = {
     '@symbiotejs/symbiote': `${symbioteBaseUrl}/core/index.js`,
     '@symbiotejs/symbiote/core': `${symbioteBaseUrl}/core/index.js`,
+    '@symbiotejs/symbiote/utils': `${symbioteBaseUrl}/utils/index.js`,
     '@symbiotejs/symbiote/': `${symbioteBaseUrl}/`,
     'symbiote-ui': `${symbioteUiBaseUrl}/index.js`,
     'symbiote-ui/core': `${symbioteUiBaseUrl}/core/index.js`,
