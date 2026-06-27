@@ -1,6 +1,7 @@
 ---
 title: MEGAVISOR
 order: 7
+period: 2010-2014
 kicker: Selected project
 summary: Co-founded product media platform combining cloud publishing, 360-degree capture workflows, shooting automation, and custom lighting hardware.
 image: https://rnd-pro.com/svg/megavisor/index.svg

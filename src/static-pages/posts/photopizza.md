@@ -1,6 +1,7 @@
 ---
 title: PhotoPizza
 order: 6
+period: 2010-2018
 kicker: Selected project
 summary: Motorized 360 turntable invented inside MEGAVISOR, then developed as an open-source PhotoPizza project for photography, video, and photogrammetry.
 image: https://rnd-pro.com/svg/photopizza/index.svg

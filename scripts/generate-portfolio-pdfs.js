@@ -27,14 +27,14 @@ const PROJECT_GROUPS = Object.freeze([
     key: 'projectGroup.agenticAi.label',
     slugs: [
       'agent-portal',
-      'mcp-agent-portal',
+      'symbiote-workspace',
+      'symbiote-engine',
       'project-graph-mcp',
       'agent-pool-mcp',
+      'mcp-agent-portal',
       'browser-x-mcp',
       'context-x-mcp',
       'terminal-x-mcp',
-      'symbiote-workspace',
-      'symbiote-engine',
     ],
   },
   {
@@ -42,7 +42,7 @@ const PROJECT_GROUPS = Object.freeze([
     slugs: [
       'symbiote-video-studio',
       'megavisor',
-      'private-lifecycle-marketing-platform',
+      'lifecycle-messaging-platform',
       'symbiote-ui',
       'photopizza-remote',
       'photosnail-public',
@@ -250,6 +250,11 @@ function createWriter(doc) {
     doc.font('bold').fontSize(12).fillColor(COLORS.ink).text(project.title, page.margin, doc.y, {
       width: contentWidth,
     });
+    if (project.period) {
+      doc.font('regular').fontSize(8.4).fillColor(COLORS.muted).text(project.period, page.margin, doc.y + 1, {
+        width: contentWidth,
+      });
+    }
     if (kicker) {
       doc.font('regular').fontSize(8.5).fillColor(COLORS.accent).text(kicker, page.margin, doc.y + 1, {
         width: contentWidth,

@@ -1,6 +1,7 @@
 ---
 title: PhotoSnail Public
 order: 19
+period: 2016
 kicker: Author project
 summary: Early PhotoSnail web project around motion-control camera systems and media presentation experiments.
 image: https://rnd-pro.com/svg/logo/index.svg

@@ -67,13 +67,38 @@ test('project entries expose markdown details in portfolio data', () => {
   assert.doesNotMatch(megavisor?.details || '', /^# MEGAVISOR/);
   assert.match(autobox?.details || '', /original capture technology line/);
   assert.match(autobox?.details || '', /upper competitive level of its time/);
+  assert.match(autobox?.details || '', /Ten Japanese netsuke objects/);
+  assert.match(autobox?.details || '', /Anna Savelyeva/);
+  assert.match(autobox?.details || '', /Max Rutherston/);
+  assert.match(autobox?.details || '', /himotoshi cord holes/);
   assert.match(complexscan?.details || '', /author product line/);
   assert.match(complexscan?.details || '', /higher-quality source textures/);
   assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /авторскую линию технологии съёмки/);
   assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /верхней конкурентной планки своего времени/);
+  assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /Десять японских нэцкэ/);
+  assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /Анны Савельевой/);
+  assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /Макса Ратерстона/);
+  assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /himotoshi/);
   assert.match(PROJECT_TRANSLATIONS.ru.complexscan.details, /авторской продуктовой линией/);
   assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /línea original de tecnología de captura/);
+  assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /Diez netsuke japoneses/);
+  assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /Anna Savelyeva/);
+  assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /Max Rutherston/);
+  assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /himotoshi/);
   assert.match(PROJECT_TRANSLATIONS.es.complexscan.details, /línea de producto propia/);
+});
+
+test('older project entries expose visible work periods', () => {
+  const projects = loadProjectEntries();
+  const bySlug = new Map(projects.map((project) => [project.slug, project]));
+
+  assert.equal(bySlug.get('megavisor')?.period, '2010-2014');
+  assert.equal(bySlug.get('photopizza')?.period, '2010-2018');
+  assert.equal(bySlug.get('photosnail-public')?.period, '2016');
+  assert.equal(bySlug.get('complexscan')?.period, '2017-2019');
+  assert.equal(bySlug.get('boothbot')?.period, '2018');
+  assert.equal(bySlug.get('photopizza-remote')?.period, '2018-2019');
+  assert.equal(bySlug.get('autobox-v1')?.period, '2019');
 });
 
 test('lifecycle messaging platform describes a public-safe technology profile', () => {

@@ -1,6 +1,7 @@
 ---
 title: BoothBot
 order: 5
+period: 2018
 kicker: Selected project
 summary: Commercial capture-automation project for wine bottles: warehouse equipment, controlled lighting, motorized camera, and catalog photo processing.
 image: https://rnd-pro.com/svg/logo/index.svg

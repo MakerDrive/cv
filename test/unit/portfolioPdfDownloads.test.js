@@ -33,4 +33,8 @@ test('portfolio build generates localized CV PDFs', async () => {
   assert.match(pdfSource, /t\(locale, 'profile\.experienceSummary'\)/);
   assert.match(pdfSource, /t\(locale, 'experience\.rnd\.label'\)/);
   assert.match(pdfSource, /t\(locale, 'experience\.programming\.label'\)/);
+  assert.match(pdfSource, /if \(project\.period\)/);
+  assert.match(pdfSource, /project\.period, page\.margin/);
+  assert.match(pdfSource, /'lifecycle-messaging-platform'/);
+  assert.doesNotMatch(pdfSource, /private-lifecycle-marketing-platform/);
 });

@@ -1,6 +1,7 @@
 ---
 title: ComplexScan
 order: 4
+period: 2017-2019
 kicker: Selected project
 summary: Commercial hardware product I invented after PhotoPizza: professional transparent-disc equipment for 3D scanning, 360 capture, and product photography.
 image: https://rnd-pro.com/svg/logo/index.svg

@@ -34,6 +34,8 @@ test('portfolio build generates llms.txt and llms-full.txt', async () => {
   assert.doesNotMatch(llmsTxt, /Profile data/);
   assert.match(llmsTxt, /### Archived projects/);
   assert.match(llmsTxt, /Symbiote Node/);
+  assert.match(llmsTxt, /AUTOBOX v1.*2019\./);
+  assert.match(llmsTxt, /Lifecycle Messaging Platform/);
   assert.doesNotMatch(llmsTxt, /Symbiote Workflow|symbiote-workflow/);
   assert.doesNotMatch(llmsTxt, /llms-full\.txt\//);
   assert.doesNotMatch(llmsTxt, /sitemap\.xml\//);
@@ -50,6 +52,8 @@ test('portfolio build generates llms.txt and llms-full.txt', async () => {
   assert.doesNotMatch(`${llmsTxt}\n${llmsFullTxt}`, /Born:|Дата рождения|Fecha de nacimiento/);
   assert.match(llmsFullTxt, /R&D-инженерный опыт/);
   assert.match(llmsFullTxt, /Программистский \/ full-stack опыт/);
+  assert.match(llmsFullTxt, /#### AUTOBOX v1\n\nURL: .*\/projects\/autobox-v1\/\?lang=en\n\nPeriod: 2019/);
+  assert.match(llmsFullTxt, /Десять японских нэцкэ/);
   assert.match(llmsFullTxt, /R&D-заметка о PhotoPizza/);
   const internalProjectMarker = String.fromCharCode(49, 83, 73, 77);
   assert.doesNotMatch(`${llmsTxt}\n${llmsFullTxt}`, new RegExp(internalProjectMarker));

@@ -45,6 +45,7 @@ function parseFrontmatter(filePath) {
     order: Number.isFinite(order) ? order : null,
     title: meta.title || slug,
     date: meta.date || '',
+    period: meta.period || '',
     kicker: meta.kicker || '',
     summary: meta.summary || '',
     image: meta.image || '',

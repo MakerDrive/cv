@@ -27,14 +27,14 @@ const projectGroups = Object.freeze([
     title: 'AI tooling and agent systems',
     slugs: [
       'agent-portal',
-      'mcp-agent-portal',
+      'symbiote-workspace',
+      'symbiote-engine',
       'project-graph-mcp',
       'agent-pool-mcp',
+      'mcp-agent-portal',
       'browser-x-mcp',
       'context-x-mcp',
       'terminal-x-mcp',
-      'symbiote-workspace',
-      'symbiote-engine',
     ],
   },
   {
@@ -42,7 +42,7 @@ const projectGroups = Object.freeze([
     slugs: [
       'symbiote-video-studio',
       'megavisor',
-      'private-lifecycle-marketing-platform',
+      'lifecycle-messaging-platform',
       'symbiote-ui',
       'photopizza-remote',
       'photosnail-public',
@@ -177,7 +177,8 @@ function writeLlmsTxt(projects) {
     for (const slug of group.slugs) {
       const project = projectBySlug.get(slug);
       if (!project) continue;
-      appendListItem(lines, project.title, urlFor(`projects/${project.slug}`, 'en'), projectSummary(project, 'en'));
+      const periodPrefix = project.period ? `${project.period}. ` : '';
+      appendListItem(lines, project.title, urlFor(`projects/${project.slug}`, 'en'), `${periodPrefix}${projectSummary(project, 'en')}`);
     }
   }
 
@@ -228,6 +229,7 @@ function writeFullLocale(lines, projects, locale) {
   for (const project of projects) {
     lines.push(`#### ${project.title}`, '');
     lines.push(`URL: ${urlFor(`projects/${project.slug}`, locale)}`, '');
+    if (project.period) lines.push(`Period: ${project.period}`, '');
     lines.push(projectSummary(project, locale), '');
     lines.push(shiftHeadings(projectDetails(project, locale)), '');
     if (project.links?.length) {
@@ -248,6 +250,7 @@ function writeFullLocale(lines, projects, locale) {
     const note = pulseNote(project, locale);
     lines.push(`#### ${project.title}`, '');
     lines.push(`URL: ${urlFor(`pulse/${project.slug}`, locale)}`, '');
+    if (project.period) lines.push(`Period: ${project.period}`, '');
     lines.push(note.summary || projectSummary(project, locale), '');
     lines.push(shiftHeadings(note.details || projectDetails(project, locale)), '');
   }

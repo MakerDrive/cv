@@ -1,6 +1,7 @@
 ---
 title: AUTOBOX v1
 order: 3
+period: 2019
 kicker: Selected project
 summary: Museum-grade 3D scanning equipment and capture technology for Hermitage and Kunstkamera artifacts: photogrammetry, custom light matrices, field scanning, and production workflow.
 image: https://rnd-pro.com/svg/logo/index.svg
@@ -20,5 +21,7 @@ This was not only implementation work inside someone else's project. I shaped an
 I worked on the capture technology line by researching photogrammetry versus laser scanning, validating RealityCapture and related tools, designing repeatable multi-angle capture, and building custom modular lighting hardware with wireless control, active cooling, sensors, and cross-polarization support.
 
 The prototype moved from lab validation to real museum work. I took part in on-site scanning sessions inside museums and personally scanned the Japanese netsuke collection at the State Hermitage Museum during test production. The same technology line was also used for Benin bronze objects at the Kunstkamera.
+
+The netsuke validation was part of the Objet.art / ArtClub Digital Heritage work for the Hermitage Under a Magnifying Glass project. Ten Japanese netsuke objects were selected with input from Anna Savelyeva, Curator of Japanese Art at the State Hermitage Museum, and British netsuke expert Max Rutherston. The objects created a strong production test: tiny carved details, himotoshi cord holes, wood, ivory, horn, glossy surfaces, translucent inserts, and complex relief that forced the capture pipeline to solve geometry, texture, color, and material-specific problems at the same time.
 
 Beyond the hardware itself, I helped organize the production process around 3D object processing: retouching, retopology, color calibration, large source datasets, field photography, and handoff between photographers and 3D specialists. I also helped find 3D retouchers and contributed to training materials so the workflow could scale beyond one operator.

@@ -18,6 +18,11 @@ test('portfolio file tree groups projects by primary domain', async () => {
 
   assert.match(source, /const PROJECT_TREE_GROUPS = \[/);
   assert.match(source, /id: 'agentic-ai'[\s\S]*'agent-portal'[\s\S]*'project-graph-mcp'[\s\S]*'symbiote-engine'/);
+  assert.match(source, /const PROJECT_TREE_GROUP_PRIORITIES = Object\.freeze\(\{/);
+  assert.match(source, /'agentic-ai': \[[\s\S]*'agent-portal'[\s\S]*'symbiote-workspace'[\s\S]*'symbiote-engine'[\s\S]*'project-graph-mcp'[\s\S]*'agent-pool-mcp'/);
+  assert.match(source, /const orderedPortfolioProjects = orderProjectsForTree\(projects\);/);
+  assert.match(source, /const portfolioTreeItems = createTreeItems\(orderedPortfolioProjects, orderedPortfolioProjects\);/);
+  assert.match(source, /setNodePositions\(this\.canvas, orderedPortfolioProjects\);/);
   assert.match(source, /id: 'product-ui'[\s\S]*'symbiote-video-studio'[\s\S]*'megavisor'[\s\S]*'symbiote-ui'/);
   assert.match(source, /id: 'archive'[\s\S]*treeLabel: tPortfolio\('projectGroup\.archive\.label'\)[\s\S]*'symbiote-node'/);
   assert.match(source, /id: 'hardware-capture'[\s\S]*'autobox-v1'[\s\S]*'complexscan'[\s\S]*'boothbot'[\s\S]*'photopizza'/);

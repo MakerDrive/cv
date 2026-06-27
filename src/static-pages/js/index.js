@@ -518,12 +518,44 @@ const PROJECT_TREE_GROUPS = [
   },
 ];
 
+const PROJECT_TREE_GROUP_PRIORITIES = Object.freeze({
+  'agentic-ai': [
+    'agent-portal',
+    'symbiote-workspace',
+    'symbiote-engine',
+    'project-graph-mcp',
+    'agent-pool-mcp',
+  ],
+});
+
 function getProjectTreeGroup(project) {
   return PROJECT_TREE_GROUPS.find((group) => group.slugs.has(project.slug)) || PROJECT_TREE_GROUPS[0];
 }
 
 function getProjectTreeGroupLabel(group) {
   return group.treeLabel || group.label;
+}
+
+function orderProjectsForTree(projectItems) {
+  let originalIndex = new Map(projectItems.map((project, index) => [project.slug, index]));
+  return [...projectItems].sort((a, b) => {
+    let groupA = getProjectTreeGroup(a);
+    let groupB = getProjectTreeGroup(b);
+    if (groupA.id !== groupB.id) {
+      return (originalIndex.get(a.slug) ?? 0) - (originalIndex.get(b.slug) ?? 0);
+    }
+
+    let priority = PROJECT_TREE_GROUP_PRIORITIES[groupA.id];
+    if (!priority) {
+      return (originalIndex.get(a.slug) ?? 0) - (originalIndex.get(b.slug) ?? 0);
+    }
+
+    let orderA = priority.indexOf(a.slug);
+    let orderB = priority.indexOf(b.slug);
+    let rankA = orderA === -1 ? Number.MAX_SAFE_INTEGER : orderA;
+    let rankB = orderB === -1 ? Number.MAX_SAFE_INTEGER : orderB;
+    return rankA - rankB || (originalIndex.get(a.slug) ?? 0) - (originalIndex.get(b.slug) ?? 0);
+  });
 }
 
 function getSkillIdsForProject(project) {
@@ -640,6 +672,9 @@ function getPortfolioEntryHref(id) {
 
 function createMarkdown(entry) {
   let lines = [`# ${entry.label}`, ''];
+  if (entry.period) {
+    lines.push(entry.period, '');
+  }
   if (entry.kicker) {
     lines.push(`**${entry.kicker}**`, '');
   }
@@ -813,6 +848,7 @@ function createPortfolioEntries() {
       category: 'data',
       icon: 'work',
       kicker: projectKicker,
+      period: project.period,
       summary: projectSummary,
       details: projectDetails,
       href: project.href,
@@ -850,6 +886,7 @@ function createPortfolioEntries() {
       category: 'module',
       icon: 'article',
       kicker: tPortfolio('pulse.label'),
+      period: project.period,
       summary: projectPulseSummary,
       details: projectPulseDetails,
       href: project.href,
@@ -997,7 +1034,8 @@ function setNodePositions(canvas, projectItems) {
 }
 
 const portfolioEntries = new Map(createPortfolioEntries().map((entry) => [entry.id, entry]));
-const portfolioTreeItems = createTreeItems(projects, projects);
+const orderedPortfolioProjects = orderProjectsForTree(projects);
+const portfolioTreeItems = createTreeItems(orderedPortfolioProjects, orderedPortfolioProjects);
 const projectTreeGroupDirectoryIds = PROJECT_TREE_GROUPS.map((group) => (
   `${tPortfolio('projects.label')}/${resourcePathSegment(getProjectTreeGroupLabel(group))}`
 ));
@@ -1043,8 +1081,8 @@ const directoryEntryIds = new Set([
 ]);
 const flatGraphGroups = [
   { id: 'group/biography', label: tPortfolio('bio.label'), type: 'data', children: ['profile/photo', 'bio/about'] },
-  { id: 'group/projects', label: tPortfolio('projects.label'), type: 'asset', children: projects.map((project) => `projects/${project.slug}`) },
-  { id: 'group/pulse', label: tPortfolio('pulse.label'), type: 'docs', children: projects.map((project) => `pulse/${project.slug}`) },
+  { id: 'group/projects', label: tPortfolio('projects.label'), type: 'asset', children: orderedPortfolioProjects.map((project) => `projects/${project.slug}`) },
+  { id: 'group/pulse', label: tPortfolio('pulse.label'), type: 'docs', children: orderedPortfolioProjects.map((project) => `pulse/${project.slug}`) },
   { id: 'group/skills', label: tPortfolio('skills.label'), type: 'action', children: skillEntries.map((skill) => skill.id) },
 ];
 
@@ -1882,7 +1920,7 @@ class PortfolioGraphPanel extends HTMLElement {
       let editor = this._structuredEditor || createPortfolioEditor();
       this._structuredEditor = editor;
       this.graphController?.setStructuredEditor?.(editor);
-      setNodePositions(this.canvas, projects);
+      setNodePositions(this.canvas, orderedPortfolioProjects);
       this.canvas.refreshConnections?.();
       this.canvas._layoutReleasedDom = false;
       this._structuredBound = true;
