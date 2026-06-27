@@ -29,8 +29,13 @@ test('portfolio build generates localized CV PDFs', async () => {
   assert.match(pdfSource, /for \(const key of \['rndProducts', 'hardware', 'museumScanning', 'aiTooling'\]\)/);
   assert.match(pdfSource, /t\(locale, 'profile\.careerTitle'\)/);
   assert.match(pdfSource, /for \(const key of \['megavisor', 'photopizza', 'hardware', 'ai', 'messaging'\]\)/);
-  assert.match(pdfSource, /t\(locale, 'profile\.age', \{ age: PROFILE_AGE \}\)/);
+  assert.match(pdfSource, /function makeOnlineCvUrl\(locale\)/);
+  assert.match(pdfSource, /t\(locale, 'profile\.locationLabel'\)/);
+  assert.match(pdfSource, /t\(locale, 'profile\.locationValue'\)/);
+  assert.match(pdfSource, /t\(locale, 'profile\.availability'\)/);
+  assert.match(pdfSource, /\$\{t\(locale, 'profile\.ageLabel'\)\}: \$\{PROFILE_AGE\}/);
   assert.match(pdfSource, /t\(locale, 'profile\.experienceSummary'\)/);
+  assert.match(pdfSource, /t\(locale, 'profile\.onlineCv'\)/);
   assert.match(pdfSource, /t\(locale, 'experience\.rnd\.label'\)/);
   assert.match(pdfSource, /t\(locale, 'experience\.programming\.label'\)/);
   assert.match(pdfSource, /if \(project\.period\)/);

@@ -41,6 +41,7 @@ import {
 const PORTFOLIO_LOCALE_STORAGE_KEY = 'cv-portfolio-locale';
 const PORTFOLIO_SUPPORTED_LOCALES = ['en', 'ru', 'es'];
 const PORTFOLIO_PROFILE_AGE = 41;
+const PORTFOLIO_ONLINE_CV_URL = 'https://MakerDrive.github.io/cv/';
 const PORTFOLIO_PDF_DOWNLOADS = Object.freeze([
   { locale: 'en', href: 'downloads/vladimir-matiasevich-cv-en.pdf' },
   { locale: 'ru', href: 'downloads/vladimir-matiasevich-cv-ru.pdf' },
@@ -98,12 +99,22 @@ function tPortfolio(key, params = {}) {
   return translate(`portfolio.${key}`, params);
 }
 
-function getProfileAgeText() {
-  return tPortfolio('profile.age', { age: PORTFOLIO_PROFILE_AGE });
+function getProfileOnlineCvUrl(locale = portfolioLocalization.locale) {
+  let url = new URL(PORTFOLIO_ONLINE_CV_URL);
+  url.searchParams.set('lang', normalizePortfolioLocale(locale) || 'en');
+  return url.href;
 }
 
 function getProfileMetaText() {
-  return `${getProfileAgeText()}\n\n${tPortfolio('profile.experienceSummary')}`;
+  return [
+    '|  |  |',
+    '| --- | --- |',
+    `| **${tPortfolio('profile.locationLabel')}** | ${tPortfolio('profile.locationValue')} |`,
+    `| **${tPortfolio('profile.availabilityLabel')}** | ${tPortfolio('profile.availability')} |`,
+    `| **${tPortfolio('profile.ageLabel')}** | ${PORTFOLIO_PROFILE_AGE} |`,
+    `| **${tPortfolio('profile.experienceLabel')}** | ${tPortfolio('profile.experienceSummary')} |`,
+    `| **CV** | [${tPortfolio('profile.onlineCv')}](${getProfileOnlineCvUrl()}) |`,
+  ].join('\n');
 }
 
 function getProfileSections() {
@@ -1425,31 +1436,6 @@ const portfolioRuntime = {
     highlightTreePath({ ref: { panel: this.tree } }, this.selectedId, { scroll: true });
   },
 
-  resetTreeState() {
-    try {
-      globalThis.localStorage?.removeItem?.(TREE_STORAGE_KEY);
-    } catch {
-      // Storage can be unavailable in private or embedded browsing contexts.
-    }
-    if (this.tree) {
-      this.tree.filterText = '';
-      this.tree.defaultExpandedIds = defaultExpandedTreeIds;
-      this.tree.expandedIds = defaultExpandedTreeIds;
-    }
-    this.syncTree();
-  },
-
-  resetGraphState() {
-    let graphPanel = /** @type {any} */ (document.querySelector('portfolio-graph-panel'));
-    graphPanel?.resetVisualState?.();
-    this.syncCanvas({ focus: true, focusScope: 'group' });
-  },
-
-  resetVisualState() {
-    this.resetTreeState();
-    this.resetGraphState();
-  },
-
   syncViewer() {
     let entry = this.getSelectedEntry();
     if (!entry || !this.viewer?.showFile) return;
@@ -2311,25 +2297,9 @@ class PortfolioWorkspace extends HTMLElement {
         handle.click();
       }
     };
-    this._onThemeReset = (event) => {
-      if (event.detail?.source !== 'reset') return;
-      this.resetVisualState();
-    };
     document.addEventListener('cascade-theme-open-full', this._onThemeOpenFull);
     document.addEventListener('portfolio-open-materials', this._onOpenMaterials);
-    document.addEventListener('cascade-theme-change', this._onThemeReset);
     layout.setLayout(createPortfolioLayoutTree());
-  }
-
-  resetVisualState() {
-    let layout = /** @type {any} */ (this.querySelector('panel-layout'));
-    layout?.closeDrawer?.('all');
-    layout?.setLayout?.(createPortfolioLayoutTree());
-    layout?.closeDrawer?.('all');
-    portfolioRuntime.resetVisualState();
-    requestAnimationFrame(() => {
-      portfolioRuntime.resetVisualState();
-    });
   }
 
   disconnectedCallback() {
@@ -2338,9 +2308,6 @@ class PortfolioWorkspace extends HTMLElement {
     }
     if (this._onOpenMaterials) {
       document.removeEventListener('portfolio-open-materials', this._onOpenMaterials);
-    }
-    if (this._onThemeReset) {
-      document.removeEventListener('cascade-theme-change', this._onThemeReset);
     }
   }
 }

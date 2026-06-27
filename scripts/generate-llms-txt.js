@@ -163,7 +163,7 @@ function writeLlmsTxt(projects) {
     lines,
     'Portfolio home',
     urlFor('', 'en'),
-    `${t('en', 'profile.age', { age: profileAge })}. ${t('en', 'profile.experienceSummary')}. ${t('en', 'profile.details')}`
+    `${t('en', 'profile.locationLabel')}: ${t('en', 'profile.locationValue')}. ${t('en', 'profile.availability')} ${t('en', 'profile.ageLabel')}: ${profileAge}. ${t('en', 'profile.experienceSummary')}. ${t('en', 'profile.details')}`
   );
   appendListItem(lines, 'Full LLM context', urlFor('llms-full.txt'), 'Complete generated markdown export for the portfolio.');
   appendListItem(lines, 'Sitemap', urlFor('sitemap.xml'), 'Machine-readable list of generated site routes.');
@@ -209,8 +209,11 @@ function writeFullLocale(lines, projects, locale) {
   lines.push(`## Locale: ${localeNames[locale]}`, '');
   lines.push('### Profile', '');
   lines.push(oneLine(t(locale, 'profile.summary')), '');
-  lines.push(t(locale, 'profile.age', { age: profileAge }), '');
+  lines.push(`${t(locale, 'profile.locationLabel')}: ${t(locale, 'profile.locationValue')}`, '');
+  lines.push(t(locale, 'profile.availability'), '');
+  lines.push(`${t(locale, 'profile.ageLabel')}: ${profileAge}`, '');
   lines.push(t(locale, 'profile.experienceSummary'), '');
+  lines.push(`${t(locale, 'profile.onlineCv')}: ${urlFor('', locale)}`, '');
   lines.push(t(locale, 'profile.details'), '');
   lines.push(`#### ${t(locale, 'experience.title')}`, '');
   lines.push(`**${t(locale, 'experience.rnd.label')}**`, '');

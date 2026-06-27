@@ -13,6 +13,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 const distDownloadsDir = path.join(rootDir, 'dist', 'downloads');
 const avatarPath = path.join(rootDir, 'src', 'static-pages', 'avatar', 'avatar.png');
+const packageJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
+const siteUrl = new URL(packageJson.homepage || 'https://MakerDrive.github.io/cv/');
+if (!siteUrl.pathname.endsWith('/')) siteUrl.pathname = `${siteUrl.pathname}/`;
 
 const PDF_DOWNLOADS = Object.freeze({
   en: 'vladimir-matiasevich-cv-en.pdf',
@@ -128,6 +131,12 @@ function t(locale, key, params = {}) {
   return formatMessage(PORTFOLIO_LOCALE_MESSAGES[locale]?.[`portfolio.${key}`]
     || PORTFOLIO_LOCALE_MESSAGES.en[`portfolio.${key}`]
     || key, params);
+}
+
+function makeOnlineCvUrl(locale) {
+  const url = new URL(siteUrl.href);
+  url.searchParams.set('lang', locale);
+  return url.href;
 }
 
 function getProjectSummary(project, locale) {
@@ -312,10 +321,22 @@ function addHeader(doc, writer, locale) {
     lineGap: 2,
   });
   doc.moveDown(0.25);
-  doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(t(locale, 'profile.age', { age: PROFILE_AGE }), textX, doc.y, {
+  doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(`${t(locale, 'profile.locationLabel')}: ${t(locale, 'profile.locationValue')}`, textX, doc.y, {
+    width: textWidth,
+  });
+  doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(t(locale, 'profile.availability'), textX, doc.y, {
+    width: textWidth,
+  });
+  doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(`${t(locale, 'profile.ageLabel')}: ${PROFILE_AGE}`, textX, doc.y, {
     width: textWidth,
   });
   doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(t(locale, 'profile.experienceSummary'), textX, doc.y, {
+    width: textWidth,
+  });
+  const onlineCvUrl = makeOnlineCvUrl(locale);
+  doc.font('regular').fontSize(9.2).fillColor(COLORS.accent).text(`${t(locale, 'profile.onlineCv')}: ${onlineCvUrl}`, textX, doc.y, {
+    link: onlineCvUrl,
+    underline: true,
     width: textWidth,
   });
   doc.y = Math.max(doc.y, imageY + imageSize + 26);
