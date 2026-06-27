@@ -154,8 +154,12 @@ function getProjectLinkSummary(summary, locale) {
   return PROJECT_LINK_SUMMARY_KEYS[summary] ? t(locale, PROJECT_LINK_SUMMARY_KEYS[summary]) : summary;
 }
 
+function plainTextMarkdown(value) {
+  return String(value || '').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1');
+}
+
 function splitParagraphs(value) {
-  return String(value || '')
+  return plainTextMarkdown(value)
     .split(/\n{2,}/)
     .map((item) => item.replace(/\s+/g, ' ').trim())
     .filter(Boolean);
@@ -196,7 +200,7 @@ function createWriter(doc) {
     doc.font(options.bold ? 'bold' : 'regular')
       .fontSize(options.size || 9.5)
       .fillColor(options.color || COLORS.ink)
-      .text(text, page.margin, doc.y, {
+      .text(plainTextMarkdown(text), page.margin, doc.y, {
         width: contentWidth,
         lineGap: options.lineGap ?? 2.2,
       });
@@ -302,7 +306,14 @@ function addHeader(doc, writer, locale) {
     width: textWidth,
     lineGap: 2,
   });
-  doc.y = imageY + imageSize + 26;
+  doc.moveDown(0.25);
+  doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(t(locale, 'profile.age', { age: PROFILE_AGE }), textX, doc.y, {
+    width: textWidth,
+  });
+  doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(t(locale, 'profile.experienceSummary'), textX, doc.y, {
+    width: textWidth,
+  });
+  doc.y = Math.max(doc.y, imageY + imageSize + 26);
 }
 
 function addFooter(doc) {
@@ -343,8 +354,26 @@ function writeLocalePdf(locale, projects, fonts) {
   addHeader(doc, writer, locale);
   writer.section(t(locale, 'bio.about'));
   writer.paragraphs(t(locale, 'profile.details'), { size: 10, color: COLORS.ink });
-  writer.section(t(locale, 'profile.factsTitle'));
-  writer.paragraph(t(locale, 'profile.age', { age: PROFILE_AGE }), { size: 9.2, color: COLORS.ink });
+  writer.section(t(locale, 'profile.statusTitle'));
+  writer.paragraph(t(locale, 'profile.statusDetails'), { size: 9.2, color: COLORS.ink, after: 0.4 });
+
+  writer.section(t(locale, 'profile.focusTitle'));
+  writer.paragraph(t(locale, 'profile.focusDetails'), { size: 9.2, color: COLORS.ink, after: 0.4 });
+
+  writer.section(t(locale, 'profile.workFormatTitle'));
+  writer.paragraph(t(locale, 'profile.workFormatDetails'), { size: 9.2, color: COLORS.ink, after: 0.4 });
+
+  writer.section(t(locale, 'profile.achievementsTitle'));
+  for (const key of ['rndProducts', 'hardware', 'museumScanning', 'aiTooling']) {
+    writer.chip(t(locale, `profile.achievement.${key}.label`));
+    writer.paragraph(t(locale, `profile.achievement.${key}.details`), { size: 8.6, color: COLORS.muted, after: 0.35 });
+  }
+
+  writer.section(t(locale, 'profile.careerTitle'));
+  for (const key of ['megavisor', 'photopizza', 'hardware', 'ai', 'messaging']) {
+    writer.chip(t(locale, `profile.career.${key}.label`));
+    writer.paragraph(t(locale, `profile.career.${key}.details`), { size: 8.6, color: COLORS.muted, after: 0.35 });
+  }
 
   writer.section(t(locale, 'experience.title'));
   writer.chip(t(locale, 'experience.rnd.label'));

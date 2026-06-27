@@ -102,11 +102,69 @@ function getProfileAgeText() {
   return tPortfolio('profile.age', { age: PORTFOLIO_PROFILE_AGE });
 }
 
+function getProfileMetaText() {
+  return `${getProfileAgeText()}\n\n${tPortfolio('profile.experienceSummary')}`;
+}
+
 function getProfileSections() {
   return [
     {
-      title: tPortfolio('profile.factsTitle'),
-      body: getProfileAgeText(),
+      title: tPortfolio('profile.statusTitle'),
+      body: tPortfolio('profile.statusDetails'),
+    },
+    {
+      title: tPortfolio('profile.focusTitle'),
+      body: tPortfolio('profile.focusDetails'),
+    },
+    {
+      title: tPortfolio('profile.workFormatTitle'),
+      body: tPortfolio('profile.workFormatDetails'),
+    },
+    {
+      title: tPortfolio('profile.achievementsTitle'),
+      items: [
+        {
+          label: tPortfolio('profile.achievement.rndProducts.label'),
+          details: tPortfolio('profile.achievement.rndProducts.details'),
+        },
+        {
+          label: tPortfolio('profile.achievement.hardware.label'),
+          details: tPortfolio('profile.achievement.hardware.details'),
+        },
+        {
+          label: tPortfolio('profile.achievement.museumScanning.label'),
+          details: tPortfolio('profile.achievement.museumScanning.details'),
+        },
+        {
+          label: tPortfolio('profile.achievement.aiTooling.label'),
+          details: tPortfolio('profile.achievement.aiTooling.details'),
+        },
+      ],
+    },
+    {
+      title: tPortfolio('profile.careerTitle'),
+      items: [
+        {
+          label: tPortfolio('profile.career.megavisor.label'),
+          details: tPortfolio('profile.career.megavisor.details'),
+        },
+        {
+          label: tPortfolio('profile.career.photopizza.label'),
+          details: tPortfolio('profile.career.photopizza.details'),
+        },
+        {
+          label: tPortfolio('profile.career.hardware.label'),
+          details: tPortfolio('profile.career.hardware.details'),
+        },
+        {
+          label: tPortfolio('profile.career.ai.label'),
+          details: tPortfolio('profile.career.ai.details'),
+        },
+        {
+          label: tPortfolio('profile.career.messaging.label'),
+          details: tPortfolio('profile.career.messaging.details'),
+        },
+      ],
     },
     {
       title: tPortfolio('experience.title'),
@@ -586,6 +644,9 @@ function createMarkdown(entry) {
     lines.push(`**${entry.kicker}**`, '');
   }
   lines.push(entry.summary || tPortfolio('node.fallback'), '');
+  if (entry.meta) {
+    lines.push(entry.meta, '');
+  }
   if (entry.details) {
     lines.push(entry.details, '');
   }
@@ -651,6 +712,7 @@ function createPortfolioEntries() {
       category: 'server',
       shape: 'disc',
       icon: 'person',
+      meta: getProfileMetaText(),
       summary: tPortfolio('profile.summary'),
       details: tPortfolio('profile.details'),
       sections: getProfileSections(),

@@ -29,6 +29,9 @@ test('portfolio build generates llms.txt and llms-full.txt', async () => {
   assert.match(llmsTxt, /pulse\/photopizza\/\?lang=en/);
   assert.match(llmsTxt, /downloads\/vladimir-matiasevich-cv-en\.pdf/);
   assert.match(llmsTxt, /Age: 41/);
+  assert.match(llmsTxt, /10\+ years in R&D, product engineering, and full-stack development/);
+  assert.doesNotMatch(llmsTxt, /Quick facts/);
+  assert.doesNotMatch(llmsTxt, /Profile data/);
   assert.match(llmsTxt, /### Archived projects/);
   assert.match(llmsTxt, /Symbiote Node/);
   assert.doesNotMatch(llmsTxt, /Symbiote Workflow|symbiote-workflow/);
@@ -41,6 +44,7 @@ test('portfolio build generates llms.txt and llms-full.txt', async () => {
   assert.match(llmsFullTxt, /## Locale: Russian/);
   assert.match(llmsFullTxt, /## Locale: Spanish/);
   assert.match(llmsFullTxt, /Возраст: 41/);
+  assert.match(llmsFullTxt, /10\+ лет в R&D, продуктовой инженерии и full-stack разработке/);
   const previousBirthYearMarker = String(2000 - 16);
   assert.doesNotMatch(`${llmsTxt}\n${llmsFullTxt}`, new RegExp(previousBirthYearMarker));
   assert.doesNotMatch(`${llmsTxt}\n${llmsFullTxt}`, /Born:|Дата рождения|Fecha de nacimiento/);

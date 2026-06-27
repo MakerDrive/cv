@@ -58,11 +58,22 @@ test('project entries expose markdown details in portfolio data', () => {
   const projects = loadProjectEntries();
   const bySlug = new Map(projects.map((project) => [project.slug, project]));
   const megavisor = bySlug.get('megavisor');
+  const autobox = bySlug.get('autobox-v1');
+  const complexscan = bySlug.get('complexscan');
 
   assert.match(megavisor?.summary || '', /360-degree capture workflows/);
   assert.match(megavisor?.details || '', /co-founder and technical director/);
   assert.match(megavisor?.details || '', /customer warehouses/);
   assert.doesNotMatch(megavisor?.details || '', /^# MEGAVISOR/);
+  assert.match(autobox?.details || '', /original capture technology line/);
+  assert.match(autobox?.details || '', /upper competitive level of its time/);
+  assert.match(complexscan?.details || '', /author product line/);
+  assert.match(complexscan?.details || '', /higher-quality source textures/);
+  assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /авторскую линию технологии съёмки/);
+  assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /верхней конкурентной планки своего времени/);
+  assert.match(PROJECT_TRANSLATIONS.ru.complexscan.details, /авторской продуктовой линией/);
+  assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /línea original de tecnología de captura/);
+  assert.match(PROJECT_TRANSLATIONS.es.complexscan.details, /línea de producto propia/);
 });
 
 test('lifecycle messaging platform describes a public-safe technology profile', () => {
@@ -73,13 +84,32 @@ test('lifecycle messaging platform describes a public-safe technology profile', 
   assert.equal(project?.title, 'Lifecycle Messaging Platform');
   assert.match(project?.details || '', /Technology profile: JavaScript\/Node\.js/);
   assert.match(project?.details || '', /opt-in SMS/);
+  assert.match(project?.details || '', /GSM modem pools/);
+  assert.match(project?.details || '', /AT commands/);
+  assert.match(project?.details || '', /server infrastructure/);
   assert.match(
     PROJECT_TRANSLATIONS.ru['lifecycle-messaging-platform'].details,
     /Технологический профиль: JavaScript\/Node\.js/
   );
   assert.match(
+    PROJECT_TRANSLATIONS.ru['lifecycle-messaging-platform'].details,
+    /GSM-модемные пулы/
+  );
+  assert.match(
+    PROJECT_TRANSLATIONS.ru['lifecycle-messaging-platform'].details,
+    /AT-команды/
+  );
+  assert.match(
     PROJECT_TRANSLATIONS.es['lifecycle-messaging-platform'].details,
     /Perfil tecnológico: JavaScript\/Node\.js/
+  );
+  assert.match(
+    PROJECT_TRANSLATIONS.es['lifecycle-messaging-platform'].details,
+    /pools de módems GSM/
+  );
+  assert.match(
+    PROJECT_TRANSLATIONS.es['lifecycle-messaging-platform'].details,
+    /comandos AT/
   );
   assert.doesNotMatch(project?.details || '', /1SIM/i);
   assert.doesNotMatch(project?.title || '', /Private Lifecycle Marketing Platform/i);
