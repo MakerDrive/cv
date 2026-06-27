@@ -47,14 +47,15 @@ test('portfolio skill routes match the active skill identifiers', async () => {
 
 test('portfolio profile states full-stack work, native stack, and stack adaptation', () => {
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.page.title'], /hardware/i);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.summary'], /takes uncertain problems to shipped products/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.summary'], /Lead full-stack R&D engineer/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.summary'], /process automation/);
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.summary'], /hardware/i);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.details'], /JavaScript, Node\.js, Web\/PWA, and Web Components/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.skill.agenticAi.summary'], /MCP\/WebMCP-oriented interfaces/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.skill.agenticAi.summary'], /context compression/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.skill.agenticAi.summary'], /model\/resource routing/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.skill.agenticAi.summary'], /provider metadata/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.details'], /Current work centers/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.details'], /stack adaptation/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.details'], /GSM modems/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.details'], /AT-command control/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.details'], /agent-operable interfaces/);
@@ -63,10 +64,10 @@ test('portfolio profile states full-stack work, native stack, and stack adaptati
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.details'], /audit gates/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.details'], /\[Lifecycle Messaging Platform\]\(projects\/lifecycle-messaging-platform\/\?lang=en\)/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.statusDetails'], /Open to a new R&D \/ product engineering project/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.statusDetails'], /unfamiliar stacks including Python/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.statusDetails'], /async-friendly format/);
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.statusDetails'], /hardware/i);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.focusDetails'], /understand an uncertain domain quickly/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.focusDetails'], /bring the prototype to a working result/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.focusDetails'], /real-process automation/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.focusDetails'], /practical use/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.workFormatDetails'], /Remote, written-first R&D \/ product engineering/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.workFormatDetails'], /inside an existing team, with a clear manager/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.achievement.rndProducts.details'], /Invented original product and technology lines/);
@@ -76,10 +77,10 @@ test('portfolio profile states full-stack work, native stack, and stack adaptati
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.career.megavisor.details'], /capture-side R&D/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.career.hardware.details'], /original museum-grade 3D scanning technology/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.achievement.aiTooling.details'], /resource-aware orchestration/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.career.ai.details'], /context compression/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.career.ai.details'], /Agent Portal, Project Graph, Agent Pool/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.career.messaging.details'], /Confidential commercial platform/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.bio.details'], /stack adaptation/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.bio.details'], /GSM modem and AT-command automation/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.bio.details'], /RND-PRO\.com/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.bio.details'], /server infrastructure/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.locationLabel'], /Location/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.locationValue'], /Buenos Aires, Argentina \(GMT-3\)/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.profile.availabilityLabel'], /Time zones/);
@@ -94,19 +95,22 @@ test('portfolio profile states full-stack work, native stack, and stack adaptati
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.experience.rnd.details'], /physical systems when useful/);
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.experience.rnd.details'], /and hardware\./);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.experience.programming.label'], /Programming \/ full-stack experience/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.experience.programming.details'], /JavaScript, Node\.js, Web\/PWA, and Web Components/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.experience.programming.details'], /PostgreSQL/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.experience.programming.details'], /including Python when needed/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.experience.programming.details'], /AT-command control/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.en['portfolio.skills.details'], /frontend\/backend\/runtime\/ops stacks including Python when needed/);
 
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.page.title'], /hardware|желез/i);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.summary'], /доводит неопределённые задачи до выпущенных продуктов/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.summary'], /Ведущий full-stack R&D-инженер/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.summary'], /автоматизации процессов/);
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.summary'], /hardware|желез/i);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.details'], /Родной стек: JavaScript, Node\.js, Web\/PWA и Web Components/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.skill.agenticAi.summary'], /MCP\/WebMCP-ориентированные интерфейсы/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.skill.agenticAi.summary'], /сжатие контекста/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.skill.agenticAi.summary'], /маршрутизация моделей\/ресурсов/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.skill.agenticAi.summary'], /provider metadata/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.details'], /захожу в незнакомую кодовую базу/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.details'], /Текущий фокус/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.details'], /адаптации к стеку/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.details'], /GSM-модемы/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.details'], /AT-команды/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.details'], /agent-operable интерфейсы/);
@@ -115,10 +119,10 @@ test('portfolio profile states full-stack work, native stack, and stack adaptati
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.details'], /audit gates/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.details'], /\[Lifecycle Messaging Platform\]\(projects\/lifecycle-messaging-platform\/\?lang=ru\)/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.statusDetails'], /Открыт к новому R&D \/ product engineering проекту/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.statusDetails'], /незнакомых стеков, включая Python/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.statusDetails'], /async-friendly формате/);
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.statusDetails'], /hardware|желез|аппаратн/i);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.focusDetails'], /быстро разобраться в неопределённой области/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.focusDetails'], /довести прототип до работающего результата/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.focusDetails'], /автоматизации реальных процессов/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.focusDetails'], /практическую эксплуатацию/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.workFormatDetails'], /письменно-ориентированная R&D/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.workFormatDetails'], /внутри существующей команды, с понятным руководителем/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.achievement.rndProducts.details'], /Придумывал собственные продуктовые и технологические линии/);
@@ -127,11 +131,11 @@ test('portfolio profile states full-stack work, native stack, and stack adaptati
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.achievement.museumScanning.details'], /верхней конкурентной планки своего времени/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.career.megavisor.details'], /R&D съёмочной части/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.career.hardware.details'], /авторской музейной технологии 3D-сканирования/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.achievement.aiTooling.details'], /ресурсной оркестрации/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.career.ai.details'], /сжатие контекста/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.achievement.aiTooling.details'], /resource-aware оркестрации/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.career.ai.details'], /Agent Portal, Project Graph, Agent Pool/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.career.messaging.details'], /Конфиденциальная коммерческая платформа/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.bio.details'], /адаптация к стеку/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.bio.details'], /GSM-модемы и AT-команды/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.bio.details'], /RND-PRO\.com/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.bio.details'], /серверную инфраструктуру/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.locationLabel'], /Локация/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.locationValue'], /Buenos Aires, Argentina \(GMT-3\)/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.profile.availabilityLabel'], /Часовые пояса/);
@@ -146,18 +150,22 @@ test('portfolio profile states full-stack work, native stack, and stack adaptati
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.experience.rnd.details'], /физических систем/);
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.experience.rnd.details'], /железа/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.experience.programming.label'], /Программистский \/ full-stack опыт/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.experience.programming.details'], /Родной стек: JavaScript, Node\.js, Web\/PWA и Web Components/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.experience.programming.details'], /PostgreSQL/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.experience.programming.details'], /Python при необходимости/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.experience.programming.details'], /управлением через serial и AT-команды/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.ru['portfolio.skills.details'], /frontend\/backend\/runtime\/ops-стекам, включая Python при необходимости/);
 
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.page.title'], /hardware/i);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.summary'], /full-stack/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.summary'], /Ingeniero full-stack líder de I\+D/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.summary'], /automatización de procesos/);
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.summary'], /hardware/i);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.details'], /JavaScript, Node\.js, Web\/PWA y Web Components/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.skill.agenticAi.summary'], /MCP\/WebMCP/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.skill.agenticAi.summary'], /compresión de contexto/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.skill.agenticAi.summary'], /enrutamiento de modelos\/recursos/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.skill.agenticAi.summary'], /provider metadata/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.details'], /La línea actual/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.details'], /adaptarme a stacks/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.details'], /módems GSM/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.details'], /comandos AT/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.details'], /interfaces operables por agentes/);
@@ -166,10 +174,10 @@ test('portfolio profile states full-stack work, native stack, and stack adaptati
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.details'], /audit gates/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.details'], /\[Lifecycle Messaging Platform\]\(projects\/lifecycle-messaging-platform\/\?lang=es\)/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.statusDetails'], /Abierto a un nuevo proyecto/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.statusDetails'], /stacks desconocidos, incluido Python/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.statusDetails'], /async-friendly/);
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.statusDetails'], /hardware/i);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.focusDetails'], /entender rápido un dominio incierto/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.focusDetails'], /llevar el prototipo a un resultado funcional/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.focusDetails'], /automatización de procesos reales/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.focusDetails'], /uso práctico/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.workFormatDetails'], /Trabajo remoto y por escrito de I\+D/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.workFormatDetails'], /dentro de un equipo existente/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.achievement.rndProducts.details'], /Inventé líneas originales de producto y tecnología/);
@@ -179,10 +187,10 @@ test('portfolio profile states full-stack work, native stack, and stack adaptati
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.career.megavisor.details'], /I\+D de captura/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.career.hardware.details'], /tecnología propia de escaneo 3D/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.achievement.aiTooling.details'], /orquestación consciente de recursos/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.career.ai.details'], /compresión de contexto/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.career.ai.details'], /Agent Portal, Project Graph, Agent Pool/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.career.messaging.details'], /Plataforma comercial confidencial/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.bio.details'], /adaptarme al stack/);
-  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.bio.details'], /módems GSM y comandos AT/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.bio.details'], /RND-PRO\.com/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.bio.details'], /infraestructura de servidor/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.locationLabel'], /Ubicación/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.locationValue'], /Buenos Aires, Argentina \(GMT-3\)/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.profile.availabilityLabel'], /Husos horarios/);
@@ -197,8 +205,11 @@ test('portfolio profile states full-stack work, native stack, and stack adaptati
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.experience.rnd.details'], /sistemas físicos/);
   assert.doesNotMatch(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.experience.rnd.details'], /y hardware\./);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.experience.programming.label'], /Experiencia de programación \/ full-stack/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.experience.programming.details'], /JavaScript, Node\.js, Web\/PWA y Web Components/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.experience.programming.details'], /PostgreSQL/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.experience.programming.details'], /incluido Python/);
   assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.experience.programming.details'], /comandos AT/);
+  assert.match(PORTFOLIO_LOCALE_MESSAGES.es['portfolio.skills.details'], /stacks frontend\/backend\/runtime\/ops desconocidos incluido Python/);
 });
 
 test('portfolio profile renders languages, contact, and separated experience sections', async () => {
