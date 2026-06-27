@@ -45,6 +45,26 @@ test('project pulse notes stay distinct from project case descriptions', () => {
   }
 });
 
+test('agent tooling pulse notes preserve article-derived R&D accents', () => {
+  assert.match(PROJECT_PULSE_NOTES.en['agent-portal'].details, /resource groups route work/);
+  assert.match(PROJECT_PULSE_NOTES.en['project-graph-mcp'].details, /10-50x reduction/);
+  assert.match(PROJECT_PULSE_NOTES.en['project-graph-mcp'].details, /faster model can extract structure/);
+  assert.match(PROJECT_PULSE_NOTES.en['agent-pool-mcp'].details, /cross-model consensus/);
+  assert.match(PROJECT_PULSE_NOTES.en['agent-pool-mcp'].details, /cheaper\/faster workers/);
+
+  assert.match(PROJECT_PULSE_NOTES.ru['agent-portal'].details, /resource groups распределяют работу/);
+  assert.match(PROJECT_PULSE_NOTES.ru['project-graph-mcp'].details, /10-50 раз/);
+  assert.match(PROJECT_PULSE_NOTES.ru['project-graph-mcp'].details, /быстрая модель извлекает структуру/);
+  assert.match(PROJECT_PULSE_NOTES.ru['agent-pool-mcp'].details, /кросс-модельный консенсус/);
+  assert.match(PROJECT_PULSE_NOTES.ru['agent-pool-mcp'].details, /более дешёвым\/быстрым воркерам/);
+
+  assert.match(PROJECT_PULSE_NOTES.es['agent-portal'].details, /resource groups enrutan trabajo/);
+  assert.match(PROJECT_PULSE_NOTES.es['project-graph-mcp'].details, /10-50x/);
+  assert.match(PROJECT_PULSE_NOTES.es['project-graph-mcp'].details, /modelo rápido extrae estructura/);
+  assert.match(PROJECT_PULSE_NOTES.es['agent-pool-mcp'].details, /consenso entre modelos/);
+  assert.match(PROJECT_PULSE_NOTES.es['agent-pool-mcp'].details, /workers más baratos\/rápidos/);
+});
+
 test('portfolio runtime uses dedicated pulse notes for journal entries', async () => {
   const source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
 

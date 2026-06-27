@@ -40,7 +40,8 @@ import {
 
 const PORTFOLIO_LOCALE_STORAGE_KEY = 'cv-portfolio-locale';
 const PORTFOLIO_SUPPORTED_LOCALES = ['en', 'ru', 'es'];
-const PORTFOLIO_PROFILE_AGE = 41;
+const PORTFOLIO_LINKEDIN_URL = 'https://www.linkedin.com/in/v-matiasevich/';
+const PORTFOLIO_TELEGRAM_URL = 'https://t.me/text2code';
 const PORTFOLIO_ONLINE_CV_URL = 'https://MakerDrive.github.io/cv/';
 const PORTFOLIO_PDF_DOWNLOADS = Object.freeze([
   { locale: 'en', href: 'downloads/vladimir-matiasevich-cv-en.pdf' },
@@ -105,14 +106,22 @@ function getProfileOnlineCvUrl(locale = portfolioLocalization.locale) {
   return url.href;
 }
 
+function getProfileContactText() {
+  let links = [];
+  if (PORTFOLIO_TELEGRAM_URL) links.push(`[Telegram](${PORTFOLIO_TELEGRAM_URL})`);
+  links.push(`[LinkedIn](${PORTFOLIO_LINKEDIN_URL})`);
+  return links.join(' · ');
+}
+
 function getProfileMetaText() {
   return [
     '|  |  |',
     '| --- | --- |',
     `| **${tPortfolio('profile.locationLabel')}** | ${tPortfolio('profile.locationValue')} |`,
     `| **${tPortfolio('profile.availabilityLabel')}** | ${tPortfolio('profile.availability')} |`,
-    `| **${tPortfolio('profile.ageLabel')}** | ${PORTFOLIO_PROFILE_AGE} |`,
+    `| **${tPortfolio('profile.languagesLabel')}** | ${tPortfolio('profile.languagesValue')} |`,
     `| **${tPortfolio('profile.experienceLabel')}** | ${tPortfolio('profile.experienceSummary')} |`,
+    `| **${tPortfolio('profile.contactLabel')}** | ${getProfileContactText()} |`,
     `| **CV** | [${tPortfolio('profile.onlineCv')}](${getProfileOnlineCvUrl()}) |`,
   ].join('\n');
 }
@@ -349,8 +358,6 @@ function getSocialLinkSummary(summaryKey) {
       return tPortfolio('social.facebook.summary');
     case 'social.github.summary':
       return tPortfolio('social.github.summary');
-    case 'social.instagram.summary':
-      return tPortfolio('social.instagram.summary');
     case 'social.linkedin.summary':
       return tPortfolio('social.linkedin.summary');
     case 'social.youtube.summary':
@@ -589,6 +596,9 @@ const PROJECT_LINK_SUMMARY_GETTERS = Object.freeze({
   'Published npm package': () => tPortfolio('project.linkSummary.publishedNpmPackage'),
   'YouTube channel with photogrammetry and capture workflow demos': () => tPortfolio('project.linkSummary.youtubePhotogrammetry'),
   'YouTube channel with product updates and demos': () => tPortfolio('project.linkSummary.youtubeProductUpdates'),
+  'Cultural-heritage 3D visualizations': () => tPortfolio('project.linkSummary.culturalHeritageVisualizations'),
+  'Hermitage netsuke scanning story': () => tPortfolio('project.linkSummary.hermitageNetsukeStory'),
+  'Benin bronze digitization record': () => tPortfolio('project.linkSummary.beninDigitization'),
 });
 
 const PROJECT_PULSE_RELATIONS = Object.freeze({

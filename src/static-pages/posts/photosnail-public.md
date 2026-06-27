@@ -5,7 +5,7 @@ period: 2016
 kicker: Author project
 summary: Early PhotoSnail web project around motion-control camera systems and media presentation experiments.
 image: https://rnd-pro.com/svg/logo/index.svg
-alt: RND-PRO logo
+alt: PhotoSnail motion-control camera project
 href: https://github.com/PhotoSnail/public
 linkLabel: View repository
 links: GitHub|https://github.com/PhotoSnail/public|Public source repository

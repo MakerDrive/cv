@@ -17,7 +17,7 @@ test('portfolio build generates localized CV PDFs', async () => {
 
   assert.match(portfolioSource, /downloadsTitle: tPortfolio\('pdf\.downloads'\)/);
   assert.match(portfolioSource, /## \$\{entry\.downloadsTitle \|\| tPortfolio\('pdf\.downloads'\)\}/);
-  assert.match(pdfSource, /const PROFILE_AGE = 41;/);
+  assert.doesNotMatch(pdfSource, /PROFILE_AGE/);
   assert.match(pdfSource, /function plainTextMarkdown\(value\)/);
   assert.match(pdfSource, /\.replace\(\/\\\[/);
   assert.match(pdfSource, /t\(locale, 'profile\.statusTitle'\)/);
@@ -33,7 +33,7 @@ test('portfolio build generates localized CV PDFs', async () => {
   assert.match(pdfSource, /t\(locale, 'profile\.locationLabel'\)/);
   assert.match(pdfSource, /t\(locale, 'profile\.locationValue'\)/);
   assert.match(pdfSource, /t\(locale, 'profile\.availability'\)/);
-  assert.match(pdfSource, /\$\{t\(locale, 'profile\.ageLabel'\)\}: \$\{PROFILE_AGE\}/);
+  assert.match(pdfSource, /\$\{t\(locale, 'profile\.languagesLabel'\)\}: \$\{t\(locale, 'profile\.languagesValue'\)\}/);
   assert.match(pdfSource, /t\(locale, 'profile\.experienceSummary'\)/);
   assert.match(pdfSource, /t\(locale, 'profile\.onlineCv'\)/);
   assert.match(pdfSource, /t\(locale, 'experience\.rnd\.label'\)/);

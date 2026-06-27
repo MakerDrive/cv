@@ -7,7 +7,6 @@ const expectedLinks = [
   ['GitHub', 'https://github.com/MakerDrive'],
   ['LinkedIn', 'https://www.linkedin.com/in/v-matiasevich/'],
   ['YouTube', 'https://www.youtube.com/@VladimirMatiasevich'],
-  ['Instagram', 'https://www.instagram.com/makerdrive/'],
   ['Facebook', 'https://www.facebook.com/v.matiasevich'],
 ];
 

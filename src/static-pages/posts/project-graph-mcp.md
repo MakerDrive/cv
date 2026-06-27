@@ -1,10 +1,11 @@
 ---
 title: Project Graph MCP
 order: 9
+period: 2026
 kicker: Author project
-summary: Code-intelligence MCP server for turning repositories into compact graphs and evidence agents can reason over.
+summary: Code-intelligence MCP server for turning repositories into compact graphs, compressed project skeletons, and evidence agents can reason over.
 image: https://rnd-pro.com/svg/logo/index.svg
-alt: RND-PRO logo
+alt: Project Graph MCP code-intelligence server
 href: https://github.com/rnd-pro/project-graph-mcp
 linkLabel: View repository
 links: GitHub|https://github.com/rnd-pro/project-graph-mcp|Public source repository; npm|https://www.npmjs.com/package/project-graph-mcp|Published npm package
@@ -15,3 +16,5 @@ links: GitHub|https://github.com/rnd-pro/project-graph-mcp|Public source reposit
 Research project around a recurring agent problem: how to give an AI enough structure about a codebase without flooding it with raw files.
 
 It exposes dependency views, code skeletons, graph summaries, and browser-test evidence as compact context for engineering agents.
+
+The R&D focus is context compression and project understanding: a faster/cheaper model can analyze structure and produce a graph representation, while a stronger model works from that distilled data instead of re-reading the whole repository. In the published article this is framed through compact skeletons and 10-50x context reduction for structural project data.

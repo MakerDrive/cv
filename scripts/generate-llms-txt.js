@@ -78,7 +78,6 @@ const pdfDownloads = Object.freeze({
   es: 'downloads/vladimir-matiasevich-cv-es.pdf',
 });
 
-const profileAge = 41;
 
 function formatMessage(value, params = {}) {
   return String(value || '').replace(/\{([a-zA-Z][a-zA-Z0-9_]*)\}/g, (match, key) => {
@@ -152,7 +151,7 @@ function writeLlmsTxt(projects) {
     '',
     `> ${oneLine(t('en', 'profile.summary'))}`,
     '',
-    'Curated R&D portfolio covering AI tooling, agent systems, product platforms, media systems, hardware-backed process automation, and selected public/open-source work. The site supports English, Russian, and Spanish through the `lang` query parameter.',
+    'Curated R&D portfolio covering AI tooling, agent systems, product platforms, media systems, process automation, and selected hardware-backed/open-source case studies. The site supports English, Russian, and Spanish through the `lang` query parameter.',
     '',
     'Use `llms-full.txt` for a fuller markdown export of profile text, project case studies, and R&D journal notes across all supported locales.',
     '',
@@ -163,7 +162,7 @@ function writeLlmsTxt(projects) {
     lines,
     'Portfolio home',
     urlFor('', 'en'),
-    `${t('en', 'profile.locationLabel')}: ${t('en', 'profile.locationValue')}. ${t('en', 'profile.availability')} ${t('en', 'profile.ageLabel')}: ${profileAge}. ${t('en', 'profile.experienceSummary')}. ${t('en', 'profile.details')}`
+    `${t('en', 'profile.locationLabel')}: ${t('en', 'profile.locationValue')}. ${t('en', 'profile.availability')} ${t('en', 'profile.languagesLabel')}: ${t('en', 'profile.languagesValue')}. ${t('en', 'profile.experienceSummary')}. ${t('en', 'profile.details')}`
   );
   appendListItem(lines, 'Full LLM context', urlFor('llms-full.txt'), 'Complete generated markdown export for the portfolio.');
   appendListItem(lines, 'Sitemap', urlFor('sitemap.xml'), 'Machine-readable list of generated site routes.');
@@ -211,7 +210,7 @@ function writeFullLocale(lines, projects, locale) {
   lines.push(oneLine(t(locale, 'profile.summary')), '');
   lines.push(`${t(locale, 'profile.locationLabel')}: ${t(locale, 'profile.locationValue')}`, '');
   lines.push(t(locale, 'profile.availability'), '');
-  lines.push(`${t(locale, 'profile.ageLabel')}: ${profileAge}`, '');
+  lines.push(`${t(locale, 'profile.languagesLabel')}: ${t(locale, 'profile.languagesValue')}`, '');
   lines.push(t(locale, 'profile.experienceSummary'), '');
   lines.push(`${t(locale, 'profile.onlineCv')}: ${urlFor('', locale)}`, '');
   lines.push(t(locale, 'profile.details'), '');

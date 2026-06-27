@@ -22,4 +22,6 @@ PhotoPizza was born inside this work: I invented the motorized turntable for MEG
 
 MEGAVISOR belongs in the product-platform line because the hardware and shooting process served a larger portal: cloud publishing, client-facing interactive media, and production operations.
 
+The platform also produced spherical panoramas and virtual tours — from a panorama you could step into a photo-360 sequence of an object standing in that scene. I directed the related media production too: product [promos](https://www.youtube.com/watch?v=6CpdVcjtZoU), a [360 photo-studio promo](https://www.youtube.com/watch?v=ySBWZPHZqsw), a [stop-motion promo](https://www.youtube.com/watch?v=492LvEkyhbg), and training tutorials.
+
 The project was founded by me and my brother Alex. Alex focused on the cloud product itself and led the development group building the online platform.

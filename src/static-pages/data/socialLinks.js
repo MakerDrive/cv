@@ -18,12 +18,6 @@ export const socialLinks = Object.freeze([
     summaryKey: 'social.youtube.summary',
   },
   {
-    id: 'social/instagram',
-    label: 'Instagram',
-    href: 'https://www.instagram.com/makerdrive/',
-    summaryKey: 'social.instagram.summary',
-  },
-  {
     id: 'social/facebook',
     label: 'Facebook',
     href: 'https://www.facebook.com/v.matiasevich',

@@ -1,10 +1,11 @@
 ---
 title: Symbiote Engine
 order: 16
+period: 2026
 kicker: Author project
 summary: Execution engine for researching reusable workflow graphs and automation blocks in the active Symbiote Workspace / UI / Engine line.
 image: https://rnd-pro.com/svg/logo/index.svg
-alt: RND-PRO logo
+alt: Symbiote Engine execution runtime
 href: https://github.com/rnd-pro/symbiote-engine
 linkLabel: View repository
 links: GitHub|https://github.com/rnd-pro/symbiote-engine|Public source repository; npm|https://www.npmjs.com/package/symbiote-engine|Published npm package

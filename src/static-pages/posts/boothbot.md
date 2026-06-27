@@ -5,7 +5,7 @@ period: 2018
 kicker: Selected project
 summary: Commercial capture-automation project for wine bottles: warehouse equipment, controlled lighting, motorized camera, and catalog photo processing.
 image: https://rnd-pro.com/svg/logo/index.svg
-alt: RND-PRO logo
+alt: BoothBot warehouse capture-automation booth
 href: https://rnd-pro.com/projects/boothbot/
 linkLabel: View project
 ---

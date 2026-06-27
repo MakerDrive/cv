@@ -5,7 +5,7 @@ period: 2017-2019
 kicker: Selected project
 summary: Commercial hardware product I invented after PhotoPizza: professional transparent-disc equipment for 3D scanning, 360 capture, and product photography.
 image: https://rnd-pro.com/svg/logo/index.svg
-alt: RND-PRO logo
+alt: ComplexScan transparent-disc 3D scanning hardware
 href: https://rnd-pro.com/pulse/complex-scan/
 linkLabel: View project
 links: PHOTOGRAMMETRY|https://www.youtube.com/@PHOTOGRAMMETRY|YouTube channel with photogrammetry and capture workflow demos

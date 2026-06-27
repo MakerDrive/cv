@@ -23,8 +23,6 @@ const PDF_DOWNLOADS = Object.freeze({
   es: 'vladimir-matiasevich-cv-es.pdf',
 });
 
-const PROFILE_AGE = 41;
-
 const PROJECT_GROUPS = Object.freeze([
   {
     key: 'projectGroup.agenticAi.label',
@@ -327,7 +325,7 @@ function addHeader(doc, writer, locale) {
   doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(t(locale, 'profile.availability'), textX, doc.y, {
     width: textWidth,
   });
-  doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(`${t(locale, 'profile.ageLabel')}: ${PROFILE_AGE}`, textX, doc.y, {
+  doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(`${t(locale, 'profile.languagesLabel')}: ${t(locale, 'profile.languagesValue')}`, textX, doc.y, {
     width: textWidth,
   });
   doc.font('regular').fontSize(9.2).fillColor(COLORS.muted).text(t(locale, 'profile.experienceSummary'), textX, doc.y, {

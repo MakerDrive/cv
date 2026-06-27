@@ -6,6 +6,42 @@ import ICONS_LINK from '../icons/link.html.js';
 const template = fs.readFileSync('./src/static-pages/page.tpl.html', 'utf8');
 const importmap = getImportMap();
 
+const SITE_BASE_URL = 'https://MakerDrive.github.io/cv/';
+const SITE_OG_IMAGE = `${SITE_BASE_URL}avatar/index.webp`;
+const SITE_DEFAULT_DESCRIPTION =
+  'Vladimir Matiasevich — R&D engineer. Custom AI agent tooling, full-stack Web/Node.js platforms, and hardware-backed process automation, from idea to production.';
+
+function escapeAttr(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function buildHeadMeta(pageData) {
+  if (typeof pageData.HEAD_META === 'string') return pageData.HEAD_META;
+  let description = pageData.DESCRIPTION || SITE_DEFAULT_DESCRIPTION;
+  let title = pageData.OG_TITLE || pageData.TITLE;
+  let image = pageData.OG_IMAGE || SITE_OG_IMAGE;
+  let tags = [
+    `<meta name="description" content="${escapeAttr(description)}">`,
+    `<meta property="og:type" content="website">`,
+    `<meta property="og:title" content="${escapeAttr(title)}">`,
+    `<meta property="og:description" content="${escapeAttr(description)}">`,
+    `<meta property="og:image" content="${escapeAttr(image)}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+    `<meta name="twitter:title" content="${escapeAttr(title)}">`,
+    `<meta name="twitter:description" content="${escapeAttr(description)}">`,
+    `<meta name="twitter:image" content="${escapeAttr(image)}">`,
+  ];
+  if (pageData.CANONICAL_URL) {
+    tags.push(`<link rel="canonical" href="${escapeAttr(pageData.CANONICAL_URL)}">`);
+    tags.push(`<meta property="og:url" content="${escapeAttr(pageData.CANONICAL_URL)}">`);
+  }
+  return tags.join('\n  ');
+}
+
 function getAssetVersion() {
   return String(process.env.CV_ASSET_VERSION || process.env.GITHUB_SHA || '').trim();
 }
@@ -79,6 +115,7 @@ export async function getPage(pageData) {
     IMPORTMAP: pageData.IMPORTMAP || importmap,
     ICONS_LINK,
     TITLE: pageData.TITLE,
+    HEAD_META: buildHeadMeta(pageData),
     BODY_ATTRS: pageData.BODY_ATTRS || '',
     BASE_PATH: pageData.BASE_PATH || './',
     CSS_PATH: versionAssetPath(pageData.CSS_PATH || 'css/index.css'),

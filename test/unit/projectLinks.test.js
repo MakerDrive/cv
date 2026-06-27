@@ -51,16 +51,30 @@ test('project entries include public author projects', () => {
   }
 
   assert.equal(bySlug.get('symbiote-node')?.title, 'Symbiote Node');
-  assert.match(bySlug.get('symbiote-node')?.summary || '', /Archived package workspace/);
+  assert.match(bySlug.get('symbiote-node')?.summary || '', /Early package workspace/);
+  assert.doesNotMatch(bySlug.get('symbiote-node')?.summary || '', /archived|legacy/i);
 });
 
 test('project entries expose markdown details in portfolio data', () => {
   const projects = loadProjectEntries();
   const bySlug = new Map(projects.map((project) => [project.slug, project]));
+  const agentPortal = bySlug.get('agent-portal');
+  const projectGraph = bySlug.get('project-graph-mcp');
+  const agentPool = bySlug.get('agent-pool-mcp');
   const megavisor = bySlug.get('megavisor');
   const autobox = bySlug.get('autobox-v1');
   const complexscan = bySlug.get('complexscan');
 
+  assert.match(agentPortal?.summary || '', /graph-based context/);
+  assert.match(agentPortal?.summary || '', /model\/resource routing/);
+  assert.match(agentPortal?.details || '', /resource-aware agent development/);
+  assert.match(agentPortal?.details || '', /cheaper\/faster models/);
+  assert.match(projectGraph?.summary || '', /compressed project skeletons/);
+  assert.match(projectGraph?.details || '', /10-50x context reduction/);
+  assert.match(projectGraph?.details || '', /faster\/cheaper model/);
+  assert.match(agentPool?.summary || '', /assigning model\/resource tiers/);
+  assert.match(agentPool?.details || '', /cross-model consensus/);
+  assert.match(agentPool?.details || '', /cheaper\/faster workers/);
   assert.match(megavisor?.summary || '', /360-degree capture workflows/);
   assert.match(megavisor?.details || '', /co-founder and technical director/);
   assert.match(megavisor?.details || '', /customer warehouses/);
@@ -80,12 +94,18 @@ test('project entries expose markdown details in portfolio data', () => {
   assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /Макса Ратерстона/);
   assert.match(PROJECT_TRANSLATIONS.ru['autobox-v1'].details, /himotoshi/);
   assert.match(PROJECT_TRANSLATIONS.ru.complexscan.details, /авторской продуктовой линией/);
+  assert.match(PROJECT_TRANSLATIONS.ru['agent-portal'].details, /ресурсная оптимизация агентной разработки/);
+  assert.match(PROJECT_TRANSLATIONS.ru['project-graph-mcp'].details, /10-50 раз/);
+  assert.match(PROJECT_TRANSLATIONS.ru['agent-pool-mcp'].details, /кросс-модельный консенсус/);
   assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /línea original de tecnología de captura/);
   assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /Diez netsuke japoneses/);
   assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /Anna Savelyeva/);
   assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /Max Rutherston/);
   assert.match(PROJECT_TRANSLATIONS.es['autobox-v1'].details, /himotoshi/);
   assert.match(PROJECT_TRANSLATIONS.es.complexscan.details, /línea de producto propia/);
+  assert.match(PROJECT_TRANSLATIONS.es['agent-portal'].details, /optimización de recursos/);
+  assert.match(PROJECT_TRANSLATIONS.es['project-graph-mcp'].details, /10-50x/);
+  assert.match(PROJECT_TRANSLATIONS.es['agent-pool-mcp'].details, /workers más baratos\/rápidos/);
 });
 
 test('older project entries expose visible work periods', () => {
@@ -98,7 +118,7 @@ test('older project entries expose visible work periods', () => {
   assert.equal(bySlug.get('complexscan')?.period, '2017-2019');
   assert.equal(bySlug.get('boothbot')?.period, '2018');
   assert.equal(bySlug.get('photopizza-remote')?.period, '2018-2019');
-  assert.equal(bySlug.get('autobox-v1')?.period, '2019');
+  assert.equal(bySlug.get('autobox-v1')?.period, '2019-2021');
 });
 
 test('lifecycle messaging platform describes a public-safe technology profile', () => {
@@ -107,14 +127,19 @@ test('lifecycle messaging platform describes a public-safe technology profile', 
   const project = bySlug.get('lifecycle-messaging-platform');
 
   assert.equal(project?.title, 'Lifecycle Messaging Platform');
-  assert.match(project?.details || '', /Technology profile: JavaScript\/Node\.js/);
+  assert.match(project?.details || '', /Technology profile:/);
+  assert.match(project?.details || '', /Backend\/runtime: JavaScript\/Node\.js/);
   assert.match(project?.details || '', /opt-in SMS/);
   assert.match(project?.details || '', /GSM modem pools/);
   assert.match(project?.details || '', /AT commands/);
   assert.match(project?.details || '', /server infrastructure/);
   assert.match(
     PROJECT_TRANSLATIONS.ru['lifecycle-messaging-platform'].details,
-    /Технологический профиль: JavaScript\/Node\.js/
+    /Технологический профиль:/
+  );
+  assert.match(
+    PROJECT_TRANSLATIONS.ru['lifecycle-messaging-platform'].details,
+    /Backend\/runtime: JavaScript\/Node\.js/
   );
   assert.match(
     PROJECT_TRANSLATIONS.ru['lifecycle-messaging-platform'].details,
@@ -126,7 +151,11 @@ test('lifecycle messaging platform describes a public-safe technology profile', 
   );
   assert.match(
     PROJECT_TRANSLATIONS.es['lifecycle-messaging-platform'].details,
-    /Perfil tecnológico: JavaScript\/Node\.js/
+    /Perfil tecnológico:/
+  );
+  assert.match(
+    PROJECT_TRANSLATIONS.es['lifecycle-messaging-platform'].details,
+    /Backend\/runtime: JavaScript\/Node\.js/
   );
   assert.match(
     PROJECT_TRANSLATIONS.es['lifecycle-messaging-platform'].details,

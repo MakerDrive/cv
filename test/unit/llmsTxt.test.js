@@ -28,13 +28,13 @@ test('portfolio build generates llms.txt and llms-full.txt', async () => {
   assert.match(llmsTxt, /projects\/agent-portal\/\?lang=en/);
   assert.match(llmsTxt, /pulse\/photopizza\/\?lang=en/);
   assert.match(llmsTxt, /downloads\/vladimir-matiasevich-cv-en\.pdf/);
-  assert.match(llmsTxt, /Age: 41/);
+  assert.match(llmsTxt, /Languages: Russian — native · English — reading & writing \(not spoken\) · Spanish — basic \(A1\)/);
   assert.match(llmsTxt, /10\+ years in R&D, product engineering, and full-stack development/);
   assert.doesNotMatch(llmsTxt, /Quick facts/);
   assert.doesNotMatch(llmsTxt, /Profile data/);
   assert.match(llmsTxt, /### Archived projects/);
   assert.match(llmsTxt, /Symbiote Node/);
-  assert.match(llmsTxt, /AUTOBOX v1.*2019\./);
+  assert.match(llmsTxt, /AUTOBOX v1.*2019-2021\./);
   assert.match(llmsTxt, /Lifecycle Messaging Platform/);
   assert.doesNotMatch(llmsTxt, /Symbiote Workflow|symbiote-workflow/);
   assert.doesNotMatch(llmsTxt, /llms-full\.txt\//);
@@ -45,7 +45,7 @@ test('portfolio build generates llms.txt and llms-full.txt', async () => {
   assert.match(llmsFullTxt, /## Locale: English/);
   assert.match(llmsFullTxt, /## Locale: Russian/);
   assert.match(llmsFullTxt, /## Locale: Spanish/);
-  assert.match(llmsFullTxt, /Возраст: 41/);
+  assert.match(llmsFullTxt, /Языки: Русский — родной · Английский — чтение и письмо \(не разговорный\) · Испанский — базовый \(A1\)/);
   assert.match(llmsFullTxt, /10\+ лет в R&D, продуктовой инженерии и full-stack разработке/);
   const previousBirthYearMarker = String(2000 - 16);
   assert.doesNotMatch(`${llmsTxt}\n${llmsFullTxt}`, new RegExp(previousBirthYearMarker));
