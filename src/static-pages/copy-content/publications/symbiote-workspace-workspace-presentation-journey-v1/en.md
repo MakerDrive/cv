@@ -1,0 +1,5 @@
+I added `workspace-presentation-journey-v1` to record one completed source execution for later presentation. Each event keeps its observed `sourceOffsetMs` and a separate `presentationOffsetMs`. A monotonic segment map binds the two timelines and permits explicit compression of idle waits without re-running the model.
+
+Events declare their provenance as operator input, tool progress, resource result, or assistant text. Tool actions come from a journey-specific allowlist, and resources carry content hashes. The terminal outcome is recorded from a fixed set that includes completion, timeout, error, and cancellation.
+
+Canonical JSON produces a `sha256-<base64>` content hash over the replay projection. The validator rejects mismatched identity, unknown fields, non-monotonic offsets, local paths, credentials, session identifiers, URLs, and private selector data. The journey hash can be referenced by the existing media-evidence action log, so presentation replay uses the same artifact graph.

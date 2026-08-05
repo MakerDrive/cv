@@ -1,0 +1,5 @@
+Desarrollé Symbiote UI como la capa reutilizable de interfaz y contratos de proveedor para los proyectos Symbiote. Su manifiesto describe Web Components, layouts, esquemas, reglas, temas y metadatos WebMCP. Los agentes pueden consultar el catálogo antes de elegir un componente; el registro del navegador queda en `symbiote-ui/ui`, mientras que la raíz y los entry points de contratos son seguros para Node y SSR.
+
+El paquete posee primitivas de grafo, árbol, editor, chat, medios y layout. Los componentes reciben datos explícitos y emiten eventos de intención. La navegación, la persistencia, los permisos, los secretos y la identidad del usuario pertenecen a la aplicación host.
+
+El sistema de tokens Cascade y los roles T2 también pertenecen a Symbiote UI. Las partes de acción de un mensaje emiten eventos tipados, las partes embed entregan al host un slot con clave para un widget vivo y el presenter cursor convierte referencias de destino en un recorrido visual controlado. La propiedad no cambia cuando Agent Portal consume estos contratos.

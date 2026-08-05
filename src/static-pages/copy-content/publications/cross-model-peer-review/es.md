@@ -1,0 +1,5 @@
+Agent Pool MCP expone `delegate_task_readonly` para peer review en los workflows de Codex. El orquestador envía un prompt de análisis acotado mediante el resource group configurado `review`. La llamada se ejecuta en plan mode y devuelve de inmediato un identificador de tarea; `get_task_result` entrega el estado y el informe completo. La guía del paquete clasifica `consult_peer` como un helper heredado y exclusivo de Gemini, fuera del workflow de resource groups de Codex.
+
+Una tarea de revisión puede asignar a Claude Sonnet 5 la inspección de un trabajo producido por GPT-5.6 Sol. La pareja es ilustrativa y procede de la política de orquestación. Agent Pool obtiene el routing del perfil del resource group o de parámetros explícitos y admite otros proveedores y modelos configurados.
+
+El worker de revisión devuelve hallazgos, riesgos y cambios propuestos como evidencia. El orquestador los contrasta con los archivos actuales y los resultados de verificación, clasifica cada hallazgo y conserva la autoridad sobre el plan y la decisión de aceptación. La evidencia del paquete no incluye un benchmark público de resultados.

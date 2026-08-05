@@ -1,0 +1,1 @@
+Capa de automatización de terminal para flujos de agentes que necesitan ejecución planificada de comandos, verificaciones de seguridad, monitoreo de procesos, validación, informes estructurados y estado de ejecución trazable.

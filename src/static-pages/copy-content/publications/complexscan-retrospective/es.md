@@ -1,0 +1,5 @@
+Inventé ComplexScan como producto comercial de hardware después de la línea open-source PhotoPizza. El sistema usaba un disco giratorio transparente de vidrio templado, mecánica estable e iluminación controlada alrededor y debajo del objeto para escaneo 3D fotogramétrico, captura 360 y fotografía de producto.
+
+Diseñé juntos el sistema físico y el método de captura. La plataforma transparente y la configuración de luz mejoraban las máscaras, las texturas fuente y la geometría antes del procesamiento 3D, reduciendo el retoque desde la captura.
+
+Mi trabajo abarcó el concepto y la I+D, el diseño mecánico, la fabricación manual de prototipos, las pruebas, la preparación de la producción, el ensamblaje final, el embalaje, la documentación de exportación y las primeras entregas a clientes de varios países. Proveedores especializados fabricaron piezas de metal y acrílico cortadas por láser; coordiné ese trabajo y completé el ensamblaje y las pruebas. La I+D resultante sirvió después para la línea museística AUTOBOX.

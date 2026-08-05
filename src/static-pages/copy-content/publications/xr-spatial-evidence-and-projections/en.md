@@ -1,0 +1,5 @@
+I added renderer-neutral XR evidence contracts to Symbiote UI. A target fixes the approved metric layout and provenance. An observation binds one XR frame to its session, reference-space epoch, committed root, stereo views, objects, and controller or hand input. The audit accepts only eligible consecutive observations and reports object error, constraint results, jitter, and drift.
+
+The projection layer creates top, front, and right orthographic views in shared meter coordinates. An axonometric pane is marked as a visual reference and cannot change the pass or fail verdict. Stereo projection uses each eye's real view matrix, projection matrix, and viewport.
+
+Invalid matrices, a missing eye, non-positive clip coordinates, or depth outside the clip range produce an explicit `UNAVAILABLE` result. This keeps a missing projection from being reported as valid evidence. Placement receipts and post-placement panel interaction use separate contracts because they are collected at different stages of the XR session.

@@ -1,0 +1,5 @@
+Agent Pool keeps a bounded stderr tail for each delegated task and combines it with live events, elapsed time, process identity, and the final exit result. This makes a running task inspectable without forwarding an unbounded process log into the agent context.
+
+The diagnostic formatter counts rate-limit signatures such as `429` and `RESOURCE_EXHAUSTED`. When the provider prints `retryDelay` or `retryDelayMs`, the value is surfaced with the task status. Other stderr content is reduced to a short actionable excerpt. The parser reports what the provider emitted; it does not infer quota state that is absent from the process output.
+
+Liveness uses the child PID with signal `0`, which checks whether the process exists without sending a termination signal. Completed tasks retain structured output and errors for later retrieval. The repository records no measurement for memory overhead or event-loop isolation, so the diagnostic contract is limited to these implemented process and result boundaries.

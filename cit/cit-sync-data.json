@@ -1,0 +1,57 @@
+{
+  "./cit/cit-store/profile/avatar.png": {
+    "cdnId": "93c81af5-aaae-4b92-f288-1f0499726500",
+    "uploadDate": "2026-07-05T18:20:54.830Z",
+    "imageName": "avatar.png",
+    "alt": "",
+    "tags": [],
+    "width": "720",
+    "height": "720",
+    "aspectRatio": "1/1",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-agent-portal-57f9f0e51763.png": {
+    "cdnId": "7f27b625-433a-4db3-7f70-1136ce949f00",
+    "uploadDate": "2026-07-27T18:23:03.033Z",
+    "imageName": "pulse-agent-portal-57f9f0e51763.png",
+    "alt": "",
+    "tags": [],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-f360-studio-7b6c454f4e31.png": {
+    "cdnId": "6a79306e-ebd9-4478-2507-d4c740f80900",
+    "uploadDate": "2026-07-27T19:37:40.786Z",
+    "imageName": "pulse-f360-studio-7b6c454f4e31.png",
+    "alt": "",
+    "tags": [],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-photopizza-f59e08c524df.png": {
+    "cdnId": "026c4e8f-c697-4933-a3ac-77476143eb00",
+    "uploadDate": "2026-07-27T19:56:21.006Z",
+    "imageName": "pulse-photopizza-f59e08c524df.png",
+    "alt": "",
+    "tags": [],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-complexscan-0add8bd3be06.png": {
+    "cdnId": "09d5ab13-863c-4e0d-9880-d5ef57422a00",
+    "uploadDate": "2026-07-27T23:13:51.972Z",
+    "imageName": "pulse-complexscan-0add8bd3be06.png",
+    "alt": "",
+    "tags": [],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  }
+}

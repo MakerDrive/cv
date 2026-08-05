@@ -1,0 +1,5 @@
+Project Graph MCP utiliza dos límites de caché. El caché del grafo registra tiempos de modificación de los fuentes y puede invalidarse mediante la superficie MCP. Cuando cambia un archivo relevante, la ruta actual reconstruye el grafo completo en vez de aplicar un parche aislado de aristas.
+
+El análisis completo de calidad tiene un caché incremental más estrecho. Calcula un hash de contenido por archivo y reutiliza resultados de complejidad, símbolos sin documentar y JSDoc cuando coinciden el hash y la firma de análisis. Los archivos modificados se procesan otra vez. Los controles entre archivos, como dead code y funciones similares, se recalculan porque dependen de relaciones externas al archivo.
+
+El hash implementado pertenece a los registros de quality analysis; el caché del grafo sigue siendo un snapshot completo. Los nodos no usan identidades SHA-256 y las actualizaciones del grafo no son incrementales en el nivel entre archivos. Esta distinción evita aceptar conclusiones obsoletas como evidencia vigente.

@@ -1,0 +1,5 @@
+Agent Pool MCP предоставляет `delegate_task_readonly` для peer review в Codex workflows. Оркестратор передаёт ограниченное задание на анализ через настроенную resource group `review`. Вызов выполняется в plan mode и сразу возвращает идентификатор задачи; `get_task_result` сообщает статус и выдаёт завершённый отчёт. В руководстве пакета `consult_peer` обозначен как legacy Gemini-only helper за пределами Codex resource-group workflow.
+
+В задаче на review можно назначить Claude Sonnet 5 для проверки работы, подготовленной GPT-5.6 Sol. Эта пара служит иллюстрацией и задаётся orchestration policy. Маршрут берётся из профиля resource group или явных параметров задачи; Agent Pool работает и с другими настроенными провайдерами и моделями.
+
+Read-only воркер возвращает findings, риски и предлагаемые изменения как evidence. Оркестратор сверяет их с актуальными файлами и результатами проверок, классифицирует каждый finding и сохраняет полномочия на план и решение о приёмке. Публичного outcome benchmark в evidence пакета нет.

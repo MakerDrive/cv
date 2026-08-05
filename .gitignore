@@ -1,0 +1,31 @@
+## editors
+/.idea
+/.vscode
+/.agicoder
+/.qoder
+/.claude
+
+## system files
+.DS_Store
+
+## npm
+/node_modules/
+/npm-debug.log
+
+## dev
+TMP
+build
+dist
+env
+.project-graph-cache.json
+/audit*_input.txt
+
+## Cloud Images Toolkit
+cit/cit-store/
+cit/social-card-sources/
+cit/CIT_API_KEY
+
+## Runtime
+secrets/
+.env
+.agent-portal

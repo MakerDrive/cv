@@ -1,0 +1,1 @@
+Interfaz de control remoto en navegador para el ecosistema PhotoPizza, enfocada en hacer prácticos los ajustes de captura, la operación de la plataforma giratoria y el control del flujo fuera del laboratorio.

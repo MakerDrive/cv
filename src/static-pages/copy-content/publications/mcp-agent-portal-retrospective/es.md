@@ -1,0 +1,5 @@
+`mcp-agent-portal` empaqueta el plano de control de Agent Portal como servidor MCP. Es la puerta pública para chats y operaciones de orquestación del portal, junto con herramientas seleccionadas de servidores hijos. Las operaciones de bajo nivel de Agent Pool permanecen dentro del runtime del producto, de modo que el cliente externo recibe un contrato más pequeño y con propiedad explícita.
+
+El gateway publica esquemas mediante el descubrimiento de MCP y valida las llamadas contra el mismo registro. La superficie pública incluye creación y reanudación de chats, consulta de resultados, estado de orquestación y el development map. Los subagentes pueden usar el endpoint Streamable HTTP; los clientes de IDE conservan la entrada stdio y el puente hacia el backend singleton.
+
+Las llamadas a herramientas tienen parámetros con nombre, una forma de resultado declarada y un límite estable de contexto. La implementación expresa ese contrato mediante definiciones JavaScript, handlers MCP y una separación clara entre las herramientas públicas del gateway y el execution layer interno. El repositorio no contiene una abstracción `Agent` separada en Python.

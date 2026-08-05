@@ -1,0 +1,7 @@
+I developed Symbiote Engine as the execution layer of the Symbiote family. `Graph` stores typed nodes and connections; `Executor` computes a topological order, rejects cycles, resolves upstream socket values, and runs the registered process or lifecycle handler. The browser entry point exposes these graph primitives without importing Node-only server and file modules.
+
+The registry describes node drivers, validates parameters, and groups reusable handlers into domain packs. Optional HTTP and WebSocket surfaces load workflow JSON, publish registry data, accept graph mutations, and stream node progress. Workspace construction and Web Components remain in their own packages.
+
+Media execution added engine-owned provider queues with readiness checks, capacity limits, cancellation, timeout, cache-hit, and cleanup events. Pre-dispatch render admission rejects jobs that exceed explicit worker, memory, storage, or geometry limits. Frame-cache keys support range-scoped invalidation, while segment planning checks stream compatibility and timeline continuity before choosing stream copy or re-encode.
+
+The same boundary contains content-addressed artifacts and a local TTS provider that verifies a canonical HMAC-bound receipt before writing audio. Deterministic browser capture uses an explicit page render clock, isolated worker profiles, imported canonical state, and seam evidence for the resulting frame ranges.

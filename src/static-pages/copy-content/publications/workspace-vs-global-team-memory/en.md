@@ -1,0 +1,5 @@
+The current memory layout uses one configured team-memory content root. Reusable skills live under `skills/`. Project-specific skills live under `workspace/<project>/skills/`, beside the project context that activates them. The implementation contains neither a `/global/skills` hierarchy nor a local `.workspace/skills` directory.
+
+The resolver first identifies active project contexts from the repository path and relevant file hints. It then lists the global skill directories and the skill directories for those active workspaces. Each returned item carries its tier and workspace, so the orchestrator can apply project-specific guidance with higher specificity and use global skills for gaps.
+
+This separation also keeps project facts in the project's memory area. Delegated prompts receive only the selected context package and skill content required by the task. The shared clone remains the single source of truth, while execution state and repository files stay in their own ownership domains.

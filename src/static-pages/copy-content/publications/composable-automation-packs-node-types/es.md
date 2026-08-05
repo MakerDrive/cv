@@ -1,0 +1,5 @@
+Symbiote Engine registra tipos de nodos a partir de descripciones autosuficientes de controladores. Cada registro define el identificador de tipo, los conectores de entrada y salida, los parámetros, la categoría y una función de proceso o ciclo de vida. El registro enumera controladores, valida parámetros, busca conectores compatibles y agrupa tipos para el menú de un editor.
+
+Un paquete de dominio reúne definiciones de nodos con los tipos de conectores que incorpora. La CLI del motor puede cargar paquetes con nombre antes de ejecutar, validar o inspeccionar un flujo de trabajo en JSON. El paquete de video incluido sigue la misma ruta de registro que los paquetes personalizados.
+
+Symbiote Video añade un manifiesto más estricto sobre este contrato: cada paquete incluye nombre, versión, espacio de nombres, capacidades y servicios requeridos del host. Su mapa de propiedad rechaza que otro espacio de nombres reclame un tipo de nodo ya asignado y mantiene intactos los identificadores de tipo del grafo.

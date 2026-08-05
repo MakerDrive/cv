@@ -1,0 +1,5 @@
+Desarrollé esta plataforma confidencial de lifecycle messaging como proyecto comercial de I+D. Su alcance público comprende comunicaciones con consentimiento del cliente: escenarios opt-in por SMS, orquestación de campañas, segmentación de audiencias, analítica, flujos por roles y automatización operativa.
+
+El perfil tecnológico incluye servicios API en JavaScript y Node.js, PostgreSQL, sincronización runtime por WebSocket, intake compatible con RabbitMQ y documentación Swagger. Las operaciones de entrega abarcan PM2 y nginx, túneles SSH/WebSocket, control serial/COM de pools de módems GSM, comandos AT, gestión de SMS entrantes y operaciones USSD.
+
+Mi contribución consistió en convertir requisitos de comunicación, audiencias, hardware-runtime y operaciones en arquitectura de producto, flujos de datos, ejecución del lado de los módems, infraestructura de servidor, interfaces de administración y herramientas operativas repetibles. La identidad del cliente y los detalles específicos de la implementación quedan fuera de la descripción pública.

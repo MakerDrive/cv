@@ -1,0 +1,5 @@
+Añadí a Symbiote UI contratos independientes del renderizador para evidencia espacial en XR. Un objetivo fija la disposición métrica aprobada y su procedencia. Una observación vincula un fotograma XR con la sesión, la época del espacio de referencia, la raíz confirmada, las vistas estéreo, los objetos y la entrada de controlador o mano. La auditoría acepta observaciones consecutivas elegibles y calcula errores de objetos, restricciones, fluctuación y deriva.
+
+La capa de proyección genera vistas superior, frontal y derecha con coordenadas comunes en metros. El panel axonométrico queda marcado como referencia visual y no modifica el veredicto. La proyección estéreo usa las matrices reales de vista y proyección, además del área de visualización de cada ojo.
+
+Matrices inválidas, un ojo ausente, una coordenada de clip no positiva o una profundidad fuera del rango devuelven `UNAVAILABLE` de forma explícita. Una proyección ausente no se registra como evidencia válida. Los recibos de colocación y la interacción posterior con paneles usan contratos separados para distintas fases de la sesión XR.

@@ -1,0 +1,5 @@
+Trasladé el contrato Cascade Theme de Symbiote UI desde una lista plana de propiedades personalizadas a niveles de tokens explícitos. T0 contiene los controles de origen, T1 deriva escalas de referencia, T2 define roles semánticos del sistema y T3 vincula las ranuras de componentes con esos roles. Las paletas de dominio para grafos y otras herramientas quedan como bloques de extensión separados.
+
+La dirección de alias se valida como componente → sistema → referencia → origen. Los estilos de componentes consumen roles T2 y no acceden directamente a las escalas o controles iniciales. Por eso los roles del sistema T2 pertenecen a Symbiote UI, también cuando Agent Portal aporta valores predeterminados propios del consumidor.
+
+La cascada se resuelve en CSS. Los colores OKLCH relativos, `color-mix()`, `light-dark()`, las propiedades personalizadas registradas y la cascada nativa derivan el tema activo. JavaScript escribe los controles de origen, guarda el conjunto y aplica el ámbito elegido. El catálogo de tokens y el manifiesto de detección publican el mismo contrato para los agentes.

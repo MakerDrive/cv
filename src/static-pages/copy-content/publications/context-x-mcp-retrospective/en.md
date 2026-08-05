@@ -1,0 +1,5 @@
+Context X MCP records an early experiment in preparing agent context before execution. The repository registered MCP tools for context enrichment, history search, and quality assessment over stdio. It also defined a coordinator boundary for topic selection and tool orchestration.
+
+The implementation evidence is narrower than the original public description. The coordinator returned placeholder responses for enrichment and history search, and the planned vector memory remained on the roadmap. This canonical retrospective therefore treats Context X as a prototype of the contract, without presenting the repository as a completed retrieval system.
+
+The durable idea moved into the current Agent Portal stack. Team memory provides one configured content root, global skills, and project-specific workspace skills. The resolver selects relevant context items for a task and returns a bounded package before delegation. That implementation preserves the original research question, what an agent must know before acting, while keeping the historical prototype's limits explicit.

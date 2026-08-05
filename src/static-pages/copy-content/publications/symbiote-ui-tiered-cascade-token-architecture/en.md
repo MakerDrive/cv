@@ -1,0 +1,5 @@
+I moved the Cascade theme contract in Symbiote UI from a flat custom-property list to explicit token tiers. T0 contains source controls, T1 derives reference ramps, T2 defines semantic system roles, and T3 maps component slots to those roles. Domain palettes for graphs and other tools remain separate extension blocks.
+
+The alias direction is enforced as component to system to reference to source. Component styles consume T2 roles and cannot reach directly into reference ramps or source knobs. T2 system roles therefore belong to Symbiote UI, including when a product such as Agent Portal supplies consumer-specific defaults.
+
+The cascade runs in CSS. Relative OKLCH colors, `color-mix()`, `light-dark()`, registered custom properties, and the native cascade derive the active theme. JavaScript writes source controls, persists bundles, and applies the selected scope. The package publishes tier metadata through its token catalog and discovery manifest so agents can inspect the same contract used by components.

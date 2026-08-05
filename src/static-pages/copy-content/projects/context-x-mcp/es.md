@@ -1,0 +1,1 @@
+Capa de enriquecimiento de contexto que investiga el paso previo a la ejecución: detectar la forma de la tarea, seleccionar información relevante del proyecto, recuperar memoria de proyecto, elegir herramientas y preparar a los agentes con el contexto de flujo correcto.

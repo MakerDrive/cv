@@ -1,0 +1,1 @@
+Capa I+D para flujos de ingeniería asistidos por agentes: contexto de proyecto, agregación de herramientas, contratos tipo tool-use/function-calling, orquestación, operaciones de navegador y un contrato más claro entre agentes y entorno de producto.

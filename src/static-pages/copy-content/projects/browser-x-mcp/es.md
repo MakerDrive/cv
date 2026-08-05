@@ -1,0 +1,1 @@
+Servidor de automatización de navegador para agentes de IA: inspección fiable de páginas, flujos de formularios, verificaciones repetibles de web UI, logs estructurados, evidencia del estado del navegador y observability para trabajo UI con agentes.

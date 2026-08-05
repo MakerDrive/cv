@@ -1,0 +1,5 @@
+Agent Pool MCP is the execution runtime behind Agent Portal's multi-agent workflows. A delegation starts a CLI worker and returns a task identifier immediately. The caller can inspect live events, bounded stderr diagnostics, PID state, completion output, or cancellation without holding the original request open.
+
+The runtime has adapters for several CLI providers and preserves task ownership across process management, resource groups, and result retrieval. Sequential pipelines persist their definitions in team memory and keep run state separately. Steps can complete, send structured messages, or return work to an earlier step with feedback. Scheduled tasks use a detached daemon and a five-field cron parser.
+
+Agent Pool is implemented in Node.js with file-backed run state; it has no separate Python or LangGraph runtime. Cross-model review is one available workflow, while acceptance and architectural decisions stay with the orchestrator. This keeps process execution distinct from the control-plane decision that closes a task.
