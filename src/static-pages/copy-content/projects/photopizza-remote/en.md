@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/photopizza/index.svg
 alt: PhotoPizza
 href: https://github.com/PhotoPizza/remote
 linkLabel: View repository
-links: GitHub|https://github.com/PhotoPizza/remote|Public source repository
+links: GitHub|https://github.com/PhotoPizza/remote|Public source repository; Demo|https://photopizza.github.io/remote/|Live demonstration
 ---
 
 # PhotoPizza Remote
