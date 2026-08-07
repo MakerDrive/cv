@@ -23,3 +23,5 @@ One focus is resource-aware agent development: the board and resource groups rou
 The current R&D line is loop engineering for autonomous software work: guiding coding agents through the full development cycle — picking up a task, working in an isolated branch, proving the work is done, then reviewing and merging — with evals, guardrails, observability, and human-in-the-loop control when the loop cannot safely continue.
 
 Agent Portal is built on a suite of MCP servers I authored, each usable on its own and composed into the product: agent execution (Agent Pool), graph-based code intelligence and retrieval (Project Graph), and browser, context, and terminal automation.
+
+The development vector shifts the project from a monolithic application toward portable configurations (Workspace-as-Config). In the target architecture, Agent Portal acts as a thin host (providing chat, auth, and model routing), while the interface and workflows are dynamically assembled by agents via Symbiote Workspace.

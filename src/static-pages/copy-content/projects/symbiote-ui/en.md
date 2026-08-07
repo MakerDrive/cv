@@ -15,4 +15,4 @@ links: GitHub|https://github.com/rnd-pro/symbiote-ui; npm|https://www.npmjs.com/
 
 Reusable UI system researched for a specific constraint: interfaces should be composable by software and understandable by agents.
 
-It covers graph editors, panel layouts, resource trees, toolbars, provider catalogs, structured UI metadata, and tool-discoverable contracts for agent-facing products. In the current Symbiote line, UI works together with Workspace as the product surface and Engine as the executable R&D layer.
+It covers graph editors, panel layouts, resource trees, toolbars, provider catalogs, structured UI metadata, and tool-discoverable contracts for agent-facing products. In the current Symbiote architecture, this library provides the visual primitives and component manifests (catalog) for the Symbiote Workspace orchestrator, acting as the building blocks from which AI agents dynamically assemble task-adaptive environments.
