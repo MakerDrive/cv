@@ -8,6 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Agent Portal AI engineering workspace
 href: https://rnd-pro.com/projects/agent-portal/
 linkLabel: View project
+links: Demo|https://rnd-pro.github.io/mcp-agent-portal/|Live demonstration
 ---
 
 # Agent Portal
