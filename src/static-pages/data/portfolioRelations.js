@@ -35,7 +35,6 @@ export const PORTFOLIO_SKILL_PROJECT_RELATIONS = Object.freeze({
 
 export const PORTFOLIO_PROJECT_RELATIONS = Object.freeze({
   'agent-portal': Object.freeze([
-    'mcp-agent-portal',
     'project-graph-mcp',
     'agent-pool-mcp',
     'browser-x-mcp',
@@ -49,12 +48,11 @@ export const PORTFOLIO_PROJECT_RELATIONS = Object.freeze({
   boothbot: Object.freeze(['megavisor', 'photopizza', 'complexscan']),
   photopizza: Object.freeze(['f360-studio', 'megavisor', 'complexscan', 'autobox-v1', 'photopizza-remote', 'photosnail-public']),
   megavisor: Object.freeze(['photopizza', 'boothbot', 'complexscan']),
-  'mcp-agent-portal': Object.freeze(['agent-portal', 'browser-x-mcp', 'context-x-mcp', 'terminal-x-mcp']),
   'project-graph-mcp': Object.freeze(['agent-portal', 'context-x-mcp', 'agent-pool-mcp']),
   'agent-pool-mcp': Object.freeze(['agent-portal', 'project-graph-mcp', 'terminal-x-mcp']),
-  'browser-x-mcp': Object.freeze(['agent-portal', 'mcp-agent-portal', 'context-x-mcp']),
+  'browser-x-mcp': Object.freeze(['agent-portal', 'context-x-mcp']),
   'context-x-mcp': Object.freeze(['agent-portal', 'project-graph-mcp', 'browser-x-mcp']),
-  'terminal-x-mcp': Object.freeze(['agent-portal', 'agent-pool-mcp', 'mcp-agent-portal']),
+  'terminal-x-mcp': Object.freeze(['agent-portal', 'agent-pool-mcp']),
   'symbiote-workspace': Object.freeze(['agent-portal', 'symbiote-ui', 'symbiote-engine']),
   'symbiote-ui': Object.freeze(['agent-portal', 'symbiote-workspace', 'symbiote-engine', 'symbiote-video-studio']),
   'symbiote-node': Object.freeze(['symbiote-ui', 'symbiote-engine', 'symbiote-workspace']),

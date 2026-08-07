@@ -7,7 +7,6 @@ export const PORTFOLIO_PROJECT_SLUGS = Object.freeze([
   'boothbot',
   'photopizza',
   'megavisor',
-  'mcp-agent-portal',
   'project-graph-mcp',
   'agent-pool-mcp',
   'browser-x-mcp',

@@ -313,12 +313,12 @@ export const PUBLICATIONS = [
     "updatedAt": null,
     "subjectPeriod": "2026",
     "relatedProjectIds": [
-      "projects/mcp-agent-portal"
+      "projects/agent-portal"
     ],
-    "primaryProjectId": "projects/mcp-agent-portal",
+    "primaryProjectId": "projects/agent-portal",
     "tags": [],
     "sourceLinks": [
-      { "href": "https://github.com/rnd-pro/mcp-agent-portal", "label": "github.com" }
+      { "href": "https://rnd-pro.com/projects/agent-portal/", "label": "rnd-pro.com" }
     ],
     "locales": {
       "en": {
@@ -1065,8 +1065,8 @@ export const PUBLICATIONS = [
     "publishedAt": null,
     "updatedAt": null,
     "subjectPeriod": "2024-2025",
-    "relatedProjectIds": ["projects/mcp-agent-portal"],
-    "primaryProjectId": "projects/mcp-agent-portal",
+    "relatedProjectIds": ["projects/agent-portal"],
+    "primaryProjectId": "projects/agent-portal",
     "tags": [],
     "locales": {
       "en": { "title": "Browser X Page-Liveness Recovery", "summary": "Browser X probes the stored Playwright page before reuse, clears a failed instance, and exposes explicit errors for actions without an active page." },
@@ -1074,7 +1074,7 @@ export const PUBLICATIONS = [
       "es": { "title": "Recuperación de page liveness en Browser X", "summary": "Browser X realiza una comprobación y reinicio de la instancia Playwright, y devuelve errores explícitos si no hay una página activa." }
     },
     "sourceLinks": [
-      { "href": "https://github.com/rnd-pro/mcp-agent-portal", "label": "github.com" }
+      { "href": "https://rnd-pro.com/projects/agent-portal/", "label": "rnd-pro.com" }
     ]
   },
   {
@@ -2081,8 +2081,8 @@ export const PUBLICATIONS = [
     "publishedAt": "2026-03-20T12:00:00Z",
     "updatedAt": null,
     "subjectPeriod": "2026",
-    "relatedProjectIds": ["projects/mcp-agent-portal"],
-    "primaryProjectId": "projects/mcp-agent-portal",
+    "relatedProjectIds": ["projects/agent-portal"],
+    "primaryProjectId": "projects/agent-portal",
     "tags": [],
     "locales": {
       "en": { "title": "Structuring Contracts Tool-use for Agent Processes", "summary": "Architectural approaches to function calling schemas and context extraction in the MCP Agent Portal." },

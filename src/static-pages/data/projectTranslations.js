@@ -27,9 +27,6 @@ export const PROJECT_TRANSLATIONS = Object.freeze({
     'lifecycle-messaging-platform': {
       summary: 'Конфиденциальная платформа lifecycle-сообщений для клиентских коммуникаций на основе согласия, opt-in SMS-сценариев, управления кампаниями, модемного SMS-runtime, сегментации, аналитики и автоматизации внутренних процессов.'
     },
-    'mcp-agent-portal': {
-      summary: 'Open-source MCP-контур управления для экспериментов с agent tool use, context retrieval, function-calling контрактами и браузерными операциями.'
-    },
     'project-graph-mcp': {
       summary: 'MCP-сервер кодовой аналитики для RAG-style project retrieval: превращает репозитории в компактные графы, сжатые скелеты проекта, структурированный контекст и проверяемые факты для ИИ-агентов.'
     },
@@ -91,9 +88,6 @@ export const PROJECT_TRANSLATIONS = Object.freeze({
     },
     'lifecycle-messaging-platform': {
       summary: 'Plataforma confidencial de lifecycle messaging para comunicaciones con consentimiento del cliente, escenarios opt-in SMS, gestión de campañas, runtime SMS con módems, segmentación, analítica y automatización interna.'
-    },
-    'mcp-agent-portal': {
-      summary: 'Plano de control MCP open-source para experimentar con agent tool use, context retrieval, contratos tipo function calling y operaciones de navegador.'
     },
     'project-graph-mcp': {
       summary: 'Servidor MCP de inteligencia de código para RAG-style project retrieval: convierte repositorios en grafos compactos, skeletons comprimidos, contexto estructurado y evidencia que los agentes pueden razonar.'

@@ -47,5 +47,5 @@ test('published publication bodies exist while retired publication bodies are ab
 });
 
 test('runtime Markdown asset count derives from public content registries', () => {
-  assert.equal(getExpectedMarkdownContentCount(), 243);
+  assert.equal(getExpectedMarkdownContentCount(), 240);
 });

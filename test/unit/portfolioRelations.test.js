@@ -46,7 +46,6 @@ test('curated portfolio relations resolve to known project entries', () => {
   }
 
   assert.deepEqual(PORTFOLIO_PROJECT_RELATIONS['agent-portal'], [
-    'mcp-agent-portal',
     'project-graph-mcp',
     'agent-pool-mcp',
     'browser-x-mcp',

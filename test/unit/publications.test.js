@@ -98,7 +98,6 @@ const PROJECT_SOURCE_HREFS = new Map([
   ['projects/boothbot', 'https://rnd-pro.com/projects/boothbot/'],
   ['projects/photopizza', 'https://rnd-pro.com/projects/photopizza/'],
   ['projects/megavisor', 'https://rnd-pro.com/projects/megavisor/'],
-  ['projects/mcp-agent-portal', 'https://github.com/rnd-pro/mcp-agent-portal'],
   ['projects/project-graph-mcp', 'https://github.com/rnd-pro/project-graph-mcp'],
   ['projects/agent-pool-mcp', 'https://github.com/rnd-pro/agent-pool-mcp'],
   ['projects/browser-x-mcp', 'https://github.com/rnd-pro/browser-x-mcp'],

@@ -64,7 +64,6 @@ test('project entries include public author projects', () => {
   const projects = loadProjectEntries();
   const bySlug = new Map(projects.map((project) => [project.slug, project]));
   const expected = [
-    ['mcp-agent-portal', 'https://github.com/rnd-pro/mcp-agent-portal'],
     ['project-graph-mcp', 'https://github.com/rnd-pro/project-graph-mcp'],
     ['agent-pool-mcp', 'https://github.com/rnd-pro/agent-pool-mcp'],
     ['browser-x-mcp', 'https://github.com/rnd-pro/browser-x-mcp'],
