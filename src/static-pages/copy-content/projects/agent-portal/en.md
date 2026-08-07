@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Agent Portal AI engineering workspace
 href: https://rnd-pro.com/projects/agent-portal/
 linkLabel: View project
-links: Demo|https://rnd-pro.github.io/mcp-agent-portal/|Live demonstration
+links: GitHub|https://github.com/rnd-pro/mcp-agent-portal|Public source repository; npm|https://www.npmjs.com/package/mcp-agent-portal|Published npm package; Demo|https://rnd-pro.github.io/mcp-agent-portal/|Live demonstration
 ---
 
 # Agent Portal
