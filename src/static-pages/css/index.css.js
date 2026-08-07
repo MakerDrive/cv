@@ -366,7 +366,6 @@ portfolio-theme-panel,
   --sn-media-bg: var(--pulse-surface-raised);
   --sn-media-poster-bg: var(--pulse-surface-raised);
   --color-bg: var(--pulse-surface-raised);
-  --color-fg: var(--pulse-text);
   background: var(--pulse-surface-raised);
 }
 
@@ -384,6 +383,7 @@ portfolio-theme-panel,
 }
 
 .portfolio-article-media-host ims-viewer {
+  --color-fg: #ffffff;
   block-size: auto;
   min-block-size: min(520px, 56.25cqi);
 }
