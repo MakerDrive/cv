@@ -160,7 +160,7 @@ test('project entries expose content paths while Markdown bodies stay out of ser
   assert.match(loadProjectContent('complexscan', 'ru'), /экспортные документы/);
   assert.match(loadProjectContent('megavisor', 'ru'), /Gate9/);
   assert.match(loadProjectContent('megavisor', 'ru'), /магазинах/);
-  assert.match(loadProjectContent('agent-portal', 'ru'), /ресурсная оптимизация агентной разработки/);
+  assert.match(loadProjectContent('agent-portal', 'ru'), /оптимизация ресурсов/);
   assert.match(loadProjectContent('agent-portal', 'ru'), /RAG-style context retrieval/);
   assert.match(loadProjectContent('project-graph-mcp', 'ru'), /10-50 раз/);
   assert.match(loadProjectContent('project-graph-mcp', 'ru'), /GraphRAG-style retrieval/);

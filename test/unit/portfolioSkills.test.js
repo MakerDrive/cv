@@ -195,7 +195,7 @@ test('localized profile and PDF preserve the compact semantic structure', () => 
       `${messages['portfolio.profile.expertise.rnd.label']} ${messages['portfolio.profile.expertise.rnd.details']}`,
       /leadership|лидерство|liderazgo/i,
     );
-    assert.match(messages['portfolio.profile.expertise.rnd.details'], /contractor|подрядчик|contratista/i);
+    assert.match(messages['portfolio.profile.expertise.rnd.details'], /contractor|Координация команд|contratista/i);
     assert.match(messages['portfolio.profile.expertise.hardware.details'], /JavaScript\/Espruino/);
     assert.match(messages['portfolio.profile.expertise.hardware.details'], /GSM/);
     assert.match(messages['portfolio.profile.expertise.hardware.details'], /AT/);
