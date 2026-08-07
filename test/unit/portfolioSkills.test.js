@@ -227,7 +227,7 @@ test('localized profile and PDF preserve the compact semantic structure', () => 
     );
     assert.match(
       messages['portfolio.skill.agenticAi.details'],
-      /agent-assisted development as an internal engineering workflow for research, prototyping, and verifiable implementation|Агентскую разработку использую как внутренний инженерный процесс для исследования, прототипирования и проверяемой реализации|desarrollo asistido por agentes como proceso interno de ingeniería para investigación, prototipado e implementación verificable/i,
+      /agent-assisted development as an internal engineering workflow for research, prototyping, and verifiable implementation|Использование агентской разработки как внутреннего инженерного процесса|desarrollo asistido por agentes como proceso interno de ingeniería para investigación, prototipado e implementación verificable/i,
     );
 
     assert.match(messages['portfolio.profile.impact.museumScanning.details'], /helped train and scale|помогал обучать и расширять|ayudé a formar y ampliar/i);
