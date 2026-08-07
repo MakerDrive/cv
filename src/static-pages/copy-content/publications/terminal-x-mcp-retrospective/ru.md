@@ -2,4 +2,4 @@ Terminal X MCP был ранним прототипом описания тер�
 
 Реализация остановилась на этой границе. Handlers выполнения, мониторинга, валидации и планирования возвращали placeholder responses; заявленные executor и monitoring agents оставались в roadmap. В репозитории нет process isolation или synchronization broker сверх базового подключения MCP-сервера.
 
-Terminal X показывает декомпозицию tool surface и работу над явными ошибками и формой результата, но не служит доказательством готового command sandbox. В текущей архитектуре Agent Portal terminal servers подключаются как optional tools, а реализованный lifecycle CLI-процессов делегированных агентов принадлежит Agent Pool.
+Terminal X служит демонстрацией декомпозиции tool surface и работы над формой результата. В текущей архитектуре Agent Portal terminal servers подключаются как optional tools, а реализованный lifecycle CLI-процессов делегированных агентов принадлежит Agent Pool.

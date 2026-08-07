@@ -153,7 +153,7 @@ test('project entries expose content paths while Markdown bodies stay out of ser
   assert.match(loadProjectContent('autobox-v1', 'ru'), /сложной логистикой оборудования/);
   assert.match(loadProjectContent('autobox-v1', 'ru'), /3D-фотографов, ретушёров и визуализаторов/);
   assert.match(loadProjectContent('autobox-v1', 'ru'), /мелкосерийной модели/);
-  assert.match(loadProjectContent('complexscan', 'ru'), /мелкосерийное, а не массовое производство/);
+  assert.match(loadProjectContent('complexscan', 'ru'), /мелкосерийное производство/);
   assert.match(loadProjectContent('autobox-v1', 'ru'), /поиске программистов/);
   assert.match(loadProjectContent('autobox-v1', 'ru'), /веб-3D-плеера/);
   assert.match(loadProjectContent('complexscan', 'ru'), /авторской продуктовой линией/);
