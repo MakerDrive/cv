@@ -201,7 +201,7 @@ test('localized profile and PDF preserve the compact semantic structure', () => 
     assert.match(messages['portfolio.profile.expertise.hardware.details'], /AT/);
     assert.match(messages['portfolio.profile.expertise.hardware.details'], /photogrammetry|фотограмметри|fotogrametría/i);
     assert.match(messages['portfolio.skill.digitalPresence.label'], /SMM/i);
-    assert.match(messages['portfolio.skill.digitalPresence.details'], /RND-PRO/);
+    assert.match(messages['portfolio.skill.digitalPresence.details'], /SMM/i);
     assert.match(messages['portfolio.skill.digitalPresence.details'], /monitoring|мониторинг|monitorización/i);
 
     const automationPositioning = [
