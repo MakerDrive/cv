@@ -687,11 +687,7 @@ function setPortfolioLocale(locale) {
     assign: (href) => globalThis.location.assign(href),
   });
 }
-headerMenuButton?.addEventListener('click', (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  openMaterialsDrawerFromHeader();
-});
+
 localeToggle?.addEventListener('sn-segmented-change', (event) => {
   let locale = normalizePortfolioLocale(event.detail?.value);
   if (localeToggle && locale) localeToggle.value = locale;
