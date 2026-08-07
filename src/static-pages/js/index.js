@@ -956,6 +956,7 @@ function getProjectLinkLabel(project) {
   let label = String(project?.linkLabel || '').trim();
   if (!label || label === 'View project') return tPortfolio('link.learnMore');
   if (label === 'View repository') return tPortfolio('link.viewRepository');
+  if (label === 'Read article') return tPortfolio('link.readArticle');
   return label;
 }
 

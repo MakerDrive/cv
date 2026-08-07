@@ -7,7 +7,7 @@ summary: R&D workspace for AI-assisted engineering and loop engineering: project
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: Agent Portal AI engineering workspace
 href: https://rnd-pro.com/projects/agent-portal/
-linkLabel: View project
+linkLabel: Read article
 links: GitHub|https://github.com/rnd-pro/mcp-agent-portal|Public source repository; npm|https://www.npmjs.com/package/mcp-agent-portal|Published npm package; Demo|https://rnd-pro.github.io/mcp-agent-portal/|Live demonstration
 ---
 
