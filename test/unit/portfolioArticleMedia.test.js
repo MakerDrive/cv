@@ -485,7 +485,8 @@ test('portfolio routes selected media into article content instead of a graph pl
   assert.match(css, /--sn-media-bg: var\(--pulse-surface-raised\)/);
   assert.match(css, /--sn-media-poster-bg: var\(--pulse-surface-raised\)/);
   assert.match(css, /--color-bg: var\(--pulse-surface-raised\)/);
-  assert.match(css, /--color-fg: var\(--pulse-text\)/);
+  assert.doesNotMatch(css, /--color-fg: var\(--pulse-text\)/);
+  assert.match(css, /\.portfolio-article-media-host ims-viewer \{[\s\S]*?--color-fg: #ffffff;/);
   assert.match(
     css,
     /\.portfolio-article-media-item \{[\s\S]*?border: 1px solid var\(--pulse-outline\);/,
