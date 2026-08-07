@@ -924,6 +924,7 @@ const PROJECT_LINK_SUMMARY_GETTERS = Object.freeze({
   'Cultural-heritage 3D visualizations': () => tPortfolio('project.linkSummary.culturalHeritageVisualizations'),
   'Hermitage netsuke scanning story': () => tPortfolio('project.linkSummary.hermitageNetsukeStory'),
   'Benin bronze digitization record': () => tPortfolio('project.linkSummary.beninDigitization'),
+  'Live demonstration': () => tPortfolio('project.linkSummary.liveDemonstration'),
   'F360 Studio 3D model portfolio': () => tPortfolio('project.linkSummary.f360Sketchfab'),
 });
 
