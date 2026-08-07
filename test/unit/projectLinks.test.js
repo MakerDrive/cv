@@ -321,7 +321,7 @@ test('portfolio runtime localizes project entry fields', async () => {
 
 test('every project link summary has a runtime localization mapping', async () => {
   const source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
-  const summaries = new Set(loadProjectEntries().flatMap((project) => project.links.map((link) => link.summary)));
+  const summaries = new Set(loadProjectEntries().flatMap((project) => project.links.map((link) => link.summary).filter(Boolean)));
 
   for (const summary of summaries) {
     const escaped = summary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

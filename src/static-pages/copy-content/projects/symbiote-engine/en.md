@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Symbiote Engine execution runtime
 href: https://github.com/rnd-pro/symbiote-engine
 linkLabel: View repository
-links: GitHub|https://github.com/rnd-pro/symbiote-engine|Public source repository; npm|https://www.npmjs.com/package/symbiote-engine|Published npm package; Demo|https://rnd-pro.github.io/symbiote-engine/|Live demonstration
+links: GitHub|https://github.com/rnd-pro/symbiote-engine; npm|https://www.npmjs.com/package/symbiote-engine; Demo|https://rnd-pro.github.io/symbiote-engine/
 ---
 
 # Symbiote Engine
