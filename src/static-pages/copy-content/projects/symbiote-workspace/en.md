@@ -13,6 +13,6 @@ links: GitHub|https://github.com/rnd-pro/symbiote-workspace; npm|https://www.npm
 
 # Symbiote Workspace
 
-Workspace system for coordinating agent-built interfaces, workflow state, graph structure, serialization, and shareable project artifacts across experimental product flows.
+A universal constructor for task-adaptive environments. Instead of static interfaces, Symbiote Workspace allows AI agents to dynamically assemble the UI for a specific task based on user intent (via chat).
 
-In the current Symbiote line, Workspace acts as the working product surface: it connects the Symbiote UI product interface with the executable experiments of Symbiote Engine, while Symbiote Node preserves the earlier package organization behind this work.
+The agent's output is not one-off code, but a portable executable configuration that describes the entire layout, modules, bindings, and execution graphs (similar to ComfyUI workflows, but for full applications). Workspace acts as the core orchestrator: it connects the visual primitives of Symbiote UI with the computational experiments of Symbiote Engine into a unified interactive environment.
