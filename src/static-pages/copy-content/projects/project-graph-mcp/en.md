@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Project Graph MCP code-intelligence server
 href: https://github.com/rnd-pro/project-graph-mcp
 linkLabel: View repository
-links: GitHub|npm|https://www.npmjs.com/package/project-graph-mcp; Demo|https://rnd-pro.github.io/project-graph-mcp/
+links: npm|https://www.npmjs.com/package/project-graph-mcp; Demo|https://rnd-pro.github.io/project-graph-mcp/
 ---
 
 # Project Graph MCP

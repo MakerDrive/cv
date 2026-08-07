@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Browser X MCP automation server
 href: https://github.com/rnd-pro/browser-x-mcp
 linkLabel: View repository
-links: GitHub|npm|https://www.npmjs.com/package/browser-x-mcp
+links: npm|https://www.npmjs.com/package/browser-x-mcp
 ---
 
 # Browser X MCP

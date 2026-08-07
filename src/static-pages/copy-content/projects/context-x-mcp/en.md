@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Context X MCP context-selection server
 href: https://github.com/rnd-pro/context-x-mcp
 linkLabel: View repository
-links: GitHub|npm|https://www.npmjs.com/package/context-x-mcp
+links: npm|https://www.npmjs.com/package/context-x-mcp
 ---
 
 # Context X MCP

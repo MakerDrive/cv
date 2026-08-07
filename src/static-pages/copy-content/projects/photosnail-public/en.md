@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: PhotoSnail motion-control camera project
 href: https://github.com/PhotoSnail/public
 linkLabel: View repository
-links: GitHub|Demo|https://photosnail.github.io/public/
+links: Demo|https://photosnail.github.io/public/
 ---
 
 # PhotoSnail Public

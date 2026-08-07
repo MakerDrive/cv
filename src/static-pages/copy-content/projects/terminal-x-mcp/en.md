@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Terminal X MCP automation server
 href: https://github.com/rnd-pro/terminal-x-mcp
 linkLabel: View repository
-links: GitHub|npm|https://www.npmjs.com/package/terminal-x-mcp
+links: npm|https://www.npmjs.com/package/terminal-x-mcp
 ---
 
 # Terminal X MCP

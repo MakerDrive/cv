@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: MCP Agent Portal control plane
 href: https://github.com/rnd-pro/mcp-agent-portal
 linkLabel: View repository
-links: GitHub|npm|https://www.npmjs.com/package/mcp-agent-portal; Demo|https://rnd-pro.github.io/mcp-agent-portal/
+links: npm|https://www.npmjs.com/package/mcp-agent-portal; Demo|https://rnd-pro.github.io/mcp-agent-portal/
 ---
 
 # MCP Agent Portal

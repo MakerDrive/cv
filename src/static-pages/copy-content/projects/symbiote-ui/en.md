@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Symbiote UI Web Component system
 href: https://github.com/rnd-pro/symbiote-ui
 linkLabel: View repository
-links: GitHub|npm|https://www.npmjs.com/package/symbiote-ui; Demo|https://rnd-pro.github.io/symbiote-ui/
+links: npm|https://www.npmjs.com/package/symbiote-ui; Demo|https://rnd-pro.github.io/symbiote-ui/
 ---
 
 # Symbiote UI
