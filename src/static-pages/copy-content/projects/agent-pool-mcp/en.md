@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Agent Pool MCP multi-agent runtime
 href: https://github.com/rnd-pro/agent-pool-mcp
 linkLabel: View repository
-links: GitHub|https://github.com/rnd-pro/agent-pool-mcp; npm|https://www.npmjs.com/package/agent-pool-mcp
+links: GitHub|npm|https://www.npmjs.com/package/agent-pool-mcp
 ---
 
 # Agent Pool MCP

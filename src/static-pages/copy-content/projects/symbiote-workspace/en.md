@@ -8,7 +8,7 @@ image: https://rnd-pro.com/svg/logo/index.svg
 alt: Symbiote Workspace constructor
 href: https://github.com/rnd-pro/symbiote-workspace
 linkLabel: View repository
-links: GitHub|https://github.com/rnd-pro/symbiote-workspace; npm|https://www.npmjs.com/package/symbiote-workspace; Demo|https://rnd-pro.github.io/symbiote-workspace/
+links: GitHub|npm|https://www.npmjs.com/package/symbiote-workspace; Demo|https://rnd-pro.github.io/symbiote-workspace/
 ---
 
 # Symbiote Workspace
