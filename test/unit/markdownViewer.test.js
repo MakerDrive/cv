@@ -30,14 +30,14 @@ test('the static client loads Markdown rendering only when a viewer exists', asy
     'utf8',
   );
   let viewerSource = await readFile(
-    new URL('../../src/ui-components/universal/markdown-viewer/logic.js', import.meta.url),
+    new URL('../../src/ui-components/universal/markdown-viewer/markdown-viewer.js', import.meta.url),
     'utf8',
   );
 
   assert.match(source, /createRuntimeAssetUrl\('js\/markdown-viewer\/index\.js'\)/);
   assert.match(source, /import\(moduleUrl\.href\)/);
   assert.doesNotMatch(source, /ui-components\/universal\/markdown-viewer/);
-  assert.match(entrySource, /ui-components\/universal\/markdown-viewer\/logic\.js/);
+  assert.match(entrySource, /ui-components\/universal\/markdown-viewer\/markdown-viewer\.js/);
   assert.match(viewerSource, /await import\('jsda-kit\/iso\/md2html\.js'\)/);
 });
 

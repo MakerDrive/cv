@@ -1,1 +1,1 @@
-import '../../ui-components/universal/login-widget/logic.js';
+import '../../ui-components/universal/login-widget/login-widget.js';

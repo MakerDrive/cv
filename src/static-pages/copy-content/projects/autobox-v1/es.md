@@ -4,11 +4,8 @@ ComplexScan AUTOBOX v1 fue un proyecto I+D completo de software y hardware para 
 :::article-block heritage-mission
 Desarrollé el equipo y la tecnología de captura para la plataforma de patrimonio cultural que hoy opera como OBJET.art. El trabajo apuntaba a digitalizar objetos de arte y artefactos culturales con fidelidad suficiente para preservación, análisis de restauración y exhibición: geometría detallada, color preciso, texturas sin sombras y un flujo capaz de escalar más allá de un único laboratorio.
 
-:::article-block capture-line
-En paralelo a la colaboración en el proyecto socio, desarrollé una línea propia de tecnología de captura: una combinación práctica de fotogrametría, movimiento repetible, control de luz, polarización cruzada, disciplina de datos fuente y flujo de procesamiento 3D, orientada a calidad de geometría, color y texturas en el nivel competitivo alto de su momento.
-
 :::article-block capture-technology
-Trabajé en la línea de tecnología de captura: investigación de fotogrametría frente a escaneo láser, validación de RealityCapture y otras herramientas, diseño de captura multiángulo repetible y construcción de iluminación modular a medida con control inalámbrico, refrigeración activa, sensores y soporte de polarización cruzada. Los equipos y configuraciones de captura se especializaron para un rango difícil de tamaños, desde piezas muy pequeñas hasta objetos museísticos grandes.
+En paralelo a la colaboración en el proyecto socio, desarrollé una línea propia de tecnología de captura. Diseñé un sistema que combinaba fotogrametría, movimiento repetible e iluminación modular a medida con control inalámbrico y polarización cruzada. Los equipos y el flujo de procesamiento 3D fueron optimizados para un rango difícil de tamaños — desde piezas miniatura hasta objetos museísticos grandes.
 
 :::article-block fabrication
 El equipo siguió el mismo modelo hands-on de series pequeñas que mis otras líneas de hardware: ensamblé personalmente prototipos y primeras unidades, coordiné proveedores especializados para piezas fabricadas —incluido corte láser de metal y acrílico— y realicé el ensamblaje final, las pruebas y la preparación para uso en campo.

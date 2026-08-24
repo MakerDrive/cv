@@ -1,6 +1,6 @@
 import Symbiote from '@symbiotejs/symbiote';
-import styles from './styles.css.js';
-import template from './template.js';
+import styles from './login-widget.css.js';
+import template from './login-widget.tpl.js';
 
 export class LoginWidget extends Symbiote {
 

@@ -15,7 +15,7 @@ if (markdownViewer) {
 }
 
 if (!document.querySelector('side-panel[disabled]')) {
-  await import('../../ui-components/universal/side-panel/logic.js');
+  await import('../../ui-components/universal/side-panel/side-panel.js');
 }
 if (document.querySelector('.pulse-tour-button')) {
   let moduleUrl = createRuntimeAssetUrl('js/tour-player/index.js');

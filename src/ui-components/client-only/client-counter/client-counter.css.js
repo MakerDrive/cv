@@ -17,9 +17,9 @@ client-counter {
   button {
     padding: 0.35em 0.75em;
     border: none;
-    border-radius: 4px;
-    background: var(--primary, #007acc);
-    color: #fff;
+    border-radius: var(--sn-radius-sm, 4px);
+    background: var(--sn-sys-accent);
+    color: contrast-color(var(--sn-sys-accent));
     font-size: 1rem;
     cursor: pointer;
 

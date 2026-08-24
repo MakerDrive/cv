@@ -1,6 +1,6 @@
 import Symbiote from '@symbiotejs/symbiote';
-import styles from './styles.js';
-import template from './template.js';
+import styles from './server-info.css.js';
+import template from './server-info.tpl.js';
 
 class ServerInfo extends Symbiote {
   serverTime = new Date().toISOString();
