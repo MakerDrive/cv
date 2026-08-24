@@ -19,7 +19,8 @@
     "width": "1200",
     "height": "630",
     "aspectRatio": "40/21",
-    "srcFormat": "PNG"
+    "srcFormat": "PNG",
+    "retiredAt": "2026-08-24T04:26:13.023Z"
   },
   "./cit/cit-store/social/pulse-f360-studio-7b6c454f4e31.png": {
     "cdnId": "6a79306e-ebd9-4478-2507-d4c740f80900",
@@ -30,7 +31,8 @@
     "width": "1200",
     "height": "630",
     "aspectRatio": "40/21",
-    "srcFormat": "PNG"
+    "srcFormat": "PNG",
+    "retiredAt": "2026-08-24T04:26:13.023Z"
   },
   "./cit/cit-store/social/pulse-photopizza-f59e08c524df.png": {
     "cdnId": "026c4e8f-c697-4933-a3ac-77476143eb00",
@@ -41,7 +43,8 @@
     "width": "1200",
     "height": "630",
     "aspectRatio": "40/21",
-    "srcFormat": "PNG"
+    "srcFormat": "PNG",
+    "retiredAt": "2026-08-24T04:26:13.023Z"
   },
   "./cit/cit-store/social/pulse-complexscan-0add8bd3be06.png": {
     "cdnId": "09d5ab13-863c-4e0d-9880-d5ef57422a00",
@@ -49,6 +52,1127 @@
     "imageName": "pulse-complexscan-0add8bd3be06.png",
     "alt": "",
     "tags": [],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG",
+    "retiredAt": "2026-08-24T04:26:13.023Z"
+  },
+  "./cit/cit-store/social/projects-agent-portal-bf1042b1f795.png": {
+    "cdnId": "fd66813b-89fb-4086-1e9b-747f9c18a800",
+    "uploadDate": "2026-08-24T04:23:04.114Z",
+    "imageName": "projects-agent-portal-bf1042b1f795.png",
+    "alt": "Agent Portal",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-symbiote-video-studio-6068c22c4917.png": {
+    "cdnId": "c8be3079-6e71-4d46-c14e-916f6200fd00",
+    "uploadDate": "2026-08-24T04:23:05.140Z",
+    "imageName": "projects-symbiote-video-studio-6068c22c4917.png",
+    "alt": "Symbiote Video Studio",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-autobox-v1-20a9345709e5.png": {
+    "cdnId": "558b4ceb-9993-4149-e03d-8529a358e100",
+    "uploadDate": "2026-08-24T04:23:05.933Z",
+    "imageName": "projects-autobox-v1-20a9345709e5.png",
+    "alt": "AUTOBOX v1",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-f360-studio-4596c080aaae.png": {
+    "cdnId": "c9d4fc0a-d9f7-493f-49c5-8bf52880c700",
+    "uploadDate": "2026-08-24T04:23:06.886Z",
+    "imageName": "projects-f360-studio-4596c080aaae.png",
+    "alt": "F360 Studio",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-complexscan-298160379d11.png": {
+    "cdnId": "ca4a46d5-06b3-419f-7808-f2f3f90bd400",
+    "uploadDate": "2026-08-24T04:23:08.666Z",
+    "imageName": "projects-complexscan-298160379d11.png",
+    "alt": "ComplexScan",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-boothbot-00b4c8ad131f.png": {
+    "cdnId": "e4a19413-9d6b-4b47-cdbb-437c048c5100",
+    "uploadDate": "2026-08-24T04:23:09.753Z",
+    "imageName": "projects-boothbot-00b4c8ad131f.png",
+    "alt": "BoothBot",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-photopizza-4dbb7242afb6.png": {
+    "cdnId": "6866fdba-6598-4941-7421-08a31bd88900",
+    "uploadDate": "2026-08-24T04:23:11.568Z",
+    "imageName": "projects-photopizza-4dbb7242afb6.png",
+    "alt": "PhotoPizza",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-megavisor-37a072374786.png": {
+    "cdnId": "d7abcf4e-bbc7-4e8a-f67f-9692906eae00",
+    "uploadDate": "2026-08-24T04:23:12.758Z",
+    "imageName": "projects-megavisor-37a072374786.png",
+    "alt": "MEGAVISOR",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-project-graph-mcp-27852994902e.png": {
+    "cdnId": "dc813063-bf54-4803-060b-387161193f00",
+    "uploadDate": "2026-08-24T04:23:13.354Z",
+    "imageName": "projects-project-graph-mcp-27852994902e.png",
+    "alt": "Project Graph MCP",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-agent-pool-mcp-2f3bc8372160.png": {
+    "cdnId": "10a4f297-4d1f-4073-9caa-d96ac215e200",
+    "uploadDate": "2026-08-24T04:23:13.910Z",
+    "imageName": "projects-agent-pool-mcp-2f3bc8372160.png",
+    "alt": "Agent Pool MCP",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-browser-x-mcp-db95431e9202.png": {
+    "cdnId": "6b7f8875-1e67-4435-8462-10bd20ac8d00",
+    "uploadDate": "2026-08-24T04:23:14.533Z",
+    "imageName": "projects-browser-x-mcp-db95431e9202.png",
+    "alt": "Browser X MCP",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-context-x-mcp-1f7403acac27.png": {
+    "cdnId": "5c0b90e7-c282-44ef-f9bf-465b1b726600",
+    "uploadDate": "2026-08-24T04:23:15.190Z",
+    "imageName": "projects-context-x-mcp-1f7403acac27.png",
+    "alt": "Context X MCP",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-terminal-x-mcp-b3ab45dd5937.png": {
+    "cdnId": "c5fac98d-bfa8-470d-9078-bab01a85b300",
+    "uploadDate": "2026-08-24T04:23:15.922Z",
+    "imageName": "projects-terminal-x-mcp-b3ab45dd5937.png",
+    "alt": "Terminal X MCP",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-symbiote-workspace-33eb48ed415d.png": {
+    "cdnId": "7c9470b1-f39d-4c30-8e20-69bab8aefa00",
+    "uploadDate": "2026-08-24T04:23:16.478Z",
+    "imageName": "projects-symbiote-workspace-33eb48ed415d.png",
+    "alt": "Symbiote Workspace",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-symbiote-ui-bcc5faa322ef.png": {
+    "cdnId": "a247e3ac-3f73-4666-e1b8-e39972c42500",
+    "uploadDate": "2026-08-24T04:23:17.053Z",
+    "imageName": "projects-symbiote-ui-bcc5faa322ef.png",
+    "alt": "Symbiote UI",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-symbiote-engine-e7322b6924b9.png": {
+    "cdnId": "cc099555-d8b8-4cf6-9fee-6ade03c7cb00",
+    "uploadDate": "2026-08-24T04:23:17.631Z",
+    "imageName": "projects-symbiote-engine-e7322b6924b9.png",
+    "alt": "Symbiote Engine",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-symbiote-node-2917b037e75f.png": {
+    "cdnId": "907095b2-57b5-4428-8a39-28d525ca3b00",
+    "uploadDate": "2026-08-24T04:23:18.192Z",
+    "imageName": "projects-symbiote-node-2917b037e75f.png",
+    "alt": "Symbiote Node",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-photopizza-remote-34c833524c74.png": {
+    "cdnId": "1f7eb548-83fd-4dcb-c7b9-56fa4f142500",
+    "uploadDate": "2026-08-24T04:23:18.917Z",
+    "imageName": "projects-photopizza-remote-34c833524c74.png",
+    "alt": "PhotoPizza Remote",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-photosnail-public-4b9b14463b6b.png": {
+    "cdnId": "2b55f465-7972-4be6-8c14-ff4eb5d34100",
+    "uploadDate": "2026-08-24T04:23:19.696Z",
+    "imageName": "projects-photosnail-public-4b9b14463b6b.png",
+    "alt": "PhotoSnail Public",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/projects-lifecycle-messaging-platform-29651f43bfd9.png": {
+    "cdnId": "3dc8405b-d791-4661-da4f-4aa264317e00",
+    "uploadDate": "2026-08-24T04:23:20.263Z",
+    "imageName": "projects-lifecycle-messaging-platform-29651f43bfd9.png",
+    "alt": "Lifecycle Messaging Platform",
+    "tags": [
+      "social-card",
+      "project"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-agent-portal-retrospective-dec3e341be5a.png": {
+    "cdnId": "71703f65-1187-4247-f597-476659db4e00",
+    "uploadDate": "2026-08-24T04:23:21.122Z",
+    "imageName": "pulse-agent-portal-retrospective-dec3e341be5a.png",
+    "alt": "Agent Portal: Shared Runtime and Versioned Control Plane",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-symbiote-video-studio-retrospective-f3f87fd52740.png": {
+    "cdnId": "961d8866-c231-4aab-dbc9-4552ac0b2800",
+    "uploadDate": "2026-08-24T04:23:21.999Z",
+    "imageName": "pulse-symbiote-video-studio-retrospective-f3f87fd52740.png",
+    "alt": "Symbiote Video Studio: Graph-Based Media Workflows",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-autobox-v1-retrospective-fb01b4da74bb.png": {
+    "cdnId": "04bbab91-c13a-42cd-2d62-0f3205e23300",
+    "uploadDate": "2026-08-24T04:23:22.791Z",
+    "imageName": "pulse-autobox-v1-retrospective-fb01b4da74bb.png",
+    "alt": "AUTOBOX v1: A Repeatable Museum-Scanning Process",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-f360-studio-retrospective-1a39f173f398.png": {
+    "cdnId": "94945f19-2c84-4acd-6968-a8400bd70f00",
+    "uploadDate": "2026-08-24T04:23:24.083Z",
+    "imageName": "pulse-f360-studio-retrospective-1a39f173f398.png",
+    "alt": "F360 Studio: Museum Capture Discipline in Commercial Photogrammetry",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-complexscan-retrospective-d5580bb0eff7.png": {
+    "cdnId": "003a3e2f-920d-49dd-53d2-7cc5c7097600",
+    "uploadDate": "2026-08-24T04:23:25.252Z",
+    "imageName": "pulse-complexscan-retrospective-d5580bb0eff7.png",
+    "alt": "ComplexScan: From Open Hardware to a Commercial Capture System",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-boothbot-retrospective-118f0c06b98a.png": {
+    "cdnId": "4e893cce-b4ba-493b-7406-2b201d038200",
+    "uploadDate": "2026-08-24T04:23:26.084Z",
+    "imageName": "pulse-boothbot-retrospective-118f0c06b98a.png",
+    "alt": "BoothBot: Warehouse Capture as an Automated Process",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-photopizza-retrospective-f8fbeba9ab98.png": {
+    "cdnId": "147d6357-fb31-4c71-6395-a85418f31f00",
+    "uploadDate": "2026-08-24T04:23:27.091Z",
+    "imageName": "pulse-photopizza-retrospective-f8fbeba9ab98.png",
+    "alt": "PhotoPizza: From MEGAVISOR Prototype to Open-Source Platform",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-megavisor-retrospective-79bf2164ecd3.png": {
+    "cdnId": "71634c6b-cb93-4a39-e214-38a233eb6c00",
+    "uploadDate": "2026-08-24T04:23:27.988Z",
+    "imageName": "pulse-megavisor-retrospective-79bf2164ecd3.png",
+    "alt": "MEGAVISOR: Capture R&D as a Product Line",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-mcp-agent-portal-retrospective-b62de5add8fe.png": {
+    "cdnId": "95bd3c9e-0c65-478b-4caf-803163723d00",
+    "uploadDate": "2026-08-24T04:23:28.883Z",
+    "imageName": "pulse-mcp-agent-portal-retrospective-b62de5add8fe.png",
+    "alt": "MCP Agent Portal: Public Gateway for Portal Tools",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-project-graph-mcp-retrospective-8269d07cc98c.png": {
+    "cdnId": "fba563ba-0205-4d59-5967-68c10a990b00",
+    "uploadDate": "2026-08-24T04:23:29.419Z",
+    "imageName": "pulse-project-graph-mcp-retrospective-8269d07cc98c.png",
+    "alt": "Project Graph MCP: Compact Codebase Context for Agents",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-agent-pool-mcp-retrospective-b03ed7738ff8.png": {
+    "cdnId": "ad042d65-5b56-4150-5a6f-11e43b934900",
+    "uploadDate": "2026-08-24T04:23:29.988Z",
+    "imageName": "pulse-agent-pool-mcp-retrospective-b03ed7738ff8.png",
+    "alt": "Agent Pool MCP: Delegation with Visible Ownership",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-browser-x-mcp-retrospective-88ab47ccf280.png": {
+    "cdnId": "49827afe-1baf-441b-da51-729e7a028200",
+    "uploadDate": "2026-08-24T04:23:30.621Z",
+    "imageName": "pulse-browser-x-mcp-retrospective-88ab47ccf280.png",
+    "alt": "Browser X MCP: Browser Automation as Agent Evidence",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-context-x-mcp-retrospective-99e247bfdc85.png": {
+    "cdnId": "d200330a-7423-4f3e-7711-5fba8dcad400",
+    "uploadDate": "2026-08-24T04:23:31.188Z",
+    "imageName": "pulse-context-x-mcp-retrospective-99e247bfdc85.png",
+    "alt": "Context X MCP: An Early Context-Preparation Prototype",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-terminal-x-mcp-retrospective-66dfdcf78506.png": {
+    "cdnId": "e9446854-3b63-47c7-3d9f-c7673a45cd00",
+    "uploadDate": "2026-08-24T04:23:31.709Z",
+    "imageName": "pulse-terminal-x-mcp-retrospective-66dfdcf78506.png",
+    "alt": "Terminal X MCP: An Early Tool-Contract Prototype",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-symbiote-workspace-retrospective-8c8e63713fdb.png": {
+    "cdnId": "1923aa99-4eb0-48da-333a-4e128a39fd00",
+    "uploadDate": "2026-08-24T04:23:32.264Z",
+    "imageName": "pulse-symbiote-workspace-retrospective-8c8e63713fdb.png",
+    "alt": "Symbiote Workspace: Portable UI and Execution Configuration",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-symbiote-ui-retrospective-5a4691c07350.png": {
+    "cdnId": "fb469040-c083-41c4-f367-ce02433ab400",
+    "uploadDate": "2026-08-24T04:23:32.792Z",
+    "imageName": "pulse-symbiote-ui-retrospective-5a4691c07350.png",
+    "alt": "Symbiote UI: Discoverable Interface Contracts",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-symbiote-node-retrospective-d17141ca4820.png": {
+    "cdnId": "5b4ab905-7209-4a52-b74e-bf063d638000",
+    "uploadDate": "2026-08-24T04:23:33.366Z",
+    "imageName": "pulse-symbiote-node-retrospective-d17141ca4820.png",
+    "alt": "Symbiote Node: Migration Facade After the Package Split",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-symbiote-engine-retrospective-54c02fd26a5f.png": {
+    "cdnId": "c1136c62-5616-4f61-94ba-262ca450a900",
+    "uploadDate": "2026-08-24T04:23:34.030Z",
+    "imageName": "pulse-symbiote-engine-retrospective-54c02fd26a5f.png",
+    "alt": "Symbiote Engine: Graph Execution Across Node and Browser",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-photosnail-public-retrospective-c264d625abb4.png": {
+    "cdnId": "1bf71da9-a30e-4b38-73aa-b569596d3000",
+    "uploadDate": "2026-08-24T04:23:34.608Z",
+    "imageName": "pulse-photosnail-public-retrospective-c264d625abb4.png",
+    "alt": "PhotoSnail: Early Camera-Motion Experiments",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-lifecycle-messaging-platform-retrospective-4a507c590e3f.png": {
+    "cdnId": "9014d485-7a24-47b9-f326-c1b513c3aa00",
+    "uploadDate": "2026-08-24T04:23:35.151Z",
+    "imageName": "pulse-lifecycle-messaging-platform-retrospective-4a507c590e3f.png",
+    "alt": "Lifecycle Messaging: Product Architecture and GSM Delivery",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-agent-pool-mcp-transparent-task-diagnostics-ee14f4b44c9c.png": {
+    "cdnId": "5a1500c3-3656-4e63-1461-92cf7d623700",
+    "uploadDate": "2026-08-24T04:23:35.732Z",
+    "imageName": "pulse-agent-pool-mcp-transparent-task-diagnostics-ee14f4b44c9c.png",
+    "alt": "Bounded Task Diagnostics in Agent Pool",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-project-graph-mcp-compact-code-mode-v1-5-e51dff5a5a86.png": {
+    "cdnId": "28d3cfe8-5062-4d11-6801-93523b897a00",
+    "uploadDate": "2026-08-24T04:23:36.279Z",
+    "imageName": "pulse-project-graph-mcp-compact-code-mode-v1-5-e51dff5a5a86.png",
+    "alt": "Compact Code Mode with External Context Contracts",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-symbiote-ui-tiered-cascade-token-architecture-6063d23e4d4d.png": {
+    "cdnId": "84406aed-5e39-48a5-0dc7-a834608d1300",
+    "uploadDate": "2026-08-24T04:23:36.897Z",
+    "imageName": "pulse-symbiote-ui-tiered-cascade-token-architecture-6063d23e4d4d.png",
+    "alt": "Tiered Cascade Theme Tokens",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-browser-x-mcp-browser-x-mcp-v1-beta-cd26c490b6f6.png": {
+    "cdnId": "10a2e208-3e62-4865-7019-48fbf8397900",
+    "uploadDate": "2026-08-24T04:23:37.650Z",
+    "imageName": "pulse-browser-x-mcp-browser-x-mcp-v1-beta-cd26c490b6f6.png",
+    "alt": "Browser X MCP 1.0.0-beta.1",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-symbiote-workspace-workspace-presentation-journey-v1-831b1e90b318.png": {
+    "cdnId": "814f24c1-772d-419e-291f-3ebb4e05ea00",
+    "uploadDate": "2026-08-24T04:23:38.249Z",
+    "imageName": "pulse-symbiote-workspace-workspace-presentation-journey-v1-831b1e90b318.png",
+    "alt": "Recorded Execution Timelines for Presentation",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-photopizza-remote-photopizza-remote-android-release-2c6772278b45.png": {
+    "cdnId": "2a8d4ab9-48c2-4f6b-477b-c80dc4157e00",
+    "uploadDate": "2026-08-24T04:23:39.026Z",
+    "imageName": "pulse-photopizza-remote-photopizza-remote-android-release-2c6772278b45.png",
+    "alt": "Release of PhotoPizza Remote for Android",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-symbiote-video-studio-live-ui-render-5e5e0197b2c0.png": {
+    "cdnId": "1581be2e-365c-43f3-84cc-4cc3638a5300",
+    "uploadDate": "2026-08-24T04:23:40.230Z",
+    "imageName": "pulse-symbiote-video-studio-live-ui-render-5e5e0197b2c0.png",
+    "alt": "Live Browser Capture in Symbiote Video Studio",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-autobox-v1-hardware-lighting-sync-postmortem-2a16306d8dfe.png": {
+    "cdnId": "e21e76ce-d912-4ca6-7d74-dbc623f3c800",
+    "uploadDate": "2026-08-24T04:26:14.559Z",
+    "imageName": "pulse-autobox-v1-hardware-lighting-sync-postmortem-2a16306d8dfe.png",
+    "alt": "Coordinating Motion, Lighting, and Capture in AUTOBOX",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-complexscan-mesh-decimation-tradeoffs-fc32c6a180ec.png": {
+    "cdnId": "88eb4036-dd37-4891-f236-262a04057c00",
+    "uploadDate": "2026-08-24T04:26:16.310Z",
+    "imageName": "pulse-complexscan-mesh-decimation-tradeoffs-fc32c6a180ec.png",
+    "alt": "Capture-System Trade-offs Before Mesh Processing",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-f360-studio-photogrammetry-lighting-rig-880ce5b31ec2.png": {
+    "cdnId": "b1f218ec-6035-4f58-6adb-8b98470d8800",
+    "uploadDate": "2026-08-24T04:26:17.727Z",
+    "imageName": "pulse-f360-studio-photogrammetry-lighting-rig-880ce5b31ec2.png",
+    "alt": "Controlled Lighting in the F360 Photogrammetry Workflow",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-lifecycle-messaging-platform-gsm-modem-pool-isolation-c51b389e22be.png": {
+    "cdnId": "3e1c1114-415b-4728-08ef-bd16a6f67600",
+    "uploadDate": "2026-08-24T04:26:18.328Z",
+    "imageName": "pulse-lifecycle-messaging-platform-gsm-modem-pool-isolation-c51b389e22be.png",
+    "alt": "GSM Modem Control as a Delivery Subsystem",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-mcp-agent-portal-agent-browser-context-lost-c1f6a48bd133.png": {
+    "cdnId": "1c73bed0-eab2-4ee2-d9a6-f1372cfde400",
+    "uploadDate": "2026-08-24T04:26:19.204Z",
+    "imageName": "pulse-mcp-agent-portal-agent-browser-context-lost-c1f6a48bd133.png",
+    "alt": "Browser X Page-Liveness Recovery",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-megavisor-gate9-logistics-bottleneck-ae0e0e0afec5.png": {
+    "cdnId": "fcb31cb7-9f65-4bac-0999-3a94e846bb00",
+    "uploadDate": "2026-08-24T04:26:20.332Z",
+    "imageName": "pulse-megavisor-gate9-logistics-bottleneck-ae0e0e0afec5.png",
+    "alt": "Gate9 Field-Capture Logistics",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-photosnail-public-arduino-interrupt-limitations-a3d950e8770e.png": {
+    "cdnId": "facfcda0-8961-4577-2653-7663a2ffe700",
+    "uploadDate": "2026-08-24T04:26:20.911Z",
+    "imageName": "pulse-photosnail-public-arduino-interrupt-limitations-a3d950e8770e.png",
+    "alt": "PhotoSnail Controller Timing: An Evidence Boundary",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-hardware-arch-opensource-turntables-a3b91aaedc2b.png": {
+    "cdnId": "7f4dd1f1-fdd6-4f1a-8032-ca45170a8d00",
+    "uploadDate": "2026-08-24T04:26:22.267Z",
+    "imageName": "pulse-hardware-arch-opensource-turntables-a3b91aaedc2b.png",
+    "alt": "Buildable Open-Source PhotoPizza Turntables",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-espruino-multi-platform-control-885b34d69ba5.png": {
+    "cdnId": "8e02e368-fe12-49fb-ba93-142309e20300",
+    "uploadDate": "2026-08-24T04:26:23.634Z",
+    "imageName": "pulse-espruino-multi-platform-control-885b34d69ba5.png",
+    "alt": "PhotoPizza Control with Espruino, IR, Wi-Fi, and Android",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-xr-spatial-evidence-and-projections-fa3b5de8a323.png": {
+    "cdnId": "1d463d5b-cc45-4d20-5651-4bf722ec0b00",
+    "uploadDate": "2026-08-24T04:26:24.480Z",
+    "imageName": "pulse-xr-spatial-evidence-and-projections-fa3b5de8a323.png",
+    "alt": "Renderer-Neutral Spatial Evidence for XR",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-multi-voice-narrated-tour-architecture-05748f5ceb57.png": {
+    "cdnId": "a31f1a43-b6b6-4181-b819-8f430555ef00",
+    "uploadDate": "2026-08-24T04:26:25.095Z",
+    "imageName": "pulse-multi-voice-narrated-tour-architecture-05748f5ceb57.png",
+    "alt": "Independent Speech Channels for Narrated Tours",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-deterministic-browser-capture-offline-rendering-c443f980b750.png": {
+    "cdnId": "fa85c7ca-7b15-47a5-b4f1-4f6953026b00",
+    "uploadDate": "2026-08-24T04:26:25.933Z",
+    "imageName": "pulse-deterministic-browser-capture-offline-rendering-c443f980b750.png",
+    "alt": "Deterministic Browser Capture for Offline Rendering",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-chat-intent-driven-workspace-construction-protocol-ca7e2025f2e3.png": {
+    "cdnId": "d9151b32-c8f8-4cc0-52c4-7f5a385b7100",
+    "uploadDate": "2026-08-24T04:26:26.583Z",
+    "imageName": "pulse-chat-intent-driven-workspace-construction-protocol-ca7e2025f2e3.png",
+    "alt": "Chat-Led Workspace Construction Protocol",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-strict-export-import-portable-workspace-configs-8b014dba70c9.png": {
+    "cdnId": "d4ca4dda-902f-4c9d-e0e1-abba415b5700",
+    "uploadDate": "2026-08-24T04:26:27.165Z",
+    "imageName": "pulse-strict-export-import-portable-workspace-configs-8b014dba70c9.png",
+    "alt": "Strict Export and Import of Portable Workspace Configs",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-no-reload-browser-updates-workspace-patching-ea2a1a6b2c53.png": {
+    "cdnId": "2553f190-149c-4d02-61a3-f35d7226cb00",
+    "uploadDate": "2026-08-24T04:26:27.732Z",
+    "imageName": "pulse-no-reload-browser-updates-workspace-patching-ea2a1a6b2c53.png",
+    "alt": "Workspace Patching Without a Browser Reload",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-dual-mode-transport-stdio-http-6bb5064d4db0.png": {
+    "cdnId": "67401733-3e7b-4236-1a23-fa7140615800",
+    "uploadDate": "2026-08-24T04:26:28.530Z",
+    "imageName": "pulse-dual-mode-transport-stdio-http-6bb5064d4db0.png",
+    "alt": "One MCP Tool Registry Across stdio, WebSocket, and HTTP",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-dynamic-workspace-registration-deduplication-6c9a2a174a07.png": {
+    "cdnId": "2048c128-4dd3-4e9c-6fc2-30a086b11200",
+    "uploadDate": "2026-08-24T04:26:29.217Z",
+    "imageName": "pulse-dynamic-workspace-registration-deduplication-6c9a2a174a07.png",
+    "alt": "Workspace Registration by Exact Path",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-distributed-master-client-mcp-orchestration-c509b5e15f17.png": {
+    "cdnId": "6c2646f1-8828-4de3-0de6-8007acc5f800",
+    "uploadDate": "2026-08-24T04:26:30.532Z",
+    "imageName": "pulse-distributed-master-client-mcp-orchestration-c509b5e15f17.png",
+    "alt": "Agent Portal Master-Client MCP Orchestration",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-cross-model-peer-review-a22e8cfe369d.png": {
+    "cdnId": "ea713432-4190-40b6-81ed-ccb65d30d000",
+    "uploadDate": "2026-08-24T04:26:31.101Z",
+    "imageName": "pulse-cross-model-peer-review-a22e8cfe369d.png",
+    "alt": "Cross-Model Peer Review: Evidence Before Acceptance",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-atomic-cron-scheduling-local-agents-d4e588a7b79e.png": {
+    "cdnId": "98c76b16-3299-43a8-9c61-2034aed3cb00",
+    "uploadDate": "2026-08-24T04:26:31.616Z",
+    "imageName": "pulse-atomic-cron-scheduling-local-agents-d4e588a7b79e.png",
+    "alt": "Cron Scheduling for Local Agent Tasks",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-workspace-vs-global-team-memory-7ead90832de3.png": {
+    "cdnId": "6977971e-aa47-4300-f925-261602416300",
+    "uploadDate": "2026-08-24T04:26:32.225Z",
+    "imageName": "pulse-workspace-vs-global-team-memory-7ead90832de3.png",
+    "alt": "Team Memory: Reusable and Project-Specific Skills",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-path-traversal-process-isolation-f2bfbfb0d8c5.png": {
+    "cdnId": "ca257625-077b-468b-1ca5-002bce4cb200",
+    "uploadDate": "2026-08-24T04:26:32.822Z",
+    "imageName": "pulse-path-traversal-process-isolation-f2bfbfb0d8c5.png",
+    "alt": "Filesystem Boundary Validation in Agent Pool",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-ast-codebase-analysis-acorn-bb53380c559d.png": {
+    "cdnId": "3e2d743a-3ebb-4b11-eb03-7af6a1172b00",
+    "uploadDate": "2026-08-24T04:26:33.569Z",
+    "imageName": "pulse-ast-codebase-analysis-acorn-bb53380c559d.png",
+    "alt": "JavaScript Structure Analysis with Vendored Acorn",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-multi-language-regex-parsers-7859b9bc6ead.png": {
+    "cdnId": "95beb9cb-2334-4468-48dc-2e4300304300",
+    "uploadDate": "2026-08-24T04:26:34.159Z",
+    "imageName": "pulse-multi-language-regex-parsers-7859b9bc6ead.png",
+    "alt": "Structural Parsers for TypeScript, Python, and Go",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-incremental-analysis-caching-a97bca02dd10.png": {
+    "cdnId": "0ed36b22-d797-4feb-e94c-67ab5a947100",
+    "uploadDate": "2026-08-24T04:26:34.754Z",
+    "imageName": "pulse-incremental-analysis-caching-a97bca02dd10.png",
+    "alt": "Two Cache Boundaries in Project Graph MCP",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-code-quality-analysis-7b1d00534645.png": {
+    "cdnId": "97b3f7d4-d904-4bee-1641-1e70840bb900",
+    "uploadDate": "2026-08-24T04:26:35.356Z",
+    "imageName": "pulse-code-quality-analysis-7b1d00534645.png",
+    "alt": "Code Quality Analysis in Project Graph MCP",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-composable-automation-packs-node-types-bd700db10ddd.png": {
+    "cdnId": "c2642e18-a648-4466-5c86-99d66de43000",
+    "uploadDate": "2026-08-24T04:26:35.956Z",
+    "imageName": "pulse-composable-automation-packs-node-types-bd700db10ddd.png",
+    "alt": "Composable Driver Packs for Symbiote Engine",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-autobox-v1-hardware-cross-polarization-museum-2f94a136ab3d.png": {
+    "cdnId": "02a125e7-a163-4d6d-1fdf-4733886b3800",
+    "uploadDate": "2026-08-24T04:26:37.000Z",
+    "imageName": "pulse-autobox-v1-hardware-cross-polarization-museum-2f94a136ab3d.png",
+    "alt": "Cross-Polarized AUTOBOX Lighting for Museum Scanning",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-autobox-v1-photogrammetry-data-workflow-d6ba3e9cfaec.png": {
+    "cdnId": "2943ed95-1bcb-42f9-10d1-ac35174d5100",
+    "uploadDate": "2026-08-24T04:26:37.981Z",
+    "imageName": "pulse-autobox-v1-photogrammetry-data-workflow-d6ba3e9cfaec.png",
+    "alt": "Source-Data Handoff in Museum Scanning",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-lifecycle-messaging-platform-gsm-modem-pool-orchestration-7b2871b1b34f.png": {
+    "cdnId": "5ca3a020-1fcc-442f-c4a7-faada5d65400",
+    "uploadDate": "2026-08-24T04:26:38.660Z",
+    "imageName": "pulse-lifecycle-messaging-platform-gsm-modem-pool-orchestration-7b2871b1b34f.png",
+    "alt": "GSM Modem Pool Orchestration with Node.js",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-photopizza-remote-browser-hardware-control-9bd34f05677b.png": {
+    "cdnId": "076d0c44-e630-4cf0-2602-055f61458200",
+    "uploadDate": "2026-08-24T04:26:39.318Z",
+    "imageName": "pulse-photopizza-remote-browser-hardware-control-9bd34f05677b.png",
+    "alt": "Browser Control for PhotoPizza Turntables",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-photosnail-public-motion-control-object-tracking-3b0866b66816.png": {
+    "cdnId": "6626e029-4a31-42df-4705-b6e5c96f1900",
+    "uploadDate": "2026-08-24T04:26:39.944Z",
+    "imageName": "pulse-photosnail-public-motion-control-object-tracking-3b0866b66816.png",
+    "alt": "PhotoSnail: Implemented Motion and Planned Object Tracking",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
+    "width": "1200",
+    "height": "630",
+    "aspectRatio": "40/21",
+    "srcFormat": "PNG"
+  },
+  "./cit/cit-store/social/pulse-terminal-x-mcp-terminal-execution-state-5c482d88e213.png": {
+    "cdnId": "a48b412d-6a43-414a-fd55-8fd299e4b000",
+    "uploadDate": "2026-08-24T04:26:40.499Z",
+    "imageName": "pulse-terminal-x-mcp-terminal-execution-state-5c482d88e213.png",
+    "alt": "Terminal X Execution-State Contracts",
+    "tags": [
+      "social-card",
+      "publication"
+    ],
     "width": "1200",
     "height": "630",
     "aspectRatio": "40/21",
