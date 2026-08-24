@@ -29,14 +29,14 @@
     "generate-pdfs": "node ./scripts/generate-portfolio-pdfs.js",
     "generate-llms": "node ./scripts/generate-llms-txt.js",
     "render-social-cards": "node ./scripts/render-social-cards.js",
+    "copy-social-cards": "node ./scripts/copy-social-cards.js",
     "sync-social-cards": "node ./scripts/sync-social-cards.js",
     "publish-social-cards": "npm run render-social-cards && npm run sync-social-cards && npm run build",
-    "build": "npm run render-social-cards && npm run clean && npx jsda build && npm run copy-robots && npm run copy-404 && npm run copy-material-symbols-assets && npm run build-force-worker && npm run generate-pdfs && npm run generate-llms && npm run verify-production-build",
+    "build": "npm run render-social-cards && npm run clean && npx jsda build && npm run copy-robots && npm run copy-404 && npm run copy-social-cards && npm run build-force-worker && npm run generate-pdfs && npm run generate-llms && npm run verify-production-build",
     "libs:status": "node ../symbiote-dev-plane/bin/symbiote-libs.js status",
     "libs:link": "node ../symbiote-dev-plane/bin/symbiote-libs.js link",
     "libs:unlink": "node ../symbiote-dev-plane/bin/symbiote-libs.js unlink --install",
     "build-force-worker": "node ./scripts/build-force-worker.js",
-    "copy-material-symbols-assets": "node ./scripts/copy-material-symbols-assets.js",
     "verify-production-build": "node ./scripts/verify-production-build.js"
   },
   "dependencies": {

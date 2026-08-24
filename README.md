@@ -54,6 +54,29 @@ npx jsda serve
 
 The default dynamic server port is `3000`.
 
+## Social cards
+
+The build derives social cards from the project and publication registries. Each
+published Pulse article and project page gets a 1200×630 PNG for `og:image` and
+`twitter:image`. The renderer tries catalog media associated with the page or
+its project; the project cover is the last source. If those sources are
+unavailable, it renders the title on a gradient background with size-aware line
+wrapping.
+
+```bash
+npm run render-social-cards
+npm run publish-social-cards
+```
+
+`render-social-cards` writes the generated files under the ignored
+`cit/cit-store/social/` directory. Normal builds copy them to
+`dist/social-cards/`, so a card that has not been uploaded yet has a deployable
+local URL.
+`publish-social-cards` uploads content-addressed versions to CIT and rewrites the
+generated `cit/social-cards.json` map. Superseded objects remain available for
+30 days. A later sync deletes an expired object only when no current card map
+entry references it.
+
 ## GitHub Pages
 
 The workflow at `.github/workflows/deploy-pages.yml` builds `dist/` and deploys it to GitHub Pages on pushes to `main`.
@@ -62,7 +85,7 @@ The workflow at `.github/workflows/deploy-pages.yml` builds `dist/` and deploys 
 
 The production build runs as a self-contained, native bundle located in `dist/`. It enforces the following production invariants:
 
-- **Self-contained execution assets**: Exactly three JavaScript execution assets are allowed in `dist/js/`: `index.js`, `markdown-viewer/index.js`, and `ForceWorker.js`. The Markdown viewer is an independent JSDA bundle; localized Markdown remains non-executable content under `dist/content/`.
+- **Self-contained execution assets**: Exactly four JavaScript execution assets are allowed in `dist/js/`: `index.js`, `markdown-viewer/index.js`, `tour-player/index.js`, and `ForceWorker.js`. The Markdown viewer and CV Show player are independent JSDA bundles; localized Markdown remains non-executable content under `dist/content/`.
 - **No Import Maps or external library CDNs**: The HTML files contain no `<script type="importmap">` or static jsDelivr/unpkg library mappings, and no raw package directories or copies (e.g. no `node_modules` inside `dist`).
 - **No static JS imports**: Emitted JavaScript files contain no statically resolvable import statements (e.g., zero parser-visible import records from packages like `@symbiotejs/symbiote`).
 - **Main bundle budget**: `dist/js/index.js` must not exceed the pre-runtime-Markdown baseline of 3,208,785 bytes raw or 773,574 bytes with gzip level 9.

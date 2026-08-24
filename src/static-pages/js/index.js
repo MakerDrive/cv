@@ -1,5 +1,7 @@
 import { createRuntimeAssetUrl } from './runtimeAssetUrl.js';
 
+let tourModule;
+
 let markdownViewer = document.querySelector('markdown-viewer');
 if (markdownViewer) {
   let moduleUrl = createRuntimeAssetUrl('js/markdown-viewer/index.js');
@@ -14,6 +16,16 @@ if (markdownViewer) {
 
 if (!document.querySelector('side-panel[disabled]')) {
   await import('../../ui-components/universal/side-panel/logic.js');
+}
+if (document.querySelector('.pulse-tour-button')) {
+  let moduleUrl = createRuntimeAssetUrl('js/tour-player/index.js');
+  try {
+    tourModule = await import(moduleUrl.href);
+  } catch {
+    let trigger = document.querySelector('.pulse-tour-button');
+    trigger?.setAttribute('disabled', '');
+    trigger?.setAttribute('aria-disabled', 'true');
+  }
 }
 
 import { socialLinks } from '../data/socialLinks.js';
@@ -653,6 +665,9 @@ let localeToggle = /** @type {any} */ (document.querySelector('.pulse-locale-tog
 let headerMenuButton = document.querySelector('.pulse-header-menu-button');
 headerMenuButton?.setAttribute('aria-label', tPortfolio('header.openMaterials'));
 headerMenuButton?.setAttribute('title', tPortfolio('header.openMaterials'));
+let tourButton = document.querySelector('.pulse-tour-button');
+tourButton?.setAttribute('aria-label', tPortfolio('panel.tour'));
+tourButton?.setAttribute('title', tPortfolio('panel.tour'));
 localeToggle?.setAttribute('aria-label', tPortfolio('header.language'));
 localeToggle?.setAttribute('title', tPortfolio('header.language'));
 localeToggle?.setAttribute('value', portfolioLocalization.locale);
@@ -700,6 +715,11 @@ document.addEventListener('click', (event) => {
   if (target instanceof Element && target.closest('.pulse-header-menu-button')) {
     event.preventDefault();
     openMaterialsDrawerFromHeader();
+    return;
+  }
+  if (target instanceof Element && target.closest('.pulse-tour-button')) {
+    event.preventDefault();
+    document.dispatchEvent(new CustomEvent('portfolio-open-tour'));
     return;
   }
 
@@ -3568,6 +3588,12 @@ class PortfolioWorkspace extends HTMLElement {
       component: 'portfolio-theme-panel',
       behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end', swipeControl: 'rail' },
     });
+    this._disposeTour = tourModule?.installPortfolioTour({
+      layout,
+      workspace: this,
+      runtime: portfolioRuntime,
+      title: tPortfolio('panel.tour'),
+    });
     this._onThemeOpenFull = () => {
       layout.openPanel('portfolio-theme', {
         direction: 'horizontal',
@@ -3599,6 +3625,7 @@ class PortfolioWorkspace extends HTMLElement {
     if (this._onOpenMaterials) {
       document.removeEventListener('portfolio-open-materials', this._onOpenMaterials);
     }
+    this._disposeTour?.();
   }
 }
 

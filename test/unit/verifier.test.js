@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import projectConfig from '../../project.cfg.js';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -11,10 +12,41 @@ import {
   verifyJsMetafile,
   verifyMainBundleSize,
   verifyRuntimeMarkdownAssetSeparation,
+  verifyRuntimeTourAssetSeparation,
+  verifyPortfolioSocialMetadata,
   runVerification,
   EXECUTABLE_ASSET_ALLOWLIST,
   MAIN_JS_SIZE_LIMITS,
 } from '../../scripts/verify-production-build.js';
+
+test('verifier requires matching 1200x630 social metadata on public portfolio pages', () => {
+  let distDir = '/mock/dist';
+  let htmlPath = '/mock/dist/projects/alpha/index.html';
+  let valid = `
+    <meta property="og:image" content="https://cdn.test/alpha.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:image" content="https://cdn.test/alpha.png">
+  `;
+
+  assert.equal(verifyPortfolioSocialMetadata(valid, htmlPath, distDir), true);
+  assert.throws(
+    () => verifyPortfolioSocialMetadata(
+      valid.replace('content="630"', 'content="720"'),
+      htmlPath,
+      distDir,
+    ),
+    /must declare a 1200x630 social image/,
+  );
+  assert.equal(
+    verifyPortfolioSocialMetadata(
+      `${valid}<meta name="robots" content="noindex, follow">`,
+      '/mock/dist/pulse/retired/index.html',
+      distDir,
+    ),
+    false,
+  );
+});
 
 test('verifier resolveScriptPath handles absolute and relative paths', () => {
   const distDir = '/mock/dist';
@@ -253,9 +285,9 @@ test('verifier verifyJsMetafile rejects any import record across all outputs', (
 });
 
 test('verifier enforces the main bundle budget and runtime Markdown asset boundary', () => {
-  assert.deepEqual(MAIN_JS_SIZE_LIMITS, {
-    raw: 1_600_000,
-    gzip: 365_000,
+  assert.deepStrictEqual(MAIN_JS_SIZE_LIMITS, {
+    raw: 1600000,
+    gzip: 370000,
   });
 
   let measured = verifyMainBundleSize('small bundle', { raw: 100, gzip: 100 });
@@ -273,6 +305,10 @@ test('verifier enforces the main bundle budget and runtime Markdown asset bounda
   verifyRuntimeMarkdownAssetSeparation(
     'const asset = "js/markdown-viewer/index.js";',
     'const markedHighlight = true; const message = "Markdown source is missing.";',
+  );
+  verifyRuntimeTourAssetSeparation(
+    'const asset = "js/tour-player/index.js";',
+    'const events = ["portfolio-tour-start", "portfolio-tour-phase"];',
   );
   assert.throws(
     () => verifyRuntimeMarkdownAssetSeparation(
@@ -296,12 +332,17 @@ test('full verifier success and failure scenarios', async () => {
       await fs.writeFile(path.join(tmpDir, 'css/index.css'), 'body {}');
       await fs.writeFile(
         path.join(tmpDir, 'js/index.js'),
-        'const asset = "js/markdown-viewer/index.js";',
+        'const markdown = "js/markdown-viewer/index.js"; const tour = "js/tour-player/index.js";',
       );
       await fs.mkdir(path.join(tmpDir, 'js/markdown-viewer'), { recursive: true });
       await fs.writeFile(
         path.join(tmpDir, 'js/markdown-viewer/index.js'),
         'const markedHighlight = true; const message = "Markdown source is missing.";',
+      );
+      await fs.mkdir(path.join(tmpDir, 'js/tour-player'), { recursive: true });
+      await fs.writeFile(
+        path.join(tmpDir, 'js/tour-player/index.js'),
+        'const events = ["portfolio-tour-start", "portfolio-tour-phase"];',
       );
       await fs.writeFile(path.join(tmpDir, 'js/ForceWorker.js'), 'console.log("hello worker");');
       await fs.writeFile(path.join(tmpDir, 'js/material-symbols.css'), 'url("material-symbols-outlined-400.ttf")');
@@ -342,7 +383,7 @@ test('full verifier success and failure scenarios', async () => {
     // 7. Parser-visible static import
     await fs.writeFile(
       path.join(tmpDir, 'js/index.js'),
-      'const asset = "js/markdown-viewer/index.js"; import { foo } from "./foo.js";',
+      'const markdown = "js/markdown-viewer/index.js"; const tour = "js/tour-player/index.js"; import { foo } from "./foo.js";',
     );
     await assert.rejects(runVerification(tmpDir), /contains import record to: "\.\/foo\.js"/);
     await writeSuccessFiles();
@@ -350,7 +391,7 @@ test('full verifier success and failure scenarios', async () => {
     // 8. Parser-visible dynamic import
     await fs.writeFile(
       path.join(tmpDir, 'js/index.js'),
-      'const asset = "js/markdown-viewer/index.js"; const mod = await import("./foo.js");',
+      'const markdown = "js/markdown-viewer/index.js"; const tour = "js/tour-player/index.js"; const mod = await import("./foo.js");',
     );
     await assert.rejects(runVerification(tmpDir), /contains import record to: "\.\/foo\.js"/);
 
@@ -367,7 +408,18 @@ test('build script hygiene and rename contracts', async () => {
   assert.equal(pkg.scripts['copy-force-worker'], undefined, 'copy-force-worker script should be removed');
   assert.equal(pkg.scripts['write-material-symbols-css'], undefined, 'write-material-symbols-css script should be removed');
 
-  assert.match(pkg.scripts['build'], /npm run copy-material-symbols-assets/, 'build should call copy-material-symbols-assets');
+  assert.equal(pkg.scripts['copy-material-symbols-assets'], undefined, 'copy-material-symbols-assets script should be removed');
+  assert.deepEqual(projectConfig.static.copy, [
+    {
+      from: './node_modules/symbiote-ui/icons/material-symbols.css',
+      to: './js/material-symbols.css',
+    },
+    {
+      from: './node_modules/symbiote-ui/icons/material-symbols-outlined-400.ttf',
+      to: './js/material-symbols-outlined-400.ttf',
+    },
+  ], 'JSDA must copy Material Symbols assets for build and SSG preview');
+  assert.match(pkg.scripts['build'], /npm run copy-social-cards/, 'build should copy social cards');
   assert.match(pkg.scripts['build'], /npm run build-force-worker/, 'build should call build-force-worker');
   assert.match(pkg.scripts['build'], /npm run verify-production-build$/, 'verification must be last in the build chain');
 

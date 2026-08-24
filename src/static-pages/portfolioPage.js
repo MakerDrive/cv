@@ -1,8 +1,15 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { getPage } from './getPage.js';
 import { loadProjectEntries } from './data/projects.js';
 import { PORTFOLIO_LOCALE_MESSAGES } from './data/portfolioTranslations.js';
 import { resolvePublicationMetadata } from './data/publicationRoutes.js';
 import { resolveSocialCardUrl } from './data/socialCards.js';
+import {
+  SOCIAL_CARD_HEIGHT,
+  SOCIAL_CARD_WIDTH,
+} from './data/socialCardPaths.js';
+import { TOUR_STORY } from './data/tourScripts.js';
 
 const projects = loadProjectEntries();
 const PAGE_TITLE = PORTFOLIO_LOCALE_MESSAGES.en['portfolio.page.title'];
@@ -25,6 +32,14 @@ const RETIREMENT_COPY = Object.freeze({
 });
 const PORTFOLIO_HEADER_CONTROLS = /*html*/ `
   <span class="pulse-header-title">${PAGE_TITLE}</span>
+  <button
+    class="pulse-tour-button"
+    type="button"
+    aria-label="Interactive Tour"
+    title="Interactive Tour"
+  >
+    <span class="material-symbols-outlined" aria-hidden="true">play_circle</span>
+  </button>
   <sn-segmented-control
     class="pulse-locale-toggle"
     name="portfolio-locale"
@@ -61,6 +76,27 @@ function renderRetirementContent(targetUrl) {
 }
 
 /**
+ * @param {string} sourceUrl
+ * @returns {string}
+ */
+export function resolveProjectPageId(sourceUrl) {
+  let sourcePath = fileURLToPath(sourceUrl);
+  let slug = path.basename(path.dirname(sourcePath));
+  return `projects/${slug}`;
+}
+
+/**
+ * @param {string} sourceUrl
+ * @returns {Promise<string>}
+ */
+export function getProjectPage(sourceUrl) {
+  return getPortfolioPage({
+    basePath: '../../',
+    projectId: resolveProjectPageId(sourceUrl),
+  });
+}
+
+/**
  * @param {Object} [options]
  * @param {string} [options.basePath]
  * @param {string} [options.publicationId]
@@ -85,6 +121,8 @@ export async function getPortfolioPage({
     if (metadata.retired || (metadata.primaryProjectId && basePath === '../../')) {
       robots = 'noindex, follow';
     }
+  } else if (publicationId) {
+    robots = 'noindex, follow';
   } else if (projectId) {
     const projectSlug = projectId.replace(/^projects\//, '');
     const project = projects.find((entry) => entry.slug === projectSlug);
@@ -112,16 +150,22 @@ export async function getPortfolioPage({
       <script type="application/json" id="pulse-projects-data">
         ${JSON.stringify(projects).replace(/</g, '\\u003c')}
       </script>
+      <script type="application/json" id="pulse-tour-story">
+        ${JSON.stringify(TOUR_STORY).replace(/</g, '\\u003c')}
+      </script>
       <section class="pulse-screen" aria-label="Vladimir Matiasevich portfolio">
         <portfolio-workspace class="pulse-workspace"></portfolio-workspace>
       </section>
     `;
+  let socialCardId = metadata && !isRetired ? publicationId : projectId;
 
   return getPage({
     BASE_PATH: basePath,
     TITLE: pageTitle,
     DESCRIPTION: pageDescription,
-    OG_IMAGE: metadata?.socialImage || resolveSocialCardUrl(projectId),
+    OG_IMAGE: metadata?.socialImage || resolveSocialCardUrl(socialCardId),
+    OG_IMAGE_WIDTH: socialCardId ? SOCIAL_CARD_WIDTH : undefined,
+    OG_IMAGE_HEIGHT: socialCardId ? SOCIAL_CARD_HEIGHT : undefined,
     CANONICAL_URL: canonicalUrl,
     ROBOTS: robots,
     publicationId,

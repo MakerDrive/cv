@@ -1,3 +1,3 @@
-import { getPortfolioPage } from '../../portfolioPage.js';
+import { getProjectPage } from '../../portfolioPage.js';
 
-export default await getPortfolioPage({ basePath: '../../' });
+export default await getProjectPage(import.meta.url);

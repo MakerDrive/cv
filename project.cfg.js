@@ -23,6 +23,16 @@ export default {
   static: {
     outputDir: './dist',
     sourceDir: './src/static-pages',
+    copy: [
+      {
+        from: './node_modules/symbiote-ui/icons/material-symbols.css',
+        to: './js/material-symbols.css',
+      },
+      {
+        from: './node_modules/symbiote-ui/icons/material-symbols-outlined-400.ttf',
+        to: './js/material-symbols-outlined-400.ttf',
+      },
+    ],
   },
   ssr: {
     enabled: true,

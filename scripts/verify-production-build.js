@@ -3,19 +3,22 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import esbuild from 'esbuild';
+import sharp from 'sharp';
 
 import { PORTFOLIO_PROJECT_IDS } from '../src/static-pages/data/portfolioProjectIds.js';
 import { getPublicPublications } from '../src/static-pages/data/publications.js';
+import { createSocialCardManifest } from './social-card-manifest.js';
 
 export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
   'js/index.js',
   'js/markdown-viewer/index.js',
+  'js/tour-player/index.js',
   'js/ForceWorker.js'
 ]);
 
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   raw: 1_600_000,
-  gzip: 365_000,
+  gzip: 370_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);
@@ -48,6 +51,41 @@ export function parseHtmlAttributes(tagString) {
     attrs[name] = value;
   }
   return attrs;
+}
+
+function getMetaContent(content, attributeName, attributeValue) {
+  let metaRegex = /<meta\b([^>]*)>/gi;
+  let metaMatch;
+  while ((metaMatch = metaRegex.exec(content)) !== null) {
+    let attrs = parseHtmlAttributes(metaMatch[1]);
+    if (attrs[attributeName] === attributeValue) return attrs.content;
+  }
+  return undefined;
+}
+
+export function verifyPortfolioSocialMetadata(content, htmlPath, distDir) {
+  let relativePath = path.relative(distDir, htmlPath).replace(/\\/g, '/');
+  let isArticleOrProject = /^(?:projects\/[^/]+|pulse\/[^/]+|projects\/[^/]+\/pulse\/[^/]+)\/index\.html$/.test(
+    relativePath,
+  );
+  if (!isArticleOrProject) return false;
+  let robots = getMetaContent(content, 'name', 'robots') || '';
+  if (robots.split(',').some((value) => value.trim() === 'noindex')) return false;
+
+  let openGraphImage = getMetaContent(content, 'property', 'og:image');
+  let twitterImage = getMetaContent(content, 'name', 'twitter:image');
+  if (!openGraphImage || openGraphImage !== twitterImage) {
+    throw new Error(
+      `HTML file "${relativePath}" must expose the same og:image and twitter:image.`,
+    );
+  }
+  if (
+    getMetaContent(content, 'property', 'og:image:width') !== '1200'
+    || getMetaContent(content, 'property', 'og:image:height') !== '630'
+  ) {
+    throw new Error(`HTML file "${relativePath}" must declare a 1200x630 social image.`);
+  }
+  return true;
 }
 
 export function verifyHtmlContent(content, htmlPath, distDir) {
@@ -174,6 +212,18 @@ export function verifyRuntimeMarkdownAssetSeparation(mainContent, viewerContent)
   }
 }
 
+export function verifyRuntimeTourAssetSeparation(mainContent, tourContent) {
+  if (!mainContent.includes('js/tour-player/index.js')) {
+    throw new Error('Main JS bundle is missing the runtime tour player asset URL.');
+  }
+  if (mainContent.includes('portfolio-tour-phase')) {
+    throw new Error('Main JS bundle contains the tour player implementation.');
+  }
+  if (!tourContent.includes('portfolio-tour-phase') || !tourContent.includes('portfolio-tour-start')) {
+    throw new Error('Tour player asset is missing its lifecycle implementation.');
+  }
+}
+
 async function fileExists(filePath) {
   try {
     const stat = await fs.stat(filePath);
@@ -234,7 +284,7 @@ export async function runVerification(distDir) {
     && filePath.endsWith('.md')
   ));
   if (markdownContentFiles.length > 0) {
-    let expectedMarkdownContentCount = getExpectedMarkdownContentCount();
+    let expectedMarkdownContentCount = getExpectedMarkdownContentCount() + 3;
     if (markdownContentFiles.length !== expectedMarkdownContentCount) {
       if (markdownContentFiles.length > expectedMarkdownContentCount) {
         console.warn(
@@ -249,7 +299,7 @@ export async function runVerification(distDir) {
     }
     for (const filePath of markdownContentFiles) {
       const relativePath = path.relative(distDir, filePath).replace(/\\/g, '/');
-      if (!/^content\/(?:projects|publications)\/[^/]+\/(?:en|ru|es)\.md$/.test(relativePath)) {
+      if (!/^content\/(?:(?:projects|publications)\/[^/]+|tours)\/(?:en|ru|es)\.md$/.test(relativePath)) {
         throw new Error(`Verification failed: invalid runtime Markdown asset path "${relativePath}".`);
       }
       if (!(await fs.readFile(filePath, 'utf8')).trim()) {
@@ -280,8 +330,13 @@ export async function runVerification(distDir) {
     path.join(distDir, 'js/markdown-viewer/index.js'),
     'utf8',
   );
+  const tourPlayerContent = await fs.readFile(
+    path.join(distDir, 'js/tour-player/index.js'),
+    'utf8',
+  );
   verifyMainBundleSize(mainJsContent);
   verifyRuntimeMarkdownAssetSeparation(mainJsContent.toString('utf8'), markdownViewerContent);
+  verifyRuntimeTourAssetSeparation(mainJsContent.toString('utf8'), tourPlayerContent);
 
   const cssFiles = [
     'css/index.css',
@@ -295,10 +350,36 @@ export async function runVerification(distDir) {
     }
   }
 
+  let publicPortfolioPageCount = 0;
   for (const filePath of allFiles) {
     if (filePath.endsWith('.html')) {
       const content = await fs.readFile(filePath, 'utf8');
       verifyHtmlContent(content, filePath, distDir);
+      if (verifyPortfolioSocialMetadata(content, filePath, distDir)) {
+        publicPortfolioPageCount++;
+      }
+    }
+  }
+
+  if (publicPortfolioPageCount > 0) {
+    let socialCardManifest = createSocialCardManifest();
+    if (publicPortfolioPageCount !== socialCardManifest.length) {
+      throw new Error(
+        `Verification failed: expected ${socialCardManifest.length} public portfolio pages with `
+          + `social metadata, found ${publicPortfolioPageCount}.`,
+      );
+    }
+    for (let card of socialCardManifest) {
+      let cardPath = path.join(distDir, 'social-cards', card.fileName);
+      if (!await fileExists(cardPath)) {
+        throw new Error(`Verification failed: social card "${card.fileName}" is missing from dist.`);
+      }
+      let metadata = await sharp(cardPath).metadata();
+      if (metadata.width !== 1200 || metadata.height !== 630 || metadata.format !== 'png') {
+        throw new Error(
+          `Verification failed: social card "${card.fileName}" must be a 1200x630 PNG.`,
+        );
+      }
     }
   }
 

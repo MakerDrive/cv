@@ -28,6 +28,10 @@ function buildHeadMeta(pageData) {
     `<meta property="og:title" content="${escapeAttr(title)}">`,
     `<meta property="og:description" content="${escapeAttr(description)}">`,
     `<meta property="og:image" content="${escapeAttr(image)}">`,
+    ...(pageData.OG_IMAGE_WIDTH && pageData.OG_IMAGE_HEIGHT ? [
+      `<meta property="og:image:width" content="${escapeAttr(pageData.OG_IMAGE_WIDTH)}">`,
+      `<meta property="og:image:height" content="${escapeAttr(pageData.OG_IMAGE_HEIGHT)}">`,
+    ] : []),
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:title" content="${escapeAttr(title)}">`,
     `<meta name="twitter:description" content="${escapeAttr(description)}">`,
@@ -70,6 +74,8 @@ function versionAssetPath(path) {
  * @property {String} [publicationId]
  * @property {String} [DESCRIPTION]
  * @property {String} [OG_IMAGE]
+ * @property {String|Number} [OG_IMAGE_WIDTH]
+ * @property {String|Number} [OG_IMAGE_HEIGHT]
  * @property {String} [CANONICAL_URL]
  * @property {String} [ROBOTS]
  */

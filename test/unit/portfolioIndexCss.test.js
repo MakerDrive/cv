@@ -26,7 +26,7 @@ test('portfolio header follows the symbiote shell topbar contract', async () => 
   assert.match(source, /--sn-sys-on-accent: var\(--pulse-surface\);/);
   assert.match(source, /body:has\(\.pulse-screen\) > header \{[^}]*position: relative;[^}]*padding: var\(--sn-app-topbar-padding, 0 16px\);[^}]*border: 0;[^}]*background: transparent;/s);
   assert.match(source, /\.pulse-header-title \{[^}]*font-size: var\(--sn-app-title-size, 13px\);[^}]*font-weight: 700;[^}]*letter-spacing: var\(--sn-app-title-letter-spacing, 0\.5px\);/s);
-  assert.match(source, /\.pulse-header-menu-button,\s*\.pulse-theme-widget \.ctw-trigger \{[^}]*min-height: var\(--sn-shell-menu-action-height, 26px\);[^}]*padding: var\(--sn-shell-menu-action-padding, 4px 10px\);[^}]*border: 1px solid transparent;[^}]*border-radius: var\(--sn-layout-header-button-radius, 4px\);[^}]*background: var\(--sn-shell-menu-action-bg, transparent\);/s);
+  assert.match(source, /\.pulse-header-menu-button,\s*\.pulse-tour-button,\s*\.pulse-theme-widget \.ctw-trigger \{[^}]*min-height: var\(--sn-shell-menu-action-height, 26px\);[^}]*padding: var\(--sn-shell-menu-action-padding, 4px 10px\);[^}]*border: 1px solid transparent;[^}]*border-radius: var\(--sn-layout-header-button-radius, 4px\);[^}]*background: var\(--sn-shell-menu-action-bg, transparent\);/s);
   assert.match(source, /\.pulse-locale-toggle \{[^}]*border: 0;[^}]*--sn-step-1: 0px;[^}]*--sn-segmented-bg: transparent;[^}]*--sn-segmented-border: transparent;[^}]*--sn-segmented-item-min-height: var\(--sn-shell-menu-action-height, 26px\);/s);
   assert.doesNotMatch(source, /--sn-segmented-selected-bg:/);
   assert.doesNotMatch(source, /--sn-segmented-hover-bg:/);

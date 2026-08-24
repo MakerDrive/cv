@@ -1951,3 +1951,314 @@ test('Pulse feed stays compact and opens publications without reloading the work
   assert.equal(afterState.pathname, '/cv/projects/agent-portal/pulse/agent-portal-retrospective/');
   assert.deepEqual(afterState.selectedTreeRows, ['occurrence/agent-portal/pulse/agent-portal-retrospective']);
 });
+
+test('CV Show advances only after speech and semantic settlement, then cleans up transport state', {
+  timeout: 60_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('CV Show smoke uses local deterministic routes');
+  let page = await createPortfolioPage(t, {
+    viewport: DESKTOP_VIEWPORT,
+    touch: false,
+  });
+  if (!page) return;
+  let { cdp, server } = page;
+
+  await navigate(cdp, `${server.origin}/cv/?lang=ru&mode=flat`, { expectedMode: 'flat' });
+  let initial = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `({
+      globalPlayer: Boolean(document.querySelector('body > tour-player')),
+      selected: document.querySelector('.sn-tree-row[aria-selected="true"]')?.dataset.treeId,
+      selectedLabel: document.querySelector('.sn-tree-row[aria-selected="true"] .sn-tree-label')?.textContent?.trim(),
+    })`,
+  });
+  assert.equal(initial.result.value.globalPlayer, false);
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `(() => {
+      window.__cvShowUtterances = [];
+      class MockUtterance extends EventTarget {
+        constructor(text) { super(); this.text = text; window.__cvShowUtterances.push(this); }
+        set onend(fn) { this.__onend = fn; }
+        get onend() { return this.__onend; }
+        set onerror(fn) { this.__onerror = fn; }
+        get onerror() { return this.__onerror; }
+      }
+      window.SpeechSynthesisUtterance = MockUtterance;
+      window.speechSynthesis.constructor.prototype.speak = function() {};
+    })()`,
+  });
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('.pulse-tour-button')?.click()`,
+  }, { label: 'open CV Show', timeoutMs: 5_000 });
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        if (document.querySelector('portfolio-tour-panel tour-player')) return resolve();
+        if (performance.now() - started > 8000) return reject(new Error('CV Show panel did not open'));
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  });
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('[data-tour-action="full"]')?.click()`,
+  }, { label: 'start full CV Show', timeoutMs: 5_000 });
+
+  let opening = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `({
+      progress: document.querySelector('portfolio-tour-panel output')?.textContent?.trim(),
+      title: document.querySelector('#tour-step-title')?.textContent?.trim(),
+      visibleTransport: Array.from(document.querySelectorAll('portfolio-tour-panel .tour-controls button'))
+        .filter((button) => getComputedStyle(button).display !== 'none')
+        .map((button) => button.dataset.tourAction),
+    })`,
+  });
+  assert.deepEqual(opening.result.value, {
+    progress: '1 / 8',
+    title: 'Кто я',
+    visibleTransport: ['previous', 'pause', 'stop', 'next'],
+  });
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `window.__cvShowUtterances.at(-1)?.onend?.()`,
+  }, { label: 'finish opening narration', timeoutMs: 5_000 });
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const progress = document.querySelector('portfolio-tour-panel output')?.textContent?.trim();
+        if (progress === '2 / 8') return resolve();
+        if (performance.now() - started > 8000) return reject(new Error(progress || 'no progress'));
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  });
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('[data-tour-action="pause"]')?.click(); window.__cvShowUtterances.at(-1)?.onend?.()`,
+  }, { label: 'pause before narration completion', timeoutMs: 5_000 });
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  let paused = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `({
+      progress: document.querySelector('portfolio-tour-panel output')?.textContent?.trim(),
+      pauseLabel: document.querySelector('[data-tour-action="pause"]')?.getAttribute('aria-label'),
+    })`,
+  });
+  assert.deepEqual(paused.result.value, { progress: '2 / 8', pauseLabel: 'Продолжить озвучивание' });
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('[data-tour-action="pause"]')?.click()`,
+  }, { label: 'resume CV Show', timeoutMs: 5_000 });
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const progress = document.querySelector('portfolio-tour-panel output')?.textContent?.trim();
+        if (progress === '3 / 8') return resolve();
+        if (performance.now() - started > 8000) return reject(new Error(progress || 'no progress'));
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  });
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('[data-tour-action="previous"]')?.click()`,
+  }, { label: 'go to previous CV Show beat', timeoutMs: 5_000 });
+  let previous = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `document.querySelector('portfolio-tour-panel output')?.textContent?.trim()`,
+  });
+  assert.equal(previous.result.value, '2 / 8');
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('[data-tour-action="stop"]')?.click()`,
+  }, { label: 'stop CV Show', timeoutMs: 5_000 });
+  let stopped = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    awaitPromise: true,
+    expression: `new Promise((resolve) => requestAnimationFrame(() => resolve({
+      playing: document.querySelector('portfolio-tour-panel tour-player')?.isPlaying,
+      selected: document.querySelector('.sn-tree-row[aria-selected="true"]')?.dataset.treeId,
+      presenterVisible: document.querySelector('.symbiote-presenter-cursor')?.classList.contains('is-visible') || false,
+      startVisible: !document.querySelector('.tour-start')?.hidden,
+    })))`,
+  });
+  assert.deepEqual(stopped.result.value, {
+    playing: false,
+    selected: initial.result.value.selected,
+    presenterVisible: false,
+    startVisible: true,
+  });
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('panel-layout')?.closeUiPanel?.('portfolio-tour')`,
+  }, { label: 'close CV Show panel', timeoutMs: 5_000 });
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('.pulse-tour-button')?.click()`,
+  }, { label: 'reopen CV Show panel', timeoutMs: 5_000 });
+  let reopened = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    awaitPromise: true,
+    expression: `new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve({
+      panels: document.querySelectorAll('portfolio-tour-panel').length,
+      players: document.querySelectorAll('portfolio-tour-panel tour-player').length,
+      playing: document.querySelector('portfolio-tour-panel tour-player')?.isPlaying,
+    }))))`,
+  });
+  assert.deepEqual(reopened.result.value, { panels: 1, players: 1, playing: false });
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('[data-tour-action="full"]')?.click()`,
+  }, { label: 'restart full CV Show for completion', timeoutMs: 5_000 });
+  let completed = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    awaitPromise: true,
+    expression: `(async () => {
+      const expectedSelections = [
+        ${JSON.stringify(initial.result.value.selectedLabel)},
+        'R&D-инжиниринг',
+        'Agent Portal',
+        'Symbiote Workspace',
+        'AUTOBOX v1',
+        'AUTOBOX v1',
+        'Пульс',
+        ${JSON.stringify(initial.result.value.selectedLabel)},
+      ];
+      const waitFor = async (check, label) => {
+        const started = performance.now();
+        while (performance.now() - started < 8000) {
+          const value = check();
+          if (value) return value;
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+        const selected = document.querySelector('.sn-tree-row[aria-selected="true"] .sn-tree-label')?.textContent?.trim();
+        const progress = document.querySelector('portfolio-tour-panel output')?.textContent?.trim();
+        const error = document.querySelector('portfolio-tour-panel .tour-error')?.textContent?.trim();
+        throw new Error('CV Show did not settle: ' + label + '; progress=' + progress + '; selected=' + selected + '; error=' + error);
+      };
+      const selectedSequence = [];
+      for (let index = 0; index < expectedSelections.length; index += 1) {
+        await waitFor(() => {
+          const selected = document.querySelector('.sn-tree-row[aria-selected="true"] .sn-tree-label')?.textContent?.trim();
+          return selected === expectedSelections[index]
+            && document.querySelector('portfolio-tour-panel output')?.textContent?.trim() === (index + 1) + ' / 8';
+        }, 'beat ' + (index + 1));
+        selectedSequence.push(expectedSelections[index]);
+        window.__cvShowUtterances.at(-1)?.onend?.();
+      }
+      await waitFor(
+        () => document.querySelector('portfolio-tour-panel tour-player')?.isPlaying === false,
+        'completion cleanup',
+      );
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      return {
+        selectedSequence,
+        selected: document.querySelector('.sn-tree-row[aria-selected="true"] .sn-tree-label')?.textContent?.trim(),
+        presenterVisible: document.querySelector('.symbiote-presenter-cursor')?.classList.contains('is-visible') || false,
+        startVisible: !document.querySelector('.tour-start')?.hidden,
+        triggerFocused: document.activeElement?.classList.contains('pulse-tour-button') || false,
+      };
+    })()`,
+  }, { label: 'complete every CV Show beat', timeoutMs: 45_000 });
+  assert.equal(
+    completed.exceptionDetails,
+    undefined,
+    completed.exceptionDetails?.exception?.description || 'full CV Show evaluation failed',
+  );
+  assert.deepEqual(completed.result.value, {
+    selectedSequence: [
+      initial.result.value.selectedLabel,
+      'R&D-инжиниринг',
+      'Agent Portal',
+      'Symbiote Workspace',
+      'AUTOBOX v1',
+      'AUTOBOX v1',
+      'Пульс',
+      initial.result.value.selectedLabel,
+    ],
+    selected: initial.result.value.selectedLabel,
+    presenterVisible: false,
+    startVisible: true,
+    triggerFocused: true,
+  });
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('[data-tour-action="short"]')?.click()`,
+  }, { label: 'start CV Show before panel close', timeoutMs: 5_000 });
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('panel-layout')?.closeUiPanel?.('portfolio-tour')`,
+  }, { label: 'close CV Show while playing', timeoutMs: 5_000 });
+  let closedWhilePlaying = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    awaitPromise: true,
+    expression: `new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve({
+      playing: document.querySelector('portfolio-tour-panel tour-player')?.isPlaying || false,
+      selected: document.querySelector('.sn-tree-row[aria-selected="true"]')?.dataset.treeId,
+      presenterVisible: document.querySelector('.symbiote-presenter-cursor')?.classList.contains('is-visible') || false,
+      triggerFocused: document.activeElement?.classList.contains('pulse-tour-button') || false,
+    }))))`,
+  });
+  assert.deepEqual(closedWhilePlaying.result.value, {
+    playing: false,
+    selected: initial.result.value.selected,
+    presenterVisible: false,
+    triggerFocused: true,
+  });
+
+  await cdp.send('Emulation.setDeviceMetricsOverride', {
+    width: 390,
+    height: 844,
+    deviceScaleFactor: 1,
+    mobile: true,
+  });
+  await navigate(cdp, `${server.origin}/cv/?lang=ru&mode=flat&resource-test=cv-show-mobile`, {
+    expectedMode: 'flat',
+  });
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('.pulse-tour-button')?.click()`,
+  }, { label: 'open mobile CV Show', timeoutMs: 5_000 });
+  let mobile = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const layout = document.querySelector('panel-layout');
+        const panel = document.querySelector('portfolio-tour-panel');
+        const buttons = Array.from(panel?.querySelectorAll('.tour-start button') || []);
+        const rect = panel?.getBoundingClientRect();
+        const ready = layout?.hasAttribute('drawer-end-open') && rect?.width > 0;
+        if (ready) {
+          return resolve({
+            drawerOpen: true,
+            panelFitsViewport: rect.left >= 0 && rect.right <= innerWidth,
+            horizontalOverflow: document.documentElement.scrollWidth - innerWidth,
+            controlsMeetTouchTarget: buttons.every((button) => button.getBoundingClientRect().height >= 44),
+            focusedControl: document.activeElement?.textContent?.trim(),
+          });
+        }
+        if (performance.now() - started > 8000) {
+          return reject(new Error('mobile CV Show drawer did not open'));
+        }
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  }, { label: 'inspect mobile CV Show', timeoutMs: 10_000 });
+  assert.deepEqual(mobile.result.value, {
+    drawerOpen: true,
+    panelFitsViewport: true,
+    horizontalOverflow: 0,
+    controlsMeetTouchTarget: true,
+    focusedControl: 'Краткий Show',
+  });
+});
