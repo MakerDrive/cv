@@ -976,6 +976,10 @@ export class PortfolioShowChat extends HTMLElement {
       this.#speechToken = token;
     }
     this.#session.resume();
+    this.dispatchEvent(new CustomEvent('portfolio-show-resume', {
+      bubbles: true,
+      composed: true,
+    }));
     this.#speech.resume();
     this.$.isPaused = false;
     this.$.resumeRequired = false;

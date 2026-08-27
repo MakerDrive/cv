@@ -314,10 +314,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     invalidateAlignedQueue();
     if (event.detail?.reason === 'meaningful-interaction') {
       presenter?.runner.meaningfulInteraction();
+      scheduleDocumentSelectionClear();
     } else {
       presenter?.runner.pause();
     }
-    scheduleDocumentSelectionClear();
+  };
+
+  const resumePresenter = (event) => {
+    if (event.target !== getChat()) return;
+    presenter?.runner.resume();
   };
 
   const disposePresenter = () => {
@@ -480,6 +485,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   document.addEventListener('portfolio-open-tour', onOpen);
   workspace.addEventListener('portfolio-show-start', onStart);
   document.addEventListener('portfolio-show-pause', pausePresenter, { capture: true });
+  document.addEventListener('portfolio-show-resume', resumePresenter, { capture: true });
   workspace.addEventListener('portfolio-show-phase', onPhase);
   workspace.addEventListener('portfolio-show-aligned-reset', onAlignedReset);
   workspace.addEventListener('portfolio-show-aligned-cue', onAlignedCue);
@@ -493,6 +499,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     document.removeEventListener('portfolio-open-tour', onOpen);
     workspace.removeEventListener('portfolio-show-start', onStart);
     document.removeEventListener('portfolio-show-pause', pausePresenter, { capture: true });
+    document.removeEventListener('portfolio-show-resume', resumePresenter, { capture: true });
     workspace.removeEventListener('portfolio-show-phase', onPhase);
     workspace.removeEventListener('portfolio-show-aligned-reset', onAlignedReset);
     workspace.removeEventListener('portfolio-show-aligned-cue', onAlignedCue);

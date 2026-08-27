@@ -390,22 +390,26 @@ test('CV runner distinguishes required and optional missing targets', async () =
   assert.equal((await createRunner().run([{ ...base, policy: 'optional' }])).status, 'optional-missing');
 });
 
-test('CV runner clears presenter attention on pause without stopping active media', () => {
+test('CV runner freezes presenter attention on pause and clears it only on Stop', () => {
   const calls = [];
   const runner = createCvShowDirectiveRunner({
     attention: {
+      pause() { calls.push('pause-attention'); },
+      resume() { calls.push('resume-attention'); },
       clearTransient() { calls.push('clear-transient'); },
       clearMarkers() { calls.push('clear-markers'); },
     },
     media: { stop(reason) { calls.push(`stop:${reason}`); } },
   });
 
-  runner.clearAttention();
-  assert.deepEqual(calls, ['clear-markers', 'clear-transient']);
-  runner.cancel();
+  runner.pause();
+  assert.deepEqual(calls, ['pause-attention']);
+  runner.resume();
+  assert.deepEqual(calls, ['pause-attention', 'resume-attention']);
+  runner.stop();
   assert.deepEqual(calls, [
-    'clear-markers',
-    'clear-transient',
+    'pause-attention',
+    'resume-attention',
     'clear-markers',
     'clear-transient',
     'stop:phase-changed',
@@ -429,7 +433,7 @@ test('CV runner cannot present a stale attention cue after pause aborts readines
   });
   const running = runner.run([{ id: 'stale.frame', type: 'frame', target: 'target' }]);
 
-  runner.clearAttention();
+  runner.pause();
   releaseReadiness({ target: { id: 'target' } });
 
   assert.equal((await running).status, 'cancelled');
@@ -1258,6 +1262,7 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(runtime, /ShowMediaController/);
   assert.match(runtime, /monitorMeaningfulShowInteractions/);
   assert.match(logic, /portfolio-show-pause/);
+  assert.match(logic, /portfolio-show-resume/);
   assert.match(runtime, /runner\.meaningfulInteraction\(\)/);
   assert.match(adapter, /createShowActionLifecycle/);
   assert.match(runtime, /cursor\.dispose\(\)/);

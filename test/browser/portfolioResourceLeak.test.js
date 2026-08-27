@@ -4177,7 +4177,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
   assert.equal(cdp.exceptions.length, 0, 'lazy agent chat/player must not throw browser exceptions');
 });
 
-test('CV Show hides presenter layers on pause and removes them on terminal lifecycle', {
+test('CV Show preserves presenter layers on pause and removes them on terminal lifecycle', {
   timeout: 45_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('presenter lifecycle acceptance requires ignored local audio fixtures');
@@ -4273,16 +4273,12 @@ test('CV Show hides presenter layers on pause and removes them on terminal lifec
         visible: overlay?.classList.contains('is-visible') || false,
         opacity: overlay ? getComputedStyle(overlay).opacity : '',
         ink: overlay?.querySelector('.pc-ink path')?.getAttribute('d') || '',
-        selectionRanges: document.getSelection()?.rangeCount || 0,
       };
     })())))`,
-  }, { label: 'verify marker pause cleanup', timeoutMs: 5_000 });
-  assert.deepEqual(markerPaused.result.value, {
-    visible: false,
-    opacity: '0',
-    ink: '',
-    selectionRanges: 0,
-  });
+  }, { label: 'verify marker pause preservation', timeoutMs: 5_000 });
+  assert.equal(markerPaused.result.value.visible, true);
+  assert.equal(markerPaused.result.value.opacity, '1');
+  assert.ok(markerPaused.result.value.ink, 'Pause must retain rendered marker ink');
 
   await clickVisible(
     cdp,
@@ -4330,14 +4326,10 @@ test('CV Show hides presenter layers on pause and removes them on terminal lifec
     expression: `new Promise((resolve) => requestAnimationFrame(() => resolve({
       selectionRanges: document.getSelection()?.rangeCount || 0,
       selectionText: document.getSelection()?.toString() || '',
-      overlayOpacity: getComputedStyle(document.querySelector('.symbiote-presenter-cursor')).opacity,
     })))`,
-  }, { label: 'verify native selection pause cleanup', timeoutMs: 5_000 });
-  assert.deepEqual(selectionPaused.result.value, {
-    selectionRanges: 0,
-    selectionText: '',
-    overlayOpacity: '0',
-  });
+  }, { label: 'verify native selection pause preservation', timeoutMs: 5_000 });
+  assert.equal(selectionPaused.result.value.selectionRanges, 1);
+  assert.ok(selectionPaused.result.value.selectionText, 'Pause must retain native selected text');
 
   await clickVisible(
     cdp,
@@ -4376,7 +4368,7 @@ test('CV Show hides presenter layers on pause and removes them on terminal lifec
     'agent-dock-shell agent-show-chat .actions-card[data-action-state="current"] [data-action-id="start-short"]',
     'restart Show for automatic terminal cleanup',
   );
-  let automaticTerminal = await cdp.send('Runtime.evaluate', {
+  await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
     expression: `new Promise((resolve, reject) => {
@@ -4386,20 +4378,38 @@ test('CV Show hides presenter layers on pause and removes them on terminal lifec
         if (host?.$.isRunning
           && host?.narrationSnapshot?.active?.activeId
           && document.querySelectorAll('.symbiote-presenter-cursor').length === 1) {
-          host.stopShow({ completed: true });
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve({
-            activeId: host.narrationSnapshot.active.activeId || '',
-            presenterCount: document.querySelectorAll('.symbiote-presenter-cursor').length,
-            selectionRanges: document.getSelection()?.rangeCount || 0,
-          })));
-          return;
+          return resolve(true);
         }
-        if (performance.now() - started > 5000) return reject(new Error('Show presenter did not recreate'));
+        if (performance.now() - started > 10000) return reject(new Error('Show presenter did not recreate'));
         setTimeout(check, 25);
       };
       check();
     })`,
-  }, { label: 'verify automatic terminal presenter disposal', timeoutMs: 5_000 });
+  }, { label: 'wait for automatic terminal presenter', timeoutMs: 12_000 });
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('portfolio-show-chat')?.stopShow({ completed: true })`,
+  }, { label: 'complete Show automatically', timeoutMs: 5_000 });
+  let automaticTerminal = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const host = document.querySelector('portfolio-show-chat');
+        const result = {
+          activeId: host?.narrationSnapshot?.active?.activeId || '',
+          presenterCount: document.querySelectorAll('.symbiote-presenter-cursor').length,
+          selectionRanges: document.getSelection()?.rangeCount || 0,
+        };
+        if (!result.activeId && result.presenterCount === 0 && result.selectionRanges === 0) {
+          return resolve(result);
+        }
+        if (performance.now() - started > 5000) return reject(new Error('automatic terminal cleanup did not settle'));
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'verify automatic terminal presenter disposal', timeoutMs: 7_000 });
   assert.deepEqual(automaticTerminal.result.value, {
     activeId: '',
     presenterCount: 0,

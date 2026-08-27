@@ -177,6 +177,13 @@ export function createCvShowDirectiveRunner(options = {}) {
     markerSeries = '';
   };
 
+  const pauseAttention = () => {
+    attention?.pause?.();
+    activeController?.abort(new DOMException('CV Show phase paused', 'AbortError'));
+    activeController = null;
+    cancelAction('pause');
+  };
+
   const cancel = (reason = 'stop') => {
     clearAttention(reason);
     media?.stop?.('phase-changed');
@@ -334,7 +341,8 @@ export function createCvShowDirectiveRunner(options = {}) {
     run,
     cancel,
     clearAttention,
-    pause: () => clearAttention('pause'),
+    pause: pauseAttention,
+    resume: () => attention?.resume?.(),
     stop: () => cancel('stop'),
     seek: () => clearAttention('seek'),
     branchChange: () => clearAttention('branch-change'),
