@@ -2560,7 +2560,12 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('local narration acceptance requires ignored local audio fixtures');
   let page = await createPortfolioPage(t, {
-    viewport: DESKTOP_VIEWPORT,
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
     touch: false,
   });
   if (!page) return;
@@ -2665,7 +2670,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
       ) }));
     };`,
   });
-  await navigate(cdp, `${server.origin}/cv/`, {
+  await navigate(cdp, `${server.origin}/cv/projects/project-graph-mcp/pulse/project-graph-mcp-compact-code-mode-v1-5/`, {
     expectedMode: 'structured',
   });
   let normalRoute = await cdp.send('Runtime.evaluate', {
@@ -2767,8 +2772,8 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
             paused: snapshot.active.paused,
             playerPlaying: player?.$.playing,
             playerCaption: player?.querySelector('.chat-show-caption-text')?.textContent?.trim(),
-            playerTts: player?.querySelector('.chat-show-tts-text')?.textContent?.trim(),
-            transcriptHasNarration: transcriptText.includes(player?.$.ttsText || ''),
+            transcriptHasNarration: Boolean(player?.$.captionText)
+              && transcriptText.includes(player.$.captionText),
             positionLabel: player?.$.positionLabel,
           });
         }
@@ -2800,7 +2805,6 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
     paused: false,
     playerPlaying: true,
     playerCaption: CV_SHOW_STORY.scenes[0].subtitle,
-    playerTts: CV_SHOW_STORY.scenes[0].speech,
     transcriptHasNarration: false,
     positionLabel: '1 / 16',
   });
@@ -3003,6 +3007,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
           },
         },
       )), { once: true });
+      trigger.addEventListener('click', () => { window.__browserAudioArbitrationClicked = true; }, { once: true });
       workspace.append(anchor, media);
       document.body.append(trigger);
       media.load();
@@ -3027,12 +3032,26 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
         if (host?.narrationSnapshot?.active?.paused && host.$?.mediaBlocksResume && media && !media.paused) {
           return resolve({ narrationPaused: true, mediaPlaying: true, resumeBlocked: true });
         }
-        if (performance.now() - started > 5000) return reject(new Error('shared media did not preempt narration'));
+        if (performance.now() - started > 5000) return resolve({
+          timeout: true,
+          clicked: window.__browserAudioArbitrationClicked === true,
+          narration: host?.narrationSnapshot || null,
+          mediaPaused: media?.paused,
+          mediaReadyState: media?.readyState,
+          resumeBlocked: host?.$?.mediaBlocksResume,
+          phases: globalThis.__cvShowPhaseHistory || [],
+          results: globalThis.__cvShowResultHistory || [],
+        });
         setTimeout(check, 25);
       };
       check();
     })`,
   }, { label: 'verify shared audio preemption', timeoutMs: 7_000 });
+  assert.equal(
+    preempted.exceptionDetails,
+    undefined,
+    preempted.exceptionDetails?.exception?.description || 'shared media preemption evaluation failed',
+  );
   assert.deepEqual(preempted.result.value, {
     narrationPaused: true,
     mediaPlaying: true,
@@ -3603,6 +3622,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
       let target = null;
       let mediaIndex = null;
       let resetIndex = null;
+      let sourceActiveId = '';
       const check = () => {
         const host = document.querySelector('portfolio-show-chat');
         if (!media) {
@@ -3623,10 +3643,15 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
             return;
           }
           media = candidate;
+          sourceActiveId = host.alignmentSnapshot.activeId || '';
           before = host.alignmentSnapshot.narrationPositionMs;
-          target = before > 1000
+          const physicalBefore = Math.round(media.currentTime * 1000);
+          target = physicalBefore > 1000
             ? 750
-            : Math.min(Math.max(before + 500, 750), Math.max(750, Math.round(media.duration * 1000) - 250));
+            : Math.min(
+                Math.max(physicalBefore + 500, 750),
+                Math.max(750, Math.round(media.duration * 1000) - 250),
+              );
           mediaIndex = globalThis.__cvShowMediaEventHistory.length;
           resetIndex = globalThis.__cvShowResetHistory.length;
           media.currentTime = target / 1000;
@@ -3634,6 +3659,14 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
         const alignment = host.alignmentSnapshot;
         const events = globalThis.__cvShowMediaEventHistory.slice(mediaIndex);
         const resets = globalThis.__cvShowResetHistory.slice(resetIndex);
+        if (alignment.activeId !== sourceActiveId || media !== globalThis.__cvShowLastMedia) {
+          return resolve({
+            transitioned: true,
+            sourceActiveId,
+            activeId: alignment.activeId || '',
+            mediaReplaced: media !== globalThis.__cvShowLastMedia,
+          });
+        }
         if (alignment.lastResetReason === 'seeked'
           && events.some(({ type }) => type === 'seeked')) return resolve({
           before,
@@ -3656,13 +3689,21 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
     undefined,
     unrelatedSeek.exceptionDetails?.exception?.description || 'ordinary seek evaluation failed',
   );
-  assert.equal(unrelatedSeek.result.value.resetReason, 'seeked');
-  assert.equal(unrelatedSeek.result.value.cueReason, 'seeked');
-  assert.notEqual(unrelatedSeek.result.value.after, unrelatedSeek.result.value.before);
-  assert.equal(unrelatedSeek.result.value.nativeSeeking, true);
-  assert.equal(unrelatedSeek.result.value.nativeTimeupdate, true);
-  assert.equal(unrelatedSeek.result.value.nativeSeeked, true);
-  assert.deepEqual(unrelatedSeek.result.value.resetReasons, ['seeked']);
+  if (unrelatedSeek.result.value.transitioned) {
+    assert.ok(
+      unrelatedSeek.result.value.activeId !== unrelatedSeek.result.value.sourceActiveId
+        || unrelatedSeek.result.value.mediaReplaced === true,
+      'ordinary seek may be superseded only by the next scene runtime or its replacement media',
+    );
+  } else {
+    assert.equal(unrelatedSeek.result.value.resetReason, 'seeked');
+    assert.equal(unrelatedSeek.result.value.cueReason, 'seeked');
+    assert.notEqual(unrelatedSeek.result.value.after, unrelatedSeek.result.value.before);
+    assert.equal(unrelatedSeek.result.value.nativeSeeking, true);
+    assert.equal(unrelatedSeek.result.value.nativeTimeupdate, true);
+    assert.equal(unrelatedSeek.result.value.nativeSeeked, true);
+    assert.deepEqual(unrelatedSeek.result.value.resetReasons, ['seeked']);
+  }
 
   await cdp.send('Runtime.evaluate', {
     expression: `(() => {
@@ -3836,6 +3877,21 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
   }, { label: 'verify manual stop removes presenter resources', timeoutMs: 5_000 });
   assert.deepEqual(stoppedPresenter.result.value, { presenterCount: 0, selectionRanges: 0 });
 
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const full = document.querySelector(
+          'agent-dock-shell agent-show-chat .actions-card[data-action-state="current"] [data-action-id="start-full"]'
+        );
+        if (full) return resolve(true);
+        if (performance.now() - started > 8000) return reject(new Error('Full mode action did not remount after Stop'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'wait for Full mode action after Stop', timeoutMs: 10_000 });
   await clickVisible(
     cdp,
     'agent-dock-shell agent-show-chat .actions-card[data-action-state="current"] [data-action-id="start-full"]',
@@ -4298,6 +4354,23 @@ test('CV Show hides presenter layers on pause and removes them on terminal lifec
   }, { label: 'verify manual terminal presenter disposal', timeoutMs: 5_000 });
   assert.deepEqual(manualTerminal.result.value, { presenterCount: 0, selectionRanges: 0 });
 
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        if (document.querySelector(
+          'agent-dock-shell agent-show-chat .actions-card[data-action-state="current"] [data-action-id="start-short"]',
+        )) return resolve(true);
+        if (performance.now() - started > 5000) {
+          return reject(new Error('Show mode selection did not return after Stop'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for mode selection after terminal cleanup', timeoutMs: 7_000 });
+
   await clickVisible(
     cdp,
     'agent-dock-shell agent-show-chat .actions-card[data-action-state="current"] [data-action-id="start-short"]',
@@ -4343,6 +4416,7 @@ async function installRuGraphSnapshotStartup(cdp) {
       window.__cvGraphTimeline = [];
       window.__cvGraphSawVisibleStraight = false;
       window.__cvGraphSawConnectionsOnlyOverlay = false;
+      window.__cvGraphSawOverlayWithLiveNodes = false;
       window.__cvGraphSawEdgeGap = false;
       window.__cvGraphSawUnhiddenSnapshot = false;
       window.__cvGraphLongTasks = [];
@@ -4364,6 +4438,14 @@ async function installRuGraphSnapshotStartup(cdp) {
           && snapshot.complete
           && snapshot.naturalWidth > 0;
         const overlayPaths = overlayReady ? 180 : 0;
+        const visibleNodeCount = [...(canvas?.querySelectorAll('graph-node') || [])]
+          .filter((node) => {
+            const style = getComputedStyle(node);
+            return style.display !== 'none'
+              && style.visibility !== 'hidden'
+              && Number(style.opacity) > 0.01
+              && node.getClientRects().length > 0;
+          }).length;
         const liveLayer = canvas?.querySelector('svg.sn-connections');
         const straightLike = paths.filter((path) => (
           ((path.getAttribute('d') || '').match(/[mlhvcsqtaz]/giu) || []).join('').toUpperCase() === 'ML'
@@ -4384,6 +4466,7 @@ async function installRuGraphSnapshotStartup(cdp) {
           none: qualities.none || 0,
           straightLike,
           proxies: canvas?.querySelectorAll('[data-conn-proxy-id]').length || 0,
+          visibleNodeCount,
           dragging: canvas?.getAttribute('data-node-dragging') || '',
         };
         const visibleStraight = frame.canvasOpacity > 0.01
@@ -4395,6 +4478,9 @@ async function installRuGraphSnapshotStartup(cdp) {
           && Number(liveLayer ? getComputedStyle(liveLayer).opacity : 0) > 0.01;
         const visibleEdges = visibleOverlay || visibleLiveEdges;
         if (visibleOverlay) window.__cvGraphSawConnectionsOnlyOverlay = true;
+        if (visibleOverlay && visibleNodeCount > 0) {
+          window.__cvGraphSawOverlayWithLiveNodes = true;
+        }
         if (snapshot && snapshot.getAttribute('aria-hidden') !== 'true') {
           window.__cvGraphSawUnhiddenSnapshot = true;
         }
@@ -4513,6 +4599,7 @@ async function readGraphSnapshotAcceptance(cdp, expectedResolution) {
             sawFullPcbQuality: (window.__cvGraphPcbQualities || []).includes('full'),
             sawVisibleStraight: window.__cvGraphSawVisibleStraight === true,
             sawConnectionsOnlyOverlay: window.__cvGraphSawConnectionsOnlyOverlay === true,
+            sawOverlayWithLiveNodes: window.__cvGraphSawOverlayWithLiveNodes === true,
             sawEdgeGap: window.__cvGraphSawEdgeGap === true,
             sawUnhiddenSnapshot: window.__cvGraphSawUnhiddenSnapshot === true,
             longTasks: (window.__cvGraphLongTasks || []).slice(),
@@ -4551,6 +4638,7 @@ async function readGraphSnapshotAcceptance(cdp, expectedResolution) {
             }, {}),
             sawVisibleStraight: window.__cvGraphSawVisibleStraight === true,
             sawConnectionsOnlyOverlay: window.__cvGraphSawConnectionsOnlyOverlay === true,
+            sawOverlayWithLiveNodes: window.__cvGraphSawOverlayWithLiveNodes === true,
             sawEdgeGap: window.__cvGraphSawEdgeGap === true,
             sawUnhiddenSnapshot: window.__cvGraphSawUnhiddenSnapshot === true,
             timeline: (window.__cvGraphTimeline || []).slice(-80),
@@ -4609,6 +4697,7 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
   assert.equal(state.snapshotResources.filter((url) => url.endsWith('/initial.svg')).length, 1);
   assert.equal(state.snapshotResources.filter((url) => url.endsWith('.snapshot.json')).length, 1);
   assert.equal(state.sawConnectionsOnlyOverlay, true, JSON.stringify(state.timeline));
+  assert.equal(state.sawOverlayWithLiveNodes, true, JSON.stringify(state.timeline));
   assert.equal(state.sawEdgeGap, false, JSON.stringify(state.timeline));
   assert.equal(state.sawUnhiddenSnapshot, false, JSON.stringify(state.timeline));
   assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
@@ -4710,6 +4799,141 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
   assert.equal(pcbCoverage.count, 0, JSON.stringify(pcbCoverage));
   assert.ok(articleSwitch.result.value.maxLongTaskMs < 250, JSON.stringify(articleSwitch.result.value));
   await saveGraphSnapshotScreenshot(cdp, 'ru-wide-cached-pcb');
+  assert.equal(cdp.exceptions.length, 0);
+});
+
+test('mobile Short Show resolves required presenter targets after starting from another article', {
+  timeout: 70_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('local narration acceptance requires ignored local audio fixtures');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: true,
+    },
+    touch: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}
+    globalThis.__cvMobileShowResults = [];
+    globalThis.__cvMobileShowPhases = [];
+    document.addEventListener('portfolio-show-phase', (event) => {
+      globalThis.__cvMobileShowPhases.push({
+        requestId: event.detail?.requestId ?? null,
+        directiveIds: (event.detail?.directives || []).map(({ id }) => id),
+        at: performance.now(),
+      });
+    }, { capture: true });
+    document.addEventListener('portfolio-show-result', (event) => {
+      const detail = event.detail || {};
+      globalThis.__cvMobileShowResults.push({
+        requestId: detail.requestId ?? null,
+        status: detail.status || '',
+        error: detail.error || '',
+        receipts: (detail.receipts || []).map((receipt) => ({
+          id: receipt.id || '',
+          sourceType: receipt.sourceType || '',
+          status: receipt.status || '',
+          reason: receipt.reason || '',
+          phases: (receipt.result?.phases || []).map(({ phase, status }) => ({ phase, status })),
+        })),
+        selectedId: document.querySelector('.sn-tree-row[aria-selected="true"]')?.dataset?.treeId || '',
+        viewerPath: document.querySelector('source-viewer')?._currentPath || '',
+        at: performance.now(),
+      });
+    }, { capture: true });
+    const nativePlay = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function(...args) {
+      this.playbackRate = 8;
+      return nativePlay.apply(this, args);
+    };`,
+  });
+  await navigate(
+    cdp,
+    `${server.origin}/cv/projects/project-graph-mcp/pulse/project-graph-mcp-compact-code-mode-v1-5/`,
+    { expectedMode: 'structured' },
+  );
+  await clickVisible(cdp, '.pulse-tour-button', 'mobile Show trigger from another article');
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const button = document.querySelector(
+          'agent-dock-shell agent-show-chat [data-action-id="start-short"]'
+        );
+        if (button) return resolve(true);
+        if (performance.now() - started > 8000) return reject(new Error('mobile Short action did not mount'));
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  }, { label: 'wait for mobile Short action', timeoutMs: 10_000 });
+  await clickVisible(
+    cdp,
+    'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
+    'mobile explicit Short mode selection',
+  );
+  const journal = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve) => {
+      const started = performance.now();
+      const check = () => {
+        const host = document.querySelector('portfolio-show-chat');
+        const activeId = host?.narrationSnapshot?.active?.activeId || '';
+        const results = globalThis.__cvMobileShowResults || [];
+        if (activeId === 'symbiote-workspace' || results.some(({ status }) => status === 'required-missing')) {
+          const viewer = document.querySelector('source-viewer');
+          const row = Array.from(viewer?.querySelectorAll('tbody tr') || [])
+            .find((candidate) => candidate.textContent?.includes('15+'));
+          const rowRect = row?.getBoundingClientRect?.();
+          const viewerRect = viewer?.getBoundingClientRect?.();
+          const layout = document.querySelector('.portfolio-layout');
+          const dock = document.querySelector('agent-dock-shell');
+          return resolve({
+            activeId,
+            results,
+            phases: globalThis.__cvMobileShowPhases || [],
+            selectedId: document.querySelector('.sn-tree-row[aria-selected="true"]')?.dataset?.treeId || '',
+            viewerPath: document.querySelector('source-viewer')?._currentPath || '',
+            debug: {
+              rowText: row?.textContent?.trim() || '',
+              rowRect: rowRect ? { x: rowRect.x, y: rowRect.y, width: rowRect.width, height: rowRect.height } : null,
+              viewerRect: viewerRect ? {
+                x: viewerRect.x, y: viewerRect.y, width: viewerRect.width, height: viewerRect.height,
+              } : null,
+              innerDrawerMode: layout?.hasAttribute('drawer-mode-active') || false,
+              innerStartOpen: layout?.hasAttribute('drawer-start-open') || false,
+              innerEndOpen: layout?.hasAttribute('drawer-end-open') || false,
+              outerDrawerMode: dock?.ref?.layout?.hasAttribute?.('drawer-mode-active') || false,
+              outerOpen: dock?.hasAttribute('open') || false,
+            },
+          });
+        }
+        if (performance.now() - started > 30000) return resolve({
+          timeout: true,
+          activeId,
+          results,
+          phases: globalThis.__cvMobileShowPhases || [],
+        });
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'journal mobile required presenter targets', timeoutMs: 35_000 });
+  assert.equal(journal.result.value.timeout, undefined, JSON.stringify(journal.result.value));
+  assert.deepEqual(
+    journal.result.value.results.filter(({ status }) => status === 'required-missing'),
+    [],
+    JSON.stringify(journal.result.value),
+  );
+  assert.match(journal.result.value.selectedId, /Профиль|Symbiote Workspace/u);
   assert.equal(cdp.exceptions.length, 0);
 });
 

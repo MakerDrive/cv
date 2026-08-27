@@ -43,6 +43,7 @@ import {
   validateCvShowAlignmentManifest,
 } from '../../src/static-pages/js/tour-player/showAlignmentAdapter.js';
 import { createBrowserSpeechController } from '../../src/static-pages/js/tour-player/speech.js';
+import { createCvShowMessageStream } from '../../src/static-pages/js/tour-player/messageStream.js';
 
 const EXPECTED_SHORT_SEQUENCE = Object.freeze([
   'positioning',
@@ -94,6 +95,12 @@ test('CV Show data exposes the approved Russian Short and detail-branch contract
   assert.equal(new Set(TOUR_SCENES.map(scene => scene.id)).size, 16);
   assert.equal(CV_SHOW_STORY.scenes.length, 16);
   assert.equal(Object.keys(CV_SHOW_STORY.branches).length, 14);
+  assert.deepEqual(CV_SHOW_STORY.scenes[0].directives.at(-1), {
+    id: 'positioning.open',
+    type: 'navigate',
+    target: 'profile/photo',
+    policy: 'required',
+  });
 
   for (const scene of CV_SHOW_STORY.scenes) {
     assert.ok(scene.title && scene.subtitle && scene.speech, scene.id);
@@ -165,6 +172,42 @@ test('CV presentation chat uses project context and never republishes narration'
   }
 });
 
+test('new CV chat messages stream from frame timestamps and cancellation settles honestly', async () => {
+  let callbacks = [];
+  let updates = [];
+  let controller = new AbortController();
+  let requestFrame = (callback) => {
+    callbacks.push(callback);
+    return callbacks.length;
+  };
+  let pending = createCvShowMessageStream('Потоковое сообщение', {
+    signal: controller.signal,
+    requestFrame,
+    cancelFrame() {},
+    charactersPerSecond: 10,
+    onUpdate: (text, receipt) => updates.push([text, receipt.status]),
+  });
+  callbacks.shift()(100);
+  callbacks.shift()(600);
+  assert.equal(updates[0][0].length > 0, true);
+  assert.equal(updates.at(-1)[0].length < 'Потоковое сообщение'.length, true);
+  controller.abort();
+  assert.equal((await pending).status, 'cancelled');
+
+  callbacks = [];
+  updates = [];
+  pending = createCvShowMessageStream('Коротко', {
+    requestFrame,
+    cancelFrame() {},
+    onUpdate: (text, receipt) => updates.push([text, receipt.status]),
+  });
+  callbacks.shift()(100);
+  callbacks.shift()(600);
+  assert.equal(updates.at(-1)[1], 'streaming', 'short replies retain a visible streaming interval');
+  callbacks.shift()(1_100);
+  assert.equal((await pending).status, 'completed');
+});
+
 test('Short and Full modes use the canonical 16-scene and 30-entry narration sets', () => {
   const short = createCvShowPlaybackEntries(CV_SHOW_STORY, 'short');
   const full = createCvShowPlaybackEntries(CV_SHOW_STORY, 'full');
@@ -211,7 +254,7 @@ test('CV adapter explicitly maps all nine product directives to the accepted sha
 
   assert.deepEqual(Object.keys(mapped), CV_SHOW_DIRECTIVE_TYPES);
   assert.equal(mapped.navigate.type, 'attention');
-  assert.equal(mapped.navigate.mode, 'cursor');
+  assert.equal(mapped.navigate.mode, 'click');
   assert.equal(mapped.frame.mode, 'frame');
   assert.equal(mapped['native-selection'].mode, 'native-selection');
   assert.equal(mapped.marker.mode, 'marker');
@@ -291,7 +334,7 @@ test('CV navigation re-resolves its target after selection and waits for the sel
     document: {},
     runtime,
     attention: {
-      present({ target }) { order.push(`present:${target.id}`); return { presented: true }; },
+      present({ target, mode }) { order.push(`present:${target.id}`); return { presented: true, mode }; },
       clearMarkers() {},
       clearTransient() {},
     },
@@ -322,6 +365,10 @@ test('CV navigation re-resolves its target after selection and waits for the sel
     'ready:viewer',
     'present:fresh-row',
   ]);
+  assert.equal(
+    result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.mode,
+    'click',
+  );
 });
 
 test('CV runner distinguishes required and optional missing targets', async () => {
@@ -870,6 +917,11 @@ test('private RU alignment uses shared recognized-word timing and real segment f
   });
   assert.equal(aligned.exactCueCount, 4);
   assert.equal(aligned.segmentCueCount, 0);
+  assert.deepEqual(aligned.captionTrack.slice(0, 3), [
+    { text: 'За', startMs: 500, endMs: 600 },
+    { text: 'годы', startMs: 600, endMs: 700 },
+    { text: 'работы', startMs: 700, endMs: 800 },
+  ]);
   media.currentTime = 0.5;
   media.dispatchEvent(new Event('timeupdate'));
   assert.equal(cues[0].source.id, 'positioning.experience-frame');
@@ -1200,6 +1252,8 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(`${logic}\n${runtime}\n${adapter}`, /symbiote-ui\/chat\/show-runtime/);
   assert.match(logic, /ShowSessionState/);
   assert.match(runtime, /ShowAttentionController/);
+  assert.doesNotMatch(runtime, /function createNativeSelection/);
+  assert.match(logic, /createCvShowMessageStream/);
   assert.match(runtime, /ShowAudioArbiter/);
   assert.match(runtime, /ShowMediaController/);
   assert.match(runtime, /monitorMeaningfulShowInteractions/);
@@ -1233,7 +1287,11 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(logic, /actionId === 'start-short'/);
   assert.match(logic, /actionId === 'start-full'/);
   assert.match(logic, /semantics: detail \? 'detail' : 'pointer-only'/);
-  assert.match(logic, /entry\.directives\.filter\(\(\{ type \}\) => type !== 'media'\)/);
+  assert.match(logic, /partitionCvShowAlignedDirectives\(entry\.directives\)/);
+  assert.match(logic, /const sceneSetupReady = this\.#runSceneSetup\(entry, requestId\)/);
+  assert.match(logic, /captionTrack/);
+  assert.match(logic, /addEventListener\?\.\('timeupdate'/);
+  assert.match(logic, /removeEventListener\?\.\('timeupdate'/);
   assert.match(logic, /queueMicrotask\(\(\) => this\.#advanceShort/);
   assert.match(logic, /payload\?\.branchId/);
   assert.doesNotMatch(logic, /payload\?\.current/);

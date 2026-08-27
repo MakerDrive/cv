@@ -38,7 +38,7 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
 
   let shared;
   if (directive.type === 'navigate') {
-    shared = { type: 'attention', id: directive.id, mode: 'cursor', targetId: directive.target };
+    shared = { type: 'attention', id: directive.id, mode: 'click', targetId: directive.target };
   } else if (directive.type === 'frame') {
     shared = { type: 'attention', id: directive.id, mode: 'frame', targetId: directive.target };
   } else if (directive.type === 'native-selection') {

@@ -241,7 +241,7 @@ portfolio-graph-panel {
   inline-size: 30.5%;
   block-size: 100%;
   border: 0;
-  background: var(--pulse-surface);
+  background: transparent;
   opacity: 1;
   pointer-events: none;
   transition: opacity 160ms ease-out;

@@ -12,6 +12,7 @@ const ALIGNMENT_MODEL = 'large-v3-turbo';
 const JSON_FILE_RE = /^(?:aligned\/)?[a-z0-9][a-z0-9._/-]*\.json$/u;
 
 const CV_SHOW_AUDIO_ANCHORS = Object.freeze({
+  'positioning.open': Object.freeze({ anchor: 'turn-start', offsetMs: 0 }),
   'positioning.experience-frame': Object.freeze({
     anchor: 'speech', quote: 'За годы работы', occurrence: 1, edge: 'start', offsetMs: 0,
   }),
@@ -308,9 +309,17 @@ export function createCvShowAlignmentController({
           source: sourceById.get(receipt.cue.cueId),
         })),
       });
+      const captionTrack = Object.freeze((sequence.turns || []).flatMap((turn) => (
+        (turn.words || []).map((word) => Object.freeze({
+          text: String(word.text || ''),
+          startMs: Number(word.startMs) || 0,
+          endMs: Number(word.endMs) || Number(word.startMs) || 0,
+        }))
+      )));
       return Object.freeze({
         runtime,
         schedule,
+        captionTrack,
         alignedSequenceHash: sequence.hash,
         mediaHash: sequence.media.hash,
         exactCueCount: schedule.filter((cue) => (

@@ -15,6 +15,7 @@ import {
   createCvShowPresentationContext,
 } from '../../../static-pages/js/tour-player/presentationContext.js';
 import { createBrowserSpeechController } from '../../../static-pages/js/tour-player/speech.js';
+import { createCvShowMessageStream } from '../../../static-pages/js/tour-player/messageStream.js';
 
 function formatProgress(message, current, total) {
   return message.replace('{current}', String(current)).replace('{total}', String(total));
@@ -104,6 +105,7 @@ export class PortfolioShowChat extends HTMLElement {
   #audioArbiter = null;
   #speechToken = null;
   #activeSpeechEntry = null;
+  #messageStreams = new Map();
 
   constructor() {
     super();
@@ -131,7 +133,16 @@ export class PortfolioShowChat extends HTMLElement {
         parts: [{ type: 'text', text: String(request.input).trim() }],
       });
     }
-    this.#messages.push(...(event.detail?.messages || []));
+    for (const message of event.detail?.messages || []) {
+      if (message?.role !== 'agent') {
+        this.#messages.push(message);
+        continue;
+      }
+      const textPart = message.parts?.find?.(({ type }) => type === 'text');
+      const trailingParts = message.parts?.filter?.((part) => part !== textPart) || [];
+      if (textPart) this.#appendStreamedMessage(message.id || `mock.agent.${this.#messages.length}`, textPart.text, trailingParts);
+      else this.#messages.push(message);
+    }
     this.#syncMessages();
   };
 
@@ -316,6 +327,7 @@ export class PortfolioShowChat extends HTMLElement {
     const wasRunning = this.$.isRunning;
     this.#requestId += 1;
     this.#stopSpeech('show-stopped');
+    this.#cancelMessageStreams();
     this.$.isRunning = false;
     this.$.isPaused = false;
     this.$.isError = false;
@@ -649,16 +661,18 @@ export class PortfolioShowChat extends HTMLElement {
     this.#session.appendMessage({ id: entry.id, role: 'agent', text: context.text });
     this.#appendAgentMessage(entry, context);
     this.emitShowDirective({ type: 'speech', id: `${entry.id}.speech`, text: entry.speech });
-    const visualDirectives = entry.directives.filter(({ type }) => type !== 'media');
-    const sceneSetupReady = this.#alignment.available
-      ? this.#runSceneSetup(entry, requestId)
-      : null;
+    const { scheduled } = partitionCvShowAlignedDirectives(entry.directives);
+    const visualDirectives = scheduled.map(({ source }) => source).filter(({ type }) => type !== 'media');
+    const sceneSetupReady = this.#runSceneSetup(entry, requestId);
     if (!this.#alignment.available) {
-      this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
-        bubbles: true,
-        composed: true,
-        detail: { directives: visualDirectives, aligned: false, requestId },
-      }));
+      void sceneSetupReady.then(() => {
+        if (requestId !== this.#requestId) return;
+        this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
+          bubbles: true,
+          composed: true,
+          detail: { directives: visualDirectives, aligned: false, requestId },
+        }));
+      });
     }
     this.#showPlayer?.bind?.(this.#showConfig());
     this.#syncPlayer();
@@ -693,6 +707,8 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   #disposeAlignedEntry() {
+    const alignedEntry = this.#alignedEntry;
+    alignedEntry?.media?.removeEventListener?.('timeupdate', alignedEntry.onCaptionTimeUpdate);
     this.#alignedEntry?.runtime?.dispose?.();
     this.#alignedEntry = null;
     this.#lastAlignedCue = null;
@@ -761,7 +777,16 @@ export class PortfolioShowChat extends HTMLElement {
       return null;
     }
     this.#disposeAlignedEntry();
-    this.#alignedEntry = aligned ? Object.freeze({ ...aligned, entryId: entry.id }) : null;
+    const onCaptionTimeUpdate = () => {
+      if (requestId === this.#requestId) this.#syncPlayer();
+    };
+    if (aligned) media.addEventListener?.('timeupdate', onCaptionTimeUpdate);
+    this.#alignedEntry = aligned ? Object.freeze({
+      ...aligned,
+      entryId: entry.id,
+      media,
+      onCaptionTimeUpdate,
+    }) : null;
     if (!aligned) return Object.freeze({ status: 'failed', reason: 'alignment-unavailable' });
     const receipt = await aligned.runtime.loadAndRestorePlayback({
       source: clip.audioUrl,
@@ -790,6 +815,7 @@ export class PortfolioShowChat extends HTMLElement {
       return;
     }
     await this.#alignmentReady;
+    await sceneSetupReady;
     if (requestId !== this.#requestId) return;
     let token = null;
     if (!startPaused) {
@@ -974,14 +1000,44 @@ export class PortfolioShowChat extends HTMLElement {
 
   #appendAgentMessage(entry, context) {
     /** @type {any[]} */
-    const parts = [{ type: 'text', text: context.text }];
+    const trailingParts = [];
     if (context.actions.length) {
-      parts.push(actionPart(`${entry.id}.actions`, context.actions, context.payload));
+      trailingParts.push(actionPart(`${entry.id}.actions`, context.actions, context.payload));
     }
     const id = `show.${entry.id}.${this.#messages.length}`;
     this.#currentMessageId = id;
-    this.#messages.push({ id, role: 'agent', parts });
+    this.#appendStreamedMessage(id, context.text, trailingParts);
+  }
+
+  #appendStreamedMessage(id, text, trailingParts = []) {
+    const textPart = { type: 'text', text: '' };
+    const message = { id, role: 'agent', parts: [textPart] };
+    this.#messages.push(message);
     this.#syncMessages();
+    const controller = new AbortController();
+    this.#messageStreams.set(id, controller);
+    void createCvShowMessageStream(text, {
+      signal: controller.signal,
+      onUpdate: (nextText) => {
+        textPart.text = nextText;
+        this.#syncMessages();
+      },
+    }).then((receipt) => {
+      if (receipt.status !== 'completed') return receipt;
+      textPart.text = String(text || '');
+      if (trailingParts.length && message.parts.length === 1) message.parts.push(...trailingParts);
+      this.#syncMessages();
+      return receipt;
+    }).finally(() => {
+      if (this.#messageStreams.get(id) === controller) this.#messageStreams.delete(id);
+    });
+  }
+
+  #cancelMessageStreams() {
+    for (const controller of this.#messageStreams.values()) {
+      controller.abort(new DOMException('CV Show message stream cancelled', 'AbortError'));
+    }
+    this.#messageStreams.clear();
   }
 
   #appendSystemMessage(text, { error = false, actions = [], actionId = '' } = {}) {
@@ -1016,13 +1072,26 @@ export class PortfolioShowChat extends HTMLElement {
   #syncPlayer(terminalState = null) {
     const scene = this.#currentScene();
     const activeEntry = this.$.inBranch ? this.#activeSpeechEntry : this.#currentEntry();
+    const captionTrack = this.#alignedEntry?.captionTrack || [];
+    const captionPositionMs = Math.max(
+      0,
+      Number(this.#alignedEntry?.media?.currentTime || 0) * 1_000,
+    );
+    let activeWordIndex = -1;
+    for (let index = 0; index < captionTrack.length; index += 1) {
+      if (captionPositionMs < captionTrack[index].startMs) break;
+      activeWordIndex = index;
+      if (captionPositionMs <= captionTrack[index].endMs) break;
+    }
     this.#showPlayer?.setState?.({
       index: Math.max(0, this.#sceneIndex),
       playing: this.$.isRunning && !this.$.isPaused,
       state: terminalState || (this.$.isPaused ? 'paused' : this.$.isRunning ? 'playing' : 'stopped'),
       caption: {
         speaker: this.$.inBranch ? this.#message('tour.details') : 'CV',
-        text: activeEntry?.subtitle || scene?.subtitle || '',
+        text: captionTrack.length ? activeEntry?.speech || '' : activeEntry?.subtitle || scene?.subtitle || '',
+        words: captionTrack,
+        activeWordIndex,
       },
       tts: activeEntry ? {
         label: this.#message('tour.tts'),

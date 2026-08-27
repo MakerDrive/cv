@@ -156,6 +156,8 @@ test('runtime snapshot fingerprint uses intrinsic canvas geometry and retains PC
   assert.doesNotMatch(page, /<object[\s\S]*class="portfolio-graph-snapshot"/);
   let css = await readFile(new URL('../../src/static-pages/css/index.css.js', import.meta.url), 'utf8');
   assert.match(css, /portfolio-canvas\[data-snapshot-pending\] \.sn-connections/);
+  assert.match(css, /\.portfolio-graph-snapshot\s*\{[^}]*background:\s*transparent/);
+  assert.doesNotMatch(css, /\.portfolio-graph-snapshot\s*\{[^}]*background:\s*var\(--pulse-surface\)/);
 });
 
 test('six measured subpixel nodes are stabilized without weakening the exact fingerprint', async () => {

@@ -49,7 +49,9 @@ function findVisibleProfileExperience(viewer, valueOnly = false) {
 function resolveTargetElement(workspace, runtime, targetId) {
   if (!targetId) return null;
   const direct = document.querySelector(`[data-tour-target="${escapeAttributeSelectorValue(targetId)}"]`);
-  if (direct) return firstVisibleSibling(direct);
+  const directTarget = direct ? firstVisibleSibling(direct) : null;
+  if (directTarget?.matches?.('video, audio')) return directTarget;
+  if (visibleElement(directTarget)) return directTarget;
   if (targetId === 'portfolio/header') return document.querySelector('body > header');
   if (targetId === 'portfolio/workspace') return workspace;
   if (targetId === 'portfolio/viewer') return runtime.viewer || workspace.querySelector('.portfolio-viewer');
@@ -78,24 +80,6 @@ function resolveTargetElement(workspace, runtime, targetId) {
     return findTreeRow(workspace, targetId, runtime) || runtime.viewer || workspace.querySelector('.portfolio-viewer');
   }
   return null;
-}
-
-function createNativeSelection(target) {
-  const selection = document.getSelection?.();
-  if (!selection || !document.createRange || !target) return { status: 'unsupported' };
-  const range = document.createRange();
-  range.selectNodeContents(target);
-  selection.removeAllRanges();
-  selection.addRange(range);
-  let active = true;
-  return {
-    receipt: { status: 'selected', target },
-    clear() {
-      if (!active) return;
-      active = false;
-      selection.removeAllRanges();
-    },
-  };
 }
 
 function resolveMediaElement(workspace, runtime, targetId) {
@@ -146,8 +130,20 @@ function inspectTargetPanel(workspace, runtime, targetId) {
   const panelType = panelTypeForTarget(targetId, runtime);
   const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
   const panel = findPanelNode(layout?.$.layoutTree, panelType);
+  const agentDock = /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
+  const outerMobile = Boolean(agentDock?.ref?.layout?.hasAttribute?.('drawer-mode-active'));
+  const outerOpen = Boolean(agentDock?.hasAttribute?.('open'));
   if (!layout || !panel) {
-    return Object.freeze({ targetId, panelType, panelId: '', mobile: false, dock: '', open: true });
+    return Object.freeze({
+      targetId,
+      panelType,
+      panelId: '',
+      mobile: false,
+      dock: '',
+      open: true,
+      outerMobile,
+      outerOpen,
+    });
   }
   const mobile = layout.hasAttribute('drawer-mode-active');
   const dock = panel.behavior?.mobileDock === 'start' ? 'start' : 'end';
@@ -160,33 +156,48 @@ function inspectTargetPanel(workspace, runtime, targetId) {
     mobile,
     dock,
     open: mobile ? drawerOpen && (!activeDrawerId || activeDrawerId === panel.id) : !panel.collapsed,
+    outerMobile,
+    outerOpen,
   });
 }
 
 function createPanelActionAdapter(workspace, runtime) {
   const inspect = ({ action }) => inspectTargetPanel(workspace, runtime, action.target);
   const reveal = ({ action, inspected }) => {
-    if (!inspected?.panelId || inspected.open) {
-      return { changed: false, ...inspected };
-    }
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
-    if (inspected.mobile) layout?.openDrawer?.(inspected.dock, inspected.panelId);
-    else {
+    const agentDock = /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
+    const innerChanged = Boolean(inspected?.panelId && !inspected.open);
+    const outerChanged = Boolean(inspected?.outerMobile && inspected.outerOpen);
+    if (innerChanged && inspected.mobile) layout?.openDrawer?.(inspected.dock, inspected.panelId);
+    else if (innerChanged) {
       layout?.dispatchEvent?.(new CustomEvent('panel-collapse-toggle', {
         bubbles: true,
         composed: true,
         detail: { panelId: inspected.panelId, collapsed: false },
       }));
     }
-    return { changed: true, ...inspectTargetPanel(workspace, runtime, action.target) };
+    if (outerChanged) agentDock?.close?.('show-action');
+    return {
+      changed: innerChanged || outerChanged,
+      innerChanged,
+      outerChanged,
+      ...inspectTargetPanel(workspace, runtime, action.target),
+    };
   };
   const awaitTransition = async ({ action, inspected, signal }) => {
-    if (!inspected?.panelId) return { ready: true, panelId: '' };
+    if (!inspected?.panelId && !inspected?.outerMobile) return { ready: true, panelId: '' };
     const ready = await waitForShowDomReadiness({
       document,
       target: () => {
         const state = inspectTargetPanel(workspace, runtime, action.target);
         const layout = workspace.querySelector('.portfolio-layout');
+        const outerReady = !inspected.outerMobile
+          || !inspected.outerOpen
+          || !state.outerOpen;
+        if (!outerReady) return null;
+        if (!inspected.panelId) return visibleElement(workspace);
+        const target = visibleElement(resolveTargetElement(workspace, runtime, action.target));
+        if (target) return target;
         return state.open ? visibleElement(findPanelElement(layout, state.panelId)) : null;
       },
       signal,
@@ -203,19 +214,31 @@ function createPanelActionAdapter(workspace, runtime) {
   });
   const restore = ({ action, inspected, reveal: revealReceipt }) => {
     if (revealReceipt?.changed !== true || inspected?.open || !inspected?.panelId) {
+      if (revealReceipt?.outerChanged) {
+        workspace.querySelector('agent-dock-shell')?.open?.('show-action');
+        return { changed: true, outerRestored: true };
+      }
       return { changed: false };
     }
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
     const current = inspectTargetPanel(workspace, runtime, action.target);
-    if (current.mobile) layout?.closeDrawer?.(current.dock);
-    else {
+    if (revealReceipt.innerChanged && current.mobile) layout?.closeDrawer?.(current.dock);
+    else if (revealReceipt.innerChanged) {
       layout?.dispatchEvent?.(new CustomEvent('panel-collapse-toggle', {
         bubbles: true,
         composed: true,
         detail: { panelId: inspected.panelId, collapsed: true },
       }));
     }
-    return { changed: true, panelId: inspected.panelId, restoredOpen: false };
+    if (revealReceipt.outerChanged) {
+      workspace.querySelector('agent-dock-shell')?.open?.('show-action');
+    }
+    return {
+      changed: true,
+      panelId: inspected.panelId,
+      restoredOpen: false,
+      outerRestored: revealReceipt.outerChanged === true,
+    };
   };
   return Object.freeze({ inspect, reveal, awaitTransition, awaitTarget, restore });
 }
@@ -241,7 +264,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     const cursor = createPresenterCursor();
     const attention = new ShowAttentionController({
       cursor,
-      selectText: createNativeSelection,
       resolveTarget: (target) => target,
     });
     const runner = createCvShowDirectiveRunner({
@@ -423,6 +445,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onDockChange = (event) => {
+    if (event.detail?.source === 'show-action') return;
     if (event.detail?.open !== false) return;
     getChat()?.stopShow?.();
     disposePresenter();

@@ -105,6 +105,7 @@ export const TOUR_SCENES = freezeDeep([
     }),
     directive('positioning.team-pause', 'idle', null),
     directive('positioning.workspace-transition', 'frame', 'project-card.symbiote-workspace'),
+    directive('positioning.open', 'navigate', 'profile/photo'),
   ]),
   scene('symbiote-workspace', '2026', 'projects/symbiote-workspace', [
     directive('workspace.open', 'navigate', 'projects/symbiote-workspace'),
