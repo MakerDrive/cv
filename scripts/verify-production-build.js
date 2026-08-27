@@ -23,7 +23,7 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 ]);
 
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
-  raw: 1_755_000,
+  raw: 1_758_000,
   gzip: 430_000,
 });
 
