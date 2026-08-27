@@ -416,6 +416,35 @@ test('CV runner freezes presenter attention on pause and clears it only on Stop'
   ]);
 });
 
+test('CV phase replacement preserves the presenter arrow while Stop performs terminal cleanup', () => {
+  const clears = [];
+  const runner = createCvShowDirectiveRunner({
+    attention: {
+      clearMarkers() {},
+      clearTransient(...args) { clears.push(args); },
+    },
+    media: { stop() {} },
+  });
+
+  runner.beginPhase();
+  assert.deepEqual(clears.at(-1), [
+    'replacement',
+    { preserveInk: false, preserveCursor: true },
+  ]);
+
+  runner.seek();
+  assert.deepEqual(clears.at(-1), [
+    'seek',
+    { preserveInk: false, preserveCursor: true },
+  ]);
+
+  runner.stop();
+  assert.deepEqual(clears.at(-1), [
+    'stop',
+    { preserveInk: false, preserveCursor: false },
+  ]);
+});
+
 test('CV runner cannot present a stale attention cue after pause aborts readiness', async () => {
   let releaseReadiness;
   let presentCalls = 0;

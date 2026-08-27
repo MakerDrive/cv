@@ -173,7 +173,8 @@ export function createCvShowDirectiveRunner(options = {}) {
     activeController = null;
     cancelAction(reason);
     attention?.clearMarkers?.();
-    attention?.clearTransient?.();
+    const preserveCursor = !['stop', 'completed', 'close', 'disposed'].includes(reason);
+    attention?.clearTransient?.(reason, { preserveInk: false, preserveCursor });
     markerSeries = '';
   };
 
@@ -190,7 +191,7 @@ export function createCvShowDirectiveRunner(options = {}) {
   };
 
   const run = async (directives = [], { continuePhase = false } = {}) => {
-    if (!continuePhase) cancel();
+    if (!continuePhase) cancel('replacement');
     let controller = new AbortController();
     activeController = controller;
     let receipts = [];
