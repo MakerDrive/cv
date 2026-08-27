@@ -25,6 +25,14 @@ const RETIREMENT_COPY = Object.freeze({
 });
 const PORTFOLIO_HEADER_CONTROLS = /*html*/ `
   <span class="pulse-header-title">${PAGE_TITLE}</span>
+  <button
+    class="pulse-tour-button"
+    type="button"
+    aria-label="Interactive Tour"
+    title="Interactive Tour"
+  >
+    <span class="material-symbols-outlined" aria-hidden="true">play_circle</span>
+  </button>
   <sn-segmented-control
     class="pulse-locale-toggle"
     name="portfolio-locale"

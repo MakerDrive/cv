@@ -19,11 +19,8 @@ ComplexScan AUTOBOX v1 was a substantial hardware and software R&D project for m
 :::article-block heritage-mission
 I developed the equipment and capture technology for the cultural-heritage platform now operating as OBJET.art. The work targeted digitization of art objects and cultural artifacts with enough fidelity for preservation, restoration analysis, and exhibition: detailed geometry, accurate color, shadow-free textures, and a workflow that could scale beyond a single lab setup.
 
-:::article-block capture-line
-In parallel with contributing to the partner platform, I developed an original capture technology line: a practical combination of photogrammetry, repeatable motion, light control, cross-polarization, source-data discipline, and 3D processing workflow aimed at geometry, color, and texture quality that was at the upper competitive level of its time.
-
 :::article-block capture-technology
-I worked on the capture technology line by researching photogrammetry versus laser scanning, validating RealityCapture and related tools, designing repeatable multi-angle capture, and building custom modular lighting hardware with wireless control, active cooling, sensors, and cross-polarization support. The equipment and capture configurations were specialized for difficult size ranges, from very small artifacts to large museum objects.
+In parallel with contributing to the partner platform, I developed an original capture technology line. I designed a system combining photogrammetry, repeatable motion, and custom modular lighting with wireless control and cross-polarization. The equipment and 3D processing workflow were optimized for a difficult size range — from miniature artifacts to large museum objects.
 
 :::article-block fabrication
 The equipment followed the same hands-on small-batch model as my other hardware lines: I assembled prototypes and early units myself, coordinated specialist contractors for fabricated parts such as laser-cut metal and acrylic, and handled final assembly, testing, and preparation for field use.

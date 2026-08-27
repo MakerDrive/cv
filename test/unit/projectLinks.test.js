@@ -126,7 +126,7 @@ test('project entries expose content paths while Markdown bodies stay out of ser
   assert.match(megavisor?.details || '', /contributed product ideas/);
   assert.doesNotMatch(megavisor?.details || '', /^# MEGAVISOR/);
   assert.match(autobox?.details || '', /original capture technology line/);
-  assert.match(autobox?.details || '', /upper competitive level of its time/);
+  assert.match(autobox?.details || '', /photogrammetry, repeatable motion, and custom modular lighting/);
   assert.match(autobox?.details || '', /Ten Japanese netsuke objects/);
   assert.match(autobox?.details || '', /Anna Savelyeva/);
   assert.match(autobox?.details || '', /Max Rutherston/);
@@ -144,7 +144,7 @@ test('project entries expose content paths while Markdown bodies stay out of ser
   assert.match(complexscan?.details || '', /small-batch production/);
   assert.match(complexscan?.details || '', /specialist contractors/);
   assert.match(loadProjectContent('autobox-v1', 'ru'), /развивал собственную технологическую линию съёмки/);
-  assert.match(loadProjectContent('autobox-v1', 'ru'), /верхней конкурентной планки своего времени/);
+  assert.match(loadProjectContent('autobox-v1', 'ru'), /фотограмметрию, повторяемое движение и кастомный модульный свет/);
   assert.match(loadProjectContent('autobox-v1', 'ru'), /Десять японских нэцкэ/);
   assert.match(loadProjectContent('autobox-v1', 'ru'), /Анны Савельевой/);
   assert.match(loadProjectContent('autobox-v1', 'ru'), /Макса Ратерстона/);

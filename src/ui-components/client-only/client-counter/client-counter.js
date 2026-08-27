@@ -1,6 +1,6 @@
 import Symbiote from '@symbiotejs/symbiote';
-import styles from './styles.js';
-import template from './template.js';
+import styles from './client-counter.css.js';
+import template from './client-counter.tpl.js';
 
 class ClientCounter extends Symbiote {
   count = 0;

@@ -13,8 +13,9 @@ if (markdownViewer) {
 }
 
 if (!document.querySelector('side-panel[disabled]')) {
-  await import('../../ui-components/universal/side-panel/logic.js');
+  await import('../../ui-components/universal/side-panel/side-panel.js');
 }
+await import('../../ui-components/client-only/tour-player/tour-player.js');
 
 import { socialLinks } from '../data/socialLinks.js';
 import { PORTFOLIO_LOCALE_MESSAGES } from '../data/portfolioTranslations.js';
@@ -700,6 +701,11 @@ document.addEventListener('click', (event) => {
   if (target instanceof Element && target.closest('.pulse-header-menu-button')) {
     event.preventDefault();
     openMaterialsDrawerFromHeader();
+    return;
+  }
+  if (target instanceof Element && target.closest('.pulse-tour-button')) {
+    event.preventDefault();
+    document.dispatchEvent(new CustomEvent('portfolio-start-tour'));
     return;
   }
 

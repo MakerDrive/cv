@@ -1,6 +1,6 @@
 import { icon } from '../../../icons/icon.js';
 
-const menuData = [
+export const menuData = [
   {
     name: 'Template Repo',
     path: './',
@@ -19,10 +19,9 @@ const menuData = [
   },
 ];
 
-let links = menuData.map(
-  item => /*html*/ `<a href="${item.path}">${icon('arrow_forward')} ${item.name}</a>`
-).join('');
-
 export default /*html*/ `
-${links}<div collapsed-btn>${icon('chevron_right')}</div>
+  <a itemize="menuItems" href="{{path}}" ${{'@current': 'isCurrent'}}>
+    <span ${{'innerHTML': 'icon'}}></span> {{name}}
+  </a>
+  <div collapsed-btn>${icon('chevron_right')}</div>
 `;

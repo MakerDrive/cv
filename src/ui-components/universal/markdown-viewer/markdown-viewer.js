@@ -1,4 +1,6 @@
-import Symbiote, { html } from '@symbiotejs/symbiote';
+import Symbiote from '@symbiotejs/symbiote';
+import template from './markdown-viewer.tpl.js';
+import styles from './markdown-viewer.css.js';
 
 const ALLOWED_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'tel:']);
 
@@ -14,6 +16,11 @@ function isSafeUrl(value) {
   }
 }
 
+/**
+ * Sanitizes markdown-generated HTML to remove scripts, styles, and unsafe URLs.
+ * @param {string} html - The raw HTML string to sanitize.
+ * @returns {string} The sanitized HTML string.
+ */
 export function sanitizeMarkdownHtml(html) {
   let template = document.createElement('template');
   template.innerHTML = String(html || '');
@@ -68,7 +75,6 @@ export class MarkdownViewer extends Symbiote {
   }
 }
 
-MarkdownViewer.template = html`
-  <div class="markdown-viewer-content" ${{innerHTML: 'renderedHtml'}}></div>
-`;
+MarkdownViewer.template = template;
+MarkdownViewer.rootStyles = styles;
 MarkdownViewer.reg('markdown-viewer');

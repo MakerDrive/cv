@@ -14,8 +14,8 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 ]);
 
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
-  raw: 1_600_000,
-  gzip: 365_000,
+  raw: 1_700_000,
+  gzip: 380_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);

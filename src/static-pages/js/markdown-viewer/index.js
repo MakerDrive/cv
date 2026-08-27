@@ -1,1 +1,1 @@
-import '../../../ui-components/universal/markdown-viewer/logic.js';
+import '../../../ui-components/universal/markdown-viewer/markdown-viewer.js';
