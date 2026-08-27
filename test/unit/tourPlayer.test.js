@@ -13,6 +13,7 @@ import { CV_SHOW_STORY } from '../../src/static-pages/data/tourScripts.js';
 import {
   CV_SHOW_DIRECTIVE_TYPES,
   adaptCvShowDirective,
+  createCvShowAttentionBarrierQueue,
   createCvShowDirectiveRunner,
 } from '../../src/static-pages/js/tour-player/showAdapter.js';
 import {
@@ -443,6 +444,34 @@ test('CV phase replacement preserves the presenter arrow while Stop performs ter
     'stop',
     { preserveInk: false, preserveCursor: false },
   ]);
+});
+
+test('automatic scene transition barrier waits for the current attention queue and cancels stale generations', async () => {
+  const queue = createCvShowAttentionBarrierQueue();
+  let releaseCurrent;
+  const currentGate = new Promise((resolve) => { releaseCurrent = resolve; });
+  const order = [];
+
+  queue.enqueue(async () => {
+    order.push('attention-start');
+    await currentGate;
+    order.push('attention-settled');
+  });
+  const currentBarrier = queue.wait();
+  await Promise.resolve();
+  assert.deepEqual(order, ['attention-start']);
+
+  releaseCurrent();
+  assert.deepEqual(await currentBarrier, { status: 'completed', generation: 0 });
+  assert.deepEqual(order, ['attention-start', 'attention-settled']);
+
+  let releaseStale;
+  const staleGate = new Promise((resolve) => { releaseStale = resolve; });
+  queue.enqueue(() => staleGate);
+  const staleBarrier = queue.wait();
+  queue.invalidate();
+  releaseStale();
+  assert.deepEqual(await staleBarrier, { status: 'cancelled', generation: 0 });
 });
 
 test('CV runner cannot present a stale attention cue after pause aborts readiness', async () => {
@@ -1326,7 +1355,9 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(logic, /captionTrack/);
   assert.match(logic, /addEventListener\?\.\('timeupdate'/);
   assert.match(logic, /removeEventListener\?\.\('timeupdate'/);
-  assert.match(logic, /queueMicrotask\(\(\) => this\.#advanceShort/);
+  assert.match(logic, /portfolio-show-before-advance/);
+  assert.match(logic, /this\.#advanceAfterAttention\(requestId\)/);
+  assert.match(runtime, /alignedAttention\.wait\(\)\.then\(complete\)/);
   assert.match(logic, /payload\?\.branchId/);
   assert.doesNotMatch(logic, /payload\?\.current/);
   assert.doesNotMatch(logic, /createElement\(['"](?:li|button)['"]\)/);

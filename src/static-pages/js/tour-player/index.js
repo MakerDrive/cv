@@ -9,7 +9,10 @@ import {
 } from 'symbiote-ui/chat/show-runtime';
 import { TOUR_LOCALE_MESSAGES } from '../../data/tourTranslations.js';
 import { activateCvShowTarget, activateCvShowUserAction } from './activation.js';
-import { createCvShowDirectiveRunner } from './showAdapter.js';
+import {
+  createCvShowAttentionBarrierQueue,
+  createCvShowDirectiveRunner,
+} from './showAdapter.js';
 
 function getLocaleMessage(key) {
   const locale = document.documentElement.lang || 'en';
@@ -283,8 +286,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   let originTargetId = '';
   let running = false;
-  let alignedGeneration = 0;
-  let alignedQueue = Promise.resolve();
+  const alignedAttention = createCvShowAttentionBarrierQueue();
   /** @type {ReturnType<typeof createPresenterSession> | null} */
   let presenter = null;
 
@@ -294,8 +296,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const invalidateAlignedQueue = () => {
-    alignedGeneration += 1;
-    alignedQueue = Promise.resolve();
+    alignedAttention.invalidate();
   };
 
   const clearDocumentSelection = () => document.getSelection?.()?.removeAllRanges();
@@ -429,24 +430,31 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onAlignedCue = (event) => {
-    const generation = alignedGeneration;
+    const generation = alignedAttention.generation;
     const requestId = event.detail?.requestId;
     const source = event.detail?.source;
     if (!source) return;
-    alignedQueue = alignedQueue.then(async () => {
-      if (generation !== alignedGeneration) return;
+    void alignedAttention.enqueue(async () => {
+      if (!alignedAttention.isCurrent(generation)) return;
       const chat = getChat();
       try {
         const result = await ensurePresenter().runner.run([source], { continuePhase: true });
-        if (generation !== alignedGeneration) return;
+        if (!alignedAttention.isCurrent(generation)) return;
         dispatchResult(chat, requestId, result);
       } catch (error) {
-        if (error?.name === 'AbortError' || !chat || generation !== alignedGeneration) return;
+        if (error?.name === 'AbortError' || !chat || !alignedAttention.isCurrent(generation)) return;
         chat.dispatchEvent(new CustomEvent('portfolio-show-result', {
           detail: { requestId, status: 'required-missing', error: error?.message || String(error) },
         }));
       }
     });
+  };
+
+  const onBeforeAdvance = (event) => {
+    const complete = event.detail?.complete;
+    if (typeof complete !== 'function') return;
+    event.detail.handled = true;
+    void alignedAttention.wait().then(complete);
   };
 
   const onDockChange = (event) => {
@@ -489,6 +497,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   workspace.addEventListener('portfolio-show-phase', onPhase);
   workspace.addEventListener('portfolio-show-aligned-reset', onAlignedReset);
   workspace.addEventListener('portfolio-show-aligned-cue', onAlignedCue);
+  workspace.addEventListener('portfolio-show-before-advance', onBeforeAdvance);
   workspace.addEventListener('portfolio-show-stop', restoreOrigin);
   workspace.addEventListener('portfolio-show-complete', restoreOrigin);
   workspace.addEventListener('portfolio-show-action', onShowAction);
@@ -503,6 +512,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     workspace.removeEventListener('portfolio-show-phase', onPhase);
     workspace.removeEventListener('portfolio-show-aligned-reset', onAlignedReset);
     workspace.removeEventListener('portfolio-show-aligned-cue', onAlignedCue);
+    workspace.removeEventListener('portfolio-show-before-advance', onBeforeAdvance);
     workspace.removeEventListener('portfolio-show-stop', restoreOrigin);
     workspace.removeEventListener('portfolio-show-complete', restoreOrigin);
     workspace.removeEventListener('portfolio-show-action', onShowAction);

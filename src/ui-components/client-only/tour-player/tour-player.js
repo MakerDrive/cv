@@ -614,6 +614,34 @@ export class PortfolioShowChat extends HTMLElement {
     }
   }
 
+  #waitForAttentionBarrier(requestId) {
+    let settle;
+    let settled = false;
+    const completion = new Promise((resolve) => { settle = resolve; });
+    const detail = {
+      requestId,
+      handled: false,
+      complete: (receipt = null) => {
+        if (settled) return;
+        settled = true;
+        settle(receipt || Object.freeze({ status: 'completed' }));
+      },
+    };
+    this.dispatchEvent(new CustomEvent('portfolio-show-before-advance', {
+      bubbles: true,
+      composed: true,
+      detail,
+    }));
+    if (!detail.handled) detail.complete(Object.freeze({ status: 'unhandled' }));
+    return completion;
+  }
+
+  async #advanceAfterAttention(requestId) {
+    const receipt = await this.#waitForAttentionBarrier(requestId);
+    if (receipt?.status === 'cancelled') return;
+    this.#advanceShort(requestId);
+  }
+
   #advanceShort(requestId) {
     if (requestId !== this.#requestId || !this.$.isRunning || this.$.isPaused || this.$.inBranch) return;
     if (this.#sceneIndex >= this.#playbackEntries.length - 1) {
@@ -851,7 +879,7 @@ export class PortfolioShowChat extends HTMLElement {
       onEnd: () => {
         if (requestId !== this.#requestId) return;
         releaseSpeech();
-        if (!startedInBranch) queueMicrotask(() => this.#advanceShort(requestId));
+        if (!startedInBranch) void this.#advanceAfterAttention(requestId);
       },
       onError: (_error, receipt) => {
         if (requestId !== this.#requestId) return;

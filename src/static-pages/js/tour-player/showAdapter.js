@@ -121,6 +121,43 @@ function throwIfAborted(signal) {
   throw signal.reason || new DOMException('CV Show phase cancelled', 'AbortError');
 }
 
+/**
+ * Serializes aligned attention work and exposes an event-driven scene barrier.
+ * Invalidating a generation releases new work without treating stale settlement
+ * as permission to advance the replacement scene.
+ */
+export function createCvShowAttentionBarrierQueue() {
+  let generation = 0;
+  let tail = Promise.resolve();
+
+  return Object.freeze({
+    get generation() { return generation; },
+    isCurrent: (value) => value === generation,
+    invalidate() {
+      generation += 1;
+      tail = Promise.resolve();
+      return generation;
+    },
+    enqueue(operation) {
+      const owner = generation;
+      const pending = tail.then(() => (
+        owner === generation ? operation(owner) : undefined
+      ));
+      tail = pending.catch(() => undefined);
+      return pending;
+    },
+    async wait() {
+      const owner = generation;
+      const pending = tail;
+      await pending;
+      return Object.freeze({
+        status: owner === generation ? 'completed' : 'cancelled',
+        generation: owner,
+      });
+    },
+  });
+}
+
 /** @param {Record<string, any>} [options] */
 export function createCvShowDirectiveRunner(options = {}) {
   const {
