@@ -70,7 +70,7 @@ async function loadDeclaredExportMatcher() {
   return (subpath) => matchers.some((matches) => matches(subpath));
 }
 
-test('source, tests, and scripts never import the symbiote-ui/ui barrel', async () => {
+test('source, tests, and scripts never import the complete symbiote-ui/ui catalog', async () => {
   let usages = await collectProviderImports();
   let barrelUsages = usages.filter(({ specifier }) => specifier === FORBIDDEN_SPECIFIER);
   assert.deepEqual(

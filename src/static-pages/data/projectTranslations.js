@@ -1,5 +1,13 @@
 export const PROJECT_TRANSLATIONS = Object.freeze({
   ru: {
+    'adaptive-maximo-workbench': {
+      title: 'Adaptive Maximo Workbench',
+      summary: 'Demo / Alpha возможностей Symbiote Workspace для обслуживания оборудования: заявки, активы, локации, бригады и объявленные действия в общем контексте человека и агента.'
+    },
+    'mobile-smm-platform': {
+      title: 'Мобильная SMM-платформа',
+      summary: 'Управляемый многопрофильный SMM-кейс: медиа, расписание, очередь, Android-исполнение, согласование, лимиты, дедупликация и журнал действий.'
+    },
     'agent-portal': {
       summary: 'R&D-среда для инженерной работы с ИИ и loop engineering: проектная память, context engineering, RAG-style context retrieval, графовый контекст, маршрутизация моделей/ресурсов, оркестрация задач, evals/guardrails и контролируемая доставка результата.'
     },
@@ -62,6 +70,14 @@ export const PROJECT_TRANSLATIONS = Object.freeze({
     },
   },
   es: {
+    'adaptive-maximo-workbench': {
+      title: 'Adaptive Maximo Workbench',
+      summary: 'Demo / Alpha de Symbiote Workspace para mantenimiento: órdenes, activos, ubicaciones, equipos y acciones declaradas en un contexto compartido entre persona y agente.'
+    },
+    'mobile-smm-platform': {
+      title: 'Plataforma móvil de operaciones SMM',
+      summary: 'Caso SMM multiperfil controlado: medios, horarios, cola, ejecución Android, aprobaciones, límites, deduplicación y registro de acciones.'
+    },
     'agent-portal': {
       summary: 'Workspace I+D para ingeniería asistida por IA y loop engineering: memoria de proyecto, context engineering, RAG-style context retrieval, contexto de grafo, enrutamiento de modelos/recursos, orquestación, evals/guardrails y entrega controlada.'
     },

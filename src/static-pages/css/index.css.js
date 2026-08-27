@@ -16,7 +16,7 @@ ${styles}
 }
 
 body {
-  background: var(--pulse-surface);
+  background: transparent;
   color: var(--pulse-text);
 }
 
@@ -202,6 +202,7 @@ main > article {
 }
 
 portfolio-workspace,
+agent-dock-shell,
 .portfolio-layout,
 portfolio-tree-panel,
 portfolio-graph-panel,
@@ -217,6 +218,7 @@ portfolio-theme-panel,
 }
 
 portfolio-workspace,
+agent-dock-shell,
 .portfolio-layout,
 portfolio-tree-panel,
 portfolio-graph-panel,
@@ -228,6 +230,40 @@ portfolio-theme-panel {
 
 portfolio-graph-panel {
   position: relative;
+}
+
+.portfolio-graph-snapshot {
+  position: absolute;
+  z-index: 2;
+  inset-block: 0;
+  inset-inline: 69.5% 0;
+  display: block;
+  inline-size: 30.5%;
+  block-size: 100%;
+  border: 0;
+  background: var(--pulse-surface);
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 160ms ease-out;
+}
+
+portfolio-graph-panel > .portfolio-graph-snapshot {
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.portfolio-graph-snapshot[data-removing] {
+  opacity: 0;
+}
+
+.portfolio-canvas[data-snapshot-pending] {
+  opacity: 1;
+  pointer-events: none;
+}
+
+.portfolio-canvas[data-snapshot-pending] .sn-connections {
+  opacity: 0;
 }
 
 portfolio-graph-panel[data-loading]::after {
@@ -456,6 +492,24 @@ portfolio-theme-panel,
   block-size: 108px;
 }
 
+/*
+ * Keep auto-sized route geometry on the same integer side of Chrome's
+ * subpixel rounding boundary in build capture and the embedded browser.
+ * These six authored nodes otherwise straddle .5px by less than 0.1px,
+ * which invalidates an exact provider nodeRects signature by one pixel.
+ */
+.portfolio-canvas graph-node[node-id="media/autobox-v1/ims/spinner"],
+.portfolio-canvas graph-node[node-id="media/autobox-v1/youtube/us3vQHuTYPw"],
+.portfolio-canvas graph-node[node-id="projects/photopizza-remote"],
+.portfolio-canvas graph-node[node-id="projects/photosnail-public"] {
+  padding-block-end: 0.5px;
+}
+
+.portfolio-canvas graph-node[node-id="media/autobox-v1/youtube/FugBzpZqXZ0"],
+.portfolio-canvas graph-node[node-id="pulse/terminal-x-mcp-terminal-execution-state"] {
+  padding-inline-end: 0.5px;
+}
+
 body > footer a {
   color: currentColor;
   font-weight: 700;
@@ -529,8 +583,12 @@ body > footer a {
   }
 
   .pulse-workspace {
-    height: auto;
+    height: var(--pulse-workspace-block-size);
     min-height: var(--pulse-workspace-block-size);
+  }
+
+  .pulse-screen > .portfolio-graph-snapshot {
+    display: none;
   }
 }
 

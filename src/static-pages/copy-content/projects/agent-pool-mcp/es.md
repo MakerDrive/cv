@@ -1,3 +1,9 @@
+:::article-block intro
+:::article-block execution-flow
+:::article-block execution-runtime
 Capa de ejecución para I+D en multi-agent orchestration: delegar trabajo entre agentes CLI, mantener responsabilidad visible, rastrear estado de procesos, gestionar handoffs y enrutar sesiones de agente mediante una interfaz MCP compartida.
 
+:::article-block work-branch
+:::article-block review-branch
+:::article-block result
 Desde el lado de la ejecución, el mismo patrón cubre workers en segundo plano, consenso entre modelos, pipelines, feedback bounce-back, transferencia de sesiones, políticas y grupos. El objetivo práctico es invertir la atención de los modelos más fuertes en decisiones, mientras los workers más baratos/rápidos hacen investigación, extracción de estructura, implementación rutinaria, validación y checks tipo eval.

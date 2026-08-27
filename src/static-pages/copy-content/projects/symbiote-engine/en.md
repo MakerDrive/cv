@@ -13,6 +13,11 @@ links: npm|https://www.npmjs.com/package/symbiote-engine; Demo|https://rnd-pro.g
 
 # Symbiote Engine
 
+:::article-block intro
+:::article-block layer-diagram
 Server-side execution library for composing backend services, DAG graphs, and automation blocks in the active Symbiote line.
 
+:::article-block workspace-join
+:::article-block execution-library
+:::article-block readonly-graph-demo
 symbiote-engine provides composable server primitives that products combine to build backends. It is NOT a framework — no opinions on auth, routing, or application structure. Within the Workspace-as-Config vector, engine is the backend execution provider for configs and plugins, not an owner of product UI.

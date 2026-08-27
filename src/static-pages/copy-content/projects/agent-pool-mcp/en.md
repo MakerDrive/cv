@@ -13,6 +13,12 @@ links: npm|https://www.npmjs.com/package/agent-pool-mcp
 
 # Agent Pool MCP
 
+:::article-block intro
+:::article-block execution-flow
+:::article-block execution-runtime
 Runtime layer for R&D on multi-agent orchestration: delegating work across CLI agents, keeping task ownership visible, tracking process state, handling handoffs, and routing agent sessions through a shared MCP interface.
 
+:::article-block work-branch
+:::article-block review-branch
+:::article-block result
 On the execution side, the runtime covers background workers, cross-model consensus, pipelines, bounce-back feedback, session handoff, policies, and groups. The practical goal is to spend stronger model attention on decisions while cheaper/faster workers handle research, structure extraction, routine implementation, validation, and eval-style checks.

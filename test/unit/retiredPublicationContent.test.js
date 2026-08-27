@@ -17,7 +17,7 @@ test('published publication bodies exist while retired publication bodies are ab
   let published = PUBLICATIONS.filter((publication) => publication.status === 'published');
   let retired = PUBLICATIONS.filter((publication) => publication.status === 'retired');
 
-  assert.equal(published.length, 60);
+  assert.equal(published.length, 62);
   assert.equal(retired.length, 38);
 
   for (let publication of published) {
@@ -47,5 +47,5 @@ test('published publication bodies exist while retired publication bodies are ab
 });
 
 test('runtime Markdown asset count derives from public content registries', () => {
-  assert.equal(getExpectedMarkdownContentCount(), 240);
+  assert.equal(getExpectedMarkdownContentCount(), 252);
 });

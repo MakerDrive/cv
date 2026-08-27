@@ -168,6 +168,8 @@ const UNDATED_PUBLICATION_SLUGS = new Set([
   'symbiote-engine-retrospective',
   'photosnail-public-retrospective',
   'lifecycle-messaging-platform-retrospective',
+  'adaptive-maximo-workbench-retrospective',
+  'mobile-smm-platform-retrospective',
   'autobox-v1-hardware-lighting-sync-postmortem',
   'complexscan-mesh-decimation-tradeoffs',
   'f360-studio-photogrammetry-lighting-rig',
@@ -314,7 +316,7 @@ function getPublicationBody(publication, locale) {
 }
 
 test('Production PUBLICATIONS registry integrity', () => {
-  assert.equal(PUBLICATIONS.length, 98, 'Production registry must contain exactly 98 portfolio publications');
+  assert.equal(PUBLICATIONS.length, 100, 'Production registry must contain exactly 100 portfolio publications');
   for (const pub of PUBLICATIONS) {
     assert.ok(['retrospective', 'article', 'release', 'field-note', 'research-note'].includes(pub.kind), `Publication ${pub.id} must be a retrospective, article, release, field-note or research-note`);
     assert.ok(['published', 'retired'].includes(pub.status), `Publication ${pub.id} must be published or retired`);
@@ -336,18 +338,18 @@ test('Production PUBLICATIONS registry integrity', () => {
   assert.doesNotThrow(() => validateRetirementTargets(PUBLICATIONS));
 });
 
-test('Production editorial classification matches the current 6/54/23/15 matrix', () => {
+test('Production editorial classification matches the current 6/56/23/15 matrix', () => {
   let retired = getRetiredPublications(PUBLICATIONS);
   let published = getPublicPublications(PUBLICATIONS);
   let bySlug = new Map(PUBLICATIONS.map(publication => [publication.slug, publication]));
 
-  assert.equal(PUBLICATIONS.length, 98);
+  assert.equal(PUBLICATIONS.length, 100);
   assert.equal(KEEP_PUBLICATION_SLUGS.size, 6);
   assert.equal(DIRECT_RETIREMENT_TARGETS.size, 15);
   assert.equal(MERGE_RETIREMENT_TARGETS.size, 23);
   assert.equal(RETIREMENT_TARGETS.size, 38);
   assert.equal(retired.length, 38);
-  assert.equal(published.length, 60);
+  assert.equal(published.length, 62);
 
   for (let slug of KEEP_PUBLICATION_SLUGS) {
     assert.equal(bySlug.get(slug)?.status, 'published', `${slug} must remain published`);
@@ -362,7 +364,7 @@ test('Production editorial classification matches the current 6/54/23/15 matrix'
   let rewriteSlugs = published
     .map(publication => publication.slug)
     .filter(slug => !KEEP_PUBLICATION_SLUGS.has(slug));
-  assert.equal(rewriteSlugs.length, 54);
+  assert.equal(rewriteSlugs.length, 56);
   assert.deepEqual(
     retired.map(publication => publication.slug).sort(),
     [...RETIREMENT_TARGETS.keys()].sort(),
@@ -479,7 +481,7 @@ test('Unique publication identity in validateAll', () => {
   assert.throws(() => validateAll([p1, p2]), /Duplicate publication ID/);
 });
 
-test('All 21 projects have at least one Pulse publication', () => {
+test('All 22 projects have at least one Pulse publication', () => {
   const coveredProjectIds = new Set(
     getPublicPublications(PUBLICATIONS).map(pub => pub.primaryProjectId),
   );
@@ -528,14 +530,19 @@ test('Published articles are associated with projects', () => {
 test('Published project records use their authoritative HTTPS project source', () => {
   let projectPublications = getPublicPublications(PUBLICATIONS)
     .filter(publication => publication.primaryProjectId !== null);
-  let lifecyclePublications = projectPublications
-    .filter(publication => publication.primaryProjectId === 'projects/lifecycle-messaging-platform');
+  let sourceFreeProjectIds = new Set([
+    'projects/lifecycle-messaging-platform',
+    'projects/adaptive-maximo-workbench',
+    'projects/mobile-smm-platform',
+  ]);
+  let sourceFreePublications = projectPublications
+    .filter(publication => sourceFreeProjectIds.has(publication.primaryProjectId));
   let sourcedPublications = projectPublications
-    .filter(publication => publication.primaryProjectId !== 'projects/lifecycle-messaging-platform');
+    .filter(publication => !sourceFreeProjectIds.has(publication.primaryProjectId));
 
-  assert.ok(lifecyclePublications.length > 0);
-  for (let publication of lifecyclePublications) {
-    assert.deepEqual(publication.sourceLinks, [], `${publication.slug} must remain confidential`);
+  assert.ok(sourceFreePublications.length >= sourceFreeProjectIds.size);
+  for (let publication of sourceFreePublications) {
+    assert.deepEqual(publication.sourceLinks, [], `${publication.slug} must not invent a public source`);
   }
 
   for (let publication of sourcedPublications) {

@@ -1,10 +1,20 @@
 :::article-block origin
+:::article-block intro
+:::article-block megavisor-origin
 Inventé PhotoPizza originalmente dentro del proyecto MEGAVISOR, donde necesitábamos una forma accesible, rápida y repetible de capturar medios interactivos de producto en 360 grados. La línea empezó con un prototipo de plataforma giratoria aún anterior, que construí antes de PhotoPizza ([primera versión](https://www.youtube.com/watch?v=f1cB4X1wI50)).
 
 :::article-block control-software
+:::article-block controller
+:::article-block controller-attribution
+:::article-block controller-media
 Dentro de MEGAVISOR definí la lógica de captura y los requisitos del equipo; el primer software de control para Arduino fue implementado por un especialista contratado. Después de MEGAVISOR empecé a desarrollar personalmente el software en JavaScript/Espruino, primero para controladores STM32 y después en configuraciones con Wi-Fi y app de navegador, mientras continuaba el proyecto como hardware y software open-source.
 
 :::article-block automation-platform
+:::article-block mechanics
+:::article-block browser-ui
+:::article-block turntable
+:::article-block camera-slider
+:::article-block panorama-head
 Posicioné el bloque de control como un módulo universal de automatización de captura: el mismo controlador movía la plataforma giratoria, un [slider de cámara](https://www.youtube.com/watch?v=t1xU6f-_lC0) y una [cabeza panorámica automática](https://www.youtube.com/watch?v=8qd0jA_UiWw), con una [app de control en navegador](https://www.youtube.com/watch?v=1p85wa4FI5s).
 
 :::article-block scope
@@ -17,4 +27,6 @@ PhotoPizza se convirtió en base para experimentos profesionales posteriores de 
 Seguí desarrollando y manteniendo PhotoPizza en paralelo con ComplexScan y F360 hasta mi traslado de Rusia a Argentina en 2022.
 
 :::article-block documentation
+:::article-block assembly-calibration
+:::article-block full-video
 El historial de builds y las variantes de hardware están documentados en el [Instagram diy.photopizza](https://www.instagram.com/diy.photopizza/).

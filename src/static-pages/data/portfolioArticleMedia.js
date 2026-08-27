@@ -58,6 +58,24 @@ export function createPortfolioMediaSlotKey(mediaId) {
   )).join('')}`;
 }
 
+export function createPortfolioArticleTargetId(slug, blockId) {
+  let project = String(slug || '').trim();
+  let block = String(blockId || '').trim();
+  return /^[a-z0-9][a-z0-9-]*$/.test(project) && /^[a-z0-9][a-z0-9-]*$/.test(block)
+    ? `article.${project}.${block}`
+    : '';
+}
+
+export function createPortfolioArticleTargetSlotKey(slug, blockId) {
+  let targetId = createPortfolioArticleTargetId(slug, blockId);
+  return targetId ? `tour-target-${slug}--${blockId}` : '';
+}
+
+export function getPortfolioArticleTargetIdFromSlotKey(slotKey) {
+  let match = String(slotKey || '').match(/^tour-target-([a-z0-9][a-z0-9-]*)--([a-z0-9][a-z0-9-]*)$/);
+  return match ? createPortfolioArticleTargetId(match[1], match[2]) : '';
+}
+
 export function parsePortfolioArticleBlocks(markdown) {
   let blocks = [];
   let current = null;
@@ -165,9 +183,9 @@ export function getPortfolioAssignedMediaDescriptors(assignments, targetId) {
 }
 
 export function composePortfolioArticleMedia({ slug, summary, details, descriptors = [] }) {
-  let placements = PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS[slug];
+  let placements = PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS[slug] || {};
   let blocks = parsePortfolioArticleBlocks(details);
-  if (!placements || !blocks.length || !descriptors.length) {
+  if (!blocks.length) {
     return { summary: String(summary || ''), details: String(details || ''), placedMediaIds: [] };
   }
 
@@ -188,7 +206,10 @@ export function composePortfolioArticleMedia({ slug, summary, details, descripto
   };
   return {
     summary: appendSlots(summary, 'lead'),
-    details: blocks.map((block) => appendSlots(block.markdown, block.id)).join('\n\n'),
+    details: blocks.map((block) => [
+      block.id ? `:::content-slot ${createPortfolioArticleTargetSlotKey(slug, block.id)}` : '',
+      appendSlots(block.markdown, block.id),
+    ].filter(Boolean).join('\n\n')).join('\n\n'),
     placedMediaIds: [...idsByBlock.values()].flat(),
   };
 }

@@ -1,4 +1,9 @@
 import { createRuntimeAssetUrl } from './runtimeAssetUrl.js';
+import {
+  capturePortfolioGraphRenderSnapshot,
+  createPortfolioGraphSnapshotRuntime,
+} from './portfolioGraphSnapshot.js';
+import { createPortfolioGraphConnectionId } from '../data/portfolioGraphSnapshot.js';
 
 let tourModule;
 
@@ -17,17 +22,6 @@ if (markdownViewer) {
 if (!document.querySelector('side-panel[disabled]')) {
   await import('../../ui-components/universal/side-panel/side-panel.js');
 }
-if (document.querySelector('.pulse-tour-button')) {
-  let moduleUrl = createRuntimeAssetUrl('js/tour-player/index.js');
-  try {
-    tourModule = await import(moduleUrl.href);
-  } catch {
-    let trigger = document.querySelector('.pulse-tour-button');
-    trigger?.setAttribute('disabled', '');
-    trigger?.setAttribute('aria-disabled', 'true');
-  }
-}
-
 import { socialLinks } from '../data/socialLinks.js';
 import { PORTFOLIO_LOCALE_MESSAGES } from '../data/portfolioTranslations.js';
 import { PROJECT_TRANSLATIONS } from '../data/projectTranslations.js';
@@ -67,6 +61,7 @@ import {
   composePortfolioArticleMedia,
   composePortfolioPublicationMedia,
   createPortfolioArticleMediaAssignments,
+  getPortfolioArticleTargetIdFromSlotKey,
   createPortfolioMediaFragmentId,
   createPortfolioMediaSlotKey,
   createPortfolioMediaNavigationUrl,
@@ -177,6 +172,7 @@ const [
 document.querySelector('.pulse-theme-widget')?.setAttribute('default-state', PORTFOLIO_THEME_DEFAULT_STATE_ATTR);
 
 await Promise.all([
+  import('symbiote-ui/chat/workspace'),
   import('symbiote-ui/canvas/node-canvas'),
   import('symbiote-ui/layout/panel-layout'),
   import('symbiote-ui/tree/TreePanel'),
@@ -186,6 +182,17 @@ await Promise.all([
   import('symbiote-ui/themes/CascadeThemeEditor/CascadeThemeEditor.js'),
   import('symbiote-ui/themes/CascadeThemeImportDialog/CascadeThemeImportDialog.js'),
 ]);
+
+if (document.querySelector('.pulse-tour-button')) {
+  try {
+    let moduleUrl = createRuntimeAssetUrl('js/tour-player/index.js');
+    tourModule = await import(moduleUrl.href);
+  } catch {
+    let trigger = document.querySelector('.pulse-tour-button');
+    trigger?.setAttribute('disabled', '');
+    trigger?.setAttribute('aria-disabled', 'true');
+  }
+}
 
 registerMediaProvider('ims', createPortfolioImsMediaAdapter());
 
@@ -1335,6 +1342,7 @@ function connect(editor, nodes, edge) {
   let to = nodes.get(edge.to);
   if (!from || !to) return;
   let conn = new Connection(from, 'out', to, 'in');
+  conn.id = createPortfolioGraphConnectionId(edge);
   conn.kind = edge.kind;
   conn.direction = edge.direction;
   conn.design = edge.design;
@@ -2347,7 +2355,12 @@ const portfolioRuntime = {
       }
     };
     this.viewer.renderContentSlots((host, slotKey, context = {}) => {
-      if (slotKey === 'pulse-feed') {
+      let tourTargetId = getPortfolioArticleTargetIdFromSlotKey(slotKey);
+      if (tourTargetId) {
+        host.classList.add('portfolio-tour-target');
+        host.dataset.tourTarget = tourTargetId;
+        host.setAttribute('aria-hidden', 'true');
+      } else if (slotKey === 'pulse-feed') {
         host.innerHTML = renderGlobalFeed(PUBLICATIONS, locale, {
           hrefBuilder: resolvePublicationHref,
         });
@@ -2580,7 +2593,7 @@ function createPortfolioLayoutTree() {
     },
     { lockRatio: true }
   );
-  return LayoutTree.createSplit('horizontal', treePanel, contentSplit, 0.22, {
+  return LayoutTree.createSplit('horizontal', treePanel, contentSplit, 0.25, {
     importance: 90,
     minInlineSize: PORTFOLIO_LAYOUT_MIN_INLINE_SIZE,
     minBlockSize: 420,
@@ -2805,6 +2818,8 @@ class PortfolioGraphPanel extends HTMLElement {
     this._graphVisibleFocusUntil = 0;
     this.cancelStructuredGraphBinding();
     this.cancelStructuredPathUpgrade({ clear: true });
+    this._graphSnapshotRuntime?.stop?.();
+    this._graphSnapshotRuntime = null;
     this.canvas?.suspendLayout?.({ reason: 'panel-disconnected' });
     this.flatGraph?.suspendLayout?.({ reason: 'panel-disconnected' });
   }
@@ -2974,9 +2989,10 @@ class PortfolioGraphPanel extends HTMLElement {
       this.append(canvas);
     }
     this.canvas = canvas;
+    let snapshot = document.querySelector('.portfolio-graph-snapshot');
+    if (snapshot) this.prepend(snapshot);
     canvas.setPanels(false);
     canvas.setViewportLocked(false);
-    canvas.setProgressiveConnectionRendering?.(false, 'portfolio-visible-stability');
     this.setStructuredGraphLoading(!this._structuredBound && this.structuredMode);
     this.applyGraphMode();
     this.graphController?.connect?.({
@@ -3076,10 +3092,11 @@ class PortfolioGraphPanel extends HTMLElement {
       return;
     }
     this.setStructuredGraphLoading(true);
-    this.setStructuredStartupPath();
     try {
       let editor = this._structuredEditor || createPortfolioEditor();
       this._structuredEditor = editor;
+      this._graphSnapshotRuntime ||= createPortfolioGraphSnapshotRuntime(this, this.canvas);
+      this._graphSnapshotRuntime.prepare();
       this.graphController?.setStructuredEditor?.(editor);
       setNodePositions(this.canvas, orderedPortfolioProjects);
       this.canvas._layoutReleasedDom = false;
@@ -3088,6 +3105,10 @@ class PortfolioGraphPanel extends HTMLElement {
       this._structuredPathReadyStyle = '';
       portfolioRuntime.syncCanvas({ focus: true, focusScope: 'node-fit' });
       this.scheduleStructuredPathUpgrade();
+      void this._graphSnapshotRuntime.adopt();
+    } catch (error) {
+      this._graphSnapshotRuntime?.stop?.();
+      throw error;
     } finally {
       this.setStructuredGraphLoading(false);
     }
@@ -3098,30 +3119,25 @@ class PortfolioGraphPanel extends HTMLElement {
     this.setAttribute('aria-busy', active ? 'true' : 'false');
   }
 
-  setStructuredStartupPath() {
-    if (!this.canvas) return;
-    this.canvas.setTransientPathStyle?.(
-      '',
-      'portfolio-startup',
-      {}
-    );
+  async captureGraphRenderSnapshot() {
+    if (!this.canvas || !this._structuredBound) {
+      throw new Error('Portfolio graph capture requires the bound structured canvas.');
+    }
+    return capturePortfolioGraphRenderSnapshot(this, this.canvas);
   }
 
   scheduleStructuredPathUpgrade() {
     this.cancelStructuredPathUpgrade();
     if (!this.canvas || !this.structuredMode) {
-      this.setStructuredStartupPath();
       return;
     }
     if (this._structuredPathReady && this._structuredPathReadyStyle === this.pathStyle) return;
-    this.setStructuredStartupPath();
     this._structuredPathReady = true;
     this._structuredPathReadyStyle = this.pathStyle;
   }
 
   cancelStructuredPathUpgrade({ clear = false } = {}) {
     if (clear) {
-      this.setStructuredStartupPath();
       this._structuredPathReady = false;
       this._structuredPathReadyStyle = '';
     }
@@ -3533,19 +3549,35 @@ class PortfolioWorkspace extends HTMLElement {
   connectedCallback() {
     if (this._ready) return;
     this._ready = true;
-    this.innerHTML = /*html*/ `
-      <panel-layout
-        class="portfolio-layout"
-        min-panel-size="150"
-        min-panel-inline-size="220"
-        min-panel-block-size="180"
-        responsive-mode="swipe"
+    let template = document.createElement('template');
+    template.innerHTML = /*html*/ `
+      <agent-dock-shell
+        closed
+        label="Agent"
+        reveal-label="Open Agent"
         responsive-breakpoint="${PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT}"
-        swipe-control="rail"
-        overflow-mode="collapse"></panel-layout>
+      >
+        <panel-layout
+          slot="main"
+          class="portfolio-layout"
+          min-panel-size="150"
+          min-panel-inline-size="220"
+          min-panel-block-size="180"
+          responsive-mode="preserve"
+          responsive-breakpoint="${PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT}"
+          swipe-control="rail"
+          overflow-mode="collapse"></panel-layout>
+      </agent-dock-shell>
     `;
-    let layout = /** @type {any} */ (this.querySelector('panel-layout'));
-    if (!layout) return;
+    let dock = /** @type {any} */ (template.content.querySelector('agent-dock-shell'));
+    let layout = /** @type {any} */ (dock?.querySelector('.portfolio-layout'));
+    if (!dock || !layout) return;
+    dock.addEventListener('agent-dock-responsive-change', (event) => {
+      layout.setLayoutBehavior({
+        responsiveMode: event.detail?.mobile ? 'swipe' : 'preserve',
+      });
+    });
+    this.replaceChildren(template.content);
     layout.registerPanelType('portfolio-tree', {
       title: tPortfolio('panel.materials'),
       icon: 'folder',
@@ -3589,7 +3621,6 @@ class PortfolioWorkspace extends HTMLElement {
       behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end', swipeControl: 'rail' },
     });
     this._disposeTour = tourModule?.installPortfolioTour({
-      layout,
       workspace: this,
       runtime: portfolioRuntime,
       title: tPortfolio('panel.tour'),

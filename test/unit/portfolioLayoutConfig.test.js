@@ -30,6 +30,25 @@ test('portfolio layout keeps drawer mode below desktop auto-collapse widths', ()
   assert.equal(PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT, 760);
 });
 
+test('outer Agent dock exclusively projects mobile mode into the nested portfolio layout', async () => {
+  let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
+  let listenerIndex = source.indexOf("dock.addEventListener('agent-dock-responsive-change'");
+  let connectionIndex = source.indexOf('this.replaceChildren(template.content)');
+
+  assert.match(source, /class="portfolio-layout"[\s\S]*?responsive-mode="preserve"/);
+  assert.ok(listenerIndex >= 0, 'portfolio workspace must consume the public Agent dock responsive event');
+  assert.ok(listenerIndex < connectionIndex, 'responsive listener must exist before the template connects');
+  assert.match(
+    source,
+    /layout\.setLayoutBehavior\(\{\s*responsiveMode: event\.detail\?\.mobile \? 'swipe' : 'preserve',\s*\}\);/,
+  );
+  assert.match(
+    source,
+    /LayoutTree\.createSplit\('horizontal', treePanel, contentSplit, 0\.25, {/,
+  );
+  assert.doesNotMatch(source, /matchMedia\(/);
+});
+
 test('portfolio overrides the library default with its configured light preset', () => {
   assert.equal(PORTFOLIO_THEME_DEFAULT_STATE, PORTFOLIO_THEME_LIGHT_STATE);
   assert.deepEqual(PORTFOLIO_THEME_LIGHT_STATE, {
@@ -268,7 +287,7 @@ test('portfolio mobile graph refocuses after drawer content becomes visible', as
   assert.match(source, /maxZoom: useNodeFitFocus\s*\?\s*0\.8/);
   assert.match(source, /structuredOptions: \{\s*padding: 56,[\s\S]*?select: entry\.id,/);
   assert.match(source, /canvas\.focusNodes\?\.\(structuredFocusTarget, \{[\s\S]*?select: entry\.id,/);
-  assert.match(source, /canvas\.setProgressiveConnectionRendering\?\.\(false, 'portfolio-visible-stability'\);/);
+  assert.doesNotMatch(source, /canvas\.setProgressiveConnectionRendering\?\.\(false/);
   assert.match(source, /this\._structuredPathReadyStyle = '';\s*portfolioRuntime\.syncCanvas\({ focus: true, focusScope: 'node-fit' }\);/);
   assert.match(source, /new ResizeObserverCtor\(\(\) => this\.scheduleVisibleGraphFocus\(\)\)/);
   assert.match(source, /new MutationObserverCtor\(\(\) => {\s*this\._graphWasVisible = false;\s*this\.scheduleVisibleGraphFocus\(\);/);
@@ -282,6 +301,8 @@ test('portfolio mobile graph refocuses after drawer content becomes visible', as
   assert.match(source, /if \(this\._structuredPathReady && this\._structuredPathReadyStyle === this\.pathStyle\) return;/);
   assert.match(source, /this\._structuredPathReady = true;\s*this\._structuredPathReadyStyle = this\.pathStyle;/);
   assert.doesNotMatch(source, /this\.canvas\.setTransientPathStyle\?\.\(\s*'straight',\s*'portfolio-startup'/);
+  assert.match(source, /createPortfolioGraphSnapshotRuntime\(this, this\.canvas\);\s*this\._graphSnapshotRuntime\.prepare\(\);\s*this\.graphController\?\.setStructuredEditor/);
+  assert.match(source, /this\._graphSnapshotRuntime\.adopt\(\)/);
   assert.doesNotMatch(source, /let chunk = \[\.\.\.remaining\]\.slice\(0, chunkSize\);/);
   assert.match(source, /focusVisibleGraphNow\(\) {\s*this\.canvas\?\.refreshConnections\?\.\(\);\s*portfolioRuntime\.syncCanvas\({ focus: true, focusScope: 'node-fit' }\);/);
 });

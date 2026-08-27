@@ -203,6 +203,23 @@ test('older project entries expose visible work periods', () => {
   assert.equal(bySlug.get('f360-studio')?.order, 3.5);
 });
 
+test('CV Show case cards expose honest pending dates and maturity boundaries', () => {
+  const bySlug = new Map(loadProjectEntries().map((project) => [project.slug, project]));
+  const maximo = bySlug.get('adaptive-maximo-workbench');
+  const mobileSmm = bySlug.get('mobile-smm-platform');
+
+  assert.equal(maximo?.period, 'Date pending');
+  assert.equal(maximo?.kicker, 'Demo / Alpha');
+  assert.match(maximo?.details || '', /production Maximo system is separate integration work/);
+  assert.equal(mobileSmm?.period, 'Date pending');
+  assert.equal(mobileSmm?.kicker, 'Selected R&D case');
+  assert.match(mobileSmm?.details || '', /does not send content to an external service/);
+  for (let locale of ['ru', 'es']) {
+    assert.ok(PROJECT_TRANSLATIONS[locale]?.['adaptive-maximo-workbench']?.summary);
+    assert.ok(PROJECT_TRANSLATIONS[locale]?.['mobile-smm-platform']?.summary);
+  }
+});
+
 test('equipment-control R&D attribution and bottle-catalog branch stay explicit', () => {
   const projects = loadProjectEntries();
   const bySlug = new Map(projects.map((project) => [project.slug, project]));

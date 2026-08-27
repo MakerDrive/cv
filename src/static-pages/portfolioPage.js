@@ -9,7 +9,8 @@ import {
   SOCIAL_CARD_HEIGHT,
   SOCIAL_CARD_WIDTH,
 } from './data/socialCardPaths.js';
-import { TOUR_STORY } from './data/tourScripts.js';
+import { CV_SHOW_STORY } from './data/tourScripts.js';
+import { TOUR_LOCAL_AUDIO_CONFIG } from './data/tourManifest.js';
 
 const projects = loadProjectEntries();
 const PAGE_TITLE = PORTFOLIO_LOCALE_MESSAGES.en['portfolio.page.title'];
@@ -151,9 +152,20 @@ export async function getPortfolioPage({
         ${JSON.stringify(projects).replace(/</g, '\\u003c')}
       </script>
       <script type="application/json" id="pulse-tour-story">
-        ${JSON.stringify(TOUR_STORY).replace(/</g, '\\u003c')}
+        ${JSON.stringify(CV_SHOW_STORY).replace(/</g, '\\u003c')}
+      </script>
+      <script type="application/json" id="pulse-show-config">
+        ${JSON.stringify(TOUR_LOCAL_AUDIO_CONFIG).replace(/</g, '\\u003c')}
       </script>
       <section class="pulse-screen" aria-label="Vladimir Matiasevich portfolio">
+        <img
+          class="portfolio-graph-snapshot"
+          src="portfolio-graph-snapshots/initial.svg"
+          alt=""
+          aria-hidden="true"
+          data-graph-visual-layer="connections-only"
+          draggable="false"
+        >
         <portfolio-workspace class="pulse-workspace"></portfolio-workspace>
       </section>
     `;

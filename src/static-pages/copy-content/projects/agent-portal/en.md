@@ -14,12 +14,21 @@ links: GitHub|https://github.com/rnd-pro/mcp-agent-portal; npm|https://www.npmjs
 # Agent Portal
 
 :::article-block workspace
+:::article-block open-source
+:::article-block process-diagram
+:::article-block process-path
 Built around a practical R&D question: how can teams use several AI agents without losing context, ownership, verification, and control?
 
 The product combines durable project memory, context engineering, RAG-style context retrieval, model routing, tool use, task orchestration, and browser-facing operations into one engineering environment that keeps AI-assisted work auditable.
 
+:::article-block configuration-label
+:::article-block workspace-gallery
+:::article-block kanban-board
+:::article-block column-settings
+:::article-block resource-groups
 One focus is resource-aware agent development: the board and resource groups route work to agents with different model tiers, so routine or exploratory tasks can run on cheaper/faster models while stronger models operate on the distilled project context and make higher-impact decisions.
 
+:::article-block human-decision
 The current R&D line is loop engineering for autonomous software work: guiding coding agents through the full development cycle — picking up a task, working in an isolated branch, proving the work is done, then reviewing and merging — with evals, guardrails, observability, and human-in-the-loop control when the loop cannot safely continue.
 
 Agent Portal is built on a suite of MCP servers I authored, coordinated by an open-source control plane (`mcp-agent-portal`). This control plane orchestrates agent execution (Agent Pool), graph-based code intelligence (Project Graph), and browser/terminal automation, providing a clean tool-use/function-calling contract between agents and the product environment.

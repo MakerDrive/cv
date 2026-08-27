@@ -13,6 +13,26 @@ links: npm|https://www.npmjs.com/package/symbiote-workspace; Demo|https://rnd-pr
 
 # Symbiote Workspace
 
-A universal constructor for task-adaptive environments. Instead of static interfaces, Symbiote Workspace allows AI agents to dynamically assemble the UI for a specific task based on user intent (via chat).
+:::article-block intro
+Symbiote Workspace is a universal environment for task-specific work. An agent turns a user's intent into an interface assembled from declared layouts, panels, modules, actions, and connections.
 
-The agent's output is not one-off code, but a portable executable configuration that describes the entire layout, modules, bindings, and execution graphs (similar to ComfyUI workflows, but for full applications). Workspace acts as the core orchestrator: it connects the visual primitives of Symbiote UI with the computational experiments of Symbiote Engine into a unified interactive environment.
+:::article-block portable-config
+The result is a portable executable configuration. It can be validated, saved, updated while the workspace is running, and reopened by a compatible host application.
+
+:::article-block config-artifact
+The portable artifact records the layout, modules, actions, connections, theme state, runtime slots, and host requirements without embedding credentials or user identity.
+
+:::article-block config-flow
+The construction path is explicit: intent becomes a configuration, the configuration is validated, and the host mounts the resulting workspace. Symbiote UI supplies reusable visual blocks; Symbiote Engine supplies reusable execution blocks.
+
+:::article-block agent-portal
+Agent Portal is being shaped as a Workspace configuration for agent-assisted engineering. Its current status remains active development.
+
+:::article-block video-studio
+Symbiote Video Studio is also moving toward the same configuration model while its video core and its alpha workspace retain separate maturity labels.
+
+:::article-block host-examples
+Agent Portal and Symbiote Video Studio are two host-compatible examples with distinct product workflows and maturity boundaries.
+
+:::article-block host-boundary
+Authentication, secrets, model routing, storage, identity, and user data remain host responsibilities. I develop Workspace as the portable construction layer between those host capabilities and reusable UI and execution libraries.

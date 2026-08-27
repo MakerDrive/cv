@@ -8,6 +8,12 @@ import sharp from 'sharp';
 import { PORTFOLIO_PROJECT_IDS } from '../src/static-pages/data/portfolioProjectIds.js';
 import { getPublicPublications } from '../src/static-pages/data/publications.js';
 import { createSocialCardManifest } from './social-card-manifest.js';
+import {
+  PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS,
+  selectPortfolioGraphSnapshotEntry,
+  validatePortfolioGraphSnapshotBinding,
+  validatePortfolioGraphSnapshotManifest,
+} from '../src/static-pages/data/portfolioGraphSnapshot.js';
 
 export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
   'js/index.js',
@@ -17,8 +23,8 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 ]);
 
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
-  raw: 1_600_000,
-  gzip: 370_000,
+  raw: 1_755_000,
+  gzip: 430_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);
@@ -216,11 +222,11 @@ export function verifyRuntimeTourAssetSeparation(mainContent, tourContent) {
   if (!mainContent.includes('js/tour-player/index.js')) {
     throw new Error('Main JS bundle is missing the runtime tour player asset URL.');
   }
-  if (mainContent.includes('portfolio-tour-phase')) {
-    throw new Error('Main JS bundle contains the tour player implementation.');
+  if (mainContent.includes('portfolio-show-phase')) {
+    throw new Error('Main JS bundle contains the CV Show implementation.');
   }
-  if (!tourContent.includes('portfolio-tour-phase') || !tourContent.includes('portfolio-tour-start')) {
-    throw new Error('Tour player asset is missing its lifecycle implementation.');
+  if (!tourContent.includes('portfolio-show-phase') || !tourContent.includes('portfolio-show-start')) {
+    throw new Error('CV Show asset is missing its lifecycle implementation.');
   }
 }
 
@@ -247,6 +253,75 @@ async function getAllFiles(dir) {
   return files.flat();
 }
 
+export async function verifyPortfolioGraphSnapshots(distDir) {
+  let snapshotDir = path.join(distDir, 'portfolio-graph-snapshots');
+  let manifestPath = path.join(snapshotDir, 'manifest.json');
+  if (!await fileExists(manifestPath)) {
+    throw new Error('Portfolio graph snapshot manifest is missing.');
+  }
+  let manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
+  let validation = validatePortfolioGraphSnapshotManifest(manifest);
+  if (!validation.valid) {
+    throw new Error(`Portfolio graph snapshot manifest is invalid: ${validation.reason}.`);
+  }
+  let expectedCount = PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.locales.length
+    * PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.themes.length
+    * PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.viewports.length;
+  if (validation.manifest.entries.length !== expectedCount) {
+    throw new Error(`Portfolio graph snapshot manifest must contain ${expectedCount} variants.`);
+  }
+  let referencedFiles = new Set(['initial.svg', 'manifest.json']);
+  for (let locale of PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.locales) {
+    for (let viewport of PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.viewports) {
+      for (let theme of PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.themes) {
+        let entry = selectPortfolioGraphSnapshotEntry(validation.manifest, {
+          locale,
+          viewport,
+          theme,
+        });
+        if (!entry) throw new Error(`Portfolio graph snapshot variant is missing: ${locale}/${viewport}/${theme}.`);
+        let svgName = path.basename(entry.svg);
+        let snapshotName = path.basename(entry.snapshot);
+        referencedFiles.add(svgName);
+        referencedFiles.add(snapshotName);
+        let svg = await fs.readFile(path.join(snapshotDir, svgName), 'utf8');
+        let pathCount = svg.match(/<path\b[^>]*\bdata-conn-id=/g)?.length || 0;
+        if (
+          /<script\b|<foreignObject\b|\son[a-z]+\s*=|(?:href|src)\s*=\s*["']https?:/i.test(svg)
+          || /<image\b|<text\b/i.test(svg)
+          || !/<svg\b[^>]*aria-hidden="true"/i.test(svg)
+          || pathCount !== 180
+        ) {
+          throw new Error(`Portfolio graph connections-only SVG is invalid: ${svgName}.`);
+        }
+        let snapshot = JSON.parse(await fs.readFile(path.join(snapshotDir, snapshotName), 'utf8'));
+        let binding = validatePortfolioGraphSnapshotBinding(snapshot, entry.routeFingerprint);
+        if (!binding.valid) {
+          throw new Error(`Portfolio graph route snapshot is invalid: ${snapshotName}: ${binding.reason}.`);
+        }
+        if (binding.snapshot.nodeRects.length !== 119 || binding.snapshot.routes.length !== 180) {
+          throw new Error(`Portfolio graph route snapshot must contain 119 nodes and 180 routes: ${snapshotName}.`);
+        }
+      }
+    }
+  }
+  let initialEntry = selectPortfolioGraphSnapshotEntry(validation.manifest, {
+    locale: 'ru',
+    viewport: 'wide',
+    theme: 'light',
+  });
+  let initialSvg = await fs.readFile(path.join(snapshotDir, 'initial.svg'));
+  let expectedInitialSvg = await fs.readFile(path.join(distDir, initialEntry.svg));
+  if (!initialSvg.equals(expectedInitialSvg)) {
+    throw new Error('Portfolio graph initial snapshot must be the RU wide/light variant.');
+  }
+  let snapshotFiles = await fs.readdir(snapshotDir);
+  let unreferenced = snapshotFiles.filter((file) => !referencedFiles.has(file));
+  if (unreferenced.length > 0) {
+    throw new Error(`Portfolio graph snapshot directory contains unreferenced files: ${unreferenced.join(', ')}.`);
+  }
+}
+
 export async function runVerification(distDir) {
   const rootDir = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
   if (!distDir) {
@@ -254,6 +329,13 @@ export async function runVerification(distDir) {
   }
 
   const allFiles = await getAllFiles(distDir);
+  let rootIndexPath = path.join(distDir, 'index.html');
+  if (await fileExists(rootIndexPath)) {
+    let rootIndex = await fs.readFile(rootIndexPath, 'utf8');
+    if (rootIndex.includes('id="pulse-projects-data"')) {
+      await verifyPortfolioGraphSnapshots(distDir);
+    }
+  }
   for (const filePath of allFiles) {
     const relativePath = path.relative(distDir, filePath).replace(/\\/g, '/');
 
@@ -284,7 +366,7 @@ export async function runVerification(distDir) {
     && filePath.endsWith('.md')
   ));
   if (markdownContentFiles.length > 0) {
-    let expectedMarkdownContentCount = getExpectedMarkdownContentCount() + 3;
+    let expectedMarkdownContentCount = getExpectedMarkdownContentCount();
     if (markdownContentFiles.length !== expectedMarkdownContentCount) {
       if (markdownContentFiles.length > expectedMarkdownContentCount) {
         console.warn(
@@ -299,7 +381,7 @@ export async function runVerification(distDir) {
     }
     for (const filePath of markdownContentFiles) {
       const relativePath = path.relative(distDir, filePath).replace(/\\/g, '/');
-      if (!/^content\/(?:(?:projects|publications)\/[^/]+|tours)\/(?:en|ru|es)\.md$/.test(relativePath)) {
+      if (!/^content\/(?:projects|publications)\/[^/]+\/(?:en|ru|es)\.md$/.test(relativePath)) {
         throw new Error(`Verification failed: invalid runtime Markdown asset path "${relativePath}".`);
       }
       if (!(await fs.readFile(filePath, 'utf8')).trim()) {

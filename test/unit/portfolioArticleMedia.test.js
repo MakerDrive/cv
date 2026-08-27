@@ -5,9 +5,11 @@ import test from 'node:test';
 import { loadProjectContent, loadProjectEntries } from '../../src/static-pages/data/projects.js';
 import { PORTFOLIO_MEDIA_CATALOG } from '../../src/static-pages/data/portfolioMediaCatalog.js';
 import { getProjectMediaDescriptors } from '../../src/static-pages/data/portfolioMediaGraph.js';
+import { CV_SHOW_STORY } from '../../src/static-pages/data/tourScripts.js';
 import {
   PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS,
   composePortfolioArticleMedia,
+  createPortfolioArticleTargetId,
   composePortfolioPublicationMedia,
   createPortfolioArticleMediaAssignments,
   createPortfolioMediaFragmentId,
@@ -176,6 +178,87 @@ test('semantic article block ids stay aligned across English, Russian, and Spani
   }
 });
 
+test('semantic article blocks expose stable CV Show DOM anchors', () => {
+  assert.equal(
+    createPortfolioArticleTargetId('symbiote-workspace', 'portable-config'),
+    'article.symbiote-workspace.portable-config',
+  );
+  assert.equal(createPortfolioArticleTargetId('../unsafe', 'portable-config'), '');
+  let workspace = loadProjectEntries().find((project) => project.slug === 'symbiote-workspace');
+  let result = composePortfolioArticleMedia({
+    slug: workspace.slug,
+    summary: workspace.summary,
+    details: loadProjectContent(workspace, 'ru'),
+  });
+  for (let blockId of [
+    'intro',
+    'portable-config',
+    'config-artifact',
+    'config-flow',
+    'agent-portal',
+    'video-studio',
+    'host-examples',
+    'host-boundary',
+  ]) {
+    assert.match(result.details, new RegExp(`:::content-slot tour-target-symbiote-workspace--${blockId}`));
+  }
+  assert.doesNotMatch(stripPortfolioArticleBlockMarkers(result.details), /:::article-block/);
+});
+
+test('every source-backed required Show article target resolves in EN, RU, and ES', () => {
+  let directives = [
+    ...CV_SHOW_STORY.scenes.flatMap(scene => scene.directives),
+    ...Object.values(CV_SHOW_STORY.branches).flatMap(branch => branch.directives),
+  ];
+  let articleTargets = directives
+    .filter(directive => directive.policy !== 'optional')
+    .map(directive => directive.target?.match(/^article\.([a-z0-9-]+)\.([a-z0-9-]+)$/))
+    .filter(Boolean);
+  let targetSlugs = new Set(articleTargets.map(match => match[1]));
+  let blockedWithoutSource = new Set([
+    'article.agent-pool-mcp.local-demo',
+    'article.autobox-v1.planning-prototype',
+    'article.autobox-v1.planning-optics',
+    'article.autobox-v1.planning-overlap',
+    'article.autobox-v1.planning-mechanics',
+    'article.autobox-v1.planning-safety',
+    'article.autobox-v1.lidar-next-layer',
+    'article.complexscan.bottle-rig',
+    'article.complexscan.bottle-catalog-link',
+  ]);
+  let availableBySlug = new Map();
+  for (let slug of targetSlugs) {
+    let expected = parsePortfolioArticleBlocks(loadProjectContent(slug, 'en'))
+      .map(block => block.id)
+      .filter(Boolean);
+    assert.ok(expected.length > 0, slug);
+    availableBySlug.set(slug, new Set(expected));
+    for (let locale of ['ru', 'es']) {
+      assert.deepEqual(
+        parsePortfolioArticleBlocks(loadProjectContent(slug, locale))
+          .map(block => block.id)
+          .filter(Boolean),
+        expected,
+        `${slug}:${locale}`,
+      );
+    }
+  }
+
+  let checked = 0;
+  let blocked = 0;
+  for (let match of articleTargets) {
+    let target = `article.${match[1]}.${match[2]}`;
+    if (blockedWithoutSource.has(target)) {
+      blocked += 1;
+      continue;
+    }
+    assert.equal(availableBySlug.get(match[1]).has(match[2]), true, target);
+    checked += 1;
+  }
+  assert.equal(blockedWithoutSource.size, 9);
+  assert.equal(checked + blocked, articleTargets.length);
+});
+
 test('every embeddable article media descriptor has one explicit semantic placement', () => {
   for (let project of loadProjectEntries()) {
     let placements = PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS[project.slug];
@@ -224,7 +307,7 @@ test('unplaced media has no generic tail fallback and authored markers stay out 
     details,
     descriptors: [{ id: 'media/unmapped/cover' }],
   });
-  assert.doesNotMatch(result.details, /content-slot/);
+  assert.match(result.details, /:::content-slot tour-target-unmapped--one/);
   assert.equal(stripPortfolioArticleBlockMarkers(details), 'First.\n\nSecond.');
 });
 

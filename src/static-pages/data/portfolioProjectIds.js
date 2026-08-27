@@ -1,6 +1,7 @@
 export const PORTFOLIO_PROJECT_SLUGS = Object.freeze([
   'agent-portal',
   'symbiote-video-studio',
+  'adaptive-maximo-workbench',
   'autobox-v1',
   'f360-studio',
   'complexscan',
@@ -19,6 +20,7 @@ export const PORTFOLIO_PROJECT_SLUGS = Object.freeze([
   'photopizza-remote',
   'photosnail-public',
   'lifecycle-messaging-platform',
+  'mobile-smm-platform',
 ]);
 
 export const PORTFOLIO_PROJECT_IDS = Object.freeze(

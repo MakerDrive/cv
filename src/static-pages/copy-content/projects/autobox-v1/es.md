@@ -5,21 +5,26 @@ ComplexScan AUTOBOX v1 fue un proyecto I+D completo de software y hardware para 
 Desarrollé el equipo y la tecnología de captura para la plataforma de patrimonio cultural que hoy opera como OBJET.art. El trabajo apuntaba a digitalizar objetos de arte y artefactos culturales con fidelidad suficiente para preservación, análisis de restauración y exhibición: geometría detallada, color preciso, texturas sin sombras y un flujo capaz de escalar más allá de un único laboratorio.
 
 :::article-block capture-technology
+:::article-block working-system
 En paralelo a la colaboración en el proyecto socio, desarrollé una línea propia de tecnología de captura. Diseñé un sistema que combinaba fotogrametría, movimiento repetible e iluminación modular a medida con control inalámbrico y polarización cruzada. Los equipos y el flujo de procesamiento 3D fueron optimizados para un rango difícil de tamaños — desde piezas miniatura hasta objetos museísticos grandes.
 
 :::article-block fabrication
 El equipo siguió el mismo modelo hands-on de series pequeñas que mis otras líneas de hardware: ensamblé personalmente prototipos y primeras unidades, coordiné proveedores especializados para piezas fabricadas —incluido corte láser de metal y acrílico— y realicé el ensamblaje final, las pruebas y la preparación para uso en campo.
 
 :::article-block museum-fieldwork
+:::article-block benin-bronze
 El prototipo avanzó desde las pruebas de laboratorio hasta la operación real en museos. Participé en la planificación y ejecución de sesiones de escaneo con logística compleja de equipos dentro de museos y, durante la validación de producción, escaneé personalmente la colección japonesa de netsuke en el Museo Estatal del Hermitage. La misma línea tecnológica también se usó para objetos de bronce de Benín en la Kunstkamera.
 
 :::article-block netsuke-collaboration
+:::article-block netsuke-video
 La validación de netsuke formó parte del trabajo OBJET.art / ArtClub Digital Heritage para el proyecto Hermitage Under a Magnifying Glass. Diez netsuke japoneses fueron seleccionados con participación de Anna Savelyeva, curadora de arte japonés del Museo Estatal del Hermitage, y del experto británico en netsuke Max Rutherston.
 
 :::article-block material-challenges
 Para la tecnología fue una prueba fuerte de producción: talla miniatura, agujeros himotoshi para el cordón, madera, marfil, cuerno, superficies brillantes, inserciones translúcidas y relieve complejo obligaban a resolver al mismo tiempo geometría, texturas, color y problemas específicos del material.
 
 :::article-block visualization
+:::article-block buddha-render
+:::article-block render-gallery
 Más allá de la captura, también produje la visualización 3D artística de los objetos digitalizados: visualicé todos los netsuke del Hermitage y todo el bronce de la Kunstkamera, y piezas concretas como un Buda dorado ([ejemplo](https://www.youtube.com/watch?v=iNqxRJgrqM8)) y una daga enjoyada mogol las escaneé y visualicé yo mismo. Estas visualizaciones se usaron en videos preparados para el proyecto del Hermitage. Los resultados colaborativos están publicados en el [canal OBJET.art / ArtClub Digital Heritage](https://www.youtube.com/@ArtClub_DigitalHeritage); los netsuke se capturaron en el propio Hermitage ([proceso](https://www.youtube.com/watch?v=us3vQHuTYPw)).
 
 :::article-block production-scale

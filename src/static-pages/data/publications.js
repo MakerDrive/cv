@@ -703,6 +703,64 @@ export const PUBLICATIONS = [
         "summary": "Una plataforma confidencial de comunicación con consentimiento combina API Node.js, PostgreSQL, estado WebSocket, campañas y entrega mediante módems GSM."
       }
     }
+  },
+  {
+    "id": "pulse/adaptive-maximo-workbench-retrospective",
+    "slug": "adaptive-maximo-workbench-retrospective",
+    "kind": "retrospective",
+    "status": "published",
+    "publishedAt": null,
+    "updatedAt": null,
+    "subjectPeriod": "date-pending",
+    "relatedProjectIds": [
+      "projects/adaptive-maximo-workbench"
+    ],
+    "primaryProjectId": "projects/adaptive-maximo-workbench",
+    "tags": [],
+    "sourceLinks": [],
+    "locales": {
+      "en": {
+        "title": "Maintenance Workspace: Shared Context with a Safe Demo Boundary",
+        "summary": "A Demo / Alpha Workspace configuration connects work orders, assets, locations, crews, and declared actions while production Maximo integration remains separate."
+      },
+      "ru": {
+        "title": "Рабочая среда обслуживания: общий контекст и безопасная граница demo",
+        "summary": "Конфигурация Demo / Alpha связывает заявки, оборудование, локации, бригады и объявленные действия; производственная интеграция Maximo остаётся отдельной работой."
+      },
+      "es": {
+        "title": "Workspace de mantenimiento: contexto compartido y límite seguro del demo",
+        "summary": "Una configuración Demo / Alpha conecta órdenes, activos, ubicaciones, equipos y acciones declaradas; la integración Maximo de producción sigue separada."
+      }
+    }
+  },
+  {
+    "id": "pulse/mobile-smm-platform-retrospective",
+    "slug": "mobile-smm-platform-retrospective",
+    "kind": "retrospective",
+    "status": "published",
+    "publishedAt": null,
+    "updatedAt": null,
+    "subjectPeriod": "date-pending",
+    "relatedProjectIds": [
+      "projects/mobile-smm-platform"
+    ],
+    "primaryProjectId": "projects/mobile-smm-platform",
+    "tags": [],
+    "sourceLinks": [],
+    "locales": {
+      "en": {
+        "title": "Controlled Mobile SMM Operations: Stable Paths and Reviewed Recovery",
+        "summary": "Profiles, media, schedules, queues, Android execution, approvals, limits, deduplication, and action logs form a local dry-run demonstration with no external send."
+      },
+      "ru": {
+        "title": "Управляемые мобильные SMM-операции: стабильный путь и проверяемое восстановление",
+        "summary": "Профили, медиа, расписание, очередь, Android-исполнение, согласование, лимиты, дедупликация и журнал собраны в локальном dry-run без внешней отправки."
+      },
+      "es": {
+        "title": "Operaciones SMM móviles controladas: recorridos estables y recuperación revisada",
+        "summary": "Perfiles, medios, horarios, cola, ejecución Android, aprobaciones, límites, deduplicación y registros forman un dry-run local sin envío externo."
+      }
+    }
   }
 ,
   {
