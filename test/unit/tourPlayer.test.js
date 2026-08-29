@@ -1493,15 +1493,26 @@ test('native scroll reports actual acted and settled receipts without provider a
   let actedAt = providerObservation(30);
   let settledAt = providerObservation(470);
   let observations = [actedAt, settledAt];
+  let lifecycle = [];
   let runner = createCvShowDirectiveRunner({
     document: {},
+    attention: {
+      clearMarkers() { lifecycle.push('clear-markers'); },
+      clearTransient(reason, options) {
+        lifecycle.push(['clear-transient', reason, options]);
+      },
+    },
     resolveTarget: () => ({ id: 'target' }),
     resolveText: (key) => key,
     waitForReadiness: async () => {
+      lifecycle.push('scroll');
       await scrollGate;
       return { id: 'target' };
     },
-    observePerformance: () => observations.shift(),
+    observePerformance: () => {
+      lifecycle.push('status');
+      return observations.shift();
+    },
   });
   let fixture = workspaceOperationFixture({
     kind: 'interaction',
@@ -1510,6 +1521,12 @@ test('native scroll reports actual acted and settled receipts without provider a
   });
   fixture.operation.projectCell.id = 'cv-show:cue:example:scroll';
   let pending = runCvShowPresentationOperation(runner, fixture.operation);
+  assert.deepEqual(lifecycle, [
+    'clear-markers',
+    ['clear-transient', 'scroll', { preserveInk: false, preserveCursor: true }],
+    'status',
+    'scroll',
+  ]);
   assert.deepEqual(fixture.receipts.map(({ status }) => status), ['acted']);
   releaseScroll();
   assert.equal(await pending, undefined);

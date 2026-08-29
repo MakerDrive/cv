@@ -715,6 +715,7 @@ export function createCvShowDirectiveRunner(options = {}) {
       = /** @type {{ signal?: AbortSignal, presentation?: any }} */ ({}),
   ) => {
     throwIfAborted(signal);
+    clearAttention('scroll');
     presentation?.reportStatus('acted', observePerformance());
     const target = await waitForReadiness({
       document,
