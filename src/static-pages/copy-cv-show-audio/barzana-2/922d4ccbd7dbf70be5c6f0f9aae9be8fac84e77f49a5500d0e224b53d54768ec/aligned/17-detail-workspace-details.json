@@ -1,0 +1,311 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-9yW5MROcgwVYAK0RnBmc7xc0I9OS21v45XUeMgUlrAA=",
+  "media": {
+    "hash": "sha256:0c404601661e4251401a4b6016a935d5edb189b7d99482115bf997b355e824a7",
+    "durationMs": 29070,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 29070,
+      "speaker": "guide",
+      "transcript": "Рабочая среда описывается конфигурацией. В ней задаются компоновка, панели, модули, действия и связи. Агент подбирает готовые блоки, валидирует конфигурацию и собирает интерфейс в браузере. Конфигурацию можно обновлять во время работы, сохранять и открывать в совместимом хост-приложении. Секреты, авторизация и пользовательские данные остаются на стороне хост. Я развиваю эту архитектуру как общий слой для специализированных рабочих процессов.",
+      "words": [
+        {
+          "text": "Рабочая",
+          "startMs": 0,
+          "endMs": 520
+        },
+        {
+          "text": "среда",
+          "startMs": 520,
+          "endMs": 920
+        },
+        {
+          "text": "описывается",
+          "startMs": 920,
+          "endMs": 1480
+        },
+        {
+          "text": "конфигурацией.",
+          "startMs": 1480,
+          "endMs": 2440
+        },
+        {
+          "text": "В",
+          "startMs": 2680,
+          "endMs": 3040
+        },
+        {
+          "text": "ней",
+          "startMs": 3040,
+          "endMs": 3200
+        },
+        {
+          "text": "задаются",
+          "startMs": 3200,
+          "endMs": 3800
+        },
+        {
+          "text": "компоновка,",
+          "startMs": 3800,
+          "endMs": 4560
+        },
+        {
+          "text": "панели,",
+          "startMs": 4740,
+          "endMs": 5260
+        },
+        {
+          "text": "модули,",
+          "startMs": 5520,
+          "endMs": 5920
+        },
+        {
+          "text": "действия",
+          "startMs": 6100,
+          "endMs": 6600
+        },
+        {
+          "text": "и",
+          "startMs": 6600,
+          "endMs": 6780
+        },
+        {
+          "text": "связи.",
+          "startMs": 6780,
+          "endMs": 7200
+        },
+        {
+          "text": "Агент",
+          "startMs": 7480,
+          "endMs": 8040
+        },
+        {
+          "text": "подбирает",
+          "startMs": 8040,
+          "endMs": 8480
+        },
+        {
+          "text": "готовые",
+          "startMs": 8480,
+          "endMs": 8900
+        },
+        {
+          "text": "блоки,",
+          "startMs": 8900,
+          "endMs": 9320
+        },
+        {
+          "text": "валидирует",
+          "startMs": 9580,
+          "endMs": 10100
+        },
+        {
+          "text": "конфигурацию",
+          "startMs": 10100,
+          "endMs": 10920
+        },
+        {
+          "text": "и",
+          "startMs": 10920,
+          "endMs": 11180
+        },
+        {
+          "text": "собирает",
+          "startMs": 11180,
+          "endMs": 11680
+        },
+        {
+          "text": "интерфейс",
+          "startMs": 11680,
+          "endMs": 12340
+        },
+        {
+          "text": "в",
+          "startMs": 12340,
+          "endMs": 12540
+        },
+        {
+          "text": "браузере.",
+          "startMs": 12540,
+          "endMs": 13120
+        },
+        {
+          "text": "Конфигурацию",
+          "startMs": 13340,
+          "endMs": 14100
+        },
+        {
+          "text": "можно",
+          "startMs": 14100,
+          "endMs": 14440
+        },
+        {
+          "text": "обновлять",
+          "startMs": 14440,
+          "endMs": 14960
+        },
+        {
+          "text": "во",
+          "startMs": 14960,
+          "endMs": 15100
+        },
+        {
+          "text": "время",
+          "startMs": 15100,
+          "endMs": 15360
+        },
+        {
+          "text": "работы,",
+          "startMs": 15360,
+          "endMs": 15780
+        },
+        {
+          "text": "сохранять",
+          "startMs": 15900,
+          "endMs": 16340
+        },
+        {
+          "text": "и",
+          "startMs": 16340,
+          "endMs": 16520
+        },
+        {
+          "text": "открывать",
+          "startMs": 16520,
+          "endMs": 16980
+        },
+        {
+          "text": "в",
+          "startMs": 16980,
+          "endMs": 17100
+        },
+        {
+          "text": "совместимом",
+          "startMs": 17100,
+          "endMs": 17720
+        },
+        {
+          "text": "хост",
+          "startMs": 17720,
+          "endMs": 18120
+        },
+        {
+          "text": "-приложении.",
+          "startMs": 18120,
+          "endMs": 18880
+        },
+        {
+          "text": "Секреты,",
+          "startMs": 19100,
+          "endMs": 19680
+        },
+        {
+          "text": "авторизация",
+          "startMs": 19860,
+          "endMs": 20440
+        },
+        {
+          "text": "и",
+          "startMs": 20440,
+          "endMs": 20600
+        },
+        {
+          "text": "пользовательские",
+          "startMs": 20600,
+          "endMs": 21320
+        },
+        {
+          "text": "данные",
+          "startMs": 21320,
+          "endMs": 21760
+        },
+        {
+          "text": "остаются",
+          "startMs": 21760,
+          "endMs": 22400
+        },
+        {
+          "text": "на",
+          "startMs": 22400,
+          "endMs": 22580
+        },
+        {
+          "text": "стороне",
+          "startMs": 22580,
+          "endMs": 22980
+        },
+        {
+          "text": "хост.",
+          "startMs": 22980,
+          "endMs": 23380
+        },
+        {
+          "text": "Я",
+          "startMs": 23540,
+          "endMs": 23780
+        },
+        {
+          "text": "развиваю",
+          "startMs": 23780,
+          "endMs": 24420
+        },
+        {
+          "text": "эту",
+          "startMs": 24420,
+          "endMs": 24680
+        },
+        {
+          "text": "архитектуру",
+          "startMs": 24680,
+          "endMs": 25460
+        },
+        {
+          "text": "как",
+          "startMs": 25460,
+          "endMs": 25760
+        },
+        {
+          "text": "общий",
+          "startMs": 25760,
+          "endMs": 26340
+        },
+        {
+          "text": "слой",
+          "startMs": 26340,
+          "endMs": 26620
+        },
+        {
+          "text": "для",
+          "startMs": 26620,
+          "endMs": 26820
+        },
+        {
+          "text": "специализированных",
+          "startMs": 26820,
+          "endMs": 27900
+        },
+        {
+          "text": "рабочих",
+          "startMs": 27900,
+          "endMs": 28380
+        },
+        {
+          "text": "процессов.",
+          "startMs": 28380,
+          "endMs": 29040
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-xyqkp62n/w+BX7TDwiBNJf++u0uTclLL+N/N6V6TFUQ="
+}

@@ -1,0 +1,386 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-CvyLD7WAESiNkgbGFBim6l+mklotNWVWdQ2z5N92Vc8=",
+  "media": {
+    "hash": "sha256:def322c74deaf058b5ddc1d33f868f5b984d5383f2d181409f6b0d319750d2a0",
+    "durationMs": 37930,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 37930,
+      "speaker": "guide",
+      "transcript": "Платформа соединяла веб-продукт, серверную инфраструктуру и физическую доставку через модемы. API и PassgreSQL хранили продуктовые данные, WebSocket связывал рантайм, а распределенные инстанции управляли пулами GSM, модемов через Serial и IT команды. Связь и устройство могли менять состояние, поэтому очередь, повторяемое выполнение и мониторинг, сохраняли управляемость процесса. Digital Twin воспроизводил физический контур для локальной проверки. В одном историческом эксперименте создания материалов и их проверка работали как независимые контуры с разными правилами оценки.",
+      "words": [
+        {
+          "text": "Платформа",
+          "startMs": 0,
+          "endMs": 520
+        },
+        {
+          "text": "соединяла",
+          "startMs": 520,
+          "endMs": 1060
+        },
+        {
+          "text": "веб",
+          "startMs": 1060,
+          "endMs": 1460
+        },
+        {
+          "text": "-продукт,",
+          "startMs": 1460,
+          "endMs": 2260
+        },
+        {
+          "text": "серверную",
+          "startMs": 2480,
+          "endMs": 3060
+        },
+        {
+          "text": "инфраструктуру",
+          "startMs": 3060,
+          "endMs": 3840
+        },
+        {
+          "text": "и",
+          "startMs": 3840,
+          "endMs": 4020
+        },
+        {
+          "text": "физическую",
+          "startMs": 4020,
+          "endMs": 4600
+        },
+        {
+          "text": "доставку",
+          "startMs": 4600,
+          "endMs": 5120
+        },
+        {
+          "text": "через",
+          "startMs": 5120,
+          "endMs": 5380
+        },
+        {
+          "text": "модемы.",
+          "startMs": 5380,
+          "endMs": 5880
+        },
+        {
+          "text": "API",
+          "startMs": 5980,
+          "endMs": 6300
+        },
+        {
+          "text": "и",
+          "startMs": 6300,
+          "endMs": 6740
+        },
+        {
+          "text": "PassgreSQL",
+          "startMs": 6740,
+          "endMs": 7300
+        },
+        {
+          "text": "хранили",
+          "startMs": 7300,
+          "endMs": 7900
+        },
+        {
+          "text": "продуктовые",
+          "startMs": 7900,
+          "endMs": 8580
+        },
+        {
+          "text": "данные,",
+          "startMs": 8580,
+          "endMs": 9020
+        },
+        {
+          "text": "WebSocket",
+          "startMs": 9220,
+          "endMs": 9760
+        },
+        {
+          "text": "связывал",
+          "startMs": 9760,
+          "endMs": 10400
+        },
+        {
+          "text": "рантайм,",
+          "startMs": 10400,
+          "endMs": 10980
+        },
+        {
+          "text": "а",
+          "startMs": 11600,
+          "endMs": 11800
+        },
+        {
+          "text": "распределенные",
+          "startMs": 11800,
+          "endMs": 12460
+        },
+        {
+          "text": "инстанции",
+          "startMs": 12460,
+          "endMs": 12920
+        },
+        {
+          "text": "управляли",
+          "startMs": 12920,
+          "endMs": 13440
+        },
+        {
+          "text": "пулами",
+          "startMs": 13440,
+          "endMs": 13880
+        },
+        {
+          "text": "GSM,",
+          "startMs": 13880,
+          "endMs": 14460
+        },
+        {
+          "text": "модемов",
+          "startMs": 14700,
+          "endMs": 15300
+        },
+        {
+          "text": "через",
+          "startMs": 15300,
+          "endMs": 15660
+        },
+        {
+          "text": "Serial",
+          "startMs": 15660,
+          "endMs": 16380
+        },
+        {
+          "text": "и",
+          "startMs": 16380,
+          "endMs": 16640
+        },
+        {
+          "text": "IT",
+          "startMs": 16640,
+          "endMs": 16960
+        },
+        {
+          "text": "команды.",
+          "startMs": 16960,
+          "endMs": 17920
+        },
+        {
+          "text": "Связь",
+          "startMs": 18040,
+          "endMs": 18520
+        },
+        {
+          "text": "и",
+          "startMs": 18520,
+          "endMs": 18700
+        },
+        {
+          "text": "устройство",
+          "startMs": 18700,
+          "endMs": 19260
+        },
+        {
+          "text": "могли",
+          "startMs": 19260,
+          "endMs": 19540
+        },
+        {
+          "text": "менять",
+          "startMs": 19540,
+          "endMs": 19920
+        },
+        {
+          "text": "состояние,",
+          "startMs": 19920,
+          "endMs": 20620
+        },
+        {
+          "text": "поэтому",
+          "startMs": 20880,
+          "endMs": 21240
+        },
+        {
+          "text": "очередь,",
+          "startMs": 21240,
+          "endMs": 21800
+        },
+        {
+          "text": "повторяемое",
+          "startMs": 22040,
+          "endMs": 22640
+        },
+        {
+          "text": "выполнение",
+          "startMs": 22640,
+          "endMs": 23240
+        },
+        {
+          "text": "и",
+          "startMs": 23240,
+          "endMs": 23360
+        },
+        {
+          "text": "мониторинг,",
+          "startMs": 23360,
+          "endMs": 23920
+        },
+        {
+          "text": "сохраняли",
+          "startMs": 24060,
+          "endMs": 24760
+        },
+        {
+          "text": "управляемость",
+          "startMs": 24760,
+          "endMs": 25540
+        },
+        {
+          "text": "процесса.",
+          "startMs": 25540,
+          "endMs": 26120
+        },
+        {
+          "text": "Digital",
+          "startMs": 26120,
+          "endMs": 26620
+        },
+        {
+          "text": "Twin",
+          "startMs": 26620,
+          "endMs": 27140
+        },
+        {
+          "text": "воспроизводил",
+          "startMs": 27140,
+          "endMs": 28080
+        },
+        {
+          "text": "физический",
+          "startMs": 28080,
+          "endMs": 28640
+        },
+        {
+          "text": "контур",
+          "startMs": 28640,
+          "endMs": 29020
+        },
+        {
+          "text": "для",
+          "startMs": 29020,
+          "endMs": 29240
+        },
+        {
+          "text": "локальной",
+          "startMs": 29240,
+          "endMs": 29700
+        },
+        {
+          "text": "проверки.",
+          "startMs": 29700,
+          "endMs": 30220
+        },
+        {
+          "text": "В",
+          "startMs": 30380,
+          "endMs": 30520
+        },
+        {
+          "text": "одном",
+          "startMs": 30520,
+          "endMs": 30760
+        },
+        {
+          "text": "историческом",
+          "startMs": 30760,
+          "endMs": 31540
+        },
+        {
+          "text": "эксперименте",
+          "startMs": 31540,
+          "endMs": 32220
+        },
+        {
+          "text": "создания",
+          "startMs": 32220,
+          "endMs": 32720
+        },
+        {
+          "text": "материалов",
+          "startMs": 32720,
+          "endMs": 33420
+        },
+        {
+          "text": "и",
+          "startMs": 33420,
+          "endMs": 33680
+        },
+        {
+          "text": "их",
+          "startMs": 33680,
+          "endMs": 33860
+        },
+        {
+          "text": "проверка",
+          "startMs": 33860,
+          "endMs": 34400
+        },
+        {
+          "text": "работали",
+          "startMs": 34400,
+          "endMs": 35060
+        },
+        {
+          "text": "как",
+          "startMs": 35060,
+          "endMs": 35260
+        },
+        {
+          "text": "независимые",
+          "startMs": 35260,
+          "endMs": 36020
+        },
+        {
+          "text": "контуры",
+          "startMs": 36020,
+          "endMs": 36440
+        },
+        {
+          "text": "с",
+          "startMs": 36440,
+          "endMs": 36560
+        },
+        {
+          "text": "разными",
+          "startMs": 36560,
+          "endMs": 36920
+        },
+        {
+          "text": "правилами",
+          "startMs": 36920,
+          "endMs": 37440
+        },
+        {
+          "text": "оценки.",
+          "startMs": 37440,
+          "endMs": 37900
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-mz+VOJAyW6nlpvQbnCN7e2qYMo9SY0DWnOQea7h7YG8="
+}

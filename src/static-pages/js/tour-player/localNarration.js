@@ -1,165 +1,10 @@
-const LOCAL_AUDIO_MANIFEST_VERSION = 'cv-show-local-audio-manifest-v1';
-const LOCAL_AUDIO_MODE = 'local';
-const DEFAULT_VOICE_SELECTION = 'maximo-default-male';
-const VOICE_SELECTIONS = Object.freeze(['maximo-default-male', 'custom-user']);
-const SETTINGS_STORAGE_KEY = 'cv-show-settings';
-const HASHED_MANIFEST_FILE_RE = /^[a-f0-9]{16,64}\/manifest\.json$/u;
-const AUDIO_FILE_RE = /^[a-z0-9][a-z0-9._-]*-[a-f0-9]{12,64}\.(?:m4a|mp3|ogg|opus|wav)$/u;
+import {
+  loadCvShowWebAudioRelease,
+  resolveCvShowWebAudioConfig,
+} from './webAudioRelease.js';
 
 function primaryLocale(value) {
   return String(value || '').trim().toLowerCase().split(/[-_]/u)[0];
-}
-
-function storyEntries(story) {
-  return [
-    ...(story?.scenes || []).map((entry) => ({ kind: 'short', entry })),
-    ...Object.values(story?.branches || {}).map((entry) => ({ kind: 'detail', entry })),
-  ];
-}
-
-function invalidManifest(reason) {
-  return Object.assign(
-    new TypeError(`CV Show local audio manifest is invalid: ${reason}`),
-    { code: 'CV_SHOW_LOCAL_AUDIO_INVALID' },
-  );
-}
-
-function readJsonConfig(source) {
-  try {
-    let value = JSON.parse(String(source || ''));
-    return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
-  } catch {
-    return null;
-  }
-}
-
-function readAppConfig(documentRef) {
-  return readJsonConfig(documentRef?.getElementById?.('pulse-show-config')?.textContent);
-}
-
-function readUserSettings(storage) {
-  try {
-    return readJsonConfig(storage?.getItem?.(SETTINGS_STORAGE_KEY));
-  } catch {
-    return null;
-  }
-}
-
-export function resolveCvShowLocalAudioConfig({
-  url = globalThis.location?.href,
-  baseUrl = globalThis.document?.baseURI || url,
-  appConfig = readAppConfig(globalThis.document),
-  userSettings = readUserSettings(globalThis.localStorage),
-} = {}) {
-  if (!url || !baseUrl) return null;
-  let locationUrl;
-  let documentBase;
-  try {
-    locationUrl = new URL(url);
-    documentBase = new URL(baseUrl);
-  } catch {
-    return null;
-  }
-  let queryMode = locationUrl.searchParams.get('showAudio');
-  let requestedMode = queryMode || userSettings?.audio || appConfig?.audio || '';
-  if (requestedMode !== LOCAL_AUDIO_MODE) return null;
-  let requestedSelection = locationUrl.searchParams.get('showVoice')
-    || userSettings?.voice
-    || appConfig?.voice
-    || DEFAULT_VOICE_SELECTION;
-  let selection = VOICE_SELECTIONS.includes(requestedSelection)
-    ? requestedSelection
-    : DEFAULT_VOICE_SELECTION;
-  let locale = primaryLocale(userSettings?.locale || appConfig?.locale || 'ru');
-  let configuredManifests = {
-    ...(appConfig?.audioManifests || {}),
-    ...(userSettings?.audioManifests || {}),
-  };
-  let manifestFile = String(configuredManifests[selection] || '');
-  if (!HASHED_MANIFEST_FILE_RE.test(manifestFile)) return null;
-  let voiceRoot = new URL(`cv-show-audio-private/${selection}/`, documentBase);
-  let manifestUrl = new URL(manifestFile, voiceRoot);
-  if (
-    manifestUrl.origin !== locationUrl.origin
-    || !manifestUrl.pathname.startsWith(voiceRoot.pathname)
-  ) return null;
-  let alignmentManifest = String(
-    userSettings?.alignmentManifest || appConfig?.alignmentManifest || 'alignment/manifest.json',
-  );
-  return Object.freeze({
-    mode: LOCAL_AUDIO_MODE,
-    locale,
-    selection,
-    manifestUrl: manifestUrl.href,
-    manifestRevision: manifestFile.split('/')[0],
-    alignmentManifest,
-  });
-}
-
-export function validateCvShowLocalAudioManifest(manifest, story, config) {
-  if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
-    throw invalidManifest('payload');
-  }
-  if (manifest.version !== LOCAL_AUDIO_MANIFEST_VERSION) throw invalidManifest('version');
-  if (primaryLocale(manifest.locale) !== primaryLocale(story?.narrationLocale)) {
-    throw invalidManifest('locale');
-  }
-  if (manifest.story?.contractRevision !== story?.contractRevision) {
-    throw invalidManifest('story revision');
-  }
-  if (manifest.voiceSelection?.id !== config?.selection) throw invalidManifest('voice selection');
-  let expected = storyEntries(story);
-  if (expected.length !== 30 || manifest.clips?.length !== expected.length) {
-    throw invalidManifest('clip count');
-  }
-  let byId = new Map();
-  let manifestUrl = new URL(config.manifestUrl);
-  for (let [index, expectedItem] of expected.entries()) {
-    let clip = manifest.clips[index];
-    let entry = expectedItem.entry;
-    if (
-      clip?.index !== index + 1
-      || clip.kind !== expectedItem.kind
-      || clip.id !== entry.id
-      || clip.speech !== entry.speech
-      || !(Number(clip.sampleRate) > 0)
-      || !/^[a-f0-9]{64}$/u.test(String(clip.sha256 || ''))
-      || !AUDIO_FILE_RE.test(String(clip.file || ''))
-    ) {
-      throw invalidManifest(`clip ${index + 1}`);
-    }
-    let audioUrl = new URL(clip.file, manifestUrl);
-    if (audioUrl.origin !== manifestUrl.origin) throw invalidManifest(`clip origin ${index + 1}`);
-    byId.set(clip.id, Object.freeze({ ...clip, audioUrl: audioUrl.href }));
-  }
-  return Object.freeze({
-    version: manifest.version,
-    locale: primaryLocale(manifest.locale),
-    inputHash: String(manifest.inputHash || ''),
-    voiceSelection: Object.freeze({ ...manifest.voiceSelection }),
-    clips: Object.freeze([...byId.values()]),
-    byId,
-  });
-}
-
-/**
- * @param {{ story?: any, config?: any, fetchImpl?: typeof globalThis.fetch, signal?: AbortSignal }} [options]
- */
-export async function loadCvShowLocalAudioManifest({
-  story,
-  config,
-  fetchImpl = globalThis.fetch,
-  signal,
-} = {}) {
-  if (!config || typeof fetchImpl !== 'function') return null;
-  let response = await fetchImpl(config.manifestUrl, {
-    cache: 'default',
-    credentials: 'same-origin',
-    signal,
-  });
-  if (!response?.ok) throw invalidManifest(`HTTP ${response?.status || 0}`);
-  let manifest = await response.json();
-  return validateCvShowLocalAudioManifest(manifest, story, config);
 }
 
 /**
@@ -361,13 +206,13 @@ export function createCvShowNarrationController({
       localSpeech = null;
       activeSpeech = null;
       source = browserSpeech?.available ? 'browser' : 'none';
-      let config = resolveCvShowLocalAudioConfig({ url, baseUrl, appConfig, userSettings });
+      let config = resolveCvShowWebAudioConfig({ url, baseUrl, appConfig, userSettings });
       if (!config) return controller.snapshot;
       if (primaryLocale(config.locale) !== primaryLocale(story?.narrationLocale)) {
         return controller.snapshot;
       }
       try {
-        let manifest = await loadCvShowLocalAudioManifest({
+        let manifest = await loadCvShowWebAudioRelease({
           story,
           config,
           fetchImpl,

@@ -1,5 +1,6 @@
 const DEFAULT_CHARACTERS_PER_SECOND = 40;
 const MIN_STREAM_DURATION_MS = 900;
+let messageStreamOperationSequence = 0;
 
 function abortReceipt(text, renderedText) {
   return Object.freeze({
@@ -66,5 +67,90 @@ export function createCvShowMessageStream(value, options = {}) {
     options.signal?.addEventListener?.('abort', onAbort, { once: true });
     if (options.signal?.aborted) onAbort();
     else frameId = requestFrame(render);
+  });
+}
+
+/**
+ * Owns the one active CV Show chat stream independently of its display message id.
+ * Replacement and cancellation invalidate callbacks before aborting the provider.
+ *
+ * @param {{createStream?:typeof createCvShowMessageStream}} [options]
+ */
+export function createCvShowMessageStreamController({
+  createStream = createCvShowMessageStream,
+} = {}) {
+  const operations = new Map();
+  let activeOperationId = '';
+
+  const isCurrent = (operation) => (
+    activeOperationId === operation.operationId
+    && operations.get(operation.operationId) === operation
+    && !operation.controller.signal.aborted
+  );
+
+  /** @param {Error|string} [reason] */
+  const cancel = (reason = 'replacement') => {
+    const abortReason = reason instanceof Error
+      ? reason
+      : new DOMException(`CV Show message stream cancelled: ${reason}`, 'AbortError');
+    const active = [...operations.values()];
+    operations.clear();
+    activeOperationId = '';
+    for (const operation of active) operation.controller.abort(abortReason);
+  };
+
+  /**
+   * @param {{displayId?:string,text?:string,
+   *   onUpdate?:(text:string,receipt:object)=>void,
+   *   onCompleted?:(receipt:object)=>void}} [input]
+   */
+  const start = ({ displayId = '', text = '', onUpdate, onCompleted } = {}) => {
+    cancel('replacement');
+    const operationId = `cv-show-message-stream-${++messageStreamOperationSequence}`;
+    const controller = new AbortController();
+    const operation = { operationId, controller };
+    operations.set(operationId, operation);
+    activeOperationId = operationId;
+
+    let stream;
+    try {
+      stream = createStream(text, {
+        signal: controller.signal,
+        onUpdate: (...args) => {
+          if (isCurrent(operation)) onUpdate?.(...args);
+        },
+      });
+    } catch (error) {
+      stream = Promise.reject(error);
+    }
+    const promise = Promise.resolve(stream)
+      .then((receipt) => {
+        if (receipt?.status === 'completed' && isCurrent(operation)) {
+          onCompleted?.(receipt);
+        }
+        return receipt;
+      })
+      .finally(() => {
+        if (operations.get(operationId) !== operation) return;
+        operations.delete(operationId);
+        if (activeOperationId === operationId) activeOperationId = '';
+      });
+
+    return Object.freeze({
+      operationId,
+      displayId: String(displayId || ''),
+      promise,
+    });
+  };
+
+  return Object.freeze({
+    start,
+    cancel,
+    get snapshot() {
+      return Object.freeze({
+        activeCount: operations.size,
+        activeOperationId,
+      });
+    },
   });
 }

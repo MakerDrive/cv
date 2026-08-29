@@ -54,6 +54,30 @@ npx jsda serve
 
 The default dynamic server port is `3000`.
 
+## CV Show audio workflow
+
+Master WAV files, voice references, Whisper recognition output, alignment
+receipts, and other reproducible authoring evidence stay outside Git in the
+ignored `TMP/cv-show-audio/` tree. Treat that tree as the local canonical source
+for the current voice revision; it is not copied into `dist/`.
+
+After changing narration text, voice, or alignment, explicitly publish a new
+content-addressed web projection:
+
+```bash
+npm run publish:cv-show-web-audio
+npm run verify:cv-show-web-audio
+```
+
+The publisher emits one immutable 61-file release under
+`src/static-pages/copy-cv-show-audio/`: 30 Ogg/Opus clips, 30 minimal aligned
+sequences, and one unified manifest. It also updates the generated public
+selector consumed by the player. A normal production build only copies that
+accepted projection verbatim; it never transcodes audio and must not contain
+WAV files or the private authoring tree. The production verifier checks the
+source/dist inventory, selector binding, hashes, MIME contract, and absence of
+private artifacts.
+
 ## Social cards
 
 The build derives social cards from the project and publication registries. Each

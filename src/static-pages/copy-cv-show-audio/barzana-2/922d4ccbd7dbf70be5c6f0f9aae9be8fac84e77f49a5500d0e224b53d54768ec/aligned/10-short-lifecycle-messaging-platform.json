@@ -1,0 +1,316 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-PU60KwaVWbbHKsHvfjCFatoqO4aK2ojKpOpaDe7FxY8=",
+  "media": {
+    "hash": "sha256:ae40641279b325bcff5a3de469d278906019a7a4b960556f4fa310c1a377fa70",
+    "durationMs": 34400,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 34400,
+      "speaker": "guide",
+      "transcript": "Теперь вернусь к периоду с 2022 по 2026 год и к Lifecycle Messaging Platform. Это маркетинговая платформа для автоматизации клиентских коммуникаций, сегментация аудитории, управление компаниями, оптин, смс, сценарии и аналитика. Я проектировал API, распределение заданий, связь с удаленными инстанциями, мониторинг и инструменты эксплуатации. Для проверки модемного контура я сделал локальный Digital Twin с виртуальными устройствами и воспроизводимыми сценариями.",
+      "words": [
+        {
+          "text": "Теперь",
+          "startMs": 0,
+          "endMs": 300
+        },
+        {
+          "text": "вернусь",
+          "startMs": 300,
+          "endMs": 820
+        },
+        {
+          "text": "к",
+          "startMs": 820,
+          "endMs": 940
+        },
+        {
+          "text": "периоду",
+          "startMs": 940,
+          "endMs": 1420
+        },
+        {
+          "text": "с",
+          "startMs": 1420,
+          "endMs": 1540
+        },
+        {
+          "text": "2022",
+          "startMs": 1540,
+          "endMs": 2440
+        },
+        {
+          "text": "по",
+          "startMs": 2440,
+          "endMs": 3220
+        },
+        {
+          "text": "2026",
+          "startMs": 3220,
+          "endMs": 4560
+        },
+        {
+          "text": "год",
+          "startMs": 4560,
+          "endMs": 5080
+        },
+        {
+          "text": "и",
+          "startMs": 5080,
+          "endMs": 5640
+        },
+        {
+          "text": "к",
+          "startMs": 5640,
+          "endMs": 5820
+        },
+        {
+          "text": "Lifecycle",
+          "startMs": 5820,
+          "endMs": 6360
+        },
+        {
+          "text": "Messaging",
+          "startMs": 6360,
+          "endMs": 6860
+        },
+        {
+          "text": "Platform.",
+          "startMs": 6860,
+          "endMs": 7360
+        },
+        {
+          "text": "Это",
+          "startMs": 7720,
+          "endMs": 8180
+        },
+        {
+          "text": "маркетинговая",
+          "startMs": 8180,
+          "endMs": 9020
+        },
+        {
+          "text": "платформа",
+          "startMs": 9020,
+          "endMs": 9640
+        },
+        {
+          "text": "для",
+          "startMs": 9640,
+          "endMs": 9820
+        },
+        {
+          "text": "автоматизации",
+          "startMs": 9820,
+          "endMs": 10580
+        },
+        {
+          "text": "клиентских",
+          "startMs": 10580,
+          "endMs": 11120
+        },
+        {
+          "text": "коммуникаций,",
+          "startMs": 11120,
+          "endMs": 11920
+        },
+        {
+          "text": "сегментация",
+          "startMs": 12120,
+          "endMs": 12960
+        },
+        {
+          "text": "аудитории,",
+          "startMs": 12960,
+          "endMs": 13740
+        },
+        {
+          "text": "управление",
+          "startMs": 14000,
+          "endMs": 14460
+        },
+        {
+          "text": "компаниями,",
+          "startMs": 14460,
+          "endMs": 15240
+        },
+        {
+          "text": "оптин,",
+          "startMs": 15480,
+          "endMs": 15860
+        },
+        {
+          "text": "смс,",
+          "startMs": 16060,
+          "endMs": 16540
+        },
+        {
+          "text": "сценарии",
+          "startMs": 16760,
+          "endMs": 17320
+        },
+        {
+          "text": "и",
+          "startMs": 17320,
+          "endMs": 17680
+        },
+        {
+          "text": "аналитика.",
+          "startMs": 17680,
+          "endMs": 18500
+        },
+        {
+          "text": "Я",
+          "startMs": 18700,
+          "endMs": 19100
+        },
+        {
+          "text": "проектировал",
+          "startMs": 19100,
+          "endMs": 19760
+        },
+        {
+          "text": "API,",
+          "startMs": 19760,
+          "endMs": 20100
+        },
+        {
+          "text": "распределение",
+          "startMs": 20340,
+          "endMs": 20980
+        },
+        {
+          "text": "заданий,",
+          "startMs": 20980,
+          "endMs": 21500
+        },
+        {
+          "text": "связь",
+          "startMs": 21720,
+          "endMs": 22160
+        },
+        {
+          "text": "с",
+          "startMs": 22160,
+          "endMs": 22360
+        },
+        {
+          "text": "удаленными",
+          "startMs": 22360,
+          "endMs": 22920
+        },
+        {
+          "text": "инстанциями,",
+          "startMs": 22920,
+          "endMs": 23600
+        },
+        {
+          "text": "мониторинг",
+          "startMs": 23780,
+          "endMs": 24460
+        },
+        {
+          "text": "и",
+          "startMs": 24460,
+          "endMs": 24880
+        },
+        {
+          "text": "инструменты",
+          "startMs": 24880,
+          "endMs": 25720
+        },
+        {
+          "text": "эксплуатации.",
+          "startMs": 25720,
+          "endMs": 26640
+        },
+        {
+          "text": "Для",
+          "startMs": 26640,
+          "endMs": 27180
+        },
+        {
+          "text": "проверки",
+          "startMs": 27180,
+          "endMs": 27660
+        },
+        {
+          "text": "модемного",
+          "startMs": 27660,
+          "endMs": 28180
+        },
+        {
+          "text": "контура",
+          "startMs": 28180,
+          "endMs": 28640
+        },
+        {
+          "text": "я",
+          "startMs": 28640,
+          "endMs": 29140
+        },
+        {
+          "text": "сделал",
+          "startMs": 29140,
+          "endMs": 29520
+        },
+        {
+          "text": "локальный",
+          "startMs": 29520,
+          "endMs": 29980
+        },
+        {
+          "text": "Digital",
+          "startMs": 29980,
+          "endMs": 30280
+        },
+        {
+          "text": "Twin",
+          "startMs": 30280,
+          "endMs": 30720
+        },
+        {
+          "text": "с",
+          "startMs": 30720,
+          "endMs": 31060
+        },
+        {
+          "text": "виртуальными",
+          "startMs": 31060,
+          "endMs": 31680
+        },
+        {
+          "text": "устройствами",
+          "startMs": 31680,
+          "endMs": 32420
+        },
+        {
+          "text": "и",
+          "startMs": 32420,
+          "endMs": 32680
+        },
+        {
+          "text": "воспроизводимыми",
+          "startMs": 32680,
+          "endMs": 33620
+        },
+        {
+          "text": "сценариями.",
+          "startMs": 33620,
+          "endMs": 34300
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-oWaNHMeK4a8HWFKDNHbPhvT2lXwblmTC1IegZIxuJoA="
+}

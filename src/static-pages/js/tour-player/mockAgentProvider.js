@@ -73,17 +73,19 @@ function isAction(request, ...ids) {
 
 export function createCvShowMockAgentProvider({ locale = 'en' } = {}) {
   const copy = COPY[primaryLocale(locale)];
-  const contactResponse = () => message('mock.contact', copy.contact, [
+  let responseSequence = 0;
+  const response = (id, ...args) => message(`${id}.${++responseSequence}`, ...args);
+  const contactResponse = () => response('mock.contact', copy.contact, [
     { id: 'contact-linkedin', label: copy.linkedin, icon: 'open_in_new' },
     { id: 'contact-telegram', label: copy.telegram, icon: 'open_in_new' },
   ], { intent: 'contact' });
-  const projectsResponse = () => message('mock.projects', copy.projects, [
+  const projectsResponse = () => response('mock.projects', copy.projects, [
     { id: 'projects', label: copy.openProjects, icon: 'folder_open' },
   ], { intent: 'projects' });
-  const helpResponse = () => message('mock.help', copy.help);
+  const helpResponse = () => response('mock.help', copy.help);
   const fallback = (request) => {
     if (!isMessage(request)) return null;
-    return message('mock.unknown', copy.unknown, [
+    return response('mock.unknown', copy.unknown, [
       { id: 'agent-projects', label: copy.openProjects, icon: 'folder_open' },
       { id: 'agent-help', label: copy.showHelp, icon: 'help' },
       { id: 'agent-contact', label: copy.contactChoice, icon: 'person' },

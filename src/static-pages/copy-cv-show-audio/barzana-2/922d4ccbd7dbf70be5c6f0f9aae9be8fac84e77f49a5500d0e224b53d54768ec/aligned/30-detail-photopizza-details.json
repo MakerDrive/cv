@@ -1,0 +1,491 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-RMoRCLC1mu2okaZ6ojjYWtwJ0uYb4Djw0rFde5rdO2o=",
+  "media": {
+    "hash": "sha256:3f67194e42a6b77a7c20d54511cd2d8764631c1a023f148ee26c2d0ab64cc285",
+    "durationMs": 46490,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 46490,
+      "speaker": "guide",
+      "transcript": "Изначально фотопицца была внутренним инструментом мегавизор облачного сервиса для фото 360 объектов 3D по норам видео и виртуальных туров. В мегавизор я разрабатывал технологию и оборудование и составил техническое задание на управляющее по первому Arduino версию по этому заданию реализовал привлеченный специалист. После мегавизор я сам продолжил управляющее по на JavaScript и Spruina. Я подбирал доступные компоненты и подробно описывал сборку с калибровкой, чтобы люди могли собирать свои версии. Один контроллер управлял поворотной платформой, слайдером камеры и автоматической панорамной головкой. Этот открытый проект дал практическую основу для последующих экспериментов Complex Scan и AutoBox.",
+      "words": [
+        {
+          "text": "Изначально",
+          "startMs": 0,
+          "endMs": 640
+        },
+        {
+          "text": "фотопицца",
+          "startMs": 640,
+          "endMs": 1500
+        },
+        {
+          "text": "была",
+          "startMs": 1500,
+          "endMs": 1760
+        },
+        {
+          "text": "внутренним",
+          "startMs": 1760,
+          "endMs": 2480
+        },
+        {
+          "text": "инструментом",
+          "startMs": 2480,
+          "endMs": 3220
+        },
+        {
+          "text": "мегавизор",
+          "startMs": 3220,
+          "endMs": 3880
+        },
+        {
+          "text": "облачного",
+          "startMs": 3880,
+          "endMs": 4620
+        },
+        {
+          "text": "сервиса",
+          "startMs": 4620,
+          "endMs": 5160
+        },
+        {
+          "text": "для",
+          "startMs": 5160,
+          "endMs": 5440
+        },
+        {
+          "text": "фото",
+          "startMs": 5440,
+          "endMs": 5760
+        },
+        {
+          "text": "360",
+          "startMs": 5760,
+          "endMs": 6320
+        },
+        {
+          "text": "объектов",
+          "startMs": 6320,
+          "endMs": 8100
+        },
+        {
+          "text": "3D",
+          "startMs": 8100,
+          "endMs": 8580
+        },
+        {
+          "text": "по",
+          "startMs": 8580,
+          "endMs": 8860
+        },
+        {
+          "text": "норам",
+          "startMs": 8860,
+          "endMs": 9220
+        },
+        {
+          "text": "видео",
+          "startMs": 9220,
+          "endMs": 9540
+        },
+        {
+          "text": "и",
+          "startMs": 9540,
+          "endMs": 9780
+        },
+        {
+          "text": "виртуальных",
+          "startMs": 9780,
+          "endMs": 10380
+        },
+        {
+          "text": "туров.",
+          "startMs": 10380,
+          "endMs": 10740
+        },
+        {
+          "text": "В",
+          "startMs": 10900,
+          "endMs": 11080
+        },
+        {
+          "text": "мегавизор",
+          "startMs": 11080,
+          "endMs": 11780
+        },
+        {
+          "text": "я",
+          "startMs": 11780,
+          "endMs": 12080
+        },
+        {
+          "text": "разрабатывал",
+          "startMs": 12080,
+          "endMs": 12840
+        },
+        {
+          "text": "технологию",
+          "startMs": 12840,
+          "endMs": 13560
+        },
+        {
+          "text": "и",
+          "startMs": 13560,
+          "endMs": 13820
+        },
+        {
+          "text": "оборудование",
+          "startMs": 13820,
+          "endMs": 14480
+        },
+        {
+          "text": "и",
+          "startMs": 14480,
+          "endMs": 14740
+        },
+        {
+          "text": "составил",
+          "startMs": 14740,
+          "endMs": 15260
+        },
+        {
+          "text": "техническое",
+          "startMs": 15260,
+          "endMs": 15860
+        },
+        {
+          "text": "задание",
+          "startMs": 15860,
+          "endMs": 16360
+        },
+        {
+          "text": "на",
+          "startMs": 16360,
+          "endMs": 16560
+        },
+        {
+          "text": "управляющее",
+          "startMs": 16560,
+          "endMs": 17340
+        },
+        {
+          "text": "по",
+          "startMs": 17340,
+          "endMs": 17620
+        },
+        {
+          "text": "первому",
+          "startMs": 17620,
+          "endMs": 18200
+        },
+        {
+          "text": "Arduino",
+          "startMs": 18200,
+          "endMs": 18540
+        },
+        {
+          "text": "версию",
+          "startMs": 18540,
+          "endMs": 19360
+        },
+        {
+          "text": "по",
+          "startMs": 19360,
+          "endMs": 19580
+        },
+        {
+          "text": "этому",
+          "startMs": 19580,
+          "endMs": 19780
+        },
+        {
+          "text": "заданию",
+          "startMs": 19780,
+          "endMs": 20300
+        },
+        {
+          "text": "реализовал",
+          "startMs": 20300,
+          "endMs": 20940
+        },
+        {
+          "text": "привлеченный",
+          "startMs": 20940,
+          "endMs": 21700
+        },
+        {
+          "text": "специалист.",
+          "startMs": 21700,
+          "endMs": 22380
+        },
+        {
+          "text": "После",
+          "startMs": 22540,
+          "endMs": 22820
+        },
+        {
+          "text": "мегавизор",
+          "startMs": 22820,
+          "endMs": 23480
+        },
+        {
+          "text": "я",
+          "startMs": 23480,
+          "endMs": 23760
+        },
+        {
+          "text": "сам",
+          "startMs": 23760,
+          "endMs": 24040
+        },
+        {
+          "text": "продолжил",
+          "startMs": 24040,
+          "endMs": 24620
+        },
+        {
+          "text": "управляющее",
+          "startMs": 24620,
+          "endMs": 25380
+        },
+        {
+          "text": "по",
+          "startMs": 25380,
+          "endMs": 25560
+        },
+        {
+          "text": "на",
+          "startMs": 25560,
+          "endMs": 25800
+        },
+        {
+          "text": "JavaScript",
+          "startMs": 25800,
+          "endMs": 26000
+        },
+        {
+          "text": "и",
+          "startMs": 26000,
+          "endMs": 26720
+        },
+        {
+          "text": "Spruina.",
+          "startMs": 26720,
+          "endMs": 27280
+        },
+        {
+          "text": "Я",
+          "startMs": 27280,
+          "endMs": 27520
+        },
+        {
+          "text": "подбирал",
+          "startMs": 27520,
+          "endMs": 27940
+        },
+        {
+          "text": "доступные",
+          "startMs": 27940,
+          "endMs": 28420
+        },
+        {
+          "text": "компоненты",
+          "startMs": 28420,
+          "endMs": 29040
+        },
+        {
+          "text": "и",
+          "startMs": 29040,
+          "endMs": 29240
+        },
+        {
+          "text": "подробно",
+          "startMs": 29240,
+          "endMs": 29720
+        },
+        {
+          "text": "описывал",
+          "startMs": 29720,
+          "endMs": 30220
+        },
+        {
+          "text": "сборку",
+          "startMs": 30220,
+          "endMs": 30700
+        },
+        {
+          "text": "с",
+          "startMs": 30700,
+          "endMs": 30820
+        },
+        {
+          "text": "калибровкой,",
+          "startMs": 30820,
+          "endMs": 31360
+        },
+        {
+          "text": "чтобы",
+          "startMs": 31480,
+          "endMs": 31740
+        },
+        {
+          "text": "люди",
+          "startMs": 31740,
+          "endMs": 32060
+        },
+        {
+          "text": "могли",
+          "startMs": 32060,
+          "endMs": 32400
+        },
+        {
+          "text": "собирать",
+          "startMs": 32400,
+          "endMs": 32860
+        },
+        {
+          "text": "свои",
+          "startMs": 32860,
+          "endMs": 33140
+        },
+        {
+          "text": "версии.",
+          "startMs": 33140,
+          "endMs": 33680
+        },
+        {
+          "text": "Один",
+          "startMs": 33820,
+          "endMs": 34200
+        },
+        {
+          "text": "контроллер",
+          "startMs": 34200,
+          "endMs": 34740
+        },
+        {
+          "text": "управлял",
+          "startMs": 34740,
+          "endMs": 35300
+        },
+        {
+          "text": "поворотной",
+          "startMs": 35300,
+          "endMs": 35860
+        },
+        {
+          "text": "платформой,",
+          "startMs": 35860,
+          "endMs": 36480
+        },
+        {
+          "text": "слайдером",
+          "startMs": 36680,
+          "endMs": 37100
+        },
+        {
+          "text": "камеры",
+          "startMs": 37100,
+          "endMs": 37580
+        },
+        {
+          "text": "и",
+          "startMs": 37580,
+          "endMs": 37840
+        },
+        {
+          "text": "автоматической",
+          "startMs": 37840,
+          "endMs": 38740
+        },
+        {
+          "text": "панорамной",
+          "startMs": 38740,
+          "endMs": 39440
+        },
+        {
+          "text": "головкой.",
+          "startMs": 39440,
+          "endMs": 39980
+        },
+        {
+          "text": "Этот",
+          "startMs": 40100,
+          "endMs": 40340
+        },
+        {
+          "text": "открытый",
+          "startMs": 40340,
+          "endMs": 40920
+        },
+        {
+          "text": "проект",
+          "startMs": 40920,
+          "endMs": 41240
+        },
+        {
+          "text": "дал",
+          "startMs": 41240,
+          "endMs": 41540
+        },
+        {
+          "text": "практическую",
+          "startMs": 41540,
+          "endMs": 42280
+        },
+        {
+          "text": "основу",
+          "startMs": 42280,
+          "endMs": 42740
+        },
+        {
+          "text": "для",
+          "startMs": 42740,
+          "endMs": 42880
+        },
+        {
+          "text": "последующих",
+          "startMs": 42880,
+          "endMs": 43620
+        },
+        {
+          "text": "экспериментов",
+          "startMs": 43620,
+          "endMs": 44360
+        },
+        {
+          "text": "Complex",
+          "startMs": 44360,
+          "endMs": 44820
+        },
+        {
+          "text": "Scan",
+          "startMs": 44820,
+          "endMs": 45180
+        },
+        {
+          "text": "и",
+          "startMs": 45180,
+          "endMs": 45560
+        },
+        {
+          "text": "AutoBox.",
+          "startMs": 45560,
+          "endMs": 46300
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-H/CXpqxg6070QXiTwh7tn0flC1LGxBqOAsQ+5C2zKsE="
+}

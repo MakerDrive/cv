@@ -5,17 +5,20 @@ import test from 'node:test';
 import { loadProjectContent, loadProjectEntries } from '../../src/static-pages/data/projects.js';
 import { PORTFOLIO_MEDIA_CATALOG } from '../../src/static-pages/data/portfolioMediaCatalog.js';
 import { getProjectMediaDescriptors } from '../../src/static-pages/data/portfolioMediaGraph.js';
+import { CV_SHOW_PRESENTATION_PROJECT } from '../../src/static-pages/data/cvShowPresentationProject.js';
 import { CV_SHOW_STORY } from '../../src/static-pages/data/tourScripts.js';
 import {
   PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS,
   composePortfolioArticleMedia,
   createPortfolioArticleTargetId,
+  createPortfolioArticleTargetSlotKey,
   composePortfolioPublicationMedia,
   createPortfolioArticleMediaAssignments,
   createPortfolioMediaFragmentId,
   createPortfolioMediaSlotKey,
   createPortfolioMediaNavigationUrl,
   getPortfolioAssignedMediaDescriptors,
+  getPortfolioArticleTargetIdFromSlotKey,
   getPortfolioMediaIdFromFragment,
   normalizePortfolioMediaLinkIdentity,
   parsePortfolioArticleBlocks,
@@ -205,58 +208,56 @@ test('semantic article blocks expose stable CV Show DOM anchors', () => {
   assert.doesNotMatch(stripPortfolioArticleBlockMarkers(result.details), /:::article-block/);
 });
 
-test('every source-backed required Show article target resolves in EN, RU, and ES', () => {
+test('every selected CV Show article target produces a semantic anchor in EN, RU, and ES', () => {
+  for (let [cellId, targetId] of [
+    ['cv-show:cue:video-studio.visible-process', 'article.symbiote-video-studio.semantic-flow'],
+    ['cv-show:cue:project-graph.context', 'article.project-graph-mcp.browser-fact'],
+    ['cv-show:cue:symbiote-engine-details.execution', 'article.symbiote-engine.readonly-graph-demo'],
+  ]) {
+    let cell = CV_SHOW_PRESENTATION_PROJECT.cells.find(({ id }) => id === cellId);
+    assert.equal(cell?.cue?.targetId, targetId, cellId);
+  }
   let directives = [
     ...CV_SHOW_STORY.scenes.flatMap(scene => scene.directives),
     ...Object.values(CV_SHOW_STORY.branches).flatMap(branch => branch.directives),
   ];
   let articleTargets = directives
-    .filter(directive => directive.policy !== 'optional')
-    .map(directive => directive.target?.match(/^article\.([a-z0-9-]+)\.([a-z0-9-]+)$/))
-    .filter(Boolean);
-  let targetSlugs = new Set(articleTargets.map(match => match[1]));
-  let blockedWithoutSource = new Set([
-    'article.agent-pool-mcp.local-demo',
-    'article.autobox-v1.planning-prototype',
-    'article.autobox-v1.planning-optics',
-    'article.autobox-v1.planning-overlap',
-    'article.autobox-v1.planning-mechanics',
-    'article.autobox-v1.planning-safety',
-    'article.autobox-v1.lidar-next-layer',
-    'article.complexscan.bottle-rig',
-    'article.complexscan.bottle-catalog-link',
-  ]);
-  let availableBySlug = new Map();
-  for (let slug of targetSlugs) {
-    let expected = parsePortfolioArticleBlocks(loadProjectContent(slug, 'en'))
-      .map(block => block.id)
-      .filter(Boolean);
-    assert.ok(expected.length > 0, slug);
-    availableBySlug.set(slug, new Set(expected));
-    for (let locale of ['ru', 'es']) {
-      assert.deepEqual(
-        parsePortfolioArticleBlocks(loadProjectContent(slug, locale))
-          .map(block => block.id)
-          .filter(Boolean),
-        expected,
-        `${slug}:${locale}`,
+    .map(directive => directive.target)
+    .filter(target => String(target || '').startsWith('article.'));
+  let uniqueTargets = [...new Set(articleTargets)];
+  let projects = new Map(loadProjectEntries().map(project => [project.slug, project]));
+
+  assert.equal(articleTargets.length, 92);
+  assert.equal(uniqueTargets.length, 77);
+  for (let target of uniqueTargets) {
+    let match = target.match(/^article\.([a-z0-9][a-z0-9-]*)\.([a-z0-9][a-z0-9-]*)$/);
+    assert.ok(match, target);
+    let [, slug, blockId] = match;
+    let project = projects.get(slug);
+    let slotKey = createPortfolioArticleTargetSlotKey(slug, blockId);
+    assert.ok(project, slug);
+    assert.equal(createPortfolioArticleTargetId(slug, blockId), target);
+    assert.equal(getPortfolioArticleTargetIdFromSlotKey(slotKey), target);
+
+    for (let locale of ['en', 'ru', 'es']) {
+      let content = loadProjectContent(slug, locale);
+      assert.equal(
+        parsePortfolioArticleBlocks(content).some(block => block.id === blockId),
+        true,
+        `${target}:${locale}`,
+      );
+      let composed = composePortfolioArticleMedia({
+        slug,
+        summary: project.summary,
+        details: content,
+      });
+      assert.equal(
+        composed.details.split('\n').includes(`:::content-slot ${slotKey}`),
+        true,
+        `${target}:${locale}:slot`,
       );
     }
   }
-
-  let checked = 0;
-  let blocked = 0;
-  for (let match of articleTargets) {
-    let target = `article.${match[1]}.${match[2]}`;
-    if (blockedWithoutSource.has(target)) {
-      blocked += 1;
-      continue;
-    }
-    assert.equal(availableBySlug.get(match[1]).has(match[2]), true, target);
-    checked += 1;
-  }
-  assert.equal(blockedWithoutSource.size, 9);
-  assert.equal(checked + blocked, articleTargets.length);
 });
 
 test('every embeddable article media descriptor has one explicit semantic placement', () => {

@@ -1,0 +1,231 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-gUeD/6uNeEthvRJxXukgkqioTDwnkuxO8n2FPsifR+o=",
+  "media": {
+    "hash": "sha256:c49b6f2b8589f7dc07ed66723d974ba4697dcf15ed64922452f491573f96a496",
+    "durationMs": 21880,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 21880,
+      "speaker": "guide",
+      "transcript": "Начну с текущего центра моей работы. В 2026 году я развиваю Symbiote Workspace в универсальную среду, где агент собирает рабочее пространство под конкретную задачу. Результат сохраняется как переносимая исполняемая конфигурация. Agent Portal и Video Studio постепенно оформляются как конфигурации этой среды.",
+      "words": [
+        {
+          "text": "Начну",
+          "startMs": 0,
+          "endMs": 380
+        },
+        {
+          "text": "с",
+          "startMs": 380,
+          "endMs": 520
+        },
+        {
+          "text": "текущего",
+          "startMs": 520,
+          "endMs": 1000
+        },
+        {
+          "text": "центра",
+          "startMs": 1000,
+          "endMs": 1420
+        },
+        {
+          "text": "моей",
+          "startMs": 1420,
+          "endMs": 1640
+        },
+        {
+          "text": "работы.",
+          "startMs": 1640,
+          "endMs": 2100
+        },
+        {
+          "text": "В",
+          "startMs": 2400,
+          "endMs": 2880
+        },
+        {
+          "text": "2026",
+          "startMs": 2880,
+          "endMs": 4040
+        },
+        {
+          "text": "году",
+          "startMs": 4040,
+          "endMs": 4520
+        },
+        {
+          "text": "я",
+          "startMs": 4520,
+          "endMs": 5100
+        },
+        {
+          "text": "развиваю",
+          "startMs": 5100,
+          "endMs": 5640
+        },
+        {
+          "text": "Symbiote",
+          "startMs": 5640,
+          "endMs": 6080
+        },
+        {
+          "text": "Workspace",
+          "startMs": 6080,
+          "endMs": 6680
+        },
+        {
+          "text": "в",
+          "startMs": 6680,
+          "endMs": 6880
+        },
+        {
+          "text": "универсальную",
+          "startMs": 6880,
+          "endMs": 7460
+        },
+        {
+          "text": "среду,",
+          "startMs": 7460,
+          "endMs": 8000
+        },
+        {
+          "text": "где",
+          "startMs": 8260,
+          "endMs": 8500
+        },
+        {
+          "text": "агент",
+          "startMs": 8500,
+          "endMs": 8900
+        },
+        {
+          "text": "собирает",
+          "startMs": 8900,
+          "endMs": 9420
+        },
+        {
+          "text": "рабочее",
+          "startMs": 9420,
+          "endMs": 9940
+        },
+        {
+          "text": "пространство",
+          "startMs": 9940,
+          "endMs": 10660
+        },
+        {
+          "text": "под",
+          "startMs": 10660,
+          "endMs": 10960
+        },
+        {
+          "text": "конкретную",
+          "startMs": 10960,
+          "endMs": 11780
+        },
+        {
+          "text": "задачу.",
+          "startMs": 11780,
+          "endMs": 12440
+        },
+        {
+          "text": "Результат",
+          "startMs": 12620,
+          "endMs": 13180
+        },
+        {
+          "text": "сохраняется",
+          "startMs": 13180,
+          "endMs": 13860
+        },
+        {
+          "text": "как",
+          "startMs": 13860,
+          "endMs": 14120
+        },
+        {
+          "text": "переносимая",
+          "startMs": 14120,
+          "endMs": 14900
+        },
+        {
+          "text": "исполняемая",
+          "startMs": 14900,
+          "endMs": 15580
+        },
+        {
+          "text": "конфигурация.",
+          "startMs": 15580,
+          "endMs": 16440
+        },
+        {
+          "text": "Agent",
+          "startMs": 16840,
+          "endMs": 17100
+        },
+        {
+          "text": "Portal",
+          "startMs": 17100,
+          "endMs": 17400
+        },
+        {
+          "text": "и",
+          "startMs": 17400,
+          "endMs": 17720
+        },
+        {
+          "text": "Video",
+          "startMs": 17720,
+          "endMs": 17940
+        },
+        {
+          "text": "Studio",
+          "startMs": 17940,
+          "endMs": 18260
+        },
+        {
+          "text": "постепенно",
+          "startMs": 18260,
+          "endMs": 19020
+        },
+        {
+          "text": "оформляются",
+          "startMs": 19020,
+          "endMs": 19640
+        },
+        {
+          "text": "как",
+          "startMs": 19640,
+          "endMs": 19940
+        },
+        {
+          "text": "конфигурации",
+          "startMs": 19940,
+          "endMs": 20820
+        },
+        {
+          "text": "этой",
+          "startMs": 20820,
+          "endMs": 21200
+        },
+        {
+          "text": "среды.",
+          "startMs": 21200,
+          "endMs": 21740
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-396wjJL+1U3f0kN77+7xZrWZxzlzVVcbt7JfVws3qtQ="
+}

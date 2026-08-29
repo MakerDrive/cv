@@ -16,6 +16,85 @@ export const CV_SHOW_DIRECTIVE_TYPES = Object.freeze([
   'idle',
 ]);
 
+function branchSnapshotMismatch(field, expected, observed) {
+  return Object.assign(
+    new TypeError(`CV Show branch return snapshot mismatch: ${field}`),
+    {
+      code: 'CV_SHOW_BRANCH_RETURN_SNAPSHOT_MISMATCH',
+      details: { field, expected, observed: observed ?? null },
+    },
+  );
+}
+
+export function validateCvShowBranchReturnSnapshot(snapshot, expected = {}) {
+  const binding = snapshot?.binding;
+  const checks = {
+    masterProjectHash: expected.masterProjectHash,
+    masterRevision: expected.masterRevision,
+    returnParentEntryId: expected.returnParentEntry?.id,
+    historicalOwnerEntryId: expected.historicalOwnerEntry?.id,
+    branchEntryId: expected.branchEntry?.id,
+    checkpointMs: snapshot?.playback?.positionMs,
+    contextualCardId: expected.contextualCardId,
+    contextualActionId: expected.contextualActionId,
+  };
+  for (let [field, value] of Object.entries(checks)) {
+    if (binding?.[field] !== value) {
+      throw branchSnapshotMismatch(field, value, binding?.[field]);
+    }
+  }
+  if (
+    snapshot?.entry?.id !== binding.returnParentEntryId
+    || snapshot?.playback?.subjectId !== binding.returnParentEntryId
+    || expected.historicalOwnerEntry?.branchId !== binding.branchEntryId
+    || expected.branchEntry?.sceneId !== binding.historicalOwnerEntryId
+    || binding.contextualCardId !== `${binding.historicalOwnerEntryId}.actions`
+    || binding.contextualActionId !== 'details'
+  ) {
+    throw branchSnapshotMismatch(
+      'entry-ancestry',
+      binding.returnParentEntryId,
+      snapshot?.entry?.id,
+    );
+  }
+  return snapshot;
+}
+
+export function createCvShowBranchReturnSnapshot({
+  masterProjectHash,
+  masterRevision,
+  returnParentEntry,
+  historicalOwnerEntry,
+  branchEntry,
+  playback,
+  contextualCardId,
+  contextualActionId,
+}) {
+  const snapshot = Object.freeze({
+    entry: returnParentEntry,
+    playback: Object.freeze({ ...playback }),
+    binding: Object.freeze({
+      masterProjectHash,
+      masterRevision,
+      returnParentEntryId: returnParentEntry?.id,
+      historicalOwnerEntryId: historicalOwnerEntry?.id,
+      branchEntryId: branchEntry?.id,
+      checkpointMs: playback?.positionMs,
+      contextualCardId,
+      contextualActionId,
+    }),
+  });
+  return validateCvShowBranchReturnSnapshot(snapshot, {
+    masterProjectHash,
+    masterRevision,
+    returnParentEntry,
+    historicalOwnerEntry,
+    branchEntry,
+    contextualCardId,
+    contextualActionId,
+  });
+}
+
 function policyOf(directive) {
   return directive?.policy === 'optional' ? 'optional' : 'required';
 }
@@ -42,7 +121,14 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
   } else if (directive.type === 'frame') {
     shared = { type: 'attention', id: directive.id, mode: 'frame', targetId: directive.target };
   } else if (directive.type === 'native-selection') {
-    shared = { type: 'attention', id: directive.id, mode: 'native-selection', targetId: directive.target };
+    shared = {
+      type: 'attention',
+      id: directive.id,
+      mode: 'native-selection',
+      targetId: directive.target,
+      ...(directive.quote ? { quote: directive.quote } : {}),
+      ...(directive.occurrence ? { occurrence: directive.occurrence } : {}),
+    };
   } else if (directive.type === 'marker') {
     shared = {
       type: 'attention',
@@ -121,41 +207,175 @@ function throwIfAborted(signal) {
   throw signal.reason || new DOMException('CV Show phase cancelled', 'AbortError');
 }
 
-/**
- * Serializes aligned attention work and exposes an event-driven scene barrier.
- * Invalidating a generation releases new work without treating stale settlement
- * as permission to advance the replacement scene.
- */
-export function createCvShowAttentionBarrierQueue() {
-  let generation = 0;
-  let tail = Promise.resolve();
+const SHOW_ATTENTION_MILESTONE_VERSION = 'show-attention-milestone-v2';
+const SHOW_ATTENTION_TERMINAL_VERSION = 'show-attention-terminal-v2';
+const SHOW_ATTENTION_TERMINAL_STATUSES = new Set([
+  'completed',
+  'rejected',
+  'cancelled',
+  'failed',
+]);
+const CV_SHOW_NATIVE_PRESENTATION_RECEIPT_VERSION =
+  'cv-show-native-presentation-receipt-v1';
+
+function observePresentationPerformance() {
+  return Object.freeze({
+    domain: 'performance',
+    timeOriginMs: globalThis.performance.timeOrigin,
+    monotonicTimeMs: globalThis.performance.now(),
+  });
+}
+
+function presentationOperationFailure(operation, result) {
+  return Object.assign(
+    new Error(`CV Show presentation operation failed: ${operation.projectCell.id}`),
+    {
+      code: 'CV_SHOW_PRESENTATION_OPERATION_FAILED',
+      operationId: operation.operationId,
+      result,
+    },
+  );
+}
+
+function presentationProviderFailure(operation, reason, details = {}) {
+  return Object.assign(
+    new TypeError(`CV Show presentation provider is invalid: ${operation.projectCell.id}/${reason}`),
+    {
+      code: 'CV_SHOW_PRESENTATION_PROVIDER_INVALID',
+      operationId: operation.operationId,
+      details: { reason, ...details },
+    },
+  );
+}
+
+function presentationProviderTerminalFailure(operation, terminal) {
+  const status = String(terminal?.status || 'invalid');
+  const code = {
+    rejected: 'CV_SHOW_PRESENTATION_PROVIDER_REJECTED',
+    cancelled: 'CV_SHOW_PRESENTATION_PROVIDER_CANCELLED',
+    failed: 'CV_SHOW_PRESENTATION_PROVIDER_FAILED',
+  }[status] || 'CV_SHOW_PRESENTATION_PROVIDER_INVALID';
+  return Object.assign(
+    new Error(`CV Show presentation provider ${status}: ${operation.projectCell.id}`),
+    {
+      code,
+      operationId: operation.operationId,
+      details: { providerReceipt: terminal },
+    },
+  );
+}
+
+function requiresProviderAdmission(operation) {
+  return operation.kind === 'attention'
+    || operation.projectCell.cue?.interaction?.type === 'select';
+}
+
+function createPresentationReporter(operation) {
+  const admissionRequired = requiresProviderAdmission(operation);
+  if (
+    !['interaction', 'attention', 'state'].includes(operation.kind)
+    || typeof operation.reportReceipt !== 'function'
+    || (admissionRequired && typeof operation.reportAdmission !== 'function')
+  ) {
+    throw presentationProviderFailure(operation, 'operation callbacks');
+  }
+
+  const reportAdmission = (providerAdmission) => {
+    if (!admissionRequired) {
+      throw presentationProviderFailure(operation, 'unexpected admission');
+    }
+    return operation.reportAdmission(Object.freeze({ providerAdmission }));
+  };
+
+  const reportMilestone = (providerReceipt) => {
+    if (
+      providerReceipt?.version !== SHOW_ATTENTION_MILESTONE_VERSION
+      || !['first-frame', 'settled'].includes(providerReceipt?.milestone)
+    ) {
+      throw presentationProviderFailure(operation, 'milestone', {
+        providerReceipt,
+      });
+    }
+    const status = operation.kind === 'interaction'
+      && providerReceipt.milestone === 'first-frame'
+      ? 'acted'
+      : providerReceipt.milestone;
+    return operation.reportReceipt(Object.freeze({
+      status,
+      observedAt: providerReceipt.observedAt,
+      providerReceipt,
+    }));
+  };
+
+  const reportStatus = (status, observedAt) => operation.reportReceipt(Object.freeze({
+    status,
+    observedAt,
+    providerReceipt: Object.freeze({
+      version: CV_SHOW_NATIVE_PRESENTATION_RECEIPT_VERSION,
+      effect: Object.freeze({
+        kind: operation.kind,
+        type: String(
+          operation.projectCell.cue?.interaction?.type
+          || operation.projectCell.cue?.kind
+          || operation.kind,
+        ),
+        status,
+      }),
+      target: Object.freeze({
+        id: operation.projectCell.cue?.targetId ?? operation.source?.target ?? null,
+      }),
+    }),
+  }));
+
+  const acceptTerminal = (providerReceipt) => {
+    if (
+      providerReceipt?.version !== SHOW_ATTENTION_TERMINAL_VERSION
+      || !SHOW_ATTENTION_TERMINAL_STATUSES.has(providerReceipt?.status)
+    ) {
+      throw presentationProviderFailure(operation, 'terminal', { providerReceipt });
+    }
+    if (providerReceipt.status === 'failed') {
+      operation.reportReceipt(Object.freeze({
+        status: 'failed',
+        observedAt: providerReceipt.observedAt,
+        providerReceipt,
+      }));
+    }
+    if (providerReceipt.status !== 'completed') {
+      throw presentationProviderTerminalFailure(operation, providerReceipt);
+    }
+    return providerReceipt;
+  };
 
   return Object.freeze({
-    get generation() { return generation; },
-    isCurrent: (value) => value === generation,
-    invalidate() {
-      generation += 1;
-      tail = Promise.resolve();
-      return generation;
-    },
-    enqueue(operation) {
-      const owner = generation;
-      const pending = tail.then(() => (
-        owner === generation ? operation(owner) : undefined
-      ));
-      tail = pending.catch(() => undefined);
-      return pending;
-    },
-    async wait() {
-      const owner = generation;
-      const pending = tail;
-      await pending;
-      return Object.freeze({
-        status: owner === generation ? 'completed' : 'cancelled',
-        generation: owner,
-      });
-    },
+    kind: operation.kind,
+    budgetMs: operation.projectCell.timing?.gestureDurationMs,
+    requiresProviderAdmission: admissionRequired,
+    reportAdmission,
+    reportMilestone,
+    reportStatus,
+    acceptTerminal,
+    providerFailure: (reason, details) => (
+      presentationProviderFailure(operation, reason, details)
+    ),
   });
+}
+
+export async function runCvShowPresentationOperation(runner, operation) {
+  throwIfAborted(operation.signal);
+  const presentation = createPresentationReporter(operation);
+  const result = operation.projectCell.id.endsWith(':scroll')
+    ? await runner.scroll(operation.source, { signal: operation.signal, presentation })
+    : await runner.run([operation.source], {
+        continuePhase: true,
+        signal: operation.signal,
+        presentation,
+      });
+  throwIfAborted(operation.signal);
+  if (result?.status !== 'success') {
+    throw presentationOperationFailure(operation, result);
+  }
+  return undefined;
 }
 
 /** @param {Record<string, any>} [options] */
@@ -173,9 +393,39 @@ export function createCvShowDirectiveRunner(options = {}) {
     actionAdapter = null,
     waitForReadiness = waitForShowDomReadiness,
     timeoutMs = 2_500,
+    observePerformance = observePresentationPerformance,
   } = options;
   let activeController = null;
   let markerSeries = '';
+  let paused = false;
+  const resumeWaiters = new Set();
+
+  const waitUntilResumed = (signal) => {
+    if (!paused) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const cleanup = () => {
+        resumeWaiters.delete(onResume);
+        signal?.removeEventListener?.('abort', onAbort);
+      };
+      const onResume = () => {
+        cleanup();
+        resolve();
+      };
+      const onAbort = () => {
+        cleanup();
+        reject(signal.reason || new DOMException('CV Show phase cancelled', 'AbortError'));
+      };
+      resumeWaiters.add(onResume);
+      signal?.addEventListener?.('abort', onAbort, { once: true });
+      if (!paused) onResume();
+    });
+  };
+
+  const resumeAttention = () => {
+    paused = false;
+    for (const resume of [...resumeWaiters]) resume();
+    return attention?.resume?.();
+  };
 
   const actionLifecycle = createShowActionLifecycle({
     inspect: (input) => actionAdapter?.inspect?.(input),
@@ -208,6 +458,8 @@ export function createCvShowDirectiveRunner(options = {}) {
   const clearAttention = (reason = 'pause') => {
     activeController?.abort(new DOMException('CV Show phase cancelled', 'AbortError'));
     activeController = null;
+    paused = false;
+    for (const resume of [...resumeWaiters]) resume();
     cancelAction(reason);
     attention?.clearMarkers?.();
     const preserveCursor = !['stop', 'completed', 'close', 'disposed'].includes(reason);
@@ -216,10 +468,8 @@ export function createCvShowDirectiveRunner(options = {}) {
   };
 
   const pauseAttention = () => {
-    attention?.pause?.();
-    activeController?.abort(new DOMException('CV Show phase paused', 'AbortError'));
-    activeController = null;
-    cancelAction('pause');
+    paused = true;
+    return attention?.pause?.();
   };
 
   const cancel = (reason = 'stop') => {
@@ -227,9 +477,17 @@ export function createCvShowDirectiveRunner(options = {}) {
     media?.stop?.('phase-changed');
   };
 
-  const run = async (directives = [], { continuePhase = false } = {}) => {
+  const run = async (
+    directives = [],
+    { continuePhase = false, signal = null, presentation = null } = {},
+  ) => {
     if (!continuePhase) cancel('replacement');
     let controller = new AbortController();
+    const abortFromSignal = () => controller.abort(
+      signal.reason || new DOMException('CV Show phase cancelled', 'AbortError'),
+    );
+    signal?.addEventListener?.('abort', abortFromSignal, { once: true });
+    if (signal?.aborted) abortFromSignal();
     activeController = controller;
     let receipts = [];
     let optionalMissing = false;
@@ -238,9 +496,22 @@ export function createCvShowDirectiveRunner(options = {}) {
       for (let source of directives) {
         throwIfAborted(controller.signal);
         let adapted = adaptCvShowDirective(source, { resolveText });
+        const actualInteraction = presentation?.kind === 'interaction'
+          && presentation.requiresProviderAdmission !== true;
+        let interactionActed = false;
+        const reportInteractionActed = () => {
+          if (!actualInteraction || interactionActed) return;
+          presentation.reportStatus('acted', observePerformance());
+          interactionActed = true;
+        };
+        const reportInteractionSettled = () => {
+          if (!actualInteraction) return;
+          presentation.reportStatus('settled', observePerformance());
+        };
         // Canonical `idle` cues are quiet narration dwell points, not chat status
         // messages and never a request for manual progression.
         if (source.type !== 'idle') emit?.(adapted.directive);
+        if (source.type === 'chat-action') reportInteractionActed();
 
         if (adapted.directive.type === 'attention') {
           if (source.type !== 'marker') {
@@ -250,17 +521,20 @@ export function createCvShowDirectiveRunner(options = {}) {
             attention?.clearMarkers?.();
           }
           if (source.type === 'marker') markerSeries = String(source.series || '');
+          const abortLifecycle = () => cancelAction('replacement');
+          controller.signal.addEventListener('abort', abortLifecycle, { once: true });
           try {
-            const abortLifecycle = () => cancelAction('replacement');
-            controller.signal.addEventListener('abort', abortLifecycle, { once: true });
             const lifecycleReceipt = await actionLifecycle.run(source, {
               adapted,
               act: async (target) => {
+                throwIfAborted(controller.signal);
+                await waitUntilResumed(controller.signal);
                 throwIfAborted(controller.signal);
                 let presentationTarget = target;
                 if (source.type === 'navigate' && runtime?.entries?.has(source.target)) {
                   const selected = runtime.select(source.target, { focus: true, updateUrl: false });
                   if (selected === false) return { unavailable: true, reason: 'navigation-rejected' };
+                  reportInteractionActed();
                   await waitForReadiness({
                     document,
                     target: () => {
@@ -277,26 +551,73 @@ export function createCvShowDirectiveRunner(options = {}) {
                   throwIfAborted(controller.signal);
                   presentationTarget = resolveTarget(source.target) || target;
                 }
-                let result = attention?.present?.({
-                  ...adapted.directive,
-                  target: presentationTarget,
-                  annotation: {
-                    marker: adapted.directive.marker,
-                    ...(source.series ? { series: source.series } : {}),
-                    ...(adapted.directive.label ? { label: adapted.directive.label } : {}),
-                  },
-                });
-                if (source.type === 'activate') activateTarget(target, source);
-                if (result?.presented === false || result?.status === 'unsupported') {
-                  return { unavailable: true, reason: result?.reason || result?.status };
+                const providerPlanned = presentation?.requiresProviderAdmission === true;
+                if (
+                  providerPlanned
+                  && (
+                    typeof attention?.present !== 'function'
+                    || typeof attention?.whenSettled !== 'function'
+                    || typeof attention?.cancel !== 'function'
+                  )
+                ) {
+                  throw presentation.providerFailure('attention lifecycle callbacks');
                 }
-                await attention?.whenSettled?.();
-                return source.type === 'navigate'
-                  ? { ...result, selectedId: runtime.selectedId }
-                  : result;
+                const cancelProvider = () => attention.cancel(controller.signal.reason);
+                if (providerPlanned) {
+                  controller.signal.addEventListener('abort', cancelProvider, { once: true });
+                }
+                try {
+                  let result;
+                  let presentFailure;
+                  try {
+                    result = attention?.present?.({
+                      ...adapted.directive,
+                      target: presentationTarget,
+                      ...(presentationTarget ? {
+                        targetIdentity: adapted.directive.targetId,
+                      } : {}),
+                      gestureId: source.id,
+                      cueTimeMs: source.cueTimeMs,
+                      mediaTimeMs: source.mediaTimeMs,
+                      ...(providerPlanned ? {
+                        budgetMs: presentation.budgetMs,
+                        onAdmission: presentation.reportAdmission,
+                        onMilestone: presentation.reportMilestone,
+                      } : {}),
+                      annotation: {
+                        marker: adapted.directive.marker,
+                        ...(source.series ? { series: source.series } : {}),
+                        ...(adapted.directive.label ? { label: adapted.directive.label } : {}),
+                      },
+                    });
+                  } catch (error) {
+                    presentFailure = error;
+                  }
+                  if (source.type === 'activate') {
+                    activateTarget(target, source);
+                    reportInteractionActed();
+                  }
+                  const settlement = await attention?.whenSettled?.();
+                  if (presentFailure) throw presentFailure;
+                  throwIfAborted(controller.signal);
+                  if (providerPlanned) presentation.acceptTerminal(settlement);
+                  if (
+                    !providerPlanned
+                    && (result?.presented === false || result?.status === 'unsupported')
+                  ) {
+                    return { unavailable: true, reason: result?.reason || result?.status };
+                  }
+                  reportInteractionSettled();
+                  return source.type === 'navigate'
+                    ? { ...result, settlement, selectedId: runtime.selectedId }
+                    : { ...result, settlement };
+                } finally {
+                  if (providerPlanned) {
+                    controller.signal.removeEventListener('abort', cancelProvider);
+                  }
+                }
               },
             });
-            controller.signal.removeEventListener('abort', abortLifecycle);
             if (lifecycleReceipt.status === 'cancelled') {
               return Object.freeze({ status: 'cancelled', receipts: Object.freeze(receipts) });
             }
@@ -313,6 +634,8 @@ export function createCvShowDirectiveRunner(options = {}) {
             }
             receipts.push(successReceipt(adapted, lifecycleReceipt));
           } catch (error) {
+            if (controller.signal.aborted) throwIfAborted(controller.signal);
+            if (presentation?.requiresProviderAdmission === true) throw error;
             if (error?.name === 'AbortError') throw error;
             let receipt = missingReceipt(adapted, error?.code || 'target-unresolved');
             receipts.push(receipt);
@@ -321,6 +644,8 @@ export function createCvShowDirectiveRunner(options = {}) {
             }
             optionalMissing = true;
             continue;
+          } finally {
+            controller.signal.removeEventListener('abort', abortLifecycle);
           }
           continue;
         }
@@ -345,7 +670,11 @@ export function createCvShowDirectiveRunner(options = {}) {
               timeoutMs,
             });
             throwIfAborted(controller.signal);
+            await waitUntilResumed(controller.signal);
+            throwIfAborted(controller.signal);
+            reportInteractionActed();
             let result = await media.play(mediaElement, adapted.directive);
+            reportInteractionSettled();
             receipts.push(successReceipt(adapted, result));
           } catch (error) {
             if (error?.name === 'AbortError') throw error;
@@ -360,6 +689,10 @@ export function createCvShowDirectiveRunner(options = {}) {
         }
 
         receipts.push(successReceipt(adapted));
+        reportInteractionSettled();
+        if (presentation?.kind === 'state') {
+          presentation.reportStatus('ready', observePerformance());
+        }
       }
       return Object.freeze({
         status: optionalMissing ? 'optional-missing' : 'success',
@@ -371,16 +704,39 @@ export function createCvShowDirectiveRunner(options = {}) {
       }
       throw error;
     } finally {
+      signal?.removeEventListener?.('abort', abortFromSignal);
       if (activeController === controller) activeController = null;
     }
   };
 
+  const scroll = async (
+    source,
+    { signal, presentation = null }
+      = /** @type {{ signal?: AbortSignal, presentation?: any }} */ ({}),
+  ) => {
+    throwIfAborted(signal);
+    presentation?.reportStatus('acted', observePerformance());
+    const target = await waitForReadiness({
+      document,
+      target: () => resolveTarget(source.target),
+      signal,
+      timeoutMs,
+    });
+    throwIfAborted(signal);
+    presentation?.reportStatus('settled', observePerformance());
+    return Object.freeze({
+      status: target ? 'success' : 'required-missing',
+      receipts: Object.freeze([]),
+    });
+  };
+
   return Object.freeze({
     run,
+    scroll,
     cancel,
     clearAttention,
     pause: pauseAttention,
-    resume: () => attention?.resume?.(),
+    resume: resumeAttention,
     stop: () => cancel('stop'),
     seek: () => clearAttention('seek'),
     branchChange: () => clearAttention('branch-change'),

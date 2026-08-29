@@ -1,0 +1,261 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-312Kbz65t8039NiIrxW4Gu3KBsuxvmrFrFLU0f2/Tjs=",
+  "media": {
+    "hash": "sha256:aa0b043e7fc919ca98419690989f7ba2ebd60377f42b370b13b3663f20edcfbe",
+    "durationMs": 26670,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 26670,
+      "speaker": "guide",
+      "transcript": "Теперь вернусь по истории программно-аппаратных проектов. В 2021-2022 годах я основал и вел F360 Studio Studio высокоточного 3D-сканирования. Я выстраивал процесс от физической съемочной установки и управляемого света до геометрии текстур и готовой презентации модели. При переезде в Аргентину физическую производственную базу пришлось закрыть.",
+      "words": [
+        {
+          "text": "Теперь",
+          "startMs": 0,
+          "endMs": 300
+        },
+        {
+          "text": "вернусь",
+          "startMs": 300,
+          "endMs": 820
+        },
+        {
+          "text": "по",
+          "startMs": 820,
+          "endMs": 980
+        },
+        {
+          "text": "истории",
+          "startMs": 980,
+          "endMs": 1360
+        },
+        {
+          "text": "программно",
+          "startMs": 1360,
+          "endMs": 2000
+        },
+        {
+          "text": "-аппаратных",
+          "startMs": 2000,
+          "endMs": 2700
+        },
+        {
+          "text": "проектов.",
+          "startMs": 2700,
+          "endMs": 3280
+        },
+        {
+          "text": "В",
+          "startMs": 3440,
+          "endMs": 3660
+        },
+        {
+          "text": "2021",
+          "startMs": 3660,
+          "endMs": 4520
+        },
+        {
+          "text": "-2022",
+          "startMs": 4520,
+          "endMs": 6520
+        },
+        {
+          "text": "годах",
+          "startMs": 6520,
+          "endMs": 7180
+        },
+        {
+          "text": "я",
+          "startMs": 7180,
+          "endMs": 7440
+        },
+        {
+          "text": "основал",
+          "startMs": 7440,
+          "endMs": 7940
+        },
+        {
+          "text": "и",
+          "startMs": 7940,
+          "endMs": 8140
+        },
+        {
+          "text": "вел",
+          "startMs": 8140,
+          "endMs": 8340
+        },
+        {
+          "text": "F360",
+          "startMs": 8340,
+          "endMs": 9340
+        },
+        {
+          "text": "Studio",
+          "startMs": 9340,
+          "endMs": 10500
+        },
+        {
+          "text": "Studio",
+          "startMs": 10500,
+          "endMs": 11020
+        },
+        {
+          "text": "высокоточного",
+          "startMs": 11020,
+          "endMs": 12320
+        },
+        {
+          "text": "3D",
+          "startMs": 12320,
+          "endMs": 12800
+        },
+        {
+          "text": "-сканирования.",
+          "startMs": 12800,
+          "endMs": 13660
+        },
+        {
+          "text": "Я",
+          "startMs": 13780,
+          "endMs": 13980
+        },
+        {
+          "text": "выстраивал",
+          "startMs": 13980,
+          "endMs": 14620
+        },
+        {
+          "text": "процесс",
+          "startMs": 14620,
+          "endMs": 14960
+        },
+        {
+          "text": "от",
+          "startMs": 14960,
+          "endMs": 15200
+        },
+        {
+          "text": "физической",
+          "startMs": 15200,
+          "endMs": 15720
+        },
+        {
+          "text": "съемочной",
+          "startMs": 15720,
+          "endMs": 16260
+        },
+        {
+          "text": "установки",
+          "startMs": 16260,
+          "endMs": 16860
+        },
+        {
+          "text": "и",
+          "startMs": 16860,
+          "endMs": 17200
+        },
+        {
+          "text": "управляемого",
+          "startMs": 17200,
+          "endMs": 17860
+        },
+        {
+          "text": "света",
+          "startMs": 17860,
+          "endMs": 18200
+        },
+        {
+          "text": "до",
+          "startMs": 18200,
+          "endMs": 18360
+        },
+        {
+          "text": "геометрии",
+          "startMs": 18360,
+          "endMs": 18920
+        },
+        {
+          "text": "текстур",
+          "startMs": 18920,
+          "endMs": 19420
+        },
+        {
+          "text": "и",
+          "startMs": 19420,
+          "endMs": 19680
+        },
+        {
+          "text": "готовой",
+          "startMs": 19680,
+          "endMs": 20180
+        },
+        {
+          "text": "презентации",
+          "startMs": 20180,
+          "endMs": 20820
+        },
+        {
+          "text": "модели.",
+          "startMs": 20820,
+          "endMs": 21200
+        },
+        {
+          "text": "При",
+          "startMs": 21360,
+          "endMs": 21660
+        },
+        {
+          "text": "переезде",
+          "startMs": 21660,
+          "endMs": 22360
+        },
+        {
+          "text": "в",
+          "startMs": 22360,
+          "endMs": 22540
+        },
+        {
+          "text": "Аргентину",
+          "startMs": 22540,
+          "endMs": 23200
+        },
+        {
+          "text": "физическую",
+          "startMs": 23200,
+          "endMs": 24000
+        },
+        {
+          "text": "производственную",
+          "startMs": 24000,
+          "endMs": 24880
+        },
+        {
+          "text": "базу",
+          "startMs": 24880,
+          "endMs": 25400
+        },
+        {
+          "text": "пришлось",
+          "startMs": 25400,
+          "endMs": 26100
+        },
+        {
+          "text": "закрыть.",
+          "startMs": 26100,
+          "endMs": 26580
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-QCDFlUxic/cVp81K7Qs542rvV2I9hZyyLxxPiWMsK34="
+}

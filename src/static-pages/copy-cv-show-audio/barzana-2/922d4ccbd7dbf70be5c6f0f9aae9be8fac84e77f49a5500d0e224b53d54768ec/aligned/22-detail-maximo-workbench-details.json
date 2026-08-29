@@ -1,0 +1,286 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-ds7QJEDa9xW3mtQKmEWqeR5A5K2P8ulczEWKSKLjPrY=",
+  "media": {
+    "hash": "sha256:ec26a9b823bc0a9ea577cf8b67c19bd8b998991aee6aa40ebff8134739a89f11",
+    "durationMs": 30560,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 30560,
+      "speaker": "guide",
+      "transcript": "В этом демо Workspace получает предметную конфигурацию для обслуживания оборудования. Панели связывают заявки, активы, локации, бригады и безопасные действия. Агент читает тот же актуальный контекст, который видит человек и работает через объявленные действия интерфейса. Этот контур проверяет архитектуру Workspace на корпоративном процессе. Реальные данные, авторизация и максимум APA подключаются отдельным интеграционным слоем.",
+      "words": [
+        {
+          "text": "В",
+          "startMs": 0,
+          "endMs": 160
+        },
+        {
+          "text": "этом",
+          "startMs": 160,
+          "endMs": 360
+        },
+        {
+          "text": "демо",
+          "startMs": 360,
+          "endMs": 860
+        },
+        {
+          "text": "Workspace",
+          "startMs": 860,
+          "endMs": 1420
+        },
+        {
+          "text": "получает",
+          "startMs": 1420,
+          "endMs": 2120
+        },
+        {
+          "text": "предметную",
+          "startMs": 2120,
+          "endMs": 2820
+        },
+        {
+          "text": "конфигурацию",
+          "startMs": 2820,
+          "endMs": 3800
+        },
+        {
+          "text": "для",
+          "startMs": 3800,
+          "endMs": 4020
+        },
+        {
+          "text": "обслуживания",
+          "startMs": 4020,
+          "endMs": 4760
+        },
+        {
+          "text": "оборудования.",
+          "startMs": 4760,
+          "endMs": 5640
+        },
+        {
+          "text": "Панели",
+          "startMs": 5880,
+          "endMs": 6360
+        },
+        {
+          "text": "связывают",
+          "startMs": 6360,
+          "endMs": 7020
+        },
+        {
+          "text": "заявки,",
+          "startMs": 7020,
+          "endMs": 7620
+        },
+        {
+          "text": "активы,",
+          "startMs": 8060,
+          "endMs": 8640
+        },
+        {
+          "text": "локации,",
+          "startMs": 9120,
+          "endMs": 9720
+        },
+        {
+          "text": "бригады",
+          "startMs": 9900,
+          "endMs": 10460
+        },
+        {
+          "text": "и",
+          "startMs": 10460,
+          "endMs": 10620
+        },
+        {
+          "text": "безопасные",
+          "startMs": 10620,
+          "endMs": 11340
+        },
+        {
+          "text": "действия.",
+          "startMs": 11340,
+          "endMs": 11860
+        },
+        {
+          "text": "Агент",
+          "startMs": 12140,
+          "endMs": 12720
+        },
+        {
+          "text": "читает",
+          "startMs": 12720,
+          "endMs": 13180
+        },
+        {
+          "text": "тот",
+          "startMs": 13180,
+          "endMs": 13520
+        },
+        {
+          "text": "же",
+          "startMs": 13520,
+          "endMs": 13720
+        },
+        {
+          "text": "актуальный",
+          "startMs": 13720,
+          "endMs": 14460
+        },
+        {
+          "text": "контекст,",
+          "startMs": 14460,
+          "endMs": 15060
+        },
+        {
+          "text": "который",
+          "startMs": 15320,
+          "endMs": 15520
+        },
+        {
+          "text": "видит",
+          "startMs": 15520,
+          "endMs": 15860
+        },
+        {
+          "text": "человек",
+          "startMs": 15860,
+          "endMs": 16280
+        },
+        {
+          "text": "и",
+          "startMs": 16280,
+          "endMs": 16800
+        },
+        {
+          "text": "работает",
+          "startMs": 16800,
+          "endMs": 17260
+        },
+        {
+          "text": "через",
+          "startMs": 17260,
+          "endMs": 17580
+        },
+        {
+          "text": "объявленные",
+          "startMs": 17580,
+          "endMs": 18420
+        },
+        {
+          "text": "действия",
+          "startMs": 18420,
+          "endMs": 18900
+        },
+        {
+          "text": "интерфейса.",
+          "startMs": 18900,
+          "endMs": 19660
+        },
+        {
+          "text": "Этот",
+          "startMs": 19860,
+          "endMs": 20200
+        },
+        {
+          "text": "контур",
+          "startMs": 20200,
+          "endMs": 20740
+        },
+        {
+          "text": "проверяет",
+          "startMs": 20740,
+          "endMs": 21320
+        },
+        {
+          "text": "архитектуру",
+          "startMs": 21320,
+          "endMs": 22040
+        },
+        {
+          "text": "Workspace",
+          "startMs": 22040,
+          "endMs": 22520
+        },
+        {
+          "text": "на",
+          "startMs": 22520,
+          "endMs": 22820
+        },
+        {
+          "text": "корпоративном",
+          "startMs": 22820,
+          "endMs": 23580
+        },
+        {
+          "text": "процессе.",
+          "startMs": 23580,
+          "endMs": 24200
+        },
+        {
+          "text": "Реальные",
+          "startMs": 24200,
+          "endMs": 25020
+        },
+        {
+          "text": "данные,",
+          "startMs": 25020,
+          "endMs": 25620
+        },
+        {
+          "text": "авторизация",
+          "startMs": 25800,
+          "endMs": 26460
+        },
+        {
+          "text": "и",
+          "startMs": 26460,
+          "endMs": 26700
+        },
+        {
+          "text": "максимум",
+          "startMs": 26700,
+          "endMs": 27120
+        },
+        {
+          "text": "APA",
+          "startMs": 27120,
+          "endMs": 27560
+        },
+        {
+          "text": "подключаются",
+          "startMs": 27560,
+          "endMs": 28360
+        },
+        {
+          "text": "отдельным",
+          "startMs": 28360,
+          "endMs": 29060
+        },
+        {
+          "text": "интеграционным",
+          "startMs": 29060,
+          "endMs": 29960
+        },
+        {
+          "text": "слоем.",
+          "startMs": 29960,
+          "endMs": 30440
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-UNQjPC/RXeXKN9aqXNN0TfjdxM3ybfppEpE4KR0jtJ4="
+}

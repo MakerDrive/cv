@@ -1,0 +1,191 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-I+3PQYr3PXjjJCoBK63DHWBK5ZiFJpgGHR+2fVdGPXo=",
+  "media": {
+    "hash": "sha256:099d515844d01c75932804c86363c1560cea819fbd6781d343a496e89cddf292",
+    "durationMs": 19840,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 19840,
+      "speaker": "guide",
+      "transcript": "Визуальную основу Workspace дает Symbiote UI. Здесь собраны компоненты, компоновки, графовые инструменты и семантические контракты интерфейса. Кстати, эта интерактивная презентация тоже собрана на Symbiote UI, поэтому библиотека уже работает прямо в текущей сцене.",
+      "words": [
+        {
+          "text": "Визуальную",
+          "startMs": 0,
+          "endMs": 520
+        },
+        {
+          "text": "основу",
+          "startMs": 520,
+          "endMs": 1100
+        },
+        {
+          "text": "Workspace",
+          "startMs": 1100,
+          "endMs": 1820
+        },
+        {
+          "text": "дает",
+          "startMs": 1820,
+          "endMs": 2580
+        },
+        {
+          "text": "Symbiote",
+          "startMs": 2580,
+          "endMs": 3340
+        },
+        {
+          "text": "UI.",
+          "startMs": 3340,
+          "endMs": 3700
+        },
+        {
+          "text": "Здесь",
+          "startMs": 4040,
+          "endMs": 4440
+        },
+        {
+          "text": "собраны",
+          "startMs": 4440,
+          "endMs": 4920
+        },
+        {
+          "text": "компоненты,",
+          "startMs": 4920,
+          "endMs": 5540
+        },
+        {
+          "text": "компоновки,",
+          "startMs": 5640,
+          "endMs": 6340
+        },
+        {
+          "text": "графовые",
+          "startMs": 6540,
+          "endMs": 7040
+        },
+        {
+          "text": "инструменты",
+          "startMs": 7040,
+          "endMs": 7960
+        },
+        {
+          "text": "и",
+          "startMs": 7960,
+          "endMs": 8160
+        },
+        {
+          "text": "семантические",
+          "startMs": 8160,
+          "endMs": 8900
+        },
+        {
+          "text": "контракты",
+          "startMs": 8900,
+          "endMs": 9480
+        },
+        {
+          "text": "интерфейса.",
+          "startMs": 9480,
+          "endMs": 10300
+        },
+        {
+          "text": "Кстати,",
+          "startMs": 10620,
+          "endMs": 11040
+        },
+        {
+          "text": "эта",
+          "startMs": 11640,
+          "endMs": 11760
+        },
+        {
+          "text": "интерактивная",
+          "startMs": 11760,
+          "endMs": 12360
+        },
+        {
+          "text": "презентация",
+          "startMs": 12360,
+          "endMs": 13120
+        },
+        {
+          "text": "тоже",
+          "startMs": 13120,
+          "endMs": 13580
+        },
+        {
+          "text": "собрана",
+          "startMs": 13580,
+          "endMs": 14320
+        },
+        {
+          "text": "на",
+          "startMs": 14320,
+          "endMs": 14760
+        },
+        {
+          "text": "Symbiote",
+          "startMs": 14760,
+          "endMs": 15260
+        },
+        {
+          "text": "UI,",
+          "startMs": 15260,
+          "endMs": 15620
+        },
+        {
+          "text": "поэтому",
+          "startMs": 15980,
+          "endMs": 16500
+        },
+        {
+          "text": "библиотека",
+          "startMs": 16500,
+          "endMs": 17320
+        },
+        {
+          "text": "уже",
+          "startMs": 17320,
+          "endMs": 17700
+        },
+        {
+          "text": "работает",
+          "startMs": 17700,
+          "endMs": 18220
+        },
+        {
+          "text": "прямо",
+          "startMs": 18220,
+          "endMs": 18580
+        },
+        {
+          "text": "в",
+          "startMs": 18580,
+          "endMs": 18760
+        },
+        {
+          "text": "текущей",
+          "startMs": 18760,
+          "endMs": 19240
+        },
+        {
+          "text": "сцене.",
+          "startMs": 19240,
+          "endMs": 19720
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-oarQ7RFK+mg+aPokoa/xoFfze07jYZNNyt1Gk4NniFQ="
+}

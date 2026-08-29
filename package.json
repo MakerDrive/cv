@@ -23,6 +23,11 @@
     "check:types": "npx tsc --noEmit",
     "test:unit": "node --test test/unit/*.test.js",
     "test:browser:resources": "node --test test/browser/*.test.js",
+    "authoring:serve": "node ./scripts/cv-show-authoring.js serve",
+    "authoring:materialize": "node ./scripts/cv-show-authoring.js materialize",
+    "verify:cv-show-private-artifacts": "node ./scripts/verify-cv-show-private-artifacts.js",
+    "publish:cv-show-web-audio": "node ./scripts/cv-show-web-audio-publisher.js",
+    "verify:cv-show-web-audio": "node ./scripts/verify-cv-show-web-audio.js",
     "clean": "rm -rf ./dist",
     "copy-robots": "cp ./src/static-pages/robots.txt ./dist/robots.txt",
     "copy-404": "sed 's|<base href=[^>]*>|<base href=/cv/>|' ./dist/index.html > ./dist/404.html",
@@ -44,7 +49,8 @@
     "@symbiotejs/symbiote": "3.8.0-webmcp.2",
     "immersive-media-spots": "^1.3.7",
     "jsda-kit": "1.6.0",
-    "symbiote-ui": "github:rnd-pro/symbiote-ui#main"
+    "symbiote-ui": "git+https://github.com/rnd-pro/symbiote-ui.git#db60842c78522739e00acc8d115cba5acb420724",
+    "symbiote-workspace": "git+https://github.com/rnd-pro/symbiote-workspace.git#6e55321301abaf65f558bc962f1971e2d6469a9e"
   },
   "overrides": {
     "@symbiotejs/symbiote": "$@symbiotejs/symbiote",

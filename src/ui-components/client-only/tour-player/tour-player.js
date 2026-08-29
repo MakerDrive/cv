@@ -1,6 +1,7 @@
 import 'symbiote-ui/chat/show-chat';
 import { ShowSessionState } from 'symbiote-ui/chat/show-runtime';
 import { TOUR_LOCALE_MESSAGES } from '../../../static-pages/data/tourTranslations.js';
+import { getCvShowRuntimeAuthority } from '../../../static-pages/js/tour-player/cvShowRuntimeAuthority.js';
 import {
   createCvShowMockAgentProvider,
   resolveTrustedCvContactAction,
@@ -8,6 +9,7 @@ import {
 import {
   createCvShowAlignmentController,
   partitionCvShowAlignedDirectives,
+  requireCvShowSceneSetupSuccess,
 } from '../../../static-pages/js/tour-player/showAlignmentAdapter.js';
 import { createCvShowNarrationController } from '../../../static-pages/js/tour-player/localNarration.js';
 import {
@@ -15,7 +17,15 @@ import {
   createCvShowPresentationContext,
 } from '../../../static-pages/js/tour-player/presentationContext.js';
 import { createBrowserSpeechController } from '../../../static-pages/js/tour-player/speech.js';
-import { createCvShowMessageStream } from '../../../static-pages/js/tour-player/messageStream.js';
+import {
+  createCvShowMessageStreamController,
+} from '../../../static-pages/js/tour-player/messageStream.js';
+import {
+  createCvShowBranchReturnSnapshot,
+  validateCvShowBranchReturnSnapshot,
+} from '../../../static-pages/js/tour-player/showAdapter.js';
+
+const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
 function formatProgress(message, current, total) {
   return message.replace('{current}', String(current)).replace('{total}', String(total));
@@ -69,6 +79,8 @@ export class PortfolioShowChat extends HTMLElement {
   };
 
   #story = null;
+  #authoringView = cvShowRuntimeAuthority.getView();
+  #unsubscribeAuthoring = null;
   /** @type {'' | 'short' | 'full'} */
   #mode = '';
   #playbackEntries = [];
@@ -92,11 +104,12 @@ export class PortfolioShowChat extends HTMLElement {
   #alignment = createCvShowAlignmentController({
     url: globalThis.location?.href,
     baseUrl: globalThis.document?.baseURI,
+    getAuthoringView: () => this.#authoringView,
   });
   /** @type {Promise<any>} */
   #alignmentReady = Promise.resolve();
   #alignedEntry = null;
-  #lastAlignedCue = null;
+  #lastExecutionReceipt = null;
   #lastAlignedReset = null;
   #lastAlignedSeekFailure = null;
   #lastAlignedGenerationReceipt = null;
@@ -105,7 +118,7 @@ export class PortfolioShowChat extends HTMLElement {
   #audioArbiter = null;
   #speechToken = null;
   #activeSpeechEntry = null;
-  #messageStreams = new Map();
+  #messageStream = createCvShowMessageStreamController();
 
   constructor() {
     super();
@@ -156,7 +169,11 @@ export class PortfolioShowChat extends HTMLElement {
     }
     if (actionId === 'start-short') void this.#start('short');
     else if (actionId === 'start-full') void this.#start('full');
-    else if (actionId === 'details') this.#enterDetails(payload?.branchId);
+    else if (actionId === 'details') this.#enterDetails(payload?.branchId, {
+      contextualCardId: event.detail?.id,
+      contextualActionId: actionId,
+      historicalOwnerEntryId: payload?.sceneId,
+    });
     else if (actionId === 'return') this.#returnFromDetails();
     else if (actionId === 'resume') void this.#resume();
     else if (actionId === 'skip-media') this.#skipMedia();
@@ -179,6 +196,20 @@ export class PortfolioShowChat extends HTMLElement {
     this.#configureVoiceInput();
   };
 
+  #onAuthoringView = (nextView) => {
+    if (
+      !nextView?.identity?.snapshot
+      || nextView.identity.snapshot === this.#authoringView?.identity?.snapshot
+    ) return;
+    if (this.$.isRunning || this.#mode || this.#alignedEntry || this.$.inBranch) {
+      this.stopShow();
+    } else {
+      this.#stopSpeech('authoring-revision-changed');
+    }
+    this.#authoringView = nextView;
+    this.#acceptStory(nextView.story);
+  };
+
   set agentDock(value) {
     this.#dock = value || null;
   }
@@ -188,6 +219,8 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   connectedCallback() {
+    this.#authoringView = cvShowRuntimeAuthority.getView();
+    this.#unsubscribeAuthoring ||= cvShowRuntimeAuthority.subscribe(this.#onAuthoringView);
     this.#dock ||= this.closest('agent-dock-shell');
     if (!this.#dock) return;
     this.#localize();
@@ -209,6 +242,8 @@ export class PortfolioShowChat extends HTMLElement {
     this.#dock?.removeEventListener('agent-show-response', this.#onAgentResponse);
     this.#dock?.removeEventListener('agent-dock-ready', this.#onDockReady);
     this.#dock?.removeEventListener('click', this.#captureTrustedContactClick, { capture: true });
+    this.#unsubscribeAuthoring?.();
+    this.#unsubscribeAuthoring = null;
     this.stopShow();
   }
 
@@ -234,14 +269,8 @@ export class PortfolioShowChat extends HTMLElement {
       activeId: this.#alignedEntry?.entryId || '',
       alignedSequenceHash: this.#alignedEntry?.alignedSequenceHash || '',
       mediaHash: this.#alignedEntry?.mediaHash || '',
-      exactCueCount: this.#alignedEntry?.exactCueCount || 0,
-      segmentCueCount: this.#alignedEntry?.segmentCueCount || 0,
-      lastCueId: this.#lastAlignedCue?.source?.id || '',
-      lastCueTimeMs: this.#lastAlignedCue?.cueTimeMs ?? null,
-      lastMediaTimeMs: this.#lastAlignedCue?.mediaTimeMs ?? null,
-      lastAlignmentSource: this.#lastAlignedCue?.cue?.alignment?.provenance?.source || '',
-      lastAlignmentResolution: this.#lastAlignedCue?.cue?.alignment?.resolution || '',
-      lastCueReason: this.#lastAlignedCue?.reason || '',
+      speechGroupCount: this.#alignedEntry?.speechGroupCount || 0,
+      lastExecutionReceipt: this.#lastExecutionReceipt,
       lastResetReason: this.#lastAlignedReset?.reason || '',
       lastSeekFailure: this.#lastAlignedSeekFailure,
       lastGenerationReceipt: this.#lastAlignedGenerationReceipt,
@@ -277,6 +306,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.isPaused = true;
     this.$.resumeRequired = true;
     this.#speech.pause();
+    this.#alignedEntry?.runtime?.pause?.();
     const positionMs = Math.max(0, Math.round(Number(this.#speech.media?.currentTime || 0) * 1000));
     this.#session.setPlayback({
       ...this.#session.snapshot.playback,
@@ -345,7 +375,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.#syncPlayer(completed ? 'completed' : 'stopped');
     this.#dock?.removeShow?.('short', { stop: false });
     this.#showPlayer = null;
-    if (wasRunning && !completed) this.#appendModeSelectionMessage();
+    if (wasRunning && !completed && this.isConnected) this.#appendModeSelectionMessage();
     if (wasRunning) {
       this.dispatchEvent(new CustomEvent(
         completed ? 'portfolio-show-complete' : 'portfolio-show-stop',
@@ -363,7 +393,7 @@ export class PortfolioShowChat extends HTMLElement {
         { id: 'start-full', label: this.#message('tour.full'), icon: 'playlist_play' },
       ],
       payload: { intent: 'show-mode' },
-    });
+    }, { stream: false });
   }
 
   #configureSharedChat() {
@@ -500,10 +530,8 @@ export class PortfolioShowChat extends HTMLElement {
     ));
   }
 
-  #loadStory() {
-    const source = document.getElementById('pulse-tour-story')?.textContent || '';
+  #acceptStory(story) {
     try {
-      const story = JSON.parse(source);
       const sceneIds = new Set(story?.scenes?.map((scene) => scene.id) || []);
       const branchesValid = Object.values(story?.branches || {}).every((branch) => (
         sceneIds.has(branch.sceneId) && branch.return?.resume === 'paused'
@@ -522,6 +550,19 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.statusText = this.$.isReady ? '' : this.#message('tour.dataUnavailable');
   }
 
+  #loadStory() {
+    if (this.#authoringView?.story) {
+      this.#acceptStory(this.#authoringView.story);
+      return;
+    }
+    const source = document.getElementById('pulse-tour-story')?.textContent || '';
+    try {
+      this.#acceptStory(JSON.parse(source));
+    } catch {
+      this.#acceptStory(null);
+    }
+  }
+
   #localize() {
     this.$.tourTitle = this.#message('panel.tour');
     this.$.tourIntro = this.#message('tour.intro');
@@ -537,12 +578,28 @@ export class PortfolioShowChat extends HTMLElement {
     return messages[key] || TOUR_LOCALE_MESSAGES.en[key] || '';
   }
 
+  #rejectUnavailableData() {
+    this.$.isError = true;
+    this.$.errorText = this.#message('tour.dataUnavailable');
+    this.$.statusText = this.$.errorText;
+    this.#appendSystemMessage(this.$.errorText, { error: true });
+  }
+
   /** @param {'short' | 'full' | ''} [mode] */
   async #start(mode = '') {
-    if (!this.$.isReady || this.$.isRunning) return;
+    if (!this.$.isReady || this.$.isRunning || this.#mode) return;
     if (mode !== 'short' && mode !== 'full') return;
+    const requestId = this.#requestId;
+    const playbackEntries = [...createCvShowPlaybackEntries(this.#story, mode)];
+    const unavailableEntryIds = playbackEntries
+      .filter(({ id }) => !this.#authoringView.mediaRegistry.entries[id]?.playable)
+      .map(({ id }) => id);
+    if (unavailableEntryIds.length) {
+      this.#rejectUnavailableData();
+      return;
+    }
     this.#mode = mode;
-    this.#playbackEntries = [...createCvShowPlaybackEntries(this.#story, mode)];
+    this.#playbackEntries = playbackEntries;
     this.#mountSharedShow();
     this.#showPlayer?.bind?.(this.#showConfig());
     this.#narrationReady = this.#speech.prepare(this.#story).then((snapshot) => {
@@ -557,17 +614,24 @@ export class PortfolioShowChat extends HTMLElement {
       return alignment;
     });
     await Promise.all([this.#narrationReady, this.#alignmentReady]);
-    if (!this.isConnected || this.$.isRunning) return;
+    if (!this.isConnected || this.$.isRunning || requestId !== this.#requestId || !this.#mode) return;
     this.#session = new ShowSessionState();
     this.#sceneIndex = 0;
     this.$.isRunning = true;
     this.$.isPaused = false;
     this.$.resumeRequired = false;
-    this.#appendAgentMessage({ id: `start-${mode}` }, {
+    const acknowledgement = await this.#appendAgentMessage({ id: `start-${mode}` }, {
       text: this.#message(`tour.start.${mode}`),
       actions: [],
       payload: null,
     });
+    if (
+      acknowledgement?.status !== 'completed'
+      || !this.isConnected
+      || !this.$.isRunning
+      || requestId !== this.#requestId
+      || !this.#mode
+    ) return;
     this.dispatchEvent(new CustomEvent('portfolio-show-start', { bubbles: true, composed: true }));
     this.#presentScene();
   }
@@ -614,7 +678,11 @@ export class PortfolioShowChat extends HTMLElement {
     }
   }
 
-  #waitForAttentionBarrier(requestId) {
+  async #waitForAttentionBarrier(requestId) {
+    await this.#alignedEntry?.runtime?.whenIdle?.();
+    if (requestId !== this.#requestId) {
+      return Object.freeze({ status: 'cancelled' });
+    }
     let settle;
     let settled = false;
     const completion = new Promise((resolve) => { settle = resolve; });
@@ -678,7 +746,10 @@ export class PortfolioShowChat extends HTMLElement {
     this.#presentEntry(entry, { startPaused });
   }
 
-  #presentEntry(entry, { startPaused = false } = {}) {
+  #presentEntry(entry, {
+    startPaused = false,
+    precedingSetupEntry = null,
+  } = {}) {
     this.#requestId += 1;
     const requestId = this.#requestId;
     this.#stopSpeech('scene-changed', { retainEntryId: entry.id });
@@ -691,16 +762,22 @@ export class PortfolioShowChat extends HTMLElement {
     this.emitShowDirective({ type: 'speech', id: `${entry.id}.speech`, text: entry.speech });
     const { scheduled } = partitionCvShowAlignedDirectives(entry.directives);
     const visualDirectives = scheduled.map(({ source }) => source).filter(({ type }) => type !== 'media');
-    const sceneSetupReady = this.#runSceneSetup(entry, requestId);
+    const sceneSetupReady = precedingSetupEntry
+      ? this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
+      : this.#alignment.available
+        ? null
+        : this.#runSceneSetup(entry, requestId);
     if (!this.#alignment.available) {
-      void sceneSetupReady.then(() => {
-        if (requestId !== this.#requestId) return;
-        this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
-          bubbles: true,
-          composed: true,
-          detail: { directives: visualDirectives, aligned: false, requestId },
-        }));
-      });
+      void sceneSetupReady
+        .then(() => {
+          if (requestId !== this.#requestId) return;
+          this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
+            bubbles: true,
+            composed: true,
+            detail: { directives: visualDirectives, aligned: false, requestId },
+          }));
+        })
+        .catch(() => {});
     }
     this.#showPlayer?.bind?.(this.#showConfig());
     this.#syncPlayer();
@@ -734,12 +811,21 @@ export class PortfolioShowChat extends HTMLElement {
     return completion;
   }
 
+  async #runPrecedingSceneSetup(precedingEntry, entry, requestId) {
+    const receipt = await this.#runSceneSetup(precedingEntry, requestId);
+    requireCvShowSceneSetupSuccess(receipt, precedingEntry.id);
+    if (requestId !== this.#requestId) return null;
+    return this.#alignment.available
+      ? null
+      : this.#runSceneSetup(entry, requestId);
+  }
+
   #disposeAlignedEntry() {
     const alignedEntry = this.#alignedEntry;
     alignedEntry?.media?.removeEventListener?.('timeupdate', alignedEntry.onCaptionTimeUpdate);
     this.#alignedEntry?.runtime?.dispose?.();
     this.#alignedEntry = null;
-    this.#lastAlignedCue = null;
+    this.#lastExecutionReceipt = null;
     this.#lastAlignedReset = null;
     this.#lastAlignedSeekFailure = null;
     this.#lastAlignedGenerationReceipt = null;
@@ -773,7 +859,50 @@ export class PortfolioShowChat extends HTMLElement {
     const aligned = await this.#alignment.createEntryRuntime({
       entry,
       media,
-      resolveText: (key) => this.#message(key),
+      audioClip: clip,
+      checkpointMs: positionMs > 0 ? positionMs : null,
+      runPresentationOperation: (operation) => {
+        let settle;
+        let settled = false;
+        const completion = new Promise((resolve, reject) => { settle = { resolve, reject }; });
+        const detail = {
+          requestId,
+          entryId: entry.id,
+          operation,
+          handled: false,
+          complete: (result, error = null) => {
+            if (settled) return;
+            settled = true;
+            if (error) settle.reject(error);
+            else settle.resolve(result);
+          },
+        };
+        this.dispatchEvent(new CustomEvent('portfolio-show-presentation-operation', {
+          bubbles: true,
+          composed: true,
+          detail,
+        }));
+        if (!detail.handled) {
+          detail.complete(null, Object.assign(
+            new Error(`CV Show presentation operation is unhandled: ${operation.projectCell.id}`),
+            { code: 'CV_SHOW_PRESENTATION_OPERATION_UNHANDLED' },
+          ));
+        }
+        return completion;
+      },
+      onReceipt: (receipt) => {
+        if (requestId !== this.#requestId) return;
+        this.#lastExecutionReceipt = receipt;
+        this.#session.setPlayback({
+          ...this.#session.snapshot.playback,
+          positionMs: Math.max(0, Math.round(Number(media.currentTime || 0) * 1_000)),
+        });
+        this.dispatchEvent(new CustomEvent('portfolio-show-presentation-receipt', {
+          bubbles: true,
+          composed: true,
+          detail: { requestId, entryId: entry.id, receipt },
+        }));
+      },
       onReset: (receipt) => {
         if (requestId !== this.#requestId) return;
         this.#lastAlignedReset = receipt;
@@ -785,19 +914,6 @@ export class PortfolioShowChat extends HTMLElement {
       },
       onSeekFailure: (receipt) => {
         this.#recordAlignedSeekFailure(receipt, requestId, entry.id);
-      },
-      onCue: (receipt) => {
-        if (requestId !== this.#requestId) return;
-        this.#lastAlignedCue = receipt;
-        this.#session.setPlayback({
-          ...this.#session.snapshot.playback,
-          positionMs: receipt.mediaTimeMs,
-        });
-        this.dispatchEvent(new CustomEvent('portfolio-show-aligned-cue', {
-          bubbles: true,
-          composed: true,
-          detail: { requestId, entryId: entry.id, ...receipt },
-        }));
       },
     });
     if (requestId !== this.#requestId) {
@@ -843,7 +959,20 @@ export class PortfolioShowChat extends HTMLElement {
       return;
     }
     await this.#alignmentReady;
-    await sceneSetupReady;
+    let sceneSetupReceipt = null;
+    try {
+      sceneSetupReceipt = await sceneSetupReady;
+      if (sceneSetupReceipt !== null) {
+        requireCvShowSceneSetupSuccess(sceneSetupReceipt, entry.id);
+      }
+    } catch {
+      if (requestId !== this.#requestId) return;
+      this.$.isError = true;
+      this.$.errorText = this.#message('tour.error.speech');
+      this.pauseShow('scene-setup-error');
+      this.#appendSystemMessage(this.$.errorText, { error: true });
+      return;
+    }
     if (requestId !== this.#requestId) return;
     let token = null;
     if (!startPaused) {
@@ -920,25 +1049,46 @@ export class PortfolioShowChat extends HTMLElement {
     if (token) this.#audioArbiter?.release?.({ ...token, reason });
   }
 
-  #enterDetails(branchId) {
+  #enterDetails(branchId, {
+    contextualCardId = '',
+    contextualActionId = '',
+    historicalOwnerEntryId = '',
+  } = {}) {
     const branch = this.#story?.branches?.[branchId];
-    const scene = this.#currentScene();
+    const returnParentEntry = this.#currentScene();
+    const historicalOwnerEntry = this.#story?.scenes?.find(
+      ({ id }) => id === historicalOwnerEntryId,
+    );
     if (
       this.#mode !== 'short'
       || !branch
-      || !scene
+      || !returnParentEntry
+      || !historicalOwnerEntry
       || !this.$.isRunning
       || this.$.inBranch
     ) return;
+    if (!this.#authoringView.mediaRegistry.entries[branch.id]?.playable) {
+      this.#rejectUnavailableData();
+      return;
+    }
     const positionMs = Math.max(0, Math.round(Number(this.#speech.media?.currentTime || 0) * 1000));
     const shortPlayback = {
       ...this.#session.snapshot.playback,
       positionMs,
       playbackState: 'paused',
       cueIndex: this.#sceneIndex,
-      subjectId: scene.id,
+      subjectId: returnParentEntry.id,
     };
-    this.#branchReturnPlayback = Object.freeze({ entry: scene, playback: shortPlayback });
+    this.#branchReturnPlayback = createCvShowBranchReturnSnapshot({
+      masterProjectHash: this.#authoringView.base.authoringProjectHash,
+      masterRevision: this.#authoringView.base.revision,
+      returnParentEntry,
+      historicalOwnerEntry,
+      branchEntry: branch,
+      playback: shortPlayback,
+      contextualCardId,
+      contextualActionId,
+    });
     this.#session.enterBranch(branch.id, shortPlayback);
     this.#session.setPlayback({
       episodeId: branch.id,
@@ -951,11 +1101,32 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.isPaused = false;
     this.$.resumeRequired = false;
     this.$.hasDetails = false;
-    this.#presentEntry(branch);
+    this.#presentEntry(branch, {
+      precedingSetupEntry: historicalOwnerEntry.id === returnParentEntry.id
+        ? null
+        : historicalOwnerEntry,
+    });
   }
 
   #returnFromDetails() {
     if (!this.$.inBranch) return;
+    const restore = this.#branchReturnPlayback;
+    if (restore) {
+      const activeBranchId = this.#session.snapshot.playback.episodeId;
+      const branchEntry = this.#story?.branches?.[activeBranchId];
+      const historicalOwnerEntry = this.#story?.scenes?.find(
+        ({ id }) => id === branchEntry?.sceneId,
+      );
+      validateCvShowBranchReturnSnapshot(restore, {
+        masterProjectHash: this.#authoringView.base.authoringProjectHash,
+        masterRevision: this.#authoringView.base.revision,
+        returnParentEntry: this.#currentScene(),
+        historicalOwnerEntry,
+        branchEntry,
+        contextualCardId: `${historicalOwnerEntry?.id}.actions`,
+        contextualActionId: 'details',
+      });
+    }
     this.#requestId += 1;
     this.#stopSpeech('branch-return');
     this.#session.returnFromBranch();
@@ -968,7 +1139,6 @@ export class PortfolioShowChat extends HTMLElement {
       actions: [{ id: 'resume', label: this.$.lblResume, icon: 'play_arrow' }],
       actionId: 'show-resume-after-branch',
     });
-    const restore = this.#branchReturnPlayback;
     this.#branchReturnPlayback = null;
     this.#syncPlayer();
     if (restore) void this.#restoreAfterBranch(restore, this.#requestId);
@@ -977,9 +1147,13 @@ export class PortfolioShowChat extends HTMLElement {
   async #restoreAfterBranch({ entry, playback }, requestId) {
     await this.#alignmentReady;
     if (requestId !== this.#requestId) return;
+    const sceneSetupReady = this.#alignment.available
+      ? null
+      : this.#runSceneSetup(entry, requestId);
     await this.#speak(entry, requestId, {
       startPaused: true,
       positionMs: playback.positionMs,
+      sceneSetupReady,
     });
   }
 
@@ -1030,7 +1204,7 @@ export class PortfolioShowChat extends HTMLElement {
     }));
   }
 
-  #appendAgentMessage(entry, context) {
+  #appendAgentMessage(entry, context, { stream = true } = {}) {
     /** @type {any[]} */
     const trailingParts = [];
     if (context.actions.length) {
@@ -1038,7 +1212,19 @@ export class PortfolioShowChat extends HTMLElement {
     }
     const id = `show.${entry.id}.${this.#messages.length}`;
     this.#currentMessageId = id;
-    this.#appendStreamedMessage(id, context.text, trailingParts);
+    if (stream) return this.#appendStreamedMessage(id, context.text, trailingParts);
+    this.#messages.push({
+      id,
+      role: 'agent',
+      parts: [{ type: 'text', text: String(context.text || '') }, ...trailingParts],
+    });
+    this.#syncMessages();
+    return Promise.resolve(Object.freeze({
+      status: 'completed',
+      text: String(context.text || ''),
+      progress: 1,
+      durationMs: 0,
+    }));
   }
 
   #appendStreamedMessage(id, text, trailingParts = []) {
@@ -1046,30 +1232,24 @@ export class PortfolioShowChat extends HTMLElement {
     const message = { id, role: 'agent', parts: [textPart] };
     this.#messages.push(message);
     this.#syncMessages();
-    const controller = new AbortController();
-    this.#messageStreams.set(id, controller);
-    void createCvShowMessageStream(text, {
-      signal: controller.signal,
+    const operation = this.#messageStream.start({
+      displayId: id,
+      text,
       onUpdate: (nextText) => {
         textPart.text = nextText;
         this.#syncMessages();
       },
-    }).then((receipt) => {
-      if (receipt.status !== 'completed') return receipt;
-      textPart.text = String(text || '');
-      if (trailingParts.length && message.parts.length === 1) message.parts.push(...trailingParts);
-      this.#syncMessages();
-      return receipt;
-    }).finally(() => {
-      if (this.#messageStreams.get(id) === controller) this.#messageStreams.delete(id);
+      onCompleted: () => {
+        textPart.text = String(text || '');
+        if (trailingParts.length && message.parts.length === 1) message.parts.push(...trailingParts);
+        this.#syncMessages();
+      },
     });
+    return operation.promise;
   }
 
   #cancelMessageStreams() {
-    for (const controller of this.#messageStreams.values()) {
-      controller.abort(new DOMException('CV Show message stream cancelled', 'AbortError'));
-    }
-    this.#messageStreams.clear();
+    this.#messageStream.cancel('stop');
   }
 
   #appendSystemMessage(text, { error = false, actions = [], actionId = '' } = {}) {

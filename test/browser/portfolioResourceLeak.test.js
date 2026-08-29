@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { createServer } from 'node:http';
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
@@ -9,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import WebSocket from 'ws';
+import { listPresentationAuthoringToolDescriptors } from 'symbiote-workspace/browser';
 import { encodeCascadeThemeShare } from 'symbiote-ui/themes/cascade-theme-share.js';
 import { stripPortfolioArticleBlockMarkers } from '../../src/static-pages/data/portfolioArticleMedia.js';
 import { PORTFOLIO_LOCALE_MESSAGES } from '../../src/static-pages/data/portfolioTranslations.js';
@@ -22,11 +24,15 @@ import {
   PUBLICATIONS,
 } from '../../src/static-pages/data/publications.js';
 import { loadPortfolioMarkdownContent } from '../../src/static-pages/data/markdownContent.js';
-import { TOUR_LOCAL_AUDIO_CONFIG } from '../../src/static-pages/data/tourManifest.js';
+import { CV_SHOW_PRESENTATION_PROJECT } from '../../src/static-pages/data/cvShowPresentationProject.js';
+import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../src/static-pages/data/cvShowWebAudioRelease.js';
 import { CV_SHOW_STORY } from '../../src/static-pages/data/tourScripts.js';
+import { createCvShowEntryTuple } from '../../src/static-pages/js/tour-player/presentationProjectAdapter.js';
+import { startCvShowAuthoringHost } from '../../scripts/cv-show-authoring-host.js';
 
 const ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const DIST_DIR = path.join(ROOT, 'dist');
+const SYMBIOTE_UI_DIR = path.join(ROOT, 'node_modules', 'symbiote-ui');
 const CHROME_PATH = process.env.CV_CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const CHROME_LAUNCH_TIMEOUT_MS = Number(process.env.CV_CHROME_LAUNCH_TIMEOUT_MS || 60_000);
 const MOBILE_VIEWPORT = Object.freeze({
@@ -49,18 +55,102 @@ const AUTOBOX_SPINNER_FRAGMENT = 'media-media%2Fautobox-v1%2Fims%2Fspinner';
 const EXTERNAL_TEST_URL = process.env.CV_RESOURCE_TEST_URL || '';
 const VERBOSE_OUTPUT = process.env.CV_RESOURCE_TEST_VERBOSE === '1';
 const PROJECTS = loadProjectEntries();
-const LOCAL_AUDIO_REVISION = TOUR_LOCAL_AUDIO_CONFIG.audioManifests[
-  TOUR_LOCAL_AUDIO_CONFIG.voice
-].split('/')[0];
-const ALIGNMENT_REVISION = TOUR_LOCAL_AUDIO_CONFIG.alignmentManifest.split('/')[2];
+const WEB_AUDIO_RELEASE_DIRECTORY = path.posix.dirname(
+  CV_SHOW_WEB_AUDIO_RELEASE.manifest.path,
+);
+const WEB_AUDIO_REQUEST_ROOT = `/cv/cv-show-audio/${WEB_AUDIO_RELEASE_DIRECTORY}/`;
+const WEB_AUDIO_MANIFEST_REQUEST_PATH =
+  `/cv/cv-show-audio/${CV_SHOW_WEB_AUDIO_RELEASE.manifest.path}`;
+const AUTHORING_TOOL_NAMES = Object.freeze(
+  listPresentationAuthoringToolDescriptors()
+    .map(({ name }) => name)
+    .sort(),
+);
+const AUTHORING_TOOL_COUNT = AUTHORING_TOOL_NAMES.length;
+
+async function loadSelectedCvShowWebAudioManifest() {
+  let manifestPath = path.join(
+    DIST_DIR,
+    'cv-show-audio',
+    CV_SHOW_WEB_AUDIO_RELEASE.manifest.path,
+  );
+  let bytes = await readFile(manifestPath);
+  assert.equal(bytes.byteLength, CV_SHOW_WEB_AUDIO_RELEASE.manifest.bytes);
+  assert.equal(
+    createHash('sha256').update(bytes).digest('hex'),
+    CV_SHOW_WEB_AUDIO_RELEASE.manifest.sha256,
+  );
+  let manifest = JSON.parse(bytes.toString('utf8'));
+  assert.equal(manifest.schemaVersion, 'cv-show-web-audio-release-v1');
+  assert.equal(manifest.releaseId, CV_SHOW_WEB_AUDIO_RELEASE.releaseId);
+  assert.equal(manifest.revision, CV_SHOW_WEB_AUDIO_RELEASE.revision);
+  assert.equal(
+    manifest.source.masterReleaseId,
+    CV_SHOW_WEB_AUDIO_RELEASE.sourceMasterReleaseId,
+  );
+  assert.equal(manifest.voiceId, CV_SHOW_WEB_AUDIO_RELEASE.voiceId);
+  assert.equal(manifest.locale, CV_SHOW_WEB_AUDIO_RELEASE.locale);
+  assert.equal(manifest.profile.mimeType, 'audio/ogg');
+  assert.equal(manifest.profile.codecType, 'audio/ogg; codecs=opus');
+  assert.equal(manifest.clips.length, 30);
+  return { manifest, manifestPath };
+}
+
+function cvShowAudioRequestPaths(requestedUrls) {
+  return requestedUrls
+    .map((url) => new URL(url).pathname)
+    .filter((pathname) => pathname.includes('/cv-show-audio'));
+}
+
+function assertSelectedCvShowWebAudioRequests(requestedUrls) {
+  let paths = cvShowAudioRequestPaths(requestedUrls);
+  for (let pathname of paths) {
+    assert.equal(pathname.startsWith(WEB_AUDIO_REQUEST_ROOT), true, pathname);
+    let relative = pathname.slice(WEB_AUDIO_REQUEST_ROOT.length);
+    assert.equal(
+      pathname === WEB_AUDIO_MANIFEST_REQUEST_PATH
+        || /^(?:clips\/[a-z0-9._-]+\.opus|aligned\/[a-z0-9._-]+\.json)$/u.test(relative),
+      true,
+      pathname,
+    );
+  }
+  return paths;
+}
+
+async function loadCvShowFutureCueSchedule(entryId, afterMs) {
+  let { manifest, manifestPath } = await loadSelectedCvShowWebAudioManifest();
+  let clip = manifest.clips.find((candidate) => candidate.id === entryId);
+  assert.ok(clip, `missing aligned CV Show clip: ${entryId}`);
+  let sequence = JSON.parse(await readFile(
+    path.join(path.dirname(manifestPath), clip.alignedSequenceFile),
+    'utf8',
+  ));
+  let tuple = createCvShowEntryTuple(CV_SHOW_PRESENTATION_PROJECT, entryId, sequence, {
+    checkpointMs: afterMs,
+    adapter: {
+      runInteraction: async () => [],
+      runAttention: async () => [],
+      waitForState: async () => [],
+    },
+  });
+  return tuple.schedule.cells
+    .filter(({ kind, startMs }) => (
+      kind !== 'narration' && startMs > tuple.schedule.presentationStartMs + afterMs
+    ))
+    .map(({ cellId, kind, startMs }) => ({
+      cellId,
+      kind,
+      startMs: startMs - tuple.schedule.presentationStartMs,
+    }));
+}
 
 const MIME_TYPES = new Map([
   ['.css', 'text/css; charset=utf-8'],
   ['.html', 'text/html; charset=utf-8'],
   ['.js', 'application/javascript; charset=utf-8'],
   ['.json', 'application/json; charset=utf-8'],
+  ['.opus', 'audio/ogg'],
   ['.svg', 'image/svg+xml'],
-  ['.wav', 'audio/wav'],
   ['.webp', 'image/webp'],
   ['.xml', 'application/xml; charset=utf-8'],
 ]);
@@ -121,6 +211,14 @@ function safeDistPath(urlPath) {
   return resolvedPath.startsWith(DIST_DIR) ? resolvedPath : null;
 }
 
+function safeSymbioteUiModulePath(urlPath) {
+  let pathname = decodeURIComponent(new URL(urlPath, 'http://localhost').pathname);
+  const prefix = '/__cv-test-provider/symbiote-ui/';
+  if (!pathname.startsWith(prefix)) return null;
+  let resolvedPath = path.resolve(SYMBIOTE_UI_DIR, pathname.slice(prefix.length));
+  return resolvedPath.startsWith(`${SYMBIOTE_UI_DIR}${path.sep}`) ? resolvedPath : null;
+}
+
 async function fileExists(filePath) {
   try {
     let info = await stat(filePath);
@@ -133,12 +231,19 @@ async function fileExists(filePath) {
 function startStaticServer(options = {}) {
   let server = createServer(async (request, response) => {
     try {
-      let filePath = safeDistPath(request.url || '/');
+      let providerModulePath = options.providerModules
+        ? safeSymbioteUiModulePath(request.url || '/')
+        : null;
+      let filePath = providerModulePath || safeDistPath(request.url || '/');
       if (!filePath) {
         response.writeHead(404).end('Not found');
         return;
       }
       if (!await fileExists(filePath)) {
+        if (providerModulePath) {
+          response.writeHead(404).end('Not found');
+          return;
+        }
         filePath = path.join(DIST_DIR, 'index.html');
       }
       let fileInfo = await stat(filePath);
@@ -594,6 +699,917 @@ async function createPortfolioPage(t, options = {}) {
   return { cdp, server };
 }
 
+async function installCvShowTerminalHarness(cdp) {
+  const bindingName = 'cvShowTerminalSignal';
+  const events = [];
+  const subscribers = new Set();
+  await cdp.send('Runtime.addBinding', { name: bindingName });
+  const offBinding = cdp.on('Runtime.bindingCalled', ({ name, payload }) => {
+    if (name !== bindingName) return;
+    let event;
+    try {
+      event = JSON.parse(payload);
+    } catch (error) {
+      event = { type: 'binding-payload-error', error: String(error), payload };
+    }
+    events.push(event);
+    for (const subscriber of subscribers) subscriber(event);
+  });
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(() => {
+      const bindingName = ${JSON.stringify(bindingName)};
+      const portable = (value) => {
+        try { return JSON.parse(JSON.stringify(value)); } catch { return null; }
+      };
+      const signal = (type, detail = {}) => {
+        try {
+          globalThis[bindingName](JSON.stringify({
+            type,
+            runId: state.runId,
+            at: performance.now(),
+            ...detail,
+          }));
+        } catch {}
+      };
+      const createState = (runId = '') => ({
+        runId,
+        operations: [],
+        receipts: [],
+        generations: [],
+        phases: [],
+        results: [],
+        lifecycle: [],
+        frames: [],
+        periodic: [],
+        streams: [],
+        manualScroll: [],
+        diagnostics: [],
+        manualScrollArmed: false,
+        activeOperations: new Map(),
+      });
+      let state = createState();
+      let streamSequence = 0;
+      let streamIds = new WeakMap();
+      let streamPending = false;
+      let lastStreamSignature = '';
+      let lastActiveFrameAt = 0;
+      let lastPeriodicAt = 0;
+      let lastHeartbeatAt = 0;
+
+      const rectOf = (element) => {
+        const rect = element?.getBoundingClientRect?.();
+        return rect ? {
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        } : null;
+      };
+      const operationSource = (operation) => ({
+        id: operation?.source?.id || '',
+        type: operation?.source?.type || '',
+        target: operation?.source?.target || '',
+        shape: operation?.source?.shape || operation?.source?.marker || '',
+        policy: operation?.source?.policy || '',
+      });
+      const sampleUi = (at) => {
+        const host = document.querySelector('portfolio-show-chat');
+        const dock = document.querySelector('agent-dock-shell');
+        const chat = dock?.getChat?.();
+        const workspace = chat?.querySelector('chat-workspace');
+        const player = chat?.querySelector('chat-show-player');
+        const composer = workspace?.querySelector('chat-composer');
+        const transcript = workspace?.querySelector('chat-transcript');
+        const scroller = transcript?.getScrollContainer?.() || transcript?.ref?.chatMessages || null;
+        const overlay = document.querySelector('.symbiote-presenter-cursor');
+        const cursor = overlay?.querySelector('.pc-cursor');
+        const cursorPath = cursor?.querySelector('path');
+        const selection = document.getSelection?.();
+        const selectionRect = selection?.rangeCount
+          ? selection.getRangeAt(0).getBoundingClientRect()
+          : null;
+        return {
+          at,
+          activeId: host?.narrationSnapshot?.active?.activeId || '',
+          narrationPositionMs: host?.alignmentSnapshot?.narrationPositionMs ?? null,
+          paused: host?.narrationSnapshot?.active?.paused === true,
+          operations: Array.from(state.activeOperations.values()).map((entry) => ({
+            operationId: entry.operationId,
+            cellId: entry.cellId,
+            kind: entry.kind,
+            sourceType: entry.source.type,
+          })),
+          pointer: {
+            overlayVisible: overlay?.classList.contains('is-visible') || false,
+            overlayOpacity: overlay ? Number.parseFloat(getComputedStyle(overlay).opacity) : 0,
+            cursorOpacity: cursor ? Number.parseFloat(getComputedStyle(cursor).opacity) : 0,
+            path: cursorPath?.getAttribute('d') || '',
+            bounds: rectOf(cursorPath),
+          },
+          inkPath: overlay?.querySelector('.pc-ink path')?.getAttribute('d') || '',
+          selection: {
+            text: selection?.toString() || '',
+            length: selection?.toString()?.length || 0,
+            ranges: selection?.rangeCount || 0,
+            rect: selectionRect ? rectOf({ getBoundingClientRect: () => selectionRect }) : null,
+          },
+          player: {
+            bounds: rectOf(player),
+            controls: Array.from(player?.querySelectorAll('[data-control]') || []).map((control) => ({
+              control: control.dataset.control || '',
+              bounds: rectOf(control),
+              visible: Boolean(control.offsetWidth > 0 && control.offsetHeight > 0)
+                && getComputedStyle(control).visibility !== 'hidden',
+            })),
+          },
+          composer: { bounds: rectOf(composer) },
+          transcript: {
+            scrollTop: scroller?.scrollTop ?? null,
+            scrollHeight: scroller?.scrollHeight ?? null,
+            clientHeight: scroller?.clientHeight ?? null,
+          },
+        };
+      };
+      const captureStream = () => {
+        streamPending = false;
+        const items = Array.from(document.querySelectorAll(
+          'agent-dock-shell agent-show-chat chat-transcript chat-message-item',
+        ));
+        if (!items.length) return;
+        const agents = items.filter((item) => (item.$?.role || item.$?.type || '') === 'agent');
+        const snapshot = agents.map((item, index) => {
+          if (!streamIds.has(item)) streamIds.set(item, 'agent-' + (++streamSequence));
+          return {
+            id: streamIds.get(item),
+            index,
+            text: item.querySelector('.msg-content')?.textContent?.trim()
+              || item.$?.text
+              || '',
+            streaming: item.$?.isStreaming === true,
+          };
+        });
+        const signature = JSON.stringify(snapshot);
+        if (signature === lastStreamSignature) return;
+        lastStreamSignature = signature;
+        const transcript = document.querySelector('agent-dock-shell agent-show-chat chat-transcript');
+        const scroller = transcript?.getScrollContainer?.() || transcript?.ref?.chatMessages || null;
+        const entry = {
+          at: performance.now(),
+          items: snapshot,
+          scrollTop: scroller?.scrollTop ?? null,
+        };
+        state.streams.push(entry);
+        signal('stream-sample', { index: state.streams.length - 1 });
+      };
+      const scheduleStreamCapture = () => {
+        if (streamPending) return;
+        streamPending = true;
+        queueMicrotask(() => requestAnimationFrame(captureStream));
+      };
+      const observeTranscript = () => {
+        const root = document.documentElement;
+        if (!root) return;
+        new MutationObserver(scheduleStreamCapture).observe(root, {
+          childList: true,
+          characterData: true,
+          subtree: true,
+        });
+        scheduleStreamCapture();
+      };
+      if (document.documentElement) observeTranscript();
+      else document.addEventListener('DOMContentLoaded', observeTranscript, { once: true });
+
+      globalThis.__cvShowTerminalHarnessReset = (runId) => {
+        state = createState(String(runId || ''));
+        lastStreamSignature = '';
+        lastActiveFrameAt = 0;
+        lastPeriodicAt = 0;
+        lastHeartbeatAt = 0;
+        scheduleStreamCapture();
+        signal('run-reset');
+        return state.runId;
+      };
+      globalThis.__cvShowTerminalHarnessSnapshot = () => ({
+        ...state,
+        activeOperations: Array.from(state.activeOperations.values()),
+      });
+      globalThis.__cvShowTerminalHarnessArmManualScroll = () => {
+        state.manualScrollArmed = true;
+        return true;
+      };
+
+      document.addEventListener('portfolio-show-presentation-operation', (event) => {
+        const detail = event.detail || {};
+        const operation = detail.operation || {};
+        const entry = {
+          at: performance.now(),
+          requestId: detail.requestId ?? null,
+          entryId: detail.entryId || '',
+          operationId: operation.operationId || '',
+          generation: operation.generation ?? null,
+          kind: operation.kind || '',
+          cellId: operation.projectCell?.id || '',
+          dependsOn: (operation.projectCell?.dependsOn || []).map((dependency) => ({
+            cellId: dependency.cellId || '',
+            barrier: dependency.barrier || '',
+          })),
+          source: operationSource(operation),
+        };
+        state.operations.push(entry);
+        if (entry.operationId) state.activeOperations.set(entry.operationId, entry);
+        signal('operation', { operation: entry });
+      }, { capture: true });
+
+      document.addEventListener('portfolio-show-presentation-receipt', (event) => {
+        const detail = event.detail || {};
+        const receipt = portable(detail.receipt || {}) || {};
+        const operation = state.activeOperations.get(receipt.operationId) || null;
+        const entry = {
+          at: performance.now(),
+          requestId: detail.requestId ?? null,
+          entryId: detail.entryId || '',
+          sourceType: operation?.source?.type || '',
+          ...receipt,
+        };
+        state.receipts.push(entry);
+        if (
+          ['settled', 'ready', 'ended', 'skipped', 'cancelled', 'failed', 'stale', 'expired']
+            .includes(receipt.status)
+        ) state.activeOperations.delete(receipt.operationId);
+        signal('receipt', {
+          receipt: {
+            entryId: entry.entryId,
+            operationId: entry.operationId,
+            cellId: entry.cellId,
+            kind: entry.kind,
+            status: entry.status,
+            sourceType: entry.sourceType,
+          },
+        });
+      }, { capture: true });
+
+      document.addEventListener('portfolio-show-aligned-generation', (event) => {
+        const entry = {
+          at: performance.now(),
+          entryId: event.detail?.entryId || '',
+          requestId: event.detail?.requestId ?? null,
+          receipt: portable(event.detail?.receipt || null),
+        };
+        state.generations.push(entry);
+        signal('generation', { entryId: entry.entryId, index: state.generations.length - 1 });
+      }, { capture: true });
+
+      document.addEventListener('portfolio-show-phase', (event) => {
+        const detail = event.detail || {};
+        const entry = {
+          at: performance.now(),
+          requestId: detail.requestId ?? null,
+          aligned: detail.aligned === true,
+          directives: (detail.directives || []).map((directive) => ({
+            id: directive.id || '',
+            type: directive.type || '',
+            policy: directive.policy || '',
+          })),
+          completedAt: null,
+          result: null,
+        };
+        state.phases.push(entry);
+        if (typeof detail.complete === 'function') {
+          const complete = detail.complete;
+          detail.complete = (result, error = null) => {
+            entry.completedAt = performance.now();
+            entry.result = portable(result);
+            if (error) entry.error = String(error?.stack || error);
+            signal('phase-complete', {
+              requestId: entry.requestId,
+              status: entry.result?.status || '',
+              error: entry.error || '',
+            });
+            complete(result, error);
+          };
+        }
+      }, { capture: true });
+
+      document.addEventListener('portfolio-show-result', (event) => {
+        const entry = { at: performance.now(), ...(portable(event.detail || {}) || {}) };
+        state.results.push(entry);
+        signal('result', { status: entry.status || '', error: entry.error || '' });
+      }, { capture: true });
+
+      for (const type of [
+        'portfolio-show-start',
+        'portfolio-show-complete',
+        'portfolio-show-stop',
+        'portfolio-show-pause',
+        'portfolio-show-resume',
+        'portfolio-show-aligned-seek-failure',
+      ]) {
+        document.addEventListener(type, (event) => {
+          const entry = {
+            type,
+            at: performance.now(),
+            detail: portable(event.detail || null),
+          };
+          state.lifecycle.push(entry);
+          signal(type, { detail: entry.detail });
+        }, { capture: true });
+      }
+
+      document.addEventListener('scroll', (event) => {
+        if (!event.isTrusted || !state.runId || !state.manualScrollArmed) return;
+        const transcript = event.target?.closest?.('chat-transcript')
+          || (event.target?.classList?.contains('chat-messages')
+            ? event.target.closest('chat-transcript')
+            : null);
+        if (!transcript) return;
+        state.manualScrollArmed = false;
+        requestAnimationFrame(() => {
+          const scroller = transcript.getScrollContainer?.() || transcript.ref?.chatMessages || event.target;
+          const entry = {
+            at: performance.now(),
+            scrollTop: scroller?.scrollTop ?? null,
+            streamIndex: state.streams.length,
+          };
+          state.manualScroll.push(entry);
+          signal('manual-scroll', entry);
+        });
+      }, { capture: true });
+
+      globalThis.addEventListener('error', (event) => {
+        const entry = { type: 'error', message: event.message || '', at: performance.now() };
+        state.diagnostics.push(entry);
+        signal('diagnostic', { diagnostic: entry });
+      });
+      globalThis.addEventListener('unhandledrejection', (event) => {
+        const entry = {
+          type: 'unhandledrejection',
+          message: String(event.reason?.stack || event.reason || ''),
+          at: performance.now(),
+        };
+        state.diagnostics.push(entry);
+        signal('diagnostic', { diagnostic: entry });
+      });
+
+      const sampleFrame = (now) => {
+        const host = document.querySelector('portfolio-show-chat');
+        if (state.activeOperations.size && now - lastActiveFrameAt >= 50) {
+          lastActiveFrameAt = now;
+          state.frames.push(sampleUi(now));
+        }
+        if (host?.narrationSnapshot?.active?.activeId && now - lastPeriodicAt >= 250) {
+          lastPeriodicAt = now;
+          state.periodic.push(sampleUi(now));
+        }
+        if (host?.$.isRunning && now - lastHeartbeatAt >= 1_000) {
+          lastHeartbeatAt = now;
+          signal('heartbeat', {
+            activeId: host?.narrationSnapshot?.active?.activeId || '',
+            positionMs: host?.alignmentSnapshot?.narrationPositionMs ?? null,
+          });
+        }
+        requestAnimationFrame(sampleFrame);
+      };
+      requestAnimationFrame(sampleFrame);
+
+      globalThis.__cvShowTerminalProviderProbe = async (marker) => {
+        globalThis.__cvShowTerminalProviderCursor?.dispose?.();
+        document.getElementById('cv-show-terminal-marker-fixture')?.remove();
+        const fixture = document.createElement('div');
+        fixture.id = 'cv-show-terminal-marker-fixture';
+        fixture.textContent = 'CV Show marker terminal evidence';
+        Object.assign(fixture.style, {
+          position: 'fixed',
+          left: '360px',
+          top: '260px',
+          width: '260px',
+          height: '92px',
+          display: 'grid',
+          placeItems: 'center',
+          background: '#ffffff',
+          color: '#111111',
+          zIndex: '2147483000',
+        });
+        document.body.append(fixture);
+        const module = await import('/__cv-test-provider/symbiote-ui/chat/presenter-cursor.js');
+        const cursor = module.createPresenterCursor(document);
+        globalThis.__cvShowTerminalProviderCursor = cursor;
+        const receipt = cursor.presentAnnotationFrame(fixture, {
+          kind: 'marker',
+          marker,
+          intent: 'emphasize',
+          placement: marker === 'underline' ? 'below' : 'over',
+        }, {
+          progress: 1,
+          seed: 'cv-show-terminal-' + marker,
+          style: { baseWidthPx: 6 },
+          viewport: { width: innerWidth, height: innerHeight },
+          ownsCursor: false,
+        });
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const overlay = document.querySelector('.symbiote-presenter-cursor');
+        const ink = overlay?.querySelector('.pc-ink');
+        const path = ink?.querySelector('path');
+        return {
+          marker,
+          receipt: portable(receipt),
+          fixture: rectOf(fixture),
+          inkPath: path?.getAttribute('d') || '',
+          inkColor: path ? getComputedStyle(path).fill : '',
+          inkOpacity: path
+            ? Number.parseFloat(getComputedStyle(path).fillOpacity)
+              * Number.parseFloat(getComputedStyle(ink).opacity)
+              * Number.parseFloat(getComputedStyle(overlay).opacity)
+            : 0,
+        };
+      };
+      signal('harness-ready');
+    })();`,
+  });
+
+  const waitFor = (runId, predicate, label, { afterIndex = 0, inactivityMs = 60_000 } = {}) => (
+    new Promise((resolve, reject) => {
+      let settled = false;
+      let timer = null;
+      const arm = () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => finish(
+          reject,
+          new Error(`Terminal harness inactivity while waiting for ${label}`),
+        ), inactivityMs);
+      };
+      const finish = (complete, value) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        subscribers.delete(onEvent);
+        complete(value);
+      };
+      const onEvent = (event) => {
+        if (event.runId !== runId) return;
+        arm();
+        if (predicate(event)) finish(resolve, event);
+      };
+      const existing = events.slice(afterIndex).find((event) => (
+        event.runId === runId && predicate(event)
+      ));
+      if (existing) {
+        resolve(existing);
+        return;
+      }
+      subscribers.add(onEvent);
+      arm();
+    })
+  );
+
+  const reset = async (runId) => {
+    const result = await cdp.send('Runtime.evaluate', {
+      returnByValue: true,
+      expression: `globalThis.__cvShowTerminalHarnessReset?.(${JSON.stringify(runId)}) || ''`,
+    }, { label: `reset terminal harness: ${runId}`, timeoutMs: 5_000 });
+    assert.equal(result.result.value, runId, `terminal harness was not installed for ${runId}`);
+    return events.length;
+  };
+  const snapshot = async (label) => {
+    const result = await cdp.send('Runtime.evaluate', {
+      returnByValue: true,
+      expression: 'globalThis.__cvShowTerminalHarnessSnapshot?.() || null',
+    }, { label: `read terminal harness snapshot: ${label}`, timeoutMs: 20_000 });
+    assert.ok(result.result.value, `terminal harness snapshot missing: ${label}`);
+    return result.result.value;
+  };
+
+  return {
+    events,
+    reset,
+    snapshot,
+    waitFor,
+    dispose: offBinding,
+  };
+}
+
+async function waitForCvShowModeSelection(cdp, label) {
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        if (document.querySelector(
+          'agent-dock-shell agent-show-chat .actions-card[data-action-state="current"] [data-action-id="start-short"]',
+        )) return resolve(true);
+        if (performance.now() - started > 15_000) {
+          return reject(new Error('CV Show mode selection did not mount'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label, timeoutMs: 17_000 });
+}
+
+function parseCssRgb(value) {
+  const match = /^rgba?\(\s*(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)/u.exec(
+    String(value || ''),
+  );
+  assert.ok(match, `marker ink must resolve to an RGB color: ${value}`);
+  return match.slice(1, 4).map(Number);
+}
+
+async function capturePresenterMarkerProbe(cdp, marker, evidenceDir) {
+  const probe = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `globalThis.__cvShowTerminalProviderProbe(${JSON.stringify(marker)})`,
+  }, { label: `render public presenter marker: ${marker}`, timeoutMs: 20_000 });
+  assert.equal(
+    probe.exceptionDetails,
+    undefined,
+    probe.exceptionDetails?.exception?.description || `provider marker probe failed: ${marker}`,
+  );
+  const screenshot = await cdp.send('Page.captureScreenshot', {
+    format: 'png',
+    fromSurface: true,
+    captureBeyondViewport: false,
+  }, { label: `capture presenter marker pixels: ${marker}`, timeoutMs: 20_000 });
+  const image = Buffer.from(screenshot.data, 'base64');
+  const screenshotPath = path.join(evidenceDir, `marker-${marker}.png`);
+  await writeFile(screenshotPath, image);
+  const sharp = (await import('sharp')).default;
+  const { data, info } = await sharp(image).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const rgb = parseCssRgb(probe.result.value.inkColor);
+  const receipt = probe.result.value.receipt;
+  const sampleInk = (point, radius) => {
+    let matches = 0;
+    const left = Math.max(0, radius === 0 ? Math.round(point.x) : Math.floor(point.x - radius));
+    const right = Math.min(
+      info.width - 1,
+      radius === 0 ? Math.round(point.x) : Math.ceil(point.x + radius),
+    );
+    const top = Math.max(0, radius === 0 ? Math.round(point.y) : Math.floor(point.y - radius));
+    const bottom = Math.min(
+      info.height - 1,
+      radius === 0 ? Math.round(point.y) : Math.ceil(point.y + radius),
+    );
+    for (let y = top; y <= bottom; y += 1) {
+      for (let x = left; x <= right; x += 1) {
+        const offset = (y * info.width + x) * info.channels;
+        const distance = Math.hypot(
+          data[offset] - rgb[0],
+          data[offset + 1] - rgb[1],
+          data[offset + 2] - rgb[2],
+        );
+        if (distance <= 72) matches += 1;
+      }
+    }
+    return matches;
+  };
+  const first = receipt.pathSamples[0];
+  const last = receipt.pathSamples.at(-1);
+  const midpoint = { x: (first.x + last.x) / 2, y: (first.y + last.y) / 2 };
+  const radius = Math.max(3, Math.ceil(receipt.maxWidthPx || 0));
+  return {
+    marker,
+    screenshotPath,
+    receipt,
+    endpointDistance: Math.hypot(last.x - first.x, last.y - first.y),
+    firstInkPixels: sampleInk(first, radius),
+    lastInkPixels: sampleInk(last, radius),
+    midpointInkPixels: sampleInk(midpoint, 0),
+  };
+}
+
+function unwrapProviderReceipt(receipt) {
+  let current = receipt?.providerReceipt || null;
+  const visited = new Set();
+  while (current?.providerReceipt && !visited.has(current)) {
+    visited.add(current);
+    current = current.providerReceipt;
+  }
+  return current;
+}
+
+function assertCvShowTerminalReceipts(snapshot, expectedEntryIds, label) {
+  assert.deepEqual(
+    snapshot.generations.map(({ entryId }) => entryId),
+    expectedEntryIds,
+    `${label}: every scene must adopt exactly one aligned media generation in story order`,
+  );
+  const negativeStatuses = new Set([
+    'skipped',
+    'expired',
+    'failed',
+    'stale',
+    'cancelled',
+    'missing',
+  ]);
+  const negativeReceipts = snapshot.receipts.filter(({ status }) => negativeStatuses.has(status));
+  const missingResults = snapshot.results.filter(({ status }) => /missing|failed|stale|expired/u.test(status));
+  const missingPhases = snapshot.phases.filter(({ result, error }) => (
+    error || /missing|failed|stale|expired/u.test(result?.status || '')
+  ));
+  assert.deepEqual({ negativeReceipts, missingResults, missingPhases }, {
+    negativeReceipts: [],
+    missingResults: [],
+    missingPhases: [],
+  }, `${label}: terminal execution journal contains a failure`);
+  assert.deepEqual(snapshot.diagnostics, [], `${label}: page diagnostics must stay empty`);
+  assert.deepEqual(snapshot.activeOperations, [], `${label}: no effect operation may outlive completion`);
+  assert.equal(
+    snapshot.lifecycle.filter(({ type }) => type === 'portfolio-show-complete').length,
+    1,
+    `${label}: the uninterrupted run must complete exactly once`,
+  );
+  assert.equal(
+    snapshot.lifecycle.filter(({ type }) => type === 'portfolio-show-stop').length,
+    0,
+    `${label}: the uninterrupted run must not stop early`,
+  );
+
+  const receiptsByOperation = Map.groupBy(
+    snapshot.receipts.filter(({ operationId }) => true),
+    ({ operationId }) => operationId,
+  );
+  for (const operation of snapshot.operations) {
+    const statuses = (receiptsByOperation.get(operation.operationId) || []).map(({ status }) => status);
+    const expected = {
+      interaction: ['acted', 'settled'],
+      attention: ['first-frame', 'settled'],
+      state: ['ready'],
+    }[operation.kind];
+    assert.deepEqual(statuses, expected, `${label}: incomplete receipt sequence for ${operation.cellId}`);
+  }
+}
+
+function assertCvShowScrollAttentionOrder(snapshot, label) {
+  const operationsByCell = new Map(snapshot.operations.map((operation) => [operation.cellId, operation]));
+  const receiptsByOperation = Map.groupBy(
+    snapshot.receipts.filter(({ operationId }) => true),
+    ({ operationId }) => operationId,
+  );
+  const transitionTimes = new Map();
+  for (let index = 0; index < snapshot.generations.length; index += 1) {
+    const nextEntryId = snapshot.generations[index + 1]?.entryId || '';
+    const nextEntryOperation = nextEntryId
+      ? snapshot.operations.find(({ entryId, at }) => (
+        entryId === nextEntryId && at > snapshot.generations[index].at
+      ))
+      : null;
+    transitionTimes.set(
+      snapshot.generations[index].entryId,
+      nextEntryOperation?.at
+        ?? snapshot.lifecycle.find(({ type, at }) => (
+          type === 'portfolio-show-complete' && at > snapshot.generations[index].at
+        ))?.at
+        ?? Number.POSITIVE_INFINITY,
+    );
+  }
+  const pairs = snapshot.operations.flatMap((attention) => {
+    if (attention.kind !== 'attention') return [];
+    const scrollDependency = attention.dependsOn.find(({ cellId }) => cellId.endsWith(':scroll'));
+    const scroll = scrollDependency ? operationsByCell.get(scrollDependency.cellId) : null;
+    return scroll ? [{ scroll, attention }] : [];
+  });
+  assert.ok(pairs.length > 0, `${label}: expected paired scroll and attention operations`);
+  for (const { scroll, attention } of pairs) {
+    const scrollReceipts = receiptsByOperation.get(scroll.operationId) || [];
+    const attentionReceipts = receiptsByOperation.get(attention.operationId) || [];
+    const acted = scrollReceipts.find(({ status }) => status === 'acted');
+    const scrollSettled = scrollReceipts.find(({ status }) => status === 'settled');
+    const firstFrame = attentionReceipts.find(({ status }) => status === 'first-frame');
+    const attentionSettled = attentionReceipts.find(({ status }) => status === 'settled');
+    const transitionAt = transitionTimes.get(attention.entryId);
+    const timing = {
+      acted: acted?.observedAt?.monotonicTimeMs,
+      scrollSettled: scrollSettled?.observedAt?.monotonicTimeMs,
+      firstFrame: firstFrame?.observedAt?.monotonicTimeMs,
+      attentionSettled: attentionSettled?.observedAt?.monotonicTimeMs,
+      transitionAt,
+    };
+    assert.ok(
+      timing.acted < timing.scrollSettled
+        && timing.scrollSettled <= timing.firstFrame
+        && timing.firstFrame < timing.attentionSettled
+        && timing.attentionSettled < timing.transitionAt,
+      `${label}: scroll/attention/transition order failed for ${attention.cellId}: ${JSON.stringify(timing)}`,
+    );
+    const scrollFrames = snapshot.frames.filter(({ operations }) => (
+      operations.some(({ operationId }) => operationId === scroll.operationId)
+    ));
+    const attentionFrames = snapshot.frames.filter(({ operations }) => (
+      operations.some(({ operationId }) => operationId === attention.operationId)
+    ));
+    assert.ok(scrollFrames.length >= 2, `${label}: scroll ${scroll.cellId} lacks multi-frame evidence`);
+    assert.ok(
+      attentionFrames.length >= 2,
+      `${label}: attention ${attention.cellId} lacks multi-frame evidence`,
+    );
+    const overlap = snapshot.frames.filter(({ operations }) => {
+      const ids = new Set(operations.map(({ operationId }) => operationId));
+      return ids.has(scroll.operationId) && ids.has(attention.operationId);
+    });
+    assert.deepEqual(overlap, [], `${label}: scroll and attention overlapped for ${attention.cellId}`);
+  }
+}
+
+function assertCvShowNativeSelectionGrowth(snapshot, label) {
+  const selections = snapshot.operations
+    .filter(({ source }) => source.type === 'native-selection')
+    .map((operation) => {
+      const frames = snapshot.frames.filter(({ operations }) => (
+        operations.some(({ operationId }) => operationId === operation.operationId)
+      ));
+      return {
+        operation,
+        lengths: [...new Set(frames.map(({ selection }) => selection.length).filter(Boolean))],
+      };
+    });
+  const progressive = selections.find(({ lengths }) => lengths.length >= 3);
+  assert.ok(
+    progressive,
+    `${label}: native Selection must grow through at least three distinct rendered lengths`,
+  );
+  const sorted = [...progressive.lengths].sort((left, right) => left - right);
+  assert.deepEqual(
+    progressive.lengths,
+    sorted,
+    `${label}: native Selection growth must not jump backward`,
+  );
+}
+
+function assertCvShowAuthoredMarkerEvidence(snapshot, label) {
+  const receiptByOperation = new Map(snapshot.receipts
+    .filter(({ status }) => status === 'settled')
+    .map((receipt) => [receipt.operationId, receipt]));
+  const markers = snapshot.operations
+    .filter(({ source }) => source.type === 'marker')
+    .map((operation) => ({
+      operation,
+      provider: unwrapProviderReceipt(receiptByOperation.get(operation.operationId)),
+    }));
+  assert.ok(markers.length > 0, `${label}: no authored marker operation was observed`);
+  for (const { operation, provider } of markers) {
+    assert.ok(
+      provider?.pathSamples?.length >= 8,
+      `${label}: ${operation.cellId} lacks provider centerline evidence`,
+    );
+    assert.ok(
+      provider?.widthSamples?.length >= 8,
+      `${label}: ${operation.cellId} lacks provider width evidence`,
+    );
+    assert.ok(
+      ['open', 'displaced-overlap'].includes(provider?.tailPolicy?.mode),
+      `${label}: ${operation.cellId} has an unexpected authored tail policy`,
+    );
+  }
+  assert.deepEqual(
+    [...new Set(markers.map(({ provider }) => provider.tailPolicy.mode))].sort(),
+    ['displaced-overlap', 'open'],
+    `${label}: authored markers must cover open and displaced endpoint geometry`,
+  );
+}
+
+function assertCvShowPointerAndPlayer(snapshot, expectedEntryIds, label) {
+  for (const entryId of expectedEntryIds) {
+    const samples = snapshot.periodic.filter((sample) => sample.activeId === entryId && !sample.paused);
+    assert.ok(samples.length >= 2, `${label}: ${entryId} lacks periodic presenter samples`);
+    for (const sample of samples) {
+      const bounds = sample.pointer.bounds;
+      assert.equal(sample.pointer.overlayVisible, true, `${label}: presenter disappeared in ${entryId}`);
+      assert.ok(sample.pointer.overlayOpacity > 0, `${label}: presenter overlay is transparent in ${entryId}`);
+      assert.ok(sample.pointer.cursorOpacity > 0, `${label}: cursor became a hidden point in ${entryId}`);
+      assert.ok(sample.pointer.path, `${label}: cursor arrow path is missing in ${entryId}`);
+      assert.ok(
+        bounds?.width > 4 && bounds?.height > 4,
+        `${label}: cursor is not a recognizable arrow in ${entryId}: ${JSON.stringify(bounds)}`,
+      );
+      assert.ok(sample.player.bounds?.height > 0, `${label}: player disappeared in ${entryId}`);
+      assert.equal(sample.player.controls.length, 4, `${label}: player controls missing in ${entryId}`);
+      assert.equal(
+        sample.player.controls.every(({ visible, bounds: controlBounds }) => (
+          visible && controlBounds?.width > 0 && controlBounds?.height > 0
+        )),
+        true,
+        `${label}: a player control is clipped in ${entryId}`,
+      );
+      assert.ok(
+        sample.player.bounds.bottom <= sample.composer.bounds.top + 1,
+        `${label}: player must remain above the composer in ${entryId}`,
+      );
+    }
+  }
+}
+
+function assertCvShowStreamJournal(snapshot, label) {
+  const lastTextById = new Map();
+  const lengthsById = new Map();
+  let progressiveItems = 0;
+  for (const sample of snapshot.streams) {
+    const streaming = sample.items.filter(({ streaming: active }) => active);
+    assert.ok(streaming.length <= 1, `${label}: agent streams are not single-flight`);
+    for (const item of streaming) {
+      assert.ok(
+        item.index >= sample.items.length - 2,
+        `${label}: an older than penultimate agent bubble grew: ${item.id}`,
+      );
+    }
+    for (const item of sample.items) {
+      const previous = lastTextById.get(item.id);
+      if (previous !== undefined && item.text !== previous) {
+        assert.ok(
+          item.text.startsWith(previous),
+          `${label}: streamed prefix regressed for ${item.id}`,
+        );
+        assert.ok(
+          item.index >= sample.items.length - 2,
+          `${label}: a non-trailing bubble changed for ${item.id}`,
+        );
+      }
+      lastTextById.set(item.id, item.text);
+      if (!lengthsById.has(item.id)) lengthsById.set(item.id, new Set());
+      if (item.text) lengthsById.get(item.id).add(item.text.length);
+    }
+  }
+  for (const lengths of lengthsById.values()) {
+    if (lengths.size >= 3) progressiveItems += 1;
+  }
+  assert.ok(progressiveItems > 0, `${label}: no progressive agent text stream was observed`);
+}
+
+function assertCvShowManualScroll(snapshot, label) {
+  assert.ok(snapshot.manualScroll.length > 0, `${label}: trusted transcript scroll was not observed`);
+  const anchor = snapshot.manualScroll[0];
+  const later = snapshot.streams.slice(anchor.streamIndex + 1).filter(({ scrollTop }) => (
+    Number.isFinite(scrollTop)
+  ));
+  assert.ok(later.length >= 2, `${label}: manual scroll lacks subsequent streaming samples`);
+  assert.equal(
+    later.every(({ scrollTop }) => Math.abs(scrollTop - anchor.scrollTop) <= 2),
+    true,
+    `${label}: transcript moved after the user scrolled away from the bottom`,
+  );
+}
+
+function assertPresenterMarkerProbes(probes) {
+  assert.deepEqual(
+    probes.map(({ receipt }) => receipt.tailPolicy.mode),
+    ['open', 'underdraw', 'displaced-overlap'],
+    'public presenter conformance must exercise every endpoint policy',
+  );
+  for (const probe of probes) {
+    assert.equal(probe.receipt.presented, true, `${probe.marker}: marker was not presented`);
+    assert.ok(probe.receipt.pathSamples.length >= 8, `${probe.marker}: centerline samples missing`);
+    assert.ok(probe.receipt.widthSamples.length >= 8, `${probe.marker}: width samples missing`);
+    assert.ok(probe.firstInkPixels > 0, `${probe.marker}: first endpoint has no rendered ink pixels`);
+    assert.ok(probe.lastInkPixels > 0, `${probe.marker}: final endpoint has no rendered ink pixels`);
+    assert.ok(
+      probe.endpointDistance > probe.receipt.maxWidthPx,
+      `${probe.marker}: endpoint centerlines closed instead of preserving a visible separation`,
+    );
+    if (probe.receipt.tailPolicy.mode !== 'open') {
+      assert.equal(
+        probe.midpointInkPixels,
+        0,
+        `${probe.marker}: endpoint gap contains marker ink`,
+      );
+    }
+  }
+  assert.equal(probes[0].receipt.tailPolicy.sourceEnd, 1);
+  assert.ok(probes[1].receipt.tailPolicy.sourceEnd < 1);
+  assert.ok(probes[2].receipt.tailPolicy.sourceEnd > 1);
+  assert.ok(Math.abs(probes[2].receipt.tailPolicy.lateralOffsetPx) > 0);
+}
+
+async function scrollCvShowTranscriptManually(cdp) {
+  const armed = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: 'globalThis.__cvShowTerminalHarnessArmManualScroll?.() === true',
+  }, { label: 'arm trusted CV Show transcript scroll evidence', timeoutMs: 5_000 });
+  assert.equal(armed.result.value, true, 'terminal harness must arm the trusted scroll receipt');
+  const point = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const transcript = document.querySelector('agent-dock-shell agent-show-chat chat-transcript');
+      const scroller = transcript?.getScrollContainer?.() || transcript?.ref?.chatMessages;
+      const rect = scroller?.getBoundingClientRect?.();
+      return rect?.width > 0 && rect.height > 0 && scroller.scrollHeight > scroller.clientHeight
+        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        : null;
+    })()`,
+  }, { label: 'locate overflowing CV Show transcript', timeoutMs: 5_000 });
+  assert.ok(point.result.value, 'CV Show transcript must overflow before trusted manual scroll');
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseMoved',
+    ...point.result.value,
+  }, { label: 'move over CV Show transcript', timeoutMs: 5_000 });
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseWheel',
+    deltaX: 0,
+    deltaY: -320,
+    ...point.result.value,
+  }, { label: 'trusted manual CV Show transcript scroll', timeoutMs: 5_000 });
+}
+
 async function createMobilePage(t) {
   return createPortfolioPage(t);
 }
@@ -770,22 +1786,124 @@ function getVisibleMarkdownParagraphs(markdown) {
     .filter(Boolean);
 }
 
-test('browser static server serves standards-correct single byte ranges', async (t) => {
-  let expected = await readFile(path.join(DIST_DIR, 'index.html'));
+test('streamed dock message updates preserve a transcript scrolled away from bottom', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -1)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  t.after(() => {
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+
+  const [{ AgentDockShell, AgentShowChat }, { ChatWorkspace }] = await Promise.all([
+    import('symbiote-ui/chat/show-chat'),
+    import('symbiote-ui/chat/workspace'),
+  ]);
+  const transcript = {
+    clientHeight: 300,
+    items: [],
+    scrollHeight: 1_200,
+    scrollTop: 240,
+    getScrollState() {
+      return {
+        hasOverflow: true,
+        isAtBottom: false,
+        distanceFromBottom: this.scrollHeight - this.scrollTop - this.clientHeight,
+      };
+    },
+    isAtBottom() { return false; },
+    setMessageItems(items) {
+      this.items = items;
+      this.scrollHeight += 24;
+    },
+    scrollToBottom() {
+      this.scrollTop = this.scrollHeight;
+    },
+  };
+  const workspace = {
+    getTranscript: () => transcript,
+    setEmpty() {},
+    setMessages(...args) {
+      return ChatWorkspace.prototype.setMessages.call(workspace, ...args);
+    },
+  };
+  const show = {
+    _conversation: {
+      setMessages(...args) {
+        return AgentShowChat.prototype._renderMessages.call(show, ...args);
+      },
+    },
+    getWorkspace: () => workspace,
+    _syncPlayerRegion() {},
+  };
+  const chat = {
+    setMessages(...args) {
+      return AgentShowChat.prototype.setMessages.call(show, ...args);
+    },
+  };
+  const dock = { getChat: () => chat };
+  const initialScrollTop = transcript.scrollTop;
+
+  AgentDockShell.prototype.setMessages.call(dock, [{
+    id: 'streamed-agent-message',
+    role: 'agent',
+    parts: [{ type: 'text', text: 'growing prefix' }],
+  }]);
+  await Promise.resolve();
+  await Promise.resolve();
+
+  assert.equal(transcript.items.length, 1, 'the streamed message update reached the transcript');
+  assert.equal(
+    transcript.scrollTop,
+    initialScrollTop,
+    'AgentDockShell.setMessages → AgentShowChat._renderMessages → '
+      + 'ChatWorkspace.setMessages must not apply its scrollToBottom=true default '
+      + 'after the user leaves the bottom',
+  );
+});
+
+test('browser static server serves the selected Opus clip with exact byte ranges', async (t) => {
+  let { manifest, manifestPath } = await loadSelectedCvShowWebAudioManifest();
+  let clip = manifest.clips[0];
+  let expected = await readFile(path.join(path.dirname(manifestPath), clip.deliveryFile));
   let server = await startStaticServer();
   t.after(() => server.close());
-  let url = `${server.origin}/cv/index.html`;
+  let url = `${server.origin}${WEB_AUDIO_REQUEST_ROOT}${clip.deliveryFile}`;
 
   let whole = await fetch(url);
   assert.equal(whole.status, 200);
   assert.equal(whole.headers.get('accept-ranges'), 'bytes');
   assert.equal(whole.headers.get('content-length'), String(expected.length));
+  assert.equal(whole.headers.get('content-type'), 'audio/ogg');
   assert.deepEqual(Buffer.from(await whole.arrayBuffer()), expected);
 
   let head = await fetch(url, { method: 'HEAD' });
   assert.equal(head.status, 200);
   assert.equal(head.headers.get('accept-ranges'), 'bytes');
   assert.equal(head.headers.get('content-length'), String(expected.length));
+  assert.equal(head.headers.get('content-type'), 'audio/ogg');
   assert.equal((await head.arrayBuffer()).byteLength, 0);
 
   for (let expectation of [
@@ -803,6 +1921,7 @@ test('browser static server serves standards-correct single byte ranges', async 
       expectation.header,
     );
     assert.equal(response.headers.get('content-length'), String(length), expectation.header);
+    assert.equal(response.headers.get('content-type'), 'audio/ogg', expectation.header);
     assert.deepEqual(
       Buffer.from(await response.arrayBuffer()),
       expected.subarray(expectation.start, expectation.end + 1),
@@ -817,6 +1936,7 @@ test('browser static server serves standards-correct single byte ranges', async 
   assert.equal(rangeHead.status, 200);
   assert.equal(rangeHead.headers.get('content-range'), null);
   assert.equal(rangeHead.headers.get('content-length'), String(expected.length));
+  assert.equal(rangeHead.headers.get('content-type'), 'audio/ogg');
   assert.equal((await rangeHead.arrayBuffer()).byteLength, 0);
 
   for (let header of ['items=0-3', 'bytes=0-1,4-5']) {
@@ -825,6 +1945,7 @@ test('browser static server serves standards-correct single byte ranges', async 
     assert.equal(response.headers.get('accept-ranges'), 'bytes', header);
     assert.equal(response.headers.get('content-range'), null, header);
     assert.equal(response.headers.get('content-length'), String(expected.length), header);
+    assert.equal(response.headers.get('content-type'), 'audio/ogg', header);
     assert.deepEqual(Buffer.from(await response.arrayBuffer()), expected, header);
   }
 
@@ -839,6 +1960,7 @@ test('browser static server serves standards-correct single byte ranges', async 
     assert.equal(response.headers.get('accept-ranges'), 'bytes', header);
     assert.equal(response.headers.get('content-range'), `bytes */${expected.length}`, header);
     assert.equal(response.headers.get('content-length'), '0', header);
+    assert.equal(response.headers.get('content-type'), 'audio/ogg', header);
     assert.equal((await response.arrayBuffer()).byteLength, 0, header);
   }
 });
@@ -2555,10 +3677,103 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
   assert.equal(restored.horizontalOverflow, 0);
 });
 
-test('CV Show mounts shared controls and plays the private local RU narration', {
-  timeout: 210_000,
+test('same-target Short Show settles its composite setup before physical narration', {
+  timeout: 45_000,
 }, async (t) => {
-  if (EXTERNAL_TEST_URL) t.skip('local narration acceptance requires ignored local audio fixtures');
+  if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}
+    globalThis.__cvSameTargetSetupReceipts = [];
+    document.addEventListener('portfolio-show-presentation-receipt', (event) => {
+      const receipt = event.detail?.receipt || {};
+      globalThis.__cvSameTargetSetupReceipts.push({
+        version: receipt.version || '',
+        operationId: receipt.operationId || '',
+        cellId: receipt.cellId || '',
+        kind: receipt.kind || '',
+        status: receipt.status || '',
+        reason: receipt.reason || '',
+      });
+    });`,
+  });
+  await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
+  await clickVisible(cdp, '.pulse-tour-button', 'same-target CV Show trigger');
+  await clickVisible(
+    cdp,
+    'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
+    'same-target explicit Short mode selection',
+  );
+  const result = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve) => {
+      const started = performance.now();
+      const check = () => {
+        const host = document.querySelector('portfolio-show-chat');
+        const narration = host?.narrationSnapshot;
+        const alignment = host?.alignmentSnapshot;
+        const receipts = globalThis.__cvSameTargetSetupReceipts || [];
+        const setup = receipts.filter(({ cellId }) => (
+          cellId === 'cv-show:cue:positioning.open'
+        ));
+        const failed = receipts.filter(({ status }) => (
+          ['failed', 'expired', 'skipped'].includes(status)
+        ));
+        if (narration?.active?.activeId === 'positioning' && !narration.active.paused) {
+          return resolve({
+            source: narration.source,
+            activeId: narration.active.activeId,
+            alignmentActiveId: alignment?.activeId || '',
+            setup,
+            failed,
+          });
+        }
+        if (performance.now() - started > 12_000) return resolve({
+          timeout: true,
+          source: narration?.source || '',
+          active: narration?.active || null,
+          alignment,
+          setup,
+          failed,
+        });
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify same-target setup and narration', timeoutMs: 15_000 });
+  assert.equal(result.result.value.timeout, undefined, JSON.stringify(result.result.value));
+  assert.equal(result.result.value.source, 'local');
+  assert.equal(result.result.value.activeId, 'positioning');
+  assert.equal(result.result.value.alignmentActiveId, 'positioning');
+  assert.deepEqual(
+    result.result.value.setup.map(({ kind, status }) => ({ kind, status })),
+    [
+      { kind: 'interaction', status: 'acted' },
+      { kind: 'interaction', status: 'settled' },
+    ],
+  );
+  assert.equal(result.result.value.setup[0].operationId, result.result.value.setup[1].operationId);
+  assert.equal(result.result.value.setup[1].version, 'workspace-presentation-effect-receipt-v2');
+  assert.deepEqual(result.result.value.failed, []);
+  assert.deepEqual(cdp.exceptions, []);
+});
+
+test('CV Show blocks narration and aligned media when required scene setup fails', {
+  timeout: 45_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('narration failure gate requires the selected public audio release');
   let page = await createPortfolioPage(t, {
     viewport: {
       width: 1087,
@@ -2573,7 +3788,138 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
 
   await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
     source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}
-    globalThis.__cvShowCueHistory = [];
+    globalThis.__cvShowSetupFailureReceipts = [];
+    globalThis.__cvShowSetupFailureGenerations = [];
+    globalThis.__cvShowSetupFailureInjected = false;
+    document.addEventListener('portfolio-show-presentation-operation', (event) => {
+      const operation = event.detail?.operation;
+      if (globalThis.__cvShowSetupFailureInjected
+        || operation?.projectCell?.id !== 'cv-show:cue:positioning.open') return;
+      globalThis.__cvShowSetupFailureInjected = true;
+      event.detail.handled = true;
+      event.detail.complete(null, Object.assign(
+        new Error('injected required setup failure'),
+        { code: 'CV_SHOW_TEST_REQUIRED_SETUP_FAILURE' },
+      ));
+    }, { capture: true });
+    document.addEventListener('portfolio-show-presentation-receipt', (event) => {
+      globalThis.__cvShowSetupFailureReceipts.push(event.detail?.receipt || null);
+    });
+    document.addEventListener('portfolio-show-aligned-generation', (event) => {
+      globalThis.__cvShowSetupFailureGenerations.push(event.detail || null);
+    });`,
+  });
+  await navigate(
+    cdp,
+    `${server.origin}/cv/projects/project-graph-mcp/pulse/project-graph-mcp-compact-code-mode-v1-5/?setup-failure=1`,
+    { expectedMode: 'structured' },
+  );
+  await clickVisible(cdp, '.pulse-tour-button', 'setup-failure CV Show trigger');
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const host = document.querySelector('portfolio-show-chat');
+        const short = document.querySelector('agent-dock-shell')?.getChat?.()
+          ?.querySelector('[data-action-id="start-short"]');
+        if (host && short) {
+          return resolve(true);
+        }
+        if (performance.now() - started > 8000) return reject(new Error('setup-failure shell unavailable'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'attach setup-failure result journal', timeoutMs: 10_000 });
+  await clickVisible(
+    cdp,
+    'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
+    'start Short with required setup failure',
+  );
+  let failed = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const host = document.querySelector('portfolio-show-chat');
+        if (host?.$.isError && host?.$.isPaused) return resolve({
+          running: host.$.isRunning,
+          paused: host.$.isPaused,
+          error: host.$.isError,
+          errorText: host.$.errorText,
+          narration: host.narrationSnapshot,
+          alignment: host.alignmentSnapshot,
+          injected: globalThis.__cvShowSetupFailureInjected,
+          receipts: globalThis.__cvShowSetupFailureReceipts,
+          generations: globalThis.__cvShowSetupFailureGenerations,
+        });
+        if (performance.now() - started > 12000) return reject(new Error('required setup failure did not block narration'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify setup failure blocks narration', timeoutMs: 15_000 });
+  assert.equal(failed.result.value.running, true);
+  assert.equal(failed.result.value.paused, true);
+  assert.equal(failed.result.value.error, true);
+  assert.ok(failed.result.value.errorText);
+  assert.equal(failed.result.value.narration.source, 'local');
+  assert.equal(failed.result.value.narration.active?.activeId || '', '');
+  assert.equal(failed.result.value.narration.active?.generationReceipt || null, null);
+  assert.equal(failed.result.value.alignment.available, true);
+  assert.equal(failed.result.value.injected, true);
+  assert.equal(failed.result.value.alignment.lastGenerationReceipt, null);
+  assert.deepEqual(failed.result.value.generations, []);
+  assert.deepEqual(failed.result.value.receipts.map((receipt) => ({
+    cellId: receipt.cellId,
+    kind: receipt.kind,
+    status: receipt.status,
+    generation: receipt.generation,
+    reason: receipt.reason,
+  })), [{
+    cellId: 'cv-show:cue:positioning.open',
+    kind: 'interaction',
+    status: 'failed',
+    generation: 0,
+    reason: 'injected required setup failure',
+  }]);
+  let publicAudioRequests = assertSelectedCvShowWebAudioRequests(cdp.requestedUrls);
+  assert.deepEqual(
+    publicAudioRequests.filter((pathname) => pathname === WEB_AUDIO_MANIFEST_REQUEST_PATH),
+    [WEB_AUDIO_MANIFEST_REQUEST_PATH],
+  );
+  assert.equal(
+    publicAudioRequests.some((pathname) => pathname.startsWith(
+      `${WEB_AUDIO_REQUEST_ROOT}clips/`,
+    )),
+    false,
+  );
+  assert.deepEqual(cdp.exceptions, []);
+});
+
+test('CV Show mounts shared controls and plays the selected public Opus narration', {
+  timeout: 210_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
+  let { manifest: webAudioManifest } = await loadSelectedCvShowWebAudioManifest();
+  let firstWebAudioClip = webAudioManifest.clips[0];
+  let page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+  });
+  if (!page) return;
+  let { cdp, server } = page;
+
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}
+    globalThis.__cvShowExecutionReceiptHistory = [];
     globalThis.__cvShowResetHistory = [];
     globalThis.__cvShowMediaEventHistory = [];
     globalThis.__cvShowGenerationHistory = [];
@@ -2581,6 +3927,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
     globalThis.__cvShowResultHistory = [];
     globalThis.__cvShowPhaseHistory = [];
     globalThis.__cvShowPauseHistory = [];
+    globalThis.__cvShowResumeHistory = [];
     globalThis.__cvShowTargetState = (targetId) => {
       const anchor = document.querySelector('[data-tour-target="' + targetId + '"]');
       let target = anchor?.nextElementSibling;
@@ -2620,26 +3967,48 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
         };
       }
     }, { capture: true });
-    document.addEventListener('portfolio-show-aligned-cue', (event) => {
-      const receipt = event.detail || {};
-      const cue = receipt.cue || {};
-      const source = receipt.source || {};
+    document.addEventListener('portfolio-show-presentation-receipt', (event) => {
+      const detail = event.detail || {};
+      const receipt = detail.receipt || {};
+      const host = document.querySelector('portfolio-show-chat');
+      const selection = document.getSelection();
+      const selectionRect = selection?.rangeCount
+        ? selection.getRangeAt(0).getBoundingClientRect()
+        : null;
       const entry = {
-        id: source.id || '',
-        cueTimeMs: receipt.cueTimeMs ?? null,
-        mediaTimeMs: receipt.mediaTimeMs ?? null,
+        requestId: detail.requestId ?? null,
+        entryId: detail.entryId || '',
+        narrationActiveId: host?.narrationSnapshot?.active?.activeId || '',
+        alignmentActiveId: host?.alignmentSnapshot?.activeId || '',
+        narrationPositionMs: host?.alignmentSnapshot?.narrationPositionMs ?? null,
+        selectionText: selection?.toString() || '',
+        selectionWidth: Math.round(selectionRect?.width || 0),
+        selectionHeight: Math.round(selectionRect?.height || 0),
+        version: receipt.version || '',
+        operationId: receipt.operationId || '',
+        generation: receipt.generation ?? null,
+        cellId: receipt.cellId || '',
+        kind: receipt.kind || '',
+        status: receipt.status || '',
         reason: receipt.reason || '',
-        alignmentSource: cue.alignment?.provenance?.source || '',
-        alignmentResolution: cue.alignment?.resolution || '',
         ...globalThis.__cvShowTargetState('article.symbiote-workspace.intro'),
         at: performance.now(),
       };
-      globalThis.__cvShowCueHistory.push(entry);
+      globalThis.__cvShowExecutionReceiptHistory.push(entry);
     });
     document.addEventListener('portfolio-show-pause', (event) => {
       globalThis.__cvShowPauseHistory.push({
         target: event.target?.tagName || '',
+        reason: event.detail?.reason || '',
         path: event.composedPath().map((node) => node?.tagName || node?.nodeName || '').filter(Boolean),
+        at: performance.now(),
+      });
+    }, { capture: true });
+    document.addEventListener('portfolio-show-resume', (event) => {
+      globalThis.__cvShowResumeHistory.push({
+        target: event.target?.tagName || '',
+        path: event.composedPath().map((node) => node?.tagName || node?.nodeName || '').filter(Boolean),
+        at: performance.now(),
       });
     }, { capture: true });
     document.addEventListener('portfolio-show-aligned-reset', (event) => {
@@ -2683,12 +4052,12 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
   });
   assert.deepEqual(normalRoute.result.value, { search: '', locale: 'ru', mode: 'structured' });
   assert.equal(
-    cdp.requestedUrls.some((url) => url.includes('/cv-show-audio-private/')),
-    false,
-    'initial /cv/ must not request narration or alignment payloads',
+    cvShowAudioRequestPaths(cdp.requestedUrls).length,
+    0,
+    'initial /cv/ must not request public narration or alignment payloads',
   );
   const consoleBeforeShow = cdp.consoleMessages.length;
-  await clickVisible(cdp, '.pulse-tour-button', 'local-audio CV Show trigger');
+  await clickVisible(cdp, '.pulse-tour-button', 'selected public-audio CV Show trigger');
 
   let mounted = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
@@ -2726,12 +4095,12 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
             manualTranscript: Boolean(host.querySelector('.show-transcript')),
           });
         }
-        if (performance.now() - started > 8000) return reject(new Error('local Show shell did not become ready'));
+        if (performance.now() - started > 8000) return reject(new Error('public-audio Show shell did not become ready'));
         setTimeout(check, 50);
       };
       check();
     })`,
-  }, { label: 'inspect shared local-audio Show shell', timeoutMs: 10_000 });
+  }, { label: 'inspect shared public-audio Show shell', timeoutMs: 10_000 });
   assert.deepEqual(mounted.result.value, {
     orchestrationConnected: true,
     sharedDock: true,
@@ -2745,9 +4114,9 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
     manualTranscript: false,
   });
   assert.equal(
-    cdp.requestedUrls.some((url) => url.includes('/cv-show-audio-private/')),
-    false,
-    'opening the chat without selecting a Show mode must stay payload-free',
+    cvShowAudioRequestPaths(cdp.requestedUrls).length,
+    0,
+    'opening the chat without selecting a Show mode must stay public-audio payload-free',
   );
   await clickVisible(
     cdp,
@@ -2793,11 +4162,11 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
       };
       check();
     })`,
-  }, { label: 'inspect first local RU clip', timeoutMs: 10_000 });
+  }, { label: 'inspect first selected Opus clip', timeoutMs: 10_000 });
   assert.equal(
     playing.exceptionDetails,
     undefined,
-    playing.exceptionDetails?.exception?.description || 'first local RU clip evaluation failed',
+    playing.exceptionDetails?.exception?.description || 'first selected Opus clip evaluation failed',
   );
   assert.deepEqual(playing.result.value, {
     source: 'local',
@@ -2809,11 +4178,34 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
     positionLabel: '1 / 16',
   });
 
-  const firstPayloadRequests = cdp.requestedUrls.filter((url) => (
-    /\/cv-show-audio-private\/.*\.(?:wav|json)$/u.test(url)
-  ));
-  const firstClipRequests = firstPayloadRequests.filter((url) => /\.wav$/u.test(url));
-  const firstAlignedRequests = firstPayloadRequests.filter((url) => /\/aligned\/.*\.json$/u.test(url));
+  let firstPayloadRequests = assertSelectedCvShowWebAudioRequests(cdp.requestedUrls);
+  let firstManifestRequests = firstPayloadRequests.filter(
+    (pathname) => pathname === WEB_AUDIO_MANIFEST_REQUEST_PATH,
+  );
+  let firstClipRequests = firstPayloadRequests.filter(
+    (pathname) => pathname.startsWith(`${WEB_AUDIO_REQUEST_ROOT}clips/`),
+  );
+  let firstAlignedRequests = firstPayloadRequests.filter(
+    (pathname) => pathname.startsWith(`${WEB_AUDIO_REQUEST_ROOT}aligned/`),
+  );
+  let allowedClipRequests = webAudioManifest.clips.slice(0, 2).map(
+    ({ deliveryFile }) => `${WEB_AUDIO_REQUEST_ROOT}${deliveryFile}`,
+  );
+  let allowedAlignedRequests = webAudioManifest.clips.slice(0, 2).map(
+    ({ alignedSequenceFile }) => `${WEB_AUDIO_REQUEST_ROOT}${alignedSequenceFile}`,
+  );
+  assert.deepEqual(firstManifestRequests, [WEB_AUDIO_MANIFEST_REQUEST_PATH]);
+  assert.equal(firstClipRequests.includes(
+    `${WEB_AUDIO_REQUEST_ROOT}${firstWebAudioClip.deliveryFile}`,
+  ), true);
+  assert.equal(firstAlignedRequests.includes(
+    `${WEB_AUDIO_REQUEST_ROOT}${firstWebAudioClip.alignedSequenceFile}`,
+  ), true);
+  assert.equal(firstClipRequests.every((pathname) => allowedClipRequests.includes(pathname)), true);
+  assert.equal(
+    firstAlignedRequests.every((pathname) => allowedAlignedRequests.includes(pathname)),
+    true,
+  );
   assert.ok(firstClipRequests.length <= 2, 'only current and at most one next audio clip may load');
   assert.ok(firstAlignedRequests.length <= 2, 'only current and at most one next alignment may load');
 
@@ -2824,46 +4216,43 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
       const started = performance.now();
       const check = () => {
         const snapshot = document.querySelector('portfolio-show-chat')?.alignmentSnapshot;
-        const observed = globalThis.__cvShowCueHistory?.find((cue) => (
-          cue.id === 'positioning.experience-frame'
-          && cue.alignmentSource === 'recognized-word'
-          && cue.alignmentResolution === 'exact'
+        const observed = globalThis.__cvShowExecutionReceiptHistory?.find((receipt) => (
+          receipt.cellId === 'cv-show:cue:positioning.experience-frame'
+          && receipt.status === 'first-frame'
         ));
         if (observed) return resolve({
           activeId: snapshot.activeId,
-          exactCueCount: snapshot.exactCueCount,
-          lastCueId: observed.id,
-          lastCueTimeMs: observed.cueTimeMs,
-          lastMediaTimeMs: observed.mediaTimeMs,
-          lastAlignmentSource: observed.alignmentSource,
-          lastAlignmentResolution: observed.alignmentResolution,
+          speechGroupCount: snapshot.speechGroupCount,
+          receipt: observed,
+          lastExecutionReceipt: snapshot.lastExecutionReceipt,
         });
         if (performance.now() - started > 5000) return resolve({
           timeout: true,
           activeId: snapshot?.activeId || '',
-          lastCueId: snapshot?.lastCueId || '',
-          history: globalThis.__cvShowCueHistory || [],
+          lastExecutionReceipt: snapshot?.lastExecutionReceipt || null,
+          history: globalThis.__cvShowExecutionReceiptHistory || [],
         });
         setTimeout(check, 25);
       };
       check();
     })`,
-  }, { label: 'wait for recognized-word Show cue', timeoutMs: 7_000 });
+  }, { label: 'wait for first Execution attention receipt', timeoutMs: 7_000 });
   if (recognizedCue.result.value.timeout) {
     assert.fail(`recognized positioning cue did not fire: ${JSON.stringify(recognizedCue.result.value)}`);
   }
   assert.equal(recognizedCue.result.value.activeId, 'positioning');
-  assert.equal(recognizedCue.result.value.exactCueCount, 4);
-  assert.equal(recognizedCue.result.value.lastCueId, 'positioning.experience-frame');
-  assert.ok(recognizedCue.result.value.lastCueTimeMs >= 1220);
-  assert.equal(recognizedCue.result.value.lastAlignmentSource, 'recognized-word');
-  assert.equal(recognizedCue.result.value.lastAlignmentResolution, 'exact');
-  assert.ok(recognizedCue.result.value.lastMediaTimeMs >= 1220);
+  assert.equal(recognizedCue.result.value.speechGroupCount, 3);
+  assert.equal(recognizedCue.result.value.receipt.version, 'workspace-presentation-effect-receipt-v2');
+  assert.equal(recognizedCue.result.value.receipt.cellId, 'cv-show:cue:positioning.experience-frame');
+  assert.equal(recognizedCue.result.value.receipt.kind, 'attention');
+  assert.equal(recognizedCue.result.value.receipt.status, 'first-frame');
+  assert.match(recognizedCue.result.value.receipt.operationId, /^presentation-effect-/u);
+  assert.equal(recognizedCue.result.value.receipt.generation, 0);
 
   await cdp.send('Runtime.evaluate', {
     expression: `document.querySelector('agent-dock-shell')?.getChat?.()
       ?.querySelector('chat-show-player [data-control="play"]')?.click()`,
-  }, { label: 'pause local narration through shared player', timeoutMs: 5_000 });
+  }, { label: 'pause selected narration through shared player', timeoutMs: 5_000 });
   let paused = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
@@ -2885,47 +4274,64 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
       const overlays = Array.from(document.querySelectorAll('.symbiote-presenter-cursor'));
       const ink = overlay?.querySelector('.pc-ink path');
       const click = overlay?.querySelector('.pc-click');
+      const cursorPath = overlay?.querySelector('.pc-cursor path');
+      const cursorBounds = cursorPath?.getBoundingClientRect();
       return {
         exists: Boolean(overlay),
         visible: overlay?.classList.contains('is-visible') || false,
         opacity: overlay ? getComputedStyle(overlay).opacity : '',
         ink: ink?.getAttribute('d') || '',
         clickOpacity: click ? getComputedStyle(click).opacity : '',
+        cursorPath: cursorPath?.getAttribute('d') || '',
+        cursorWidth: Math.round(cursorBounds?.width || 0),
+        cursorHeight: Math.round(cursorBounds?.height || 0),
         selectionRanges: document.getSelection()?.rangeCount || 0,
         selectionText: document.getSelection()?.toString() || '',
         selectionCollapsed: document.getSelection()?.isCollapsed ?? true,
         pauseEventCount: globalThis.__cvShowPauseHistory.length,
         pauseEventTarget: globalThis.__cvShowPauseHistory.at(-1)?.target || '',
+        completedExperienceFrameCount: (globalThis.__cvShowExecutionReceiptHistory || []).filter(
+          ({ cellId, status }) => (
+            cellId === 'cv-show:cue:positioning.experience-frame' && status === 'settled'
+          ),
+        ).length,
         overlayStates: overlays.map((node) => ({
           className: node.className,
           opacity: getComputedStyle(node).opacity,
         })),
       };
     })()`,
-  }, { label: 'verify pause hides every presenter layer', timeoutMs: 5_000 });
+  }, { label: 'verify pause retains the visible presenter gesture', timeoutMs: 5_000 });
   assert.equal(
     cdp.exceptions.length,
     0,
     cdp.exceptions.map(({ exceptionDetails }) => exceptionDetails?.exception?.description || exceptionDetails?.text).join('\n'),
   );
-  assert.deepEqual(pausedPresenter.result.value, {
-    exists: true,
-    visible: false,
-    opacity: '0',
-    ink: '',
-    clickOpacity: '0',
-    selectionRanges: 0,
-    selectionText: '',
-    selectionCollapsed: true,
-    pauseEventCount: 1,
-    pauseEventTarget: 'PORTFOLIO-SHOW-CHAT',
-    overlayStates: [{ className: 'symbiote-presenter-cursor is-paused', opacity: '0' }],
-  });
+  assert.equal(pausedPresenter.result.value.exists, true);
+  assert.equal(pausedPresenter.result.value.visible, true);
+  assert.equal(pausedPresenter.result.value.opacity, '1');
+  assert.equal(pausedPresenter.result.value.ink, '');
+  assert.equal(pausedPresenter.result.value.clickOpacity, '0');
+  assert.ok(pausedPresenter.result.value.cursorPath, 'Pause must retain the presenter arrow path');
+  assert.ok(pausedPresenter.result.value.cursorWidth > 4, JSON.stringify(pausedPresenter.result.value));
+  assert.ok(pausedPresenter.result.value.cursorHeight > 4, JSON.stringify(pausedPresenter.result.value));
+  assert.equal(pausedPresenter.result.value.selectionText, '');
+  assert.equal(pausedPresenter.result.value.selectionCollapsed, true);
+  assert.equal(pausedPresenter.result.value.pauseEventCount, 1);
+  assert.equal(pausedPresenter.result.value.pauseEventTarget, 'PORTFOLIO-SHOW-CHAT');
+  assert.equal(
+    pausedPresenter.result.value.completedExperienceFrameCount,
+    0,
+    'Pause must keep the pending cue inside the transition barrier instead of completing it',
+  );
+  assert.deepEqual(pausedPresenter.result.value.overlayStates, [
+    { className: 'symbiote-presenter-cursor is-visible', opacity: '1' },
+  ]);
 
   await clickVisible(
     cdp,
     'agent-dock-shell agent-show-chat chat-show-player [data-control="play"]',
-    'resume local narration through shared transport',
+    'resume selected narration through shared transport',
   );
   let resumed = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
@@ -2955,22 +4361,40 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
       const started = performance.now();
       const check = () => {
         const host = document.querySelector('portfolio-show-chat');
-        const observed = globalThis.__cvShowCueHistory?.find((cue) => (
-          cue.id === 'positioning.tenure-marker'
-          && cue.alignmentSource === 'recognized-word'
-          && cue.alignmentResolution === 'exact'
+        const observed = globalThis.__cvShowExecutionReceiptHistory?.find((receipt) => (
+          receipt.cellId === 'cv-show:cue:positioning.tenure-marker'
+          && receipt.status === 'first-frame'
         ));
         if (observed) {
-          return resolve({ cue: observed.id, cueTimeMs: observed.cueTimeMs });
+          return resolve(observed);
         }
-        if (performance.now() - started > 5000) return reject(new Error('recognized-word marker cue did not fire'));
+        if (performance.now() - started > 12000) return reject(new Error('marker Execution receipt did not fire'));
         setTimeout(check, 16);
       };
       check();
     })`,
-  }, { label: 'verify recognized-word marker cue', timeoutMs: 7_000 });
-  assert.equal(visibleMarker.result.value.cue, 'positioning.tenure-marker');
-  assert.ok(visibleMarker.result.value.cueTimeMs >= 2080);
+  }, { label: 'verify marker Execution receipt', timeoutMs: 14_000 });
+  assert.equal(visibleMarker.result.value.version, 'workspace-presentation-effect-receipt-v2');
+  assert.equal(visibleMarker.result.value.cellId, 'cv-show:cue:positioning.tenure-marker');
+  assert.equal(visibleMarker.result.value.kind, 'attention');
+  assert.equal(visibleMarker.result.value.status, 'first-frame');
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const result = globalThis.__cvShowExecutionReceiptHistory?.find(({ cellId, status }) => (
+          cellId === 'cv-show:cue:positioning.tenure-marker' && status === 'settled'
+        ));
+        if (result) return resolve(true);
+        if (performance.now() - started > 20000) {
+          return reject(new Error('recognized-word marker gesture did not settle'));
+        }
+        setTimeout(check, 16);
+      };
+      check();
+    })`,
+  }, { label: 'wait for tenure marker settlement before media arbitration', timeoutMs: 22_000 });
 
   let arbitrationPoint = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
@@ -2982,7 +4406,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
       media.id = 'browser-audio-arbitration-fixture';
       media.preload = 'auto';
       media.src = new URL(
-        'cv-show-audio-private/maximo-default-male/${LOCAL_AUDIO_REVISION}/01-short-positioning-0bd5868e6d15.wav',
+        'cv-show-audio/${WEB_AUDIO_RELEASE_DIRECTORY}/${firstWebAudioClip.deliveryFile}',
         document.baseURI,
       ).href;
       const trigger = document.createElement('button');
@@ -3103,30 +4527,16 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
         const host = document.querySelector('portfolio-show-chat');
         const narration = host?.narrationSnapshot;
         const alignment = host?.alignmentSnapshot;
-        const selection = document.getSelection();
-        const selectionRect = selection?.rangeCount
-          ? selection.getRangeAt(0).getBoundingClientRect()
-          : null;
-        const portableCue = globalThis.__cvShowCueHistory?.find(({ id }) => (
-          id === 'workspace.portable-config'
+        const portableCue = globalThis.__cvShowExecutionReceiptHistory?.find(({ cellId, status }) => (
+          cellId === 'cv-show:cue:workspace.portable-config' && status === 'settled'
         ));
-        if (narration?.active?.activeId === 'symbiote-workspace'
-          && alignment?.activeId === 'symbiote-workspace'
-          && portableCue) {
-          return resolve({
-            positionMs: alignment.narrationPositionMs,
-            cue: portableCue.id,
-            selectionWidth: Math.round(selectionRect?.width || 0),
-            selectionHeight: Math.round(selectionRect?.height || 0),
-          });
-        }
+        if (portableCue) return resolve({ receipt: portableCue });
         if (performance.now() - started > 45000) return resolve({
           timeout: true,
           activeId: narration?.active?.activeId || '',
           paused: narration?.active?.paused ?? null,
           alignment,
-          selectionText: selection?.toString() || '',
-          cueHistory: globalThis.__cvShowCueHistory || [],
+          receiptHistory: globalThis.__cvShowExecutionReceiptHistory || [],
           resultHistory: globalThis.__cvShowResultHistory || [],
         });
         setTimeout(check, 25);
@@ -3143,50 +4553,120 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
     assert.fail(`autonomous aligned workspace scene did not become visible: ${JSON.stringify(shortBeforeBranch.result.value)}`);
   }
 
-  let presenterResults = await cdp.send('Runtime.evaluate', {
+  let presenterEvidence = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
-    expression: `globalThis.__cvShowResultHistory || []`,
+    expression: `({
+      results: globalThis.__cvShowResultHistory || [],
+      receipts: globalThis.__cvShowExecutionReceiptHistory || [],
+    })`,
   }, { label: 'inspect presenter directive receipts', timeoutMs: 5_000 });
-  let requiredMissing = presenterResults.result.value.filter((result) => result.status === 'required-missing');
+  let requiredMissing = presenterEvidence.result.value.results
+    .filter((result) => result.status === 'required-missing');
+  let failedPresentationReceipts = presenterEvidence.result.value.receipts.filter(
+    ({ status }) => ['failed', 'expired', 'skipped'].includes(status),
+  );
   assert.deepEqual(
-    requiredMissing,
-    [],
+    { requiredMissing, failedPresentationReceipts },
+    { requiredMissing: [], failedPresentationReceipts: [] },
     `required presenter directives failed: ${JSON.stringify({
       requiredMissing,
-      phases: (await cdp.send('Runtime.evaluate', {
-        returnByValue: true,
-        expression: `globalThis.__cvShowPhaseHistory || []`,
-      })).result.value,
+      failedPresentationReceipts,
     })}`,
   );
-  let workspaceOpenResults = presenterResults.result.value.filter((result) => (
-    result.receipts?.some(({ id }) => id === 'workspace.open')
-  ));
-  assert.equal(workspaceOpenResults.length, 1, 'workspace.open scene setup must execute exactly once');
-  assert.equal(workspaceOpenResults[0].status, 'success');
+  let workspaceOpenReceipts = presenterEvidence.result.value.receipts.filter(
+    ({ cellId }) => cellId === 'cv-show:cue:workspace.open',
+  );
   assert.deepEqual(
-    workspaceOpenResults[0].receipts.map(({ id, status }) => ({ id, status })),
-    [{ id: 'workspace.open', status: 'success' }],
+    workspaceOpenReceipts.map(({ kind, status }) => ({ kind, status })),
+    [
+      { kind: 'interaction', status: 'acted' },
+      { kind: 'interaction', status: 'settled' },
+    ],
+    'workspace.open scene setup must execute exactly once',
   );
+  assert.equal(workspaceOpenReceipts[0].operationId, workspaceOpenReceipts[1].operationId);
+  assert.equal(workspaceOpenReceipts[1].version, 'workspace-presentation-effect-receipt-v2');
   assert.equal(
-    workspaceOpenResults[0].receipts[0].result.phases
-      .find(({ phase }) => phase === 'act').result.selectedId,
-    'projects/symbiote-workspace',
+    workspaceOpenReceipts[1].selectedId,
+    'Проекты/ИИ-инструменты/Symbiote Workspace',
   );
-  assert.equal(workspaceOpenResults[0].viewerPath, 'Symbiote Workspace.md');
-  assert.equal(workspaceOpenResults[0].targetReady, true, 'workspace article intro must be ready after scene setup');
+  assert.equal(workspaceOpenReceipts[1].viewerPath, 'Symbiote Workspace.md');
+  assert.equal(workspaceOpenReceipts[1].targetReady, true, 'workspace article intro must be ready after scene setup');
   let workspaceIntroCue = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
-    expression: `globalThis.__cvShowCueHistory?.find(({ id }) => id === 'workspace.intro-frame') || null`,
+    expression: `globalThis.__cvShowExecutionReceiptHistory?.find(({ cellId, status }) => (
+      cellId === 'cv-show:cue:workspace.intro-frame' && status === 'first-frame'
+    )) || null`,
   }, { label: 'inspect workspace intro cue ordering', timeoutMs: 5_000 });
   assert.ok(workspaceIntroCue.result.value, 'workspace intro cue must be delivered');
   assert.match(workspaceIntroCue.result.value.selectedId, /Symbiote Workspace$/u);
   assert.equal(workspaceIntroCue.result.value.viewerPath, 'Symbiote Workspace.md');
   assert.equal(workspaceIntroCue.result.value.targetReady, true);
   assert.ok(
-    workspaceOpenResults[0].at <= workspaceIntroCue.result.value.at,
+    workspaceOpenReceipts[1].at <= workspaceIntroCue.result.value.at,
     'workspace.open scene setup must complete before workspace.intro-frame',
   );
+  let transitionBarrier = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const receipts = globalThis.__cvShowExecutionReceiptHistory || [];
+      const finalAccent = receipts.find(
+        ({ cellId, status }) => (
+          cellId === 'cv-show:cue:positioning.workspace-transition' && status === 'settled'
+        ),
+      );
+      const workspaceSetup = receipts.find(
+        ({ cellId, status }) => cellId === 'cv-show:cue:workspace.open' && status === 'acted',
+      );
+      return {
+        finalAccentCompletedAt: finalAccent?.at ?? null,
+        workspaceSetupDispatchedAt: workspaceSetup?.at ?? null,
+        finalAccentStatus: finalAccent?.status || '',
+        workspaceSetupStatus: workspaceSetup?.status || '',
+      };
+    })()`,
+  }, { label: 'verify final accent settles before article transition', timeoutMs: 5_000 });
+  assert.equal(transitionBarrier.result.value.finalAccentStatus, 'settled');
+  assert.equal(transitionBarrier.result.value.workspaceSetupStatus, 'acted');
+  assert.ok(
+    transitionBarrier.result.value.finalAccentCompletedAt
+      <= transitionBarrier.result.value.workspaceSetupDispatchedAt,
+    `article transition began before the final accent settled: ${JSON.stringify(transitionBarrier.result.value)}`,
+  );
+  const positioningDirectiveIds = CV_SHOW_STORY.scenes[0].directives
+    .filter(({ timing }) => timing.phase === 'speech')
+    .map(({ id }) => id);
+  let positioningTiming = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const ids = ${JSON.stringify(positioningDirectiveIds)};
+      const executionReceipts = globalThis.__cvShowExecutionReceiptHistory || [];
+      return ids.map((id) => {
+        const cellId = 'cv-show:cue:' + id;
+        const receipts = executionReceipts.filter((entry) => entry.cellId === cellId);
+        const firstFrame = receipts.find(({ status }) => status === 'first-frame');
+        const settled = receipts.find(({ status }) => status === 'settled');
+        return {
+          id,
+          firstFrame,
+          settled,
+          firstFrameCount: receipts.filter(({ status }) => status === 'first-frame').length,
+          settledCount: receipts.filter(({ status }) => status === 'settled').length,
+        };
+      });
+    })()`,
+  }, { label: 'verify strict positioning Execution receipt sequences', timeoutMs: 5_000 });
+  for (let timing of positioningTiming.result.value) {
+    assert.equal(timing.firstFrameCount, 1, JSON.stringify(timing));
+    assert.equal(timing.settledCount, 1, JSON.stringify(timing));
+    assert.equal(timing.firstFrame.version, 'workspace-presentation-effect-receipt-v2');
+    assert.equal(timing.firstFrame.kind, 'attention');
+    assert.equal(timing.firstFrame.status, 'first-frame');
+    assert.equal(timing.settled.status, 'settled');
+    assert.equal(timing.firstFrame.operationId, timing.settled.operationId);
+    assert.equal(timing.firstFrame.generation, timing.settled.generation);
+    assert.equal(timing.firstFrame.cellId, `cv-show:cue:${timing.id}`);
+  }
 
   let accumulated = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
@@ -3228,8 +4708,24 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
   }
   assert.equal(accumulated.result.value.activeId, 'symbiote-ui');
   assert.deepEqual(accumulated.result.value.states.slice(-2), ['historical', 'current']);
-  assert.equal(shortBeforeBranch.result.value.cue, 'workspace.portable-config');
-  assert.ok(shortBeforeBranch.result.value.positionMs >= 11_040, 'Short scene 2 must advance to the recognized selection cue');
+  assert.equal(
+    shortBeforeBranch.result.value.receipt.cellId,
+    'cv-show:cue:workspace.portable-config',
+  );
+  assert.equal(shortBeforeBranch.result.value.receipt.kind, 'interaction');
+  assert.equal(shortBeforeBranch.result.value.receipt.status, 'settled');
+  assert.equal(shortBeforeBranch.result.value.receipt.entryId, 'symbiote-workspace');
+  assert.equal(shortBeforeBranch.result.value.receipt.narrationActiveId, 'symbiote-workspace');
+  assert.equal(shortBeforeBranch.result.value.receipt.alignmentActiveId, 'symbiote-workspace');
+  assert.match(shortBeforeBranch.result.value.receipt.selectedId, /Symbiote Workspace$/u);
+  assert.equal(shortBeforeBranch.result.value.receipt.viewerPath, 'Symbiote Workspace.md');
+  assert.equal(shortBeforeBranch.result.value.receipt.targetReady, true);
+  assert.match(
+    shortBeforeBranch.result.value.receipt.selectionText,
+    /переносимая исполняемая конфигурация/u,
+  );
+  assert.ok(shortBeforeBranch.result.value.receipt.selectionWidth > 0);
+  assert.ok(shortBeforeBranch.result.value.receipt.selectionHeight > 0);
 
   let fixedPlayer = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
@@ -3255,43 +4751,134 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
   assert.equal(fixedPlayer.result.value.transcriptOutsidePlayer, true);
   assert.ok(fixedPlayer.result.value.topDelta <= 1);
 
-  await cdp.send('Runtime.evaluate', {
-    expression: `(() => {
-      const action = document.querySelector(
-        'agent-dock-shell agent-show-chat .actions-card[data-action-state="historical"] [data-action-id="details"]'
-      );
-      action?.addEventListener('click', () => {
-        globalThis.__cvShowBranchClickPosition = document.querySelector('portfolio-show-chat')
-          ?.alignmentSnapshot?.narrationPositionMs;
+  const historicalDetailSelector = 'agent-dock-shell agent-show-chat '
+    + '.actions-card[data-actions-id="symbiote-workspace.actions"]'
+    + '[data-action-state="historical"] [data-action-id="details"]';
+  let historicalBranchPoint = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const selector = ${JSON.stringify(historicalDetailSelector)};
+      const dock = document.querySelector('agent-dock-shell');
+      const observeAction = (event) => {
+        const detail = event.detail || {};
+        if (detail.id !== 'symbiote-workspace.actions' || detail.actionId !== 'details') return;
+        const host = document.querySelector('portfolio-show-chat');
+        globalThis.__cvShowBranchAction = {
+          id: detail.id,
+          actionId: detail.actionId,
+          payload: detail.payload,
+          checkpoint: host?.alignmentSnapshot?.narrationPositionMs || 0,
+        };
+        globalThis.__cvShowBranchClickPosition = globalThis.__cvShowBranchAction.checkpoint;
         globalThis.__cvShowBranchMediaEventIndex = globalThis.__cvShowMediaEventHistory.length;
         globalThis.__cvShowBranchResetIndex = globalThis.__cvShowResetHistory.length;
-      }, { capture: true, once: true });
-    })()`,
-  }, { label: 'observe exact trusted historical-branch checkpoint', timeoutMs: 5_000 });
-  await cdp.send('Runtime.evaluate', {
-    awaitPromise: true,
-    expression: `new Promise((resolve, reject) => {
+        globalThis.__cvShowBranchPauseIndex = globalThis.__cvShowPauseHistory.length;
+        dock?.removeEventListener('agent-show-action', observeAction, { capture: true });
+      };
+      dock?.addEventListener('agent-show-action', observeAction, { capture: true });
+      document.querySelector(selector)?.scrollIntoView?.({ block: 'center', inline: 'center' });
       const started = performance.now();
       const check = () => {
         const host = document.querySelector('portfolio-show-chat');
         const activeId = host?.narrationSnapshot?.active?.activeId;
         const positionMs = host?.alignmentSnapshot?.narrationPositionMs || 0;
-        if (activeId === 'symbiote-ui' && positionMs >= 260 && positionMs <= 320) {
-          return resolve(positionMs);
+        if (activeId === 'symbiote-ui' && positionMs >= 260 && positionMs <= 700) {
+          const target = document.querySelector(selector);
+          const rect = target?.getBoundingClientRect();
+          const hit = rect && document.elementFromPoint(
+            rect.left + rect.width / 2,
+            rect.top + rect.height / 2,
+          );
+          if (!rect?.width || !rect.height || (hit !== target && !target?.contains?.(hit))) {
+            return reject(new Error('historical detail action is not hit-testable during playback'));
+          }
+          return resolve({
+            observedPositionMs: positionMs,
+            point: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
+          });
         }
         if (performance.now() - started > 5000) {
-          return reject(new Error('historical branch checkpoint did not enter the 260-320ms window: '
+          return reject(new Error('historical branch checkpoint did not enter the 260-700ms window: '
             + JSON.stringify({ activeId, positionMs })));
         }
         setTimeout(check, 5);
       };
       check();
     })`,
-  }, { label: 'enter exact nonzero historical-branch checkpoint window', timeoutMs: 7_000 });
-  await clickVisible(
-    cdp,
-    'agent-dock-shell agent-show-chat .actions-card[data-action-state="historical"] [data-action-id="details"]',
-    'historical detail action',
+  }, { label: 'freeze exact contextual historical-branch checkpoint', timeoutMs: 7_000 });
+  assert.equal(
+    historicalBranchPoint.exceptionDetails,
+    undefined,
+    historicalBranchPoint.exceptionDetails?.exception?.description || 'historical branch point evaluation failed',
+  );
+  assert.ok(
+    Number.isFinite(historicalBranchPoint.result.value?.point?.x)
+      && Number.isFinite(historicalBranchPoint.result.value?.point?.y),
+    `historical branch point is not finite: ${JSON.stringify(historicalBranchPoint)}`,
+  );
+  await clickVisible(cdp, historicalDetailSelector, 'exact historical detail action');
+  let historicalBranchAction = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve) => {
+      const started = performance.now();
+      const check = () => {
+        if (globalThis.__cvShowBranchAction) {
+          return resolve({ action: globalThis.__cvShowBranchAction });
+        }
+        if (performance.now() - started > 2000) {
+          const target = document.querySelector(${JSON.stringify(historicalDetailSelector)});
+          const rect = target?.getBoundingClientRect();
+          const hit = rect && document.elementFromPoint(
+            rect.left + rect.width / 2,
+            rect.top + rect.height / 2,
+          );
+          return resolve({
+            timeout: true,
+            target: target ? {
+              disabled: target.disabled,
+              connected: target.isConnected,
+              text: target.textContent?.trim() || '',
+              rect: rect ? {
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height,
+              } : null,
+              hitTag: hit?.tagName || '',
+              hitClass: hit?.className || '',
+              hitActionId: hit?.dataset?.actionId || '',
+              containsHit: target === hit || target.contains(hit),
+            } : null,
+          });
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'read exact historical detail action receipt', timeoutMs: 5_000 });
+  assert.deepEqual({
+    id: historicalBranchAction.result.value.action?.id,
+    actionId: historicalBranchAction.result.value.action?.actionId,
+    payload: historicalBranchAction.result.value.action?.payload,
+  }, {
+    id: 'symbiote-workspace.actions',
+    actionId: 'details',
+    payload: {
+      intent: 'detail',
+      branchId: 'workspace-details',
+      sceneId: 'symbiote-workspace',
+    },
+  }, JSON.stringify(historicalBranchAction.result.value));
+  assert.ok(
+    historicalBranchAction.result.value.action.checkpoint
+      >= historicalBranchPoint.result.value.observedPositionMs,
+    JSON.stringify(historicalBranchAction.result.value),
+  );
+  assert.ok(
+    historicalBranchAction.result.value.action.checkpoint <= 1_000,
+    JSON.stringify(historicalBranchAction.result.value),
   );
   await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
@@ -3307,11 +4894,14 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
       check();
     })`,
   }, { label: 'wait for aligned detail branch', timeoutMs: 7_000 });
+  const detailReturnSelector = 'agent-dock-shell agent-show-chat '
+    + '.actions-card[data-actions-id="workspace-details.actions"] '
+    + '[data-action-id="return"]';
   let returnPoint = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
     expression: `new Promise((resolve, reject) => {
-      const selector = 'agent-dock-shell agent-show-chat .actions-card[data-action-state="current"] [data-action-id="return"]';
+      const selector = ${JSON.stringify(detailReturnSelector)};
       const started = performance.now();
       const check = () => {
         const target = document.querySelector(selector);
@@ -3322,7 +4912,22 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
           rect.top + rect.height / 2,
         );
         if (rect?.width > 0 && rect.height > 0 && (hit === target || target?.contains?.(hit))) {
-          return resolve({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+          const host = document.querySelector('portfolio-show-chat');
+          return resolve({
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+            actionState: target.closest('.actions-card')?.dataset?.actionState || '',
+            narration: host?.narrationSnapshot || null,
+            alignment: host?.alignmentSnapshot || null,
+            hostState: host ? {
+              isPaused: host.$?.isPaused,
+              isError: host.$?.isError,
+              errorText: host.$?.errorText || '',
+              resumeRequired: host.$?.resumeRequired,
+              mediaBlocksResume: host.$?.mediaBlocksResume,
+            } : null,
+            pauses: globalThis.__cvShowPauseHistory.slice(globalThis.__cvShowBranchPauseIndex || 0),
+          });
         }
         if (performance.now() - started > 5000) {
           const cards = Array.from(document.querySelectorAll('agent-dock-shell agent-show-chat .actions-card'))
@@ -3334,6 +4939,23 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
       check();
     })`,
   }, { label: 'wait for interactive detail return action', timeoutMs: 7_000 });
+  assert.equal(
+    returnPoint.exceptionDetails,
+    undefined,
+    returnPoint.exceptionDetails?.exception?.description || 'detail return point evaluation failed',
+  );
+  assert.ok(
+    Number.isFinite(returnPoint.result.value?.x) && Number.isFinite(returnPoint.result.value?.y),
+    `detail return point is not finite: ${JSON.stringify(returnPoint)}`,
+  );
+  assert.deepEqual(returnPoint.result.value.pauses, [], JSON.stringify(returnPoint.result.value));
+  assert.equal(returnPoint.result.value.hostState.isPaused, false, JSON.stringify(returnPoint.result.value));
+  assert.equal(returnPoint.result.value.hostState.isError, false, JSON.stringify(returnPoint.result.value));
+  assert.equal(returnPoint.result.value.hostState.errorText, '', JSON.stringify(returnPoint.result.value));
+  assert.equal(returnPoint.result.value.hostState.resumeRequired, false, JSON.stringify(returnPoint.result.value));
+  assert.equal(returnPoint.result.value.hostState.mediaBlocksResume, false, JSON.stringify(returnPoint.result.value));
+  assert.equal(returnPoint.result.value.narration.active.lastError, '', JSON.stringify(returnPoint.result.value));
+  assert.equal(returnPoint.result.value.alignment.lastSeekFailure, null, JSON.stringify(returnPoint.result.value));
   await cdp.send('Runtime.evaluate', {
     expression: `(() => {
       const nativeAddEventListener = EventTarget.prototype.addEventListener;
@@ -3360,13 +4982,8 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
         return nativeAddEventListener.call(media, type, listener, options);
       };
     })()`,
-  }, { label: 'journal restored detached local media without accessor interception', timeoutMs: 5_000 });
-  await cdp.send('Input.dispatchMouseEvent', {
-    type: 'mousePressed', button: 'left', clickCount: 1, ...returnPoint.result.value,
-  }, { label: 'press detail return action', timeoutMs: 5_000 });
-  await cdp.send('Input.dispatchMouseEvent', {
-    type: 'mouseReleased', button: 'left', clickCount: 1, ...returnPoint.result.value,
-  }, { label: 'click detail return action', timeoutMs: 5_000 });
+  }, { label: 'journal restored detached selected media without accessor interception', timeoutMs: 5_000 });
+  await clickVisible(cdp, detailReturnSelector, 'detail return action');
   let restored;
   const restoreStarted = Date.now();
   while (Date.now() - restoreStarted <= 20_000) {
@@ -3384,9 +5001,8 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
           narrationActiveId: narration?.active?.activeId || '',
           paused: narration?.active?.paused,
           resetReason: alignment?.lastResetReason || '',
-          cueReason: alignment?.lastCueReason || '',
           positionMs: alignment?.narrationPositionMs ?? null,
-          source: alignment?.lastAlignmentSource || '',
+          lastExecutionReceipt: alignment?.lastExecutionReceipt || null,
           lastSeekFailure: alignment?.lastSeekFailure || null,
           presenter: {
             count: document.querySelectorAll('.symbiote-presenter-cursor').length,
@@ -3420,12 +5036,16 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
   assert.equal(restored.result.value.activeId, 'symbiote-ui');
   assert.equal(restored.result.value.paused, true);
   assert.equal(restored.result.value.resetReason, 'branch-return');
-  assert.equal(restored.result.value.cueReason, '');
-  assert.equal(restored.result.value.source, '');
+  assert.equal(
+    restored.result.value.lastExecutionReceipt.cellId,
+    'cv-show:cue:symbiote-ui.open',
+  );
+  assert.equal(restored.result.value.lastExecutionReceipt.kind, 'interaction');
+  assert.equal(restored.result.value.lastExecutionReceipt.status, 'settled');
   assert.deepEqual(restored.result.value.presenter, {
     count: 1,
-    visible: false,
-    opacity: '0',
+    visible: true,
+    opacity: '1',
     ink: '',
   });
   assert.equal(restored.result.value.selectionRanges, 0);
@@ -3462,7 +5082,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
         activeId: alignment?.activeId,
         positionMs: alignment?.narrationPositionMs,
         resetReason: alignment?.lastResetReason,
-        cueReason: alignment?.lastCueReason,
+        lastExecutionReceipt: alignment?.lastExecutionReceipt || null,
         lastSeekFailure: alignment?.lastSeekFailure || null,
         lastGenerationReceipt: alignment?.lastGenerationReceipt || null,
         playbackClockState: alignment?.playbackClockState || null,
@@ -3493,7 +5113,11 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
     `branch-return physical position drifted after dwell: ${JSON.stringify(stableBranchReturn.result.value)}`,
   );
   assert.equal(stableBranchReturn.result.value.resetReason, 'branch-return');
-  assert.equal(stableBranchReturn.result.value.cueReason, '');
+  assert.equal(
+    stableBranchReturn.result.value.lastExecutionReceipt.cellId,
+    'cv-show:cue:symbiote-ui.open',
+  );
+  assert.equal(stableBranchReturn.result.value.lastExecutionReceipt.status, 'settled');
   assert.equal(stableBranchReturn.result.value.lastSeekFailure, null);
   assert.equal(stableBranchReturn.result.value.seekFailures.length, 0);
   assert.equal(stableBranchReturn.result.value.generations.length, 1);
@@ -3505,11 +5129,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
   assert.ok(Math.abs(
     stableBranchReturn.result.value.lastGenerationReceipt.observedMs - branchCheckpoint.result.value,
   ) <= 25);
-  assert.deepEqual(stableBranchReturn.result.value.playbackClockState, {
-    active: false,
-    intervalMs: 250,
-    pendingCueCount: 1,
-  });
+  assert.equal(stableBranchReturn.result.value.playbackClockState, null);
   assert.equal(stableBranchReturn.result.value.nativeSeeking, true);
   assert.equal(stableBranchReturn.result.value.nativeTimeupdate, true);
   assert.equal(stableBranchReturn.result.value.nativeSeeked, true);
@@ -3519,7 +5139,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
   ) <= 25);
   assert.equal(stableBranchReturn.result.value.resetReasons.at(-1), 'branch-return');
   assert.deepEqual(stableBranchReturn.result.value.presenter, {
-    cursorVisible: false,
+    cursorVisible: true,
     frameVisible: false,
     markerVisible: false,
     selectionRanges: 0,
@@ -3527,31 +5147,31 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
 
   let resumeCueBaseline = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
-    expression: `globalThis.__cvShowCueHistory.length`,
+    expression: `globalThis.__cvShowExecutionReceiptHistory.length`,
   }, { label: 'record branch resume cue baseline', timeoutMs: 5_000 });
+  const expectedFutureCues = await loadCvShowFutureCueSchedule(
+    'symbiote-ui',
+    branchCheckpoint.result.value,
+  );
+  assert.ok(expectedFutureCues.length > 0, 'branch checkpoint must retain a future aligned cue');
   await clickVisible(
     cdp,
     'agent-dock-shell agent-show-chat .actions-card[data-action-state="current"] [data-action-id="resume"]',
     'explicit branch-return resume',
   );
-  await cdp.send('Runtime.evaluate', {
-    expression: `(() => {
-      if (globalThis.__cvShowLastMedia) globalThis.__cvShowLastMedia.playbackRate = 8;
-    })()`,
-  }, { label: 'accelerate the real remaining canonical cue', timeoutMs: 5_000 });
   let resumedCue;
   const resumedCueStarted = Date.now();
-  while (Date.now() - resumedCueStarted <= 8_000) {
+  while (Date.now() - resumedCueStarted <= 12_000) {
     resumedCue = await cdp.send('Runtime.evaluate', {
       returnByValue: true,
       expression: `(() => {
         const baseline = ${resumeCueBaseline.result.value};
         const host = document.querySelector('portfolio-show-chat');
-        const cues = globalThis.__cvShowCueHistory.slice(baseline);
+        const cues = globalThis.__cvShowExecutionReceiptHistory.slice(baseline);
         return {
           cues,
           paused: host?.narrationSnapshot?.active?.paused,
-          lastCueReason: host?.alignmentSnapshot?.lastCueReason || '',
+          lastExecutionReceipt: host?.alignmentSnapshot?.lastExecutionReceipt || null,
           activeId: host?.alignmentSnapshot?.activeId || '',
           positionMs: host?.alignmentSnapshot?.narrationPositionMs ?? null,
           generationReceipt: host?.alignmentSnapshot?.lastGenerationReceipt || null,
@@ -3567,47 +5187,51 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
         };
       })()`,
     }, { label: 'sample explicit branch resume cue', timeoutMs: 5_000 });
-    if (resumedCue.result.value.cues.length > 0) break;
+    if (resumedCue.result.value.cues.filter(({ cellId }) => (
+      cellId === expectedFutureCues[0].cellId
+    )).length >= 2) break;
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
-  assert.equal(
-    resumedCue.result.value.cues.length,
-    1,
-    `explicit resume did not emit exactly one future cue: ${JSON.stringify(resumedCue.result.value)}`,
+  const resumedFirstCell = resumedCue.result.value.cues.filter(({ cellId }) => (
+    cellId === expectedFutureCues[0].cellId
+  ));
+  assert.deepEqual(
+    resumedFirstCell.map(({ status }) => status),
+    ['acted', 'settled'],
+    `explicit resume did not complete the first future scroll: ${JSON.stringify(resumedCue.result.value)}`,
   );
-  assert.equal(resumedCue.result.value.cues[0].id, 'symbiote-ui.pause');
-  assert.equal(
-    resumedCue.result.value.cues[0].reason,
-    'timeupdate',
-    `unexpected provider cue delivery reason: ${JSON.stringify(resumedCue.result.value.cues[0])}`,
-  );
-  assert.ok(resumedCue.result.value.cues[0].cueTimeMs >= branchCheckpoint.result.value);
-  assert.ok(resumedCue.result.value.cues[0].mediaTimeMs >= resumedCue.result.value.cues[0].cueTimeMs);
-  assert.equal(resumedCue.result.value.paused, true);
+  assert.equal(resumedFirstCell[0].version, 'workspace-presentation-effect-receipt-v2');
+  assert.equal(resumedFirstCell[0].kind, 'interaction');
+  assert.equal(resumedFirstCell[0].operationId, resumedFirstCell[1].operationId);
+  assert.equal(resumedFirstCell[0].generation, resumedFirstCell[1].generation);
+  assert.ok(expectedFutureCues[0].startMs > branchCheckpoint.result.value);
+  assert.equal(resumedCue.result.value.paused, false);
   await new Promise((resolve) => setTimeout(resolve, 700));
   let resumedCueStable = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
     expression: `(() => ({
-      cues: globalThis.__cvShowCueHistory.slice(${resumeCueBaseline.result.value}),
+      cues: globalThis.__cvShowExecutionReceiptHistory.slice(${resumeCueBaseline.result.value}),
       activeId: document.querySelector('portfolio-show-chat')?.alignmentSnapshot?.activeId || '',
       clock: document.querySelector('portfolio-show-chat')?.alignmentSnapshot?.playbackClockState || null,
-      latestPhase: globalThis.__cvShowPhaseHistory.at(-1) || null,
+      latestSetupReceipt: [...(globalThis.__cvShowExecutionReceiptHistory || [])]
+        .reverse()
+        .find(({ cellId, status }) => (
+          cellId.endsWith('.open') && (status === 'acted' || status === 'settled')
+        )) || null,
     }))()`,
   }, { label: 'verify explicit resume emits no duplicate cue', timeoutMs: 5_000 });
-  assert.equal(resumedCueStable.result.value.cues.length, 1);
-  if (resumedCueStable.result.value.activeId === 'symbiote-ui') {
-    assert.deepEqual(resumedCueStable.result.value.clock, {
-      active: false,
-      intervalMs: 250,
-      pendingCueCount: 0,
-    });
-  } else if (resumedCueStable.result.value.activeId) {
+  assert.deepEqual(
+    resumedCueStable.result.value.cues
+      .filter(({ cellId }) => cellId === expectedFutureCues[0].cellId)
+      .map(({ status }) => status),
+    ['acted', 'settled'],
+  );
+  assert.equal(resumedCueStable.result.value.clock, null);
+  if (resumedCueStable.result.value.activeId) {
     assert.notEqual(resumedCueStable.result.value.activeId, '');
-    assert.equal(resumedCueStable.result.value.clock.intervalMs, 250);
   } else {
-    assert.equal(resumedCueStable.result.value.clock, null);
     assert.ok(
-      resumedCueStable.result.value.latestPhase?.directiveIds?.some((id) => id.endsWith('.open')),
+      resumedCueStable.result.value.latestSetupReceipt,
       `an empty aligned runtime is valid only while the next scene setup owns the transition: ${JSON.stringify(resumedCueStable.result.value)}`,
     );
   }
@@ -3631,7 +5255,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
             : null;
           if (!candidate || candidate.readyState < 2 || candidate.seekable.length < 1) {
             if (performance.now() - started > 5000) {
-              return reject(new Error('restored local narration media is not seekable'));
+              return reject(new Error('restored selected narration media is not seekable'));
             }
             setTimeout(check, 25);
             return;
@@ -3672,7 +5296,7 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
           before,
           after: alignment.narrationPositionMs,
           resetReason: alignment.lastResetReason,
-          cueReason: alignment.lastCueReason,
+          lastExecutionReceipt: alignment.lastExecutionReceipt || null,
           nativeSeeking: events.some(({ type }) => type === 'seeking'),
           nativeTimeupdate: events.some(({ type }) => type === 'timeupdate'),
           nativeSeeked: true,
@@ -3697,12 +5321,17 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
     );
   } else {
     assert.equal(unrelatedSeek.result.value.resetReason, 'seeked');
-    assert.equal(unrelatedSeek.result.value.cueReason, 'seeked');
     assert.notEqual(unrelatedSeek.result.value.after, unrelatedSeek.result.value.before);
     assert.equal(unrelatedSeek.result.value.nativeSeeking, true);
     assert.equal(unrelatedSeek.result.value.nativeTimeupdate, true);
     assert.equal(unrelatedSeek.result.value.nativeSeeked, true);
-    assert.deepEqual(unrelatedSeek.result.value.resetReasons, ['seeked']);
+    assert.equal(unrelatedSeek.result.value.resetReasons.at(-1), 'seeked');
+    assert.equal(
+      unrelatedSeek.result.value.resetReasons.every((reason) => (
+        reason === 'timeupdate' || reason === 'seeked'
+      )),
+      true,
+    );
   }
 
   await cdp.send('Runtime.evaluate', {
@@ -4152,21 +5781,22 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
     controlsPresent: true,
   });
 
+  let completedAudioRequests = assertSelectedCvShowWebAudioRequests(cdp.requestedUrls);
   assert.ok(
-    cdp.requestedUrls.some((url) => url.includes(`/cv/cv-show-audio-private/maximo-default-male/${LOCAL_AUDIO_REVISION}/manifest.json`)),
-    'browser must request the ignored local RU manifest',
+    completedAudioRequests.includes(WEB_AUDIO_MANIFEST_REQUEST_PATH),
+    'browser must request the selected public delivery manifest',
   );
   assert.ok(
-    cdp.requestedUrls.some((url) => new RegExp(`/cv/cv-show-audio-private/maximo-default-male/${LOCAL_AUDIO_REVISION}/01-short-positioning-[a-f0-9]{12}\\.wav$`, 'u').test(url)),
-    'browser must request the first deterministic RU WAV',
+    completedAudioRequests.includes(
+      `${WEB_AUDIO_REQUEST_ROOT}${firstWebAudioClip.deliveryFile}`,
+    ),
+    'browser must request the first selected Opus clip',
   );
   assert.ok(
-    cdp.requestedUrls.some((url) => url.includes(`/cv/cv-show-audio-private/maximo-default-male/${LOCAL_AUDIO_REVISION}/alignment/large-v3-turbo/${ALIGNMENT_REVISION}/manifest.json`)),
-    'browser must request the ignored RU Whisper alignment manifest',
-  );
-  assert.ok(
-    cdp.requestedUrls.some((url) => url.includes(`/alignment/large-v3-turbo/${ALIGNMENT_REVISION}/aligned/01-short-positioning.json`)),
-    'browser must request the workspace-aligned-sequence-v3 artifact',
+    completedAudioRequests.includes(
+      `${WEB_AUDIO_REQUEST_ROOT}${firstWebAudioClip.alignedSequenceFile}`,
+    ),
+    'browser must request the selected workspace-aligned-sequence-v3 artifact',
   );
   const mainW8 = cdp.consoleMessages.slice(0, consoleBeforeShow)
     .filter(({ text }) => text.includes('"code":8'));
@@ -4177,10 +5807,348 @@ test('CV Show mounts shared controls and plays the private local RU narration', 
   assert.equal(cdp.exceptions.length, 0, 'lazy agent chat/player must not throw browser exceptions');
 });
 
+test('terminal CV Show proves uninterrupted desktop and mobile timing, attention, and player behavior', {
+  timeout: 1_400_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('terminal CV Show acceptance requires the selected public Opus release');
+  let { manifest: webAudioManifest } = await loadSelectedCvShowWebAudioManifest();
+  let firstWebAudioClip = webAudioManifest.clips[0];
+  const evidenceDir = path.join(ROOT, 'tmp', 'cv-show-terminal-visual-harness');
+  await mkdir(evidenceDir, { recursive: true });
+  const expectedShortEntryIds = [...CV_SHOW_STORY.short];
+  const expectedDirectiveTypes = [
+    'activate',
+    'chat-action',
+    'frame',
+    'marker',
+    'media',
+    'native-selection',
+    'navigate',
+  ];
+  assert.equal(
+    CV_SHOW_WEB_AUDIO_RELEASE.voiceId,
+    'barzana-2',
+    'terminal CV Show acceptance must exercise the accepted Barzana 2 voice',
+  );
+  assert.equal(
+    CV_SHOW_WEB_AUDIO_RELEASE.revision,
+    '922d4ccbd7dbf70be5c6f0f9aae9be8fac84e77f49a5500d0e224b53d54768ec',
+  );
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const consoleStartIndex = cdp.consoleMessages.length;
+  const exceptionStartIndex = cdp.exceptions.length;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  const openAndStartShort = async (runId, label) => {
+    await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
+    const runEventIndex = await harness.reset(runId);
+    await clickVisible(cdp, '.pulse-tour-button', `${label} CV Show trigger`);
+    await waitForCvShowModeSelection(cdp, `${label} mode selection`);
+    await clickVisible(
+      cdp,
+      'agent-dock-shell agent-show-chat '
+        + '.actions-card[data-action-state="current"] [data-action-id="start-short"]',
+      `${label} Short Show`,
+    );
+    await harness.waitFor(
+      runId,
+      ({ type }) => type === 'portfolio-show-start',
+      `${label} start`,
+      { afterIndex: runEventIndex },
+    );
+    return runEventIndex;
+  };
+
+  const desktopRunId = 'desktop-short-1087x719';
+  const desktopRunEventIndex = await openAndStartShort(desktopRunId, 'desktop terminal');
+  await harness.waitFor(
+    desktopRunId,
+    ({ type, entryId }) => type === 'generation' && entryId === expectedShortEntryIds[7],
+    'desktop eighth scene generation before manual transcript scroll',
+    { afterIndex: desktopRunEventIndex },
+  );
+  const manualScrollEventIndex = harness.events.length;
+  await scrollCvShowTranscriptManually(cdp);
+  const manualScroll = await harness.waitFor(
+    desktopRunId,
+    ({ type }) => type === 'manual-scroll',
+    'trusted desktop transcript scroll',
+    { afterIndex: manualScrollEventIndex },
+  );
+  await harness.waitFor(
+    desktopRunId,
+    (event) => event.type === 'stream-sample'
+      && event.index >= manualScroll.streamIndex + 2,
+    'two message stream frames after trusted transcript scroll',
+    { afterIndex: manualScrollEventIndex },
+  );
+  await harness.waitFor(
+    desktopRunId,
+    ({ type }) => type === 'portfolio-show-complete',
+    'uninterrupted desktop Short 16/16 completion',
+    { afterIndex: desktopRunEventIndex },
+  );
+  const desktop = await harness.snapshot('desktop Short 16/16');
+  assert.equal(desktop.runId, desktopRunId);
+  assertCvShowTerminalReceipts(desktop, expectedShortEntryIds, 'desktop Short');
+  assert.deepEqual(
+    [...new Set(desktop.operations.map(({ source }) => source.type))].sort(),
+    expectedDirectiveTypes,
+    'desktop Short must execute every authored directive class',
+  );
+  assertCvShowScrollAttentionOrder(desktop, 'desktop Short');
+  assertCvShowNativeSelectionGrowth(desktop, 'desktop Short');
+  assertCvShowAuthoredMarkerEvidence(desktop, 'desktop Short');
+  assertCvShowPointerAndPlayer(desktop, expectedShortEntryIds, 'desktop Short');
+  assertCvShowStreamJournal(desktop, 'desktop Short');
+  assertCvShowManualScroll(desktop, 'desktop Short');
+
+  const markerProbes = [];
+  for (const marker of ['underline', 'box', 'oval']) {
+    markerProbes.push(await capturePresenterMarkerProbe(cdp, marker, evidenceDir));
+  }
+  assertPresenterMarkerProbes(markerProbes);
+  await cdp.send('Runtime.evaluate', {
+    expression: `globalThis.__cvShowTerminalProviderCursor?.dispose?.();
+      document.getElementById('cv-show-terminal-marker-fixture')?.remove();`,
+  }, { label: 'dispose public presenter marker conformance probe', timeoutMs: 5_000 });
+
+  const detailRunId = 'desktop-representative-detail';
+  const detailRunEventIndex = await openAndStartShort(detailRunId, 'desktop detail');
+  await harness.waitFor(
+    detailRunId,
+    ({ type, entryId }) => type === 'generation' && entryId === 'symbiote-workspace',
+    'workspace scene before representative detail',
+    { afterIndex: detailRunEventIndex },
+  );
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const action = document.querySelector(
+          'agent-dock-shell agent-show-chat '
+            + '.actions-card[data-actions-id="symbiote-workspace.actions"] '
+            + '[data-action-id="details"]',
+        );
+        if (action?.offsetWidth > 0 && action.offsetHeight > 0) return resolve(true);
+        if (performance.now() - started > 12_000) {
+          return reject(new Error('representative detail action did not become visible'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for representative detail action', timeoutMs: 14_000 });
+  await clickVisible(
+    cdp,
+    'agent-dock-shell agent-show-chat '
+      + '.actions-card[data-actions-id="symbiote-workspace.actions"] '
+      + '[data-action-id="details"]',
+    'representative workspace detail',
+  );
+  await harness.waitFor(
+    detailRunId,
+    ({ type, entryId }) => type === 'generation' && entryId === 'workspace-details',
+    'representative detail aligned generation',
+    { afterIndex: detailRunEventIndex },
+  );
+  await harness.waitFor(
+    detailRunId,
+    ({ type, receipt }) => type === 'receipt'
+      && receipt.entryId === 'workspace-details'
+      && receipt.status === 'first-frame',
+    'representative detail first attention frame',
+    { afterIndex: detailRunEventIndex },
+  );
+  const presenterBeforePause = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const overlay = document.querySelector('.symbiote-presenter-cursor');
+      const cursor = overlay?.querySelector('.pc-cursor');
+      return {
+        count: document.querySelectorAll('.symbiote-presenter-cursor').length,
+        visible: overlay?.classList.contains('is-visible') || false,
+        opacity: overlay ? getComputedStyle(overlay).opacity : '',
+        cursorPath: cursor?.querySelector('path')?.getAttribute('d') || '',
+        inkPath: overlay?.querySelector('.pc-ink path')?.getAttribute('d') || '',
+        selectionText: document.getSelection()?.toString() || '',
+      };
+    })()`,
+  }, { label: 'capture presenter immediately before Pause', timeoutMs: 5_000 });
+  const detailPauseEventIndex = harness.events.length;
+  await clickVisible(
+    cdp,
+    'agent-dock-shell agent-show-chat chat-show-player [data-control="play"]',
+    'Pause representative detail',
+  );
+  await harness.waitFor(
+    detailRunId,
+    ({ type }) => type === 'portfolio-show-pause',
+    'representative detail Pause receipt',
+    { afterIndex: detailPauseEventIndex },
+  );
+  const presenterPaused = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => {
+      const overlay = document.querySelector('.symbiote-presenter-cursor');
+      const cursor = overlay?.querySelector('.pc-cursor');
+      resolve({
+        count: document.querySelectorAll('.symbiote-presenter-cursor').length,
+        visible: overlay?.classList.contains('is-visible') || false,
+        opacity: overlay ? getComputedStyle(overlay).opacity : '',
+        cursorPath: cursor?.querySelector('path')?.getAttribute('d') || '',
+        inkPath: overlay?.querySelector('.pc-ink path')?.getAttribute('d') || '',
+        selectionText: document.getSelection()?.toString() || '',
+      });
+    })))`,
+  }, { label: 'prove Pause retains the active presenter layer', timeoutMs: 5_000 });
+  assert.equal(presenterBeforePause.result.value.count, 1);
+  assert.equal(presenterPaused.result.value.count, 1);
+  assert.equal(presenterPaused.result.value.visible, true);
+  assert.equal(presenterPaused.result.value.opacity, '1');
+  assert.equal(
+    Boolean(
+      presenterPaused.result.value.cursorPath
+      || presenterPaused.result.value.inkPath
+      || presenterPaused.result.value.selectionText
+    ),
+    true,
+    'Pause must retain a visible pointer, marker, or native Selection',
+  );
+  if (presenterBeforePause.result.value.inkPath) {
+    assert.equal(presenterPaused.result.value.inkPath, presenterBeforePause.result.value.inkPath);
+  }
+  if (presenterBeforePause.result.value.selectionText) {
+    assert.equal(
+      presenterPaused.result.value.selectionText,
+      presenterBeforePause.result.value.selectionText,
+    );
+  }
+
+  const detailStopEventIndex = harness.events.length;
+  await clickVisible(
+    cdp,
+    'agent-dock-shell agent-show-chat chat-show-player [data-control="stop"]',
+    'Stop representative detail',
+  );
+  await harness.waitFor(
+    detailRunId,
+    ({ type }) => type === 'portfolio-show-stop',
+    'representative detail Stop receipt',
+    { afterIndex: detailStopEventIndex },
+  );
+  const presenterStopped = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve({
+      presenterCount: document.querySelectorAll('.symbiote-presenter-cursor').length,
+      selectionRanges: document.getSelection()?.rangeCount || 0,
+      playerPresent: Boolean(document.querySelector(
+        'agent-dock-shell agent-show-chat chat-show-player',
+      )),
+    }))))`,
+  }, { label: 'prove Stop clears presenter and player resources', timeoutMs: 5_000 });
+  assert.deepEqual(presenterStopped.result.value, {
+    presenterCount: 0,
+    selectionRanges: 0,
+    playerPresent: false,
+  });
+  const detail = await harness.snapshot('representative detail Pause and Stop');
+  assert.ok(detail.generations.some(({ entryId }) => entryId === 'workspace-details'));
+  assert.equal(
+    detail.lifecycle.filter(({ type }) => type === 'portfolio-show-pause').length,
+    1,
+  );
+  assert.equal(
+    detail.lifecycle.filter(({ type }) => type === 'portfolio-show-stop').length,
+    1,
+  );
+
+  await cdp.send('Emulation.setDeviceMetricsOverride', MOBILE_VIEWPORT);
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+  const mobileRunId = 'mobile-short-390x844';
+  const mobileRunEventIndex = await openAndStartShort(mobileRunId, 'mobile terminal');
+  await harness.waitFor(
+    mobileRunId,
+    ({ type }) => type === 'portfolio-show-complete',
+    'complete mobile Short 16/16',
+    { afterIndex: mobileRunEventIndex },
+  );
+  const mobile = await harness.snapshot('mobile Short 16/16');
+  assert.equal(mobile.runId, mobileRunId);
+  assertCvShowTerminalReceipts(mobile, expectedShortEntryIds, 'mobile Short');
+  assert.deepEqual(
+    [...new Set(mobile.operations.map(({ source }) => source.type))].sort(),
+    expectedDirectiveTypes,
+    'mobile Short must execute every authored directive class',
+  );
+  assertCvShowScrollAttentionOrder(mobile, 'mobile Short');
+  assertCvShowNativeSelectionGrowth(mobile, 'mobile Short');
+  assertCvShowAuthoredMarkerEvidence(mobile, 'mobile Short');
+  assertCvShowPointerAndPlayer(mobile, expectedShortEntryIds, 'mobile Short');
+  assertCvShowStreamJournal(mobile, 'mobile Short');
+
+  const diagnostics = cdp.consoleMessages.slice(consoleStartIndex).filter(({ level }) => (
+    level === 'warning' || level === 'error'
+  ));
+  const exceptions = cdp.exceptions.slice(exceptionStartIndex);
+  assert.deepEqual(diagnostics, [], 'terminal CV Show browser console warning/error journal must be empty');
+  assert.deepEqual(exceptions, [], 'terminal CV Show browser exception journal must be empty');
+  let terminalAudioRequests = assertSelectedCvShowWebAudioRequests(cdp.requestedUrls);
+  assert.ok(
+    terminalAudioRequests.includes(WEB_AUDIO_MANIFEST_REQUEST_PATH),
+    'terminal CV Show must request the selected Barzana 2 delivery manifest',
+  );
+  assert.ok(
+    terminalAudioRequests.includes(`${WEB_AUDIO_REQUEST_ROOT}${firstWebAudioClip.deliveryFile}`),
+    'terminal CV Show must physically request the first selected Barzana 2 Opus clip',
+  );
+  assert.ok(
+    terminalAudioRequests.includes(
+      `${WEB_AUDIO_REQUEST_ROOT}${firstWebAudioClip.alignedSequenceFile}`,
+    ),
+    'terminal CV Show must request the selected aligned sequence',
+  );
+
+  await writeFile(path.join(evidenceDir, 'terminal-evidence.json'), JSON.stringify({
+    contract: {
+      viewport: { width: 1087, height: 719, deviceScaleFactor: 1 },
+      mobileViewport: MOBILE_VIEWPORT,
+      entries: expectedShortEntryIds,
+      directiveTypes: expectedDirectiveTypes,
+      releaseId: CV_SHOW_WEB_AUDIO_RELEASE.releaseId,
+      voice: CV_SHOW_WEB_AUDIO_RELEASE.voiceId,
+      revision: CV_SHOW_WEB_AUDIO_RELEASE.revision,
+      manifestPath: CV_SHOW_WEB_AUDIO_RELEASE.manifest.path,
+      mimeType: webAudioManifest.profile.mimeType,
+    },
+    desktop,
+    detail,
+    mobile,
+    markerProbes,
+    diagnostics,
+    exceptions,
+  }, null, 2));
+});
+
 test('CV Show preserves presenter layers on pause and removes them on terminal lifecycle', {
   timeout: 45_000,
 }, async (t) => {
-  if (EXTERNAL_TEST_URL) t.skip('presenter lifecycle acceptance requires ignored local audio fixtures');
+  if (EXTERNAL_TEST_URL) t.skip('presenter lifecycle requires the selected public audio release');
   let page = await createPortfolioPage(t, {
     viewport: DESKTOP_VIEWPORT,
     touch: false,
@@ -4226,19 +6194,29 @@ test('CV Show preserves presenter layers on pause and removes them on terminal l
 
   await cdp.send('Runtime.evaluate', {
     expression: `document.querySelector('portfolio-show-chat')?.dispatchEvent(new CustomEvent(
-      'portfolio-show-aligned-cue',
+      'portfolio-show-presentation-operation',
       {
         bubbles: true,
         composed: true,
         detail: {
           requestId: 'presenter-lifecycle-marker',
-          source: {
-            id: 'presenter-lifecycle.marker',
-            type: 'marker',
-            target: 'profile.experience.15-plus',
-            shape: 'oval',
-            series: 'presenter-lifecycle',
-            policy: 'required',
+          entryId: 'positioning',
+          handled: false,
+          complete: () => {},
+          operation: {
+            operationId: 'presentation-effect-test-marker',
+            generation: 0,
+            kind: 'attention',
+            projectCell: { id: 'cv-show:cue:presenter-lifecycle.marker' },
+            signal: new AbortController().signal,
+            source: {
+              id: 'presenter-lifecycle.marker',
+              type: 'marker',
+              target: 'profile.experience.15-plus',
+              shape: 'oval',
+              series: 'presenter-lifecycle',
+              policy: 'required',
+            },
           },
         },
       },
@@ -4287,17 +6265,27 @@ test('CV Show preserves presenter layers on pause and removes them on terminal l
   );
   await cdp.send('Runtime.evaluate', {
     expression: `document.querySelector('portfolio-show-chat')?.dispatchEvent(new CustomEvent(
-      'portfolio-show-aligned-cue',
+      'portfolio-show-presentation-operation',
       {
         bubbles: true,
         composed: true,
         detail: {
           requestId: 'presenter-lifecycle-selection',
-          source: {
-            id: 'presenter-lifecycle.selection',
-            type: 'native-selection',
-            target: 'profile.experience',
-            policy: 'required',
+          entryId: 'positioning',
+          handled: false,
+          complete: () => {},
+          operation: {
+            operationId: 'presentation-effect-test-selection',
+            generation: 0,
+            kind: 'attention',
+            projectCell: { id: 'cv-show:cue:presenter-lifecycle.selection' },
+            signal: new AbortController().signal,
+            source: {
+              id: 'presenter-lifecycle.selection',
+              type: 'native-selection',
+              target: 'profile.experience',
+              policy: 'required',
+            },
           },
         },
       },
@@ -4815,7 +6803,7 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
 test('mobile Short Show resolves required presenter targets after starting from another article', {
   timeout: 70_000,
 }, async (t) => {
-  if (EXTERNAL_TEST_URL) t.skip('local narration acceptance requires ignored local audio fixtures');
+  if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
   const page = await createPortfolioPage(t, {
     viewport: {
       width: 390,
@@ -5318,4 +7306,755 @@ test('normal RU /cv/ preserves full PCB plus exactly three proxies during one-no
   assert.equal(dropped.result.value.sawVisibleStraight, false, JSON.stringify(dropped.result.value.timeline));
   await saveGraphSnapshotScreenshot(cdp, 'ru-wide-pcb-after-drop');
   assert.equal(cdp.exceptions.length, 0);
+});
+
+test('loopback authoring persists one live WebMCP timing revision and public static stays read-only', {
+  timeout: 120_000,
+}, async (t) => {
+  await stat(path.join(DIST_DIR, 'index.html'));
+  let chrome = await launchChrome();
+  if (!chrome) {
+    t.skip(`Chrome executable not found at ${CHROME_PATH}`);
+    return;
+  }
+
+  const BINDING_NAME = '__cvShowAuthoringBrowserEvidence';
+  const AUTHORING_PREFIX = 'presentation_authoring_';
+  let temporaryRoot = '';
+  let storageRoot = '';
+  let temporarySourcePath = '';
+  let authoringHost = null;
+  let publicServer = null;
+  let authoringCdp = null;
+  let publicCdp = null;
+  let authoringEvidence = [];
+  let stopAuthoringEvidence = null;
+  let hostClosed = false;
+
+  let configurePage = async (cdp) => {
+    await cdp.send('Page.enable');
+    await cdp.send('Runtime.enable');
+    await cdp.send('Network.enable');
+    await cdp.send('Emulation.setDeviceMetricsOverride', DESKTOP_VIEWPORT);
+    await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+    await cdp.send('Network.setBlockedURLs', {
+      urls: [
+        'https://fonts.googleapis.com/*',
+        'https://fonts.gstatic.com/*',
+        'https://rnd-pro.com/*',
+        'https://img.youtube.com/*',
+        'https://www.youtube.com/*',
+        'https://github.com/*',
+        'https://www.npmjs.com/*',
+        'https://cdn.jsdelivr.net/*',
+      ],
+    });
+  };
+
+  let installNativeWebMcpHarness = async (cdp) => {
+    await cdp.send('Runtime.addBinding', { name: BINDING_NAME });
+    await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: `(() => {
+        const bindingName = ${JSON.stringify(BINDING_NAME)};
+        const authoringPrefix = ${JSON.stringify(AUTHORING_PREFIX)};
+        const expectedAuthoringNames = new Set(${JSON.stringify(AUTHORING_TOOL_NAMES)});
+        const hasExpectedAuthoringNames = (names) => (
+          names.size === expectedAuthoringNames.size
+          && [...names].every((name) => expectedAuthoringNames.has(name))
+        );
+        const generation = Number(window.name || '0') + 1;
+        window.name = String(generation);
+        const tools = new Map();
+        const registeredAuthoringNames = new Set();
+        const activeAuthoringNames = new Set();
+        let resolveReady;
+        const ready = new Promise((resolve) => {
+          resolveReady = resolve;
+        });
+        const emit = (type, detail = {}) => {
+          try {
+            globalThis[bindingName](JSON.stringify({ type, generation, ...detail }));
+          } catch {}
+        };
+        const snapshot = () => ({
+          generation,
+          toolNames: [...tools.keys()].sort(),
+          authoringToolNames: [...activeAuthoringNames].sort(),
+          descriptors: [...tools.values()]
+            .filter(({ name }) => name.startsWith(authoringPrefix))
+            .map(({ name, description, inputSchema, annotations }) => ({
+              name,
+              description,
+              inputSchema,
+              annotations: annotations || null,
+            }))
+            .sort((left, right) => left.name.localeCompare(right.name)),
+        });
+        const registerTool = (tool, options = {}) => {
+          tools.set(tool.name, tool);
+          if (!tool.name.startsWith(authoringPrefix)) return;
+          registeredAuthoringNames.add(tool.name);
+          activeAuthoringNames.add(tool.name);
+          emit('tool-registered', {
+            name: tool.name,
+            registeredCount: registeredAuthoringNames.size,
+          });
+          options.signal?.addEventListener('abort', () => {
+            tools.delete(tool.name);
+            activeAuthoringNames.delete(tool.name);
+            emit('tool-aborted', {
+              name: tool.name,
+              activeCount: activeAuthoringNames.size,
+            });
+            if (hasExpectedAuthoringNames(registeredAuthoringNames)
+              && activeAuthoringNames.size === 0) {
+              emit('tools-disposed', { disposedCount: registeredAuthoringNames.size });
+            }
+          }, { once: true });
+          if (hasExpectedAuthoringNames(registeredAuthoringNames)) resolveReady(snapshot());
+        };
+        Object.defineProperty(document, 'modelContext', {
+          configurable: true,
+          value: Object.freeze({ registerTool }),
+        });
+        Object.defineProperty(globalThis, '__cvAuthoringNative', {
+          configurable: true,
+          value: Object.freeze({
+            ready,
+            snapshot,
+            execute(name, input = {}) {
+              const tool = tools.get(name);
+              if (!tool) throw new Error('Native WebMCP tool is unavailable: ' + name);
+              return tool.execute(input);
+            },
+          }),
+        });
+        globalThis.addEventListener('pagehide', () => {
+          emit('pagehide', { activeCount: activeAuthoringNames.size });
+        }, { once: true });
+      })()`,
+    });
+  };
+
+  let decodeEvidence = (params) => {
+    if (params.name !== BINDING_NAME) return null;
+    try {
+      return JSON.parse(params.payload);
+    } catch {
+      return null;
+    }
+  };
+  let waitForAuthoringEvidence = (type, generation, timeoutMs = 20_000) => {
+    let existing = authoringEvidence.find((value) => (
+      value.type === type && value.generation === generation
+    ));
+    if (existing) return Promise.resolve(existing);
+    return new Promise((resolve, reject) => {
+      let timer = setTimeout(() => {
+        off();
+        reject(new Error(
+          `Timed out waiting for authoring evidence ${type}/${generation}; observed `
+          + JSON.stringify(authoringEvidence),
+        ));
+      }, timeoutMs);
+      let off = authoringCdp.on('Runtime.bindingCalled', (params) => {
+        let value = decodeEvidence(params);
+        if (value?.type !== type || value.generation !== generation) return;
+        clearTimeout(timer);
+        off();
+        resolve(value);
+      });
+    });
+  };
+
+  try {
+    let temporaryParent = path.join(ROOT, 'tmp', 'cv-show-timing-corrective');
+    await mkdir(temporaryParent, { recursive: true });
+    temporaryRoot = await mkdtemp(path.join(temporaryParent, 'loopback-browser-'));
+    storageRoot = path.join(temporaryRoot, 'storage');
+    temporarySourcePath = path.join(
+      temporaryRoot,
+      'src',
+      'static-pages',
+      'data',
+      'cvShowPresentationProject.js',
+    );
+    await mkdir(path.dirname(temporarySourcePath), { recursive: true });
+    let sourceBytes = await readFile(path.join(
+      ROOT,
+      'src',
+      'static-pages',
+      'data',
+      'cvShowPresentationProject.js',
+    ));
+    await writeFile(temporarySourcePath, sourceBytes);
+
+    publicServer = await startStaticServer();
+    authoringHost = await startCvShowAuthoringHost({
+      repoRoot: ROOT,
+      distDir: DIST_DIR,
+      storageRoot,
+      port: 0,
+    });
+
+    publicCdp = await createPage(chrome.port);
+    await configurePage(publicCdp);
+    await installNativeWebMcpHarness(publicCdp);
+    await navigate(
+      publicCdp,
+      `${publicServer.origin}/cv/?mode=structured&authoring-public-static=1`,
+      { expectedMode: 'structured' },
+    );
+    let publicState = await publicCdp.send('Runtime.evaluate', {
+      returnByValue: true,
+      expression: `(() => {
+        const nativeSnapshot = globalThis.__cvAuthoringNative.snapshot();
+        return {
+          bootstrapScripts: [...document.scripts]
+            .filter(({ src }) => src.includes('/__cv-authoring/'))
+            .map(({ src }) => src),
+          authoringResources: performance.getEntriesByType('resource')
+            .map(({ name }) => name)
+            .filter((name) => name.includes('/__cv-authoring/')),
+          authoringToolNames: nativeSnapshot.authoringToolNames,
+          authoringDescriptors: nativeSnapshot.descriptors,
+          authoringCookieVisible: document.cookie.includes('cv-show-authoring='),
+        };
+      })()`,
+    }, { label: 'inspect ordinary public-static authoring boundary', timeoutMs: 5_000 });
+    assert.deepEqual(publicState.result.value, {
+      bootstrapScripts: [],
+      authoringResources: [],
+      authoringToolNames: [],
+      authoringDescriptors: [],
+      authoringCookieVisible: false,
+    });
+    assert.equal(
+      publicCdp.requestedUrls.some((url) => url.includes('/__cv-authoring/')),
+      false,
+    );
+
+    authoringCdp = await createPage(chrome.port);
+    await configurePage(authoringCdp);
+    await installNativeWebMcpHarness(authoringCdp);
+    stopAuthoringEvidence = authoringCdp.on('Runtime.bindingCalled', (params) => {
+      let value = decodeEvidence(params);
+      if (value) authoringEvidence.push(value);
+    });
+    let authoringUrl = `${authoringHost.origin}/cv/?mode=structured&loopback-authoring=1`;
+    await navigate(authoringCdp, authoringUrl, { expectedMode: 'structured' });
+    let nativeReady = await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: 'globalThis.__cvAuthoringNative.ready',
+    }, { label: 'wait for native provider WebMCP registration', timeoutMs: 20_000 });
+    assert.equal(nativeReady.result.value.generation, 1);
+    assert.deepEqual(nativeReady.result.value.authoringToolNames, AUTHORING_TOOL_NAMES);
+    assert.equal(nativeReady.result.value.descriptors.length, AUTHORING_TOOL_COUNT);
+    assert.deepEqual(
+      nativeReady.result.value.descriptors.map(({ name }) => name),
+      AUTHORING_TOOL_NAMES,
+    );
+    assert.equal(
+      nativeReady.result.value.descriptors.every(({ name, description, inputSchema }) => (
+        name.startsWith(AUTHORING_PREFIX)
+          && typeof description === 'string'
+          && description.length > 0
+          && inputSchema?.type === 'object'
+      )),
+      true,
+    );
+    assert.equal(
+      authoringCdp.requestedUrls.some((url) => url.includes('/__cv-authoring/bootstrap.js')),
+      true,
+    );
+    assert.equal(
+      authoringCdp.requestedUrls.some((url) => url.includes('/__cv-authoring/client.js')),
+      true,
+    );
+
+    let initial = await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `(async () => {
+        const response = await globalThis.__cvAuthoringNative.execute(
+          'presentation_authoring_inspect',
+          {},
+        );
+        const envelope = JSON.parse(response.content[0].text);
+        const cell = envelope.result?.cells?.find(
+          ({ id }) => id === 'cv-show:cue:positioning.experience-frame',
+        );
+        return {
+          isError: response.isError === true,
+          status: envelope.status,
+          toolName: envelope.toolName,
+          sessionId: envelope.sessionId,
+          base: envelope.result?.project ? {
+            revision: envelope.result.project.revision,
+            authoringProjectHash: envelope.result.project.hash,
+          } : null,
+          timelineHash: envelope.result?.timeline?.hash || '',
+          descriptorNames: envelope.result?.descriptors?.map(({ name }) => name).sort() || [],
+          cell: cell ? { id: cell.id, timing: cell.timing } : null,
+        };
+      })()`,
+    }, { label: 'inspect live authoring revision through native WebMCP', timeoutMs: 10_000 });
+    assert.equal(initial.result.value.isError, false);
+    assert.equal(initial.result.value.status, 'ok');
+    assert.equal(initial.result.value.toolName, 'presentation_authoring_inspect');
+    assert.equal(initial.result.value.sessionId, authoringHost.sessionId);
+    assert.deepEqual(initial.result.value.descriptorNames, AUTHORING_TOOL_NAMES);
+    assert.ok(initial.result.value.cell);
+    assert.ok(initial.result.value.timelineHash);
+
+    let mutationInput = {
+      id: 'cv-show-browser-timing-revision-1',
+      base: initial.result.value.base,
+      payload: {
+        cellId: initial.result.value.cell.id,
+        timing: {
+          ...structuredClone(initial.result.value.cell.timing),
+          leadMs: initial.result.value.cell.timing.leadMs + 1,
+        },
+      },
+    };
+
+    await clickVisible(authoringCdp, '.pulse-tour-button', 'loopback CV Show trigger');
+    let chatReady = await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `new Promise((resolve, reject) => {
+        const signal = AbortSignal.timeout(8000);
+        const observer = new MutationObserver(() => accept());
+        const accept = () => {
+          const chat = document.querySelector('portfolio-show-chat');
+          const start = document.querySelector(
+            'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
+          );
+          if (!chat || !start) return;
+          observer.disconnect();
+          resolve({ ready: chat.$.isReady, startAction: start.dataset.actionId });
+        };
+        signal.addEventListener('abort', () => {
+          observer.disconnect();
+          reject(signal.reason);
+        }, { once: true });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        accept();
+      })`,
+    }, { label: 'wait for live CV Show player', timeoutMs: 10_000 });
+    assert.deepEqual(chatReady.result.value, { ready: true, startAction: 'start-short' });
+
+    await authoringCdp.send('Runtime.evaluate', {
+      expression: `globalThis.__cvAuthoringShowStarted = new Promise((resolve, reject) => {
+        const signal = AbortSignal.timeout(15000);
+        const onStart = () => {
+          const chat = document.querySelector('portfolio-show-chat');
+          resolve({ running: chat?.$.isRunning === true, paused: chat?.$.isPaused === true });
+        };
+        signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+        document.addEventListener('portfolio-show-start', onStart, { capture: true, once: true });
+      })`,
+    }, { label: 'arm live CV Show start receipt', timeoutMs: 5_000 });
+    await clickVisible(
+      authoringCdp,
+      'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
+      'loopback Short start',
+    );
+    let started = await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: 'globalThis.__cvAuthoringShowStarted',
+    }, { label: 'observe live CV Show start', timeoutMs: 17_000 });
+    assert.deepEqual(started.result.value, { running: true, paused: false });
+
+    let mutation = await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `(async () => {
+        const input = ${JSON.stringify(mutationInput)};
+        const stopped = new Promise((resolve, reject) => {
+          const signal = AbortSignal.timeout(10000);
+          const onStop = () => resolve(true);
+          signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+          document.addEventListener('portfolio-show-stop', onStop, { capture: true, once: true });
+        });
+        const response = await globalThis.__cvAuthoringNative.execute(
+          'presentation_authoring_cell_set_timing',
+          input,
+        );
+        const envelope = JSON.parse(response.content[0].text);
+        const stopObserved = envelope.status === 'ok' ? await stopped : false;
+        const afterResponse = await globalThis.__cvAuthoringNative.execute(
+          'presentation_authoring_inspect',
+          {},
+        );
+        const after = JSON.parse(afterResponse.content[0].text);
+        const changedCell = envelope.result?.project?.cells?.find(
+          ({ id }) => id === input.payload.cellId,
+        );
+        const inspectedCell = after.result?.cells?.find(({ id }) => id === input.payload.cellId);
+        const chat = document.querySelector('portfolio-show-chat');
+        return {
+          isError: response.isError === true,
+          status: envelope.status,
+          toolName: envelope.toolName,
+          result: envelope.result ? {
+            project: {
+              revision: envelope.result.project.revision,
+              hash: envelope.result.project.hash,
+            },
+            timing: changedCell?.timing || null,
+            timelineHash: envelope.result.timeline?.hash || '',
+            authorityReceipt: envelope.result.authorityReceipt,
+            mediaStatus: envelope.result.cvMediaDisposition?.status || '',
+            affectedEntryIds: envelope.result.cvMediaDisposition?.affectedEntryIds || [],
+          } : null,
+          liveProjection: {
+            stopObserved,
+            running: chat?.$.isRunning === true,
+            ready: chat?.$.isReady === true,
+          },
+          inspectAfter: after.result ? {
+            revision: after.result.project.revision,
+            hash: after.result.project.hash,
+            timing: inspectedCell?.timing || null,
+            timelineHash: after.result.timeline?.hash || '',
+          } : null,
+        };
+      })()`,
+    }, { label: 'mutate timing through native provider WebMCP', timeoutMs: 20_000 });
+    let mutationValue = mutation.result.value;
+    assert.equal(mutationValue.isError, false);
+    assert.equal(mutationValue.status, 'ok');
+    assert.equal(mutationValue.toolName, 'presentation_authoring_cell_set_timing');
+    assert.equal(
+      mutationValue.result.project.revision,
+      initial.result.value.base.revision + 1,
+    );
+    assert.notEqual(
+      mutationValue.result.project.hash,
+      initial.result.value.base.authoringProjectHash,
+    );
+    assert.deepEqual(mutationValue.result.timing, mutationInput.payload.timing);
+    assert.ok(mutationValue.result.timelineHash);
+    assert.equal(mutationValue.result.authorityReceipt.status, 'committed');
+    assert.equal(mutationValue.result.authorityReceipt.replica.status, 'ready');
+    assert.equal(
+      mutationValue.result.authorityReceipt.currentBase.revision,
+      mutationValue.result.project.revision,
+    );
+    assert.equal(
+      mutationValue.result.authorityReceipt.currentBase.authoringProjectHash,
+      mutationValue.result.project.hash,
+    );
+    assert.match(mutationValue.result.authorityReceipt.commitId, /^sha256:[a-f0-9]{64}$/u);
+    assert.equal(mutationValue.result.mediaStatus, 'preserved');
+    assert.deepEqual(mutationValue.result.affectedEntryIds, []);
+    assert.deepEqual(mutationValue.liveProjection, {
+      stopObserved: true,
+      running: false,
+      ready: true,
+    });
+    assert.deepEqual(mutationValue.inspectAfter, {
+      revision: mutationValue.result.project.revision,
+      hash: mutationValue.result.project.hash,
+      timing: mutationInput.payload.timing,
+      timelineHash: mutationValue.result.timelineHash,
+    });
+
+    await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      expression: `new Promise((resolve, reject) => {
+        const signal = AbortSignal.timeout(5000);
+        const selector = 'agent-dock-shell agent-show-chat '
+          + '.actions-card[data-action-state="current"] [data-action-id="start-short"]';
+        const observer = new MutationObserver(() => accept());
+        const accept = () => {
+          if (!document.querySelector(selector)) return;
+          observer.disconnect();
+          resolve(true);
+        };
+        signal.addEventListener('abort', () => {
+          observer.disconnect();
+          reject(signal.reason);
+        }, { once: true });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        accept();
+      })`,
+    }, { label: 'wait for the committed Show projection controls', timeoutMs: 7_000 });
+
+    await authoringCdp.send('Runtime.evaluate', {
+      expression: `globalThis.__cvAuthoringProjectedTiming = new Promise((resolve, reject) => {
+        const signal = AbortSignal.timeout(20000);
+        const onOperation = (event) => {
+          const operation = event.detail?.operation;
+          if (operation?.projectCell?.id !== ${JSON.stringify(mutationInput.payload.cellId)}) {
+            return;
+          }
+          document.removeEventListener(
+            'portfolio-show-presentation-operation',
+            onOperation,
+            { capture: true },
+          );
+          const chat = document.querySelector('portfolio-show-chat');
+          resolve({
+            entryId: event.detail?.entryId || '',
+            cellId: operation.projectCell.id,
+            kind: operation.kind,
+            timing: operation.projectCell.timing,
+            scheduleCellId: operation.scheduleCell?.cellId || '',
+            activeId: chat?.alignmentSnapshot?.activeId || '',
+          });
+        };
+        signal.addEventListener('abort', () => {
+          document.removeEventListener(
+            'portfolio-show-presentation-operation',
+            onOperation,
+            { capture: true },
+          );
+          reject(signal.reason);
+        }, { once: true });
+        document.addEventListener(
+          'portfolio-show-presentation-operation',
+          onOperation,
+          { capture: true },
+        );
+      })`,
+    }, { label: 'arm live timing projection receipt', timeoutMs: 5_000 });
+    await clickVisible(
+      authoringCdp,
+      'agent-dock-shell agent-show-chat '
+        + '.actions-card[data-action-state="current"] [data-action-id="start-short"]',
+      'restart Short from the committed authoring revision',
+    );
+    let projectedTiming = await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: 'globalThis.__cvAuthoringProjectedTiming',
+    }, { label: 'observe committed timing in the live Show execution tuple', timeoutMs: 22_000 });
+    assert.deepEqual(projectedTiming.result.value, {
+      entryId: 'positioning',
+      cellId: mutationInput.payload.cellId,
+      kind: 'attention',
+      timing: mutationInput.payload.timing,
+      scheduleCellId: mutationInput.payload.cellId,
+      activeId: 'positioning',
+    });
+
+    let firstPageHide = waitForAuthoringEvidence('pagehide', 1);
+    let firstDisposed = waitForAuthoringEvidence('tools-disposed', 1);
+    let [firstPageHideParams, firstDisposedParams] = await Promise.all([
+      authoringCdp.send('Runtime.evaluate', {
+        expression: `globalThis.dispatchEvent(new PageTransitionEvent('pagehide', {
+          persisted: false,
+        }))`,
+      }, { label: 'dispatch first pagehide lifecycle boundary', timeoutMs: 5_000 })
+        .then(() => firstPageHide),
+      firstDisposed,
+    ]);
+    assert.equal(firstPageHideParams.activeCount, AUTHORING_TOOL_COUNT);
+    assert.equal(firstDisposedParams.disposedCount, AUTHORING_TOOL_COUNT);
+    assert.deepEqual(
+      authoringEvidence
+        .filter(({ type, generation }) => type === 'tool-aborted' && generation === 1)
+        .map(({ name }) => name)
+        .sort(),
+      nativeReady.result.value.authoringToolNames,
+    );
+    let firstDisposedState = await authoringCdp.send('Runtime.evaluate', {
+      returnByValue: true,
+      expression: 'globalThis.__cvAuthoringNative.snapshot().authoringToolNames',
+    }, { label: 'verify first native WebMCP registry disposal', timeoutMs: 5_000 });
+    assert.deepEqual(firstDisposedState.result.value, []);
+
+    let reloadedPage = waitForEvent(authoringCdp, 'Page.loadEventFired', () => true, 20_000);
+    await authoringCdp.send('Page.reload', { ignoreCache: true });
+    await reloadedPage;
+
+    let reloadedNative = await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: 'globalThis.__cvAuthoringNative.ready',
+    }, { label: 'wait for reloaded native WebMCP registration', timeoutMs: 20_000 });
+    assert.equal(reloadedNative.result.value.generation, 2);
+    assert.deepEqual(
+      reloadedNative.result.value.authoringToolNames,
+      nativeReady.result.value.authoringToolNames,
+    );
+
+    let reloaded = await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `(async () => {
+        const response = await globalThis.__cvAuthoringNative.execute(
+          'presentation_authoring_inspect',
+          {},
+        );
+        const envelope = JSON.parse(response.content[0].text);
+        const session = await fetch('/__cv-authoring/api/session', {
+          credentials: 'same-origin',
+          headers: { accept: 'application/json' },
+        }).then((value) => value.json());
+        const cell = envelope.result?.cells?.find(
+          ({ id }) => id === ${JSON.stringify(mutationInput.payload.cellId)},
+        );
+        return {
+          isError: response.isError === true,
+          status: envelope.status,
+          inspect: envelope.result ? {
+            revision: envelope.result.project.revision,
+            hash: envelope.result.project.hash,
+            timing: cell?.timing || null,
+            timelineHash: envelope.result.timeline?.hash || '',
+          } : null,
+          session: {
+            schemaVersion: session.schemaVersion,
+            status: session.status,
+            sessionId: session.sessionId,
+            sourceBase: session.sourceBase,
+            base: session.base,
+            identity: session.identity,
+            dirty: session.dirty,
+            materialized: session.materialized,
+          },
+        };
+      })()`,
+    }, { label: 'inspect exact persisted authoring revision after reload', timeoutMs: 10_000 });
+    let reloadedValue = reloaded.result.value;
+    assert.equal(reloadedValue.isError, false);
+    assert.equal(reloadedValue.status, 'ok');
+    assert.deepEqual(reloadedValue.inspect, mutationValue.inspectAfter);
+    assert.equal(reloadedValue.session.schemaVersion, 'cv-show-authoring-host-session-v1');
+    assert.equal(reloadedValue.session.status, 'authorized');
+    assert.equal(reloadedValue.session.sessionId, authoringHost.sessionId);
+    assert.equal(reloadedValue.session.base.revision, mutationValue.result.project.revision);
+    assert.equal(
+      reloadedValue.session.base.authoringProjectHash,
+      mutationValue.result.project.hash,
+    );
+    assert.deepEqual(
+      reloadedValue.session.identity,
+      mutationValue.result.authorityReceipt.currentIdentity,
+    );
+    assert.equal(
+      reloadedValue.session.base.snapshotIdentity,
+      reloadedValue.session.identity.snapshot,
+    );
+    assert.equal(reloadedValue.session.dirty, true);
+    assert.equal(reloadedValue.session.materialized, false);
+
+    let stale = await authoringCdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `(async () => {
+        const input = ${JSON.stringify(mutationInput)};
+        const response = await globalThis.__cvAuthoringNative.execute(
+          'presentation_authoring_cell_set_timing',
+          input,
+        );
+        const envelope = JSON.parse(response.content[0].text);
+        const afterResponse = await globalThis.__cvAuthoringNative.execute(
+          'presentation_authoring_inspect',
+          {},
+        );
+        const after = JSON.parse(afterResponse.content[0].text);
+        const cell = after.result?.cells?.find(({ id }) => id === input.payload.cellId);
+        return {
+          isError: response.isError === true,
+          status: envelope.status,
+          toolName: envelope.toolName,
+          error: envelope.error,
+          after: after.result ? {
+            revision: after.result.project.revision,
+            hash: after.result.project.hash,
+            timing: cell?.timing || null,
+            timelineHash: after.result.timeline?.hash || '',
+          } : null,
+        };
+      })()`,
+    }, { label: 'replay stale authoring base through native WebMCP', timeoutMs: 10_000 });
+    let staleValue = stale.result.value;
+    assert.equal(staleValue.isError, true);
+    assert.equal(staleValue.status, 'error');
+    assert.equal(staleValue.toolName, 'presentation_authoring_cell_set_timing');
+    assert.equal(staleValue.error.code, 'CV_SHOW_AUTHORING_STALE');
+    assert.equal(staleValue.error.details.causeCode, 'CV_SHOW_AUTHORING_STALE');
+    assert.deepEqual(staleValue.error.details.causeDetails.received, mutationInput.base);
+    assert.deepEqual(staleValue.error.details.causeDetails.expected, {
+      revision: mutationValue.result.project.revision,
+      authoringProjectHash: mutationValue.result.project.hash,
+    });
+    assert.equal(staleValue.error.currentBase.revision, mutationValue.result.project.revision);
+    assert.equal(
+      staleValue.error.currentBase.authoringProjectHash,
+      mutationValue.result.project.hash,
+    );
+    assert.deepEqual(staleValue.after, mutationValue.inspectAfter);
+
+    let finalPageHide = waitForAuthoringEvidence('pagehide', 2);
+    let finalDisposed = waitForAuthoringEvidence('tools-disposed', 2);
+    let [finalPageHideParams, finalDisposedParams] = await Promise.all([
+      authoringCdp.send('Runtime.evaluate', {
+        expression: `globalThis.dispatchEvent(new PageTransitionEvent('pagehide', {
+          persisted: false,
+        }))`,
+      }, { label: 'dispatch final pagehide lifecycle boundary', timeoutMs: 5_000 })
+        .then(() => finalPageHide),
+      finalDisposed,
+    ]);
+    assert.equal(finalPageHideParams.activeCount, AUTHORING_TOOL_COUNT);
+    assert.equal(finalDisposedParams.disposedCount, AUTHORING_TOOL_COUNT);
+    assert.deepEqual(
+      authoringEvidence
+        .filter(({ type, generation }) => type === 'tool-aborted' && generation === 2)
+        .map(({ name }) => name)
+        .sort(),
+      nativeReady.result.value.authoringToolNames,
+    );
+    let finalDisposedState = await authoringCdp.send('Runtime.evaluate', {
+      returnByValue: true,
+      expression: 'globalThis.__cvAuthoringNative.snapshot().authoringToolNames',
+    }, { label: 'verify final native WebMCP registry disposal', timeoutMs: 5_000 });
+    assert.deepEqual(finalDisposedState.result.value, []);
+
+    let blankLoaded = waitForEvent(authoringCdp, 'Page.loadEventFired', () => true, 20_000);
+    await authoringCdp.send('Page.navigate', { url: 'about:blank' });
+    await blankLoaded;
+    assert.deepEqual(authoringCdp.exceptions, []);
+    verifyNoBlockedRequests(authoringCdp);
+
+    stopAuthoringEvidence();
+    stopAuthoringEvidence = null;
+    authoringCdp.close();
+    authoringCdp = null;
+    await authoringHost.close();
+    hostClosed = true;
+
+    let sourceSha256 = `sha256:${createHash('sha256').update(sourceBytes).digest('hex')}`;
+    assert.equal(reloadedValue.session.sourceBase.sourceSha256, sourceSha256);
+    let persistedSourceBytes = await readFile(temporarySourcePath);
+    let persistedSourceSha = `sha256:${createHash('sha256').update(persistedSourceBytes).digest('hex')}`;
+    assert.deepEqual(persistedSourceBytes, sourceBytes);
+    assert.equal(persistedSourceSha, sourceSha256);
+    assert.deepEqual(publicCdp.exceptions, []);
+    verifyNoBlockedRequests(publicCdp);
+  } finally {
+    stopAuthoringEvidence?.();
+    try {
+      authoringCdp?.close();
+    } catch {}
+    try {
+      publicCdp?.close();
+    } catch {}
+    if (authoringHost && !hostClosed) {
+      await authoringHost.close().catch(() => undefined);
+    }
+    await publicServer?.close().catch(() => undefined);
+    await chrome.close().catch(() => undefined);
+    if (temporaryRoot) {
+      await rm(temporaryRoot, { recursive: true, force: true });
+    }
+  }
 });

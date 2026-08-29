@@ -14,6 +14,9 @@ import {
   validatePortfolioGraphSnapshotBinding,
   validatePortfolioGraphSnapshotManifest,
 } from '../src/static-pages/data/portfolioGraphSnapshot.js';
+import { CV_SHOW_AUDIO_RELEASE } from '../src/static-pages/data/cvShowPresentationProject.js';
+import { CV_SHOW_WEB_AUDIO_RELEASE } from '../src/static-pages/data/cvShowWebAudioRelease.js';
+import { verifyCvShowWebAudio } from './verify-cv-show-web-audio.js';
 
 export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
   'js/index.js',
@@ -253,6 +256,101 @@ async function getAllFiles(dir) {
   return files.flat();
 }
 
+function cvShowReleaseRelativeRoot(selector) {
+  let manifestPath = String(selector?.manifest?.path || '');
+  let expected = `${selector?.voiceId}/${selector?.revision}/manifest.json`;
+  if (
+    manifestPath !== expected
+    || path.posix.normalize(manifestPath) !== manifestPath
+    || manifestPath.includes('\\')
+  ) {
+    throw new Error('Verification failed: invalid selected CV Show web-audio manifest path.');
+  }
+  return path.posix.dirname(manifestPath);
+}
+
+function relativeInventory(root, files) {
+  return files.map((file) => path.relative(root, file).replace(/\\/g, '/')).sort();
+}
+
+export function verifyNoPublicWavArtifacts(allFiles, distDir) {
+  for (let filePath of allFiles) {
+    let relativePath = path.relative(distDir, filePath).replace(/\\/g, '/');
+    let segments = relativePath.toLowerCase().split('/');
+    if (relativePath.toLowerCase().endsWith('.wav')) {
+      throw new Error(`Verification failed: forbidden WAV asset found in "${relativePath}".`);
+    }
+    if (segments.includes('cv-show-audio-private')) {
+      throw new Error(
+        `Verification failed: forbidden private CV Show audio path found in "${relativePath}".`,
+      );
+    }
+  }
+}
+
+export async function verifyCvShowWebAudioPublication({
+  rootDir = path.resolve(fileURLToPath(new URL('..', import.meta.url))),
+  distDir = path.join(rootDir, 'dist'),
+  selector = CV_SHOW_WEB_AUDIO_RELEASE,
+} = {}) {
+  if (
+    selector?.sourceMasterReleaseId !== CV_SHOW_AUDIO_RELEASE.releaseId
+    || selector?.voiceId !== CV_SHOW_AUDIO_RELEASE.manifests.voice
+    || selector?.locale !== CV_SHOW_AUDIO_RELEASE.manifests.locale
+  ) {
+    throw new Error(
+      'Verification failed: selected CV Show web audio does not bind the current private master release.',
+    );
+  }
+  let releaseRelativeRoot = cvShowReleaseRelativeRoot(selector);
+  let sourceBase = path.join(rootDir, 'src/static-pages/copy-cv-show-audio');
+  let distBase = path.join(distDir, 'cv-show-audio');
+  let sourceRoot = path.join(sourceBase, releaseRelativeRoot);
+  let distRoot = path.join(distBase, releaseRelativeRoot);
+  let [sourceFiles, distFiles] = await Promise.all([
+    getAllFiles(sourceBase),
+    getAllFiles(distBase),
+  ]);
+  let sourceInventory = relativeInventory(sourceBase, sourceFiles);
+  let distInventory = relativeInventory(distBase, distFiles);
+  let expectedPrefix = `${releaseRelativeRoot}/`;
+  let sourceUnexpected = sourceInventory.filter((file) => !file.startsWith(expectedPrefix));
+  let distUnexpected = distInventory.filter((file) => !file.startsWith(expectedPrefix));
+  if (
+    sourceInventory.length !== 61
+    || distInventory.length !== 61
+    || sourceUnexpected.length > 0
+    || distUnexpected.length > 0
+    || JSON.stringify(sourceInventory) !== JSON.stringify(distInventory)
+  ) {
+    throw new Error(
+      'Verification failed: public CV Show audio tree contains unexpected files or differs from source.',
+    );
+  }
+  let [sourceResult, distResult] = await Promise.all([
+    verifyCvShowWebAudio({ root: sourceRoot, selector, verifyMedia: false }),
+    verifyCvShowWebAudio({ root: distRoot, selector, verifyMedia: false }),
+  ]);
+  if (
+    sourceResult.treeInventorySha256 !== distResult.treeInventorySha256
+    || sourceResult.manifestSha256 !== distResult.manifestSha256
+    || sourceResult.manifestBytes !== distResult.manifestBytes
+    || sourceResult.totalDeliveryBytes !== distResult.totalDeliveryBytes
+  ) {
+    throw new Error(
+      'Verification failed: copied CV Show web-audio bytes differ from the tracked source release.',
+    );
+  }
+  return Object.freeze({
+    releaseId: distResult.releaseId,
+    revision: distResult.revision,
+    files: distResult.files,
+    clips: distResult.clips,
+    alignedSequences: distResult.alignedSequences,
+    mediaProbed: distResult.mediaProbed,
+  });
+}
+
 export async function verifyPortfolioGraphSnapshots(distDir) {
   let snapshotDir = path.join(distDir, 'portfolio-graph-snapshots');
   let manifestPath = path.join(snapshotDir, 'manifest.json');
@@ -329,6 +427,8 @@ export async function runVerification(distDir) {
   }
 
   const allFiles = await getAllFiles(distDir);
+  verifyNoPublicWavArtifacts(allFiles, distDir);
+  await verifyCvShowWebAudioPublication({ rootDir, distDir });
   let rootIndexPath = path.join(distDir, 'index.html');
   if (await fileExists(rootIndexPath)) {
     let rootIndex = await fs.readFile(rootIndexPath, 'utf8');
@@ -419,6 +519,12 @@ export async function runVerification(distDir) {
   verifyMainBundleSize(mainJsContent);
   verifyRuntimeMarkdownAssetSeparation(mainJsContent.toString('utf8'), markdownViewerContent);
   verifyRuntimeTourAssetSeparation(mainJsContent.toString('utf8'), tourPlayerContent);
+  if (
+    mainJsContent.includes('cv-show-audio-private')
+    || tourPlayerContent.includes('cv-show-audio-private')
+  ) {
+    throw new Error('Production bundles contain the obsolete private CV Show audio path.');
+  }
 
   const cssFiles = [
     'css/index.css',

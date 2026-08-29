@@ -1,0 +1,311 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-3TtaLNw7jTOHh9+r3sLlK+YUvp11nWiOZHJ3gJpePLM=",
+  "media": {
+    "hash": "sha256:8b53b9c18b15250161f2ec61270e62996bdc65b981b7f1f73da9ba1306a2f5e0",
+    "durationMs": 27990,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 27990,
+      "speaker": "guide",
+      "transcript": "AutoBox была одной из позиций более широкой линейки ComplexScan, которую я развивал в 2017-2022 годах. В нее входили прозрачные платформы для бестеневой съемки предметов в формате фото 360 и для 3D сканирования, а также отдельная установка для каталожной съемки бутылок. Я проектировал оборудование и метод съемки как единый продукт и довел линию до первых международных поставок.",
+      "words": [
+        {
+          "text": "AutoBox",
+          "startMs": 0,
+          "endMs": 560
+        },
+        {
+          "text": "была",
+          "startMs": 560,
+          "endMs": 800
+        },
+        {
+          "text": "одной",
+          "startMs": 800,
+          "endMs": 1060
+        },
+        {
+          "text": "из",
+          "startMs": 1060,
+          "endMs": 1240
+        },
+        {
+          "text": "позиций",
+          "startMs": 1240,
+          "endMs": 1800
+        },
+        {
+          "text": "более",
+          "startMs": 1800,
+          "endMs": 2240
+        },
+        {
+          "text": "широкой",
+          "startMs": 2240,
+          "endMs": 2760
+        },
+        {
+          "text": "линейки",
+          "startMs": 2760,
+          "endMs": 3200
+        },
+        {
+          "text": "ComplexScan,",
+          "startMs": 3200,
+          "endMs": 4000
+        },
+        {
+          "text": "которую",
+          "startMs": 4260,
+          "endMs": 4780
+        },
+        {
+          "text": "я",
+          "startMs": 4780,
+          "endMs": 4980
+        },
+        {
+          "text": "развивал",
+          "startMs": 4980,
+          "endMs": 5480
+        },
+        {
+          "text": "в",
+          "startMs": 5480,
+          "endMs": 5780
+        },
+        {
+          "text": "2017",
+          "startMs": 5780,
+          "endMs": 6620
+        },
+        {
+          "text": "-2022",
+          "startMs": 6620,
+          "endMs": 8460
+        },
+        {
+          "text": "годах.",
+          "startMs": 8460,
+          "endMs": 9080
+        },
+        {
+          "text": "В",
+          "startMs": 9220,
+          "endMs": 9480
+        },
+        {
+          "text": "нее",
+          "startMs": 9480,
+          "endMs": 9660
+        },
+        {
+          "text": "входили",
+          "startMs": 9660,
+          "endMs": 10360
+        },
+        {
+          "text": "прозрачные",
+          "startMs": 10360,
+          "endMs": 11140
+        },
+        {
+          "text": "платформы",
+          "startMs": 11140,
+          "endMs": 11720
+        },
+        {
+          "text": "для",
+          "startMs": 11720,
+          "endMs": 11860
+        },
+        {
+          "text": "бестеневой",
+          "startMs": 11860,
+          "endMs": 12400
+        },
+        {
+          "text": "съемки",
+          "startMs": 12400,
+          "endMs": 12880
+        },
+        {
+          "text": "предметов",
+          "startMs": 12880,
+          "endMs": 13560
+        },
+        {
+          "text": "в",
+          "startMs": 13560,
+          "endMs": 14000
+        },
+        {
+          "text": "формате",
+          "startMs": 14000,
+          "endMs": 14380
+        },
+        {
+          "text": "фото",
+          "startMs": 14380,
+          "endMs": 14640
+        },
+        {
+          "text": "360",
+          "startMs": 14640,
+          "endMs": 15220
+        },
+        {
+          "text": "и",
+          "startMs": 15220,
+          "endMs": 15780
+        },
+        {
+          "text": "для",
+          "startMs": 15780,
+          "endMs": 15940
+        },
+        {
+          "text": "3D",
+          "startMs": 15940,
+          "endMs": 16300
+        },
+        {
+          "text": "сканирования,",
+          "startMs": 16300,
+          "endMs": 17020
+        },
+        {
+          "text": "а",
+          "startMs": 17320,
+          "endMs": 17380
+        },
+        {
+          "text": "также",
+          "startMs": 17380,
+          "endMs": 17640
+        },
+        {
+          "text": "отдельная",
+          "startMs": 17640,
+          "endMs": 18200
+        },
+        {
+          "text": "установка",
+          "startMs": 18200,
+          "endMs": 18740
+        },
+        {
+          "text": "для",
+          "startMs": 18740,
+          "endMs": 18920
+        },
+        {
+          "text": "каталожной",
+          "startMs": 18920,
+          "endMs": 19660
+        },
+        {
+          "text": "съемки",
+          "startMs": 19660,
+          "endMs": 20040
+        },
+        {
+          "text": "бутылок.",
+          "startMs": 20040,
+          "endMs": 20520
+        },
+        {
+          "text": "Я",
+          "startMs": 20640,
+          "endMs": 20900
+        },
+        {
+          "text": "проектировал",
+          "startMs": 20900,
+          "endMs": 21680
+        },
+        {
+          "text": "оборудование",
+          "startMs": 21680,
+          "endMs": 22480
+        },
+        {
+          "text": "и",
+          "startMs": 22480,
+          "endMs": 22760
+        },
+        {
+          "text": "метод",
+          "startMs": 22760,
+          "endMs": 23060
+        },
+        {
+          "text": "съемки",
+          "startMs": 23060,
+          "endMs": 23580
+        },
+        {
+          "text": "как",
+          "startMs": 23580,
+          "endMs": 23960
+        },
+        {
+          "text": "единый",
+          "startMs": 23960,
+          "endMs": 24400
+        },
+        {
+          "text": "продукт",
+          "startMs": 24400,
+          "endMs": 24900
+        },
+        {
+          "text": "и",
+          "startMs": 24900,
+          "endMs": 25040
+        },
+        {
+          "text": "довел",
+          "startMs": 25040,
+          "endMs": 25360
+        },
+        {
+          "text": "линию",
+          "startMs": 25360,
+          "endMs": 25860
+        },
+        {
+          "text": "до",
+          "startMs": 25860,
+          "endMs": 26120
+        },
+        {
+          "text": "первых",
+          "startMs": 26120,
+          "endMs": 26560
+        },
+        {
+          "text": "международных",
+          "startMs": 26560,
+          "endMs": 27300
+        },
+        {
+          "text": "поставок.",
+          "startMs": 27300,
+          "endMs": 27900
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-UlMLUnrcTaTmIP9bqWarqU7qrehLUPG68MkruvDSX0k="
+}

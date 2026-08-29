@@ -1,0 +1,256 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-HXEvtFdlA3Vo8IWiQ6CsKy+XNKRanHHC72YBbc1bZUc=",
+  "media": {
+    "hash": "sha256:a21382798cae0ce15302b9d8597c2d0e92b5463d5fc70900a548dfb22b2f7c36",
+    "durationMs": 23650,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 23650,
+      "speaker": "guide",
+      "transcript": "Одна из актуальных конфигураций — это линия Agent Portal, которую я развиваю с 2025 года. Это визуальная среда и оркестратор агентной разработки. Kanban-доска здесь исполняет процесс. Этапы можно настраивать, привязывать к ним действия, роли и пулы агентов. Автономность тоже настраивается, а конфликт возвращает задачу человеку.",
+      "words": [
+        {
+          "text": "Одна",
+          "startMs": 0,
+          "endMs": 300
+        },
+        {
+          "text": "из",
+          "startMs": 300,
+          "endMs": 460
+        },
+        {
+          "text": "актуальных",
+          "startMs": 460,
+          "endMs": 900
+        },
+        {
+          "text": "конфигураций",
+          "startMs": 900,
+          "endMs": 1740
+        },
+        {
+          "text": "—",
+          "startMs": 1740,
+          "endMs": 1880
+        },
+        {
+          "text": "это",
+          "startMs": 1880,
+          "endMs": 2320
+        },
+        {
+          "text": "линия",
+          "startMs": 2320,
+          "endMs": 2740
+        },
+        {
+          "text": "Agent",
+          "startMs": 2740,
+          "endMs": 3060
+        },
+        {
+          "text": "Portal,",
+          "startMs": 3060,
+          "endMs": 3560
+        },
+        {
+          "text": "которую",
+          "startMs": 3900,
+          "endMs": 4180
+        },
+        {
+          "text": "я",
+          "startMs": 4180,
+          "endMs": 4320
+        },
+        {
+          "text": "развиваю",
+          "startMs": 4320,
+          "endMs": 4760
+        },
+        {
+          "text": "с",
+          "startMs": 4760,
+          "endMs": 4860
+        },
+        {
+          "text": "2025",
+          "startMs": 4860,
+          "endMs": 6100
+        },
+        {
+          "text": "года.",
+          "startMs": 6100,
+          "endMs": 6840
+        },
+        {
+          "text": "Это",
+          "startMs": 7020,
+          "endMs": 7360
+        },
+        {
+          "text": "визуальная",
+          "startMs": 7360,
+          "endMs": 8000
+        },
+        {
+          "text": "среда",
+          "startMs": 8000,
+          "endMs": 8540
+        },
+        {
+          "text": "и",
+          "startMs": 8540,
+          "endMs": 9060
+        },
+        {
+          "text": "оркестратор",
+          "startMs": 9060,
+          "endMs": 9860
+        },
+        {
+          "text": "агентной",
+          "startMs": 9860,
+          "endMs": 10420
+        },
+        {
+          "text": "разработки.",
+          "startMs": 10420,
+          "endMs": 11160
+        },
+        {
+          "text": "Kanban",
+          "startMs": 11380,
+          "endMs": 11900
+        },
+        {
+          "text": "-доска",
+          "startMs": 11900,
+          "endMs": 12340
+        },
+        {
+          "text": "здесь",
+          "startMs": 12340,
+          "endMs": 12660
+        },
+        {
+          "text": "исполняет",
+          "startMs": 12660,
+          "endMs": 13400
+        },
+        {
+          "text": "процесс.",
+          "startMs": 13400,
+          "endMs": 13780
+        },
+        {
+          "text": "Этапы",
+          "startMs": 14180,
+          "endMs": 14780
+        },
+        {
+          "text": "можно",
+          "startMs": 14780,
+          "endMs": 15020
+        },
+        {
+          "text": "настраивать,",
+          "startMs": 15020,
+          "endMs": 15700
+        },
+        {
+          "text": "привязывать",
+          "startMs": 15780,
+          "endMs": 16340
+        },
+        {
+          "text": "к",
+          "startMs": 16340,
+          "endMs": 16460
+        },
+        {
+          "text": "ним",
+          "startMs": 16460,
+          "endMs": 16600
+        },
+        {
+          "text": "действия,",
+          "startMs": 16600,
+          "endMs": 17180
+        },
+        {
+          "text": "роли",
+          "startMs": 17420,
+          "endMs": 17920
+        },
+        {
+          "text": "и",
+          "startMs": 17920,
+          "endMs": 18260
+        },
+        {
+          "text": "пулы",
+          "startMs": 18260,
+          "endMs": 18780
+        },
+        {
+          "text": "агентов.",
+          "startMs": 18780,
+          "endMs": 19300
+        },
+        {
+          "text": "Автономность",
+          "startMs": 19560,
+          "endMs": 20240
+        },
+        {
+          "text": "тоже",
+          "startMs": 20240,
+          "endMs": 20520
+        },
+        {
+          "text": "настраивается,",
+          "startMs": 20520,
+          "endMs": 21160
+        },
+        {
+          "text": "а",
+          "startMs": 21400,
+          "endMs": 21480
+        },
+        {
+          "text": "конфликт",
+          "startMs": 21480,
+          "endMs": 21940
+        },
+        {
+          "text": "возвращает",
+          "startMs": 21940,
+          "endMs": 22520
+        },
+        {
+          "text": "задачу",
+          "startMs": 22520,
+          "endMs": 23020
+        },
+        {
+          "text": "человеку.",
+          "startMs": 23020,
+          "endMs": 23540
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-yE9y9ulBC9ZWhWrfn5XWVkf7R2tU8e5NfV5ECGMWtTE="
+}

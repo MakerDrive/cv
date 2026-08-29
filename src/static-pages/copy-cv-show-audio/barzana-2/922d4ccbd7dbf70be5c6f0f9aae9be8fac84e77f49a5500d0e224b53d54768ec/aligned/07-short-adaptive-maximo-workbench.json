@@ -1,0 +1,226 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-7dJUWKStNhWhvY68VwVlA9e2NGOV//td5/72zZ13izA=",
+  "media": {
+    "hash": "sha256:0acf8f42d5b1b9a1a7912f48523e6092cde6df88f8c81955c5ae7370cedf2ba9",
+    "durationMs": 23350,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 23350,
+      "speaker": "guide",
+      "transcript": "Следующий пример — Adaptive Maxima Workbench. Он показывает, как заявки, оборудование, локации, бригады и доступные действия собираются в одном рабочем пространстве с общим актуальным контекстом. Сейчас это демо — альфа возможностей Workspace. Подключение к реальному Maxima выполняется как отдельная интеграция.",
+      "words": [
+        {
+          "text": "Следующий",
+          "startMs": 0,
+          "endMs": 540
+        },
+        {
+          "text": "пример",
+          "startMs": 540,
+          "endMs": 880
+        },
+        {
+          "text": "—",
+          "startMs": 880,
+          "endMs": 1100
+        },
+        {
+          "text": "Adaptive",
+          "startMs": 1100,
+          "endMs": 1760
+        },
+        {
+          "text": "Maxima",
+          "startMs": 1760,
+          "endMs": 2320
+        },
+        {
+          "text": "Workbench.",
+          "startMs": 2320,
+          "endMs": 3040
+        },
+        {
+          "text": "Он",
+          "startMs": 3240,
+          "endMs": 3860
+        },
+        {
+          "text": "показывает,",
+          "startMs": 3860,
+          "endMs": 4460
+        },
+        {
+          "text": "как",
+          "startMs": 4520,
+          "endMs": 4660
+        },
+        {
+          "text": "заявки,",
+          "startMs": 4660,
+          "endMs": 5300
+        },
+        {
+          "text": "оборудование,",
+          "startMs": 5560,
+          "endMs": 6440
+        },
+        {
+          "text": "локации,",
+          "startMs": 6700,
+          "endMs": 7320
+        },
+        {
+          "text": "бригады",
+          "startMs": 7500,
+          "endMs": 8080
+        },
+        {
+          "text": "и",
+          "startMs": 8080,
+          "endMs": 8440
+        },
+        {
+          "text": "доступные",
+          "startMs": 8440,
+          "endMs": 9060
+        },
+        {
+          "text": "действия",
+          "startMs": 9060,
+          "endMs": 9480
+        },
+        {
+          "text": "собираются",
+          "startMs": 9480,
+          "endMs": 10140
+        },
+        {
+          "text": "в",
+          "startMs": 10140,
+          "endMs": 10440
+        },
+        {
+          "text": "одном",
+          "startMs": 10440,
+          "endMs": 10620
+        },
+        {
+          "text": "рабочем",
+          "startMs": 10620,
+          "endMs": 11180
+        },
+        {
+          "text": "пространстве",
+          "startMs": 11180,
+          "endMs": 11820
+        },
+        {
+          "text": "с",
+          "startMs": 11820,
+          "endMs": 12380
+        },
+        {
+          "text": "общим",
+          "startMs": 12380,
+          "endMs": 12680
+        },
+        {
+          "text": "актуальным",
+          "startMs": 12680,
+          "endMs": 13300
+        },
+        {
+          "text": "контекстом.",
+          "startMs": 13300,
+          "endMs": 14140
+        },
+        {
+          "text": "Сейчас",
+          "startMs": 14280,
+          "endMs": 14780
+        },
+        {
+          "text": "это",
+          "startMs": 14780,
+          "endMs": 15180
+        },
+        {
+          "text": "демо",
+          "startMs": 15180,
+          "endMs": 15720
+        },
+        {
+          "text": "—",
+          "startMs": 15720,
+          "endMs": 15860
+        },
+        {
+          "text": "альфа",
+          "startMs": 15860,
+          "endMs": 16480
+        },
+        {
+          "text": "возможностей",
+          "startMs": 16480,
+          "endMs": 17420
+        },
+        {
+          "text": "Workspace.",
+          "startMs": 17420,
+          "endMs": 18220
+        },
+        {
+          "text": "Подключение",
+          "startMs": 18460,
+          "endMs": 19160
+        },
+        {
+          "text": "к",
+          "startMs": 19160,
+          "endMs": 19280
+        },
+        {
+          "text": "реальному",
+          "startMs": 19280,
+          "endMs": 19760
+        },
+        {
+          "text": "Maxima",
+          "startMs": 19760,
+          "endMs": 20420
+        },
+        {
+          "text": "выполняется",
+          "startMs": 20420,
+          "endMs": 21380
+        },
+        {
+          "text": "как",
+          "startMs": 21380,
+          "endMs": 21620
+        },
+        {
+          "text": "отдельная",
+          "startMs": 21620,
+          "endMs": 22280
+        },
+        {
+          "text": "интеграция.",
+          "startMs": 22280,
+          "endMs": 23140
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-U5QgojnOmkJFhAjPngJf2XHywMb5knnydSrGA8qTirU="
+}

@@ -1,0 +1,206 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-QuA60A9ldfwMqxRe5+32LGtL5+MySIzBuhQU3ezXP70=",
+  "media": {
+    "hash": "sha256:0352ab07677fc936932c4487b9ac092ca5a6a0a7be48f6c682b720fb319c76eb",
+    "durationMs": 20450,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 20450,
+      "speaker": "guide",
+      "transcript": "Чтобы показать внутреннее устройство Agent Portal, спущусь на уровень двух отдельных инструментов. В 2026 году Agent Pool MCP оформился как исполнительный слой. Он распределяет задачи между агентами, отслеживает владение и состояние, передает сессии и маршрутизирует ресурсы.",
+      "words": [
+        {
+          "text": "Чтобы",
+          "startMs": 0,
+          "endMs": 220
+        },
+        {
+          "text": "показать",
+          "startMs": 220,
+          "endMs": 900
+        },
+        {
+          "text": "внутреннее",
+          "startMs": 900,
+          "endMs": 1740
+        },
+        {
+          "text": "устройство",
+          "startMs": 1740,
+          "endMs": 2320
+        },
+        {
+          "text": "Agent",
+          "startMs": 2320,
+          "endMs": 2760
+        },
+        {
+          "text": "Portal,",
+          "startMs": 2760,
+          "endMs": 3220
+        },
+        {
+          "text": "спущусь",
+          "startMs": 3520,
+          "endMs": 4180
+        },
+        {
+          "text": "на",
+          "startMs": 4180,
+          "endMs": 4300
+        },
+        {
+          "text": "уровень",
+          "startMs": 4300,
+          "endMs": 4680
+        },
+        {
+          "text": "двух",
+          "startMs": 4680,
+          "endMs": 4900
+        },
+        {
+          "text": "отдельных",
+          "startMs": 4900,
+          "endMs": 5560
+        },
+        {
+          "text": "инструментов.",
+          "startMs": 5560,
+          "endMs": 6420
+        },
+        {
+          "text": "В",
+          "startMs": 6520,
+          "endMs": 6680
+        },
+        {
+          "text": "2026",
+          "startMs": 6680,
+          "endMs": 8280
+        },
+        {
+          "text": "году",
+          "startMs": 8280,
+          "endMs": 8800
+        },
+        {
+          "text": "Agent",
+          "startMs": 8800,
+          "endMs": 9220
+        },
+        {
+          "text": "Pool",
+          "startMs": 9220,
+          "endMs": 9520
+        },
+        {
+          "text": "MCP",
+          "startMs": 9520,
+          "endMs": 10100
+        },
+        {
+          "text": "оформился",
+          "startMs": 10100,
+          "endMs": 11040
+        },
+        {
+          "text": "как",
+          "startMs": 11040,
+          "endMs": 11260
+        },
+        {
+          "text": "исполнительный",
+          "startMs": 11260,
+          "endMs": 12140
+        },
+        {
+          "text": "слой.",
+          "startMs": 12140,
+          "endMs": 12480
+        },
+        {
+          "text": "Он",
+          "startMs": 12660,
+          "endMs": 12940
+        },
+        {
+          "text": "распределяет",
+          "startMs": 12940,
+          "endMs": 13800
+        },
+        {
+          "text": "задачи",
+          "startMs": 13800,
+          "endMs": 14240
+        },
+        {
+          "text": "между",
+          "startMs": 14240,
+          "endMs": 14460
+        },
+        {
+          "text": "агентами,",
+          "startMs": 14460,
+          "endMs": 15040
+        },
+        {
+          "text": "отслеживает",
+          "startMs": 15320,
+          "endMs": 15900
+        },
+        {
+          "text": "владение",
+          "startMs": 15900,
+          "endMs": 16420
+        },
+        {
+          "text": "и",
+          "startMs": 16420,
+          "endMs": 16600
+        },
+        {
+          "text": "состояние,",
+          "startMs": 16600,
+          "endMs": 17220
+        },
+        {
+          "text": "передает",
+          "startMs": 17380,
+          "endMs": 17760
+        },
+        {
+          "text": "сессии",
+          "startMs": 17760,
+          "endMs": 18340
+        },
+        {
+          "text": "и",
+          "startMs": 18340,
+          "endMs": 18600
+        },
+        {
+          "text": "маршрутизирует",
+          "startMs": 18600,
+          "endMs": 19480
+        },
+        {
+          "text": "ресурсы.",
+          "startMs": 19480,
+          "endMs": 20040
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-GQ9qyw21LO4TK/lN5KnQIPvMpGM0heZbjzgISz+ek0U="
+}

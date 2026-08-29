@@ -9,10 +9,13 @@ import {
 } from 'symbiote-ui/chat/show-runtime';
 import { TOUR_LOCALE_MESSAGES } from '../../data/tourTranslations.js';
 import { activateCvShowTarget, activateCvShowUserAction } from './activation.js';
+import { getCvShowRuntimeAuthority } from './cvShowRuntimeAuthority.js';
 import {
-  createCvShowAttentionBarrierQueue,
   createCvShowDirectiveRunner,
+  runCvShowPresentationOperation,
 } from './showAdapter.js';
+
+export const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
 function getLocaleMessage(key) {
   const locale = document.documentElement.lang || 'en';
@@ -286,17 +289,13 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   let originTargetId = '';
   let running = false;
-  const alignedAttention = createCvShowAttentionBarrierQueue();
+  const activePresentationOperations = new Set();
   /** @type {ReturnType<typeof createPresenterSession> | null} */
   let presenter = null;
 
   const ensurePresenter = () => {
     presenter ||= createPresenterSession();
     return presenter;
-  };
-
-  const invalidateAlignedQueue = () => {
-    alignedAttention.invalidate();
   };
 
   const clearDocumentSelection = () => document.getSelection?.()?.removeAllRanges();
@@ -312,7 +311,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   const pausePresenter = (event) => {
     if (event.target !== getChat()) return;
-    invalidateAlignedQueue();
     if (event.detail?.reason === 'meaningful-interaction') {
       presenter?.runner.meaningfulInteraction();
       scheduleDocumentSelectionClear();
@@ -327,7 +325,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const disposePresenter = () => {
-    invalidateAlignedQueue();
     if (!presenter) return;
     const session = presenter;
     presenter = null;
@@ -394,7 +391,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     const requestId = event.detail?.requestId;
     const complete = event.detail?.complete;
     if (typeof complete === 'function') event.detail.handled = true;
-    invalidateAlignedQueue();
     const { runner } = ensurePresenter();
     runner.beginPhase();
     const directives = event.detail?.directives || [];
@@ -422,39 +418,32 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onAlignedReset = (event) => {
-    invalidateAlignedQueue();
     const reason = event.detail?.receipt?.reason || '';
     if (reason === 'branch-return') ensurePresenter().runner.branchReturn();
     else if (reason.includes('seek')) ensurePresenter().runner.seek();
     else ensurePresenter().runner.beginPhase();
   };
 
-  const onAlignedCue = (event) => {
-    const generation = alignedAttention.generation;
-    const requestId = event.detail?.requestId;
-    const source = event.detail?.source;
-    if (!source) return;
-    void alignedAttention.enqueue(async () => {
-      if (!alignedAttention.isCurrent(generation)) return;
-      const chat = getChat();
-      try {
-        const result = await ensurePresenter().runner.run([source], { continuePhase: true });
-        if (!alignedAttention.isCurrent(generation)) return;
-        dispatchResult(chat, requestId, result);
-      } catch (error) {
-        if (error?.name === 'AbortError' || !chat || !alignedAttention.isCurrent(generation)) return;
-        chat.dispatchEvent(new CustomEvent('portfolio-show-result', {
-          detail: { requestId, status: 'required-missing', error: error?.message || String(error) },
-        }));
-      }
-    });
+  const onPresentationOperation = (event) => {
+    const complete = event.detail?.complete;
+    const operation = event.detail?.operation;
+    if (typeof complete !== 'function' || !operation) return;
+    event.detail.handled = true;
+    const pending = runCvShowPresentationOperation(ensurePresenter().runner, operation);
+    activePresentationOperations.add(pending);
+    void pending.then(
+      (receipts) => complete(receipts),
+      (error) => complete(null, error),
+    ).finally(() => activePresentationOperations.delete(pending));
   };
 
   const onBeforeAdvance = (event) => {
     const complete = event.detail?.complete;
     if (typeof complete !== 'function') return;
     event.detail.handled = true;
-    void alignedAttention.wait().then(complete);
+    void Promise.allSettled([...activePresentationOperations]).then(() => complete(
+      Object.freeze({ status: 'completed' }),
+    ));
   };
 
   const onDockChange = (event) => {
@@ -496,7 +485,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   document.addEventListener('portfolio-show-resume', resumePresenter, { capture: true });
   workspace.addEventListener('portfolio-show-phase', onPhase);
   workspace.addEventListener('portfolio-show-aligned-reset', onAlignedReset);
-  workspace.addEventListener('portfolio-show-aligned-cue', onAlignedCue);
+  workspace.addEventListener('portfolio-show-presentation-operation', onPresentationOperation);
   workspace.addEventListener('portfolio-show-before-advance', onBeforeAdvance);
   workspace.addEventListener('portfolio-show-stop', restoreOrigin);
   workspace.addEventListener('portfolio-show-complete', restoreOrigin);
@@ -511,7 +500,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     document.removeEventListener('portfolio-show-resume', resumePresenter, { capture: true });
     workspace.removeEventListener('portfolio-show-phase', onPhase);
     workspace.removeEventListener('portfolio-show-aligned-reset', onAlignedReset);
-    workspace.removeEventListener('portfolio-show-aligned-cue', onAlignedCue);
+    workspace.removeEventListener('portfolio-show-presentation-operation', onPresentationOperation);
     workspace.removeEventListener('portfolio-show-before-advance', onBeforeAdvance);
     workspace.removeEventListener('portfolio-show-stop', restoreOrigin);
     workspace.removeEventListener('portfolio-show-complete', restoreOrigin);

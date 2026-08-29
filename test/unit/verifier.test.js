@@ -5,6 +5,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../src/static-pages/data/cvShowWebAudioRelease.js';
 import {
   resolveScriptPath,
   verifyHtmlContent,
@@ -14,6 +15,8 @@ import {
   verifyRuntimeMarkdownAssetSeparation,
   verifyRuntimeTourAssetSeparation,
   verifyPortfolioSocialMetadata,
+  verifyCvShowWebAudioPublication,
+  verifyNoPublicWavArtifacts,
   runVerification,
   EXECUTABLE_ASSET_ALLOWLIST,
   MAIN_JS_SIZE_LIMITS,
@@ -320,6 +323,7 @@ test('verifier enforces the main bundle budget and runtime Markdown asset bounda
 });
 
 test('full verifier success and failure scenarios', async () => {
+  const rootDir = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'cv-native-build-dist-'));
   try {
     await fs.mkdir(path.join(tmpDir, 'js'), { recursive: true });
@@ -347,6 +351,15 @@ test('full verifier success and failure scenarios', async () => {
       await fs.writeFile(path.join(tmpDir, 'js/ForceWorker.js'), 'console.log("hello worker");');
       await fs.writeFile(path.join(tmpDir, 'js/material-symbols.css'), 'url("material-symbols-outlined-400.ttf")');
       await fs.writeFile(path.join(tmpDir, 'js/material-symbols-outlined-400.ttf'), 'fontdata');
+      try {
+        await fs.stat(path.join(tmpDir, 'cv-show-audio'));
+      } catch {
+        await fs.cp(
+          path.join(rootDir, 'src/static-pages/copy-cv-show-audio'),
+          path.join(tmpDir, 'cv-show-audio'),
+          { recursive: true },
+        );
+      }
     };
 
     // 1. Success
@@ -395,6 +408,27 @@ test('full verifier success and failure scenarios', async () => {
     );
     await assert.rejects(runVerification(tmpDir), /contains import record to: "\.\/foo\.js"/);
 
+    // 9. Public builds never contain source WAVs.
+    await writeSuccessFiles();
+    await fs.writeFile(path.join(tmpDir, 'source-master.wav'), 'private master');
+    await assert.rejects(runVerification(tmpDir), /forbidden WAV asset/);
+    await fs.unlink(path.join(tmpDir, 'source-master.wav'));
+
+    // 10. Only the selected immutable 61-file audio release may be copied.
+    await fs.writeFile(path.join(tmpDir, 'cv-show-audio', 'unexpected.txt'), 'extra release state');
+    await assert.rejects(runVerification(tmpDir), /public CV Show audio tree contains unexpected files/);
+    await fs.unlink(path.join(tmpDir, 'cv-show-audio', 'unexpected.txt'));
+
+    // 11. Source and dist must retain exact content-addressed delivery bytes.
+    let releaseRoot = path.join(
+      tmpDir,
+      'cv-show-audio',
+      path.dirname(CV_SHOW_WEB_AUDIO_RELEASE.manifest.path),
+    );
+    let releaseManifest = JSON.parse(await fs.readFile(path.join(releaseRoot, 'manifest.json')));
+    await fs.appendFile(path.join(releaseRoot, releaseManifest.clips[0].deliveryFile), 'diverged');
+    await assert.rejects(runVerification(tmpDir), /does not match its manifest identity/);
+
   } finally {
     await fs.rm(tmpDir, { recursive: true, force: true });
   }
@@ -422,9 +456,51 @@ test('build script hygiene and rename contracts', async () => {
   assert.match(pkg.scripts['build'], /npm run copy-social-cards/, 'build should copy social cards');
   assert.match(pkg.scripts['build'], /npm run build-force-worker/, 'build should call build-force-worker');
   assert.match(pkg.scripts['build'], /npm run verify-production-build$/, 'verification must be last in the build chain');
+  assert.equal(
+    pkg.scripts['publish:cv-show-web-audio'],
+    'node ./scripts/cv-show-web-audio-publisher.js',
+    'web-audio publication must remain an explicit authoring step',
+  );
+  assert.equal(
+    pkg.scripts['verify:cv-show-web-audio'],
+    'node ./scripts/verify-cv-show-web-audio.js',
+    'the accepted web-audio release must have an explicit owning verifier',
+  );
+  assert.doesNotMatch(
+    pkg.scripts.build,
+    /publish:cv-show-web-audio|cv-show-web-audio-publisher/u,
+    'normal production builds must never transcode private masters',
+  );
 
   const workerJs = await fs.readFile(path.join(rootDir, 'scripts/build-force-worker.js'), 'utf8');
   assert.match(workerJs, /import\s+\{\s*jsBuild\s*\}\s+from\s+['"]jsda-kit\/server\/build-asset\.js['"]/, 'must import jsBuild');
   assert.match(workerJs, /fileURLToPath/, 'must use fileURLToPath');
   assert.doesNotMatch(workerJs, /console\.log/, 'must not have console.log');
+});
+
+test('production verifier binds the exact selected public audio tree without media subprocesses', async (t) => {
+  const rootDir = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
+  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'cv-web-audio-dist-'));
+  t.after(() => fs.rm(temporary, { recursive: true, force: true }));
+  await fs.cp(
+    path.join(rootDir, 'src/static-pages/copy-cv-show-audio'),
+    path.join(temporary, 'cv-show-audio'),
+    { recursive: true },
+  );
+  let result = await verifyCvShowWebAudioPublication({ rootDir, distDir: temporary });
+  assert.deepEqual(result, {
+    releaseId: CV_SHOW_WEB_AUDIO_RELEASE.releaseId,
+    revision: CV_SHOW_WEB_AUDIO_RELEASE.revision,
+    files: 61,
+    clips: 30,
+    alignedSequences: 30,
+    mediaProbed: false,
+  });
+  assert.doesNotThrow(() => verifyNoPublicWavArtifacts([
+    path.join(temporary, 'cv-show-audio', 'clip.opus'),
+  ], temporary));
+  assert.throws(
+    () => verifyNoPublicWavArtifacts([path.join(temporary, 'private.WAV')], temporary),
+    /forbidden WAV asset/,
+  );
 });

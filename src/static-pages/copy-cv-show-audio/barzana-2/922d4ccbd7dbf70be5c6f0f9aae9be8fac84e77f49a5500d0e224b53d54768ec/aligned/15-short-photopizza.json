@@ -1,0 +1,341 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-OpwU9tTrAjznoCmvKUP9OcdZjcw/1XGP3mP+5jJrXMU=",
+  "media": {
+    "hash": "sha256:98195c864f4b28ba22b28ae8755a7855ff145c221c7a0d08c74fecef3769689e",
+    "durationMs": 33620,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 33620,
+      "speaker": "guide",
+      "transcript": "В начале этой линии была фотопицца, которую я развивал с 2010 по 2022 год. Проект появился внутри Megavisor как инструмент для повторяемой съемки фото 360. Я продумал механику, электронику, прошивку, браузерный интерфейс, документацию и упаковку. Позже я открыл проект, чтобы снизить порог входа в съемку фото 360 и 3D сканирование. Универсальный блок управления работал с поворотными платформами, слайдером камеры и моторизированной панорамной головкой.",
+      "words": [
+        {
+          "text": "В",
+          "startMs": 0,
+          "endMs": 300
+        },
+        {
+          "text": "начале",
+          "startMs": 300,
+          "endMs": 760
+        },
+        {
+          "text": "этой",
+          "startMs": 760,
+          "endMs": 1160
+        },
+        {
+          "text": "линии",
+          "startMs": 1160,
+          "endMs": 1620
+        },
+        {
+          "text": "была",
+          "startMs": 1620,
+          "endMs": 1920
+        },
+        {
+          "text": "фотопицца,",
+          "startMs": 1920,
+          "endMs": 2600
+        },
+        {
+          "text": "которую",
+          "startMs": 2800,
+          "endMs": 3000
+        },
+        {
+          "text": "я",
+          "startMs": 3000,
+          "endMs": 3160
+        },
+        {
+          "text": "развивал",
+          "startMs": 3160,
+          "endMs": 3640
+        },
+        {
+          "text": "с",
+          "startMs": 3640,
+          "endMs": 3820
+        },
+        {
+          "text": "2010",
+          "startMs": 3820,
+          "endMs": 4560
+        },
+        {
+          "text": "по",
+          "startMs": 4560,
+          "endMs": 5300
+        },
+        {
+          "text": "2022",
+          "startMs": 5300,
+          "endMs": 6240
+        },
+        {
+          "text": "год.",
+          "startMs": 6240,
+          "endMs": 6940
+        },
+        {
+          "text": "Проект",
+          "startMs": 7160,
+          "endMs": 7580
+        },
+        {
+          "text": "появился",
+          "startMs": 7580,
+          "endMs": 8060
+        },
+        {
+          "text": "внутри",
+          "startMs": 8060,
+          "endMs": 8360
+        },
+        {
+          "text": "Megavisor",
+          "startMs": 8360,
+          "endMs": 8960
+        },
+        {
+          "text": "как",
+          "startMs": 8960,
+          "endMs": 9200
+        },
+        {
+          "text": "инструмент",
+          "startMs": 9200,
+          "endMs": 9800
+        },
+        {
+          "text": "для",
+          "startMs": 9800,
+          "endMs": 10200
+        },
+        {
+          "text": "повторяемой",
+          "startMs": 10200,
+          "endMs": 10800
+        },
+        {
+          "text": "съемки",
+          "startMs": 10800,
+          "endMs": 11180
+        },
+        {
+          "text": "фото",
+          "startMs": 11180,
+          "endMs": 11480
+        },
+        {
+          "text": "360.",
+          "startMs": 11480,
+          "endMs": 12100
+        },
+        {
+          "text": "Я",
+          "startMs": 12700,
+          "endMs": 13000
+        },
+        {
+          "text": "продумал",
+          "startMs": 13000,
+          "endMs": 13560
+        },
+        {
+          "text": "механику,",
+          "startMs": 13560,
+          "endMs": 14280
+        },
+        {
+          "text": "электронику,",
+          "startMs": 14560,
+          "endMs": 15260
+        },
+        {
+          "text": "прошивку,",
+          "startMs": 15560,
+          "endMs": 16140
+        },
+        {
+          "text": "браузерный",
+          "startMs": 16400,
+          "endMs": 17000
+        },
+        {
+          "text": "интерфейс,",
+          "startMs": 17000,
+          "endMs": 17600
+        },
+        {
+          "text": "документацию",
+          "startMs": 17820,
+          "endMs": 18500
+        },
+        {
+          "text": "и",
+          "startMs": 18500,
+          "endMs": 18700
+        },
+        {
+          "text": "упаковку.",
+          "startMs": 18700,
+          "endMs": 19260
+        },
+        {
+          "text": "Позже",
+          "startMs": 19460,
+          "endMs": 19840
+        },
+        {
+          "text": "я",
+          "startMs": 19840,
+          "endMs": 20000
+        },
+        {
+          "text": "открыл",
+          "startMs": 20000,
+          "endMs": 20340
+        },
+        {
+          "text": "проект,",
+          "startMs": 20340,
+          "endMs": 20700
+        },
+        {
+          "text": "чтобы",
+          "startMs": 20880,
+          "endMs": 21100
+        },
+        {
+          "text": "снизить",
+          "startMs": 21100,
+          "endMs": 21560
+        },
+        {
+          "text": "порог",
+          "startMs": 21560,
+          "endMs": 21860
+        },
+        {
+          "text": "входа",
+          "startMs": 21860,
+          "endMs": 22240
+        },
+        {
+          "text": "в",
+          "startMs": 22240,
+          "endMs": 22320
+        },
+        {
+          "text": "съемку",
+          "startMs": 22320,
+          "endMs": 22740
+        },
+        {
+          "text": "фото",
+          "startMs": 22740,
+          "endMs": 23020
+        },
+        {
+          "text": "360",
+          "startMs": 23020,
+          "endMs": 23620
+        },
+        {
+          "text": "и",
+          "startMs": 23620,
+          "endMs": 24360
+        },
+        {
+          "text": "3D",
+          "startMs": 24360,
+          "endMs": 24700
+        },
+        {
+          "text": "сканирование.",
+          "startMs": 24700,
+          "endMs": 25560
+        },
+        {
+          "text": "Универсальный",
+          "startMs": 25560,
+          "endMs": 26520
+        },
+        {
+          "text": "блок",
+          "startMs": 26520,
+          "endMs": 26780
+        },
+        {
+          "text": "управления",
+          "startMs": 26780,
+          "endMs": 27380
+        },
+        {
+          "text": "работал",
+          "startMs": 27380,
+          "endMs": 27860
+        },
+        {
+          "text": "с",
+          "startMs": 27860,
+          "endMs": 27960
+        },
+        {
+          "text": "поворотными",
+          "startMs": 27960,
+          "endMs": 28480
+        },
+        {
+          "text": "платформами,",
+          "startMs": 28480,
+          "endMs": 29240
+        },
+        {
+          "text": "слайдером",
+          "startMs": 29500,
+          "endMs": 30360
+        },
+        {
+          "text": "камеры",
+          "startMs": 30360,
+          "endMs": 30900
+        },
+        {
+          "text": "и",
+          "startMs": 30900,
+          "endMs": 31460
+        },
+        {
+          "text": "моторизированной",
+          "startMs": 31460,
+          "endMs": 32400
+        },
+        {
+          "text": "панорамной",
+          "startMs": 32400,
+          "endMs": 32980
+        },
+        {
+          "text": "головкой.",
+          "startMs": 32980,
+          "endMs": 33500
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-qHmdeJ2sXDo584XiGbAz67NKeAcyj2n4H9+n8SDD8VE="
+}

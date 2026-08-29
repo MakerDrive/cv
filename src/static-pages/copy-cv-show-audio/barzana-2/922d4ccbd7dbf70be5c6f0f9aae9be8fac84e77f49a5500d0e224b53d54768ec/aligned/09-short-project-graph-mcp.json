@@ -1,0 +1,176 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-yhzVjmdM/s8JUYlN3i60weQo0Be2DZH3gzuCJy81kvk=",
+  "media": {
+    "hash": "sha256:7b6ec1f1ad9cc261559a37b3a286315329f45c24dcfc888e7d799f3280e3d950",
+    "durationMs": 15180,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 15180,
+      "speaker": "guide",
+      "transcript": "Второй слой Project Graph MCP. Он превращает репозиторий в компактный граф, скелеты кода и структурированный контекст. Агент получает релевантную часть проекта для текущего шага и может опираться на проверяемые факты.",
+      "words": [
+        {
+          "text": "Второй",
+          "startMs": 0,
+          "endMs": 500
+        },
+        {
+          "text": "слой",
+          "startMs": 500,
+          "endMs": 820
+        },
+        {
+          "text": "Project",
+          "startMs": 820,
+          "endMs": 1200
+        },
+        {
+          "text": "Graph",
+          "startMs": 1200,
+          "endMs": 1700
+        },
+        {
+          "text": "MCP.",
+          "startMs": 1700,
+          "endMs": 2580
+        },
+        {
+          "text": "Он",
+          "startMs": 2580,
+          "endMs": 3120
+        },
+        {
+          "text": "превращает",
+          "startMs": 3120,
+          "endMs": 3960
+        },
+        {
+          "text": "репозиторий",
+          "startMs": 3960,
+          "endMs": 4860
+        },
+        {
+          "text": "в",
+          "startMs": 4860,
+          "endMs": 4980
+        },
+        {
+          "text": "компактный",
+          "startMs": 4980,
+          "endMs": 5620
+        },
+        {
+          "text": "граф,",
+          "startMs": 5620,
+          "endMs": 5920
+        },
+        {
+          "text": "скелеты",
+          "startMs": 6120,
+          "endMs": 6920
+        },
+        {
+          "text": "кода",
+          "startMs": 6920,
+          "endMs": 7400
+        },
+        {
+          "text": "и",
+          "startMs": 7400,
+          "endMs": 7760
+        },
+        {
+          "text": "структурированный",
+          "startMs": 7760,
+          "endMs": 8560
+        },
+        {
+          "text": "контекст.",
+          "startMs": 8560,
+          "endMs": 9120
+        },
+        {
+          "text": "Агент",
+          "startMs": 9300,
+          "endMs": 9720
+        },
+        {
+          "text": "получает",
+          "startMs": 9720,
+          "endMs": 10160
+        },
+        {
+          "text": "релевантную",
+          "startMs": 10160,
+          "endMs": 10740
+        },
+        {
+          "text": "часть",
+          "startMs": 10740,
+          "endMs": 10960
+        },
+        {
+          "text": "проекта",
+          "startMs": 10960,
+          "endMs": 11500
+        },
+        {
+          "text": "для",
+          "startMs": 11500,
+          "endMs": 11620
+        },
+        {
+          "text": "текущего",
+          "startMs": 11620,
+          "endMs": 12080
+        },
+        {
+          "text": "шага",
+          "startMs": 12080,
+          "endMs": 12520
+        },
+        {
+          "text": "и",
+          "startMs": 12520,
+          "endMs": 12960
+        },
+        {
+          "text": "может",
+          "startMs": 12960,
+          "endMs": 13200
+        },
+        {
+          "text": "опираться",
+          "startMs": 13200,
+          "endMs": 13660
+        },
+        {
+          "text": "на",
+          "startMs": 13660,
+          "endMs": 13820
+        },
+        {
+          "text": "проверяемые",
+          "startMs": 13820,
+          "endMs": 14540
+        },
+        {
+          "text": "факты.",
+          "startMs": 14540,
+          "endMs": 15040
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-fm3AlgX+NlEjpV1tH1HKf8QW5hAhfm1ulFHzCYgQzgQ="
+}

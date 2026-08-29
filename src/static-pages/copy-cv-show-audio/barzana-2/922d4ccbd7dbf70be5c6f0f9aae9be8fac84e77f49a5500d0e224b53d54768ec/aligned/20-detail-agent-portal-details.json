@@ -1,0 +1,501 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-kjWa8VtmLRigBs9UVhhaH5rHCoSspD56uoRX9ZleEFY=",
+  "media": {
+    "hash": "sha256:fa68ddfce8d2f2e228ce34e3514a32993e9e450e137e97c829450cac4cf75150",
+    "durationMs": 45490,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 45490,
+      "speaker": "guide",
+      "transcript": "Agent Portal – мой open-source проект. Я придумал и реализовал его архитектуру, а в работе мы использовали его как общую среду для агентной разработки. В центре находится исполняемая Kanban-доска. Каждая колонка запускает часть процесса и может получить свои действия, роли и пул специализированных агентов. Для задач с кодом система создает изолированную рабочую копию и ветку. Один агент выполняет работу, другой независимо проверяет результат. Успешный аудит открывает путь к публикации, а конфликт переводит карточку к решению человека. Модели и подписки объединяются в группы ресурсов, поэтому этап получает исполнителя с подходящими возможностями и доступным лимитом.",
+      "words": [
+        {
+          "text": "Agent",
+          "startMs": 0,
+          "endMs": 380
+        },
+        {
+          "text": "Portal",
+          "startMs": 380,
+          "endMs": 1000
+        },
+        {
+          "text": "–",
+          "startMs": 1000,
+          "endMs": 1380
+        },
+        {
+          "text": "мой",
+          "startMs": 1380,
+          "endMs": 1500
+        },
+        {
+          "text": "open",
+          "startMs": 1500,
+          "endMs": 1980
+        },
+        {
+          "text": "-source",
+          "startMs": 1980,
+          "endMs": 2380
+        },
+        {
+          "text": "проект.",
+          "startMs": 2380,
+          "endMs": 2900
+        },
+        {
+          "text": "Я",
+          "startMs": 3200,
+          "endMs": 3580
+        },
+        {
+          "text": "придумал",
+          "startMs": 3580,
+          "endMs": 4160
+        },
+        {
+          "text": "и",
+          "startMs": 4160,
+          "endMs": 4440
+        },
+        {
+          "text": "реализовал",
+          "startMs": 4440,
+          "endMs": 5160
+        },
+        {
+          "text": "его",
+          "startMs": 5160,
+          "endMs": 5440
+        },
+        {
+          "text": "архитектуру,",
+          "startMs": 5440,
+          "endMs": 6280
+        },
+        {
+          "text": "а",
+          "startMs": 6440,
+          "endMs": 6760
+        },
+        {
+          "text": "в",
+          "startMs": 6760,
+          "endMs": 6860
+        },
+        {
+          "text": "работе",
+          "startMs": 6860,
+          "endMs": 7280
+        },
+        {
+          "text": "мы",
+          "startMs": 7280,
+          "endMs": 7400
+        },
+        {
+          "text": "использовали",
+          "startMs": 7400,
+          "endMs": 7960
+        },
+        {
+          "text": "его",
+          "startMs": 7960,
+          "endMs": 8220
+        },
+        {
+          "text": "как",
+          "startMs": 8220,
+          "endMs": 8500
+        },
+        {
+          "text": "общую",
+          "startMs": 8500,
+          "endMs": 9020
+        },
+        {
+          "text": "среду",
+          "startMs": 9020,
+          "endMs": 9460
+        },
+        {
+          "text": "для",
+          "startMs": 9460,
+          "endMs": 9700
+        },
+        {
+          "text": "агентной",
+          "startMs": 9700,
+          "endMs": 10220
+        },
+        {
+          "text": "разработки.",
+          "startMs": 10220,
+          "endMs": 10860
+        },
+        {
+          "text": "В",
+          "startMs": 11000,
+          "endMs": 11200
+        },
+        {
+          "text": "центре",
+          "startMs": 11200,
+          "endMs": 11560
+        },
+        {
+          "text": "находится",
+          "startMs": 11560,
+          "endMs": 12140
+        },
+        {
+          "text": "исполняемая",
+          "startMs": 12140,
+          "endMs": 13120
+        },
+        {
+          "text": "Kanban",
+          "startMs": 13120,
+          "endMs": 13600
+        },
+        {
+          "text": "-доска.",
+          "startMs": 13600,
+          "endMs": 14120
+        },
+        {
+          "text": "Каждая",
+          "startMs": 14460,
+          "endMs": 14920
+        },
+        {
+          "text": "колонка",
+          "startMs": 14920,
+          "endMs": 15420
+        },
+        {
+          "text": "запускает",
+          "startMs": 15420,
+          "endMs": 16100
+        },
+        {
+          "text": "часть",
+          "startMs": 16100,
+          "endMs": 16380
+        },
+        {
+          "text": "процесса",
+          "startMs": 16380,
+          "endMs": 17160
+        },
+        {
+          "text": "и",
+          "startMs": 17160,
+          "endMs": 17520
+        },
+        {
+          "text": "может",
+          "startMs": 17520,
+          "endMs": 17800
+        },
+        {
+          "text": "получить",
+          "startMs": 17800,
+          "endMs": 18300
+        },
+        {
+          "text": "свои",
+          "startMs": 18300,
+          "endMs": 18600
+        },
+        {
+          "text": "действия,",
+          "startMs": 18600,
+          "endMs": 19180
+        },
+        {
+          "text": "роли",
+          "startMs": 19540,
+          "endMs": 19960
+        },
+        {
+          "text": "и",
+          "startMs": 19960,
+          "endMs": 20140
+        },
+        {
+          "text": "пул",
+          "startMs": 20140,
+          "endMs": 20320
+        },
+        {
+          "text": "специализированных",
+          "startMs": 20320,
+          "endMs": 21300
+        },
+        {
+          "text": "агентов.",
+          "startMs": 21300,
+          "endMs": 21880
+        },
+        {
+          "text": "Для",
+          "startMs": 22100,
+          "endMs": 22320
+        },
+        {
+          "text": "задач",
+          "startMs": 22320,
+          "endMs": 22620
+        },
+        {
+          "text": "с",
+          "startMs": 22620,
+          "endMs": 22820
+        },
+        {
+          "text": "кодом",
+          "startMs": 22820,
+          "endMs": 23220
+        },
+        {
+          "text": "система",
+          "startMs": 23220,
+          "endMs": 23700
+        },
+        {
+          "text": "создает",
+          "startMs": 23700,
+          "endMs": 24200
+        },
+        {
+          "text": "изолированную",
+          "startMs": 24200,
+          "endMs": 25120
+        },
+        {
+          "text": "рабочую",
+          "startMs": 25120,
+          "endMs": 25680
+        },
+        {
+          "text": "копию",
+          "startMs": 25680,
+          "endMs": 26060
+        },
+        {
+          "text": "и",
+          "startMs": 26060,
+          "endMs": 26200
+        },
+        {
+          "text": "ветку.",
+          "startMs": 26200,
+          "endMs": 26500
+        },
+        {
+          "text": "Один",
+          "startMs": 26500,
+          "endMs": 27060
+        },
+        {
+          "text": "агент",
+          "startMs": 27060,
+          "endMs": 27400
+        },
+        {
+          "text": "выполняет",
+          "startMs": 27400,
+          "endMs": 27940
+        },
+        {
+          "text": "работу,",
+          "startMs": 27940,
+          "endMs": 28380
+        },
+        {
+          "text": "другой",
+          "startMs": 28580,
+          "endMs": 28880
+        },
+        {
+          "text": "независимо",
+          "startMs": 28880,
+          "endMs": 29480
+        },
+        {
+          "text": "проверяет",
+          "startMs": 29480,
+          "endMs": 29980
+        },
+        {
+          "text": "результат.",
+          "startMs": 29980,
+          "endMs": 30380
+        },
+        {
+          "text": "Успешный",
+          "startMs": 30620,
+          "endMs": 31100
+        },
+        {
+          "text": "аудит",
+          "startMs": 31100,
+          "endMs": 31560
+        },
+        {
+          "text": "открывает",
+          "startMs": 31560,
+          "endMs": 32120
+        },
+        {
+          "text": "путь",
+          "startMs": 32120,
+          "endMs": 32420
+        },
+        {
+          "text": "к",
+          "startMs": 32420,
+          "endMs": 32520
+        },
+        {
+          "text": "публикации,",
+          "startMs": 32520,
+          "endMs": 33320
+        },
+        {
+          "text": "а",
+          "startMs": 33480,
+          "endMs": 33680
+        },
+        {
+          "text": "конфликт",
+          "startMs": 33680,
+          "endMs": 34220
+        },
+        {
+          "text": "переводит",
+          "startMs": 34220,
+          "endMs": 34700
+        },
+        {
+          "text": "карточку",
+          "startMs": 34700,
+          "endMs": 35340
+        },
+        {
+          "text": "к",
+          "startMs": 35340,
+          "endMs": 35500
+        },
+        {
+          "text": "решению",
+          "startMs": 35500,
+          "endMs": 35960
+        },
+        {
+          "text": "человека.",
+          "startMs": 35960,
+          "endMs": 36500
+        },
+        {
+          "text": "Модели",
+          "startMs": 36860,
+          "endMs": 37460
+        },
+        {
+          "text": "и",
+          "startMs": 37460,
+          "endMs": 37620
+        },
+        {
+          "text": "подписки",
+          "startMs": 37620,
+          "endMs": 38180
+        },
+        {
+          "text": "объединяются",
+          "startMs": 38180,
+          "endMs": 39040
+        },
+        {
+          "text": "в",
+          "startMs": 39040,
+          "endMs": 39200
+        },
+        {
+          "text": "группы",
+          "startMs": 39200,
+          "endMs": 39480
+        },
+        {
+          "text": "ресурсов,",
+          "startMs": 39480,
+          "endMs": 40080
+        },
+        {
+          "text": "поэтому",
+          "startMs": 40220,
+          "endMs": 40680
+        },
+        {
+          "text": "этап",
+          "startMs": 40680,
+          "endMs": 41040
+        },
+        {
+          "text": "получает",
+          "startMs": 41040,
+          "endMs": 41520
+        },
+        {
+          "text": "исполнителя",
+          "startMs": 41520,
+          "endMs": 42140
+        },
+        {
+          "text": "с",
+          "startMs": 42140,
+          "endMs": 42280
+        },
+        {
+          "text": "подходящими",
+          "startMs": 42280,
+          "endMs": 43000
+        },
+        {
+          "text": "возможностями",
+          "startMs": 43000,
+          "endMs": 43880
+        },
+        {
+          "text": "и",
+          "startMs": 43880,
+          "endMs": 44180
+        },
+        {
+          "text": "доступным",
+          "startMs": 44180,
+          "endMs": 44800
+        },
+        {
+          "text": "лимитом.",
+          "startMs": 44800,
+          "endMs": 45380
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-LeYgypDyD3mCmVpLphti3dc5sCXcjwRHsynPYZRMrK0="
+}

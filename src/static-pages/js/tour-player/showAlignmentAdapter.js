@@ -1,54 +1,18 @@
 import {
-  SHOW_ALIGNED_SEQUENCE_VERSION,
   ShowAlignedMediaRuntime,
-  createShowAlignedCueSchedule,
   validateShowAlignedSequence,
 } from 'symbiote-ui/chat/show-runtime';
-import { resolveCvShowLocalAudioConfig } from './localNarration.js';
-import { adaptCvShowDirective } from './showAdapter.js';
+import { getCvShowRuntimeAuthority } from './cvShowRuntimeAuthority.js';
+import {
+  createCvShowEntryTuple,
+  projectCvShowDirective,
+} from './presentationProjectAdapter.js';
+import {
+  loadCvShowWebAudioRelease,
+  resolveCvShowWebAudioConfig,
+} from './webAudioRelease.js';
 
-const ALIGNMENT_MANIFEST_VERSION = 'cv-show-whisper-alignment-manifest-v1';
-const ALIGNMENT_MODEL = 'large-v3-turbo';
-const JSON_FILE_RE = /^(?:aligned\/)?[a-z0-9][a-z0-9._/-]*\.json$/u;
-
-const CV_SHOW_AUDIO_ANCHORS = Object.freeze({
-  'positioning.open': Object.freeze({ anchor: 'turn-start', offsetMs: 0 }),
-  'positioning.experience-frame': Object.freeze({
-    anchor: 'speech', quote: 'За годы работы', occurrence: 1, edge: 'start', offsetMs: 0,
-  }),
-  'positioning.tenure-marker': Object.freeze({
-    anchor: 'speech', quote: 'задачи менялись', occurrence: 1, edge: 'start', offsetMs: 0,
-  }),
-  'positioning.team-pause': Object.freeze({
-    anchor: 'speech', quote: 'вместе с командой', occurrence: 1, edge: 'start', offsetMs: 0,
-  }),
-  'positioning.workspace-transition': Object.freeze({
-    anchor: 'speech', quote: 'А дальше', occurrence: 1, edge: 'start', offsetMs: 0,
-  }),
-  'workspace.intro-frame': Object.freeze({
-    anchor: 'speech', quote: 'В 2026 году', occurrence: 1, edge: 'start', offsetMs: 0,
-  }),
-  'workspace.portable-config': Object.freeze({
-    anchor: 'speech', quote: 'Результат сохраняется', occurrence: 1, edge: 'start', offsetMs: 0,
-  }),
-  'workspace.agent-portal-card': Object.freeze({
-    anchor: 'speech', quote: 'Agent Portal', occurrence: 1, edge: 'start', offsetMs: 0,
-  }),
-  'workspace.video-studio-card': Object.freeze({
-    anchor: 'speech', quote: 'Video Studio', occurrence: 1, edge: 'start', offsetMs: 0,
-  }),
-});
-
-function primaryLocale(value) {
-  return String(value || '').trim().toLowerCase().split(/[-_]/u)[0];
-}
-
-function storyEntries(story) {
-  return [
-    ...(story?.scenes || []).map((entry) => ({ kind: 'short', entry })),
-    ...Object.values(story?.branches || {}).map((entry) => ({ kind: 'detail', entry })),
-  ];
-}
+const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
 function invalidAlignment(reason) {
   return Object.assign(
@@ -57,71 +21,73 @@ function invalidAlignment(reason) {
   );
 }
 
-export function resolveCvShowAlignmentConfig(options = {}) {
-  const audio = resolveCvShowLocalAudioConfig(options);
-  if (!audio) return null;
-  const manifestUrl = new URL(audio.alignmentManifest, audio.manifestUrl);
-  if (manifestUrl.origin !== new URL(audio.manifestUrl).origin) return null;
-  return Object.freeze({ ...audio, alignmentManifestUrl: manifestUrl.href });
-}
-
-export function validateCvShowAlignmentManifest(manifest, story, config) {
-  if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
-    throw invalidAlignment('payload');
-  }
-  if (manifest.version !== ALIGNMENT_MANIFEST_VERSION) throw invalidAlignment('version');
-  if (manifest.model !== ALIGNMENT_MODEL) throw invalidAlignment('model');
-  if (manifest.alignedSequenceVersion !== SHOW_ALIGNED_SEQUENCE_VERSION) {
-    throw invalidAlignment('aligned sequence version');
-  }
-  if (primaryLocale(manifest.locale) !== primaryLocale(story?.narrationLocale)) {
-    throw invalidAlignment('locale');
-  }
-  if (manifest.story?.contractRevision !== story?.contractRevision) {
-    throw invalidAlignment('story revision');
-  }
-  const expected = storyEntries(story);
-  if (expected.length !== 30 || manifest.clips?.length !== expected.length) {
-    throw invalidAlignment('clip count');
-  }
-  const manifestUrl = new URL(config.alignmentManifestUrl);
-  const byId = new Map();
-  for (let [index, expectedItem] of expected.entries()) {
-    const clip = manifest.clips[index];
-    const entry = expectedItem.entry;
-    if (
-      clip?.index !== index + 1
-      || clip.kind !== expectedItem.kind
-      || clip.id !== entry.id
-      || !String(clip.sourceAudioSha256 || '')
-      || !String(clip.alignedSequenceHash || '').startsWith(`${SHOW_ALIGNED_SEQUENCE_VERSION}:`)
-      || !JSON_FILE_RE.test(String(clip.alignedSequenceFile || ''))
-      || clip.metrics?.timingCoverage !== 1
-    ) {
-      throw invalidAlignment(`clip ${index + 1}`);
-    }
-    const sequenceUrl = new URL(clip.alignedSequenceFile, manifestUrl);
-    if (sequenceUrl.origin !== manifestUrl.origin) throw invalidAlignment(`clip origin ${index + 1}`);
-    byId.set(clip.id, Object.freeze({ ...clip, sequenceUrl: sequenceUrl.href }));
+function captureAuthoringView(getAuthoringView) {
+  const source = getAuthoringView?.();
+  if (
+    !source?.project
+    || !source?.base
+    || !source?.identity?.snapshot
+    || !source?.identity?.media
+    || !source?.mediaRegistry
+  ) {
+    throw invalidAlignment('authoring view');
   }
   return Object.freeze({
-    version: manifest.version,
-    locale: primaryLocale(manifest.locale),
-    model: manifest.model,
-    story: Object.freeze({ ...manifest.story }),
-    aggregate: Object.freeze({ ...manifest.aggregate }),
-    clips: Object.freeze([...byId.values()]),
-    byId,
+    base: Object.freeze({
+      revision: source.base.revision,
+      authoringProjectHash: source.base.authoringProjectHash,
+    }),
+    identity: Object.freeze(structuredClone(source.identity)),
+    project: structuredClone(source.project),
+    mediaRegistry: structuredClone(source.mediaRegistry),
   });
 }
 
-export function resolveCvShowAudioAnchor(directive, index, total) {
-  const exact = CV_SHOW_AUDIO_ANCHORS[directive?.id];
-  if (exact) return exact;
-  if (directive?.type === 'idle' || directive?.type === 'chat-action' || index === total - 1) {
-    return Object.freeze({ anchor: 'turn-end', offsetMs: 0 });
+async function sha256Hex(bytes) {
+  if (!globalThis.crypto?.subtle) throw invalidAlignment('SHA-256 unavailable');
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), (value) => value.toString(16).padStart(2, '0')).join('');
+}
+
+async function readAlignedSequenceResponse(response, clip) {
+  if (!response?.ok) throw invalidAlignment(`HTTP ${response?.status || 0}`);
+  if (typeof response.arrayBuffer !== 'function') {
+    throw invalidAlignment(`raw aligned sequence bytes ${clip.id}`);
   }
-  return Object.freeze({ anchor: 'turn-start', offsetMs: 0 });
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  const observedHash = await sha256Hex(bytes);
+  if (observedHash !== clip.alignedSequenceSha256) {
+    throw invalidAlignment(`raw aligned sequence hash ${clip.id}`);
+  }
+  try {
+    return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+  } catch {
+    throw invalidAlignment(`aligned sequence JSON ${clip.id}`);
+  }
+}
+
+export function resolveCvShowAudioAnchor(directive, index, total) {
+  void index;
+  void total;
+  const timing = directive?.timing;
+  if (timing?.phase === 'setup') {
+    return Object.freeze({ anchor: 'turn-start', offsetMs: 0 });
+  }
+  if (
+    timing?.phase !== 'speech'
+    || timing.anchor !== 'speech'
+    || !String(timing.quote || '')
+    || !(Number(timing.offsetMs) < 0)
+  ) {
+    throw invalidAlignment(`directive timing ${directive?.id || ''}`);
+  }
+  return Object.freeze({
+    anchor: 'speech',
+    quote: timing.quote,
+    occurrence: Number(timing.occurrence) || 1,
+    edge: timing.edge === 'end' ? 'end' : 'start',
+    offsetMs: Number(timing.offsetMs),
+  });
 }
 
 /**
@@ -134,10 +100,10 @@ export function partitionCvShowAlignedDirectives(directives = []) {
   const sceneSetup = [];
   const scheduled = [];
   for (let [index, source] of directives.entries()) {
-    const at = resolveCvShowAudioAnchor(source, index, directives.length);
-    if (source?.type === 'navigate' && at.anchor === 'turn-start' && at.offsetMs === 0) {
+    if (source?.timing?.phase === 'setup') {
       sceneSetup.push(source);
     } else {
+      const at = resolveCvShowAudioAnchor(source, index, directives.length);
       scheduled.push(Object.freeze({ index, source, at }));
     }
   }
@@ -147,6 +113,25 @@ export function partitionCvShowAlignedDirectives(directives = []) {
   });
 }
 
+export function requireCvShowSceneSetupSuccess(receipt, entryId = '') {
+  const setupActions = receipt?.receipts;
+  const setupAction = setupActions?.[0];
+  if (
+    receipt?.status === 'success'
+    && Array.isArray(setupActions)
+    && setupActions.length === 1
+    && setupAction?.status === 'success'
+    && setupAction.result?.status === 'completed'
+  ) {
+    return receipt;
+  }
+  const status = String(receipt?.status || 'missing');
+  throw Object.assign(
+    new Error(`CV Show scene setup failed: ${entryId}/${status}`),
+    { code: 'CV_SHOW_SCENE_SETUP_FAILED', receipt },
+  );
+}
+
 /**
  * @param {{
  *   url?: string,
@@ -154,6 +139,7 @@ export function partitionCvShowAlignedDirectives(directives = []) {
  *   fetchImpl?: typeof globalThis.fetch,
  *   appConfig?: any,
  *   userSettings?: any,
+ *   getAuthoringView?: () => any,
  * }} [options]
  */
 export function createCvShowAlignmentController({
@@ -162,6 +148,7 @@ export function createCvShowAlignmentController({
   fetchImpl = globalThis.fetch,
   appConfig,
   userSettings,
+  getAuthoringView = () => cvShowRuntimeAuthority.getView(),
 } = {}) {
   let manifest = null;
   let config = null;
@@ -202,14 +189,13 @@ export function createCvShowAlignmentController({
           credentials: 'same-origin',
           signal: requestController.signal,
         });
-        if (!response?.ok) throw invalidAlignment(`HTTP ${response?.status || 0}`);
-        const sequence = await response.json();
+        const sequence = await readAlignedSequenceResponse(response, clip);
         validateShowAlignedSequence(sequence);
         if (
           sequence.hash !== clip.alignedSequenceHash
-          || sequence.media?.hash !== `sha256:${clip.sourceAudioSha256}`
+          || sequence.media?.hash !== `sha256:${clip.masterWavSha256}`
           || sequence.timelineHash !== clip.timelineHash
-          || sequence.media?.durationMs !== clip.mediaDurationMs
+          || sequence.media?.durationMs !== clip.masterDurationMs
         ) {
           throw invalidAlignment(`provenance ${clip.id}`);
         }
@@ -230,25 +216,26 @@ export function createCvShowAlignmentController({
     get snapshot() {
       return Object.freeze({
         available: controller.available,
-        version: manifest?.version || '',
-        model: manifest?.model || '',
+        version: manifest?.schemaVersion || '',
+        schemaVersion: manifest?.schemaVersion || '',
+        releaseId: manifest?.releaseId || '',
         clipCount: manifest?.clips?.length || 0,
-        timingCoverage: manifest?.aggregate?.timingCoverage || 0,
+        timingCoverage: controller.available ? 1 : 0,
       });
     },
     async prepare(story) {
       cancel('CV Show alignment configuration changed');
-      config = resolveCvShowAlignmentConfig({ url, baseUrl, appConfig, userSettings });
+      manifest = null;
+      config = resolveCvShowWebAudioConfig({ url, baseUrl, appConfig, userSettings });
       if (!config || typeof fetchImpl !== 'function') return controller.snapshot;
       manifestController = new AbortController();
       try {
-        const response = await fetchImpl(config.alignmentManifestUrl, {
-          cache: 'default',
-          credentials: 'same-origin',
+        manifest = await loadCvShowWebAudioRelease({
+          story,
+          config,
+          fetchImpl,
           signal: manifestController.signal,
         });
-        if (!response?.ok) throw invalidAlignment(`HTTP ${response?.status || 0}`);
-        manifest = validateCvShowAlignmentManifest(await response.json(), story, config);
       } catch (error) {
         if (error?.name === 'AbortError') return controller.snapshot;
         manifest = null;
@@ -266,48 +253,132 @@ export function createCvShowAlignmentController({
       retain([String(id || '')]);
     },
     cancel,
-    /** @param {{ entry?: any, media?: any, resolveText?: any, onCue?: any, onReset?: any, onSeekFailure?: any }} [options] */
+    /** @param {{ entry?: any, media?: any, audioClip?: any, checkpointMs?: number | null, runPresentationOperation?: any, onReceipt?: any, onReset?: any, onSeekFailure?: any }} [options] */
     async createEntryRuntime(options = {}) {
+      const authoringView = captureAuthoringView(getAuthoringView);
       const {
         entry,
         media,
-        resolveText,
-        onCue,
+        audioClip,
+        checkpointMs = null,
+        runPresentationOperation,
+        onReceipt,
         onReset,
         onSeekFailure,
       } = options;
       if (!controller.available || !entry || !media) return null;
+      if (typeof runPresentationOperation !== 'function') {
+        throw invalidAlignment(`presentation adapter ${entry.id}`);
+      }
       retain([entry.id]);
       const sequence = await loadSequence(entry.id);
-      const sourceById = new Map();
-      const { scheduled } = partitionCvShowAlignedDirectives(entry.directives);
-      const cues = scheduled.map(({ source, index, at }) => {
-        const adapted = adaptCvShowDirective(source, { resolveText });
-        const cueId = `${String(index).padStart(3, '0')}:${source.id}`;
-        sourceById.set(cueId, source);
-        return {
-          cueId,
-          turnIndex: 0,
-          at,
-          directive: adapted.directive,
-        };
+      const alignmentClip = manifest.byId.get(entry.id);
+      let tuple = null;
+      const adapterMethod = async (operation, kind) => runPresentationOperation(Object.freeze({
+        ...operation,
+        kind,
+        source: projectCvShowDirective(operation.projectCell, tuple.project),
+      }));
+      tuple = createCvShowEntryTuple(authoringView.project, entry.id, sequence, {
+        checkpointMs,
+        mediaAdmission: { audioClip, alignmentClip },
+        mediaAncestry: authoringView.mediaRegistry,
+        adapter: {
+          runInteraction: (operation) => adapterMethod(operation, 'interaction'),
+          runAttention: (operation) => adapterMethod(operation, 'attention'),
+          waitForState: (operation) => adapterMethod(operation, 'state'),
+        },
+        onReceipt,
       });
-      const clip = manifest.byId.get(entry.id);
-      const schedule = createShowAlignedCueSchedule(sequence, cues, {
-        isWordReliable: () => (
-          clip.metrics?.timingCoverage === 1
-          && clip.metrics?.observedWordsMatch === true
-        ),
-      });
-      const runtime = new ShowAlignedMediaRuntime({
+      if (
+        tuple.masterProjectHash !== authoringView.base.authoringProjectHash
+        || tuple.masterRevision !== authoringView.base.revision
+      ) {
+        throw invalidAlignment(`authoring base ${entry.id}`);
+      }
+      const mediaRuntime = new ShowAlignedMediaRuntime({
         media,
-        schedule,
+        schedule: [],
         onReset,
         onSeekFailure,
-        onCue: (receipt) => onCue?.(Object.freeze({
-          ...receipt,
-          source: sourceById.get(receipt.cue.cueId),
-        })),
+      });
+      let disposed = false;
+      const sampleExecution = (reason) => {
+        if (disposed || tuple.execution.snapshot.state !== 'running') {
+          return tuple.execution.snapshot;
+        }
+        const mediaTimeMs = tuple.schedule.presentationStartMs
+          + Math.max(0, Math.round(Number(media.currentTime || 0) * 1_000));
+        try {
+          return tuple.execution.sample({ mediaTimeMs, reason });
+        } catch (error) {
+          onSeekFailure?.(Object.freeze({
+            status: 'failed',
+            reason: error.code || 'presentation-sample-failed',
+            operationId: tuple.execution.snapshot.activeOperationId,
+            requestedMs: mediaTimeMs,
+            observedMs: tuple.execution.snapshot.mediaTimeMs,
+            phase: 'presentation-sample',
+          }));
+          return tuple.execution.snapshot;
+        }
+      };
+      const mediaListeners = {
+        play: () => {
+          if (tuple.execution.snapshot.state === 'paused') tuple.execution.resume();
+          sampleExecution('media-play');
+        },
+        playing: () => sampleExecution('media-playing'),
+        timeupdate: () => sampleExecution('media-timeupdate'),
+        ended: () => sampleExecution('media-ended'),
+      };
+      for (let [type, listener] of Object.entries(mediaListeners)) {
+        media.addEventListener?.(type, listener);
+      }
+      const runSetup = async () => {
+        tuple.execution.sample({ mediaTimeMs: 0, reason: 'entry-setup' });
+        const snapshot = await tuple.execution.whenIdle();
+        const setupCell = tuple.schedule.cells.find((cell) => (
+          cell.kind !== 'narration' && cell.startMs === 0
+        ));
+        const terminal = snapshot.terminal.find(({ cellId }) => cellId === setupCell?.cellId);
+        if (terminal?.status !== 'completed') {
+          throw Object.assign(
+            new Error(`CV Show presentation setup failed: ${entry.id}`),
+            { code: 'CV_SHOW_SCENE_SETUP_FAILED', snapshot },
+          );
+        }
+        return snapshot;
+      };
+      const runtime = Object.freeze({
+        media,
+        async loadAndRestorePlayback(snapshot, context) {
+          await runSetup();
+          await tuple.execution.pause();
+          return mediaRuntime.loadAndRestorePlayback(snapshot, context);
+        },
+        pause() {
+          return mediaRuntime.pause();
+        },
+        resume() {
+          tuple.execution.resume();
+          sampleExecution('runtime-resume');
+          return mediaRuntime.resume();
+        },
+        whenIdle: () => tuple.execution.whenIdle(),
+        stop() {
+          void tuple.execution.stop();
+          return mediaRuntime.pause();
+        },
+        dispose() {
+          if (disposed) return;
+          disposed = true;
+          for (let [type, listener] of Object.entries(mediaListeners)) {
+            media.removeEventListener?.(type, listener);
+          }
+          void tuple.execution.dispose();
+          mediaRuntime.dispose();
+        },
       });
       const captionTrack = Object.freeze((sequence.turns || []).flatMap((turn) => (
         (turn.words || []).map((word) => Object.freeze({
@@ -318,14 +389,21 @@ export function createCvShowAlignmentController({
       )));
       return Object.freeze({
         runtime,
-        schedule,
+        authoringBase: authoringView.base,
+        authoringIdentity: authoringView.identity,
+        masterProjectHash: tuple.masterProjectHash,
+        masterRevision: tuple.masterRevision,
+        schedule: tuple.schedule,
+        project: tuple.project,
+        timeline: tuple.timeline,
+        alignedSequence: tuple.alignedSequence,
         captionTrack,
-        alignedSequenceHash: sequence.hash,
+        alignedSequenceHash: tuple.alignedSequence.hash,
+        sourceAlignedSequenceHash: sequence.hash,
         mediaHash: sequence.media.hash,
-        exactCueCount: schedule.filter((cue) => (
-          cue.alignment.resolution === 'exact' || cue.alignment.resolution === 'occurrence'
-        )).length,
-        segmentCueCount: schedule.filter((cue) => cue.alignment.resolution === 'segment').length,
+        speechGroupCount: tuple.includedSpeechDirectiveIds.length,
+        execution: tuple.execution,
+        includedSpeechDirectiveIds: tuple.includedSpeechDirectiveIds,
       });
     },
   };

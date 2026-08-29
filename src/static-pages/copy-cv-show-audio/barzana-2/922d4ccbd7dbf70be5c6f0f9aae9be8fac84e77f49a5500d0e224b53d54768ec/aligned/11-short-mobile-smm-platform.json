@@ -1,0 +1,296 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-jouw3343cu87tHuZ+u5yq4TEQ5+SUZrdWSIZb1F/X94=",
+  "media": {
+    "hash": "sha256:a849003c1618b598fb122e739d1dfea57ea2c49cb5bf480e39fcd5929d85d7cb",
+    "durationMs": 31810,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 31810,
+      "speaker": "guide",
+      "transcript": "Отдельный прикладной кейс – мобильная SMM-платформа для управляемой работы с несколькими профилями. В одном контуре собраны медиаматериалы, публикации, расписания, входящие обращения и очередь. Android устройства выполняют стабильные операции по готовым сценариям. При изменении интерфейса агент останавливает процесс, анализирует экран и готовит обновление сценария для проверки. Лимиты, дедупликация, согласование и журнал сохраняют управляемость действий.",
+      "words": [
+        {
+          "text": "Отдельный",
+          "startMs": 0,
+          "endMs": 660
+        },
+        {
+          "text": "прикладной",
+          "startMs": 660,
+          "endMs": 1340
+        },
+        {
+          "text": "кейс",
+          "startMs": 1340,
+          "endMs": 1760
+        },
+        {
+          "text": "–",
+          "startMs": 1760,
+          "endMs": 1920
+        },
+        {
+          "text": "мобильная",
+          "startMs": 1920,
+          "endMs": 2560
+        },
+        {
+          "text": "SMM",
+          "startMs": 2560,
+          "endMs": 3200
+        },
+        {
+          "text": "-платформа",
+          "startMs": 3200,
+          "endMs": 3780
+        },
+        {
+          "text": "для",
+          "startMs": 3780,
+          "endMs": 3920
+        },
+        {
+          "text": "управляемой",
+          "startMs": 3920,
+          "endMs": 4520
+        },
+        {
+          "text": "работы",
+          "startMs": 4520,
+          "endMs": 4900
+        },
+        {
+          "text": "с",
+          "startMs": 4900,
+          "endMs": 5060
+        },
+        {
+          "text": "несколькими",
+          "startMs": 5060,
+          "endMs": 5620
+        },
+        {
+          "text": "профилями.",
+          "startMs": 5620,
+          "endMs": 6280
+        },
+        {
+          "text": "В",
+          "startMs": 6540,
+          "endMs": 7000
+        },
+        {
+          "text": "одном",
+          "startMs": 7000,
+          "endMs": 7260
+        },
+        {
+          "text": "контуре",
+          "startMs": 7260,
+          "endMs": 7880
+        },
+        {
+          "text": "собраны",
+          "startMs": 7880,
+          "endMs": 8420
+        },
+        {
+          "text": "медиаматериалы,",
+          "startMs": 8420,
+          "endMs": 9380
+        },
+        {
+          "text": "публикации,",
+          "startMs": 9620,
+          "endMs": 10480
+        },
+        {
+          "text": "расписания,",
+          "startMs": 10680,
+          "endMs": 11340
+        },
+        {
+          "text": "входящие",
+          "startMs": 11480,
+          "endMs": 12080
+        },
+        {
+          "text": "обращения",
+          "startMs": 12080,
+          "endMs": 12840
+        },
+        {
+          "text": "и",
+          "startMs": 12840,
+          "endMs": 13060
+        },
+        {
+          "text": "очередь.",
+          "startMs": 13060,
+          "endMs": 13600
+        },
+        {
+          "text": "Android",
+          "startMs": 14140,
+          "endMs": 14600
+        },
+        {
+          "text": "устройства",
+          "startMs": 14600,
+          "endMs": 15480
+        },
+        {
+          "text": "выполняют",
+          "startMs": 15480,
+          "endMs": 16040
+        },
+        {
+          "text": "стабильные",
+          "startMs": 16040,
+          "endMs": 16640
+        },
+        {
+          "text": "операции",
+          "startMs": 16640,
+          "endMs": 17180
+        },
+        {
+          "text": "по",
+          "startMs": 17180,
+          "endMs": 17360
+        },
+        {
+          "text": "готовым",
+          "startMs": 17360,
+          "endMs": 17820
+        },
+        {
+          "text": "сценариям.",
+          "startMs": 17820,
+          "endMs": 18520
+        },
+        {
+          "text": "При",
+          "startMs": 18840,
+          "endMs": 19240
+        },
+        {
+          "text": "изменении",
+          "startMs": 19240,
+          "endMs": 19780
+        },
+        {
+          "text": "интерфейса",
+          "startMs": 19780,
+          "endMs": 20540
+        },
+        {
+          "text": "агент",
+          "startMs": 20540,
+          "endMs": 21060
+        },
+        {
+          "text": "останавливает",
+          "startMs": 21060,
+          "endMs": 21860
+        },
+        {
+          "text": "процесс,",
+          "startMs": 21860,
+          "endMs": 22320
+        },
+        {
+          "text": "анализирует",
+          "startMs": 22700,
+          "endMs": 23640
+        },
+        {
+          "text": "экран",
+          "startMs": 23640,
+          "endMs": 23960
+        },
+        {
+          "text": "и",
+          "startMs": 23960,
+          "endMs": 24240
+        },
+        {
+          "text": "готовит",
+          "startMs": 24240,
+          "endMs": 24720
+        },
+        {
+          "text": "обновление",
+          "startMs": 24720,
+          "endMs": 25380
+        },
+        {
+          "text": "сценария",
+          "startMs": 25380,
+          "endMs": 25960
+        },
+        {
+          "text": "для",
+          "startMs": 25960,
+          "endMs": 26180
+        },
+        {
+          "text": "проверки.",
+          "startMs": 26180,
+          "endMs": 26780
+        },
+        {
+          "text": "Лимиты,",
+          "startMs": 26780,
+          "endMs": 27560
+        },
+        {
+          "text": "дедупликация,",
+          "startMs": 27780,
+          "endMs": 28560
+        },
+        {
+          "text": "согласование",
+          "startMs": 28860,
+          "endMs": 29500
+        },
+        {
+          "text": "и",
+          "startMs": 29500,
+          "endMs": 29620
+        },
+        {
+          "text": "журнал",
+          "startMs": 29620,
+          "endMs": 30000
+        },
+        {
+          "text": "сохраняют",
+          "startMs": 30000,
+          "endMs": 30560
+        },
+        {
+          "text": "управляемость",
+          "startMs": 30560,
+          "endMs": 31220
+        },
+        {
+          "text": "действий.",
+          "startMs": 31220,
+          "endMs": 31720
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-VQ5Z3hduRHfGaTGR77UNeCHDKJ9zPkdRfjtUy+1/fVA="
+}
