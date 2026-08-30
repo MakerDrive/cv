@@ -229,6 +229,7 @@ portfolio-theme-panel {
 }
 
 portfolio-graph-panel {
+  display: block;
   position: relative;
 }
 

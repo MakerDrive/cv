@@ -42,6 +42,20 @@ async function loadCvShowStartHrefFactory(locationHref, basePath) {
   )(new URL(locationHref), () => basePath);
 }
 
+async function loadCvShowStartActivationPolicy() {
+  const source = await readFile(
+    new URL('../../src/static-pages/js/index.js', import.meta.url),
+    'utf8',
+  );
+  const declaration = source.match(
+    /function shouldHandleCvShowStartActivation\(event, anchor, options = \{\}\) \{[\s\S]*?\n\}/u,
+  )?.[0];
+  assert.ok(declaration, 'shouldHandleCvShowStartActivation declaration');
+  return Function(
+    `"use strict"; ${declaration}; return shouldHandleCvShowStartActivation;`,
+  )();
+}
+
 function createPrimaryClick(window, modifiers = {}) {
   const event = new window.Event('click', { bubbles: true, cancelable: true });
   for (const [name, value] of Object.entries({
@@ -57,7 +71,7 @@ function createPrimaryClick(window, modifiers = {}) {
   return event;
 }
 
-test('profile CV Show link keeps its deeplink query outside SPA article capture', async () => {
+test('profile CV Show link starts in the current document while preserving native share affordances', async () => {
   const getCvShowStartHref = await loadCvShowStartHrefFactory(
     'https://portfolio.example/cv/profile/photo/?lang=ru&mode=structured#profile',
     '/cv/',
@@ -70,16 +84,32 @@ test('profile CV Show link keeps its deeplink query outside SPA article capture'
   assert.equal(showUrl.searchParams.get('mode'), 'structured');
   assert.equal(showUrl.hash, '#profile');
 
+  const shouldHandleCvShowStartActivation = await loadCvShowStartActivationPolicy();
+
   const { window, document } = parseHTML('<!doctype html><html><body></body></html>');
   const entries = new Map([
     ['profile/photo', {}],
     ['projects/agent-portal', {}],
   ]);
   const selected = [];
+  const opened = [];
+  document.addEventListener('portfolio-open-tour', (event) => {
+    opened.push(event.detail?.entryId);
+  });
   document.addEventListener('click', (event) => {
     const path = event.composedPath();
     const anchor = path.find((element) => element instanceof window.HTMLAnchorElement);
     if (!anchor) return;
+    if (shouldHandleCvShowStartActivation(event, anchor, {
+      currentUrl: 'https://portfolio.example/cv/profile/photo/?lang=ru&mode=structured#profile',
+      basePath: '/cv/',
+    })) {
+      event.preventDefault();
+      document.dispatchEvent(new window.CustomEvent('portfolio-open-tour', {
+        detail: { entryId: 'positioning', source: 'cv-presentation-link' },
+      }));
+      return;
+    }
     const targetId = shouldHandleInAppActivation(event, anchor, {
       entries,
       basePath: '/cv/',
@@ -98,9 +128,15 @@ test('profile CV Show link keeps its deeplink query outside SPA article capture'
 
   const showClick = createPrimaryClick(window);
   showLink.firstElementChild.dispatchEvent(showClick);
-  assert.equal(showClick.defaultPrevented, false, 'native navigation keeps the Show URL intact');
-  assert.equal(showLink.getAttribute('target'), '_blank', 'new-tab intent remains intact');
+  assert.equal(showClick.defaultPrevented, true, 'ordinary activation stays in the live document');
+  assert.equal(showLink.getAttribute('target'), '_blank', 'the shareable href keeps its new-tab affordance');
+  assert.deepEqual(opened, ['positioning']);
   assert.deepEqual(selected, []);
+
+  const modifiedShowClick = createPrimaryClick(window, { metaKey: true });
+  showLink.firstElementChild.dispatchEvent(modifiedShowClick);
+  assert.equal(modifiedShowClick.defaultPrevented, false, 'modified activation remains native');
+  assert.deepEqual(opened, ['positioning']);
 
   const articleLink = document.createElement('a');
   articleLink.setAttribute('href', 'projects/agent-portal/?lang=ru');

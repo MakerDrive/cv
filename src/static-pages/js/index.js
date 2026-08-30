@@ -573,7 +573,7 @@ function startPortfolioChromeLocalization() {
     let detail = event.detail;
     if (detail?.source === 'reset') {
       for (let workspace of document.querySelectorAll('portfolio-workspace')) {
-        workspace.resetPanelDefaults?.('appearance-reset');
+        /** @type {any} */ (workspace).resetPanelDefaults?.('appearance-reset');
       }
       return;
     }
@@ -743,6 +743,14 @@ document.addEventListener('click', (event) => {
     path.find((el) => el instanceof HTMLAnchorElement || (el && typeof el === 'object' && 'nodeName' in el && el.nodeName === 'A'))
   );
   if (!anchor) return;
+
+  if (shouldHandleCvShowStartActivation(event, anchor)) {
+    event.preventDefault();
+    document.dispatchEvent(new CustomEvent('portfolio-open-tour', {
+      detail: { entryId: 'positioning', source: 'cv-presentation-link' },
+    }));
+    return;
+  }
 
   const targetId = shouldHandleInAppActivation(event, anchor, {
     entries: portfolioRuntime?.entries,
@@ -1036,6 +1044,35 @@ function getCvShowStartHref() {
   url.searchParams.set('showMode', 'short');
   url.searchParams.set('showEntry', 'positioning');
   return `${url.pathname}${url.search}${url.hash}`;
+}
+
+function shouldHandleCvShowStartActivation(event, anchor, options = {}) {
+  if (event?.defaultPrevented) return false;
+  if (event?.button != null && event.button !== 0) return false;
+  if (event?.metaKey || event?.ctrlKey || event?.shiftKey || event?.altKey) return false;
+  if (!anchor || anchor.hasAttribute?.('download')) return false;
+  const href = anchor.getAttribute?.('href');
+  if (!href) return false;
+
+  let currentUrl;
+  let targetUrl;
+  let baseUrl;
+  try {
+    currentUrl = new URL(options.currentUrl || location.href);
+    targetUrl = new URL(href, currentUrl);
+    baseUrl = new URL(options.basePath || getPortfolioBasePath(), currentUrl);
+  } catch {
+    return false;
+  }
+
+  const playIntent = targetUrl.searchParams.get('showPlay');
+  return targetUrl.origin === currentUrl.origin
+    && targetUrl.pathname === baseUrl.pathname
+    && targetUrl.searchParams.get('showMode') === 'short'
+    && targetUrl.searchParams.get('showEntry') === 'positioning'
+    && !targetUrl.searchParams.has('showTime')
+    && !targetUrl.searchParams.has('showDetail')
+    && (playIntent == null || playIntent === '1');
 }
 
 function protectMarkdownLinkTargets(markdown) {
@@ -2838,6 +2875,7 @@ class PortfolioGraphPanel extends HTMLElement {
     this.cancelVisibleGraphFocus();
     this.cancelDeferredVisibleGraphFocus();
     this._graphWasVisible = false;
+    this._graphViewportSize = '';
     this._graphVisibleFocusUntil = 0;
     this.cancelStructuredGraphBinding();
     this.cancelStructuredPathUpgrade({ clear: true });
@@ -2871,7 +2909,14 @@ class PortfolioGraphPanel extends HTMLElement {
     });
     this._graphDrawerObserver.observe(drawerNode, {
       attributes: true,
-      attributeFilter: ['drawer-open', 'drawer-expanded', 'drawer-rail-collapsed', 'style'],
+      attributeFilter: [
+        'collapsed',
+        'auto-collapsed',
+        'drawer-open',
+        'drawer-expanded',
+        'drawer-rail-collapsed',
+        'style',
+      ],
     });
   }
 
@@ -2911,8 +2956,7 @@ class PortfolioGraphPanel extends HTMLElement {
     this._deferredGraphFocusTimer = 0;
   }
 
-  isGraphPanelVisible() {
-    let rect = this.getBoundingClientRect?.();
+  isGraphPanelVisible(rect = this.getBoundingClientRect?.()) {
     if (!rect || rect.width < 128 || rect.height < 128) return false;
 
     let drawerNode = this.closest?.('layout-node');
@@ -2929,8 +2973,13 @@ class PortfolioGraphPanel extends HTMLElement {
   }
 
   focusGraphAfterVisibleResize() {
-    if (!this.isGraphPanelVisible()) {
+    let rect = this.getBoundingClientRect?.();
+    let viewportSize = rect
+      ? `${Math.round(rect.width)}x${Math.round(rect.height)}`
+      : '';
+    if (!this.isGraphPanelVisible(rect)) {
       this._graphWasVisible = false;
+      this._graphViewportSize = '';
       this._graphVisibleFocusUntil = 0;
       this.cancelDeferredVisibleGraphFocus();
       return;
@@ -2941,7 +2990,12 @@ class PortfolioGraphPanel extends HTMLElement {
     }
 
     let now = globalThis.performance?.now?.() || Date.now();
-    if (!this._graphWasVisible) {
+    let viewportChanged = Boolean(
+      this._graphViewportSize
+      && this._graphViewportSize !== viewportSize
+    );
+    this._graphViewportSize = viewportSize;
+    if (!this._graphWasVisible || viewportChanged) {
       this._graphWasVisible = true;
       this._graphVisibleFocusUntil = now + 600;
       this.focusVisibleGraphNow();

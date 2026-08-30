@@ -1,4 +1,5 @@
 import {
+  applyPresentationAuthoringProjectCommands,
   createPresentationAlignedSequence,
   createPresentationAuthoringProject,
   createPresentationAuthoringProjectHashes,
@@ -127,24 +128,25 @@ function exactDependency(cell, ownerId) {
 }
 
 function projectShape(project) {
+  const timeline = createPresentationAuthoringTimelineProjection(project);
   return Object.freeze({
-    cells: new Map(project.cells.map((cell) => [cell.id, Object.freeze({
-      kind: cell.kind,
-      layerId: cell.layerId,
-      replyTo: cell.kind === 'narration' ? cell.turn.replyTo || null : null,
-      role: cell.kind === 'narration'
-        ? 'narration'
-        : cell.id.endsWith(':scroll')
-          ? 'scroll'
-          : cell.timing.at.anchor === 'turn-start' ? 'setup' : 'speech',
-      turnId: cell.turnId,
-    })])),
-    cellIds: Object.freeze(project.cells.map(({ id }) => id)),
-    layerIds: Object.freeze(project.layers.map(({ id }) => id)),
+    layers: Object.freeze(project.layers.map(({ id, kind }) => Object.freeze({ id, kind }))),
+    turns: Object.freeze(timeline.turns.map(({ id, replyTo }) => Object.freeze({
+      id,
+      replyTo: replyTo || null,
+    }))),
   });
 }
 
 const CANONICAL_MASTER_SHAPE = projectShape(CV_SHOW_PRESENTATION_PROJECT);
+
+function expectedCellLayer(cell) {
+  if (cell.kind === 'narration') return 'cv-show:layer:narration';
+  if (cell.cue?.kind === 'focus') return 'cv-show:layer:focus';
+  if (cell.cue?.kind === 'annotation') return 'cv-show:layer:annotation';
+  if (cell.cue?.kind === 'interaction') return 'cv-show:layer:interaction';
+  return '';
+}
 
 export function validateCvShowMasterProject(projectInput) {
   const project = validatePresentationAuthoringProject(projectInput);
@@ -164,36 +166,48 @@ export function validateCvShowMasterProject(projectInput) {
   const turnIds = timeline.turns.map(({ id }) => id);
   if (
     new Set(turnIds).size !== 30
+    || turnIds.some((entryId, index) => entryId !== CANONICAL_MASTER_SHAPE.turns[index]?.id)
+    || timeline.turns.some(({ replyTo }, index) => (
+      (replyTo || null) !== CANONICAL_MASTER_SHAPE.turns[index]?.replyTo
+    ))
     || turnIds.some((entryId) => !cvShow.entries[entryId])
     || narrationCells.some(({ turnId }) => !cvShow.entries[turnId])
   ) {
     throw invalidProject('master turn registry');
   }
   if (
-    project.cells.length !== CANONICAL_MASTER_SHAPE.cells.size
-    || project.layers.length !== CANONICAL_MASTER_SHAPE.layerIds.length
-    || project.layers.some(({ id }, index) => id !== CANONICAL_MASTER_SHAPE.layerIds[index])
-    || project.cells.some(({ id }, index) => id !== CANONICAL_MASTER_SHAPE.cellIds[index])
+    project.layers.length !== CANONICAL_MASTER_SHAPE.layers.length
+    || project.layers.some(({ id, kind }, index) => (
+      id !== CANONICAL_MASTER_SHAPE.layers[index]?.id
+      || kind !== CANONICAL_MASTER_SHAPE.layers[index]?.kind
+    ))
   ) {
-    throw invalidProject('master structural shape');
+    throw invalidProject('master layer shape');
   }
   for (let cell of project.cells) {
-    const expected = CANONICAL_MASTER_SHAPE.cells.get(cell.id);
-    const role = cell.kind === 'narration'
-      ? 'narration'
-      : cell.id.endsWith(':scroll')
-        ? 'scroll'
-        : cell.timing.at.anchor === 'turn-start' ? 'setup' : 'speech';
     if (
-      !expected
-      || expected.kind !== cell.kind
-      || expected.layerId !== cell.layerId
-      || expected.turnId !== cell.turnId
-      || expected.replyTo !== (cell.kind === 'narration' ? cell.turn.replyTo || null : null)
-      || expected.role !== role
+      expectedCellLayer(cell) !== cell.layerId
+      || (cell.kind === 'narration' && cell.id !== `cv-show:narration:${cell.turnId}`)
+      || (cell.kind === 'cue' && !cell.id.startsWith('cv-show:cue:'))
+      || (cell.kind === 'cue' && cell.id.endsWith(':scroll')
+        && cell.cue?.interaction?.type !== 'scroll')
+      || (cell.kind === 'cue' && !cell.id.endsWith(':scroll')
+        && cell.cue?.interaction?.type === 'scroll')
+      || (cell.kind === 'cue' && !['turn-start', 'speech'].includes(cell.timing.at.anchor))
     ) {
       throw invalidProject(`unsupported structural cell ${cell.id}`);
     }
+  }
+  const authoredDirectiveIds = project.cells
+    .filter(({ kind, id }) => kind === 'cue' && !id.endsWith(':scroll'))
+    .map(({ id }) => id);
+  const metadataDirectiveIds = Object.keys(cvShow.directives);
+  if (
+    authoredDirectiveIds.length !== metadataDirectiveIds.length
+    || authoredDirectiveIds.some((id) => !Object.hasOwn(cvShow.directives, id))
+    || metadataDirectiveIds.some((id) => !authoredDirectiveIds.includes(id))
+  ) {
+    throw invalidProject('directive registry');
   }
   for (let entryId of turnIds) {
     const source = entryCells(project, entryId);
@@ -203,7 +217,17 @@ export function validateCvShowMasterProject(projectInput) {
     ));
     const setup = attention.filter(({ timing }) => timing.at.anchor === 'turn-start');
     const speech = attention.filter(({ timing }) => timing.at.anchor === 'speech');
-    if (narration.length !== 1 || setup.length !== 1 || speech.length === 0) {
+    const speechScrolls = source.filter((cell) => (
+      cell.kind === 'cue'
+      && cell.id.endsWith(':scroll')
+      && cell.timing.at.anchor === 'speech'
+    ));
+    if (
+      narration.length !== 1
+      || setup.length !== 1
+      || speech.length === 0
+      || speechScrolls.length !== speech.length
+    ) {
       throw invalidProject(`incomplete master turn ${entryId}`);
     }
     let previousCellId = null;
@@ -226,6 +250,19 @@ export function validateCvShowMasterProject(projectInput) {
   projectCvShowStory(project);
   projectCvShowAttentionTimelines(project);
   return project;
+}
+
+export function applyCvShowMasterProjectCommands(projectInput, commandInputs = []) {
+  const current = validateCvShowMasterProject(projectInput);
+  const application = applyPresentationAuthoringProjectCommands(current, commandInputs);
+  const draft = clone(application.project);
+  delete draft.hash;
+  for (const change of application.changes) {
+    const removed = change.type === 'cell.remove' ? change.cell : null;
+    if (removed?.kind !== 'cue' || removed.id.endsWith(':scroll')) continue;
+    delete draft.script.metadata.cvShow.directives[removed.id];
+  }
+  return validateCvShowMasterProject(createPresentationAuthoringProject(draft));
 }
 
 function mediaBindingIssue(binding, narrationCellHash) {

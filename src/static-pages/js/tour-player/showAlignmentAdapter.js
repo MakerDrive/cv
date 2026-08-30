@@ -13,6 +13,7 @@ import {
 } from './webAudioRelease.js';
 
 const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
+const MAX_PRESENTATION_PREROLL_MEDIA_DRIFT_MS = 50;
 
 function invalidAlignment(reason) {
   return Object.assign(
@@ -276,7 +277,7 @@ export function createCvShowAlignmentController({
       retain([String(id || '')]);
     },
     cancel,
-    /** @param {{ entry?: any, media?: any, audioClip?: any, checkpointMs?: number | null, runPresentationOperation?: any, onReceipt?: any, onReset?: any, onSeekFailure?: any }} [options] */
+    /** @param {{ entry?: any, media?: any, audioClip?: any, checkpointMs?: number | null, deferPresentationUntilPlayback?: boolean, beforeDeferredPresentation?: (() => Promise<any> | any) | null, runPresentationOperation?: any, onReceipt?: any, onReset?: any, onSeekFailure?: any }} [options] */
     async createEntryRuntime(options = {}) {
       const authoringView = captureAuthoringView(getAuthoringView);
       const {
@@ -284,6 +285,8 @@ export function createCvShowAlignmentController({
         media,
         audioClip,
         checkpointMs = null,
+        deferPresentationUntilPlayback = false,
+        beforeDeferredPresentation = null,
         runPresentationOperation,
         onReceipt,
         onReset,
@@ -332,8 +335,33 @@ export function createCvShowAlignmentController({
       });
       let disposed = false;
       let attentionGateInProgress = false;
+      let physicalPlaybackStarted = false;
+      let playbackRequested = false;
+      let deferredPresentationStarted = false;
+      let deferredPresentationCompleted = false;
+      let deferredPresentationPromise = null;
+      let deferredPresentationError = null;
+      let deferredMediaStartSeconds = 0;
+      const mutedAdmission = deferPresentationUntilPlayback && media.muted === true;
+      const normalizeDeferredMediaStart = () => {
+        const observedSeconds = Math.max(0, Number(media.currentTime || 0));
+        const driftMs = Math.abs(observedSeconds - deferredMediaStartSeconds) * 1_000;
+        if (
+          media.paused === true
+          && (mutedAdmission || driftMs <= MAX_PRESENTATION_PREROLL_MEDIA_DRIFT_MS)
+          && driftMs > 0
+        ) {
+          mediaRuntime.seek(Math.round(deferredMediaStartSeconds * 1_000), {
+            reason: 'presentation-preroll-normalization',
+          });
+        }
+      };
       const sampleExecution = (reason) => {
-        if (disposed || tuple.execution.snapshot.state !== 'running') {
+        if (
+          disposed
+          || (deferPresentationUntilPlayback && !deferredPresentationCompleted)
+          || tuple.execution.snapshot.state !== 'running'
+        ) {
           return tuple.execution.snapshot;
         }
         const mediaTimeMs = tuple.schedule.presentationStartMs
@@ -353,11 +381,16 @@ export function createCvShowAlignmentController({
         }
       };
       const mediaListeners = {
-        play: () => {
+        playing: () => {
+          physicalPlaybackStarted = true;
+          playbackRequested = true;
+          if (deferPresentationUntilPlayback && !deferredPresentationCompleted) {
+            if (!deferredPresentationStarted) void startDeferredPresentation();
+            return;
+          }
           if (tuple.execution.snapshot.state === 'paused') tuple.execution.resume();
-          sampleExecution('media-play');
+          sampleExecution('media-playing');
         },
-        playing: () => sampleExecution('media-playing'),
         timeupdate: () => sampleExecution('media-timeupdate'),
         seeking: () => {
           if (attentionGateInProgress) void tuple.execution.seek();
@@ -445,7 +478,10 @@ export function createCvShowAlignmentController({
         });
       };
       const requirePausedMediaAtStart = async (cell, receipt = null) => {
-        if (media.paused === true && Number(media.currentTime) === 0) return;
+        if (
+          media.paused === true
+          && Math.abs(Number(media.currentTime) - deferredMediaStartSeconds) < 0.0005
+        ) return;
         await tuple.execution.pause();
         throw attentionGateFailure(
           entry.id,
@@ -514,33 +550,107 @@ export function createCvShowAlignmentController({
           attentionGateInProgress = false;
         }
       };
+      const startDeferredPresentation = () => {
+        if (deferredPresentationStarted || disposed) {
+          return deferredPresentationPromise || Promise.resolve(tuple.execution.snapshot);
+        }
+        deferredPresentationStarted = true;
+        deferredPresentationPromise = (async () => {
+          mediaRuntime.pause();
+          normalizeDeferredMediaStart();
+          await beforeDeferredPresentation?.();
+          if (disposed) return tuple.execution.snapshot;
+          if (tuple.execution.snapshot.state === 'paused') tuple.execution.resume();
+          await runSetup();
+          await runCrossBoundaryAttentionGate();
+          deferredPresentationCompleted = true;
+          if (!disposed && playbackRequested) {
+            normalizeDeferredMediaStart();
+            if (mutedAdmission) media.muted = false;
+            await Promise.resolve(mediaRuntime.resume());
+          }
+          return tuple.execution.snapshot;
+        })().catch((error) => {
+          deferredPresentationCompleted = true;
+          deferredPresentationError = error;
+          playbackRequested = false;
+          const failedTerminal = error?.snapshot?.terminal?.find?.(({ status }) => (
+            status !== 'completed'
+          )) || null;
+          onSeekFailure?.(Object.freeze({
+            status: 'failed',
+            reason: error?.code || 'presentation-preroll-failed',
+            operationId: tuple.execution.snapshot.activeOperationId,
+            requestedMs: 0,
+            observedMs: Math.max(0, Math.round(Number(media.currentTime || 0) * 1_000)),
+            phase: 'presentation-preroll',
+            details: Object.freeze({
+              message: String(error?.message || ''),
+              cellId: String(error?.receipt?.cellId || failedTerminal?.cellId || ''),
+              receiptStatus: String(error?.receipt?.status || ''),
+              terminal: failedTerminal,
+              provider: error?.details || null,
+            }),
+          }));
+          return tuple.execution.snapshot;
+        });
+        return deferredPresentationPromise;
+      };
       const runtime = Object.freeze({
         media,
         async loadAndRestorePlayback(snapshot, context) {
-          await runSetup();
+          deferredMediaStartSeconds = Math.max(
+            0,
+            Number(snapshot?.positionMs || 0) / 1_000,
+          );
+          if (!deferPresentationUntilPlayback) await runSetup();
           await tuple.execution.pause();
           const generation = await mediaRuntime.loadAndRestorePlayback(snapshot, context);
           if (generation?.status !== 'completed') return generation;
-          await runCrossBoundaryAttentionGate();
+          if (!deferPresentationUntilPlayback) await runCrossBoundaryAttentionGate();
           return generation;
         },
         pause() {
+          playbackRequested = false;
           return mediaRuntime.pause();
         },
         resume() {
-          if (attentionGateInProgress) return false;
+          if (attentionGateInProgress) {
+            playbackRequested = true;
+            return true;
+          }
+          if (deferPresentationUntilPlayback && !physicalPlaybackStarted) {
+            playbackRequested = true;
+            return mediaRuntime.resume();
+          }
+          if (
+            deferPresentationUntilPlayback
+            && deferredPresentationStarted
+            && !deferredPresentationCompleted
+          ) {
+            playbackRequested = true;
+            return true;
+          }
           tuple.execution.resume();
           sampleExecution('runtime-resume');
+          playbackRequested = true;
+          if (mutedAdmission) media.muted = false;
           return mediaRuntime.resume();
         },
-        whenIdle: () => tuple.execution.whenIdle(),
+        async whenIdle() {
+          if (deferredPresentationPromise) await deferredPresentationPromise;
+          if (deferredPresentationError) throw deferredPresentationError;
+          return tuple.execution.whenIdle();
+        },
         stop() {
+          playbackRequested = false;
           void tuple.execution.stop();
           return mediaRuntime.pause();
         },
         dispose() {
           if (disposed) return;
           disposed = true;
+          playbackRequested = false;
           for (let [type, listener] of Object.entries(mediaListeners)) {
             media.removeEventListener?.(type, listener);
           }

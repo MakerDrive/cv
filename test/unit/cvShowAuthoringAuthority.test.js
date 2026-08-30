@@ -196,7 +196,7 @@ async function enable(authority, transport, regeneration = null) {
 function timingCommand(authority, id = 'test-timing') {
   const project = authority.getView().project;
   const cell = project.cells.find(({ id: cellId }) => (
-    cellId === 'cv-show:cue:positioning.experience-frame'
+    cellId === 'cv-show:cue:positioning.tenure-marker'
   ));
   return Object.freeze({
     id,
@@ -904,7 +904,7 @@ test('narration mutation invalidates only its clip and topology-invalid candidat
 
   const invalidBase = authority.view.base;
   const sourceCell = authority.view.project.cells.find(({ id }) => (
-    id === 'cv-show:cue:positioning.experience-frame'
+    id === 'cv-show:cue:positioning.tenure-marker'
   ));
   await assert.rejects(
     session.invoke('presentation_authoring_cell_add', {

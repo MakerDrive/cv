@@ -44,7 +44,7 @@ test('outer Agent dock exclusively projects mobile mode into the nested portfoli
   );
   assert.match(
     source,
-    /LayoutTree\.createSplit\('horizontal', treePanel, contentSplit, 0\.25, {/,
+    /LayoutTree\.createSplit\('horizontal', treePanel, contentSplit, PORTFOLIO_TREE_SPLIT_RATIO, {/,
   );
   assert.doesNotMatch(source, /matchMedia\(/);
 });
@@ -291,7 +291,10 @@ test('portfolio mobile graph refocuses after drawer content becomes visible', as
   assert.match(source, /this\._structuredPathReadyStyle = '';\s*portfolioRuntime\.syncCanvas\({ focus: true, focusScope: 'node-fit' }\);/);
   assert.match(source, /new ResizeObserverCtor\(\(\) => this\.scheduleVisibleGraphFocus\(\)\)/);
   assert.match(source, /new MutationObserverCtor\(\(\) => {\s*this\._graphWasVisible = false;\s*this\.scheduleVisibleGraphFocus\(\);/);
-  assert.match(source, /attributeFilter: \['drawer-open', 'drawer-expanded', 'drawer-rail-collapsed', 'style'\]/);
+  assert.match(
+    source,
+    /attributeFilter: \[[\s\S]*?'drawer-open'[\s\S]*?'drawer-expanded'[\s\S]*?'drawer-rail-collapsed'[\s\S]*?'style'[\s\S]*?\]/u,
+  );
   assert.match(source, /focusGraphAfterVisibleResize\(\) {/);
   assert.match(source, /rect\.width < 128 \|\| rect\.height < 128/);
   assert.match(source, /drawerNode\.hasAttribute\('drawer-rail-collapsed'\)/);
@@ -305,6 +308,47 @@ test('portfolio mobile graph refocuses after drawer content becomes visible', as
   assert.match(source, /this\._graphSnapshotRuntime\.adopt\(\)/);
   assert.doesNotMatch(source, /let chunk = \[\.\.\.remaining\]\.slice\(0, chunkSize\);/);
   assert.match(source, /focusVisibleGraphNow\(\) {\s*this\.canvas\?\.refreshConnections\?\.\(\);\s*portfolioRuntime\.syncCanvas\({ focus: true, focusScope: 'node-fit' }\);/);
+});
+
+test('portfolio graph refits the selected node after an already-visible layout pane resizes', async () => {
+  let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
+  let css = await readFile(new URL('../../src/static-pages/css/index.css.js', import.meta.url), 'utf8');
+  let methodStart = source.indexOf('  focusGraphAfterVisibleResize() {');
+  let methodEnd = source.indexOf('\n  focusVisibleGraphNow() {', methodStart);
+
+  assert.ok(methodStart >= 0 && methodEnd > methodStart, 'graph resize handler declaration');
+  let methodSource = source.slice(methodStart, methodEnd).trim();
+  let { focusGraphAfterVisibleResize } = Function(`"use strict"; return ({${methodSource}});`)();
+  let width = 640;
+  let focused = 0;
+  let deferred = 0;
+  let panel = {
+    _graphReady: true,
+    _graphWasVisible: true,
+    _graphViewportSize: '640x600',
+    _graphVisibleFocusUntil: 0,
+    structuredMode: true,
+    _structuredBound: true,
+    getBoundingClientRect: () => ({ width, height: 600 }),
+    isGraphPanelVisible: () => width >= 128,
+    focusVisibleGraphNow: () => { focused += 1; },
+    scheduleDeferredVisibleGraphFocus: () => { deferred += 1; },
+    scheduleStructuredGraphBinding: () => {},
+    scheduleStructuredPathUpgrade: () => {},
+    cancelDeferredVisibleGraphFocus: () => {},
+  };
+
+  width = 300;
+  focusGraphAfterVisibleResize.call(panel);
+
+  assert.equal(focused, 1, 'a changed layout viewport must invalidate the stale graph fit');
+  assert.equal(deferred, 1, 'the graph must settle one final fit after the layout resize');
+  assert.equal(panel._graphViewportSize, '300x600');
+  assert.match(css, /portfolio-graph-panel\s*\{[^}]*display:\s*block;/u);
+  assert.match(
+    source,
+    /attributeFilter: \[[^\]]*'collapsed'[^\]]*'auto-collapsed'[^\]]*\]/u,
+  );
 });
 
 test('portfolio structured graph toolbar routes content actions', async () => {
@@ -437,7 +481,7 @@ test('portfolio static pages version local CSS and JS assets', () => {
 
 test('portfolio structured graph applies layout only on binding, explicit selection, and URL change', async () => {
   let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
-  let bindingStart = source.indexOf('  bindStructuredGraphRenderer() {');
+  let bindingStart = source.indexOf('  bindStructuredGraphRenderer({ allowHidden = false } = {}) {');
   let bindingEnd = source.indexOf('  setStructuredGraphLoading(active) {', bindingStart);
   let bindingSource = source.slice(bindingStart, bindingEnd);
   let selectionStart = source.indexOf('  setGraphLayout(layoutAlgo) {');

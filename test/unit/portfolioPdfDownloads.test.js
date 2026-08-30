@@ -2,7 +2,21 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { parseInlineMarkdownLinks } from '../../scripts/generate-portfolio-pdfs.js';
+import {
+  makeCvShowUrl,
+  parseInlineMarkdownLinks,
+} from '../../scripts/generate-portfolio-pdfs.js';
+
+test('PDF CV presentation link uses the absolute localized autostart route', () => {
+  for (const locale of ['en', 'ru', 'es']) {
+    const href = makeCvShowUrl(locale);
+    assert.equal(
+      href,
+      `https://makerdrive.github.io/cv/?lang=${locale}&showMode=short&showEntry=positioning`,
+    );
+    assert.doesNotMatch(href, /showPlay=/u);
+  }
+});
 
 test('PDF paragraph Markdown parser preserves text and extracts inline links', () => {
   const source = 'До [команды RND-PRO](https://rnd-pro.com/workflow/en/) и [документации](https://example.com/docs?q=1) после.';

@@ -4052,6 +4052,280 @@ test('CV Show blocks narration and aligned media when required scene setup fails
   assert.deepEqual(cdp.exceptions, []);
 });
 
+test('profile presentation link completes one marker preroll before Opus narration', {
+  timeout: 90_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
+  const page = await createPortfolioPage(t, {
+    viewport: DESKTOP_VIEWPORT,
+    touch: false,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}
+    globalThis.__profileLinkReceipts = [];
+    globalThis.__profileLinkFailures = [];
+    document.addEventListener('portfolio-show-presentation-receipt', (event) => {
+      const receipt = event.detail?.receipt || {};
+      globalThis.__profileLinkReceipts.push({
+        cellId: receipt.cellId || '',
+        kind: receipt.kind || '',
+        status: receipt.status || '',
+        reason: receipt.reason || '',
+        at: performance.now(),
+      });
+    });
+    document.addEventListener('portfolio-show-aligned-seek-failure', (event) => {
+      globalThis.__profileLinkFailures.push(event.detail?.receipt || null);
+    });`,
+  });
+  await navigate(
+    cdp,
+    `${server.origin}/cv/?showMode=short&showEntry=positioning&showPlay=0`,
+    { expectedMode: 'structured' },
+  );
+  const paused = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const host = document.querySelector('portfolio-show-chat');
+        const player = document.querySelector('agent-dock-shell')?.getChat?.()
+          ?.querySelector('chat-show-player');
+        const activeId = host?.narrationSnapshot?.active?.activeId || '';
+        if (activeId === 'positioning') return resolve({
+          href: location.href,
+          playerPlaying: player?.$.playing,
+          presenterCount: document.querySelectorAll('.symbiote-presenter-cursor').length,
+          receiptCount: globalThis.__profileLinkReceipts.length,
+          activeId,
+          paused: host?.narrationSnapshot?.active?.paused,
+        });
+        if (performance.now() - started > 8000) {
+          return reject(new Error('paused positioning media did not become ready'));
+        }
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify paused profile presentation route', timeoutMs: 10_000 });
+  assert.equal(paused.result.value.href.includes('showPlay=0'), true);
+  assert.equal(paused.result.value.playerPlaying, false);
+  assert.equal(paused.result.value.presenterCount, 0);
+  assert.equal(paused.result.value.receiptCount, 0);
+  assert.equal(paused.result.value.activeId, 'positioning');
+  assert.equal(paused.result.value.paused, true);
+
+  const presentationLink = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const anchor = Array.from(
+        document.querySelectorAll('code-block a[href*="showEntry=positioning"]'),
+      ).find((candidate) => {
+        const candidateRect = candidate.getBoundingClientRect();
+        return candidateRect.width > 0 && candidateRect.height > 0;
+      });
+      anchor?.scrollIntoView?.({ block: 'center', inline: 'nearest' });
+      const rect = anchor?.getBoundingClientRect?.();
+      const x = rect ? rect.left + rect.width / 2 : 0;
+      const y = rect ? rect.top + rect.height / 2 : 0;
+      const hit = rect ? document.elementFromPoint(x, y) : null;
+      return anchor && rect ? {
+        x,
+        y,
+        rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+        hit: hit?.outerHTML?.slice?.(0, 240) || '',
+      } : null;
+    })()`,
+  }, { label: 'locate profile CV presentation link', timeoutMs: 5_000 });
+  assert.ok(presentationLink.result.value, 'profile CV presentation link must exist');
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mousePressed', button: 'left', clickCount: 1,
+    x: presentationLink.result.value.x,
+    y: presentationLink.result.value.y,
+  }, { label: 'press profile CV presentation link', timeoutMs: 5_000 });
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseReleased', button: 'left', clickCount: 1,
+    x: presentationLink.result.value.x,
+    y: presentationLink.result.value.y,
+  }, { label: 'activate profile CV presentation link', timeoutMs: 5_000 });
+  const terminal = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve) => {
+      const started = performance.now();
+      const check = () => {
+        const receipts = globalThis.__profileLinkReceipts || [];
+        const marker = receipts.filter(({ cellId }) => (
+          cellId === 'cv-show:cue:positioning.tenure-marker'
+        ));
+        const failure = globalThis.__profileLinkFailures?.at(-1) || null;
+        if (failure || marker.some(({ status }) => status === 'settled')
+          || performance.now() - started > 20000) {
+          const host = document.querySelector('portfolio-show-chat');
+          const player = document.querySelector('agent-dock-shell')?.getChat?.()
+            ?.querySelector('chat-show-player');
+          const selection = document.getSelection();
+          return resolve({
+            timedOut: !failure && !marker.some(({ status }) => status === 'settled'),
+            href: location.href,
+            failure,
+            receipts,
+            marker,
+            playerPlaying: player?.$.playing,
+            activeId: host?.narrationSnapshot?.active?.activeId || '',
+            paused: host?.narrationSnapshot?.active?.paused,
+            lastError: host?.narrationSnapshot?.active?.lastError || '',
+            selectionText: selection?.toString() || '',
+            selectionCollapsed: selection?.isCollapsed ?? true,
+          });
+        }
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'wait for profile marker preroll', timeoutMs: 23_000 });
+  assert.equal(terminal.exceptionDetails, undefined);
+  assert.equal(
+    terminal.result.value.timedOut,
+    false,
+    JSON.stringify({ terminal: terminal.result.value, presentationLink: presentationLink.result.value }),
+  );
+  assert.equal(terminal.result.value.failure, null, JSON.stringify(terminal.result.value));
+  assert.deepEqual(
+    terminal.result.value.marker.map(({ status }) => status),
+    ['first-frame', 'settled'],
+    JSON.stringify(terminal.result.value),
+  );
+  assert.equal(
+    terminal.result.value.receipts.some(({ cellId }) => cellId.includes('experience-frame')),
+    false,
+  );
+  assert.equal(terminal.result.value.href.includes('showPlay=0'), false);
+  assert.equal(terminal.result.value.activeId, 'positioning');
+  assert.equal(terminal.result.value.paused, false);
+  assert.equal(terminal.result.value.lastError, '');
+  assert.equal(terminal.result.value.playerPlaying, true);
+  assert.equal(terminal.result.value.selectionText, '');
+  assert.equal(terminal.result.value.selectionCollapsed, true);
+});
+
+test('direct detail route settles its owner article before detail narration', {
+  timeout: 90_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
+  const page = await createPortfolioPage(t, {
+    viewport: DESKTOP_VIEWPORT,
+    touch: false,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}
+    globalThis.__directDetailReceipts = [];
+    globalThis.__directDetailFailures = [];
+    document.addEventListener('portfolio-show-presentation-receipt', (event) => {
+      const receipt = event.detail?.receipt || {};
+      globalThis.__directDetailReceipts.push({
+        cellId: receipt.cellId || '',
+        entryId: receipt.entryId || '',
+        kind: receipt.kind || '',
+        status: receipt.status || '',
+        reason: receipt.reason || '',
+        viewerPath: document.querySelector('source-viewer .sv-header')?.innerText || '',
+        at: performance.now(),
+      });
+    });
+    document.addEventListener('portfolio-show-aligned-seek-failure', (event) => {
+      globalThis.__directDetailFailures.push(event.detail?.receipt || null);
+    });`,
+  });
+  await navigate(
+    cdp,
+    `${server.origin}/cv/?showMode=short&showEntry=symbiote-workspace`
+      + '&showDetail=workspace-details&showPlay=0',
+    { expectedMode: 'structured' },
+  );
+  const paused = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const host = document.querySelector('portfolio-show-chat');
+        const activeId = host?.narrationSnapshot?.active?.activeId || '';
+        if (activeId === 'workspace-details') return resolve({
+          activeId,
+          paused: host?.narrationSnapshot?.active?.paused,
+          error: host?.$.isError || false,
+          errorText: host?.$.errorText || '',
+        });
+        if (performance.now() - started > 8000) return reject(new Error(
+          'paused direct detail media did not become ready: '
+          + JSON.stringify({ activeId, error: host?.$.isError, errorText: host?.$.errorText }),
+        ));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify paused direct detail route', timeoutMs: 10_000 });
+  assert.deepEqual(paused.result.value, {
+    activeId: 'workspace-details',
+    paused: true,
+    error: false,
+    errorText: '',
+  });
+
+  await clickVisible(
+    cdp,
+    'agent-dock-shell agent-show-chat chat-show-player [data-control="play"]',
+    'resume direct detail route',
+  );
+  const terminal = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve) => {
+      const started = performance.now();
+      const check = () => {
+        const receipts = globalThis.__directDetailReceipts || [];
+        const failures = globalThis.__directDetailFailures || [];
+        const detailSettled = receipts.some(({ cellId, status }) => (
+          cellId === 'cv-show:cue:workspace-details.flow-frame' && status === 'settled'
+        ));
+        if (failures.length || detailSettled || performance.now() - started > 18000) {
+          const host = document.querySelector('portfolio-show-chat');
+          return resolve({
+            timedOut: !failures.length && !detailSettled,
+            href: location.href,
+            receipts,
+            failures,
+            activeId: host?.narrationSnapshot?.active?.activeId || '',
+            paused: host?.narrationSnapshot?.active?.paused,
+            error: host?.$.isError || false,
+            errorText: host?.$.errorText || '',
+            viewerPath: document.querySelector('source-viewer .sv-header')?.innerText || '',
+          });
+        }
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'wait for direct detail owner and setup', timeoutMs: 21_000 });
+  const value = terminal.result.value;
+  assert.equal(value.timedOut, false, JSON.stringify(value));
+  assert.deepEqual(value.failures, [], JSON.stringify(value));
+  assert.equal(value.error, false, JSON.stringify(value));
+  assert.equal(value.activeId, 'workspace-details', JSON.stringify(value));
+  assert.match(value.viewerPath, /Symbiote Workspace\.md/u, JSON.stringify(value));
+  const detailFirstFrame = value.receipts.find(({ cellId, status }) => (
+    cellId === 'cv-show:cue:workspace-details.flow-frame' && status === 'first-frame'
+  ));
+  assert.ok(detailFirstFrame, JSON.stringify(value));
+  assert.match(detailFirstFrame.viewerPath, /Symbiote Workspace\.md/u, JSON.stringify(value));
+});
+
 test('CV Show mounts shared controls and plays the selected public Opus narration', {
   timeout: 210_000,
 }, async (t) => {
@@ -4370,7 +4644,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
       const check = () => {
         const snapshot = document.querySelector('portfolio-show-chat')?.alignmentSnapshot;
         const observed = globalThis.__cvShowExecutionReceiptHistory?.find((receipt) => (
-          receipt.cellId === 'cv-show:cue:positioning.experience-frame'
+          receipt.cellId === 'cv-show:cue:positioning.tenure-marker'
           && receipt.status === 'first-frame'
         ));
         if (observed) return resolve({
@@ -4379,7 +4653,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
           receipt: observed,
           lastExecutionReceipt: snapshot.lastExecutionReceipt,
         });
-        if (performance.now() - started > 5000) return resolve({
+        if (performance.now() - started > 12000) return resolve({
           timeout: true,
           activeId: snapshot?.activeId || '',
           lastExecutionReceipt: snapshot?.lastExecutionReceipt || null,
@@ -4389,14 +4663,14 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
       };
       check();
     })`,
-  }, { label: 'wait for first Execution attention receipt', timeoutMs: 7_000 });
+  }, { label: 'wait for first Execution attention receipt', timeoutMs: 14_000 });
   if (recognizedCue.result.value.timeout) {
     assert.fail(`recognized positioning cue did not fire: ${JSON.stringify(recognizedCue.result.value)}`);
   }
   assert.equal(recognizedCue.result.value.activeId, 'positioning');
-  assert.equal(recognizedCue.result.value.speechGroupCount, 3);
+  assert.equal(recognizedCue.result.value.speechGroupCount, 2);
   assert.equal(recognizedCue.result.value.receipt.version, 'workspace-presentation-effect-receipt-v2');
-  assert.equal(recognizedCue.result.value.receipt.cellId, 'cv-show:cue:positioning.experience-frame');
+  assert.equal(recognizedCue.result.value.receipt.cellId, 'cv-show:cue:positioning.tenure-marker');
   assert.equal(recognizedCue.result.value.receipt.kind, 'attention');
   assert.equal(recognizedCue.result.value.receipt.status, 'first-frame');
   assert.match(recognizedCue.result.value.receipt.operationId, /^presentation-effect-/u);
@@ -4443,9 +4717,9 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
         selectionCollapsed: document.getSelection()?.isCollapsed ?? true,
         pauseEventCount: globalThis.__cvShowPauseHistory.length,
         pauseEventTarget: globalThis.__cvShowPauseHistory.at(-1)?.target || '',
-        completedExperienceFrameCount: (globalThis.__cvShowExecutionReceiptHistory || []).filter(
+        completedTenureMarkerCount: (globalThis.__cvShowExecutionReceiptHistory || []).filter(
           ({ cellId, status }) => (
-            cellId === 'cv-show:cue:positioning.experience-frame' && status === 'settled'
+            cellId === 'cv-show:cue:positioning.tenure-marker' && status === 'settled'
           ),
         ).length,
         overlayStates: overlays.map((node) => ({
@@ -4463,7 +4737,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
   assert.equal(pausedPresenter.result.value.exists, true);
   assert.equal(pausedPresenter.result.value.visible, true);
   assert.equal(pausedPresenter.result.value.opacity, '1');
-  assert.equal(pausedPresenter.result.value.ink, '');
+  assert.ok(pausedPresenter.result.value.ink, 'Pause must retain the in-flight marker ink');
   assert.equal(pausedPresenter.result.value.clickOpacity, '0');
   assert.ok(pausedPresenter.result.value.cursorPath, 'Pause must retain the presenter arrow path');
   assert.ok(pausedPresenter.result.value.cursorWidth > 4, JSON.stringify(pausedPresenter.result.value));
@@ -4473,7 +4747,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
   assert.equal(pausedPresenter.result.value.pauseEventCount, 1);
   assert.equal(pausedPresenter.result.value.pauseEventTarget, 'PORTFOLIO-SHOW-CHAT');
   assert.equal(
-    pausedPresenter.result.value.completedExperienceFrameCount,
+    pausedPresenter.result.value.completedTenureMarkerCount,
     0,
     'Pause must keep the pending cue inside the transition barrier instead of completing it',
   );
@@ -7680,7 +7954,7 @@ test('desktop-to-mobile Short Show settles the first required frame before narra
     `${server.origin}/cv/`,
     { expectedMode: 'structured' },
   );
-  const runId = 'mobile-first-required-frame';
+  const runId = 'mobile-first-required-marker';
   await harness.reset(runId);
   await clickVisible(cdp, '.pulse-tour-button', 'fresh mobile Show trigger');
   await cdp.send('Runtime.evaluate', {
@@ -7703,7 +7977,7 @@ test('desktop-to-mobile Short Show settles the first required frame before narra
     'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
     'mobile explicit Short mode selection',
   );
-  const terminalFrame = await cdp.send('Runtime.evaluate', {
+  const terminalMarker = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
     expression: `new Promise((resolve) => {
@@ -7711,7 +7985,7 @@ test('desktop-to-mobile Short Show settles the first required frame before narra
       const check = () => {
         const snapshot = globalThis.__cvShowTerminalHarnessSnapshot?.();
         const receipts = (snapshot?.receipts || []).filter(({ cellId }) => (
-          cellId === 'cv-show:cue:positioning.experience-frame'
+          cellId === 'cv-show:cue:positioning.tenure-marker'
         ));
         const terminal = receipts.find(({ status }) => (
           ['settled', 'deadline-missed', 'failed', 'expired'].includes(status)
@@ -7733,16 +8007,16 @@ test('desktop-to-mobile Short Show settles the first required frame before narra
       };
       check();
     })`,
-  }, { label: 'wait for fresh mobile positioning frame', timeoutMs: 14_000 });
-  assert.ok(terminalFrame.result.value.terminal, JSON.stringify(terminalFrame.result.value));
-  const snapshot = await harness.snapshot('fresh mobile positioning frame');
-  const experienceFrameReceipts = snapshot.receipts.filter(({ cellId }) => (
-    cellId === 'cv-show:cue:positioning.experience-frame'
+  }, { label: 'wait for fresh mobile positioning marker', timeoutMs: 14_000 });
+  assert.ok(terminalMarker.result.value.terminal, JSON.stringify(terminalMarker.result.value));
+  const snapshot = await harness.snapshot('fresh mobile positioning marker');
+  const tenureMarkerReceipts = snapshot.receipts.filter(({ cellId }) => (
+    cellId === 'cv-show:cue:positioning.tenure-marker'
   ));
   assert.deepEqual(
-    experienceFrameReceipts.map(({ status }) => status),
+    tenureMarkerReceipts.map(({ status }) => status),
     ['first-frame', 'settled'],
-    JSON.stringify(experienceFrameReceipts),
+    JSON.stringify(tenureMarkerReceipts),
   );
   const targetState = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
@@ -8405,7 +8679,7 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
         );
         const envelope = JSON.parse(response.content[0].text);
         const cell = envelope.result?.cells?.find(
-          ({ id }) => id === 'cv-show:cue:positioning.experience-frame',
+          ({ id }) => id === 'cv-show:cue:positioning.tenure-marker',
         );
         return {
           isError: response.isError === true,

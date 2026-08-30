@@ -645,14 +645,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const onStart = () => {
     workspace.querySelector('portfolio-graph-panel')
       ?.prepareShowTarget?.({ allowHidden: true });
+    running = true;
     ensurePresenter();
     originTargetId = runtime.selectedId;
-    running = true;
     let chat = getChat();
     if (chat) chat.audioArbiter = audioArbiter;
   };
 
   const onSeek = () => {
+    if (!running) return;
     ensurePresenter().runner.seek();
   };
 
@@ -664,6 +665,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onPhase = async (event) => {
+    if (!running) return;
     const chat = getChat();
     const requestId = event.detail?.requestId;
     const complete = event.detail?.complete;
@@ -695,17 +697,23 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onAlignedReset = (event) => {
+    if (!running) return;
     const reason = event.detail?.receipt?.reason || '';
     // Caption-clock initialization establishes a media-time baseline. Neither
     // its first sample nor the owned source-load restore replaces the
     // presentation generation that is executing the scene setup cell.
-    if (reason === 'initial' || reason === 'alignment-ready') return;
+    if (
+      reason === 'initial'
+      || reason === 'alignment-ready'
+      || reason === 'presentation-preroll-normalization'
+    ) return;
     if (reason === 'branch-return') ensurePresenter().runner.branchReturn();
     else if (reason.includes('seek')) ensurePresenter().runner.seek();
     else ensurePresenter().runner.beginPhase();
   };
 
   const onPresentationOperation = (event) => {
+    if (!running) return;
     const complete = event.detail?.complete;
     const operation = event.detail?.operation;
     if (typeof complete !== 'function' || !operation) return;

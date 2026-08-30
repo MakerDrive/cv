@@ -714,6 +714,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     const fixture = {
       dock,
       mounts: 0,
+      phases: [],
       showPlayer,
       get config() { return showPlayer.configs.find(({ timeline }) => timeline?.turns?.length); },
     };
@@ -731,6 +732,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     player.agentDock = dock;
     player.addEventListener('portfolio-show-phase', (event) => {
       if (typeof event.detail?.complete !== 'function') return;
+      fixture.phases.push(event.detail);
       event.detail.handled = true;
       event.detail.complete(Object.freeze({
         status: 'success',
@@ -777,6 +779,76 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   assert.deepEqual(stoppedStartEvents, []);
   assert.equal(stopped.player.$.isRunning, false);
 
+  const pausedRoute = createFixture();
+  const pausedRouteStartEvents = [];
+  pausedRoute.dock.addEventListener('portfolio-show-start', (event) => {
+    pausedRouteStartEvents.push(event.detail);
+  });
+  const pausedRouteSpeechCount = spoken.length;
+  assert.equal(await pausedRoute.player.applyShowRoute({
+    mode: 'short',
+    entryId: 'positioning',
+    timeMs: 0,
+    play: false,
+  }), true);
+  await Promise.resolve();
+  assert.equal(spoken.length, pausedRouteSpeechCount, 'showPlay=0 does not queue browser speech');
+  assert.deepEqual(pausedRouteStartEvents, []);
+  assert.deepEqual(pausedRoute.phases, []);
+  assert.equal(pausedRoute.player.$.isPaused, true);
+  assert.equal(pausedRoute.config.controller.isPlaying, false);
+  assert.equal(pausedRoute.player.routeSnapshot.play, false);
+
+  const blocked = createFixture();
+  const blockedStartEvents = [];
+  const blockedResumeEvents = [];
+  blocked.dock.addEventListener('portfolio-show-start', (event) => blockedStartEvents.push(event.detail));
+  blocked.dock.addEventListener('portfolio-show-resume', (event) => blockedResumeEvents.push(event.detail));
+  assert.equal(await blocked.player.applyShowRoute({
+    mode: 'short',
+    entryId: 'positioning',
+    timeMs: 0,
+    play: true,
+  }), true);
+  await new Promise((resolve) => setImmediate(resolve));
+  const deniedUtterance = spoken.at(-1);
+  deniedUtterance.onerror?.({ error: 'not-allowed' });
+  await Promise.resolve();
+  assert.deepEqual(blockedStartEvents, []);
+  assert.deepEqual(blockedResumeEvents, []);
+  assert.deepEqual(blocked.phases, [], 'autoplay denial cannot admit presentation gestures');
+  assert.equal(blocked.player.$.isPaused, true);
+  assert.equal(blocked.player.$.resumeRequired, true);
+  assert.equal(blocked.config.controller.isPlaying, false);
+  assert.equal(blocked.player.routeSnapshot.play, false);
+
+  const deniedSpeechCount = spoken.length;
+  blocked.config.controller.play();
+  await Promise.resolve();
+  assert.equal(spoken.length, deniedSpeechCount + 1, 'trusted Resume creates a fresh utterance');
+  assert.deepEqual(blockedStartEvents, []);
+  assert.deepEqual(blocked.phases, []);
+  spoken.at(-1).onstart?.();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.deepEqual(blockedStartEvents, [{ routeDriven: true }]);
+  assert.deepEqual(blockedResumeEvents, [], 'the first physical start is not mislabeled Resume');
+  assert.equal(blocked.phases.length, 1);
+  assert.equal(blocked.config.controller.isPlaying, true);
+
+  assert.equal(blocked.player.pauseShow(), true);
+  const resumedUtterance = spoken.at(-1);
+  const resumedSpeechCount = spoken.length;
+  blocked.config.controller.play();
+  await Promise.resolve();
+  assert.equal(spoken.length, resumedSpeechCount, 'Resume continues the retained utterance');
+  assert.equal(blockedResumeEvents.length, 0, 'Resume intent is not a transport receipt');
+  assert.equal(blocked.config.controller.isPlaying, false);
+  resumedUtterance.onresume?.();
+  await Promise.resolve();
+  assert.equal(blockedResumeEvents.length, 1);
+  assert.equal(blocked.config.controller.isPlaying, true);
+
   const restarted = createFixture();
   const restartEvents = [];
   const restartedStartEvents = [];
@@ -784,6 +856,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   restarted.dock.addEventListener('portfolio-show-seek', (event) => restartEvents.push(event.detail));
   restarted.dock.addEventListener('portfolio-show-start', (event) => restartedStartEvents.push(event.detail));
   restarted.dock.addEventListener('portfolio-show-stop', (event) => restartedStopEvents.push(event.detail));
+  const restartedSpeechCount = spoken.length;
   const supersededRestartStart = restarted.player.applyShowRoute({
     mode: 'short',
     entryId: 'symbiote-ui',
@@ -795,13 +868,13 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   assert.equal(await supersededRestartStart, false);
   await new Promise((resolve) => setImmediate(resolve));
 
-  assert.equal(restartedStartEvents.length, 1, 'Restart publishes one surviving Show lifecycle');
-  assert.deepEqual(restartedStartEvents[0], { routeDriven: true });
+  assert.deepEqual(restartedStartEvents, [], 'requested playback is not a physical Show start');
+  assert.deepEqual(restarted.phases, [], 'presentation is not admitted before physical narration');
   assert.deepEqual(restartEvents, [{ index: 0, positionMs: 0 }]);
   assert.deepEqual(restartedStopEvents, []);
   assert.equal(restarted.mounts, 1, 'Restart reuses the player mounted by the pending route');
   assert.equal(restarted.player.$.isRunning, true);
-  assert.equal(restarted.config.controller.isPlaying, true, 'Restart preserves routed play intent');
+  assert.equal(restarted.config.controller.isPlaying, false, 'requested play is pending physical narration');
   assert.deepEqual(restarted.player.routeSnapshot, {
     mode: 'short',
     entryId: 'positioning',
@@ -811,7 +884,13 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     running: true,
     completed: false,
   });
-  assert.equal(spoken.length, 1, 'the superseded route cannot start a duplicate narration');
+  assert.equal(spoken.length, restartedSpeechCount + 1, 'the superseded route cannot start duplicate narration');
+  spoken.at(-1).onstart?.();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.deepEqual(restartedStartEvents, [{ routeDriven: true }]);
+  assert.equal(restarted.phases.length, 1, 'physical narration admits the first presentation phase');
+  assert.equal(restarted.config.controller.isPlaying, true);
 
   const completionEvents = [];
   restarted.dock.addEventListener('portfolio-show-complete', (event) => {
@@ -909,16 +988,28 @@ test('detail admission rejects stale live media before branch or presentation mu
     'DocumentFragment',
     'CSSStyleSheet',
     'location',
+    'speechSynthesis',
+    'SpeechSynthesisUtterance',
   ];
   const previousGlobals = new Map(globalKeys.map((key) => (
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   let dock = null;
-  for (const key of globalKeys.slice(0, -2)) globalThis[key] = window[key];
+  for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
   globalThis.location = new URL('https://portfolio.example/cv/');
+  globalThis.speechSynthesis = {
+    paused: false,
+    cancel() {},
+    pause() { this.paused = true; },
+    resume() { this.paused = false; },
+    speak(utterance) { queueMicrotask(() => utterance.onstart?.()); },
+  };
+  globalThis.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+    constructor(text) { this.text = text; }
+  };
   t.after(() => {
     dock?.remove();
     for (const [key, descriptor] of previousGlobals) {
@@ -976,7 +1067,18 @@ test('detail admission rejects stale live media before branch or presentation mu
   player.agentDock = dock;
   const phases = [];
   const narrationHandoffs = [];
-  player.addEventListener('portfolio-show-phase', (event) => phases.push(event.detail));
+  player.addEventListener('portfolio-show-phase', (event) => {
+    phases.push(event.detail);
+    if (typeof event.detail?.complete !== 'function') return;
+    event.detail.handled = true;
+    event.detail.complete(Object.freeze({
+      status: 'success',
+      receipts: Object.freeze([Object.freeze({
+        status: 'success',
+        result: Object.freeze({ status: 'completed' }),
+      })]),
+    }));
+  });
   const emitShowDirective = player.emitShowDirective.bind(player);
   player.emitShowDirective = (directive) => {
     narrationHandoffs.push(directive);
@@ -1059,7 +1161,7 @@ test('detail admission rejects stale live media before branch or presentation mu
       payload: { branchId: 'symbiote-ui-details', sceneId: 'symbiote-ui' },
     },
   }));
-  await Promise.resolve();
+  await new Promise((resolve) => setImmediate(resolve));
 
   assert.equal(player.$.inBranch, true);
   assert.equal(sessionCalls.enterBranch, beforeStaleDetail.sessionCalls.enterBranch + 1);
@@ -2414,6 +2516,9 @@ function createInstalledPresenterCursor(events, durationMs = 220) {
     presentClickFrame(target, frame) {
       return receipt('click', target, frame, 0);
     },
+    presentAnnotationFrame(target, _annotation, frame) {
+      return receipt('marker', target, frame, durationMs);
+    },
     clear() {},
     clearAccumulatedAnnotations() {},
   });
@@ -2443,7 +2548,7 @@ function createInstalledProjectTuple(entryId, directiveId) {
 
 function createInstalledProviderHarness({
   entryId = 'positioning',
-  directiveId = 'positioning.experience-frame',
+  directiveId = 'positioning.tenure-marker',
   focusDurationMs = 220,
   hostless = false,
   reducedMotion = false,
@@ -2660,10 +2765,10 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
       record.receiptInputs[0].providerReceipt.observedAt,
     );
     assertInstalledOrder(harness.events, [
-      'ui:plan:frame',
+      'ui:plan:marker',
       'cv:admission',
       'workspace:admission',
-      'ui:pixel:frame',
+      'ui:pixel:marker',
       'cv:first-frame',
       'workspace:first-frame',
       'cv:settled',
@@ -2686,7 +2791,7 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
       let record = harness.recordFor(harness.targetCellId);
       assert.equal(providerAdmission.version, SHOW_ATTENTION_ADMISSION_VERSION);
       assert.equal(providerAdmission.status, 'admitted');
-      assert.equal(providerAdmission.budget.limitMs, 1_200);
+      assert.equal(providerAdmission.budget.limitMs, 2_500);
       assert.equal(providerAdmission.budget.plannedDurationMs, 220);
       assert.equal(record.admissionInputs[0].providerAdmission, providerAdmission);
       assert.equal(harness.events.some((event) => event.startsWith('ui:pixel:')), false);
@@ -2750,10 +2855,10 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
       assertInstalledRecursivelyFrozen(providerAdmission);
       assertInstalledRecursivelyFrozen(targetReceipts[0]);
       assertInstalledOrder(harness.events, [
-        'ui:plan:frame',
+        'ui:plan:marker',
         'cv:admission',
         'workspace:admission',
-        'ui:pixel:frame',
+        'ui:pixel:marker',
         'cv:first-frame',
         'workspace:first-frame',
         'cv:settled',
@@ -2822,12 +2927,12 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
     name: 'rejected admissions preserve exact over-budget and unresolved-target evidence',
     run: async () => {
       let rejections = [{
-        options: { focusDurationMs: 1_201 },
+        options: { focusDurationMs: 2_501 },
         assertEvidence(providerAdmission) {
           assert.equal(providerAdmission.reason.code, 'budget-exceeded');
           assert.deepEqual(
             providerAdmission.budget,
-            { limitMs: 1_200, plannedDurationMs: 1_201 },
+            { limitMs: 2_500, plannedDurationMs: 2_501 },
           );
         },
       }, {
@@ -2836,8 +2941,8 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
           assert.equal(providerAdmission.reason.code, 'provider-rejected');
           assert.deepEqual(providerAdmission.reason.provider, { code: 'target-unresolved' });
           assert.deepEqual(providerAdmission.target, {
-            id: 'profile.experience',
-            identity: 'profile.experience',
+            id: 'profile.experience.15-plus',
+            identity: 'profile.experience.15-plus',
             layoutIdentity: null,
             geometryIdentity: null,
             geometry: null,
@@ -3255,7 +3360,7 @@ test('native Show activation requires both an allowlisted safePath and a same-or
   assert.equal(internal.clicks, 1);
 });
 
-test('browser speech controller retains utterances, ignores stale completion, and clears global pause', () => {
+test('browser speech controller publishes physical starts, ignores stale completion, and clears global pause', () => {
   const spoken = [];
   let cancelled = 0;
   let paused = true;
@@ -3270,16 +3375,52 @@ test('browser speech controller retains utterances, ignores stale completion, an
     constructor(text) { this.text = text; }
   }
   const completed = [];
+  const started = [];
+  const blocked = [];
   const speech = createBrowserSpeechController({ synth, Utterance: FakeUtterance });
 
   assert.equal(speech.available, true);
-  speech.speak('First', { lang: 'ru', onEnd: () => completed.push('first') });
+  speech.speak('First', {
+    lang: 'ru',
+    onStart: () => started.push('first'),
+    onEnd: () => completed.push('first'),
+  });
   assert.equal(paused, false);
-  speech.speak('Second', { lang: 'ru', onEnd: () => completed.push('second') });
+  assert.deepEqual(started, [], 'speak() acceptance is not a physical playback receipt');
+  speech.speak('Second', {
+    lang: 'ru',
+    onStart: () => started.push('second'),
+    onEnd: () => completed.push('second'),
+  });
+  spoken[0].onstart?.();
+  assert.deepEqual(started, [], 'a stale utterance cannot publish playback');
+  spoken[1].onstart?.();
+  assert.deepEqual(started, ['second']);
   spoken[0].onend?.();
   assert.deepEqual(completed, []);
   spoken[1].onend?.();
   assert.deepEqual(completed, ['second']);
+
+  speech.speak('Blocked', {
+    lang: 'ru',
+    onStart: () => started.push('blocked'),
+    onBlocked: (reason) => blocked.push(reason),
+  });
+  spoken[2].onerror?.({ error: 'not-allowed' });
+  spoken[2].onstart?.();
+  assert.deepEqual(blocked, ['autoplay-blocked']);
+  assert.deepEqual(started, ['second'], 'blocked speech cannot publish a physical start');
+  speech.speak('Paused', {
+    lang: 'ru',
+    startPaused: true,
+    onStart: () => started.push('paused-resume'),
+  });
+  assert.equal(spoken.length, 3, 'an explicitly paused route does not queue browser speech');
+  assert.equal(speech.resume(), true);
+  assert.equal(spoken.length, 4);
+  assert.deepEqual(started, ['second']);
+  spoken[3].onstart?.();
+  assert.deepEqual(started, ['second', 'paused-resume']);
   speech.pause();
   assert.equal(paused, true);
   speech.cancel();
@@ -3562,6 +3703,101 @@ test('narration and alignment share one verified public manifest fetch', async (
   assert.equal(fetches, 1);
 });
 
+test('deferred aligned startup loads paused media without presentation admission', async (t) => {
+  let { appConfig, manifest, raw } = createWebAudioHarness();
+  clearCvShowWebAudioReleaseCache();
+  const authority = createCvShowAuthoringAuthority({
+    seedProject: CV_SHOW_STRUCTURAL_MEDIA_FIXTURE.project,
+  });
+  const fetchImpl = async (url) => {
+    const clip = manifest.clips.find(({ alignedSequenceFile }) => (
+      String(url).endsWith(alignedSequenceFile)
+    ));
+    return new Response(
+      clip ? CV_SHOW_STRUCTURAL_MEDIA_FIXTURE.sequenceJson(clip.id) : raw,
+      { headers: { 'content-type': 'application/json' } },
+    );
+  };
+  const alignment = createCvShowAlignmentController({
+    url: 'https://portfolio.example/cv/?showAudio=local',
+    baseUrl: 'https://portfolio.example/cv/',
+    appConfig,
+    fetchImpl,
+    getAuthoringView: () => authority.getView(),
+  });
+  t.after(() => {
+    alignment.cancel();
+    authority.dispose();
+  });
+  assert.equal((await alignment.prepare(CV_SHOW_STORY)).available, true);
+
+  class FakeMedia extends EventTarget {
+    #currentTime = 0;
+    #src = '';
+    paused = true;
+    ended = false;
+    error = null;
+    readyState = 0;
+    preload = '';
+    loadCount = 0;
+    playCount = 0;
+    seekable = { length: 1, start: () => 0, end: () => 60 };
+
+    get currentTime() { return this.#currentTime; }
+    set currentTime(value) {
+      this.#currentTime = Number(value) || 0;
+      this.dispatchEvent(new Event('seeking'));
+      this.dispatchEvent(new Event('seeked'));
+    }
+    get src() { return this.#src; }
+    set src(value) { this.#src = String(value); }
+    get currentSrc() { return this.#src; }
+    pause() { this.paused = true; }
+    play() {
+      this.playCount += 1;
+      this.paused = false;
+      this.dispatchEvent(new Event('play'));
+      this.dispatchEvent(new Event('playing'));
+      return Promise.resolve();
+    }
+    load() {
+      this.loadCount += 1;
+      this.dispatchEvent(new Event('loadstart'));
+      this.readyState = 1;
+      this.dispatchEvent(new Event('loadedmetadata'));
+      this.readyState = 2;
+      this.dispatchEvent(new Event('loadeddata'));
+    }
+  }
+
+  const operations = [];
+  const media = new FakeMedia();
+  const entry = CV_SHOW_STORY.scenes.find(({ id }) => id === 'symbiote-workspace');
+  const clip = manifest.clips.find(({ id }) => id === entry.id);
+  const aligned = await alignment.createEntryRuntime({
+    entry,
+    media,
+    audioClip: clip,
+    deferPresentationUntilPlayback: true,
+    runPresentationOperation: async (operation) => {
+      operations.push(operation.projectCell.id);
+    },
+  });
+  t.after(() => aligned.runtime.dispose());
+  const receipt = await aligned.runtime.loadAndRestorePlayback({
+    source: 'https://portfolio.example/cv/cv-show-audio/symbiote-workspace.opus',
+    positionMs: 0,
+    paused: true,
+    preload: 'auto',
+  }, { reason: 'alignment-ready' });
+
+  assert.equal(receipt.status, 'completed');
+  assert.equal(media.loadCount, 1);
+  assert.equal(media.playCount, 0);
+  assert.equal(media.paused, true);
+  assert.deepEqual(operations, [], 'paused preparation cannot admit presenter operations');
+});
+
 test('fresh scene turn-start navigation is the one Project setup cell', () => {
   const entry = CV_SHOW_STORY.scenes.find(({ id }) => id === 'symbiote-workspace');
   const partition = partitionCvShowAlignedDirectives(entry.directives);
@@ -3711,9 +3947,106 @@ test('local audio waits for the shared alignment handoff before playback', async
   assert.equal(speech.snapshot.generationReceipt.status, 'completed');
 });
 
+test('local audio can arm an aligned Resume without playing media outside its gate', async () => {
+  const manifest = await validatedWebAudioManifest();
+  const started = [];
+  const listeners = new Map();
+  const audio = {
+    paused: true,
+    currentTime: 0,
+    playCalls: 0,
+    addEventListener(type, listener) { listeners.set(type, listener); },
+    removeEventListener(type, listener) {
+      if (listeners.get(type) === listener) listeners.delete(type);
+    },
+    play() {
+      this.paused = false;
+      this.playCalls += 1;
+      return Promise.resolve();
+    },
+    pause() { this.paused = true; },
+    emit(type) { listeners.get(type)?.(); },
+  };
+  const speech = createLocalAudioSpeechController({ manifest, createAudio: () => audio });
+  assert.equal(speech.speak(CV_SHOW_STORY.scenes[0].speech, {
+    id: 'positioning',
+    lang: 'ru',
+    startPaused: true,
+    onMedia: () => Object.freeze({ status: 'completed', reason: 'alignment-ready' }),
+    onStart: () => started.push('playing'),
+  }), true);
+  await Promise.resolve();
+
+  assert.equal(speech.resume({ deferMedia: true }), true);
+  assert.equal(audio.playCalls, 0, 'the speech layer cannot bypass the aligned media gate');
+  await audio.play();
+  audio.emit('playing');
+  assert.deepEqual(started, ['playing'], 'the armed request still publishes physical playback');
+});
+
+test('local audio pause revokes a delayed play while aligned preparation is pending', async () => {
+  let manifest = await validatedWebAudioManifest();
+  let releaseAlignment;
+  let audio = {
+    paused: true,
+    currentTime: 0,
+    playCalls: 0,
+    addEventListener() {},
+    removeEventListener() {},
+    play() { this.paused = false; this.playCalls += 1; return Promise.resolve(); },
+    pause() { this.paused = true; },
+  };
+  const alignmentReady = new Promise((resolve) => { releaseAlignment = resolve; });
+  const speech = createLocalAudioSpeechController({ manifest, createAudio: () => audio });
+  assert.equal(speech.speak(CV_SHOW_STORY.scenes[0].speech, {
+    id: 'positioning',
+    lang: 'ru',
+    onMedia: () => alignmentReady,
+  }), true);
+  speech.pause();
+  releaseAlignment(Object.freeze({ status: 'completed', reason: 'alignment-ready' }));
+  await alignmentReady;
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(audio.playCalls, 0, 'a pause revokes the unresolved automatic play intent');
+  assert.equal(speech.snapshot.paused, true);
+  assert.equal(speech.resume(), true);
+  await Promise.resolve();
+  assert.equal(audio.playCalls, 1, 'trusted Resume creates a new play attempt');
+});
+
+test('local audio publishes physical start only after play settles', async () => {
+  let manifest = await validatedWebAudioManifest();
+  let resolvePlay;
+  const playReady = new Promise((resolve) => { resolvePlay = resolve; });
+  const started = [];
+  let audio = {
+    paused: true,
+    currentTime: 0,
+    addEventListener() {},
+    removeEventListener() {},
+    play() { this.paused = false; return playReady; },
+    pause() { this.paused = true; },
+  };
+  const speech = createLocalAudioSpeechController({ manifest, createAudio: () => audio });
+  assert.equal(speech.speak(CV_SHOW_STORY.scenes[0].speech, {
+    id: 'positioning',
+    lang: 'ru',
+    onMedia: () => Object.freeze({ status: 'completed', reason: 'alignment-ready' }),
+    onStart: () => started.push('playing'),
+  }), true);
+  await Promise.resolve();
+  assert.deepEqual(started, [], 'play request acceptance is not a physical playback receipt');
+  resolvePlay();
+  await playReady;
+  await Promise.resolve();
+  assert.deepEqual(started, ['playing']);
+});
+
 test('local audio retains aligned media when autoplay is blocked and resumes after a gesture', async () => {
   let manifest = await validatedWebAudioManifest();
   let blocked = [];
+  let started = [];
   let sourceReleased = false;
   let playCalls = 0;
   let audio = {
@@ -3736,17 +4069,20 @@ test('local audio retains aligned media when autoplay is blocked and resumes aft
     lang: 'ru',
     onMedia: () => Object.freeze({ status: 'completed', reason: 'alignment-ready' }),
     onBlocked: (reason) => blocked.push(reason),
+    onStart: () => started.push('playing'),
   }), true);
   await Promise.resolve();
   await Promise.resolve();
   await Promise.resolve();
   assert.deepEqual(blocked, ['autoplay-blocked']);
+  assert.deepEqual(started, [], 'a rejected play attempt cannot publish a physical start');
   assert.equal(speech.snapshot.activeId, 'positioning');
   assert.equal(speech.snapshot.playBlocked, true);
   assert.equal(sourceReleased, false, 'policy blocking must retain the prepared media source');
   assert.equal(speech.resume(), true);
   await Promise.resolve();
   assert.equal(playCalls, 2);
+  assert.deepEqual(started, ['playing']);
   assert.equal(speech.snapshot.playBlocked, false);
   assert.equal(speech.snapshot.lastError, '');
 });
@@ -4001,7 +4337,12 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   );
   assert.match(logic, /semantics: detail \? 'detail' : 'pointer-only'/);
   assert.match(logic, /partitionCvShowAlignedDirectives\(entry\.directives\)/);
-  assert.match(logic, /this\.#alignment\.available\s*\? null\s*:\s*this\.#runSceneSetup\(entry, requestId\)/u);
+  assert.match(
+    logic,
+    /const startUnalignedPresentation = this\.#alignment\.available \? null : async \(\) => \{[\s\S]*?this\.#runSceneSetup\(entry, requestId\)[\s\S]*?onPhysicalStart: startUnalignedPresentation/u,
+    'unaligned setup is admitted only from the physical narration-start callback',
+  );
+  assert.match(logic, /deferPresentationUntilPlayback: !this\.#presentationAdmitted/u);
   assert.match(logic, /requireCvShowSceneSetupSuccess\(sceneSetupReceipt, entry\.id\)/);
   assert.match(logic, /captionTrack/);
   assert.match(logic, /addEventListener\?\.\('timeupdate'/);
@@ -4012,13 +4353,13 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(runtime, /runCvShowPresentationOperation/);
   assert.match(
     runtime,
-    /const onSeek = \(\) => \{\s*ensurePresenter\(\)\.runner\.seek\(\);\s*\};[\s\S]*?addEventListener\('portfolio-show-seek', onSeek\)/u,
-    'a player seek cancels the prior presenter generation before the replacement setup starts',
+    /const onSeek = \(\) => \{\s*if \(!running\) return;\s*ensurePresenter\(\)\.runner\.seek\(\);\s*\};[\s\S]*?addEventListener\('portfolio-show-seek', onSeek\)/u,
+    'a pre-start seek cannot instantiate a presenter; an admitted seek resets its generation',
   );
   assert.match(
     runtime,
     /if \(reason === 'initial' \|\| reason === 'alignment-ready'\) return;[\s\S]*?reason === 'branch-return'[\s\S]*?reason\.includes\('seek'\)/u,
-    'caption-clock initialization must not cancel an in-flight pre-audio setup operation',
+    'caption-clock initialization must not cancel an active admitted setup operation',
   );
   assert.match(logic, /portfolio-show-presentation-receipt/);
   assert.match(logic, /lastExecutionReceipt/);

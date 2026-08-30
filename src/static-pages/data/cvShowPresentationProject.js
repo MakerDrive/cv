@@ -486,77 +486,9 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "profile.experience"
-      },
-      "dependsOn": [],
-      "id": "cv-show:cue:positioning.experience-frame:scroll",
-      "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "За годы работы"
-        },
-        "gestureDurationMs": 1000,
-        "leadMs": 2650,
-        "settleBy": "anchor",
-        "until": null
-      },
-      "turnId": "positioning"
-    },
-    {
-      "cue": {
-        "focus": {
-          "mode": "frame"
-        },
-        "kind": "focus",
-        "targetId": "profile.experience"
-      },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:positioning.experience-frame:scroll"
-        }
-      ],
-      "id": "cv-show:cue:positioning.experience-frame",
-      "kind": "cue",
-      "layerId": "cv-show:layer:focus",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "За годы работы"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 1450,
-        "settleBy": "anchor",
-        "until": {
-          "anchor": "turn-end",
-          "offsetMs": 0
-        }
-      },
-      "turnId": "positioning"
-    },
-    {
-      "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "scroll"
-        },
-        "kind": "interaction",
         "targetId": "profile.experience.15-plus"
       },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:positioning.experience-frame"
-        }
-      ],
+      "dependsOn": [],
       "id": "cv-show:cue:positioning.tenure-marker:scroll",
       "kind": "cue",
       "layerId": "cv-show:layer:interaction",
@@ -566,7 +498,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Этот подход проходит"
+          "quote": "За годы работы"
         },
         "gestureDurationMs": 800,
         "leadMs": 3800,
@@ -599,7 +531,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Этот подход проходит"
+          "quote": "За годы работы"
         },
         "gestureDurationMs": 2500,
         "leadMs": 2800,
@@ -698,7 +630,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0
         },
         "gestureDurationMs": 5800,
-        "leadMs": 7250,
+        "leadMs": 8700,
         "settleBy": "anchor",
         "until": null
       },
@@ -7179,7 +7111,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 10,
+  "revision": 13,
   "schemaVersion": "workspace-presentation-authoring-project-v1",
   "script": {
     "grounding": {
@@ -7606,10 +7538,6 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "occurrence": 1,
               "quote": "внутри проекта MEGAVISOR"
             }
-          },
-          "cv-show:cue:positioning.experience-frame": {
-            "policy": "required",
-            "refinements": {}
           },
           "cv-show:cue:positioning.open": {
             "policy": "required",
@@ -8526,15 +8454,13 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-xkDP1BOrbemy4iknmMC7Vj4rwXfu/OsnY5Q7ZPGcfIc=",
     "entries": [
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-UfV9vvznYaadrPsBBU1u/xP+tUAlQM8sMTus8y+6chQ=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-4oJB2ehokvfpW+eA+ZQpFe5bMKt1pf2nZ9XFKJRh+us=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-KExlaKA0IWxKVHGAEDKGKTQerk+FxPxDNIuGlb34k0E=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-bfYXmZECWXVDxrq8Y7qBcjtSzfLvfme7ICOI5zpLllI=",
         "entryId": "positioning",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-sbh9tY0wTCS+eEJsXxytlfB/bpguH8sFhlGY7n7XT8g=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-vMvRHzVYcfqmRvAWZI9J1ITYPoEJ+yz7vpIqmHke6TU=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-+ZFtKIAMQAyUc3rZxl+CEh3nxHfLrSTi9nBwf6PojcE=",
         "sourceCellIds": [
           "cv-show:narration:positioning",
-          "cv-show:cue:positioning.experience-frame:scroll",
-          "cv-show:cue:positioning.experience-frame",
           "cv-show:cue:positioning.tenure-marker:scroll",
           "cv-show:cue:positioning.tenure-marker",
           "cv-show:cue:positioning.workspace-transition:scroll",
@@ -9060,7 +8986,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-SgEaflEyjb9U4ssSelo7BAchd9vgWDHLBCQfw9TEk/0="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-DL+99lXlpLUNsizSHbn7Hlz7lPB+6Tr+mZQ5NVqsiXM=",
+    "hash": "cv-show-audio-provenance-v1:sha256-CNWehYLinMMW9cwVtLwEcJNETC1m53IHPKDbJkeRKhs=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
@@ -9120,8 +9046,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "manifestHash": "cv-show-media-manifest-v1:sha256-5DVgYxiVwYXx99g4SXUiiyDJI2Z9v1dwUqSEW4s7+jI=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:227802e8bef9acf6f932020ab6036d00a7352d013a9ae2778324045605813ee4",
-  "predecessorReleaseId": "cv-show-audio-release-v1:72dba6c71068a42d0e3f89d9a2dcb22740623fadaa798967ff81e9f9eba1697b",
+  "planId": "cv-show-audio-release-plan-v1:759673a19e15b73e878adbbdf1135ed9c3e117433000cd34d3032b99221f0c28",
+  "predecessorReleaseId": "cv-show-audio-release-v1:80baa44523097754273e17436bd01f1b6e1e70e426eeaa2d162aa3775a3266f7",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WJXMA0f9i4DwyS1CYrZ3FSAznMtAbhDA/lcaYjQVtNY=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-xkDP1BOrbemy4iknmMC7Vj4rwXfu/OsnY5Q7ZPGcfIc=",
@@ -9129,12 +9055,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v1:sha256-yOG/UiS3IgXZbiDf3rr5YwVr6h04M4MODvRgx4k0M30=",
-    "revision": 10
+    "authoringProjectHash": "workspace-presentation-authoring-project-v1:sha256-Lm2KMupZttc67Ene87zWoYgA1daM0dGX/kuFCJmdUss=",
+    "revision": 13
   },
-  "releaseId": "cv-show-audio-release-v1:f8328f109db219a59e09adeb5d652c48563e0641a311e361728da62dd268c8b7",
+  "releaseId": "cv-show-audio-release-v1:eff86dfa2bdde05046e1c050612601f7d1b95aba7a8146ad9c548750a3b74266",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:5a291f9ef196616ddf2d69b1a5d4c37429e82af0527138e6fbf6aacc3e8892cc"
+  "verificationHash": "cv-show-audio-release-verification-v1:0e0f5b2dd8f70fb1634e1cb11318d41c2cbb518f99bf3e8cef414daa971a1af0"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );

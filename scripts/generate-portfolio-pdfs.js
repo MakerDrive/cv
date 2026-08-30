@@ -119,6 +119,13 @@ function makeOnlineCvUrl(locale) {
   return makePortfolioUrl(locale);
 }
 
+export function makeCvShowUrl(locale) {
+  const url = new URL(makeOnlineCvUrl(locale));
+  url.searchParams.set('showMode', 'short');
+  url.searchParams.set('showEntry', 'positioning');
+  return url.href;
+}
+
 function plainTextMarkdown(value) {
   return String(value || '')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
@@ -565,7 +572,10 @@ function writeLocalePdf(locale, fonts) {
   const writer = createWriter(doc);
 
   addHeader(doc, writer, locale);
-  const summary = t(locale, 'pdf.summaryDetails');
+  const summary = [
+    t(locale, 'pdf.summaryDetails'),
+    `[${t(locale, 'show.openPresentation')}](${makeCvShowUrl(locale)})`,
+  ].join('\n\n');
   writer.section(t(locale, 'pdf.summaryTitle'), {
     minContentHeight: writer.measureBullet(summary, { size: 10.5, lineGap: 1.4 }),
     topGap: 6,

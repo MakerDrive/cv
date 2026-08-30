@@ -137,7 +137,11 @@ export function parseCvShowRoute(value, policy = {}) {
   });
 }
 
-/** Remove only CV Show parameters while preserving the rest of the URL. */
+/**
+ * Remove only CV Show parameters while preserving the rest of the URL.
+ * @param {string | URL} value
+ * @param {{ baseUrl?: string | URL }} [options]
+ */
 export function stripCvShowRoute(value, { baseUrl } = {}) {
   const url = toUrl(value, baseUrl);
   for (const name of CV_SHOW_ROUTE_PARAMS) url.searchParams.delete(name);

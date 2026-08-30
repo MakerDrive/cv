@@ -48,8 +48,8 @@ function narrationVariant(entryId = 'positioning') {
 function anchorVariant(entryId = 'positioning') {
   return projectVariant((input) => {
     let cellIds = new Set([
-      `cv-show:cue:${entryId}.experience-frame:scroll`,
-      `cv-show:cue:${entryId}.experience-frame`,
+      `cv-show:cue:${entryId}.tenure-marker:scroll`,
+      `cv-show:cue:${entryId}.tenure-marker`,
     ]);
     for (let cell of input.cells.filter(({ id }) => cellIds.has(id))) {
       cell.timing.at.quote = 'За годы';
@@ -59,7 +59,7 @@ function anchorVariant(entryId = 'positioning') {
 
 function attentionVariant(entryId = 'positioning') {
   return projectVariant((input) => {
-    let cell = input.cells.find(({ id }) => id === `cv-show:cue:${entryId}.experience-frame`);
+    let cell = input.cells.find(({ id }) => id === `cv-show:cue:${entryId}.tenure-marker`);
     cell.timing.gestureDurationMs += 1;
   });
 }

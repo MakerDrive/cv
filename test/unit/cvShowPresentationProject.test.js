@@ -28,9 +28,11 @@ import { createCvShowAudioReleaseDescriptor } from '../../scripts/cv-show-audio-
 import { parsePortfolioArticleBlocks } from '../../src/static-pages/data/portfolioArticleMedia.js';
 import { loadProjectContent } from '../../src/static-pages/data/projects.js';
 import {
+  applyCvShowMasterProjectCommands,
   createCvShowMediaBindingRegistry,
   createCvShowEntryProject,
   createCvShowEntryTuple,
+  validateCvShowMasterProject,
   validateCvShowRuntimeAdmission,
 } from '../../src/static-pages/js/tour-player/presentationProjectAdapter.js';
 import {
@@ -470,8 +472,8 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
     EXPECTED_DETAIL_PARENTS,
   );
   assert.equal(setupCells.length, 30);
-  assert.equal(groups.length, 87);
-  assert.equal(cueCells.length, 30 + (87 * 2));
+  assert.equal(groups.length, 86);
+  assert.equal(cueCells.length, 30 + (86 * 2));
   assert.deepEqual(project.layers.map(({ id }) => id), [
     'cv-show:layer:narration',
     'cv-show:layer:focus',
@@ -483,11 +485,11 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v1:sha256-yOG/UiS3IgXZbiDf3rr5YwVr6h04M4MODvRgx4k0M30=',
+    'workspace-presentation-authoring-project-v1:sha256-Lm2KMupZttc67Ene87zWoYgA1daM0dGX/kuFCJmdUss=',
   );
   assert.equal(
     timeline.hash,
-    'presentation-timeline-v3:sha256-AXgpXZ85yey9yls/cAE065uizAtzYebCgFlnW2KAVlw=',
+    'presentation-timeline-v3:sha256-un8q10hv8zYHIWkUWxDBKZgJtOQ0xzstL/JYazo8yEo=',
   );
 
   const manifestSource = await readFile(
@@ -613,7 +615,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     'cv-show:cue:mobile-smm.agent-update',
   ]);
   const expectedSetupMarginOverrides = Object.freeze({
-    'cv-show:cue:positioning.open': 1_450,
+    'cv-show:cue:positioning.open': 2_900,
     'cv-show:cue:complexscan.open': 2_050,
   });
   const routeReadinessScrollActions = new Set([
@@ -633,7 +635,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     'cv-show:cue:photopizza.origin',
   ]);
 
-  assert.equal(attentionCells.length, 117);
+  assert.equal(attentionCells.length, 116);
   assert.equal(new Set(attentionCells.map(({ turnId }) => turnId)).size, 30);
   assert.deepEqual(
     Object.fromEntries(Object.entries(Object.groupBy(
@@ -850,8 +852,8 @@ test('the structural fixture joins all 30 Project entries without media authorit
 
   assert.equal(tupleCoverage.length, 30);
   assert.equal(new Set(tupleCoverage.map(({ projectHash }) => projectHash)).size, 30);
-  assert.equal(tupleCoverage.reduce((total, item) => total + item.speechGroupCount, 0), 87);
-  assert.deepEqual(anchorDispositions, { exact: 202, fuzzy: 2 });
+  assert.equal(tupleCoverage.reduce((total, item) => total + item.speechGroupCount, 0), 86);
+  assert.deepEqual(anchorDispositions, { exact: 200, fuzzy: 2 });
 });
 
 test('runtime admission joins Project master ancestry without treating delivery bytes as WAV', () => {
@@ -1087,10 +1089,59 @@ test('alignment verifies master hash, duration, internal hash, and timeline inde
   }
 });
 
+test('positioning introduces experience once with the authored marker gesture', () => {
+  const positioning = CV_SHOW_STORY.scenes.find(({ id }) => id === 'positioning');
+  const experienceAttention = positioning.directives
+    .filter(({ target }) => String(target || '').startsWith('profile.experience'))
+    .map(({ id, type, target, timing }) => ({
+      id,
+      type,
+      target,
+      quote: timing.quote,
+    }));
+
+  assert.deepEqual(experienceAttention, [{
+    id: 'positioning.tenure-marker',
+    type: 'marker',
+    target: 'profile.experience.15-plus',
+    quote: 'За годы работы',
+  }]);
+});
+
+test('master validation admits a structurally valid attention-group removal', () => {
+  const base = {
+    revision: CV_SHOW_PRESENTATION_PROJECT.revision,
+    authoringProjectHash: CV_SHOW_PRESENTATION_PROJECT.hash,
+  };
+  const command = (id, type, payload) => ({
+    schemaVersion: 'workspace-presentation-authoring-command-v1',
+    id,
+    base,
+    type,
+    payload,
+  });
+  const project = applyCvShowMasterProjectCommands(CV_SHOW_PRESENTATION_PROJECT, [
+    command('positioning-transition-remove', 'cell.remove', {
+      cellId: 'cv-show:cue:positioning.workspace-transition',
+    }),
+    command('positioning-transition-scroll-remove', 'cell.remove', {
+      cellId: 'cv-show:cue:positioning.workspace-transition:scroll',
+    }),
+  ]);
+
+  assert.equal(validateCvShowMasterProject(project), project);
+  assert.equal(
+    Object.hasOwn(
+      project.script.metadata.cvShow.directives,
+      'cv-show:cue:positioning.workspace-transition',
+    ),
+    false,
+  );
+});
+
 test('slice identity binds ordered source cells without master or media state', () => {
   const entryId = 'positioning';
   const allSpeechDirectiveIds = [
-    'positioning.experience-frame',
     'positioning.tenure-marker',
     'positioning.workspace-transition',
   ];
@@ -1144,7 +1195,7 @@ test('CV authoring authority rejects slices, structural cells, and broken group 
 
   const session = await createTestAuthoringSession(CV_SHOW_PRESENTATION_PROJECT);
   const original = session.view.project;
-  const sourceCell = original.cells.find(({ id }) => id === 'cv-show:cue:positioning.experience-frame');
+  const sourceCell = original.cells.find(({ id }) => id === 'cv-show:cue:positioning.tenure-marker');
   await assert.rejects(
     session.mutationSession.invoke('presentation_authoring_cell_add', {
       id: 'cv-show-test-structural-add',
@@ -1266,7 +1317,7 @@ test('Workspace authoring tools mutate the actual master, invert semantics, and 
   const baseRevision = STRUCTURAL_PROJECT.revision;
   const originalRegistry = session.view.mediaRegistry;
   const originalTimelineHash = createPresentationAuthoringTimelineProjection(STRUCTURAL_PROJECT).hash;
-  const cellId = 'cv-show:cue:positioning.experience-frame';
+  const cellId = 'cv-show:cue:positioning.tenure-marker';
   const originalCell = STRUCTURAL_PROJECT.cells.find(({ id }) => id === cellId);
   const originalStory = projectCvShowStory(STRUCTURAL_PROJECT);
   const originalSlice = createCvShowEntryProject(STRUCTURAL_PROJECT, 'positioning');
@@ -1285,7 +1336,7 @@ test('Workspace authoring tools mutate the actual master, invert semantics, and 
   assert.notEqual(timingProject.hash, STRUCTURAL_PROJECT.hash);
   assert.notEqual(timingSlice.hash, originalSlice.hash);
   assert.equal(
-    timingStory.scenes[0].directives.find(({ id }) => id === 'positioning.experience-frame').timing.offsetMs,
+    timingStory.scenes[0].directives.find(({ id }) => id === 'positioning.tenure-marker').timing.offsetMs,
     -timingProject.cells.find(({ id }) => id === cellId).timing.leadMs,
   );
   assert.equal(timingResult.mediaDisposition.status, 'preserved');
@@ -1478,8 +1529,8 @@ test('branch return derives a filtered parent slice with setup once and no compl
     checkpointMs,
     adapter: immediateAdapter(operations),
   });
-  assert.equal(filtered.includedSpeechDirectiveIds.includes('positioning.experience-frame'), false);
-  assert.equal(filtered.project.cells.some(({ id }) => id.includes('positioning.experience-frame')), false);
+  assert.equal(filtered.includedSpeechDirectiveIds.includes('positioning.tenure-marker'), false);
+  assert.equal(filtered.project.cells.some(({ id }) => id.includes('positioning.tenure-marker')), false);
   assert.equal(filtered.project.script.metadata.cvShow.slice.parent, null);
   assert.deepEqual(filtered.project.cells.find(({ id }) => id.endsWith(':scroll')).dependsOn, [{
     cellId: 'cv-show:cue:positioning.open',
@@ -1494,7 +1545,7 @@ test('branch return derives a filtered parent slice with setup once and no compl
     await filtered.execution.whenIdle();
   }
   assert.equal(operations.filter(({ projectCell }) => projectCell.id === 'cv-show:cue:positioning.open').length, 1);
-  assert.equal(operations.some(({ projectCell }) => projectCell.id.includes('positioning.experience-frame')), false);
+  assert.equal(operations.some(({ projectCell }) => projectCell.id.includes('positioning.tenure-marker')), false);
   for (let id of filtered.includedSpeechDirectiveIds) {
     assert.equal(operations.filter(({ projectCell }) => (
       projectCell.id === `cv-show:cue:${id}` || projectCell.id === `cv-show:cue:${id}:scroll`
@@ -1595,30 +1646,31 @@ test('branch filtering uses the earliest group start at every checkpoint boundar
   }
 });
 
-test('aligned media runtime settles cross-boundary attention before playback', async () => {
+test('aligned media waits for physical playback and completes preroll before narration', async (t) => {
   let { appConfig, manifest, raw: releaseRaw } = structuralWebHarness();
   clearCvShowWebAudioReleaseCache();
-  const authoringView = createCvShowAuthoringAuthority({
+  const authority = createCvShowAuthoringAuthority({
     seedProject: STRUCTURAL_PROJECT,
-  }).getView();
-  let injectedAuthoringView = structuredClone(authoringView);
-  let authoringViewReads = 0;
+  });
   const fetchImpl = async (url) => {
-    const clip = manifest.clips.find(({ alignedSequenceFile }) => String(url).endsWith(alignedSequenceFile));
-    const value = clip
-      ? structuralSequenceJson(clip.id)
-      : releaseRaw;
-    return new Response(value, { headers: { 'content-type': 'application/json' } });
+    const clip = manifest.clips.find(({ alignedSequenceFile }) => (
+      String(url).endsWith(alignedSequenceFile)
+    ));
+    return new Response(
+      clip ? structuralSequenceJson(clip.id) : releaseRaw,
+      { headers: { 'content-type': 'application/json' } },
+    );
   };
   const controller = createCvShowAlignmentController({
     url: 'https://portfolio.example/cv/?showAudio=local',
     baseUrl: 'https://portfolio.example/cv/',
     appConfig,
     fetchImpl,
-    getAuthoringView: () => {
-      authoringViewReads += 1;
-      return injectedAuthoringView;
-    },
+    getAuthoringView: () => authority.getView(),
+  });
+  t.after(() => {
+    controller.cancel();
+    authority.dispose();
   });
   await controller.prepare(CV_SHOW_STORY);
 
@@ -1632,13 +1684,8 @@ test('aligned media runtime settles cross-boundary attention before playback', a
     preload = '';
     loadCount = 0;
     playCount = 0;
-    ownerDocument;
+    muted = false;
     seekable = { length: 1, start: () => 0, end: () => 60 };
-
-    constructor(ownerDocument = null) {
-      super();
-      this.ownerDocument = ownerDocument;
-    }
 
     get currentTime() { return this.#currentTime; }
     set currentTime(value) {
@@ -1652,10 +1699,12 @@ test('aligned media runtime settles cross-boundary attention before playback', a
     pause() {
       this.paused = true;
       this.dispatchEvent(new Event('pause'));
+      queueMicrotask(() => this.dispatchEvent(new Event('timeupdate')));
     }
     play() {
       this.playCount += 1;
       this.paused = false;
+      if (this.playCount === 1) this.#currentTime = 0.417;
       this.dispatchEvent(new Event('play'));
       this.dispatchEvent(new Event('playing'));
       return Promise.resolve();
@@ -1670,243 +1719,119 @@ test('aligned media runtime settles cross-boundary attention before playback', a
     }
   }
 
-  const source = CV_SHOW_STORY.scenes[0];
-  const operationLog = [];
-  const executionReceipts = [];
-  const presentationFrameCallbacks = [];
-  const presentationFrameWaiters = [];
-  const presentationDocument = {
-    visibilityState: 'visible',
-    defaultView: {
-      requestAnimationFrame(callback) {
-        presentationFrameCallbacks.push(callback);
-        for (const resolve of presentationFrameWaiters.splice(0)) resolve();
-        return presentationFrameCallbacks.length;
-      },
-    },
-  };
-  const nextPresentationFrame = async () => {
-    while (presentationFrameCallbacks.length === 0) {
-      await new Promise((resolve) => presentationFrameWaiters.push(resolve));
-    }
-    return presentationFrameCallbacks.shift();
-  };
-  let focusOperation = null;
-  let resolveFocusStarted;
-  const focusStarted = new Promise((resolve) => { resolveFocusStarted = resolve; });
-  let resolveFocusCompletion;
-  const focusCompletion = new Promise((resolve) => { resolveFocusCompletion = resolve; });
-  const runPresentationOperation = async (operation) => {
-    operationLog.push({ id: operation.projectCell.id, loadCount: media.loadCount });
-    if (operation.projectCell.id === 'cv-show:cue:positioning.experience-frame') {
-      assert.equal(
-        media.loadCount,
-        1,
-        'cross-boundary attention starts only after the paused media generation is ready',
-      );
-      assert.equal(media.paused, true);
-      operation.reportAdmission(Object.freeze({
-        providerAdmission: testProviderAdmission(operation),
-      }));
-      focusOperation = operation;
-      resolveFocusStarted();
-      return focusCompletion;
-    }
-    return reportOperationReceipts(operation);
-  };
-  const media = new FakeMedia(presentationDocument);
-  const alignedPromise = controller.createEntryRuntime({
-    entry: source,
+  const entry = CV_SHOW_STORY.scenes.find(({ id }) => id === 'positioning');
+  const media = new FakeMedia();
+  media.muted = true;
+  const operations = [];
+  let releaseMarker;
+  let markMarkerStarted;
+  const markerGate = new Promise((resolve) => { releaseMarker = resolve; });
+  const markerStarted = new Promise((resolve) => { markMarkerStarted = resolve; });
+  const aligned = await controller.createEntryRuntime({
+    entry,
     media,
-    audioClip: manifest.clips[0],
-    runPresentationOperation,
-    onReceipt: (receipt) => executionReceipts.push(receipt),
-  });
-  injectedAuthoringView.base.revision = 99;
-  injectedAuthoringView.identity.snapshot = 'cv-show-authoring-snapshot-v1:changed';
-  injectedAuthoringView.project.revision = 99;
-  const aligned = await alignedPromise;
-  assert.equal(authoringViewReads, 1);
-  assert.deepEqual(aligned.authoringBase, authoringView.base);
-  assert.deepEqual(aligned.authoringIdentity, authoringView.identity);
-  assert.equal(aligned.masterProjectHash, authoringView.base.authoringProjectHash);
-  assert.equal(aligned.masterRevision, authoringView.base.revision);
-  let generationResolved = false;
-  const generationPromise = aligned.runtime.loadAndRestorePlayback({
-    source: 'https://portfolio.example/cv/positioning.opus',
-    positionMs: 0,
-    paused: true,
-    preload: 'auto',
-  }, { reason: 'alignment-ready' }).then((receipt) => {
-    generationResolved = true;
-    return receipt;
-  });
-  const readinessFrameOne = await nextPresentationFrame();
-  assert.equal(focusOperation, null, 'attention is not activated before the first readiness frame');
-  assert.equal(generationResolved, false);
-  readinessFrameOne();
-  const readinessFrameTwo = await nextPresentationFrame();
-  assert.equal(focusOperation, null, 'attention is not activated before the second readiness frame');
-  assert.equal(generationResolved, false);
-  readinessFrameTwo();
-  const startupBoundary = await Promise.race([
-    focusStarted.then(() => 'focus-started'),
-    generationPromise.then(() => 'generation-resolved'),
-  ]);
-  assert.equal(startupBoundary, 'focus-started');
-  assert.equal(generationResolved, false, 'generation remains gated before first-frame');
-  assert.equal(media.paused, true);
-  assert.equal(media.currentTime, 0);
-  assert.equal(media.playCount, 0);
-  assert.equal(aligned.execution.snapshot.activeCount, 1);
-  assert.equal(
-    aligned.execution.snapshot.activeCellId,
-    'cv-show:cue:positioning.experience-frame',
-  );
-  const acceptedFirstFrame = focusOperation.reportReceipt(Object.freeze({
-    status: 'first-frame',
-    observedAt: operationObservation(),
-    providerReceipt: TEST_PROVIDER_RECEIPT,
-  }));
-  await Promise.resolve();
-  assert.equal(
-    generationResolved,
-    false,
-    'an accepted first frame remains gated until the attention effect settles',
-  );
-  const acceptedSettlement = focusOperation.reportReceipt(Object.freeze({
-    status: 'settled',
-    observedAt: operationObservation(),
-    providerReceipt: TEST_PROVIDER_RECEIPT,
-  }));
-  resolveFocusCompletion();
-  const generation = await generationPromise;
-  assert.equal(generation.status, 'completed');
-  assert.deepEqual(operationLog, [
-    { id: 'cv-show:cue:positioning.open', loadCount: 0 },
-    { id: 'cv-show:cue:positioning.experience-frame:scroll', loadCount: 0 },
-    { id: 'cv-show:cue:positioning.experience-frame', loadCount: 1 },
-  ]);
-  assert.equal(media.loadCount, 1);
-  assert.equal(media.paused, true, 'accepted first-frame does not advance media');
-  assert.equal(media.currentTime, 0);
-  assert.equal(media.playCount, 0);
-  assert.equal(aligned.execution.snapshot.state, 'running');
-  assert.equal(aligned.execution.snapshot.activeCount, 0, 'settlement completes before playback');
-  assert.equal(
-    executionReceipts.find(({ cellId, status }) => (
-      cellId === 'cv-show:cue:positioning.experience-frame' && status === 'first-frame'
-    )),
-    acceptedFirstFrame,
-    'the gate preserves the exact Workspace-accepted first-frame receipt',
-  );
-  assert.equal(
-    executionReceipts.find(({ cellId, status }) => (
-      cellId === 'cv-show:cue:positioning.experience-frame' && status === 'settled'
-    )),
-    acceptedSettlement,
-    'generation unlocks only from the exact Workspace-accepted settlement receipt',
-  );
-  aligned.runtime.resume();
-  assert.equal(media.playCount, 1);
-  assert.equal(aligned.execution.snapshot.activeCount, 0);
-  media.currentTime = 0.15;
-  media.dispatchEvent(new Event('timeupdate'));
-  assert.equal(aligned.execution.snapshot.activeCount, 0);
-  aligned.runtime.pause();
-  assert.equal(aligned.execution.snapshot.state, 'running');
-  assert.equal(aligned.execution.snapshot.activeCount, 0);
-  await aligned.runtime.whenIdle();
-  assert.equal(aligned.execution.snapshot.activeCount, 0);
-  aligned.runtime.dispose();
-  assert.equal(aligned.execution.snapshot.state, 'disposed');
-
-  injectedAuthoringView = structuredClone(authoringView);
-  const cancelledMedia = new FakeMedia();
-  let cancelledFocusOperation = null;
-  let resolveCancelledFocusStarted;
-  const cancelledFocusStarted = new Promise((resolve) => {
-    resolveCancelledFocusStarted = resolve;
-  });
-  const cancelledAligned = await controller.createEntryRuntime({
-    entry: source,
-    media: cancelledMedia,
-    audioClip: manifest.clips[0],
-    runPresentationOperation: async (operation) => {
-      if (operation.projectCell.id !== 'cv-show:cue:positioning.experience-frame') {
-        return reportOperationReceipts(operation);
-      }
-      operation.reportAdmission(Object.freeze({
-        providerAdmission: testProviderAdmission(operation),
+    audioClip: manifest.clips.find(({ id }) => id === entry.id),
+    deferPresentationUntilPlayback: true,
+    beforeDeferredPresentation: async () => {
+      operations.push(Object.freeze({
+        id: 'historical-owner',
+        mediaPaused: media.paused,
+        mediaMuted: media.muted,
+        mediaTimeMs: Math.round(media.currentTime * 1_000),
       }));
-      cancelledFocusOperation = operation;
-      resolveCancelledFocusStarted();
-      return new Promise(() => {});
+    },
+    runPresentationOperation: async (operation) => {
+      operations.push(Object.freeze({
+        id: operation.projectCell.id,
+        mediaPaused: media.paused,
+        mediaMuted: media.muted,
+        mediaTimeMs: Math.round(media.currentTime * 1_000),
+      }));
+      if (operation.projectCell.id === 'cv-show:cue:positioning.tenure-marker') {
+        if (requiresProviderAdmission(operation)) {
+          operation.reportAdmission(Object.freeze({
+            providerAdmission: testProviderAdmission(operation),
+          }));
+        }
+        const observedAt = operationObservation();
+        operation.reportReceipt(Object.freeze({
+          status: 'first-frame',
+          observedAt,
+          providerReceipt: TEST_PROVIDER_RECEIPT,
+        }));
+        markMarkerStarted();
+        await markerGate;
+        operation.reportReceipt(Object.freeze({
+          status: 'settled',
+          observedAt,
+          providerReceipt: TEST_PROVIDER_RECEIPT,
+        }));
+        return undefined;
+      }
+      return reportOperationReceipts(operation);
     },
   });
-  const cancelledGeneration = cancelledAligned.runtime.loadAndRestorePlayback({
+  t.after(() => aligned.runtime.dispose());
+
+  const generation = await aligned.runtime.loadAndRestorePlayback({
     source: 'https://portfolio.example/cv/positioning.opus',
     positionMs: 0,
     paused: true,
     preload: 'auto',
   }, { reason: 'alignment-ready' });
-  await cancelledFocusStarted;
-  assert.equal(cancelledMedia.paused, true);
-  assert.equal(cancelledMedia.currentTime, 0);
-  assert.equal(cancelledMedia.playCount, 0);
-  cancelledAligned.runtime.dispose();
-  await assert.rejects(
-    cancelledGeneration,
-    (error) => error.code === 'CV_SHOW_SCENE_SETUP_FAILED'
-      && error.receipt?.status === 'cancelled',
-  );
-  assert.ok(cancelledFocusOperation);
-  assert.throws(
-    () => cancelledFocusOperation.reportReceipt(Object.freeze({
-      status: 'first-frame',
-      observedAt: operationObservation(),
-      providerReceipt: TEST_PROVIDER_RECEIPT,
-    })),
-    (error) => error.code === 'PRESENTATION_EFFECT_RECEIPT_STALE',
-    'disposal suppresses the saved late first-frame reporter',
-  );
-  assert.equal(cancelledMedia.playCount, 0);
-  assert.equal(cancelledAligned.execution.snapshot.state, 'disposed');
+  assert.equal(generation.status, 'completed');
+  assert.equal(media.loadCount, 1);
+  assert.equal(media.playCount, 0);
+  assert.equal(media.paused, true);
+  assert.deepEqual(operations, [], 'showPlay=0 cannot admit presenter work');
+  assert.equal(aligned.execution.snapshot.state, 'paused');
 
-  injectedAuthoringView = structuredClone(authoringView);
-  const firstSpeechGroup = aligned.schedule.cells.filter(({ cellId }) => (
-    cellId.includes('positioning.experience-frame')
-  ));
-  const checkpointMs = Math.max(
-    0,
-    Math.min(...firstSpeechGroup.map(({ startMs }) => startMs))
-      - aligned.schedule.presentationStartMs,
+  await Promise.resolve(aligned.runtime.resume());
+  await markerStarted;
+  aligned.runtime.pause();
+  assert.equal(
+    aligned.runtime.resume(),
+    true,
+    'Resume during the retained marker becomes a queued transport intent',
   );
-  const branchMedia = new FakeMedia();
-  const branchOperations = [];
-  const branchAligned = await controller.createEntryRuntime({
-    entry: source,
-    media: branchMedia,
-    audioClip: manifest.clips[0],
-    checkpointMs,
-    runPresentationOperation: async (operation) => {
-      branchOperations.push(operation.projectCell.id);
-      return reportOperationReceipts(operation);
+  assert.equal(media.playCount, 1, 'queued Resume cannot move media during the marker gate');
+  releaseMarker();
+  await aligned.runtime.whenIdle();
+
+  assert.deepEqual(operations, [
+    {
+      id: 'historical-owner',
+      mediaPaused: true,
+      mediaMuted: true,
+      mediaTimeMs: 0,
     },
-  });
-  const branchGeneration = await branchAligned.runtime.loadAndRestorePlayback({
-    source: 'https://portfolio.example/cv/positioning.opus',
-    positionMs: checkpointMs,
-    paused: true,
-    preload: 'auto',
-  }, { reason: 'branch-return' });
-  assert.equal(branchGeneration.status, 'completed');
-  assert.deepEqual(branchOperations, ['cv-show:cue:positioning.open']);
-  assert.equal(branchAligned.includedSpeechDirectiveIds.includes('positioning.experience-frame'), false);
-  assert.equal(branchAligned.project.cells.some(({ id }) => id.includes('positioning.experience-frame')), false);
-  assert.equal(branchMedia.currentTime, checkpointMs / 1_000);
-  assert.equal(branchMedia.paused, true);
-  assert.equal(branchAligned.execution.snapshot.state, 'paused');
-  branchAligned.runtime.dispose();
-  assert.equal(branchAligned.execution.snapshot.state, 'disposed');
+    {
+      id: 'cv-show:cue:positioning.open',
+      mediaPaused: true,
+      mediaMuted: true,
+      mediaTimeMs: 0,
+    },
+    {
+      id: 'cv-show:cue:positioning.tenure-marker:scroll',
+      mediaPaused: true,
+      mediaMuted: true,
+      mediaTimeMs: 0,
+    },
+    {
+      id: 'cv-show:cue:positioning.tenure-marker',
+      mediaPaused: true,
+      mediaMuted: true,
+      mediaTimeMs: 0,
+    },
+  ]);
+  assert.equal(media.playCount, 2, 'one admitted play is followed by one post-preroll resume');
+  assert.equal(media.paused, false);
+  assert.equal(media.muted, false);
+  assert.equal(media.currentTime, 0);
+  assert.equal(
+    aligned.execution.snapshot.terminal
+      .filter(({ cellId }) => cellId.includes('positioning.tenure-marker'))
+      .every(({ status }) => status === 'completed'),
+    true,
+  );
 });

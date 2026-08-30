@@ -30,6 +30,7 @@ export function createLocalAudioSpeechController({
     if (!active) return;
     active.audio.removeEventListener?.('ended', active.onEnded);
     active.audio.removeEventListener?.('error', active.onFailed);
+    active.audio.removeEventListener?.('playing', active.onPlaying);
     releaseAudio(active.audio, { releaseSource });
     active = null;
   };
@@ -85,6 +86,8 @@ export function createLocalAudioSpeechController({
         if (token !== generation || active?.audio !== audio) return;
         if (error?.name === 'NotAllowedError') {
           active.playBlocked = true;
+          active.playRequested = false;
+          active.reportStarted = null;
           lastError = 'autoplay-blocked';
           releaseAudio(audio);
           options.onBlocked?.(lastError, error);
@@ -102,19 +105,41 @@ export function createLocalAudioSpeechController({
       };
       audio.addEventListener?.('ended', onEnded, { once: true });
       audio.addEventListener?.('error', onFailed, { once: true });
-      const play = () => {
-        if (token !== generation || active?.audio !== audio) return false;
+      let onPlaying = () => active?.reportStarted?.();
+      audio.addEventListener?.('playing', onPlaying);
+      const play = ({ deferMedia = false } = {}) => {
+        if (
+          token !== generation
+          || active?.audio !== audio
+          || active.playRequested !== true
+        ) return false;
         const attempt = active.playAttempt + 1;
         active.playAttempt = attempt;
-        Promise.resolve(audio.play?.()).then(() => {
+        const reportStarted = () => {
           if (token === generation && active?.audio === audio && active.playAttempt === attempt) {
             active.playBlocked = false;
             lastError = '';
+            if (active.reportedStartAttempt !== attempt && active.playRequested === true) {
+              active.reportedStartAttempt = attempt;
+              options.onStart?.();
+            }
           }
-        }).catch((error) => {
-          if (token !== generation || active?.audio !== audio || active.playAttempt !== attempt) return;
+        };
+        active.reportStarted = reportStarted;
+        if (deferMedia) return true;
+        let result;
+        try {
+          result = audio.play?.();
+        } catch (error) {
           onFailed(error);
-        });
+          return false;
+        }
+        if (typeof result?.then === 'function') {
+          Promise.resolve(result).then(reportStarted).catch((error) => {
+            if (token !== generation || active?.audio !== audio || active.playAttempt !== attempt) return;
+            onFailed(error);
+          });
+        }
         return true;
       };
       active = {
@@ -122,10 +147,13 @@ export function createLocalAudioSpeechController({
         audio,
         onEnded,
         onFailed,
+        onPlaying,
         play,
         playAttempt: 0,
         playBlocked: false,
-        resumeRequested: false,
+        playRequested: options.startPaused !== true,
+        reportStarted: null,
+        reportedStartAttempt: 0,
         generationReceipt: null,
       };
       let setup;
@@ -149,23 +177,24 @@ export function createLocalAudioSpeechController({
           return;
         }
         active.generationReceipt = receipt;
-        if (options.startPaused !== true || active.resumeRequested) play();
+        if (active.playRequested) play();
       }).catch(onFailed);
       return true;
     },
     pause() {
       if (!active) return;
       active.playAttempt += 1;
-      active.resumeRequested = false;
+      active.playRequested = false;
+      active.reportStarted = null;
       active.audio.pause?.();
     },
-    resume() {
+    resume(options = {}) {
       if (!active) return false;
+      active.playRequested = true;
       if (active.generationReceipt?.status !== 'completed') {
-        active.resumeRequested = true;
         return true;
       }
-      return active.play();
+      return active.play(options);
     },
     transition(id) {
       generation += 1;
@@ -259,8 +288,8 @@ export function createCvShowNarrationController({
     pause() {
       activeSpeech?.pause?.();
     },
-    resume() {
-      return activeSpeech?.resume?.() ?? false;
+    resume(options = {}) {
+      return activeSpeech?.resume?.(options) ?? false;
     },
     transition(id) {
       localSpeech?.transition?.(id);

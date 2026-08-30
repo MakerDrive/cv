@@ -117,6 +117,9 @@ function easeInOutCubic(progress) {
  * shared readiness layer remains responsible for native `scrollend` and stable
  * frame evidence. Native smooth-scroll duration is browser-selected and can
  * exceed the Project's hard event cell even when the visual motion is done.
+ * @param {Element} target
+ * @param {{ document?: Document, signal?: AbortSignal, durationMs?: number }} [options]
+ * @returns {Promise<void>}
  */
 export function animateCvShowScrollIntoView(
   target,

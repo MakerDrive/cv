@@ -123,6 +123,11 @@ export class PortfolioShowChat extends HTMLElement {
   #showCompleted = false;
   #completedDetailReview = false;
   #completedDetailReviewPreparing = false;
+  #presentationAdmitted = false;
+  #transportPlaying = false;
+  #playRequested = false;
+  #resumePending = false;
+  #pendingStartDetail = null;
   #session = new ShowSessionState();
   #audioArbiter = null;
   #speechToken = null;
@@ -305,15 +310,18 @@ export class PortfolioShowChat extends HTMLElement {
         ? Math.max(0, Math.round(mediaPosition * 1_000))
         : Math.max(0, Math.round(Number(fallbackPosition) || 0)),
       play: this.$.isRunning
-        ? !this.$.isPaused
+        ? this.#playRequested
         : Boolean(this.#pendingTransportIntent?.play),
       running: Boolean(this.$.isRunning),
       completed: Boolean(this.#showCompleted),
     });
   }
 
+  /**
+   * @param {{ mode?: 'short' | 'full', entryId?: string, detailId?: string, timeMs?: number, play?: boolean }} [route]
+   */
   async applyShowRoute({ mode, entryId = '', detailId = '', timeMs = 0, play = true } = {}) {
-    if (!this.$.isReady || !['short', 'full'].includes(mode)) return false;
+    if (!this.$.isReady || (mode !== 'short' && mode !== 'full')) return false;
     if (this.$.isRunning || this.#mode) this.stopShow({ reason: 'route-replace' });
     const transportRequestId = ++this.#transportRequestId;
     return this.#start(mode, {
@@ -349,7 +357,13 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   pauseShow(reason = 'explicit') {
-    if (!this.$.isRunning || this.$.isPaused) return false;
+    if (
+      !this.$.isRunning
+      || (!this.#playRequested && !this.#transportPlaying && this.$.isPaused)
+    ) return false;
+    this.#playRequested = false;
+    this.#transportPlaying = false;
+    this.#resumePending = false;
     this.$.isPaused = true;
     this.$.resumeRequired = true;
     this.#speech.pause();
@@ -426,6 +440,11 @@ export class PortfolioShowChat extends HTMLElement {
     this.#branchReturnPlayback = null;
     this.#completedDetailReview = false;
     this.#completedDetailReviewPreparing = false;
+    this.#presentationAdmitted = false;
+    this.#transportPlaying = false;
+    this.#playRequested = false;
+    this.#resumePending = false;
+    this.#pendingStartDetail = null;
     this.#showCompleted = completed;
     this.#pendingTransportIntent = null;
     this.#mode = '';
@@ -508,7 +527,7 @@ export class PortfolioShowChat extends HTMLElement {
       ),
       state: {
         index: Math.max(0, this.#sceneIndex),
-        playing: this.$.isRunning && !this.$.isPaused,
+        playing: this.#transportPlaying,
         progress: {
           positionMs: Math.max(
             0,
@@ -522,7 +541,7 @@ export class PortfolioShowChat extends HTMLElement {
         tts: entry ? {
           label: this.#message('tour.tts'),
           text: entry.speech,
-          status: this.$.isPaused ? 'paused' : this.$.isRunning ? 'playing' : 'idle',
+          status: this.#transportPlaying ? 'playing' : this.$.isRunning ? 'paused' : 'idle',
         } : {},
       },
       title: this.$.tourTitle,
@@ -548,7 +567,7 @@ export class PortfolioShowChat extends HTMLElement {
       onIndexChange: null,
       onStateChange: null,
       get index() { return Math.max(0, host.#sceneIndex); },
-      get isPlaying() { return host.$.isRunning && !host.$.isPaused; },
+      get isPlaying() { return host.#transportPlaying; },
       get isPaused() { return host.$.isPaused; },
       play() {
         if (!host.$.isRunning && host.#mode) void host.#start(host.#mode);
@@ -722,6 +741,11 @@ export class PortfolioShowChat extends HTMLElement {
       || !this.#mode
     ) return false;
     this.#session = new ShowSessionState();
+    this.#presentationAdmitted = false;
+    this.#transportPlaying = false;
+    this.#playRequested = Boolean(play);
+    this.#resumePending = false;
+    this.#pendingStartDetail = Object.freeze({ routeDriven: Boolean(routeDriven) });
     this.$.isRunning = true;
     this.$.isPaused = !play;
     this.$.resumeRequired = !play;
@@ -738,11 +762,6 @@ export class PortfolioShowChat extends HTMLElement {
       || activeTransportRequestId !== this.#transportRequestId
       || !this.#mode
     ) return false;
-    this.dispatchEvent(new CustomEvent('portfolio-show-start', {
-      bubbles: true,
-      composed: true,
-      detail: { routeDriven },
-    }));
     this.#presentScene({ startPaused: !play || Boolean(detailId), positionMs: detailId ? 0 : targetMs });
     if (detailId) {
       const scene = this.#story?.scenes?.find(({ id }) => id === requestedEntry.id);
@@ -794,7 +813,11 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.resumeRequired = true;
     if (!wasRunning) {
       this.#session = new ShowSessionState();
-      this.dispatchEvent(new CustomEvent('portfolio-show-start', { bubbles: true, composed: true }));
+      this.#presentationAdmitted = false;
+      this.#transportPlaying = false;
+      this.#playRequested = false;
+      this.#resumePending = false;
+      this.#pendingStartDetail = Object.freeze({});
     }
     this.#presentScene({ startPaused: true });
   }
@@ -839,15 +862,17 @@ export class PortfolioShowChat extends HTMLElement {
       this.#showCompleted = false;
     }
     this.#sceneIndex = index;
-    if (!wasRunning) this.#session = new ShowSessionState();
-    this.$.isRunning = true;
     if (!wasRunning) {
-      this.dispatchEvent(new CustomEvent('portfolio-show-start', {
-        bubbles: true,
-        composed: true,
-        detail: { routeDriven: Boolean(pendingTransportIntent?.routeDriven) },
-      }));
+      this.#session = new ShowSessionState();
+      this.#presentationAdmitted = false;
+      this.#transportPlaying = false;
+      this.#playRequested = Boolean(wasPlaying);
+      this.#resumePending = false;
+      this.#pendingStartDetail = Object.freeze({
+        routeDriven: Boolean(pendingTransportIntent?.routeDriven),
+      });
     }
+    this.$.isRunning = true;
     this.#presentScene({ startPaused: !wasPlaying, positionMs: targetMs });
     if (this.#pendingTransportIntent === pendingTransportIntent) {
       this.#pendingTransportIntent = null;
@@ -927,6 +952,45 @@ export class PortfolioShowChat extends HTMLElement {
     this.#presentScene();
   }
 
+  #publishPhysicalStart(entry, requestId) {
+    if (
+      requestId !== this.#requestId
+      || entry !== this.#activeSpeechEntry
+      || !this.$.isRunning
+      || !this.#playRequested
+    ) return false;
+    const firstPhysicalStart = !this.#presentationAdmitted;
+    const publishResume = this.#resumePending && !firstPhysicalStart;
+    const wasPaused = this.$.isPaused;
+    this.#presentationAdmitted = true;
+    this.#transportPlaying = true;
+    this.#resumePending = false;
+    this.$.isPaused = false;
+    this.$.resumeRequired = false;
+    this.$.statusText = '';
+    if (wasPaused) this.#session.resume();
+    this.#session.setPlayback({
+      ...this.#session.snapshot.playback,
+      playbackState: 'playing',
+    });
+    if (firstPhysicalStart) {
+      const detail = this.#pendingStartDetail || Object.freeze({});
+      this.#pendingStartDetail = null;
+      this.dispatchEvent(new CustomEvent('portfolio-show-start', {
+        bubbles: true,
+        composed: true,
+        detail,
+      }));
+    } else if (publishResume) {
+      this.dispatchEvent(new CustomEvent('portfolio-show-resume', {
+        bubbles: true,
+        composed: true,
+      }));
+    }
+    this.#syncPlayer();
+    return true;
+  }
+
   #presentScene({ startPaused = false, positionMs = 0 } = {}) {
     const entry = this.#currentEntry();
     if (!entry) return;
@@ -934,7 +998,7 @@ export class PortfolioShowChat extends HTMLElement {
       episodeId: this.#mode,
       cueIndex: this.#sceneIndex,
       positionMs,
-      playbackState: startPaused ? 'paused' : 'playing',
+      playbackState: 'paused',
       subjectId: entry.sceneId || entry.id,
     });
     this.$.inBranch = false;
@@ -961,6 +1025,9 @@ export class PortfolioShowChat extends HTMLElement {
     this.#requestId += 1;
     const requestId = this.#requestId;
     this.#stopSpeech('scene-changed', { retainEntryId: entry.id });
+    this.#transportPlaying = false;
+    this.#playRequested = !startPaused;
+    this.#resumePending = false;
     let context = createCvShowPresentationContext(entry, {
       inBranch: this.$.inBranch,
       returnLabel: this.$.lblReturn,
@@ -970,26 +1037,36 @@ export class PortfolioShowChat extends HTMLElement {
     this.emitShowDirective({ type: 'speech', id: `${entry.id}.speech`, text: entry.speech });
     const { scheduled } = partitionCvShowAlignedDirectives(entry.directives);
     const visualDirectives = scheduled.map(({ source }) => source).filter(({ type }) => type !== 'media');
-    const sceneSetupReady = precedingSetupEntry
-      ? this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
-      : this.#alignment.available
-        ? null
-        : this.#runSceneSetup(entry, requestId);
-    if (!this.#alignment.available) {
-      void sceneSetupReady
-        .then(() => {
-          if (requestId !== this.#requestId) return;
-          this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
-            bubbles: true,
-            composed: true,
-            detail: { directives: visualDirectives, aligned: false, requestId },
-          }));
-        })
-        .catch(() => {});
-    }
+    const runPrecedingSetup = this.#alignment.available && precedingSetupEntry
+      ? () => this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
+      : null;
+    const sceneSetupReady = runPrecedingSetup && this.#presentationAdmitted
+      ? runPrecedingSetup()
+      : null;
+    const beforeDeferredPresentation = runPrecedingSetup && !this.#presentationAdmitted
+      ? runPrecedingSetup
+      : null;
+    const startUnalignedPresentation = this.#alignment.available ? null : async () => {
+      const receipt = precedingSetupEntry
+        ? await this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
+        : await this.#runSceneSetup(entry, requestId);
+      requireCvShowSceneSetupSuccess(receipt, entry.id);
+      if (requestId !== this.#requestId) return;
+      this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
+        bubbles: true,
+        composed: true,
+        detail: { directives: visualDirectives, aligned: false, requestId },
+      }));
+    };
     this.#showPlayer?.bind?.(this.#showConfig());
     this.#syncPlayer();
-    void this.#speak(entry, requestId, { startPaused, positionMs, sceneSetupReady });
+    void this.#speak(entry, requestId, {
+      startPaused,
+      positionMs,
+      sceneSetupReady,
+      beforeDeferredPresentation,
+      onPhysicalStart: startUnalignedPresentation,
+    });
   }
 
   #runSceneSetup(entry, requestId) {
@@ -1059,16 +1136,23 @@ export class PortfolioShowChat extends HTMLElement {
     positionMs = 0,
     reason = 'alignment-ready',
     sceneSetupReady = null,
+    beforeDeferredPresentation = null,
   } = {}) {
     await sceneSetupReady;
     if (requestId !== this.#requestId) {
       return Object.freeze({ status: 'cancelled', reason: 'scene-replaced' });
+    }
+    const deferPresentationUntilPlayback = !this.#presentationAdmitted;
+    if (deferPresentationUntilPlayback && typeof media.muted === 'boolean') {
+      media.muted = true;
     }
     const aligned = await this.#alignment.createEntryRuntime({
       entry,
       media,
       audioClip: clip,
       checkpointMs: positionMs > 0 ? positionMs : null,
+      deferPresentationUntilPlayback,
+      beforeDeferredPresentation,
       runPresentationOperation: (operation) => {
         let settle;
         let settled = false;
@@ -1160,6 +1244,8 @@ export class PortfolioShowChat extends HTMLElement {
     startPaused = false,
     positionMs = 0,
     sceneSetupReady = null,
+    beforeDeferredPresentation = null,
+    onPhysicalStart = null,
   } = {}) {
     if (!this.#speech.available) {
       this.pauseShow('narration-unavailable');
@@ -1208,13 +1294,27 @@ export class PortfolioShowChat extends HTMLElement {
       id: entry.id,
       lang: this.#story.narrationLocale,
       startPaused,
+      onStart: () => {
+        if (!this.#publishPhysicalStart(entry, requestId)) return;
+        if (typeof onPhysicalStart !== 'function') return;
+        void onPhysicalStart().catch(() => {
+          if (requestId !== this.#requestId) return;
+          this.$.isError = true;
+          this.$.errorText = this.#message('tour.error.speech');
+          this.pauseShow('scene-setup-error');
+          this.#appendSystemMessage(this.$.errorText, { error: true });
+        });
+      },
       onMedia: (media, clip) => this.#attachAlignedEntry(entry, media, clip, requestId, {
         positionMs,
         reason: positionMs > 0 ? 'branch-return' : 'alignment-ready',
         sceneSetupReady,
+        beforeDeferredPresentation,
       }),
       onEnd: () => {
         if (requestId !== this.#requestId) return;
+        this.#transportPlaying = false;
+        this.#syncPlayer();
         releaseSpeech();
         if (!startedInBranch) void this.#advanceAfterAttention(requestId);
       },
@@ -1252,6 +1352,7 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   #stopSpeech(reason, { retainEntryId = '' } = {}) {
+    this.#transportPlaying = false;
     this.#disposeAlignedEntry();
     if (retainEntryId) {
       this.#alignment.transition?.(retainEntryId);
@@ -1318,7 +1419,7 @@ export class PortfolioShowChat extends HTMLElement {
       episodeId: branch.id,
       cueIndex: 0,
       positionMs,
-      playbackState: startPaused ? 'paused' : 'playing',
+      playbackState: 'paused',
       subjectId: branch.sceneId,
     });
     this.$.inBranch = true;
@@ -1375,13 +1476,13 @@ export class PortfolioShowChat extends HTMLElement {
       this.$.resumeRequired = false;
       this.$.hasDetails = true;
       this.#completedDetailReview = true;
+      this.#presentationAdmitted = false;
+      this.#transportPlaying = false;
+      this.#playRequested = false;
+      this.#resumePending = false;
+      this.#pendingStartDetail = Object.freeze({ completedDetailReview: true });
       this.#mountSharedShow();
       this.#showPlayer?.bind?.(this.#showConfig());
-      this.dispatchEvent(new CustomEvent('portfolio-show-start', {
-        bubbles: true,
-        composed: true,
-        detail: { completedDetailReview: true },
-      }));
       return true;
     } catch {
       this.#rejectUnavailableData();
@@ -1465,15 +1566,19 @@ export class PortfolioShowChat extends HTMLElement {
       }
       this.#speechToken = token;
     }
-    this.#session.resume();
-    this.dispatchEvent(new CustomEvent('portfolio-show-resume', {
-      bubbles: true,
-      composed: true,
-    }));
-    this.#speech.resume();
-    this.$.isPaused = false;
-    this.$.resumeRequired = false;
-    this.$.statusText = '';
+    this.#playRequested = true;
+    this.#resumePending = this.#presentationAdmitted;
+    const alignedRuntime = this.#alignedEntry?.runtime || null;
+    const speechAccepted = this.#speech.resume({ deferMedia: Boolean(alignedRuntime) });
+    const mediaAccepted = speechAccepted === false || !alignedRuntime
+      ? speechAccepted
+      : alignedRuntime.resume();
+    const accepted = speechAccepted !== false && mediaAccepted !== false;
+    if (accepted === false) {
+      this.#speech.pause();
+      this.#playRequested = false;
+      this.#resumePending = false;
+    }
     this.#syncPlayer();
   }
 
@@ -1585,8 +1690,8 @@ export class PortfolioShowChat extends HTMLElement {
     }
     this.#showPlayer?.setState?.({
       index: Math.max(0, this.#sceneIndex),
-      playing: this.$.isRunning && !this.$.isPaused,
-      state: terminalState || (this.$.isPaused ? 'paused' : this.$.isRunning ? 'playing' : 'stopped'),
+      playing: this.#transportPlaying,
+      state: terminalState || (this.#transportPlaying ? 'playing' : this.$.isRunning ? 'paused' : 'stopped'),
       progress: { positionMs: captionPositionMs },
       caption: {
         speaker: this.$.inBranch ? this.#message('tour.details') : 'CV',
@@ -1597,7 +1702,7 @@ export class PortfolioShowChat extends HTMLElement {
       tts: activeEntry ? {
         label: this.#message('tour.tts'),
         text: activeEntry.speech,
-        status: terminalState || (this.$.isPaused ? 'paused' : this.$.isRunning ? 'playing' : 'idle'),
+        status: terminalState || (this.#transportPlaying ? 'playing' : this.$.isRunning ? 'paused' : 'idle'),
       } : {},
     });
     this.#notifyController(terminalState);
