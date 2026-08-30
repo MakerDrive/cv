@@ -643,9 +643,9 @@ test('branch return reruns subject setup before restoring paused narration', asy
   );
   assert.match(
     logic,
-    /const requestId = this\.#requestId;[\s\S]*?if \(unavailableEntryIds\.length\)[\s\S]*?return;\s*\}\s*this\.#mode = mode;/u,
+    /const requestId = this\.#requestId;[\s\S]*?if \(unavailableEntryIds\.length\)[\s\S]*?return false;\s*\}\s*this\.#mode = mode;/u,
   );
-  assert.match(logic, /requestId !== this\.#requestId \|\| !this\.#mode/u);
+  assert.match(logic, /requestId !== this\.#requestId[\s\S]*?\|\| !this\.#mode/u);
   assert.match(logic, /masterProjectHash: this\.#authoringView\.base\.authoringProjectHash/u);
   assert.match(logic, /masterRevision: this\.#authoringView\.base\.revision/u);
   assert.doesNotMatch(logic, /CV_SHOW_PRESENTATION_PROJECT/u);

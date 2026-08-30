@@ -756,8 +756,14 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const onSkipMedia = () => media.skip();
 
   const interactionMonitor = monitorMeaningfulShowInteractions(document, {
-    accept: (event) => !getDock()?.contains(event.target),
-    pause: () => getChat()?.pauseShow?.('meaningful-interaction'),
+    accept: (event) => !(typeof event.composedPath === 'function'
+      ? event.composedPath()
+      : [event.target]
+    ).some((node) => node?.matches?.('chat-workspace, chat-show-player')),
+    pause: () => {
+      presenter?.runner.meaningfulInteraction();
+      getChat()?.pauseShow?.('meaningful-interaction');
+    },
   });
 
   document.addEventListener('portfolio-open-tour', onOpen);
