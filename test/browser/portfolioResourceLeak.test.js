@@ -6532,6 +6532,117 @@ test('authored workspace scroll settles inside its hard cell before selection st
   assert.equal(cdp.exceptions.length, 0);
 });
 
+test('paused workspace checkpoint restores held attention without starting media', {
+  timeout: 60_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('paused checkpoint acceptance requires the selected public Opus release');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  const runId = 'workspace-paused-checkpoint';
+  const runEventIndex = harness.events.length;
+  const navigationArm = await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `globalThis.__cvShowTerminalHarnessReset?.(${JSON.stringify(runId)});`,
+  });
+  try {
+    await navigate(
+      cdp,
+      `${server.origin}/cv/profile/photo/?showMode=short&showEntry=symbiote-workspace&showTime=20210&showPlay=0`,
+      { expectedMode: 'structured' },
+    );
+  } finally {
+    await cdp.send('Page.removeScriptToEvaluateOnNewDocument', {
+      identifier: navigationArm.identifier,
+    });
+  }
+  const armed = await harness.snapshot('workspace paused checkpoint armed before autorun');
+  assert.equal(armed.runId, runId, 'terminal harness must be armed before route autorun');
+  await harness.waitFor(
+    runId,
+    ({ type, receipt }) => type === 'receipt'
+      && receipt.cellId === 'cv-show:cue:workspace.agent-portal-card'
+      && ['settled', 'failed', 'skipped', 'expired'].includes(receipt.status),
+    'workspace paused checkpoint terminal receipt',
+    { afterIndex: runEventIndex, inactivityMs: 30_000 },
+  );
+  await harness.waitFor(
+    runId,
+    ({ type, entryId }) => type === 'generation' && entryId === 'symbiote-workspace',
+    'workspace paused checkpoint media generation',
+    { afterIndex: runEventIndex, inactivityMs: 30_000 },
+  );
+  const terminal = await harness.snapshot('workspace paused checkpoint');
+  const heldIds = [
+    'cv-show:cue:workspace.intro-frame',
+    'cv-show:cue:workspace.agent-portal-card',
+  ];
+  for (const cellId of heldIds) {
+    assert.deepEqual(
+      terminal.receipts
+        .filter((receipt) => receipt.cellId === cellId)
+        .map(({ status }) => status),
+      ['first-frame', 'settled'],
+      JSON.stringify({ cellId, receipts: terminal.receipts, operations: terminal.operations }),
+    );
+    assert.equal(
+      terminal.receipts.some((receipt) => receipt.cellId === `${cellId}:scroll`),
+      false,
+      'checkpoint restoration must not replay a completed companion scroll',
+    );
+  }
+  assert.equal(
+    terminal.lifecycle.some(({ type }) => type === 'portfolio-show-start'),
+    false,
+    'static checkpoint restoration is not a physical playback start',
+  );
+  assert.equal(
+    terminal.results.some(({ status }) => status === 'required-missing'),
+    false,
+    JSON.stringify(terminal.results),
+  );
+  const visual = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const viewer = document.querySelector('source-viewer');
+      const overlay = document.querySelector('.symbiote-presenter-cursor');
+      const cursor = overlay?.querySelector('.pc-cursor');
+      const marquee = overlay?.querySelector('.pc-marquee');
+      const marqueeRect = marquee?.getBoundingClientRect();
+      return {
+        source: viewer?.textContent?.replace(/\\s+/g, ' ').trim().slice(0, 120) || '',
+        cursorVisible: Boolean(overlay?.classList.contains('is-visible')
+          && Number(getComputedStyle(cursor).opacity) > 0),
+        frameVisible: Boolean(
+          (marqueeRect?.width || 0) > 0
+          && (marqueeRect?.height || 0) > 0
+          && Number(getComputedStyle(marquee).opacity) > 0
+        ),
+      };
+    })()`,
+  }, { label: 'verify paused checkpoint attention pair remains visible', timeoutMs: 5_000 });
+  assert.match(visual.result.value.source, /Symbiote Workspace/u);
+  assert.deepEqual(
+    {
+      cursorVisible: visual.result.value.cursorVisible,
+      frameVisible: visual.result.value.frameVisible,
+    },
+    { cursorVisible: true, frameVisible: true },
+  );
+  assert.equal(cdp.exceptions.length, 0);
+});
+
 test('agent portal decision marker settles as authored ink after its companion scroll', {
   timeout: 70_000,
 }, async (t) => {

@@ -566,6 +566,10 @@ export function createCvShowDirectiveRunner(options = {}) {
                     typeof attention?.present !== 'function'
                     || typeof attention?.whenSettled !== 'function'
                     || typeof attention?.cancel !== 'function'
+                    || (
+                      source.checkpointMode === 'restore-held'
+                      && typeof attention?.seek !== 'function'
+                    )
                   )
                 ) {
                   throw presentation.providerFailure('attention lifecycle callbacks');
@@ -608,6 +612,9 @@ export function createCvShowDirectiveRunner(options = {}) {
                     });
                   } catch (error) {
                     presentFailure = error;
+                  }
+                  if (!presentFailure && source.checkpointMode === 'restore-held') {
+                    attention?.seek?.(presentation.budgetMs);
                   }
                   if (source.type === 'activate') {
                     activateTarget(target, source);

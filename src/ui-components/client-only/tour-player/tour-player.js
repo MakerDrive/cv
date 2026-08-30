@@ -92,6 +92,7 @@ export class PortfolioShowChat extends HTMLElement {
   #requestId = 0;
   #transportRequestId = 0;
   #pendingTransportIntent = null;
+  #pendingTrustedPlay = false;
   #messages = [];
   #currentMessageId = '';
   #dock = null;
@@ -357,10 +358,14 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   pauseShow(reason = 'explicit') {
+    const cancelledPendingPlay = this.#cancelPendingTrustedPlay();
     if (
       !this.$.isRunning
       || (!this.#playRequested && !this.#transportPlaying && this.$.isPaused)
-    ) return false;
+    ) {
+      if (cancelledPendingPlay) this.#syncPlayer();
+      return cancelledPendingPlay;
+    }
     this.#playRequested = false;
     this.#transportPlaying = false;
     this.#resumePending = false;
@@ -445,6 +450,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.#playRequested = false;
     this.#resumePending = false;
     this.#pendingStartDetail = null;
+    this.#pendingTrustedPlay = false;
     this.#showCompleted = completed;
     this.#pendingTransportIntent = null;
     this.#mode = '';
@@ -570,7 +576,11 @@ export class PortfolioShowChat extends HTMLElement {
       get isPlaying() { return host.#transportPlaying; },
       get isPaused() { return host.$.isPaused; },
       play() {
-        if (!host.$.isRunning && host.#mode) void host.#start(host.#mode);
+        if (
+          host.#pendingTransportIntent
+          || (host.$.isRunning && host.$.resumeRequired && !host.#activeSpeechEntry)
+        ) host.#queuePendingTrustedPlay();
+        else if (!host.$.isRunning && host.#mode) void host.#start(host.#mode);
         else if (host.$.isPaused) void host.#resume();
       },
       toggle() {
@@ -584,6 +594,34 @@ export class PortfolioShowChat extends HTMLElement {
       preview(index) { void host.#preview(index); },
       seek(index, positionMs) { void host.#seek(index, positionMs); },
     };
+  }
+
+  #queuePendingTrustedPlay() {
+    this.#pendingTrustedPlay = true;
+    this.#playRequested = true;
+    if (this.#pendingTransportIntent) {
+      this.#pendingTransportIntent = Object.freeze({
+        ...this.#pendingTransportIntent,
+        play: true,
+      });
+    }
+    this.#syncPlayer();
+  }
+
+  #cancelPendingTrustedPlay() {
+    const cancelled = Boolean(
+      this.#pendingTrustedPlay
+      || this.#pendingTransportIntent?.play,
+    );
+    this.#pendingTrustedPlay = false;
+    this.#playRequested = false;
+    if (this.#pendingTransportIntent) {
+      this.#pendingTransportIntent = Object.freeze({
+        ...this.#pendingTransportIntent,
+        play: false,
+      });
+    }
+    return cancelled;
   }
 
   #videoController = Object.freeze({
@@ -728,6 +766,7 @@ export class PortfolioShowChat extends HTMLElement {
       play: Boolean(play),
       positionMs: targetMs,
       routeDriven: Boolean(routeDriven),
+      transportRequestId: activeTransportRequestId,
     });
     this.#pendingTransportIntent = pendingTransportIntent;
     this.#mountSharedShow();
@@ -743,12 +782,16 @@ export class PortfolioShowChat extends HTMLElement {
     this.#session = new ShowSessionState();
     this.#presentationAdmitted = false;
     this.#transportPlaying = false;
-    this.#playRequested = Boolean(play);
+    let effectivePlay = Boolean(
+      this.#pendingTrustedPlay
+      || this.#pendingTransportIntent?.play,
+    );
+    this.#playRequested = effectivePlay;
     this.#resumePending = false;
     this.#pendingStartDetail = Object.freeze({ routeDriven: Boolean(routeDriven) });
     this.$.isRunning = true;
-    this.$.isPaused = !play;
-    this.$.resumeRequired = !play;
+    this.$.isPaused = !effectivePlay;
+    this.$.resumeRequired = !effectivePlay;
     const acknowledgement = await this.#appendAgentMessage({ id: `start-${mode}` }, {
       text: this.#message(`tour.start.${mode}`),
       actions: [],
@@ -762,7 +805,18 @@ export class PortfolioShowChat extends HTMLElement {
       || activeTransportRequestId !== this.#transportRequestId
       || !this.#mode
     ) return false;
-    this.#presentScene({ startPaused: !play || Boolean(detailId), positionMs: detailId ? 0 : targetMs });
+    effectivePlay = Boolean(
+      this.#pendingTrustedPlay
+      || this.#pendingTransportIntent?.play,
+    );
+    this.#pendingTrustedPlay = false;
+    this.#playRequested = effectivePlay;
+    this.$.isPaused = !effectivePlay;
+    this.$.resumeRequired = !effectivePlay;
+    this.#presentScene({
+      startPaused: !effectivePlay || Boolean(detailId),
+      positionMs: detailId ? 0 : targetMs,
+    });
     if (detailId) {
       const scene = this.#story?.scenes?.find(({ id }) => id === requestedEntry.id);
       if (mode !== 'short' || !scene || scene.branchId !== detailId) {
@@ -773,13 +827,13 @@ export class PortfolioShowChat extends HTMLElement {
         contextualCardId: `${scene.id}.actions`,
         contextualActionId: 'details',
         historicalOwnerEntryId: scene.id,
-        startPaused: !play,
+        startPaused: !effectivePlay,
         positionMs: targetMs,
         forcePrecedingSetup: true,
       });
       if (activeTransportRequestId !== this.#transportRequestId) return false;
     }
-    if (this.#pendingTransportIntent === pendingTransportIntent) {
+    if (this.#pendingTransportIntent?.transportRequestId === activeTransportRequestId) {
       this.#pendingTransportIntent = null;
     }
     return true;
@@ -874,7 +928,10 @@ export class PortfolioShowChat extends HTMLElement {
     }
     this.$.isRunning = true;
     this.#presentScene({ startPaused: !wasPlaying, positionMs: targetMs });
-    if (this.#pendingTransportIntent === pendingTransportIntent) {
+    if (
+      this.#pendingTransportIntent?.transportRequestId
+      === pendingTransportIntent?.transportRequestId
+    ) {
       this.#pendingTransportIntent = null;
     }
     this.dispatchEvent(new CustomEvent('portfolio-show-seek', {
@@ -1035,10 +1092,20 @@ export class PortfolioShowChat extends HTMLElement {
     this.#session.appendMessage({ id: entry.id, role: 'agent', text: context.text });
     this.#appendAgentMessage(entry, context);
     this.emitShowDirective({ type: 'speech', id: `${entry.id}.speech`, text: entry.speech });
+    const restorePausedCheckpoint = Boolean(
+      startPaused
+      && positionMs > 0
+      && this.#alignment.available,
+    );
     const { scheduled } = partitionCvShowAlignedDirectives(entry.directives);
     const visualDirectives = scheduled.map(({ source }) => source).filter(({ type }) => type !== 'media');
     const runPrecedingSetup = this.#alignment.available && precedingSetupEntry
-      ? () => this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
+      ? () => this.#runPrecedingSceneSetup(
+          precedingSetupEntry,
+          entry,
+          requestId,
+          { restorePausedCheckpoint },
+        )
       : null;
     const sceneSetupReady = runPrecedingSetup && this.#presentationAdmitted
       ? runPrecedingSetup()
@@ -1065,11 +1132,12 @@ export class PortfolioShowChat extends HTMLElement {
       positionMs,
       sceneSetupReady,
       beforeDeferredPresentation,
+      restorePausedCheckpoint,
       onPhysicalStart: startUnalignedPresentation,
     });
   }
 
-  #runSceneSetup(entry, requestId) {
+  #runSceneSetup(entry, requestId, { restorePausedCheckpoint = false } = {}) {
     const { sceneSetup } = partitionCvShowAlignedDirectives(entry.directives);
     let settle;
     let settled = false;
@@ -1078,6 +1146,7 @@ export class PortfolioShowChat extends HTMLElement {
       directives: sceneSetup,
       aligned: true,
       requestId,
+      restorePausedCheckpoint,
       handled: false,
       complete: (result) => {
         if (settled) return;
@@ -1096,8 +1165,15 @@ export class PortfolioShowChat extends HTMLElement {
     return completion;
   }
 
-  async #runPrecedingSceneSetup(precedingEntry, entry, requestId) {
-    const receipt = await this.#runSceneSetup(precedingEntry, requestId);
+  async #runPrecedingSceneSetup(
+    precedingEntry,
+    entry,
+    requestId,
+    { restorePausedCheckpoint = false } = {},
+  ) {
+    const receipt = await this.#runSceneSetup(precedingEntry, requestId, {
+      restorePausedCheckpoint,
+    });
     requireCvShowSceneSetupSuccess(receipt, precedingEntry.id);
     if (requestId !== this.#requestId) return null;
     return this.#alignment.available
@@ -1137,12 +1213,14 @@ export class PortfolioShowChat extends HTMLElement {
     reason = 'alignment-ready',
     sceneSetupReady = null,
     beforeDeferredPresentation = null,
+    restorePausedCheckpoint = false,
   } = {}) {
     await sceneSetupReady;
     if (requestId !== this.#requestId) {
       return Object.freeze({ status: 'cancelled', reason: 'scene-replaced' });
     }
-    const deferPresentationUntilPlayback = !this.#presentationAdmitted;
+    const deferPresentationUntilPlayback = !this.#presentationAdmitted
+      && !restorePausedCheckpoint;
     if (deferPresentationUntilPlayback && typeof media.muted === 'boolean') {
       media.muted = true;
     }
@@ -1152,6 +1230,7 @@ export class PortfolioShowChat extends HTMLElement {
       audioClip: clip,
       checkpointMs: positionMs > 0 ? positionMs : null,
       deferPresentationUntilPlayback,
+      restorePausedCheckpoint,
       beforeDeferredPresentation,
       runPresentationOperation: (operation) => {
         let settle;
@@ -1161,6 +1240,7 @@ export class PortfolioShowChat extends HTMLElement {
           requestId,
           entryId: entry.id,
           operation,
+          restorePausedCheckpoint,
           handled: false,
           complete: (result, error = null) => {
             if (settled) return;
@@ -1245,6 +1325,7 @@ export class PortfolioShowChat extends HTMLElement {
     positionMs = 0,
     sceneSetupReady = null,
     beforeDeferredPresentation = null,
+    restorePausedCheckpoint = false,
     onPhysicalStart = null,
   } = {}) {
     if (!this.#speech.available) {
@@ -1268,8 +1349,15 @@ export class PortfolioShowChat extends HTMLElement {
       return;
     }
     if (requestId !== this.#requestId) return;
+    let effectiveStartPaused = startPaused
+      ? !this.#pendingTrustedPlay
+      : !this.#playRequested;
+    this.#pendingTrustedPlay = false;
+    this.#playRequested = !effectiveStartPaused;
+    this.$.isPaused = effectiveStartPaused;
+    this.$.resumeRequired = effectiveStartPaused;
     let token = null;
-    if (!startPaused) {
+    if (!effectiveStartPaused) {
       token = await this.#audioArbiter?.acquire?.({
         id: `cv-show-speech-${entry.id}`,
         kind: 'speech',
@@ -1281,6 +1369,15 @@ export class PortfolioShowChat extends HTMLElement {
       if (token) this.#audioArbiter?.release?.(token);
       return;
     }
+    if (!effectiveStartPaused && !this.#playRequested) {
+      effectiveStartPaused = true;
+      if (token) this.#audioArbiter?.release?.(token);
+      token = null;
+    }
+    this.#pendingTrustedPlay = false;
+    this.#playRequested = !effectiveStartPaused;
+    this.$.isPaused = effectiveStartPaused;
+    this.$.resumeRequired = effectiveStartPaused;
     this.#speechToken = token;
     this.#activeSpeechEntry = entry;
     const releaseSpeech = () => {
@@ -1293,7 +1390,7 @@ export class PortfolioShowChat extends HTMLElement {
     const started = this.#speech.speak(entry.speech, {
       id: entry.id,
       lang: this.#story.narrationLocale,
-      startPaused,
+      startPaused: effectiveStartPaused,
       onStart: () => {
         if (!this.#publishPhysicalStart(entry, requestId)) return;
         if (typeof onPhysicalStart !== 'function') return;
@@ -1307,9 +1404,12 @@ export class PortfolioShowChat extends HTMLElement {
       },
       onMedia: (media, clip) => this.#attachAlignedEntry(entry, media, clip, requestId, {
         positionMs,
-        reason: positionMs > 0 ? 'branch-return' : 'alignment-ready',
+        reason: restorePausedCheckpoint
+          ? 'paused-checkpoint'
+          : positionMs > 0 ? 'branch-return' : 'alignment-ready',
         sceneSetupReady,
         beforeDeferredPresentation,
+        restorePausedCheckpoint,
       }),
       onEnd: () => {
         if (requestId !== this.#requestId) return;
@@ -1548,6 +1648,10 @@ export class PortfolioShowChat extends HTMLElement {
 
   async #resume() {
     if (!this.$.resumeRequired || this.$.mediaBlocksResume) return;
+    if (!this.#activeSpeechEntry) {
+      this.#queuePendingTrustedPlay();
+      return;
+    }
     if (
       this.#activeSpeechEntry
       && this.#audioArbiter

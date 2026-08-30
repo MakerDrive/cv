@@ -799,6 +799,122 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   assert.equal(pausedRoute.config.controller.isPlaying, false);
   assert.equal(pausedRoute.player.routeSnapshot.play, false);
 
+  const pendingTrustedPlay = createFixture();
+  const pendingTrustedPlayStarts = [];
+  pendingTrustedPlay.dock.addEventListener('portfolio-show-start', (event) => {
+    pendingTrustedPlayStarts.push(event.detail);
+  });
+  const pendingTrustedPlaySpeechCount = spoken.length;
+  const pendingTrustedPlayRoute = pendingTrustedPlay.player.applyShowRoute({
+    mode: 'short',
+    entryId: 'symbiote-workspace',
+    timeMs: 0,
+    play: false,
+  });
+  assert.equal(
+    pendingTrustedPlay.mounts,
+    1,
+    'the trusted Play control is available while narration resources are still preparing',
+  );
+  pendingTrustedPlay.config.controller.play();
+  assert.equal(await pendingTrustedPlayRoute, true);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(
+    spoken.length,
+    pendingTrustedPlaySpeechCount + 1,
+    'trusted Play during preparation is retained until speech becomes active',
+  );
+  assert.equal(pendingTrustedPlay.player.routeSnapshot.play, true);
+  assert.deepEqual(
+    pendingTrustedPlayStarts,
+    [],
+    'retaining trusted Play is not a physical Show start receipt',
+  );
+  spoken.at(-1).onstart?.();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.deepEqual(pendingTrustedPlayStarts, [{ routeDriven: true }]);
+
+  const cancelledPendingPlay = createFixture();
+  const cancelledPendingPlayStarts = [];
+  cancelledPendingPlay.dock.addEventListener('portfolio-show-start', (event) => {
+    cancelledPendingPlayStarts.push(event.detail);
+  });
+  const cancelledPendingPlaySpeechCount = spoken.length;
+  const cancelledPendingPlayRoute = cancelledPendingPlay.player.applyShowRoute({
+    mode: 'short',
+    entryId: 'symbiote-workspace',
+    timeMs: 0,
+    play: false,
+  });
+  cancelledPendingPlay.config.controller.play();
+  cancelledPendingPlay.config.controller.pause();
+  assert.equal(await cancelledPendingPlayRoute, true);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(
+    spoken.length,
+    cancelledPendingPlaySpeechCount,
+    'Pause during preparation cancels queued trusted Play before speech becomes active',
+  );
+  assert.equal(cancelledPendingPlay.player.routeSnapshot.play, false);
+  assert.deepEqual(cancelledPendingPlayStarts, []);
+
+  const pausedDuringLease = createFixture();
+  let resolveLease;
+  let markLeaseRequested;
+  const leaseRequested = new Promise((resolve) => { markLeaseRequested = resolve; });
+  const releasedLeases = [];
+  pausedDuringLease.player.audioArbiter = {
+    snapshot: Object.freeze({ tokenId: '' }),
+    acquire() {
+      markLeaseRequested();
+      return new Promise((resolve) => { resolveLease = resolve; });
+    },
+    release(token) { releasedLeases.push(token); },
+  };
+  const pausedDuringLeaseSpeechCount = spoken.length;
+  const pausedDuringLeaseRoute = pausedDuringLease.player.applyShowRoute({
+    mode: 'short',
+    entryId: 'symbiote-workspace',
+    timeMs: 0,
+    play: false,
+  });
+  pausedDuringLease.config.controller.play();
+  assert.equal(await pausedDuringLeaseRoute, true);
+  await leaseRequested;
+  pausedDuringLease.config.controller.pause();
+  resolveLease(Object.freeze({ id: 'pending-speech-lease' }));
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(
+    spoken.length,
+    pausedDuringLeaseSpeechCount,
+    'Pause while the audio lease is pending must keep the not-yet-active utterance paused',
+  );
+  assert.deepEqual(releasedLeases, [Object.freeze({ id: 'pending-speech-lease' })]);
+
+  const pendingSeekPlay = createFixture();
+  const pendingSeekPlaySpeechCount = spoken.length;
+  const supersededPendingSeekRoute = pendingSeekPlay.player.applyShowRoute({
+    mode: 'short',
+    entryId: 'symbiote-workspace',
+    timeMs: 0,
+    play: false,
+  });
+  pendingSeekPlay.config.controller.seek(1, 1_000);
+  pendingSeekPlay.config.controller.play();
+  assert.equal(await supersededPendingSeekRoute, false);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(spoken.length, pendingSeekPlaySpeechCount + 1);
+  spoken.at(-1).onstart?.();
+  pendingSeekPlay.config.controller.pause();
+  assert.equal(globalThis.speechSynthesis.paused, true);
+  pendingSeekPlay.config.controller.play();
+  assert.equal(
+    globalThis.speechSynthesis.paused,
+    false,
+    'seek cleanup follows the transport request id, so stale object identity cannot trap Resume',
+  );
+
   const blocked = createFixture();
   const blockedStartEvents = [];
   const blockedResumeEvents = [];
@@ -2066,6 +2182,55 @@ test('admitted semantic select maps exact v2 first-frame evidence to acted', asy
     mode: 'native-selection',
     firstStatus: 'acted',
   });
+});
+
+test('checkpoint-held attention seeks the admitted provider to its settled visual frame', async () => {
+  let admission = providerAdmissionFixture({ mode: 'frame', plannedDurationMs: 650 });
+  let firstFrame = providerMilestoneFixture(admission, 'first-frame', 100);
+  let settled = providerMilestoneFixture(admission, 'settled', 100);
+  let terminal = providerTerminalFixture(
+    admission,
+    'completed',
+    100,
+    settled.providerReceipt,
+    'settled',
+  );
+  let request;
+  let seekCalls = [];
+  let terminalGate;
+  let attention = {
+    clearMarkers() {},
+    present(input) {
+      request = input;
+      input.onAdmission(admission);
+      terminalGate = new Promise((resolve) => { this.resolveTerminal = resolve; });
+      return { presented: true, admission };
+    },
+    seek(elapsedMs) {
+      seekCalls.push(elapsedMs);
+      request.onMilestone(firstFrame);
+      request.onMilestone(settled);
+      this.resolveTerminal(terminal);
+      return settled.providerReceipt;
+    },
+    whenSettled() { return terminalGate; },
+    cancel() { return false; },
+  };
+  let fixture = workspaceOperationFixture({
+    source: {
+      id: 'example.frame',
+      type: 'frame',
+      target: 'target',
+      checkpointMode: 'restore-held',
+    },
+  });
+
+  assert.equal(
+    await runCvShowPresentationOperation(providerScenarioRunner(attention), fixture.operation),
+    undefined,
+  );
+  assert.deepEqual(seekCalls, [650]);
+  assert.deepEqual(fixture.receipts.map(({ status }) => status), ['first-frame', 'settled']);
 });
 
 test('target-unresolved rejection relays the exact nested v2 provider detail', async () => {
@@ -3796,6 +3961,90 @@ test('deferred aligned startup loads paused media without presentation admission
   assert.equal(media.playCount, 0);
   assert.equal(media.paused, true);
   assert.deepEqual(operations, [], 'paused preparation cannot admit presenter operations');
+
+  const restoredOperations = [];
+  const restoredMedia = new FakeMedia();
+  const restored = await alignment.createEntryRuntime({
+    entry,
+    media: restoredMedia,
+    audioClip: clip,
+    checkpointMs: 20_210,
+    deferPresentationUntilPlayback: true,
+    restorePausedCheckpoint: true,
+    runPresentationOperation: async (operation) => {
+      restoredOperations.push(operation.projectCell.id);
+      const observedAt = freezeProviderValue({
+        domain: 'performance',
+        timeOriginMs: performance.timeOrigin,
+        monotonicTimeMs: performance.now(),
+      });
+      if (operation.kind === 'attention') {
+        const admission = providerAdmissionFixture({
+          mode: operation.source.type,
+          gestureId: operation.source.id,
+          targetId: operation.scheduleCell.targetId,
+          limitMs: operation.scheduleCell.gesture.endMs - operation.scheduleCell.gesture.startMs,
+          plannedDurationMs: Math.min(
+            500,
+            operation.scheduleCell.gesture.endMs - operation.scheduleCell.gesture.startMs,
+          ),
+        });
+        operation.reportAdmission({ providerAdmission: admission });
+        operation.reportReceipt({
+          status: 'first-frame',
+          observedAt,
+          providerReceipt: { status: 'presenting' },
+        });
+        operation.reportReceipt({
+          status: 'settled',
+          observedAt,
+          providerReceipt: { status: 'settled' },
+        });
+        return undefined;
+      }
+      if (operation.projectCell.cue.interaction?.type === 'select') {
+        operation.reportAdmission({
+          providerAdmission: providerAdmissionFixture({
+            mode: 'frame',
+            gestureId: operation.source.id,
+            targetId: operation.scheduleCell.targetId,
+            limitMs: operation.scheduleCell.gesture.endMs - operation.scheduleCell.gesture.startMs,
+            plannedDurationMs: Math.min(
+              500,
+              operation.scheduleCell.gesture.endMs - operation.scheduleCell.gesture.startMs,
+            ),
+          }),
+        });
+      }
+      operation.reportReceipt({
+        status: 'acted',
+        observedAt,
+        providerReceipt: { status: 'acted' },
+      });
+      operation.reportReceipt({
+        status: 'settled',
+        observedAt,
+        providerReceipt: { status: 'settled' },
+      });
+      return undefined;
+    },
+  });
+  t.after(() => restored.runtime.dispose());
+  const restoredReceipt = await restored.runtime.loadAndRestorePlayback({
+    source: 'https://portfolio.example/cv/cv-show-audio/symbiote-workspace.opus',
+    positionMs: 20_210,
+    paused: true,
+    preload: 'auto',
+  }, { reason: 'checkpoint-restore' });
+
+  assert.equal(restoredReceipt.status, 'completed');
+  assert.equal(restoredMedia.playCount, 0, 'static checkpoint restoration cannot autoplay media');
+  assert.equal(restoredMedia.paused, true);
+  assert.deepEqual(restoredOperations, [
+    'cv-show:cue:workspace.open',
+    'cv-show:cue:workspace.intro-frame',
+    'cv-show:cue:workspace.agent-portal-card',
+  ], 'a paused checkpoint restores setup and only the attention still held at that time');
 });
 
 test('fresh scene turn-start navigation is the one Project setup cell', () => {
@@ -4301,7 +4550,6 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     /release\?\.\(\{ \.\.\.activeToken, reason: 'paused' \}\)/,
     'autoplay fallback releases the audio lease without cancelling resumable media',
   );
-  assert.match(runtime, /runner\.meaningfulInteraction\(\)/);
   assert.match(adapter, /createShowActionLifecycle/);
   assert.match(runtime, /cursor\.dispose\(\)/);
   assert.ok(
@@ -4342,7 +4590,16 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     /const startUnalignedPresentation = this\.#alignment\.available \? null : async \(\) => \{[\s\S]*?this\.#runSceneSetup\(entry, requestId\)[\s\S]*?onPhysicalStart: startUnalignedPresentation/u,
     'unaligned setup is admitted only from the physical narration-start callback',
   );
-  assert.match(logic, /deferPresentationUntilPlayback: !this\.#presentationAdmitted/u);
+  assert.match(
+    logic,
+    /const deferPresentationUntilPlayback = !this\.#presentationAdmitted\s*&& !restorePausedCheckpoint/u,
+  );
+  assert.match(logic, /restorePausedCheckpoint,/u);
+  assert.match(
+    logic,
+    /reason: restorePausedCheckpoint\s*\? 'paused-checkpoint'\s*: positionMs > 0 \? 'branch-return' : 'alignment-ready'/u,
+    'a static checkpoint must not publish the destructive branch-return reset reason',
+  );
   assert.match(logic, /requireCvShowSceneSetupSuccess\(sceneSetupReceipt, entry\.id\)/);
   assert.match(logic, /captionTrack/);
   assert.match(logic, /addEventListener\?\.\('timeupdate'/);
@@ -4353,12 +4610,17 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(runtime, /runCvShowPresentationOperation/);
   assert.match(
     runtime,
-    /const onSeek = \(\) => \{\s*if \(!running\) return;\s*ensurePresenter\(\)\.runner\.seek\(\);\s*\};[\s\S]*?addEventListener\('portfolio-show-seek', onSeek\)/u,
-    'a pre-start seek cannot instantiate a presenter; an admitted seek resets its generation',
+    /const onSeek = \(\) => \{\s*if \(!running && !presenter\) return;\s*ensurePresenterLifecycle\(\)\.runner\.seek\(\);\s*\};[\s\S]*?addEventListener\('portfolio-show-seek', onSeek\)/u,
+    'a pre-start seek cannot instantiate a presenter; a restored or admitted seek resets its generation',
   );
   assert.match(
     runtime,
-    /if \(reason === 'initial' \|\| reason === 'alignment-ready'\) return;[\s\S]*?reason === 'branch-return'[\s\S]*?reason\.includes\('seek'\)/u,
+    /if \(!running && event\.detail\?\.restorePausedCheckpoint !== true\) return;/u,
+    'only an explicit paused-checkpoint projection may admit presenter operations before media starts',
+  );
+  assert.match(
+    runtime,
+    /if \(\s*reason === 'initial'\s*\|\| reason === 'alignment-ready'\s*\|\| reason === 'paused-checkpoint'\s*\|\| reason === 'presentation-preroll-normalization'\s*\) return;[\s\S]*?reason === 'branch-return'[\s\S]*?reason\.includes\('seek'\)/u,
     'caption-clock initialization must not cancel an active admitted setup operation',
   );
   assert.match(logic, /portfolio-show-presentation-receipt/);
@@ -4378,4 +4640,22 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     'the main panel layout must register before the independently built Show entrypoint loads',
   );
   assert.doesNotMatch(main, /client-only\/tour-player\/tour-player\.js/);
+});
+
+test('trusted document interaction pauses the Show without destructively clearing presenter attention', async () => {
+  const runtime = await readFile(new URL(
+    '../../src/static-pages/js/tour-player/index.js',
+    import.meta.url,
+  ), 'utf8');
+  const monitor = runtime.match(
+    /const interactionMonitor = monitorMeaningfulShowInteractions\(document, \{[\s\S]*?pause: \(\) => \{(?<body>[\s\S]*?)\n    \},\n  \}\);/u,
+  );
+
+  assert.ok(monitor?.groups?.body, 'document interaction pause callback');
+  assert.match(monitor.groups.body, /getChat\(\)\?\.pauseShow\?\.\('meaningful-interaction'\)/u);
+  assert.doesNotMatch(
+    monitor.groups.body,
+    /meaningfulInteraction|clearMarkers|clearTransient/u,
+    'Pause must retain the active marker/frame/selection and presenter cursor pair',
+  );
 });

@@ -1124,7 +1124,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "article.symbiote-engine.workspace-join"
+        "targetId": "article.symbiote-engine.readonly-graph-demo"
       },
       "dependsOn": [
         {
@@ -1157,7 +1157,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "marker": "underline"
         },
         "kind": "annotation",
-        "targetId": "article.symbiote-engine.workspace-join"
+        "targetId": "article.symbiote-engine.readonly-graph-demo"
       },
       "dependsOn": [
         {
@@ -7111,7 +7111,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 13,
+  "revision": 14,
   "schemaVersion": "workspace-presentation-authoring-project-v1",
   "script": {
     "grounding": {
@@ -7623,7 +7623,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "policy": "required",
             "refinements": {
               "series": "workspace-layers",
-              "shape": "converging-arrows"
+              "shape": "underline"
             }
           },
           "cv-show:cue:symbiote-ui-details.catalog": {
@@ -8505,9 +8505,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-MHJhJN4//GIMq6RPi0uaFfJLkIA7h4/2axAfIKRADn8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-LFp8wKwac/hIIH4m2SOzHRtDFW81YE5tijXCVn4Y49E=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-PxgA1jmphbdOsuGWLThmcFlS9KAkPlIcGvamzWUc3g8=",
         "entryId": "symbiote-engine",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-ir9h3QGH0aNPI1VpbPs9CJjylE5MZ0DTCG4zBtplZ7k=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Ibbe7zyvlOfrtgrZ3A0oCESRsMiGJQ3OgVrmVJpjoOo=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-rPFrozOo8qk7JXLQWW5Red6QWTeq7aQg2Px44b28TV8=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-engine",
@@ -8986,7 +8986,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-SgEaflEyjb9U4ssSelo7BAchd9vgWDHLBCQfw9TEk/0="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-CNWehYLinMMW9cwVtLwEcJNETC1m53IHPKDbJkeRKhs=",
+    "hash": "cv-show-audio-provenance-v1:sha256-TAvP9dREb4Q0tcKvsRnP40G7uHfSj004zRFoLY+jnGU=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
@@ -9046,8 +9046,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "manifestHash": "cv-show-media-manifest-v1:sha256-5DVgYxiVwYXx99g4SXUiiyDJI2Z9v1dwUqSEW4s7+jI=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:759673a19e15b73e878adbbdf1135ed9c3e117433000cd34d3032b99221f0c28",
-  "predecessorReleaseId": "cv-show-audio-release-v1:80baa44523097754273e17436bd01f1b6e1e70e426eeaa2d162aa3775a3266f7",
+  "planId": "cv-show-audio-release-plan-v1:332b264ac5f074187af29f30347779b0195773c16bae391ed63dd7d3757320ad",
+  "predecessorReleaseId": "cv-show-audio-release-v1:eff86dfa2bdde05046e1c050612601f7d1b95aba7a8146ad9c548750a3b74266",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WJXMA0f9i4DwyS1CYrZ3FSAznMtAbhDA/lcaYjQVtNY=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-xkDP1BOrbemy4iknmMC7Vj4rwXfu/OsnY5Q7ZPGcfIc=",
@@ -9055,12 +9055,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v1:sha256-Lm2KMupZttc67Ene87zWoYgA1daM0dGX/kuFCJmdUss=",
-    "revision": 13
+    "authoringProjectHash": "workspace-presentation-authoring-project-v1:sha256-AJNvdfmDRLj19Qf7shV9vCtm60PyHZfGGKqvHLoGh8Q=",
+    "revision": 14
   },
-  "releaseId": "cv-show-audio-release-v1:eff86dfa2bdde05046e1c050612601f7d1b95aba7a8146ad9c548750a3b74266",
+  "releaseId": "cv-show-audio-release-v1:f91053a8d32e9504ff659755057996e2c35cd0a8e4a362c6b55d38e7d1d962c6",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:0e0f5b2dd8f70fb1634e1cb11318d41c2cbb518f99bf3e8cef414daa971a1af0"
+  "verificationHash": "cv-show-audio-release-verification-v1:abec39b7553e3677bc518cd99bdd5a1338afa17bb58b6d50be348ff265764665"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );

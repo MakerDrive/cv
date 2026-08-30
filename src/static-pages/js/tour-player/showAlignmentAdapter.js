@@ -277,7 +277,7 @@ export function createCvShowAlignmentController({
       retain([String(id || '')]);
     },
     cancel,
-    /** @param {{ entry?: any, media?: any, audioClip?: any, checkpointMs?: number | null, deferPresentationUntilPlayback?: boolean, beforeDeferredPresentation?: (() => Promise<any> | any) | null, runPresentationOperation?: any, onReceipt?: any, onReset?: any, onSeekFailure?: any }} [options] */
+    /** @param {{ entry?: any, media?: any, audioClip?: any, checkpointMs?: number | null, deferPresentationUntilPlayback?: boolean, restorePausedCheckpoint?: boolean, beforeDeferredPresentation?: (() => Promise<any> | any) | null, runPresentationOperation?: any, onReceipt?: any, onReset?: any, onSeekFailure?: any }} [options] */
     async createEntryRuntime(options = {}) {
       const authoringView = captureAuthoringView(getAuthoringView);
       const {
@@ -286,6 +286,7 @@ export function createCvShowAlignmentController({
         audioClip,
         checkpointMs = null,
         deferPresentationUntilPlayback = false,
+        restorePausedCheckpoint = false,
         beforeDeferredPresentation = null,
         runPresentationOperation,
         onReceipt,
@@ -342,7 +343,8 @@ export function createCvShowAlignmentController({
       let deferredPresentationPromise = null;
       let deferredPresentationError = null;
       let deferredMediaStartSeconds = 0;
-      const mutedAdmission = deferPresentationUntilPlayback && media.muted === true;
+      const deferPresentation = deferPresentationUntilPlayback && !restorePausedCheckpoint;
+      const mutedAdmission = deferPresentation && media.muted === true;
       const normalizeDeferredMediaStart = () => {
         const observedSeconds = Math.max(0, Number(media.currentTime || 0));
         const driftMs = Math.abs(observedSeconds - deferredMediaStartSeconds) * 1_000;
@@ -359,7 +361,7 @@ export function createCvShowAlignmentController({
       const sampleExecution = (reason) => {
         if (
           disposed
-          || (deferPresentationUntilPlayback && !deferredPresentationCompleted)
+          || (deferPresentation && !deferredPresentationCompleted)
           || tuple.execution.snapshot.state !== 'running'
         ) {
           return tuple.execution.snapshot;
@@ -384,7 +386,7 @@ export function createCvShowAlignmentController({
         playing: () => {
           physicalPlaybackStarted = true;
           playbackRequested = true;
-          if (deferPresentationUntilPlayback && !deferredPresentationCompleted) {
+          if (deferPresentation && !deferredPresentationCompleted) {
             if (!deferredPresentationStarted) void startDeferredPresentation();
             return;
           }
@@ -550,6 +552,23 @@ export function createCvShowAlignmentController({
           attentionGateInProgress = false;
         }
       };
+      const heldAttentionCells = tuple.heldAttentionDirectiveIds.map((directiveId) => (
+        tuple.schedule.cells.find(({ cellId }) => cellId === `cv-show:cue:${directiveId}`)
+      )).filter(Boolean);
+      const runHeldCheckpointAttention = async () => {
+        for (const cell of heldAttentionCells) {
+          tuple.execution.sample({
+            mediaTimeMs: cell.gesture?.startMs ?? cell.startMs,
+            reason: 'checkpoint-attention-restore',
+          });
+          const idle = await tuple.execution.whenIdle();
+          const terminal = idle.terminal.find(({ cellId }) => cellId === cell.cellId);
+          if (terminal?.status !== 'completed') {
+            throw attentionGateFailure(entry.id, cell.cellId, null, idle);
+          }
+        }
+        return tuple.execution.snapshot;
+      };
       const startDeferredPresentation = () => {
         if (deferredPresentationStarted || disposed) {
           return deferredPresentationPromise || Promise.resolve(tuple.execution.snapshot);
@@ -563,6 +582,7 @@ export function createCvShowAlignmentController({
           if (tuple.execution.snapshot.state === 'paused') tuple.execution.resume();
           await runSetup();
           await runCrossBoundaryAttentionGate();
+          await runHeldCheckpointAttention();
           deferredPresentationCompleted = true;
           if (!disposed && playbackRequested) {
             normalizeDeferredMediaStart();
@@ -603,11 +623,15 @@ export function createCvShowAlignmentController({
             0,
             Number(snapshot?.positionMs || 0) / 1_000,
           );
-          if (!deferPresentationUntilPlayback) await runSetup();
+          if (!deferPresentation) {
+            await beforeDeferredPresentation?.();
+            await runSetup();
+            await runHeldCheckpointAttention();
+          }
           await tuple.execution.pause();
           const generation = await mediaRuntime.loadAndRestorePlayback(snapshot, context);
           if (generation?.status !== 'completed') return generation;
-          if (!deferPresentationUntilPlayback) await runCrossBoundaryAttentionGate();
+          if (!deferPresentation) await runCrossBoundaryAttentionGate();
           return generation;
         },
         pause() {
@@ -619,12 +643,12 @@ export function createCvShowAlignmentController({
             playbackRequested = true;
             return true;
           }
-          if (deferPresentationUntilPlayback && !physicalPlaybackStarted) {
+          if (deferPresentation && !physicalPlaybackStarted) {
             playbackRequested = true;
             return mediaRuntime.resume();
           }
           if (
-            deferPresentationUntilPlayback
+            deferPresentation
             && deferredPresentationStarted
             && !deferredPresentationCompleted
           ) {
@@ -682,6 +706,7 @@ export function createCvShowAlignmentController({
         speechGroupCount: tuple.includedSpeechDirectiveIds.length,
         execution: tuple.execution,
         includedSpeechDirectiveIds: tuple.includedSpeechDirectiveIds,
+        heldAttentionDirectiveIds: tuple.heldAttentionDirectiveIds,
       });
     },
   };

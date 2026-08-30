@@ -16,6 +16,7 @@ import {
   CV_SHOW_PRESENTATION_PROJECT_HASHES,
   CV_SHOW_PRESENTATION_TIMELINE,
   CV_SHOW_STORY,
+  projectCvShowDirective,
   projectCvShowStory,
 } from '../../src/static-pages/data/cvShowPresentationProject.js';
 import {
@@ -485,11 +486,11 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v1:sha256-Lm2KMupZttc67Ene87zWoYgA1daM0dGX/kuFCJmdUss=',
+    'workspace-presentation-authoring-project-v1:sha256-AJNvdfmDRLj19Qf7shV9vCtm60PyHZfGGKqvHLoGh8Q=',
   );
   assert.equal(
     timeline.hash,
-    'presentation-timeline-v3:sha256-un8q10hv8zYHIWkUWxDBKZgJtOQ0xzstL/JYazo8yEo=',
+    'presentation-timeline-v3:sha256-rNZXrzMKdRhHZNBrW8OAiqEed+Smz5raUiUruhpOWAE=',
   );
 
   const manifestSource = await readFile(
@@ -1139,6 +1140,95 @@ test('master validation admits a structurally valid attention-group removal', ()
   );
 });
 
+test('CV directive refinement command composes with cue target edits atomically', () => {
+  const original = structuredClone(CV_SHOW_PRESENTATION_PROJECT);
+  const currentBase = base(CV_SHOW_PRESENTATION_PROJECT);
+  const command = (id, type, payload, commandBase = currentBase) => ({
+    schemaVersion: 'workspace-presentation-authoring-command-v1',
+    id,
+    base: commandBase,
+    type,
+    payload,
+  });
+  const markerId = 'cv-show:cue:symbiote-engine.workspace-join';
+  const scrollId = `${markerId}:scroll`;
+  const targetId = 'article.symbiote-engine.readonly-graph-demo';
+  const marker = CV_SHOW_PRESENTATION_PROJECT.cells.find(({ id }) => id === markerId);
+  const scroll = CV_SHOW_PRESENTATION_PROJECT.cells.find(({ id }) => id === scrollId);
+  const project = applyCvShowMasterProjectCommands(CV_SHOW_PRESENTATION_PROJECT, [
+    command('engine-scroll-target', 'cell.set-content', {
+      cellId: scrollId,
+      content: {
+        ...structuredClone(scroll.cue),
+        targetId,
+      },
+    }),
+    command('engine-marker-target', 'cell.set-content', {
+      cellId: markerId,
+      content: {
+        ...structuredClone(marker.cue),
+        targetId,
+      },
+    }),
+    command('engine-marker-refinements', 'cv-show.directive.set-refinements', {
+      cellId: markerId,
+      refinements: {
+        series: 'workspace-layers',
+        shape: 'underline',
+      },
+    }),
+  ]);
+
+  assert.equal(project.revision, CV_SHOW_PRESENTATION_PROJECT.revision + 1);
+  assert.notEqual(project.hash, CV_SHOW_PRESENTATION_PROJECT.hash);
+  assert.equal(project.cells.find(({ id }) => id === markerId).cue.targetId, targetId);
+  assert.equal(project.cells.find(({ id }) => id === scrollId).cue.targetId, targetId);
+  assert.deepEqual(project.script.metadata.cvShow.directives[markerId].refinements, {
+    series: 'workspace-layers',
+    shape: 'underline',
+  });
+  assert.equal(validateCvShowMasterProject(project), project);
+  assert.deepEqual(CV_SHOW_PRESENTATION_PROJECT, original);
+
+  const invalidCases = [
+    ['stale base', command(
+      'engine-stale-refinements',
+      'cv-show.directive.set-refinements',
+      { cellId: markerId, refinements: { shape: 'underline' } },
+      { ...currentBase, revision: currentBase.revision + 1 },
+    )],
+    ['unknown cell', command('engine-unknown-refinements', 'cv-show.directive.set-refinements', {
+      cellId: 'cv-show:cue:symbiote-engine.unknown',
+      refinements: { shape: 'underline' },
+    })],
+    ['scroll cell', command('engine-scroll-refinements', 'cv-show.directive.set-refinements', {
+      cellId: scrollId,
+      refinements: { shape: 'underline' },
+    })],
+    ['invalid refinements', command('engine-invalid-refinements', 'cv-show.directive.set-refinements', {
+      cellId: markerId,
+      refinements: ['underline'],
+    })],
+  ];
+  for (const [name, invalidCommand] of invalidCases) {
+    assert.throws(
+      () => applyCvShowMasterProjectCommands(CV_SHOW_PRESENTATION_PROJECT, [
+        command(`${invalidCommand.id}-valid-target`, 'cell.set-content', {
+          cellId: markerId,
+          content: {
+            ...structuredClone(marker.cue),
+            targetId,
+          },
+        }),
+        invalidCommand,
+      ]),
+      (error) => String(error.code || '').startsWith('CV_SHOW_AUTHORING_COMMAND_'),
+      name,
+    );
+    assert.deepEqual(CV_SHOW_PRESENTATION_PROJECT, original, name);
+  }
+});
+
 test('slice identity binds ordered source cells without master or media state', () => {
   const entryId = 'positioning';
   const allSpeechDirectiveIds = [
@@ -1512,7 +1602,7 @@ test('Execution v1 has one active effect, no queue/autodrain, actual receipts, a
   assert.equal(expired.some(({ status, kind }) => status === 'ended' && kind === 'narration'), true);
 });
 
-test('branch return derives a filtered parent slice with setup once and no completed groups', async () => {
+test('checkpoint restores held attention without replaying its completed scroll interaction', async () => {
   const manifest = structuralAlignmentManifest();
   const clip = manifest.clips[0];
   const sequence = structuralSequence(clip.id);
@@ -1523,19 +1613,43 @@ test('branch return derives a filtered parent slice with setup once and no compl
     !cellId.endsWith(':scroll')
     && STRUCTURAL_PROJECT.cells.find(({ id }) => id === cellId)?.timing?.at.anchor === 'speech'
   ));
-  const checkpointMs = attentionCells[0].anchorMs - full.schedule.presentationStartMs + 1;
+  const heldAttention = attentionCells[0];
+  const checkpointMs = heldAttention.anchorMs - full.schedule.presentationStartMs + 1;
+  const checkpointScheduleMs = full.schedule.presentationStartMs + checkpointMs;
+  const completedScroll = full.schedule.cells.find(
+    ({ cellId }) => cellId === `${heldAttention.cellId}:scroll`,
+  );
+  assert.equal(completedScroll.gesture.endMs < checkpointScheduleMs, true);
+  assert.equal(heldAttention.gesture.endMs < checkpointScheduleMs, true);
+  assert.equal(checkpointScheduleMs < heldAttention.visibility.endMs, true);
   const operations = [];
   const filtered = createCvShowEntryTuple(STRUCTURAL_PROJECT, clip.id, sequence, {
     checkpointMs,
     adapter: immediateAdapter(operations),
   });
   assert.equal(filtered.includedSpeechDirectiveIds.includes('positioning.tenure-marker'), false);
-  assert.equal(filtered.project.cells.some(({ id }) => id.includes('positioning.tenure-marker')), false);
+  assert.equal(
+    filtered.project.cells.some(({ id }) => id === 'cv-show:cue:positioning.tenure-marker:scroll'),
+    false,
+    'the already-past scroll must not replay at a direct checkpoint',
+  );
+  assert.equal(
+    filtered.project.cells.some(({ id }) => id === 'cv-show:cue:positioning.tenure-marker'),
+    true,
+    'the still-visible attention cell must be projected as a held checkpoint snapshot',
+  );
+  assert.equal(
+    projectCvShowDirective(
+      filtered.project.cells.find(({ id }) => id === 'cv-show:cue:positioning.tenure-marker'),
+      filtered.project,
+    ).checkpointMode,
+    'restore-held',
+  );
   assert.equal(filtered.project.script.metadata.cvShow.slice.parent, null);
   assert.deepEqual(filtered.project.cells.find(({ id }) => id.endsWith(':scroll')).dependsOn, [{
-    cellId: 'cv-show:cue:positioning.open',
+    cellId: 'cv-show:cue:positioning.tenure-marker',
     barrier: 'settled',
-  }]);
+  }], 'the next scroll waits for the restored marker to settle');
 
   filtered.execution.sample({ mediaTimeMs: 0, reason: 'branch-setup' });
   await filtered.execution.whenIdle();
@@ -1545,7 +1659,16 @@ test('branch return derives a filtered parent slice with setup once and no compl
     await filtered.execution.whenIdle();
   }
   assert.equal(operations.filter(({ projectCell }) => projectCell.id === 'cv-show:cue:positioning.open').length, 1);
-  assert.equal(operations.some(({ projectCell }) => projectCell.id.includes('positioning.tenure-marker')), false);
+  assert.equal(
+    operations.filter(({ projectCell }) => projectCell.id === 'cv-show:cue:positioning.tenure-marker').length,
+    1,
+    'the held attention snapshot is restored exactly once',
+  );
+  assert.equal(
+    operations.some(({ projectCell }) => projectCell.id === 'cv-show:cue:positioning.tenure-marker:scroll'),
+    false,
+    'restoring held attention cannot replay its completed scroll',
+  );
   for (let id of filtered.includedSpeechDirectiveIds) {
     assert.equal(operations.filter(({ projectCell }) => (
       projectCell.id === `cv-show:cue:${id}` || projectCell.id === `cv-show:cue:${id}:scroll`
@@ -1604,10 +1727,13 @@ test('branch filtering uses the earliest group start at every checkpoint boundar
     assert.equal(tuple.project.id, repeated.project.id, boundary.name);
     assert.equal(tuple.project.hash, repeated.project.hash, boundary.name);
     const firstRetainedScroll = tuple.project.cells.find(({ id }) => id.endsWith(':scroll'));
+    const dependencyCellId = tuple.heldAttentionDirectiveIds.length
+      ? `cv-show:cue:${tuple.heldAttentionDirectiveIds.at(-1)}`
+      : 'cv-show:cue:workspace.open';
     assert.deepEqual(firstRetainedScroll.dependsOn, [{
-      cellId: 'cv-show:cue:workspace.open',
+      cellId: dependencyCellId,
       barrier: 'settled',
-    }], boundary.name);
+    }], `${boundary.name}: future work waits for setup or the restored held attention`);
 
     tuple.execution.sample({ mediaTimeMs: 0, reason: `${boundary.name}-setup` });
     await tuple.execution.whenIdle();

@@ -467,6 +467,16 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     return presenter;
   };
 
+  const ensurePresenterLifecycle = () => {
+    workspace.querySelector('portfolio-graph-panel')
+      ?.prepareShowTarget?.({ allowHidden: true });
+    const session = ensurePresenter();
+    originTargetId ||= runtime.selectedId;
+    const chat = getChat();
+    if (chat) chat.audioArbiter = audioArbiter;
+    return session;
+  };
+
   const clearDocumentSelection = () => document.getSelection?.()?.removeAllRanges();
 
   const scheduleDocumentSelectionClear = () => {
@@ -515,13 +525,19 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const restoreOrigin = (event) => {
     cancelPendingRouteWrite();
     const wasRunning = running;
+    const wasPresenting = Boolean(presenter);
     const reason = event?.detail?.reason || '';
     const routeDriven = reason.startsWith('route-');
     running = false;
     disposePresenter();
     media.stop('show-terminal');
     audioArbiter.release({ reason: 'show-terminal' });
-    if (!routeDriven && wasRunning && originTargetId && runtime.entries.has(originTargetId)) {
+    if (
+      !routeDriven
+      && (wasRunning || wasPresenting)
+      && originTargetId
+      && runtime.entries.has(originTargetId)
+    ) {
       runtime.select(originTargetId, { focus: true, updateUrl: false });
     }
     originTargetId = '';
@@ -643,18 +659,13 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onStart = () => {
-    workspace.querySelector('portfolio-graph-panel')
-      ?.prepareShowTarget?.({ allowHidden: true });
     running = true;
-    ensurePresenter();
-    originTargetId = runtime.selectedId;
-    let chat = getChat();
-    if (chat) chat.audioArbiter = audioArbiter;
+    ensurePresenterLifecycle();
   };
 
   const onSeek = () => {
-    if (!running) return;
-    ensurePresenter().runner.seek();
+    if (!running && !presenter) return;
+    ensurePresenterLifecycle().runner.seek();
   };
 
   const dispatchResult = (chat, requestId, result) => {
@@ -665,12 +676,12 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onPhase = async (event) => {
-    if (!running) return;
+    if (!running && event.detail?.restorePausedCheckpoint !== true) return;
     const chat = getChat();
     const requestId = event.detail?.requestId;
     const complete = event.detail?.complete;
     if (typeof complete === 'function') event.detail.handled = true;
-    const { runner } = ensurePresenter();
+    const { runner } = ensurePresenterLifecycle();
     runner.beginPhase();
     const directives = event.detail?.directives || [];
     if (event.detail?.aligned && !directives.length) {
@@ -697,7 +708,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onAlignedReset = (event) => {
-    if (!running) return;
+    if (!running && !presenter) return;
     const reason = event.detail?.receipt?.reason || '';
     // Caption-clock initialization establishes a media-time baseline. Neither
     // its first sample nor the owned source-load restore replaces the
@@ -705,20 +716,24 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     if (
       reason === 'initial'
       || reason === 'alignment-ready'
+      || reason === 'paused-checkpoint'
       || reason === 'presentation-preroll-normalization'
     ) return;
-    if (reason === 'branch-return') ensurePresenter().runner.branchReturn();
-    else if (reason.includes('seek')) ensurePresenter().runner.seek();
-    else ensurePresenter().runner.beginPhase();
+    if (reason === 'branch-return') ensurePresenterLifecycle().runner.branchReturn();
+    else if (reason.includes('seek')) ensurePresenterLifecycle().runner.seek();
+    else ensurePresenterLifecycle().runner.beginPhase();
   };
 
   const onPresentationOperation = (event) => {
-    if (!running) return;
+    if (!running && event.detail?.restorePausedCheckpoint !== true) return;
     const complete = event.detail?.complete;
     const operation = event.detail?.operation;
     if (typeof complete !== 'function' || !operation) return;
     event.detail.handled = true;
-    const pending = runCvShowPresentationOperation(ensurePresenter().runner, operation);
+    const pending = runCvShowPresentationOperation(
+      ensurePresenterLifecycle().runner,
+      operation,
+    );
     activePresentationOperations.add(pending);
     void pending.then(
       (receipts) => complete(receipts),
@@ -769,7 +784,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       : [event.target]
     ).some((node) => node?.matches?.('chat-workspace, chat-show-player')),
     pause: () => {
-      presenter?.runner.meaningfulInteraction();
       getChat()?.pauseShow?.('meaningful-interaction');
     },
   });

@@ -53,11 +53,17 @@ const NARRATION_INPUT_SCHEMA = 'cv-show-narration-input-v1';
 const ANCHOR_CONTRACT_SCHEMA = 'cv-show-anchor-contract-v1';
 const ATTENTION_CONTRACT_SCHEMA = 'cv-show-attention-contract-v1';
 const ENTRY_SLICE_SCHEMA = 'cv-show-entry-slice-v1';
+const AUTHORING_COMMAND_SCHEMA = 'workspace-presentation-authoring-command-v1';
+const DIRECTIVE_REFINEMENTS_COMMAND = 'cv-show.directive.set-refinements';
 const SHA256_HASH_RE = /^sha256:[a-f0-9]{64}$/u;
 const SHA256_INTEGRITY_RE = /:sha256-[A-Za-z0-9+/]{43}=$/u;
 
 function clone(value) {
   return structuredClone(value);
+}
+
+function directiveId(cellId) {
+  return String(cellId || '').replace(/^cv-show:cue:/u, '').replace(/:scroll$/u, '');
 }
 
 function freezeDeep(value) {
@@ -71,6 +77,92 @@ function invalidProject(reason, details = {}) {
     new TypeError(`CV Show presentation project is invalid: ${reason}`),
     { code: 'CV_SHOW_PRESENTATION_PROJECT_INVALID', details },
   );
+}
+
+function invalidAuthoringCommand(reason, details = {}, code = 'CV_SHOW_AUTHORING_COMMAND_INVALID') {
+  return Object.assign(
+    new TypeError(`CV Show authoring command is invalid: ${reason}`),
+    { code, details },
+  );
+}
+
+function isPlainRecord(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+function isPortableRefinementValue(value) {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Array.isArray(value)) return value.every(isPortableRefinementValue);
+  return isPlainRecord(value) && Object.values(value).every(isPortableRefinementValue);
+}
+
+function exactKeys(value, expected) {
+  const keys = Object.keys(value).sort();
+  const expectedKeys = [...expected].sort();
+  return keys.length === expectedKeys.length
+    && keys.every((key, index) => key === expectedKeys[index]);
+}
+
+function normalizeDirectiveRefinementsCommand(project, commandInput) {
+  if (!isPlainRecord(commandInput) || !exactKeys(
+    commandInput,
+    ['schemaVersion', 'id', 'base', 'type', 'payload'],
+  )) {
+    throw invalidAuthoringCommand('command shape');
+  }
+  if (
+    commandInput.schemaVersion !== AUTHORING_COMMAND_SCHEMA
+    || typeof commandInput.id !== 'string'
+    || !commandInput.id
+    || commandInput.type !== DIRECTIVE_REFINEMENTS_COMMAND
+  ) {
+    throw invalidAuthoringCommand('command identity', { commandId: commandInput.id });
+  }
+  const base = commandInput.base;
+  if (!isPlainRecord(base) || !exactKeys(base, ['revision', 'authoringProjectHash'])) {
+    throw invalidAuthoringCommand('command base', { commandId: commandInput.id });
+  }
+  if (base.revision !== project.revision || base.authoringProjectHash !== project.hash) {
+    throw invalidAuthoringCommand(
+      `command "${commandInput.id}" base does not match the current master`,
+      {
+        commandId: commandInput.id,
+        expected: { revision: project.revision, authoringProjectHash: project.hash },
+        received: clone(base),
+      },
+      'CV_SHOW_AUTHORING_COMMAND_STALE',
+    );
+  }
+  const payload = commandInput.payload;
+  if (!isPlainRecord(payload) || !exactKeys(payload, ['cellId', 'refinements'])) {
+    throw invalidAuthoringCommand('command payload', { commandId: commandInput.id });
+  }
+  const cellId = payload.cellId;
+  const cell = typeof cellId === 'string'
+    ? project.cells.find(({ id }) => id === cellId)
+    : null;
+  if (
+    !cell
+    || cell.kind !== 'cue'
+    || cellId.endsWith(':scroll')
+    || !Object.hasOwn(metadata(project).directives, cellId)
+  ) {
+    throw invalidAuthoringCommand('directive cell', { commandId: commandInput.id, cellId });
+  }
+  if (!isPlainRecord(payload.refinements) || !isPortableRefinementValue(payload.refinements)) {
+    throw invalidAuthoringCommand('refinements must be a plain portable record', {
+      commandId: commandInput.id,
+      cellId,
+    });
+  }
+  return {
+    id: commandInput.id,
+    cellId,
+    refinements: clone(payload.refinements),
+  };
 }
 
 function staleMedia(entryId, details = {}) {
@@ -254,13 +346,43 @@ export function validateCvShowMasterProject(projectInput) {
 
 export function applyCvShowMasterProjectCommands(projectInput, commandInputs = []) {
   const current = validateCvShowMasterProject(projectInput);
-  const application = applyPresentationAuthoringProjectCommands(current, commandInputs);
+  if (!Array.isArray(commandInputs)) {
+    throw invalidAuthoringCommand('commands must be an array');
+  }
+  const ids = new Set();
+  const directiveCommands = [];
+  const genericCommands = [];
+  for (const commandInput of commandInputs) {
+    const commandId = isPlainRecord(commandInput) ? commandInput.id : null;
+    if (typeof commandId === 'string' && ids.has(commandId)) {
+      throw invalidAuthoringCommand('duplicate command id', { commandId });
+    }
+    if (typeof commandId === 'string') ids.add(commandId);
+    if (commandInput?.type === DIRECTIVE_REFINEMENTS_COMMAND) {
+      directiveCommands.push(normalizeDirectiveRefinementsCommand(current, commandInput));
+    } else {
+      genericCommands.push(commandInput);
+    }
+  }
+  if (!commandInputs.length) return current;
+  const application = applyPresentationAuthoringProjectCommands(current, genericCommands);
   const draft = clone(application.project);
   delete draft.hash;
+  if (!genericCommands.length) draft.revision = current.revision + 1;
   for (const change of application.changes) {
     const removed = change.type === 'cell.remove' ? change.cell : null;
     if (removed?.kind !== 'cue' || removed.id.endsWith(':scroll')) continue;
     delete draft.script.metadata.cvShow.directives[removed.id];
+  }
+  for (const command of directiveCommands) {
+    const directive = draft.script.metadata.cvShow.directives[command.cellId];
+    if (!directive) {
+      throw invalidAuthoringCommand('directive cell was removed by the command batch', {
+        commandId: command.id,
+        cellId: command.cellId,
+      });
+    }
+    directive.refinements = clone(command.refinements);
   }
   return validateCvShowMasterProject(createPresentationAuthoringProject(draft));
 }
@@ -442,10 +564,15 @@ function selectedDirectiveProjection(project, sourceCellIds) {
     }));
 }
 
-function createEntrySelection(project, entryId, { speechDirectiveIds = null } = {}) {
+function createEntrySelection(
+  project,
+  entryId,
+  { speechDirectiveIds = null, heldAttentionDirectiveIds = [] } = {},
+) {
   let cvShow = metadata(project);
   if (!cvShow.entries[entryId]) throw invalidProject(`unknown entry ${entryId}`);
   let allowedGroups = speechDirectiveIds === null ? null : new Set(speechDirectiveIds);
+  let heldGroups = new Set(heldAttentionDirectiveIds);
   let source = entryCells(project, entryId);
   let narration = project.cells.find((cell) => (
     cell.kind === 'narration' && cell.turnId === entryId
@@ -457,7 +584,9 @@ function createEntrySelection(project, entryId, { speechDirectiveIds = null } = 
   let setup = source.find(({ id }) => id === setupCellId);
   let groups = directiveMetadataForTurn(project, entryId)
     .filter(([, value]) => value.phase === 'speech')
-    .filter(([, value]) => allowedGroups === null || allowedGroups.has(value.id));
+    .filter(([, value]) => (
+      allowedGroups === null || allowedGroups.has(value.id) || heldGroups.has(value.id)
+    ));
   let selectedCells = [narration, setup];
   let previousCellId = setup.id;
   for (let [attentionCellId] of groups) {
@@ -465,12 +594,20 @@ function createEntrySelection(project, entryId, { speechDirectiveIds = null } = 
     let scroll = source.find(({ id }) => id === scrollCellId);
     let attention = source.find(({ id }) => id === attentionCellId);
     if (!scroll || !attention) throw invalidProject(`incomplete group ${attentionCellId}`);
-    selectedCells.push({
-      ...clone(scroll),
-      dependsOn: [{ cellId: previousCellId, barrier: 'settled' }],
-    });
-    selectedCells.push(clone(attention));
-    previousCellId = attention.id;
+    if (heldGroups.has(directiveId(attentionCellId))) {
+      selectedCells.push({
+        ...clone(attention),
+        dependsOn: [{ cellId: setup.id, barrier: 'settled' }],
+      });
+      previousCellId = attention.id;
+    } else {
+      selectedCells.push({
+        ...clone(scroll),
+        dependsOn: [{ cellId: previousCellId, barrier: 'settled' }],
+      });
+      selectedCells.push(clone(attention));
+      previousCellId = attention.id;
+    }
   }
   let selected = new Set(selectedCells.map(({ id }) => id));
   let sourceCellIds = project.cells
@@ -482,6 +619,11 @@ function createEntrySelection(project, entryId, { speechDirectiveIds = null } = 
   return Object.freeze({
     cells: Object.freeze(selectedCells),
     sourceCellIds: Object.freeze(sourceCellIds),
+    heldAttentionCellIds: Object.freeze(
+      selectedCells
+        .filter(({ id }) => heldGroups.has(directiveId(id)))
+        .map(({ id }) => id),
+    ),
     parent: narration.turn.replyTo || cvShow.slice?.parent || null,
   });
 }
@@ -583,6 +725,15 @@ function createSliceMetadata(project, entryId, selection, provenance) {
     project,
     selection.sourceCellIds,
   ).map(({ cellId, directive }) => [cellId, directive]));
+  for (let cellId of selection.heldAttentionCellIds) {
+    directives[cellId] = {
+      ...directives[cellId],
+      refinements: {
+        ...directives[cellId].refinements,
+        checkpointMode: 'restore-held',
+      },
+    };
+  }
   return {
     entries: { [entryId]: entryMetadataProjection(project, entryId) },
     directives,
@@ -596,6 +747,7 @@ function createSliceMetadata(project, entryId, selection, provenance) {
       narrationInputHash: provenance.narrationInputHash,
       anchorContractHash: provenance.anchorContractHash,
       attentionContractHash: provenance.attentionContractHash,
+      heldAttentionCellIds: clone(selection.heldAttentionCellIds),
     },
   };
 }
@@ -798,20 +950,36 @@ function createSliceAlignment(slice, sourceSequence) {
   });
 }
 
-function futureDirectiveIds(project, schedule, entryId, checkpointMs) {
+function checkpointDirectiveProjection(project, schedule, entryId, checkpointMs) {
   const byCellId = new Map(schedule.cells.map((cell) => [cell.cellId, cell]));
-  return directiveMetadataForTurn(project, entryId)
+  const checkpointScheduleMs = schedule.presentationStartMs + checkpointMs;
+  const future = [];
+  const held = [];
+  for (let [cellId, value] of directiveMetadataForTurn(project, entryId)
     .filter(([, value]) => value.phase === 'speech')
-    .filter(([cellId]) => {
-      const groupCells = [byCellId.get(`${cellId}:scroll`), byCellId.get(cellId)];
-      if (groupCells.some((cell) => !cell)) {
-        throw invalidProject(`incomplete scheduled group ${cellId}`);
-      }
-      const groupStartMs = Math.min(...groupCells.map(({ startMs }) => startMs))
-        - schedule.presentationStartMs;
-      return groupStartMs > checkpointMs;
-    })
-    .map(([, value]) => value.id);
+  ) {
+    const scroll = byCellId.get(`${cellId}:scroll`);
+    const attention = byCellId.get(cellId);
+    if (!scroll || !attention) throw invalidProject(`incomplete scheduled group ${cellId}`);
+    const groupStartMs = Math.min(scroll.startMs, attention.startMs)
+      - schedule.presentationStartMs;
+    if (groupStartMs > checkpointMs) {
+      future.push(value.id);
+      continue;
+    }
+    if (
+      Number.isFinite(attention.gesture?.endMs)
+      && attention.gesture.endMs < checkpointScheduleMs
+      && Number.isFinite(attention.visibility?.endMs)
+      && checkpointScheduleMs < attention.visibility.endMs
+    ) {
+      held.push(value.id);
+    }
+  }
+  return Object.freeze({
+    future: Object.freeze(future),
+    held: Object.freeze(held),
+  });
 }
 
 export function createCvShowEntryTuple(
@@ -844,10 +1012,19 @@ export function createCvShowEntryTuple(
   let includedSpeechDirectiveIds = directiveMetadataForTurn(master, entryId)
     .filter(([, value]) => value.phase === 'speech')
     .map(([, value]) => value.id);
+  let heldAttentionDirectiveIds = [];
   if (checkpointMs !== null) {
-    includedSpeechDirectiveIds = futureDirectiveIds(master, schedule, entryId, checkpointMs);
+    const checkpointProjection = checkpointDirectiveProjection(
+      master,
+      schedule,
+      entryId,
+      checkpointMs,
+    );
+    includedSpeechDirectiveIds = [...checkpointProjection.future];
+    heldAttentionDirectiveIds = [...checkpointProjection.held];
     project = createCvShowEntryProjectFromMaster(master, entryId, {
       speechDirectiveIds: includedSpeechDirectiveIds,
+      heldAttentionDirectiveIds,
     });
     alignedSequence = createSliceAlignment(project, sourceSequence);
     schedule = createPresentationScheduleV2(project, alignedSequence);
@@ -872,5 +1049,6 @@ export function createCvShowEntryTuple(
     schedule,
     execution,
     includedSpeechDirectiveIds: Object.freeze(includedSpeechDirectiveIds),
+    heldAttentionDirectiveIds: Object.freeze(heldAttentionDirectiveIds),
   });
 }
