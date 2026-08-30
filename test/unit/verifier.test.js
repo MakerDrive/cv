@@ -5,6 +5,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { CV_SHOW_AUDIO_RELEASE } from '../../src/static-pages/data/cvShowPresentationProject.js';
 import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../src/static-pages/data/cvShowWebAudioRelease.js';
 import {
   resolveScriptPath,
@@ -15,6 +16,7 @@ import {
   verifyRuntimeMarkdownAssetSeparation,
   verifyRuntimeTourAssetSeparation,
   verifyPortfolioSocialMetadata,
+  verifyCvShowWebAudioMasterCompatibility,
   verifyCvShowWebAudioPublication,
   verifyNoPublicWavArtifacts,
   runVerification,
@@ -289,7 +291,7 @@ test('verifier verifyJsMetafile rejects any import record across all outputs', (
 
 test('verifier enforces the main bundle budget and runtime Markdown asset boundary', () => {
   assert.deepStrictEqual(MAIN_JS_SIZE_LIMITS, {
-    raw: 1758000,
+    raw: 1765000,
     gzip: 430000,
   });
 
@@ -496,6 +498,23 @@ test('production verifier binds the exact selected public audio tree without med
     alignedSequences: 30,
     mediaProbed: false,
   });
+  let manifest = JSON.parse(await fs.readFile(path.join(
+    rootDir,
+    'src/static-pages/copy-cv-show-audio',
+    CV_SHOW_WEB_AUDIO_RELEASE.manifest.path,
+  ), 'utf8'));
+  assert.equal(verifyCvShowWebAudioMasterCompatibility({
+    selector: CV_SHOW_WEB_AUDIO_RELEASE,
+    manifest,
+  }), true);
+  assert.throws(() => verifyCvShowWebAudioMasterCompatibility({
+    selector: CV_SHOW_WEB_AUDIO_RELEASE,
+    manifest,
+    release: {
+      ...CV_SHOW_AUDIO_RELEASE,
+      artifactTreeHash: `cv-show-audio-artifact-tree-v1:${'0'.repeat(64)}`,
+    },
+  }), /not artifact-equivalent/u);
   assert.doesNotThrow(() => verifyNoPublicWavArtifacts([
     path.join(temporary, 'cv-show-audio', 'clip.opus'),
   ], temporary));

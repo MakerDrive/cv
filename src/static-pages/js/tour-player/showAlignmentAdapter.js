@@ -21,6 +21,29 @@ function invalidAlignment(reason) {
   );
 }
 
+function attentionGateFailure(entryId, cellId, receipt = null, snapshot = null) {
+  const status = receipt?.status || snapshot?.state || 'missing';
+  return Object.assign(
+    new Error(`CV Show pre-audio attention gate failed: ${entryId}/${cellId}/${status}`),
+    {
+      code: 'CV_SHOW_SCENE_SETUP_FAILED',
+      receipt,
+      snapshot,
+    },
+  );
+}
+
+function waitForVisiblePresentationFrames(media) {
+  const document = media?.ownerDocument;
+  const requestFrame = document?.defaultView?.requestAnimationFrame?.bind(document.defaultView);
+  if (typeof requestFrame !== 'function' || document.visibilityState === 'hidden') {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    requestFrame(() => requestFrame(resolve));
+  });
+}
+
 function captureAuthoringView(getAuthoringView) {
   const source = getAuthoringView?.();
   if (
@@ -274,6 +297,11 @@ export function createCvShowAlignmentController({
       const sequence = await loadSequence(entry.id);
       const alignmentClip = manifest.byId.get(entry.id);
       let tuple = null;
+      const receiptObservers = new Set();
+      const receiveAcceptedReceipt = (receipt) => {
+        onReceipt?.(receipt);
+        for (const observer of [...receiptObservers]) observer(receipt);
+      };
       const adapterMethod = async (operation, kind) => runPresentationOperation(Object.freeze({
         ...operation,
         kind,
@@ -288,7 +316,7 @@ export function createCvShowAlignmentController({
           runAttention: (operation) => adapterMethod(operation, 'attention'),
           waitForState: (operation) => adapterMethod(operation, 'state'),
         },
-        onReceipt,
+        onReceipt: receiveAcceptedReceipt,
       });
       if (
         tuple.masterProjectHash !== authoringView.base.authoringProjectHash
@@ -303,6 +331,7 @@ export function createCvShowAlignmentController({
         onSeekFailure,
       });
       let disposed = false;
+      let attentionGateInProgress = false;
       const sampleExecution = (reason) => {
         if (disposed || tuple.execution.snapshot.state !== 'running') {
           return tuple.execution.snapshot;
@@ -330,37 +359,176 @@ export function createCvShowAlignmentController({
         },
         playing: () => sampleExecution('media-playing'),
         timeupdate: () => sampleExecution('media-timeupdate'),
+        seeking: () => {
+          if (attentionGateInProgress) void tuple.execution.seek();
+        },
         ended: () => sampleExecution('media-ended'),
       };
       for (let [type, listener] of Object.entries(mediaListeners)) {
         media.addEventListener?.(type, listener);
       }
       const runSetup = async () => {
-        tuple.execution.sample({ mediaTimeMs: 0, reason: 'entry-setup' });
-        const snapshot = await tuple.execution.whenIdle();
-        const setupCell = tuple.schedule.cells.find((cell) => (
-          cell.kind !== 'narration' && cell.startMs === 0
+        const prerollCells = tuple.schedule.cells.filter((cell) => (
+          cell.kind !== 'narration'
+          && cell.startMs < tuple.schedule.presentationStartMs
+          && Number.isFinite(cell.plannedBarriers?.settled)
+          && cell.plannedBarriers.settled <= tuple.schedule.presentationStartMs
         ));
-        const terminal = snapshot.terminal.find(({ cellId }) => cellId === setupCell?.cellId);
-        if (terminal?.status !== 'completed') {
-          throw Object.assign(
-            new Error(`CV Show presentation setup failed: ${entry.id}`),
-            { code: 'CV_SHOW_SCENE_SETUP_FAILED', snapshot },
-          );
+        let snapshot = tuple.execution.snapshot;
+        for (const cell of prerollCells) {
+          tuple.execution.sample({
+            mediaTimeMs: cell.startMs,
+            reason: cell.startMs === 0 ? 'entry-setup' : 'entry-preroll',
+          });
+          snapshot = await tuple.execution.whenIdle();
+          const terminal = snapshot.terminal.find(({ cellId }) => cellId === cell.cellId);
+          if (terminal?.status !== 'completed') {
+            throw Object.assign(
+              new Error(`CV Show presentation setup failed: ${entry.id}/${cell.cellId}`),
+              { code: 'CV_SHOW_SCENE_SETUP_FAILED', snapshot },
+            );
+          }
         }
         return snapshot;
+      };
+      const projectCellById = new Map(tuple.project.cells.map((cell) => [cell.id, cell]));
+      const crossBoundaryAttentionCells = tuple.schedule.cells.filter((cell) => {
+        const projectCell = projectCellById.get(cell.cellId);
+        return cell.kind !== 'narration'
+          && cell.kind !== 'interaction'
+          && cell.kind !== 'state'
+          && cell.startMs < tuple.schedule.presentationStartMs
+          && Number.isFinite(cell.plannedBarriers?.settled)
+          && cell.plannedBarriers.settled > tuple.schedule.presentationStartMs
+          && projectCell
+          && projectCvShowDirective(projectCell, tuple.project).policy === 'required';
+      });
+      const waitForAcceptedAttentionSettlement = (cell) => {
+        let settled = false;
+        let firstFrameReceipt = null;
+        let resolvePromise;
+        let rejectPromise;
+        const finish = (settle, value) => {
+          if (settled) return;
+          settled = true;
+          receiptObservers.delete(observe);
+          settle(value);
+        };
+        const observe = (receipt) => {
+          if (receipt.cellId !== cell.cellId || receipt.kind !== 'attention') return;
+          if (receipt.status === 'first-frame') {
+            firstFrameReceipt = receipt;
+            return;
+          }
+          if (receipt.status === 'settled' && firstFrameReceipt) {
+            finish(resolvePromise, Object.freeze({
+              firstFrame: firstFrameReceipt,
+              settled: receipt,
+            }));
+            return;
+          }
+          finish(
+            rejectPromise,
+            attentionGateFailure(entry.id, cell.cellId, receipt, tuple.execution.snapshot),
+          );
+        };
+        const promise = new Promise((resolve, reject) => {
+          resolvePromise = resolve;
+          rejectPromise = reject;
+        });
+        receiptObservers.add(observe);
+        return Object.freeze({
+          promise,
+          cancel(error) {
+            finish(rejectPromise, error);
+          },
+        });
+      };
+      const requirePausedMediaAtStart = async (cell, receipt = null) => {
+        if (media.paused === true && Number(media.currentTime) === 0) return;
+        await tuple.execution.pause();
+        throw attentionGateFailure(
+          entry.id,
+          cell.cellId,
+          receipt,
+          tuple.execution.snapshot,
+        );
+      };
+      const requireCurrentAcceptedAttentionSettlement = (cell, receipts) => {
+        const snapshot = tuple.execution.snapshot;
+        const barrier = snapshot.barriers.find(({ cellId }) => cellId === cell.cellId);
+        if (
+          snapshot.state === 'running'
+          && snapshot.generation === receipts.firstFrame.generation
+          && snapshot.generation === receipts.settled.generation
+          && barrier?.barriers.includes('first-frame')
+          && barrier?.barriers.includes('settled')
+        ) return;
+        throw attentionGateFailure(entry.id, cell.cellId, receipts.settled, snapshot);
+      };
+      const runCrossBoundaryAttentionGate = async () => {
+        if (crossBoundaryAttentionCells.length === 0) return tuple.execution.snapshot;
+        attentionGateInProgress = true;
+        try {
+          for (let index = 0; index < crossBoundaryAttentionCells.length; index += 1) {
+            const cell = crossBoundaryAttentionCells[index];
+            await requirePausedMediaAtStart(cell);
+            if (index > 0) {
+              const idle = await tuple.execution.whenIdle();
+              const previous = crossBoundaryAttentionCells[index - 1];
+              const terminal = idle.terminal.find(({ cellId }) => cellId === previous.cellId);
+              if (terminal?.status !== 'completed') {
+                throw attentionGateFailure(entry.id, previous.cellId, null, idle);
+              }
+            }
+            await waitForVisiblePresentationFrames(media);
+            await requirePausedMediaAtStart(cell);
+            if (tuple.execution.snapshot.state === 'paused') tuple.execution.resume();
+            const settlement = waitForAcceptedAttentionSettlement(cell);
+            let sampled;
+            try {
+              sampled = tuple.execution.sample({
+                mediaTimeMs: tuple.schedule.presentationStartMs,
+                reason: 'entry-attention-preroll',
+              });
+            } catch (error) {
+              settlement.cancel(error);
+              await settlement.promise;
+            }
+            if (sampled.activeCellId !== cell.cellId) {
+              const error = attentionGateFailure(entry.id, cell.cellId, null, sampled);
+              settlement.cancel(error);
+              await settlement.promise;
+            }
+            const receipts = await settlement.promise;
+            await requirePausedMediaAtStart(cell, receipts.settled);
+            requireCurrentAcceptedAttentionSettlement(cell, receipts);
+            const idle = await tuple.execution.whenIdle();
+            const terminal = idle.terminal.find(({ cellId }) => cellId === cell.cellId);
+            if (terminal?.status !== 'completed') {
+              throw attentionGateFailure(entry.id, cell.cellId, receipts.settled, idle);
+            }
+          }
+          return tuple.execution.snapshot;
+        } finally {
+          attentionGateInProgress = false;
+        }
       };
       const runtime = Object.freeze({
         media,
         async loadAndRestorePlayback(snapshot, context) {
           await runSetup();
           await tuple.execution.pause();
-          return mediaRuntime.loadAndRestorePlayback(snapshot, context);
+          const generation = await mediaRuntime.loadAndRestorePlayback(snapshot, context);
+          if (generation?.status !== 'completed') return generation;
+          await runCrossBoundaryAttentionGate();
+          return generation;
         },
         pause() {
           return mediaRuntime.pause();
         },
         resume() {
+          if (attentionGateInProgress) return false;
           tuple.execution.resume();
           sampleExecution('runtime-resume');
           return mediaRuntime.resume();

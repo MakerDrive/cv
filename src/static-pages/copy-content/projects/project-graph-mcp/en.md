@@ -14,14 +14,22 @@ links: npm|https://www.npmjs.com/package/project-graph-mcp; Demo|https://rnd-pro
 # Project Graph MCP
 
 :::article-block repository-root
-:::article-block focus-zone
 Research project around a recurring agent problem: how to give an AI enough retrievable structure about a codebase without flooding it with raw files.
 
 :::article-block graph-example
-:::article-block compact-context
-:::article-block readonly-node
-:::article-block browser-fact
-It exposes dependency views, code skeletons, graph summaries, and browser-test evidence as compact structured context for engineering agents.
+It exposes dependency views and graph summaries.
 
 :::article-block compact-skeleton
-The R&D focus is context engineering, GraphRAG-style retrieval, context compression, and project understanding: a faster/cheaper model can analyze structure and produce a graph representation, while a stronger model works from that distilled data instead of re-reading the whole repository. In practice this comes down to compact skeletons and 10-50x context reduction for structural project data.
+It also exposes code skeletons.
+
+:::article-block compact-context
+These representations form compact structured context for engineering agents.
+
+:::article-block browser-fact
+This is compact structured engineering context: the R&D focus is context engineering, GraphRAG-style retrieval, context compression, and project understanding. A faster/cheaper model can analyze structure, produce a graph representation, and give an agent the relevant part of the project for the current step. Verifiable browser-test facts form a separate layer inside that focused map.
+
+:::article-block readonly-node
+Browser-test evidence adds verifiable facts to that context.
+
+:::article-block focus-zone
+A stronger model works from that distilled data instead of re-reading the whole repository. In practice this comes down to compact skeletons and 10-50x context reduction for structural project data.

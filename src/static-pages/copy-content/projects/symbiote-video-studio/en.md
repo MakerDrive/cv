@@ -13,16 +13,28 @@ linkLabel: View project
 # Symbiote Video Studio
 
 :::article-block overview
-:::article-block visible-process
-:::article-block node-graph
-:::article-block timeline
-:::article-block preview
-:::article-block export
 Prototype-driven video production environment for turning rough media processes into faster, structured editing tools with practical AI assistance.
 
+:::article-block visible-process
+Materials remain together in one visible production process.
+
+:::article-block node-graph
+The semantic video description becomes a node graph.
+
+:::article-block timeline
+The same description also becomes a timeline and composition.
+
+:::article-block preview
+The workspace can run a live preview of the current result.
+
+:::article-block export
+After the state is saved, the process can proceed to render/export.
+
 :::article-block semantic-flow
-Materials, a node graph, timeline, preview, and render/export are brought into one visible process. The agent works through semantic interface elements, while every stage remains legible to a person.
+Graph, timeline, composition, live preview, and render/export are brought into one visible process.
 
 :::article-block demo
+The demo directly presents Symbiote Workspace functionality: an agent describes scenes, layers, clips, and transitions through semantic interface elements, while a person can inspect the node graph, run live preview, save state, and proceed to export.
+
 :::article-block full-video
-The demo directly presents Symbiote Workspace functionality. Symbiote Video Studio is currently being developed into a Workspace configuration for this media-production flow.
+The Symbiote Video core already works. Video Studio continues in alpha as a universal Workspace configuration for this media-production flow.

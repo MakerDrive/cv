@@ -28,6 +28,9 @@ Scheduling creates explicit queued work with a visible target and planned time.
 :::article-block queue
 The queue exposes pending, active, stopped, and completed operations without hiding the current device state.
 
+:::article-block ui-change-demo
+The recovery demonstration stops on a changed local test interface, analyzes the current screen, and prepares a proposed scenario revision for review.
+
 :::article-block approval-log
 Approval and action-log records keep the decision and the resulting local receipt together.
 
@@ -36,7 +39,3 @@ Devices execute declared scenarios. Device credentials and production account de
 
 :::article-block local-demo
 The public demonstration ends with a local draft, a test target, and approval or dry-run evidence. It does not send content to an external service.
-
-:::article-block ui-change-demo
-The recovery demonstration stops on a changed local test interface, analyzes the current screen, and prepares a proposed scenario revision for review.
-

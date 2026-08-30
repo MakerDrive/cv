@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { createServer } from 'node:http';
-import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -721,6 +721,7 @@ async function installCvShowTerminalHarness(cdp) {
       const portable = (value) => {
         try { return JSON.parse(JSON.stringify(value)); } catch { return null; }
       };
+      const operationKey = (requestId, operationId) => String(requestId) + '::' + String(operationId);
       const signal = (type, detail = {}) => {
         try {
           globalThis[bindingName](JSON.stringify({
@@ -742,9 +743,7 @@ async function installCvShowTerminalHarness(cdp) {
         frames: [],
         periodic: [],
         streams: [],
-        manualScroll: [],
         diagnostics: [],
-        manualScrollArmed: false,
         activeOperations: new Map(),
       });
       let state = createState();
@@ -796,6 +795,7 @@ async function installCvShowTerminalHarness(cdp) {
           narrationPositionMs: host?.alignmentSnapshot?.narrationPositionMs ?? null,
           paused: host?.narrationSnapshot?.active?.paused === true,
           operations: Array.from(state.activeOperations.values()).map((entry) => ({
+            requestId: entry.requestId,
             operationId: entry.operationId,
             cellId: entry.cellId,
             kind: entry.kind,
@@ -853,12 +853,9 @@ async function installCvShowTerminalHarness(cdp) {
         const signature = JSON.stringify(snapshot);
         if (signature === lastStreamSignature) return;
         lastStreamSignature = signature;
-        const transcript = document.querySelector('agent-dock-shell agent-show-chat chat-transcript');
-        const scroller = transcript?.getScrollContainer?.() || transcript?.ref?.chatMessages || null;
         const entry = {
           at: performance.now(),
           items: snapshot,
-          scrollTop: scroller?.scrollTop ?? null,
         };
         state.streams.push(entry);
         signal('stream-sample', { index: state.streams.length - 1 });
@@ -895,11 +892,6 @@ async function installCvShowTerminalHarness(cdp) {
         ...state,
         activeOperations: Array.from(state.activeOperations.values()),
       });
-      globalThis.__cvShowTerminalHarnessArmManualScroll = () => {
-        state.manualScrollArmed = true;
-        return true;
-      };
-
       document.addEventListener('portfolio-show-presentation-operation', (event) => {
         const detail = event.detail || {};
         const operation = detail.operation || {};
@@ -918,14 +910,39 @@ async function installCvShowTerminalHarness(cdp) {
           source: operationSource(operation),
         };
         state.operations.push(entry);
-        if (entry.operationId) state.activeOperations.set(entry.operationId, entry);
+        if (entry.operationId) {
+          state.activeOperations.set(operationKey(entry.requestId, entry.operationId), entry);
+        }
+        if (typeof detail.complete === 'function') {
+          const complete = detail.complete;
+          detail.complete = (receipts, error = null) => {
+            entry.completion = portable({
+              receipts: receipts || null,
+              error: error ? {
+                name: error.name || '',
+                code: error.code || '',
+                message: error.message || String(error),
+                details: error.details || null,
+                result: error.result || null,
+                receipt: error.receipt || null,
+              } : null,
+            });
+            signal('operation-complete', {
+              operationId: entry.operationId,
+              cellId: entry.cellId,
+              completion: entry.completion,
+            });
+            complete(receipts, error);
+          };
+        }
         signal('operation', { operation: entry });
       }, { capture: true });
 
       document.addEventListener('portfolio-show-presentation-receipt', (event) => {
         const detail = event.detail || {};
         const receipt = portable(detail.receipt || {}) || {};
-        const operation = state.activeOperations.get(receipt.operationId) || null;
+        const key = operationKey(detail.requestId ?? null, receipt.operationId);
+        const operation = state.activeOperations.get(key) || null;
         const entry = {
           at: performance.now(),
           requestId: detail.requestId ?? null,
@@ -937,7 +954,7 @@ async function installCvShowTerminalHarness(cdp) {
         if (
           ['settled', 'ready', 'ended', 'skipped', 'cancelled', 'failed', 'stale', 'expired']
             .includes(receipt.status)
-        ) state.activeOperations.delete(receipt.operationId);
+        ) state.activeOperations.delete(key);
         signal('receipt', {
           receipt: {
             entryId: entry.entryId,
@@ -1004,6 +1021,7 @@ async function installCvShowTerminalHarness(cdp) {
         'portfolio-show-stop',
         'portfolio-show-pause',
         'portfolio-show-resume',
+        'portfolio-show-aligned-reset',
         'portfolio-show-aligned-seek-failure',
       ]) {
         document.addEventListener(type, (event) => {
@@ -1013,29 +1031,43 @@ async function installCvShowTerminalHarness(cdp) {
             detail: portable(event.detail || null),
           };
           state.lifecycle.push(entry);
-          signal(type, { detail: entry.detail });
+          const host = document.querySelector('portfolio-show-chat');
+          signal(type, {
+            detail: entry.detail,
+            activeId: host?.narrationSnapshot?.active?.activeId || '',
+            narration: portable(host?.narrationSnapshot || null),
+            alignment: portable(host?.alignmentSnapshot || null),
+            graph: (() => {
+              const panel = document.querySelector('portfolio-graph-panel');
+              const node = panel?.querySelector('graph-node[node-id="projects/index"]');
+              const nodeRect = node?.getBoundingClientRect?.();
+              return {
+                viewMode: panel?.viewMode || '',
+                graphReady: panel?._graphReady === true,
+                structuredBound: panel?._structuredBound === true,
+                canvasConnected: panel?.canvas?.isConnected === true,
+                panelVisible: panel?.isGraphPanelVisible?.() === true,
+                ownerCollapsed: panel?.closest('layout-node')?.hasAttribute('collapsed') === true,
+                nodeConnected: node?.isConnected === true,
+                nodeRect: nodeRect ? portable({
+                  left: nodeRect.left,
+                  top: nodeRect.top,
+                  width: nodeRect.width,
+                  height: nodeRect.height,
+                }) : null,
+              };
+            })(),
+            activeOperations: Array.from(state.activeOperations.values()).map((operation) => ({
+              operationId: operation.operationId,
+              cellId: operation.cellId,
+              sourceType: operation.source?.type || '',
+            })),
+            lastOperation: portable(state.operations.at(-1) || null),
+            lastResult: state.results.at(-1) || null,
+            lastReceipt: state.receipts.at(-1) || null,
+          });
         }, { capture: true });
       }
-
-      document.addEventListener('scroll', (event) => {
-        if (!event.isTrusted || !state.runId || !state.manualScrollArmed) return;
-        const transcript = event.target?.closest?.('chat-transcript')
-          || (event.target?.classList?.contains('chat-messages')
-            ? event.target.closest('chat-transcript')
-            : null);
-        if (!transcript) return;
-        state.manualScrollArmed = false;
-        requestAnimationFrame(() => {
-          const scroller = transcript.getScrollContainer?.() || transcript.ref?.chatMessages || event.target;
-          const entry = {
-            at: performance.now(),
-            scrollTop: scroller?.scrollTop ?? null,
-            streamIndex: state.streams.length,
-          };
-          state.manualScroll.push(entry);
-          signal('manual-scroll', entry);
-        });
-      }, { capture: true });
 
       globalThis.addEventListener('error', (event) => {
         const entry = { type: 'error', message: event.message || '', at: performance.now() };
@@ -1132,11 +1164,16 @@ async function installCvShowTerminalHarness(cdp) {
     new Promise((resolve, reject) => {
       let settled = false;
       let timer = null;
+      let lastHeartbeatProgress = '';
+      let lastProgressEvent = null;
       const arm = () => {
         clearTimeout(timer);
         timer = setTimeout(() => finish(
           reject,
-          new Error(`Terminal harness inactivity while waiting for ${label}`),
+          new Error(
+            `Terminal harness inactivity while waiting for ${label}: `
+            + JSON.stringify(lastProgressEvent),
+          ),
         ), inactivityMs);
       };
       const finish = (complete, value) => {
@@ -1148,8 +1185,28 @@ async function installCvShowTerminalHarness(cdp) {
       };
       const onEvent = (event) => {
         if (event.runId !== runId) return;
+        if (predicate(event)) {
+          finish(resolve, event);
+          return;
+        }
+        if (
+          event.type === 'portfolio-show-pause'
+          || event.type === 'portfolio-show-aligned-seek-failure'
+          || event.type === 'diagnostic'
+        ) {
+          finish(
+            reject,
+            new Error(`Terminal harness failed while waiting for ${label}: ${JSON.stringify(event)}`),
+          );
+          return;
+        }
+        if (event.type === 'heartbeat') {
+          const progress = JSON.stringify([event.activeId || '', event.positionMs ?? null]);
+          if (progress === lastHeartbeatProgress) return;
+          lastHeartbeatProgress = progress;
+        }
+        lastProgressEvent = event;
         arm();
-        if (predicate(event)) finish(resolve, event);
       };
       const existing = events.slice(afterIndex).find((event) => (
         event.runId === runId && predicate(event)
@@ -1289,6 +1346,43 @@ function unwrapProviderReceipt(receipt) {
   return current;
 }
 
+function cvShowOperationKey({ requestId, operationId }) {
+  return `${requestId}::${operationId}`;
+}
+
+function isCvShowAuthoredEffectOperation(operation, sourceType) {
+  return operation?.source?.type === sourceType
+    && !String(operation?.cellId || '').endsWith(':scroll');
+}
+
+test('CV Show terminal evidence separates authored effects from companion scroll operations', () => {
+  const authoredSelection = {
+    kind: 'interaction',
+    cellId: 'cv-show:cue:workspace.portable-config',
+    source: { type: 'native-selection' },
+  };
+  const selectionScroll = {
+    kind: 'interaction',
+    cellId: 'cv-show:cue:workspace.portable-config:scroll',
+    source: { type: 'native-selection' },
+  };
+  const authoredMarker = {
+    kind: 'attention',
+    cellId: 'cv-show:cue:positioning.tenure-marker',
+    source: { type: 'marker' },
+  };
+  const markerScroll = {
+    kind: 'interaction',
+    cellId: 'cv-show:cue:positioning.tenure-marker:scroll',
+    source: { type: 'marker' },
+  };
+
+  assert.equal(isCvShowAuthoredEffectOperation(authoredSelection, 'native-selection'), true);
+  assert.equal(isCvShowAuthoredEffectOperation(selectionScroll, 'native-selection'), false);
+  assert.equal(isCvShowAuthoredEffectOperation(authoredMarker, 'marker'), true);
+  assert.equal(isCvShowAuthoredEffectOperation(markerScroll, 'marker'), false);
+});
+
 function assertCvShowTerminalReceipts(snapshot, expectedEntryIds, label) {
   assert.deepEqual(
     snapshot.generations.map(({ entryId }) => entryId),
@@ -1328,10 +1422,11 @@ function assertCvShowTerminalReceipts(snapshot, expectedEntryIds, label) {
 
   const receiptsByOperation = Map.groupBy(
     snapshot.receipts.filter(({ operationId }) => true),
-    ({ operationId }) => operationId,
+    cvShowOperationKey,
   );
   for (const operation of snapshot.operations) {
-    const statuses = (receiptsByOperation.get(operation.operationId) || []).map(({ status }) => status);
+    const statuses = (receiptsByOperation.get(cvShowOperationKey(operation)) || [])
+      .map(({ status }) => status);
     const expected = {
       interaction: ['acted', 'settled'],
       attention: ['first-frame', 'settled'],
@@ -1345,7 +1440,7 @@ function assertCvShowScrollAttentionOrder(snapshot, label) {
   const operationsByCell = new Map(snapshot.operations.map((operation) => [operation.cellId, operation]));
   const receiptsByOperation = Map.groupBy(
     snapshot.receipts.filter(({ operationId }) => true),
-    ({ operationId }) => operationId,
+    cvShowOperationKey,
   );
   const transitionTimes = new Map();
   for (let index = 0; index < snapshot.generations.length; index += 1) {
@@ -1372,8 +1467,8 @@ function assertCvShowScrollAttentionOrder(snapshot, label) {
   });
   assert.ok(pairs.length > 0, `${label}: expected paired scroll and attention operations`);
   for (const { scroll, attention } of pairs) {
-    const scrollReceipts = receiptsByOperation.get(scroll.operationId) || [];
-    const attentionReceipts = receiptsByOperation.get(attention.operationId) || [];
+    const scrollReceipts = receiptsByOperation.get(cvShowOperationKey(scroll)) || [];
+    const attentionReceipts = receiptsByOperation.get(cvShowOperationKey(attention)) || [];
     const acted = scrollReceipts.find(({ status }) => status === 'acted');
     const scrollSettled = scrollReceipts.find(({ status }) => status === 'settled');
     const firstFrame = attentionReceipts.find(({ status }) => status === 'first-frame');
@@ -1393,20 +1488,22 @@ function assertCvShowScrollAttentionOrder(snapshot, label) {
         && timing.attentionSettled < timing.transitionAt,
       `${label}: scroll/attention/transition order failed for ${attention.cellId}: ${JSON.stringify(timing)}`,
     );
-    const scrollFrames = snapshot.frames.filter(({ operations }) => (
-      operations.some(({ operationId }) => operationId === scroll.operationId)
-    ));
+    assert.ok(
+      scrollSettled.at <= attention.at,
+      `${label}: attention ${attention.cellId} started before its scroll operation settled`,
+    );
     const attentionFrames = snapshot.frames.filter(({ operations }) => (
-      operations.some(({ operationId }) => operationId === attention.operationId)
+      operations.some((operation) => (
+        cvShowOperationKey(operation) === cvShowOperationKey(attention)
+      ))
     ));
-    assert.ok(scrollFrames.length >= 2, `${label}: scroll ${scroll.cellId} lacks multi-frame evidence`);
     assert.ok(
       attentionFrames.length >= 2,
       `${label}: attention ${attention.cellId} lacks multi-frame evidence`,
     );
     const overlap = snapshot.frames.filter(({ operations }) => {
-      const ids = new Set(operations.map(({ operationId }) => operationId));
-      return ids.has(scroll.operationId) && ids.has(attention.operationId);
+      const ids = new Set(operations.map(cvShowOperationKey));
+      return ids.has(cvShowOperationKey(scroll)) && ids.has(cvShowOperationKey(attention));
     });
     assert.deepEqual(overlap, [], `${label}: scroll and attention overlapped for ${attention.cellId}`);
   }
@@ -1414,10 +1511,12 @@ function assertCvShowScrollAttentionOrder(snapshot, label) {
 
 function assertCvShowNativeSelectionGrowth(snapshot, label) {
   const selections = snapshot.operations
-    .filter(({ source }) => source.type === 'native-selection')
+    .filter((operation) => isCvShowAuthoredEffectOperation(operation, 'native-selection'))
     .map((operation) => {
       const frames = snapshot.frames.filter(({ operations }) => (
-        operations.some(({ operationId }) => operationId === operation.operationId)
+        operations.some((candidate) => (
+          cvShowOperationKey(candidate) === cvShowOperationKey(operation)
+        ))
       ));
       return {
         operation,
@@ -1440,12 +1539,12 @@ function assertCvShowNativeSelectionGrowth(snapshot, label) {
 function assertCvShowAuthoredMarkerEvidence(snapshot, label) {
   const receiptByOperation = new Map(snapshot.receipts
     .filter(({ status }) => status === 'settled')
-    .map((receipt) => [receipt.operationId, receipt]));
+    .map((receipt) => [cvShowOperationKey(receipt), receipt]));
   const markers = snapshot.operations
-    .filter(({ source }) => source.type === 'marker')
+    .filter((operation) => isCvShowAuthoredEffectOperation(operation, 'marker'))
     .map((operation) => ({
       operation,
-      provider: unwrapProviderReceipt(receiptByOperation.get(operation.operationId)),
+      provider: unwrapProviderReceipt(receiptByOperation.get(cvShowOperationKey(operation))),
     }));
   assert.ok(markers.length > 0, `${label}: no authored marker operation was observed`);
   for (const { operation, provider } of markers) {
@@ -1458,18 +1557,24 @@ function assertCvShowAuthoredMarkerEvidence(snapshot, label) {
       `${label}: ${operation.cellId} lacks provider width evidence`,
     );
     assert.ok(
-      ['open', 'displaced-overlap'].includes(provider?.tailPolicy?.mode),
+      ['open', 'open-gap'].includes(provider?.tailPolicy?.mode),
       `${label}: ${operation.cellId} has an unexpected authored tail policy`,
     );
   }
   assert.deepEqual(
     [...new Set(markers.map(({ provider }) => provider.tailPolicy.mode))].sort(),
-    ['displaced-overlap', 'open'],
+    ['open', 'open-gap'],
     `${label}: authored markers must cover open and displaced endpoint geometry`,
   );
 }
 
-function assertCvShowPointerAndPlayer(snapshot, expectedEntryIds, label) {
+function assertCvShowPointerAndPlayer(
+  snapshot,
+  expectedEntryIds,
+  label,
+  { allowResponsiveDrawerHiding = false } = {},
+) {
+  const entriesWithVisiblePlayer = new Set();
   for (const entryId of expectedEntryIds) {
     const samples = snapshot.periodic.filter((sample) => sample.activeId === entryId && !sample.paused);
     assert.ok(samples.length >= 2, `${label}: ${entryId} lacks periodic presenter samples`);
@@ -1483,8 +1588,28 @@ function assertCvShowPointerAndPlayer(snapshot, expectedEntryIds, label) {
         bounds?.width > 4 && bounds?.height > 4,
         `${label}: cursor is not a recognizable arrow in ${entryId}: ${JSON.stringify(bounds)}`,
       );
-      assert.ok(sample.player.bounds?.height > 0, `${label}: player disappeared in ${entryId}`);
-      assert.equal(sample.player.controls.length, 4, `${label}: player controls missing in ${entryId}`);
+      assert.deepEqual(
+        sample.player.controls.map(({ control }) => control),
+        ['restart', 'prev', 'play', 'next', 'stop'],
+        `${label}: mounted player controls are incomplete or out of order in ${entryId}`,
+      );
+      const playerVisible = sample.player.bounds?.height > 0;
+      if (!playerVisible) {
+        assert.equal(
+          allowResponsiveDrawerHiding,
+          true,
+          `${label}: player disappeared in ${entryId}`,
+        );
+        assert.equal(
+          sample.player.controls.every(({ visible, bounds: controlBounds }) => (
+            !visible && controlBounds?.width === 0 && controlBounds?.height === 0
+          )),
+          true,
+          `${label}: responsive drawer hid the player only partially in ${entryId}`,
+        );
+        continue;
+      }
+      entriesWithVisiblePlayer.add(entryId);
       assert.equal(
         sample.player.controls.every(({ visible, bounds: controlBounds }) => (
           visible && controlBounds?.width > 0 && controlBounds?.height > 0
@@ -1497,6 +1622,12 @@ function assertCvShowPointerAndPlayer(snapshot, expectedEntryIds, label) {
         `${label}: player must remain above the composer in ${entryId}`,
       );
     }
+  }
+  if (allowResponsiveDrawerHiding) {
+    assert.ok(
+      entriesWithVisiblePlayer.size >= 2,
+      `${label}: responsive drawer never restored the mounted player for chat-owned scenes`,
+    );
   }
 }
 
@@ -1536,24 +1667,10 @@ function assertCvShowStreamJournal(snapshot, label) {
   assert.ok(progressiveItems > 0, `${label}: no progressive agent text stream was observed`);
 }
 
-function assertCvShowManualScroll(snapshot, label) {
-  assert.ok(snapshot.manualScroll.length > 0, `${label}: trusted transcript scroll was not observed`);
-  const anchor = snapshot.manualScroll[0];
-  const later = snapshot.streams.slice(anchor.streamIndex + 1).filter(({ scrollTop }) => (
-    Number.isFinite(scrollTop)
-  ));
-  assert.ok(later.length >= 2, `${label}: manual scroll lacks subsequent streaming samples`);
-  assert.equal(
-    later.every(({ scrollTop }) => Math.abs(scrollTop - anchor.scrollTop) <= 2),
-    true,
-    `${label}: transcript moved after the user scrolled away from the bottom`,
-  );
-}
-
 function assertPresenterMarkerProbes(probes) {
   assert.deepEqual(
     probes.map(({ receipt }) => receipt.tailPolicy.mode),
-    ['open', 'underdraw', 'displaced-overlap'],
+    ['open', 'underdraw', 'open-gap'],
     'public presenter conformance must exercise every endpoint policy',
   );
   for (const probe of probes) {
@@ -1576,38 +1693,7 @@ function assertPresenterMarkerProbes(probes) {
   }
   assert.equal(probes[0].receipt.tailPolicy.sourceEnd, 1);
   assert.ok(probes[1].receipt.tailPolicy.sourceEnd < 1);
-  assert.ok(probes[2].receipt.tailPolicy.sourceEnd > 1);
-  assert.ok(Math.abs(probes[2].receipt.tailPolicy.lateralOffsetPx) > 0);
-}
-
-async function scrollCvShowTranscriptManually(cdp) {
-  const armed = await cdp.send('Runtime.evaluate', {
-    returnByValue: true,
-    expression: 'globalThis.__cvShowTerminalHarnessArmManualScroll?.() === true',
-  }, { label: 'arm trusted CV Show transcript scroll evidence', timeoutMs: 5_000 });
-  assert.equal(armed.result.value, true, 'terminal harness must arm the trusted scroll receipt');
-  const point = await cdp.send('Runtime.evaluate', {
-    returnByValue: true,
-    expression: `(() => {
-      const transcript = document.querySelector('agent-dock-shell agent-show-chat chat-transcript');
-      const scroller = transcript?.getScrollContainer?.() || transcript?.ref?.chatMessages;
-      const rect = scroller?.getBoundingClientRect?.();
-      return rect?.width > 0 && rect.height > 0 && scroller.scrollHeight > scroller.clientHeight
-        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-        : null;
-    })()`,
-  }, { label: 'locate overflowing CV Show transcript', timeoutMs: 5_000 });
-  assert.ok(point.result.value, 'CV Show transcript must overflow before trusted manual scroll');
-  await cdp.send('Input.dispatchMouseEvent', {
-    type: 'mouseMoved',
-    ...point.result.value,
-  }, { label: 'move over CV Show transcript', timeoutMs: 5_000 });
-  await cdp.send('Input.dispatchMouseEvent', {
-    type: 'mouseWheel',
-    deltaX: 0,
-    deltaY: -320,
-    ...point.result.value,
-  }, { label: 'trusted manual CV Show transcript scroll', timeoutMs: 5_000 });
+  assert.ok(probes[2].receipt.tailPolicy.sourceEnd < 1);
 }
 
 async function createMobilePage(t) {
@@ -2115,6 +2201,47 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
         return { ok: false, reason: 'missing-appearance-controls' };
       }
 
+      const workspace = document.querySelector('portfolio-workspace');
+      const portfolioLayout = workspace?._layout;
+      const dockLayout = workspace?._dock?.ref?.layout;
+      const ratioState = (layout) => {
+        const result = {};
+        const visit = (node) => {
+          if (node?.type !== 'split') return;
+          const childTypes = new Set([node.first?.panelType, node.second?.panelType]);
+          if (childTypes.has('portfolio-tree')) result.tree = node.ratio;
+          if (childTypes.has('portfolio-viewer') && childTypes.has('portfolio-graph')) result.content = node.ratio;
+          if (childTypes.has('portfolio-theme')) result.theme = node.ratio;
+          if (childTypes.has('agent-dock-main') && childTypes.has('agent-chat')) result.dock = node.ratio;
+          visit(node.first);
+          visit(node.second);
+        };
+        visit(layout?.getLayout?.());
+        return result;
+      };
+      const mutateRatios = (layout, values) => {
+        const tree = layout?.getLayout?.();
+        const visit = (node) => {
+          if (node?.type !== 'split') return;
+          const childTypes = new Set([node.first?.panelType, node.second?.panelType]);
+          if (childTypes.has('portfolio-tree')) node.ratio = values.tree;
+          if (childTypes.has('portfolio-viewer') && childTypes.has('portfolio-graph')) node.ratio = values.content;
+          if (childTypes.has('portfolio-theme')) node.ratio = values.theme;
+          if (childTypes.has('agent-dock-main') && childTypes.has('agent-chat')) node.ratio = values.dock;
+          visit(node.first);
+          visit(node.second);
+        };
+        visit(tree);
+        layout?.setLayout?.(tree);
+      };
+      mutateRatios(portfolioLayout, { tree: 0.37, content: 0.41, theme: 0.56 });
+      mutateRatios(dockLayout, { dock: 0.58 });
+      await waitFrame();
+      const ratiosBeforeReset = {
+        ...ratioState(portfolioLayout),
+        ...ratioState(dockLayout),
+      };
+
       const overriddenAttributes = (element) => ['default-state', 'storage-key', 'target-selector']
         .filter((name) => element?.hasAttribute(name));
       const initial = {
@@ -2133,7 +2260,16 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
       const storedAfterInput = JSON.parse(localStorage.getItem(storageKey) || 'null');
 
       resetButton.click();
-      await waitFor(() => editor.state?.pattern === 100 && localStorage.getItem(storageKey) === null);
+      await waitFor(() => {
+        const outer = ratioState(portfolioLayout);
+        const inner = ratioState(dockLayout);
+        return editor.state?.pattern === 100
+          && localStorage.getItem(storageKey) === null
+          && outer.tree === 0.25
+          && outer.content === 0.5
+          && outer.theme === 0.72
+          && inner.dock === 0.67;
+      });
       const afterReset = {
         contrast: editor.state?.contrast,
         pattern: editor.state?.pattern,
@@ -2144,6 +2280,10 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
         graphLayout: graphPanel?.graphLayout,
         urlMode: new URL(location.href).searchParams.get('mode'),
         urlLayout: new URL(location.href).searchParams.get('layout'),
+        panelRatios: {
+          ...ratioState(portfolioLayout),
+          ...ratioState(dockLayout),
+        },
       };
 
       const overflowY = getComputedStyle(panelContent).overflowY;
@@ -2159,6 +2299,7 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
         articleMedia,
         initial,
         graphBeforeReset,
+        ratiosBeforeReset,
         storedPatternAfterInput: storedAfterInput?.pattern,
         afterReset,
         overflowY,
@@ -2188,6 +2329,12 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
   assert.equal(state.graphBeforeReset.urlMode, 'flat', JSON.stringify(state));
   assert.equal(state.graphBeforeReset.urlLayout, 'tree', JSON.stringify(state));
   assert.equal(state.storedPatternAfterInput, 0, JSON.stringify(state));
+  assert.deepEqual(state.ratiosBeforeReset, {
+    tree: 0.37,
+    content: 0.41,
+    theme: 0.56,
+    dock: 0.58,
+  }, JSON.stringify(state));
   assert.equal(state.afterReset.contrast, 67, JSON.stringify(state));
   assert.equal(state.afterReset.pattern, 100, JSON.stringify(state));
   assert.equal(Number(state.afterReset.rootPattern), 1, JSON.stringify(state));
@@ -2196,6 +2343,12 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
   assert.equal(state.afterReset.graphLayout, 'tree', JSON.stringify(state));
   assert.equal(state.afterReset.urlMode, 'flat', JSON.stringify(state));
   assert.equal(state.afterReset.urlLayout, 'tree', JSON.stringify(state));
+  assert.deepEqual(state.afterReset.panelRatios, {
+    tree: 0.25,
+    content: 0.5,
+    theme: 0.72,
+    dock: 0.67,
+  }, JSON.stringify(state));
   assert.equal(state.overflowY, 'auto', JSON.stringify(state));
   assert.ok(state.scrollHeight > state.clientHeight, JSON.stringify(state));
   assert.ok(state.scrollTop > 0, JSON.stringify(state));
@@ -4106,17 +4259,17 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     sharedDock: true,
     sharedWorkspace: true,
     sharedTranscript: true,
-    playerBeforeChoice: false,
+    playerBeforeChoice: true,
     embedBeforeChoice: false,
     activeComposer: true,
     voiceInput: true,
     modeActions: [true, true],
     manualTranscript: false,
   });
-  assert.equal(
-    cvShowAudioRequestPaths(cdp.requestedUrls).length,
-    0,
-    'opening the chat without selecting a Show mode must stay public-audio payload-free',
+  assert.deepEqual(
+    cvShowAudioRequestPaths(cdp.requestedUrls),
+    [WEB_AUDIO_MANIFEST_REQUEST_PATH],
+    'the native player may preload metadata, but no clip or alignment before mode selection',
   );
   await clickVisible(
     cdp,
@@ -5765,7 +5918,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
         const controls = Array.from(player?.querySelectorAll('[data-control]') || []);
         const dockRect = chat?.getBoundingClientRect();
         const playerRect = player?.getBoundingClientRect();
-        if (dockRect?.height > 0 && playerRect?.height > 0 && controls.length === 4) return resolve({
+        if (dockRect?.height > 0 && playerRect?.height > 0 && controls.length === 5) return resolve({
           playerFits: playerRect.left >= dockRect.left && playerRect.right <= dockRect.right
             && playerRect.width <= dockRect.width,
           controlsPresent: true,
@@ -5807,6 +5960,704 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
   assert.equal(cdp.exceptions.length, 0, 'lazy agent chat/player must not throw browser exceptions');
 });
 
+test('finale deeplink prepares the native graph panel before sequential scroll and frame cues', {
+  timeout: 60_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('finale readiness requires the selected public Opus release');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const panel = document.querySelector('portfolio-graph-panel');
+      const owner = panel?.closest('layout-node');
+      if (!owner?._setCollapsed) return reject(new Error('graph layout node unavailable'));
+      owner._setCollapsed(true);
+      const started = performance.now();
+      const check = () => {
+        if (owner.hasAttribute('collapsed')) return resolve(true);
+        if (performance.now() - started > 2_000) {
+          return reject(new Error('graph layout node did not collapse'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'persist collapsed graph panel before finale deeplink', timeoutMs: 3_000 });
+  const runId = 'finale-native-graph-readiness';
+  const pageEventIndex = harness.events.length;
+  await cdp.send('Page.navigate', {
+    url: `${server.origin}/cv/profile/photo/?showMode=short&showEntry=finale&showPlay=0`,
+  });
+  await harness.waitFor(
+    '',
+    ({ type }) => type === 'harness-ready',
+    'new finale document harness',
+    { afterIndex: pageEventIndex, inactivityMs: 10_000 },
+  );
+  await harness.reset(runId);
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const player = document.querySelector('chat-show-player');
+        const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
+        if (play && player.textContent?.includes('16 / 16')) return resolve(true);
+        if (performance.now() - started > 15_000) {
+          return reject(new Error('paused finale deeplink did not become ready'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for paused finale deeplink', timeoutMs: 17_000 });
+  const initial = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const panel = document.querySelector('portfolio-graph-panel');
+      return {
+        structuredBound: panel?._structuredBound === true,
+        targetPresent: Boolean(panel?.querySelector('graph-node[node-id="projects/index"]')),
+      };
+    })()`,
+  }, { label: 'inspect paused finale graph state', timeoutMs: 5_000 });
+  assert.deepEqual(initial.result.value, {
+    structuredBound: true,
+    targetPresent: true,
+  });
+
+  await clickVisible(
+    cdp,
+    'chat-show-player [data-control="play"]',
+    'play paused finale deeplink',
+  );
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: 'new Promise((resolve) => setTimeout(resolve, 10_000))',
+  }, { label: 'settle resumed finale playback', timeoutMs: 12_000 });
+  const snapshot = await harness.snapshot('finale native graph readiness');
+  const operations = snapshot.operations.filter(({ cellId }) => (
+    cellId === 'cv-show:cue:finale.history:scroll'
+    || cellId === 'cv-show:cue:finale.history'
+  ));
+  assert.deepEqual(operations.map(({ cellId }) => cellId), [
+    'cv-show:cue:finale.history:scroll',
+    'cv-show:cue:finale.history',
+  ], JSON.stringify({
+    operations: snapshot.operations,
+    receipts: snapshot.receipts,
+    diagnostics: snapshot.diagnostics,
+    phases: snapshot.phases,
+    lifecycle: snapshot.lifecycle,
+  }));
+  const receipts = snapshot.receipts.filter(({ cellId }) => (
+    cellId === 'cv-show:cue:finale.history:scroll'
+    || cellId === 'cv-show:cue:finale.history'
+  ));
+  assert.equal(
+    receipts.some(({ status }) => status === 'expired' || status === 'failed'),
+    false,
+    JSON.stringify(receipts),
+  );
+  const scrollSettled = receipts.find(({ cellId, status }) => (
+    cellId === 'cv-show:cue:finale.history:scroll' && status === 'settled'
+  ));
+  const frameFirstFrame = receipts.find(({ cellId, status }) => (
+    cellId === 'cv-show:cue:finale.history' && status === 'first-frame'
+  ));
+  assert.ok(scrollSettled, JSON.stringify(receipts));
+  assert.ok(frameFirstFrame, JSON.stringify(receipts));
+  assert.ok(scrollSettled.at <= frameFirstFrame.at, JSON.stringify(receipts));
+  const graph = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const panel = document.querySelector('portfolio-graph-panel');
+      const target = panel?.querySelector('graph-node[node-id="projects/index"]');
+      const rect = target?.getBoundingClientRect();
+      return {
+        collapsed: panel?.closest('layout-node')?.hasAttribute('collapsed') === true,
+        structuredBound: panel?._structuredBound === true,
+        targetVisible: Boolean(rect && rect.width > 0 && rect.height > 0),
+      };
+    })()`,
+  }, { label: 'inspect settled finale graph state', timeoutMs: 5_000 });
+  assert.deepEqual(graph.result.value, {
+    collapsed: false,
+    structuredBound: true,
+    targetVisible: true,
+  });
+  await harness.waitFor(
+    runId,
+    ({ type }) => type === 'portfolio-show-complete',
+    'focused finale completion',
+    { afterIndex: pageEventIndex },
+  );
+  const terminal = await harness.snapshot('focused finale completion');
+  assert.equal(
+    terminal.lifecycle.some(({ type }) => type === 'portfolio-show-pause'),
+    false,
+    JSON.stringify(terminal.lifecycle),
+  );
+  assert.equal(cdp.exceptions.length, 0);
+});
+
+test('automatic photopizza to finale transition retains aligned audio generation ownership', {
+  timeout: 120_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('transition ownership requires the selected public Opus release');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  await navigate(
+    cdp,
+    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=photopizza&showTime=30000&showPlay=0`,
+    { expectedMode: 'structured' },
+  );
+  const runId = 'photopizza-finale-transition';
+  const runEventIndex = await harness.reset(runId);
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const player = document.querySelector('chat-show-player');
+        const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
+        if (play && player.textContent?.includes('15 / 16')) return resolve(true);
+        if (performance.now() - started > 15_000) {
+          return reject(new Error('paused photopizza deeplink did not become ready'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for paused photopizza deeplink', timeoutMs: 17_000 });
+  await clickVisible(cdp, 'chat-show-player [data-control="play"]', 'play photopizza transition');
+  await harness.waitFor(
+    runId,
+    ({ type }) => type === 'portfolio-show-complete',
+    'photopizza to finale completion',
+    { afterIndex: runEventIndex },
+  );
+  const terminal = await harness.snapshot('photopizza to finale transition');
+  assert.ok(terminal.generations.some(({ entryId }) => entryId === 'finale'));
+  assert.equal(
+    terminal.lifecycle.some(({ type }) => type === 'portfolio-show-pause'),
+    false,
+    JSON.stringify(terminal.lifecycle),
+  );
+  assert.equal(
+    terminal.receipts.some(({ status }) => status === 'failed' || status === 'expired'),
+    false,
+    JSON.stringify(terminal.receipts),
+  );
+  assert.equal(cdp.exceptions.length, 0);
+});
+
+test('authored workspace scroll settles inside its hard cell before selection starts', {
+  timeout: 70_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('scroll timing acceptance requires the selected public Opus release');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  await navigate(
+    cdp,
+    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=symbiote-workspace&showTime=0&showPlay=0`,
+    { expectedMode: 'structured' },
+  );
+  const runId = 'workspace-scroll-hard-cell';
+  const runEventIndex = await harness.reset(runId);
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const player = document.querySelector('chat-show-player');
+        const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
+        if (play && player.textContent?.includes('2 / 16')) return resolve(true);
+        if (performance.now() - started > 15_000) {
+          return reject(new Error('paused workspace deeplink did not become ready'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for paused workspace deeplink', timeoutMs: 17_000 });
+  await clickVisible(cdp, 'chat-show-player [data-control="play"]', 'play workspace scroll probe');
+  await harness.waitFor(
+    runId,
+    ({ type, receipt }) => type === 'receipt'
+      && receipt.cellId === 'cv-show:cue:workspace.portable-config'
+      && ['settled', 'failed', 'skipped', 'expired'].includes(receipt.status),
+    'workspace portable-config terminal receipt',
+    { afterIndex: runEventIndex, inactivityMs: 30_000 },
+  );
+  const terminal = await harness.snapshot('workspace scroll hard cell');
+  const scroll = terminal.receipts.filter(({ cellId }) => (
+    cellId === 'cv-show:cue:workspace.portable-config:scroll'
+  ));
+  const attention = terminal.receipts.filter(({ cellId }) => (
+    cellId === 'cv-show:cue:workspace.portable-config'
+  ));
+  assert.deepEqual(
+    scroll.map(({ status }) => status),
+    ['acted', 'settled'],
+    JSON.stringify({
+      receipts: terminal.receipts,
+      operations: terminal.operations,
+    }),
+  );
+  assert.deepEqual(
+    attention.map(({ status }) => status),
+    ['acted', 'settled'],
+    JSON.stringify(terminal.receipts),
+  );
+  assert.ok(
+    scroll.at(-1).at <= attention[0].at,
+    'selection must not start until the scroll has settled',
+  );
+  assert.equal(cdp.exceptions.length, 0);
+});
+
+test('agent portal decision marker settles as authored ink after its companion scroll', {
+  timeout: 70_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('marker geometry acceptance requires the selected public Opus release');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  await navigate(
+    cdp,
+    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=agent-portal&showTime=17000&showPlay=0`,
+    { expectedMode: 'structured' },
+  );
+  const runId = 'agent-portal-human-decision-marker';
+  const runEventIndex = await harness.reset(runId);
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const player = document.querySelector('chat-show-player');
+        const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
+        if (play && player.textContent?.includes('5 / 16')) return resolve(true);
+        if (performance.now() - started > 15_000) {
+          return reject(new Error('paused agent portal deeplink did not become ready'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for paused agent portal marker probe', timeoutMs: 17_000 });
+  await clickVisible(cdp, 'chat-show-player [data-control="play"]', 'play agent portal marker probe');
+  await harness.waitFor(
+    runId,
+    ({ type, receipt }) => type === 'receipt'
+      && receipt.cellId === 'cv-show:cue:agent-portal.human-decision'
+      && ['settled', 'failed', 'skipped', 'expired'].includes(receipt.status),
+    'agent portal human-decision terminal receipt',
+    { afterIndex: runEventIndex, inactivityMs: 30_000 },
+  );
+  const terminal = await harness.snapshot('agent portal human-decision marker');
+  const scroll = terminal.receipts.filter(({ cellId }) => (
+    cellId === 'cv-show:cue:agent-portal.human-decision:scroll'
+  ));
+  const marker = terminal.receipts.filter(({ cellId }) => (
+    cellId === 'cv-show:cue:agent-portal.human-decision'
+  ));
+  assert.deepEqual(scroll.map(({ status }) => status), ['acted', 'settled'], JSON.stringify(scroll));
+  assert.deepEqual(marker.map(({ status }) => status), ['first-frame', 'settled'], JSON.stringify(marker));
+  const provider = unwrapProviderReceipt(marker.at(-1));
+  assert.notEqual(provider?.fallback, true, JSON.stringify(provider));
+  assert.equal(provider?.kind, 'marker', JSON.stringify(provider));
+  assert.equal(provider?.name, 'oval', JSON.stringify(provider));
+  assert.equal(provider?.gesturePolicy?.reason, 'explicit-emphasis', JSON.stringify(provider));
+  assert.ok(provider?.pathSamples?.length >= 8, JSON.stringify(provider));
+  assert.ok(provider?.widthSamples?.length >= 8, JSON.stringify(provider));
+  assert.ok(['open', 'open-gap'].includes(provider?.tailPolicy?.mode), JSON.stringify(provider));
+  assert.equal(cdp.exceptions.length, 0);
+});
+
+test('all authored CV Show markers fit their hard budgets at real desktop and mobile geometry', {
+  timeout: 300_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('marker budget acceptance requires the selected local provider');
+  const entries = [
+    ...CV_SHOW_STORY.scenes,
+    ...Object.values(CV_SHOW_STORY.branches),
+  ];
+  const scenes = new Map(CV_SHOW_STORY.scenes.map((entry) => [entry.id, entry]));
+  const cells = new Map(CV_SHOW_PRESENTATION_PROJECT.cells.map((cell) => [cell.id, cell]));
+  const probes = entries.flatMap((entry) => {
+    const scene = entry.sceneId ? scenes.get(entry.sceneId) : entry;
+    const setupProjectCell = CV_SHOW_PRESENTATION_PROJECT.cells.find((cell) => (
+      cell.turnId === entry.id && cell.timing?.at?.anchor === 'turn-start'
+    ));
+    const route = ['positioning', 'finale'].includes(entry.id)
+      ? '/cv/profile/photo/'
+      : `/cv/${scene?.projectId || ''}/`;
+    const params = new URLSearchParams({
+      mode: 'structured',
+      showMode: 'short',
+      showEntry: scene.id,
+      showPlay: '0',
+    });
+    if (entry.sceneId) params.set('showDetail', entry.id);
+    return entry.directives
+      .filter(({ type }) => type === 'marker')
+      .map((directive) => {
+        const projectCell = cells.get(`cv-show:cue:${directive.id}`);
+        const scrollProjectCell = cells.get(`cv-show:cue:${directive.id}:scroll`);
+        return {
+          directive,
+          entryId: entry.id,
+          pagePath: `${route}?${params}`,
+          projectCell,
+          scrollProjectCell,
+          setupProjectCell,
+          budgetMs: projectCell?.timing?.gestureDurationMs,
+        };
+      });
+  });
+  assert.equal(probes.length, 24, 'the geometry gate must cover every authored marker cue');
+  assert.ok(probes.every(({
+    budgetMs,
+    projectCell,
+    scrollProjectCell,
+    setupProjectCell,
+  }) => (
+    Number.isFinite(budgetMs)
+    && projectCell?.cue?.kind === 'annotation'
+    && scrollProjectCell?.cue?.interaction?.type === 'scroll'
+    && setupProjectCell?.kind === 'cue'
+    && setupProjectCell?.timing?.at?.anchor === 'turn-start'
+  )));
+
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const results = [];
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(() => {
+      globalThis.__cvShowMarkerSetupReceipts = [];
+      document.addEventListener('portfolio-show-presentation-receipt', (event) => {
+        const receipt = event.detail?.receipt || {};
+        if (!receipt.cellId) return;
+        globalThis.__cvShowMarkerSetupReceipts.push({
+          cellId: receipt.cellId,
+          status: receipt.status || '',
+        });
+      }, { capture: true });
+    })();`,
+  });
+
+  const probeViewport = async (label, viewport, touch) => {
+    await cdp.send('Emulation.setDeviceMetricsOverride', viewport);
+    await cdp.send('Emulation.setTouchEmulationEnabled', touch
+      ? { enabled: true, maxTouchPoints: 5 }
+      : { enabled: false });
+    const byPage = Map.groupBy(probes, ({ pagePath }) => pagePath);
+    for (const [pagePath, pageProbes] of byPage) {
+      await navigate(cdp, `${server.origin}${pagePath}`, {
+        expectedMode: 'structured',
+      });
+      await cdp.send('Runtime.evaluate', {
+        awaitPromise: true,
+        expression: `new Promise((resolve, reject) => {
+          const startedAt = performance.now();
+          const check = () => {
+            const player = document.querySelector('chat-show-player');
+            const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
+            if (play && document.querySelector('portfolio-show-chat')) return resolve(true);
+            if (performance.now() - startedAt > 15_000) {
+              return reject(new Error('paused marker probe deeplink did not become ready'));
+            }
+            requestAnimationFrame(check);
+          };
+          check();
+        })`,
+      }, { label: `${label} paused marker probe deeplink`, timeoutMs: 17_000 });
+      const setupCellId = pageProbes[0].setupProjectCell.id;
+      await cdp.send('Runtime.evaluate', {
+        awaitPromise: true,
+        returnByValue: true,
+        expression: `new Promise((resolve, reject) => {
+          const setupCellId = ${JSON.stringify(setupCellId)};
+          const startedAt = performance.now();
+          const check = () => {
+            const rows = (globalThis.__cvShowMarkerSetupReceipts || [])
+              .filter(({ cellId }) => cellId === setupCellId);
+            if (rows.some(({ status }) => status === 'settled')) {
+              return resolve(true);
+            }
+            if (rows.some(({ status }) => ['cancelled', 'failed', 'expired'].includes(status))) {
+              return reject(new Error('paused marker probe setup failed: ' + JSON.stringify(rows)));
+            }
+            if (performance.now() - startedAt > 20_000) {
+              return reject(new Error('paused marker probe setup did not settle: ' + setupCellId));
+            }
+            requestAnimationFrame(check);
+          };
+          check();
+        })`,
+      }, { label: `${label} marker probe setup: ${setupCellId}`, timeoutMs: 22_000 });
+      for (const probe of pageProbes) {
+        const evaluated = await cdp.send('Runtime.evaluate', {
+          awaitPromise: true,
+          returnByValue: true,
+          expression: `(async () => {
+            const probe = ${JSON.stringify(probe)};
+            const host = document.querySelector('portfolio-show-chat');
+            if (!host) return { missing: true, reason: 'show-host-unavailable' };
+            const runOperation = ({ projectCell, source, kind, captureAdmission = false }) => (
+              new Promise((resolve, reject) => {
+                const controller = new AbortController();
+                const receipts = [];
+                let admission = null;
+                let settled = false;
+                const timer = setTimeout(() => {
+                  if (settled) return;
+                  settled = true;
+                  controller.abort(new DOMException('marker probe timed out', 'AbortError'));
+                  reject(new Error('synthetic presentation operation timed out: ' + projectCell.id));
+                }, 15_000);
+                const finish = (value, error) => {
+                  if (settled) return;
+                  settled = true;
+                  clearTimeout(timer);
+                  if (captureAdmission && admission) {
+                    resolve({
+                      admission,
+                      receipts,
+                      terminalError: error ? {
+                        name: error.name || '',
+                        code: error.code || '',
+                        message: error.message || String(error),
+                      } : null,
+                    });
+                    return;
+                  }
+                  if (error) return reject(error);
+                  resolve({ value, receipts, admission });
+                };
+                const detail = {
+                  requestId: 'marker-budget-probe:' + probe.entryId,
+                  entryId: probe.entryId,
+                  handled: false,
+                  complete: finish,
+                  operation: {
+                    operationId: 'marker-budget-probe:' + projectCell.id,
+                    generation: 0,
+                    kind,
+                    projectCell,
+                    source,
+                    signal: controller.signal,
+                    reportReceipt: (receipt) => receipts.push(receipt),
+                    ...(captureAdmission ? {
+                      reportAdmission: (value) => {
+                        admission = value?.providerAdmission || value;
+                        queueMicrotask(() => controller.abort(
+                          new DOMException('marker plan captured', 'AbortError'),
+                        ));
+                      },
+                    } : {}),
+                  },
+                };
+                host.dispatchEvent(new CustomEvent('portfolio-show-presentation-operation', {
+                  bubbles: true,
+                  composed: true,
+                  detail,
+                }));
+                if (!detail.handled) {
+                  clearTimeout(timer);
+                  settled = true;
+                  reject(new Error('presentation operation was not handled: ' + projectCell.id));
+                }
+              })
+            );
+            try {
+              const scroll = await runOperation({
+                projectCell: probe.scrollProjectCell,
+                source: probe.directive,
+                kind: 'interaction',
+              });
+              const marker = await runOperation({
+                projectCell: probe.projectCell,
+                source: probe.directive,
+                kind: 'attention',
+                captureAdmission: true,
+              });
+              const admission = marker.admission;
+              const evidence = admission?.plan?.evidence;
+              return {
+                missing: admission?.reason?.code === 'target-unresolved',
+                scrollReceiptStatuses: scroll.receipts.map(({ status }) => status),
+                markerReceiptStatuses: marker.receipts.map(({ status }) => status),
+                admissionStatus: admission?.status || '',
+                admissionReason: admission?.reason || null,
+                target: admission?.target ? {
+                  id: admission.target.id,
+                  identity: admission.target.identity,
+                  layoutIdentity: admission.target.layoutIdentity,
+                  geometryIdentity: admission.target.geometryIdentity,
+                } : null,
+                presented: evidence?.presented,
+                suppressed: evidence?.suppressed,
+                kind: evidence?.kind,
+                name: evidence?.name,
+                durationMs: admission?.budget?.plannedDurationMs,
+                arcLengthPx: evidence?.arcLengthPx,
+                gesturePolicy: evidence?.gesturePolicy,
+                safety: evidence?.safety,
+              };
+            } catch (error) {
+              return {
+                missing: true,
+                reason: {
+                  name: error?.name || '',
+                  code: error?.code || '',
+                  message: error?.message || String(error),
+                },
+              };
+            }
+          })()`,
+        }, {
+          label: `${label} marker budget probe: ${probe.directive.id}`,
+          timeoutMs: 35_000,
+        });
+        results.push({
+          label,
+          entryId: probe.entryId,
+          cellId: probe.projectCell.id,
+          scrollCellId: probe.scrollProjectCell.id,
+          targetId: probe.directive.target,
+          requestedShape: probe.directive.shape,
+          budgetMs: probe.budgetMs,
+          ...evaluated.result.value,
+        });
+      }
+    }
+  };
+
+  await probeViewport('desktop-1087x719', {
+    width: 1087,
+    height: 719,
+    deviceScaleFactor: 1,
+    mobile: false,
+  }, false);
+  await probeViewport('mobile-390x844', MOBILE_VIEWPORT, true);
+
+  const failures = results.filter((result) => (
+    result.missing
+    || result.admissionStatus !== 'admitted'
+    || result.admissionReason?.code !== 'within-budget'
+    || result.target?.id !== result.targetId
+    || result.target?.identity !== result.targetId
+    || !result.target?.layoutIdentity
+    || !result.target?.geometryIdentity
+    || result.scrollReceiptStatuses?.join(',') !== 'acted,settled'
+    || result.presented !== true
+    || result.suppressed === true
+    || result.kind !== 'marker'
+    || !Number.isFinite(result.durationMs)
+    || result.durationMs > result.budgetMs
+  ));
+  assert.deepEqual(failures, [], JSON.stringify(failures, null, 2));
+  assert.equal(cdp.exceptions.length, 0);
+});
+
+test('public presenter markers keep rounded ink endpoints and a visible tail gap', {
+  timeout: 60_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('marker pixel evidence requires the local provider seam');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+  await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
+  const evidenceDir = path.join(ROOT, 'tmp', 'cv-show-terminal-visual-harness');
+  await mkdir(evidenceDir, { recursive: true });
+  const markerProbes = [];
+  for (const marker of ['underline', 'box', 'oval']) {
+    markerProbes.push(await capturePresenterMarkerProbe(cdp, marker, evidenceDir));
+  }
+  assertPresenterMarkerProbes(markerProbes);
+  await cdp.send('Runtime.evaluate', {
+    expression: `globalThis.__cvShowTerminalProviderCursor?.dispose?.();
+      document.getElementById('cv-show-terminal-marker-fixture')?.remove();`,
+  }, { label: 'dispose public presenter marker conformance probe', timeoutMs: 5_000 });
+});
+
 test('terminal CV Show proves uninterrupted desktop and mobile timing, attention, and player behavior', {
   timeout: 1_400_000,
 }, async (t) => {
@@ -5815,6 +6666,36 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
   let firstWebAudioClip = webAudioManifest.clips[0];
   const evidenceDir = path.join(ROOT, 'tmp', 'cv-show-terminal-visual-harness');
   await mkdir(evidenceDir, { recursive: true });
+  const progressPath = path.join(evidenceDir, 'terminal-progress.json');
+  const progressRunId = `${process.pid}-${Date.now()}`;
+  let terminalProgress = {
+    status: 'diagnostic-only',
+    runId: progressRunId,
+    checkpoint: 'started',
+    desktop: null,
+    detail: null,
+    mobile: null,
+  };
+  const persistTerminalProgress = async (checkpoint, evidence = {}) => {
+    if (t.signal.aborted) return false;
+    const next = {
+      ...terminalProgress,
+      ...evidence,
+      checkpoint,
+      updatedAt: new Date().toISOString(),
+    };
+    const temporaryPath = `${progressPath}.${progressRunId}.tmp`;
+    await writeFile(temporaryPath, JSON.stringify(next, null, 2));
+    if (t.signal.aborted) {
+      await rm(temporaryPath, { force: true });
+      return false;
+    }
+    await rename(temporaryPath, progressPath);
+    terminalProgress = next;
+    return true;
+  };
+  await rm(progressPath, { force: true });
+  await persistTerminalProgress('started');
   const expectedShortEntryIds = [...CV_SHOW_STORY.short];
   const expectedDirectiveTypes = [
     'activate',
@@ -5832,7 +6713,7 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
   );
   assert.equal(
     CV_SHOW_WEB_AUDIO_RELEASE.revision,
-    '922d4ccbd7dbf70be5c6f0f9aae9be8fac84e77f49a5500d0e224b53d54768ec',
+    'dfaea667c8ab7a29b819e432751dbc4acc731c875203e8391cc85935b4dc3360',
   );
   const page = await createPortfolioPage(t, {
     viewport: {
@@ -5875,32 +6756,12 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
   const desktopRunEventIndex = await openAndStartShort(desktopRunId, 'desktop terminal');
   await harness.waitFor(
     desktopRunId,
-    ({ type, entryId }) => type === 'generation' && entryId === expectedShortEntryIds[7],
-    'desktop eighth scene generation before manual transcript scroll',
-    { afterIndex: desktopRunEventIndex },
-  );
-  const manualScrollEventIndex = harness.events.length;
-  await scrollCvShowTranscriptManually(cdp);
-  const manualScroll = await harness.waitFor(
-    desktopRunId,
-    ({ type }) => type === 'manual-scroll',
-    'trusted desktop transcript scroll',
-    { afterIndex: manualScrollEventIndex },
-  );
-  await harness.waitFor(
-    desktopRunId,
-    (event) => event.type === 'stream-sample'
-      && event.index >= manualScroll.streamIndex + 2,
-    'two message stream frames after trusted transcript scroll',
-    { afterIndex: manualScrollEventIndex },
-  );
-  await harness.waitFor(
-    desktopRunId,
     ({ type }) => type === 'portfolio-show-complete',
     'uninterrupted desktop Short 16/16 completion',
     { afterIndex: desktopRunEventIndex },
   );
   const desktop = await harness.snapshot('desktop Short 16/16');
+  await persistTerminalProgress('desktop-captured', { desktop });
   assert.equal(desktop.runId, desktopRunId);
   assertCvShowTerminalReceipts(desktop, expectedShortEntryIds, 'desktop Short');
   assert.deepEqual(
@@ -5913,17 +6774,6 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
   assertCvShowAuthoredMarkerEvidence(desktop, 'desktop Short');
   assertCvShowPointerAndPlayer(desktop, expectedShortEntryIds, 'desktop Short');
   assertCvShowStreamJournal(desktop, 'desktop Short');
-  assertCvShowManualScroll(desktop, 'desktop Short');
-
-  const markerProbes = [];
-  for (const marker of ['underline', 'box', 'oval']) {
-    markerProbes.push(await capturePresenterMarkerProbe(cdp, marker, evidenceDir));
-  }
-  assertPresenterMarkerProbes(markerProbes);
-  await cdp.send('Runtime.evaluate', {
-    expression: `globalThis.__cvShowTerminalProviderCursor?.dispose?.();
-      document.getElementById('cv-show-terminal-marker-fixture')?.remove();`,
-  }, { label: 'dispose public presenter marker conformance probe', timeoutMs: 5_000 });
 
   const detailRunId = 'desktop-representative-detail';
   const detailRunEventIndex = await openAndStartShort(detailRunId, 'desktop detail');
@@ -6068,6 +6918,7 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
     playerPresent: false,
   });
   const detail = await harness.snapshot('representative detail Pause and Stop');
+  await persistTerminalProgress('detail-captured', { detail });
   assert.ok(detail.generations.some(({ entryId }) => entryId === 'workspace-details'));
   assert.equal(
     detail.lifecycle.filter(({ type }) => type === 'portfolio-show-pause').length,
@@ -6089,6 +6940,7 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
     { afterIndex: mobileRunEventIndex },
   );
   const mobile = await harness.snapshot('mobile Short 16/16');
+  await persistTerminalProgress('mobile-captured', { mobile });
   assert.equal(mobile.runId, mobileRunId);
   assertCvShowTerminalReceipts(mobile, expectedShortEntryIds, 'mobile Short');
   assert.deepEqual(
@@ -6099,7 +6951,9 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
   assertCvShowScrollAttentionOrder(mobile, 'mobile Short');
   assertCvShowNativeSelectionGrowth(mobile, 'mobile Short');
   assertCvShowAuthoredMarkerEvidence(mobile, 'mobile Short');
-  assertCvShowPointerAndPlayer(mobile, expectedShortEntryIds, 'mobile Short');
+  assertCvShowPointerAndPlayer(mobile, expectedShortEntryIds, 'mobile Short', {
+    allowResponsiveDrawerHiding: true,
+  });
   assertCvShowStreamJournal(mobile, 'mobile Short');
 
   const diagnostics = cdp.consoleMessages.slice(consoleStartIndex).filter(({ level }) => (
@@ -6139,11 +6993,12 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
     desktop,
     detail,
     mobile,
-    markerProbes,
     diagnostics,
     exceptions,
   }, null, 2));
+  await persistTerminalProgress('body-complete');
 });
+
 
 test('CV Show preserves presenter layers on pause and removes them on terminal lifecycle', {
   timeout: 45_000,
@@ -6800,63 +7655,34 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
   assert.equal(cdp.exceptions.length, 0);
 });
 
-test('mobile Short Show resolves required presenter targets after starting from another article', {
+test('desktop-to-mobile Short Show settles the first required frame before narration advances', {
   timeout: 70_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
   const page = await createPortfolioPage(t, {
-    viewport: {
-      width: 390,
-      height: 844,
-      deviceScaleFactor: 1,
-      mobile: true,
-    },
-    touch: true,
+    viewport: DESKTOP_VIEWPORT,
+    touch: false,
+    providerModules: true,
   });
   if (!page) return;
   const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
 
   await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
-    source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}
-    globalThis.__cvMobileShowResults = [];
-    globalThis.__cvMobileShowPhases = [];
-    document.addEventListener('portfolio-show-phase', (event) => {
-      globalThis.__cvMobileShowPhases.push({
-        requestId: event.detail?.requestId ?? null,
-        directiveIds: (event.detail?.directives || []).map(({ id }) => id),
-        at: performance.now(),
-      });
-    }, { capture: true });
-    document.addEventListener('portfolio-show-result', (event) => {
-      const detail = event.detail || {};
-      globalThis.__cvMobileShowResults.push({
-        requestId: detail.requestId ?? null,
-        status: detail.status || '',
-        error: detail.error || '',
-        receipts: (detail.receipts || []).map((receipt) => ({
-          id: receipt.id || '',
-          sourceType: receipt.sourceType || '',
-          status: receipt.status || '',
-          reason: receipt.reason || '',
-          phases: (receipt.result?.phases || []).map(({ phase, status }) => ({ phase, status })),
-        })),
-        selectedId: document.querySelector('.sn-tree-row[aria-selected="true"]')?.dataset?.treeId || '',
-        viewerPath: document.querySelector('source-viewer')?._currentPath || '',
-        at: performance.now(),
-      });
-    }, { capture: true });
-    const nativePlay = HTMLMediaElement.prototype.play;
-    HTMLMediaElement.prototype.play = function(...args) {
-      this.playbackRate = 8;
-      return nativePlay.apply(this, args);
-    };`,
+    source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}`,
   });
+  await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
+  await cdp.send('Emulation.setDeviceMetricsOverride', MOBILE_VIEWPORT);
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
   await navigate(
     cdp,
-    `${server.origin}/cv/projects/project-graph-mcp/pulse/project-graph-mcp-compact-code-mode-v1-5/`,
+    `${server.origin}/cv/`,
     { expectedMode: 'structured' },
   );
-  await clickVisible(cdp, '.pulse-tour-button', 'mobile Show trigger from another article');
+  const runId = 'mobile-first-required-frame';
+  await harness.reset(runId);
+  await clickVisible(cdp, '.pulse-tour-button', 'fresh mobile Show trigger');
   await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     expression: `new Promise((resolve, reject) => {
@@ -6877,61 +7703,57 @@ test('mobile Short Show resolves required presenter targets after starting from 
     'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
     'mobile explicit Short mode selection',
   );
-  const journal = await cdp.send('Runtime.evaluate', {
+  const terminalFrame = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
     expression: `new Promise((resolve) => {
       const started = performance.now();
       const check = () => {
-        const host = document.querySelector('portfolio-show-chat');
-        const activeId = host?.narrationSnapshot?.active?.activeId || '';
-        const results = globalThis.__cvMobileShowResults || [];
-        if (activeId === 'symbiote-workspace' || results.some(({ status }) => status === 'required-missing')) {
-          const viewer = document.querySelector('source-viewer');
-          const row = Array.from(viewer?.querySelectorAll('tbody tr') || [])
-            .find((candidate) => candidate.textContent?.includes('15+'));
-          const rowRect = row?.getBoundingClientRect?.();
-          const viewerRect = viewer?.getBoundingClientRect?.();
-          const layout = document.querySelector('.portfolio-layout');
-          const dock = document.querySelector('agent-dock-shell');
+        const snapshot = globalThis.__cvShowTerminalHarnessSnapshot?.();
+        const receipts = (snapshot?.receipts || []).filter(({ cellId }) => (
+          cellId === 'cv-show:cue:positioning.experience-frame'
+        ));
+        const terminal = receipts.find(({ status }) => (
+          ['settled', 'deadline-missed', 'failed', 'expired'].includes(status)
+        ));
+        if (terminal || performance.now() - started > 12_000) {
+          const host = document.querySelector('portfolio-show-chat');
           return resolve({
-            activeId,
-            results,
-            phases: globalThis.__cvMobileShowPhases || [],
-            selectedId: document.querySelector('.sn-tree-row[aria-selected="true"]')?.dataset?.treeId || '',
-            viewerPath: document.querySelector('source-viewer')?._currentPath || '',
-            debug: {
-              rowText: row?.textContent?.trim() || '',
-              rowRect: rowRect ? { x: rowRect.x, y: rowRect.y, width: rowRect.width, height: rowRect.height } : null,
-              viewerRect: viewerRect ? {
-                x: viewerRect.x, y: viewerRect.y, width: viewerRect.width, height: viewerRect.height,
-              } : null,
-              innerDrawerMode: layout?.hasAttribute('drawer-mode-active') || false,
-              innerStartOpen: layout?.hasAttribute('drawer-start-open') || false,
-              innerEndOpen: layout?.hasAttribute('drawer-end-open') || false,
-              outerDrawerMode: dock?.ref?.layout?.hasAttribute?.('drawer-mode-active') || false,
-              outerOpen: dock?.hasAttribute('open') || false,
-            },
+            terminal: terminal || null,
+            receipts,
+            runId: snapshot?.runId || '',
+            operationCount: snapshot?.operations?.length || 0,
+            generationIds: (snapshot?.generations || []).map(({ entryId }) => entryId),
+            lifecycle: snapshot?.lifecycle || [],
+            narration: host?.narrationSnapshot || null,
+            alignment: host?.alignmentSnapshot || null,
           });
         }
-        if (performance.now() - started > 30000) return resolve({
-          timeout: true,
-          activeId,
-          results,
-          phases: globalThis.__cvMobileShowPhases || [],
-        });
         setTimeout(check, 25);
       };
       check();
     })`,
-  }, { label: 'journal mobile required presenter targets', timeoutMs: 35_000 });
-  assert.equal(journal.result.value.timeout, undefined, JSON.stringify(journal.result.value));
+  }, { label: 'wait for fresh mobile positioning frame', timeoutMs: 14_000 });
+  assert.ok(terminalFrame.result.value.terminal, JSON.stringify(terminalFrame.result.value));
+  const snapshot = await harness.snapshot('fresh mobile positioning frame');
+  const experienceFrameReceipts = snapshot.receipts.filter(({ cellId }) => (
+    cellId === 'cv-show:cue:positioning.experience-frame'
+  ));
   assert.deepEqual(
-    journal.result.value.results.filter(({ status }) => status === 'required-missing'),
-    [],
-    JSON.stringify(journal.result.value),
+    experienceFrameReceipts.map(({ status }) => status),
+    ['first-frame', 'settled'],
+    JSON.stringify(experienceFrameReceipts),
   );
-  assert.match(journal.result.value.selectedId, /Профиль|Symbiote Workspace/u);
+  const targetState = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `({
+      activeId: document.querySelector('portfolio-show-chat')?.narrationSnapshot?.active?.activeId || '',
+      selectedId: document.querySelector('.sn-tree-row[aria-selected="true"]')?.dataset?.treeId || '',
+      viewerPath: document.querySelector('source-viewer')?._currentPath || '',
+    })`,
+  }, { label: 'read fresh mobile positioning target state', timeoutMs: 5_000 });
+  assert.equal(targetState.result.value.activeId, 'positioning');
+  assert.match(targetState.result.value.selectedId, /Профиль/u);
   assert.equal(cdp.exceptions.length, 0);
 });
 

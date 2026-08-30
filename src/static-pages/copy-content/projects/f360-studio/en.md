@@ -13,15 +13,19 @@ links: YouTube|https://www.youtube.com/@PHOTOGRAMMETRY|YouTube channel with phot
 
 # F360 Studio
 
-:::article-block production-path
 I founded and ran F360 as a high-precision 3D scanning studio after the museum-scanning work with AUTOBOX. The studio translated the capture discipline developed for cultural-heritage objects into a commercial workflow for digitizing products and other physical objects.
 
-The work covered capture planning, photogrammetry, controlled lighting, source-image quality, geometry and texture processing, and presentation of finished models. I combined the physical scanning setup with the complete production pipeline rather than treating capture and 3D post-production as separate services.
+:::article-block production-path
+The work covered capture planning, photogrammetry, controlled lighting, source-image quality, and geometry and texture processing. I combined the physical scanning setup with the complete production pipeline rather than treating capture and 3D post-production as separate services.
 
 :::article-block gallery-result
-:::article-block period-founder
-:::article-block gallery-result-one
-:::article-block gallery-result-two
-F360 operated in 2021-2022 alongside the continuing PhotoPizza and ComplexScan lines. Public examples remain available on the [F360 YouTube channel](https://www.youtube.com/@PHOTOGRAMMETRY) and in the [F360 Studio Sketchfab portfolio](https://sketchfab.com/F360-Studio).
+Presentation of the finished models completed that workflow.
 
-During my 2022 relocation from Russia to Argentina, maintaining the studio's physical production base across that move was not feasible, so I closed the project.
+:::article-block period-founder
+F360 operated in 2021-2022 alongside the continuing PhotoPizza and ComplexScan lines.
+
+:::article-block gallery-result-one
+Public examples remain available on the [F360 YouTube channel](https://www.youtube.com/@PHOTOGRAMMETRY) and in the [F360 Studio Sketchfab portfolio](https://sketchfab.com/F360-Studio).
+
+:::article-block gallery-result-two
+In 2021–2022, during my relocation from Russia to Argentina, maintaining the studio's physical production base across that move was not feasible, so I closed the project.

@@ -180,7 +180,7 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
   });
 }
 
-function missingReceipt(adapted, reason) {
+function missingReceipt(adapted, reason, details = null) {
   return Object.freeze({
     id: adapted.source.id,
     sourceType: adapted.sourceType,
@@ -188,6 +188,7 @@ function missingReceipt(adapted, reason) {
     policy: adapted.policy,
     status: 'missing',
     reason,
+    ...(details ? { details } : {}),
   });
 }
 
@@ -372,7 +373,7 @@ export async function runCvShowPresentationOperation(runner, operation) {
         presentation,
       });
   throwIfAborted(operation.signal);
-  if (result?.status !== 'success') {
+  if (!['success', 'optional-missing'].includes(result?.status)) {
     throw presentationOperationFailure(operation, result);
   }
   return undefined;
@@ -389,6 +390,7 @@ export function createCvShowDirectiveRunner(options = {}) {
     resolveTarget,
     resolveMedia,
     resolveText,
+    resolveSelectionQuote = (source) => source?.quote || '',
     activateTarget = () => false,
     actionAdapter = null,
     waitForReadiness = waitForShowDomReadiness,
@@ -549,7 +551,13 @@ export function createCvShowDirectiveRunner(options = {}) {
                     scroll: false,
                   });
                   throwIfAborted(controller.signal);
-                  presentationTarget = resolveTarget(source.target) || target;
+                  // Map-opening navigation has a semantic layout target supplied by
+                  // the action adapter. Re-resolving only by entry id would replace
+                  // that graph node with the tree row after selection and can detach
+                  // the active gesture during an automatic scene transition.
+                  presentationTarget = String(source.id || '').endsWith('.map')
+                    ? target
+                    : resolveTarget(source.target) || target;
                 }
                 const providerPlanned = presentation?.requiresProviderAdmission === true;
                 if (
@@ -567,14 +575,21 @@ export function createCvShowDirectiveRunner(options = {}) {
                   controller.signal.addEventListener('abort', cancelProvider, { once: true });
                 }
                 try {
+                  const attentionDirective = adapted.directive.mode === 'native-selection'
+                    ? {
+                        ...adapted.directive,
+                        quote: resolveSelectionQuote(source, presentationTarget),
+                        occurrence: 1,
+                      }
+                    : adapted.directive;
                   let result;
                   let presentFailure;
                   try {
                     result = attention?.present?.({
-                      ...adapted.directive,
+                      ...attentionDirective,
                       target: presentationTarget,
                       ...(presentationTarget ? {
-                        targetIdentity: adapted.directive.targetId,
+                        targetIdentity: attentionDirective.targetId,
                       } : {}),
                       gestureId: source.id,
                       cueTimeMs: source.cueTimeMs,
@@ -586,6 +601,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                       } : {}),
                       annotation: {
                         marker: adapted.directive.marker,
+                        ...(adapted.directive.mode === 'marker' ? { intent: 'emphasize' } : {}),
                         ...(source.series ? { series: source.series } : {}),
                         ...(adapted.directive.label ? { label: adapted.directive.label } : {}),
                       },
@@ -637,7 +653,11 @@ export function createCvShowDirectiveRunner(options = {}) {
             if (controller.signal.aborted) throwIfAborted(controller.signal);
             if (presentation?.requiresProviderAdmission === true) throw error;
             if (error?.name === 'AbortError') throw error;
-            let receipt = missingReceipt(adapted, error?.code || 'target-unresolved');
+            let receipt = missingReceipt(
+              adapted,
+              error?.code || 'target-unresolved',
+              error?.receipt ? { actionLifecycle: error.receipt } : null,
+            );
             receipts.push(receipt);
             if (adapted.policy === 'required') {
               return Object.freeze({ status: 'required-missing', receipts: Object.freeze(receipts) });
@@ -658,6 +678,8 @@ export function createCvShowDirectiveRunner(options = {}) {
             if (adapted.policy === 'required') {
               return Object.freeze({ status: 'required-missing', receipts: Object.freeze(receipts) });
             }
+            reportInteractionActed();
+            reportInteractionSettled();
             optionalMissing = true;
             continue;
           }
@@ -683,6 +705,7 @@ export function createCvShowDirectiveRunner(options = {}) {
             if (adapted.policy === 'required') {
               return Object.freeze({ status: 'required-missing', receipts: Object.freeze(receipts) });
             }
+            reportInteractionSettled();
             optionalMissing = true;
           }
           continue;
@@ -717,18 +740,32 @@ export function createCvShowDirectiveRunner(options = {}) {
     throwIfAborted(signal);
     clearAttention('scroll');
     presentation?.reportStatus('acted', observePerformance());
-    const target = await waitForReadiness({
-      document,
-      target: () => resolveTarget(source.target),
-      signal,
-      timeoutMs,
-    });
-    throwIfAborted(signal);
-    presentation?.reportStatus('settled', observePerformance());
-    return Object.freeze({
-      status: target ? 'success' : 'required-missing',
-      receipts: Object.freeze([]),
-    });
+    const context = {
+      retainRevealedPanel: false,
+      scrollOperation: true,
+      act: async () => {
+        await waitUntilResumed(signal);
+        throwIfAborted(signal);
+        context.retainRevealedPanel = true;
+        return { settled: true };
+      },
+    };
+    const abortLifecycle = () => { void actionLifecycle.cancel('replacement'); };
+    signal?.addEventListener?.('abort', abortLifecycle, { once: true });
+    try {
+      const lifecycleReceipt = await actionLifecycle.run(source, context);
+      throwIfAborted(signal);
+      if (lifecycleReceipt.status === 'cancelled') {
+        return Object.freeze({ status: 'cancelled', receipts: Object.freeze([]) });
+      }
+      presentation?.reportStatus('settled', observePerformance());
+      return Object.freeze({
+        status: 'success',
+        receipts: Object.freeze([]),
+      });
+    } finally {
+      signal?.removeEventListener?.('abort', abortLifecycle);
+    }
   };
 
   return Object.freeze({

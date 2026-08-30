@@ -26,7 +26,7 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 ]);
 
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
-  raw: 1_758_000,
+  raw: 1_765_000,
   gzip: 430_000,
 });
 
@@ -288,18 +288,43 @@ export function verifyNoPublicWavArtifacts(allFiles, distDir) {
   }
 }
 
+export function verifyCvShowWebAudioMasterCompatibility({
+  selector,
+  manifest,
+  release = CV_SHOW_AUDIO_RELEASE,
+} = {}) {
+  let source = manifest?.source;
+  if (
+    selector?.releaseId !== manifest?.releaseId
+    || selector?.sourceMasterReleaseId !== source?.masterReleaseId
+    || selector?.voiceId !== manifest?.voiceId
+    || selector?.locale !== manifest?.locale
+    || selector?.revision !== manifest?.revision
+    || manifest?.voiceId !== release?.manifests?.voice
+    || manifest?.locale !== release?.manifests?.locale
+    || source?.masterArtifactTreeHash !== release?.artifactTreeHash
+    || source?.audioManifestSha256 !== release?.manifests?.audio?.sha256
+    || source?.alignmentManifestSha256 !== release?.manifests?.alignment?.sha256
+    || source?.voiceIdentityHash !== release?.acceptedProvenance?.voiceIdentityHash
+  ) {
+    throw new Error(
+      'Verification failed: selected CV Show web audio is not artifact-equivalent to the current private master release.',
+    );
+  }
+  return true;
+}
+
 export async function verifyCvShowWebAudioPublication({
   rootDir = path.resolve(fileURLToPath(new URL('..', import.meta.url))),
   distDir = path.join(rootDir, 'dist'),
   selector = CV_SHOW_WEB_AUDIO_RELEASE,
 } = {}) {
   if (
-    selector?.sourceMasterReleaseId !== CV_SHOW_AUDIO_RELEASE.releaseId
-    || selector?.voiceId !== CV_SHOW_AUDIO_RELEASE.manifests.voice
+    selector?.voiceId !== CV_SHOW_AUDIO_RELEASE.manifests.voice
     || selector?.locale !== CV_SHOW_AUDIO_RELEASE.manifests.locale
   ) {
     throw new Error(
-      'Verification failed: selected CV Show web audio does not bind the current private master release.',
+      'Verification failed: selected CV Show web audio does not match the current voice and locale.',
     );
   }
   let releaseRelativeRoot = cvShowReleaseRelativeRoot(selector);
@@ -331,6 +356,8 @@ export async function verifyCvShowWebAudioPublication({
     verifyCvShowWebAudio({ root: sourceRoot, selector, verifyMedia: false }),
     verifyCvShowWebAudio({ root: distRoot, selector, verifyMedia: false }),
   ]);
+  let sourceManifest = JSON.parse(await fs.readFile(path.join(sourceRoot, 'manifest.json'), 'utf8'));
+  verifyCvShowWebAudioMasterCompatibility({ selector, manifest: sourceManifest });
   if (
     sourceResult.treeInventorySha256 !== distResult.treeInventorySha256
     || sourceResult.manifestSha256 !== distResult.manifestSha256

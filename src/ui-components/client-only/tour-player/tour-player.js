@@ -43,15 +43,19 @@ function actionPart(id, actions, payload = null) {
   };
 }
 
-/** @param {any} story @param {'short' | 'full'} [mode] */
-function playerTimeline(story, mode = 'short') {
+/** @param {any} story @param {'short' | 'full'} [mode] @param {any} [mediaRegistry] */
+function playerTimeline(story, mode = 'short', mediaRegistry = null) {
   return Object.freeze({
     title: 'CV Show',
-    turns: Object.freeze(createCvShowPlaybackEntries(story, mode).map((entry) => Object.freeze({
-      id: entry.id,
-      persona: entry.sceneId ? 'Detail' : 'CV',
-      text: entry.title || entry.id,
-    }))),
+    turns: Object.freeze(createCvShowPlaybackEntries(story, mode).map((entry) => {
+      let durationMs = Number(mediaRegistry?.entries?.[entry.id]?.audio?.durationMilliseconds);
+      return Object.freeze({
+        id: entry.id,
+        persona: entry.sceneId ? 'Detail' : 'CV',
+        text: entry.title || entry.id,
+        durationMs: Number.isFinite(durationMs) && durationMs > 0 ? durationMs : null,
+      });
+    })),
   });
 }
 
@@ -86,6 +90,8 @@ export class PortfolioShowChat extends HTMLElement {
   #playbackEntries = [];
   #sceneIndex = -1;
   #requestId = 0;
+  #transportRequestId = 0;
+  #pendingTransportIntent = null;
   #messages = [];
   #currentMessageId = '';
   #dock = null;
@@ -114,6 +120,9 @@ export class PortfolioShowChat extends HTMLElement {
   #lastAlignedSeekFailure = null;
   #lastAlignedGenerationReceipt = null;
   #branchReturnPlayback = null;
+  #showCompleted = false;
+  #completedDetailReview = false;
+  #completedDetailReviewPreparing = false;
   #session = new ShowSessionState();
   #audioArbiter = null;
   #speechToken = null;
@@ -169,7 +178,7 @@ export class PortfolioShowChat extends HTMLElement {
     }
     if (actionId === 'start-short') void this.#start('short');
     else if (actionId === 'start-full') void this.#start('full');
-    else if (actionId === 'details') this.#enterDetails(payload?.branchId, {
+    else if (actionId === 'details') void this.#enterDetails(payload?.branchId, {
       contextualCardId: event.detail?.id,
       contextualActionId: actionId,
       historicalOwnerEntryId: payload?.sceneId,
@@ -279,6 +288,44 @@ export class PortfolioShowChat extends HTMLElement {
     });
   }
 
+  get routeSnapshot() {
+    const currentEntry = this.#currentEntry();
+    const activeBranchId = this.$.inBranch ? this.#session.snapshot.playback.episodeId : '';
+    const branch = activeBranchId ? this.#story?.branches?.[activeBranchId] : null;
+    const mediaPosition = Number(
+      this.#speech.media?.currentTime ?? this.#alignedEntry?.media?.currentTime,
+    );
+    const fallbackPosition = this.#pendingTransportIntent?.positionMs
+      ?? this.#session.snapshot.playback.positionMs;
+    return Object.freeze({
+      mode: this.#mode,
+      entryId: branch?.sceneId || currentEntry?.id || '',
+      detailId: branch?.id || this.#pendingTransportIntent?.detailId || '',
+      timeMs: Number.isFinite(mediaPosition)
+        ? Math.max(0, Math.round(mediaPosition * 1_000))
+        : Math.max(0, Math.round(Number(fallbackPosition) || 0)),
+      play: this.$.isRunning
+        ? !this.$.isPaused
+        : Boolean(this.#pendingTransportIntent?.play),
+      running: Boolean(this.$.isRunning),
+      completed: Boolean(this.#showCompleted),
+    });
+  }
+
+  async applyShowRoute({ mode, entryId = '', detailId = '', timeMs = 0, play = true } = {}) {
+    if (!this.$.isReady || !['short', 'full'].includes(mode)) return false;
+    if (this.$.isRunning || this.#mode) this.stopShow({ reason: 'route-replace' });
+    const transportRequestId = ++this.#transportRequestId;
+    return this.#start(mode, {
+      entryId: String(entryId || ''),
+      detailId: String(detailId || ''),
+      positionMs: Math.max(0, Math.round(Number(timeMs) || 0)),
+      play: play !== false,
+      routeDriven: true,
+      transportRequestId,
+    });
+  }
+
   emitShowDirective(directive) {
     const event = this.#session.emit(directive);
     if (directive.type === 'footnote' && directive.text) {
@@ -307,7 +354,10 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.resumeRequired = true;
     this.#speech.pause();
     this.#alignedEntry?.runtime?.pause?.();
-    const positionMs = Math.max(0, Math.round(Number(this.#speech.media?.currentTime || 0) * 1000));
+    const positionMs = Math.max(
+      0,
+      Math.round(Number(this.#speech.media?.currentTime || 0) * 1000),
+    );
     this.#session.setPlayback({
       ...this.#session.snapshot.playback,
       positionMs,
@@ -319,7 +369,9 @@ export class PortfolioShowChat extends HTMLElement {
       bubbles: true,
       composed: true,
     }));
-    this.$.statusText = this.#message('tour.status.paused');
+    this.$.statusText = this.#message(
+      reason === 'autoplay-blocked' ? 'tour.status.autoplayBlocked' : 'tour.status.paused',
+    );
     if (!this.$.mediaBlocksResume) {
       this.#appendSystemMessage(this.$.statusText, {
         actions: [{ id: 'resume', label: this.$.lblResume, icon: 'play_arrow' }],
@@ -353,9 +405,12 @@ export class PortfolioShowChat extends HTMLElement {
     this.#syncPlayer();
   }
 
-  stopShow({ focusStart = false, completed = false } = {}) {
+  stopShow({ focusStart = false, completed = false, reason = 'explicit' } = {}) {
     const wasRunning = this.$.isRunning;
+    const hadShow = Boolean(wasRunning || this.#mode || this.#pendingTransportIntent);
+    const terminalRouteState = this.routeSnapshot;
     this.#requestId += 1;
+    this.#transportRequestId += 1;
     this.#stopSpeech('show-stopped');
     this.#cancelMessageStreams();
     this.$.isRunning = false;
@@ -369,6 +424,10 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.statusText = '';
     this.$.errorText = '';
     this.#branchReturnPlayback = null;
+    this.#completedDetailReview = false;
+    this.#completedDetailReviewPreparing = false;
+    this.#showCompleted = completed;
+    this.#pendingTransportIntent = null;
     this.#mode = '';
     this.#playbackEntries = [];
     this.#sceneIndex = -1;
@@ -376,10 +435,17 @@ export class PortfolioShowChat extends HTMLElement {
     this.#dock?.removeShow?.('short', { stop: false });
     this.#showPlayer = null;
     if (wasRunning && !completed && this.isConnected) this.#appendModeSelectionMessage();
-    if (wasRunning) {
+    if (hadShow) {
       this.dispatchEvent(new CustomEvent(
         completed ? 'portfolio-show-complete' : 'portfolio-show-stop',
-        { bubbles: true, composed: true },
+        {
+          bubbles: true,
+          composed: true,
+          detail: {
+            reason,
+            routeState: Object.freeze({ ...terminalRouteState, play: false, completed }),
+          },
+        },
       ));
     }
     if (focusStart && this.isConnected) queueMicrotask(() => this.focusFirstControl());
@@ -435,10 +501,20 @@ export class PortfolioShowChat extends HTMLElement {
     const entry = this.#currentEntry();
     return {
       controller: this.#controller,
-      timeline: playerTimeline(this.#story, this.#mode || 'short'),
+      timeline: playerTimeline(
+        this.#story,
+        this.#mode || 'short',
+        this.#authoringView.mediaRegistry,
+      ),
       state: {
         index: Math.max(0, this.#sceneIndex),
         playing: this.$.isRunning && !this.$.isPaused,
+        progress: {
+          positionMs: Math.max(
+            0,
+            Number(this.#alignedEntry?.media?.currentTime || 0) * 1_000,
+          ),
+        },
         caption: {
           speaker: entry?.sceneId ? this.#message('tour.details') : 'CV',
           text: entry?.subtitle || '',
@@ -487,6 +563,7 @@ export class PortfolioShowChat extends HTMLElement {
       next() { host.#step(1); },
       stop() { host.stopShow({ focusStart: true }); },
       preview(index) { void host.#preview(index); },
+      seek(index, positionMs) { void host.#seek(index, positionMs); },
     };
   }
 
@@ -586,9 +663,17 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   /** @param {'short' | 'full' | ''} [mode] */
-  async #start(mode = '') {
-    if (!this.$.isReady || this.$.isRunning || this.#mode) return;
-    if (mode !== 'short' && mode !== 'full') return;
+  async #start(mode = '', {
+    entryId = '',
+    detailId = '',
+    positionMs = 0,
+    play = true,
+    routeDriven = false,
+    transportRequestId = 0,
+  } = {}) {
+    if (!this.$.isReady || this.$.isRunning || this.#mode) return false;
+    if (mode !== 'short' && mode !== 'full') return false;
+    const activeTransportRequestId = transportRequestId || ++this.#transportRequestId;
     const requestId = this.#requestId;
     const playbackEntries = [...createCvShowPlaybackEntries(this.#story, mode)];
     const unavailableEntryIds = playbackEntries
@@ -596,12 +681,92 @@ export class PortfolioShowChat extends HTMLElement {
       .map(({ id }) => id);
     if (unavailableEntryIds.length) {
       this.#rejectUnavailableData();
-      return;
+      return false;
     }
     this.#mode = mode;
+    this.#showCompleted = false;
     this.#playbackEntries = playbackEntries;
+    const requestedIndex = entryId
+      ? playbackEntries.findIndex((entry) => entry.id === entryId)
+      : 0;
+    if (requestedIndex < 0) {
+      this.#mode = '';
+      this.#playbackEntries = [];
+      return false;
+    }
+    const requestedEntry = playbackEntries[requestedIndex];
+    const durationMs = Number(
+      this.#authoringView.mediaRegistry.entries[detailId || requestedEntry.id]
+        ?.audio?.durationMilliseconds,
+    );
+    const targetMs = Math.min(
+      Number.isFinite(durationMs) && durationMs > 0 ? durationMs : Number.MAX_SAFE_INTEGER,
+      Math.max(0, Math.round(Number(positionMs) || 0)),
+    );
+    this.#sceneIndex = requestedIndex;
+    const pendingTransportIntent = Object.freeze({
+      detailId: String(detailId || ''),
+      play: Boolean(play),
+      positionMs: targetMs,
+      routeDriven: Boolean(routeDriven),
+    });
+    this.#pendingTransportIntent = pendingTransportIntent;
     this.#mountSharedShow();
     this.#showPlayer?.bind?.(this.#showConfig());
+    await this.#prepareNarrationResources();
+    if (
+      !this.isConnected
+      || this.$.isRunning
+      || requestId !== this.#requestId
+      || activeTransportRequestId !== this.#transportRequestId
+      || !this.#mode
+    ) return false;
+    this.#session = new ShowSessionState();
+    this.$.isRunning = true;
+    this.$.isPaused = !play;
+    this.$.resumeRequired = !play;
+    const acknowledgement = await this.#appendAgentMessage({ id: `start-${mode}` }, {
+      text: this.#message(`tour.start.${mode}`),
+      actions: [],
+      payload: null,
+    });
+    if (
+      acknowledgement?.status !== 'completed'
+      || !this.isConnected
+      || !this.$.isRunning
+      || requestId !== this.#requestId
+      || activeTransportRequestId !== this.#transportRequestId
+      || !this.#mode
+    ) return false;
+    this.dispatchEvent(new CustomEvent('portfolio-show-start', {
+      bubbles: true,
+      composed: true,
+      detail: { routeDriven },
+    }));
+    this.#presentScene({ startPaused: !play || Boolean(detailId), positionMs: detailId ? 0 : targetMs });
+    if (detailId) {
+      const scene = this.#story?.scenes?.find(({ id }) => id === requestedEntry.id);
+      if (mode !== 'short' || !scene || scene.branchId !== detailId) {
+        this.stopShow({ reason: 'route-invalid-detail' });
+        return false;
+      }
+      await this.#enterDetails(detailId, {
+        contextualCardId: `${scene.id}.actions`,
+        contextualActionId: 'details',
+        historicalOwnerEntryId: scene.id,
+        startPaused: !play,
+        positionMs: targetMs,
+        forcePrecedingSetup: true,
+      });
+      if (activeTransportRequestId !== this.#transportRequestId) return false;
+    }
+    if (this.#pendingTransportIntent === pendingTransportIntent) {
+      this.#pendingTransportIntent = null;
+    }
+    return true;
+  }
+
+  async #prepareNarrationResources() {
     this.#narrationReady = this.#speech.prepare(this.#story).then((snapshot) => {
       this.dataset.narrationSource = snapshot.source;
       return snapshot;
@@ -613,34 +778,15 @@ export class PortfolioShowChat extends HTMLElement {
       this.dataset.alignmentSource = alignment.available ? alignment.version : 'none';
       return alignment;
     });
-    await Promise.all([this.#narrationReady, this.#alignmentReady]);
-    if (!this.isConnected || this.$.isRunning || requestId !== this.#requestId || !this.#mode) return;
-    this.#session = new ShowSessionState();
-    this.#sceneIndex = 0;
-    this.$.isRunning = true;
-    this.$.isPaused = false;
-    this.$.resumeRequired = false;
-    const acknowledgement = await this.#appendAgentMessage({ id: `start-${mode}` }, {
-      text: this.#message(`tour.start.${mode}`),
-      actions: [],
-      payload: null,
-    });
-    if (
-      acknowledgement?.status !== 'completed'
-      || !this.isConnected
-      || !this.$.isRunning
-      || requestId !== this.#requestId
-      || !this.#mode
-    ) return;
-    this.dispatchEvent(new CustomEvent('portfolio-show-start', { bubbles: true, composed: true }));
-    this.#presentScene();
+    return Promise.all([this.#narrationReady, this.#alignmentReady]);
   }
 
   async #preview(index) {
     if (!this.$.isReady || this.$.inBranch || !Number.isInteger(index)) return;
     if (index < 0 || index >= this.#playbackEntries.length) return;
+    const transportRequestId = ++this.#transportRequestId;
     await Promise.all([this.#narrationReady, this.#alignmentReady]);
-    if (!this.isConnected) return;
+    if (!this.isConnected || transportRequestId !== this.#transportRequestId) return;
     const wasRunning = this.$.isRunning;
     this.#sceneIndex = index;
     this.$.isRunning = true;
@@ -651,6 +797,67 @@ export class PortfolioShowChat extends HTMLElement {
       this.dispatchEvent(new CustomEvent('portfolio-show-start', { bubbles: true, composed: true }));
     }
     this.#presentScene({ startPaused: true });
+  }
+
+  async #seek(index, positionMs = 0) {
+    if (!this.$.isReady || !Number.isInteger(index)) return false;
+    if (index < 0 || index >= this.#playbackEntries.length) return false;
+    const durationMs = Number(
+      this.#authoringView.mediaRegistry.entries[this.#playbackEntries[index]?.id]
+        ?.audio?.durationMilliseconds,
+    );
+    const targetMs = Math.min(
+      Number.isFinite(durationMs) && durationMs > 0 ? durationMs : Number.MAX_SAFE_INTEGER,
+      Math.max(0, Math.round(Number(positionMs) || 0)),
+    );
+    const pendingTransportIntent = !this.$.isRunning && this.#pendingTransportIntent
+      ? Object.freeze({
+        ...this.#pendingTransportIntent,
+        detailId: '',
+        positionMs: targetMs,
+      })
+      : null;
+    if (pendingTransportIntent) {
+      this.#sceneIndex = index;
+      this.#pendingTransportIntent = pendingTransportIntent;
+    }
+    const transportRequestId = ++this.#transportRequestId;
+    await Promise.all([this.#narrationReady, this.#alignmentReady]);
+    if (
+      !this.isConnected
+      || !this.#mode
+      || transportRequestId !== this.#transportRequestId
+    ) return false;
+    const wasRunning = this.$.isRunning;
+    const wasPlaying = wasRunning
+      ? !this.$.isPaused
+      : Boolean(pendingTransportIntent?.play);
+    if (this.$.inBranch) {
+      this.#session.returnFromBranch();
+      this.#branchReturnPlayback = null;
+      this.#completedDetailReview = false;
+      this.#showCompleted = false;
+    }
+    this.#sceneIndex = index;
+    if (!wasRunning) this.#session = new ShowSessionState();
+    this.$.isRunning = true;
+    if (!wasRunning) {
+      this.dispatchEvent(new CustomEvent('portfolio-show-start', {
+        bubbles: true,
+        composed: true,
+        detail: { routeDriven: Boolean(pendingTransportIntent?.routeDriven) },
+      }));
+    }
+    this.#presentScene({ startPaused: !wasPlaying, positionMs: targetMs });
+    if (this.#pendingTransportIntent === pendingTransportIntent) {
+      this.#pendingTransportIntent = null;
+    }
+    this.dispatchEvent(new CustomEvent('portfolio-show-seek', {
+      bubbles: true,
+      composed: true,
+      detail: { index, positionMs: targetMs },
+    }));
+    return true;
   }
 
   #currentScene() {
@@ -720,13 +927,13 @@ export class PortfolioShowChat extends HTMLElement {
     this.#presentScene();
   }
 
-  #presentScene({ startPaused = false } = {}) {
+  #presentScene({ startPaused = false, positionMs = 0 } = {}) {
     const entry = this.#currentEntry();
     if (!entry) return;
     this.#session.setPlayback({
       episodeId: this.#mode,
       cueIndex: this.#sceneIndex,
-      positionMs: 0,
+      positionMs,
       playbackState: startPaused ? 'paused' : 'playing',
       subjectId: entry.sceneId || entry.id,
     });
@@ -743,11 +950,12 @@ export class PortfolioShowChat extends HTMLElement {
       this.#sceneIndex + 1,
       this.#playbackEntries.length,
     );
-    this.#presentEntry(entry, { startPaused });
+    this.#presentEntry(entry, { startPaused, positionMs });
   }
 
   #presentEntry(entry, {
     startPaused = false,
+    positionMs = 0,
     precedingSetupEntry = null,
   } = {}) {
     this.#requestId += 1;
@@ -781,7 +989,7 @@ export class PortfolioShowChat extends HTMLElement {
     }
     this.#showPlayer?.bind?.(this.#showConfig());
     this.#syncPlayer();
-    void this.#speak(entry, requestId, { startPaused, sceneSetupReady });
+    void this.#speak(entry, requestId, { startPaused, positionMs, sceneSetupReady });
   }
 
   #runSceneSetup(entry, requestId) {
@@ -1020,6 +1228,15 @@ export class PortfolioShowChat extends HTMLElement {
         this.pauseShow('narration-error');
         this.#appendSystemMessage(this.#message('tour.error.speech'), { error: true });
       },
+      onBlocked: () => {
+        if (requestId !== this.#requestId) return;
+        const activeToken = this.#speechToken;
+        this.#speechToken = null;
+        if (activeToken) {
+          this.#audioArbiter?.release?.({ ...activeToken, reason: 'paused' });
+        }
+        this.pauseShow('autoplay-blocked');
+      },
     });
     if (!started) {
       releaseSpeech();
@@ -1049,32 +1266,39 @@ export class PortfolioShowChat extends HTMLElement {
     if (token) this.#audioArbiter?.release?.({ ...token, reason });
   }
 
-  #enterDetails(branchId, {
+  async #enterDetails(branchId, {
     contextualCardId = '',
     contextualActionId = '',
     historicalOwnerEntryId = '',
+    startPaused = false,
+    positionMs = 0,
+    forcePrecedingSetup = false,
   } = {}) {
     const branch = this.#story?.branches?.[branchId];
-    const returnParentEntry = this.#currentScene();
     const historicalOwnerEntry = this.#story?.scenes?.find(
       ({ id }) => id === historicalOwnerEntryId,
     );
-    if (
-      this.#mode !== 'short'
-      || !branch
-      || !returnParentEntry
-      || !historicalOwnerEntry
-      || !this.$.isRunning
-      || this.$.inBranch
-    ) return;
+    if (!branch || !historicalOwnerEntry || this.$.inBranch) return;
     if (!this.#authoringView.mediaRegistry.entries[branch.id]?.playable) {
       this.#rejectUnavailableData();
       return;
     }
-    const positionMs = Math.max(0, Math.round(Number(this.#speech.media?.currentTime || 0) * 1000));
+    if (!this.$.isRunning && !this.#mode) {
+      if (!await this.#prepareCompletedDetailReview(historicalOwnerEntry)) return;
+    }
+    const returnParentEntry = this.#currentScene();
+    if (
+      this.#mode !== 'short'
+      || !returnParentEntry
+      || !this.$.isRunning
+    ) return;
+    const parentPositionMs = Math.max(
+      0,
+      Math.round(Number(this.#speech.media?.currentTime || 0) * 1000),
+    );
     const shortPlayback = {
       ...this.#session.snapshot.playback,
-      positionMs,
+      positionMs: parentPositionMs,
       playbackState: 'paused',
       cueIndex: this.#sceneIndex,
       subjectId: returnParentEntry.id,
@@ -1093,19 +1317,78 @@ export class PortfolioShowChat extends HTMLElement {
     this.#session.setPlayback({
       episodeId: branch.id,
       cueIndex: 0,
-      positionMs: 0,
-      playbackState: 'playing',
+      positionMs,
+      playbackState: startPaused ? 'paused' : 'playing',
       subjectId: branch.sceneId,
     });
     this.$.inBranch = true;
-    this.$.isPaused = false;
-    this.$.resumeRequired = false;
+    this.$.isPaused = startPaused;
+    this.$.resumeRequired = startPaused;
     this.$.hasDetails = false;
     this.#presentEntry(branch, {
-      precedingSetupEntry: historicalOwnerEntry.id === returnParentEntry.id
-        ? null
-        : historicalOwnerEntry,
+      startPaused,
+      positionMs,
+      precedingSetupEntry: forcePrecedingSetup
+        ? historicalOwnerEntry
+        : this.#completedDetailReview
+        || historicalOwnerEntry.id !== returnParentEntry.id
+        ? historicalOwnerEntry
+        : null,
     });
+  }
+
+  async #prepareCompletedDetailReview(historicalOwnerEntry) {
+    if (
+      !this.#showCompleted
+      || this.#completedDetailReviewPreparing
+      || this.$.isRunning
+      || this.#mode
+      || this.$.inBranch
+    ) return false;
+    this.#completedDetailReviewPreparing = true;
+    const requestId = this.#requestId;
+    try {
+      await this.#prepareNarrationResources();
+      if (
+        !this.isConnected
+        || requestId !== this.#requestId
+        || !this.#showCompleted
+        || this.$.isRunning
+        || this.#mode
+      ) return false;
+      const playbackEntries = [...createCvShowPlaybackEntries(this.#story, 'short')];
+      const sceneIndex = playbackEntries.findIndex(({ id }) => id === historicalOwnerEntry.id);
+      if (sceneIndex < 0) return false;
+      this.#mode = 'short';
+      this.#playbackEntries = playbackEntries;
+      this.#sceneIndex = sceneIndex;
+      this.#session = new ShowSessionState();
+      this.#session.setPlayback({
+        episodeId: 'short',
+        cueIndex: sceneIndex,
+        positionMs: 0,
+        playbackState: 'paused',
+        subjectId: historicalOwnerEntry.id,
+      });
+      this.$.isRunning = true;
+      this.$.isPaused = true;
+      this.$.resumeRequired = false;
+      this.$.hasDetails = true;
+      this.#completedDetailReview = true;
+      this.#mountSharedShow();
+      this.#showPlayer?.bind?.(this.#showConfig());
+      this.dispatchEvent(new CustomEvent('portfolio-show-start', {
+        bubbles: true,
+        composed: true,
+        detail: { completedDetailReview: true },
+      }));
+      return true;
+    } catch {
+      this.#rejectUnavailableData();
+      return false;
+    } finally {
+      this.#completedDetailReviewPreparing = false;
+    }
   }
 
   #returnFromDetails() {
@@ -1126,6 +1409,11 @@ export class PortfolioShowChat extends HTMLElement {
         contextualCardId: `${historicalOwnerEntry?.id}.actions`,
         contextualActionId: 'details',
       });
+    }
+    if (this.#completedDetailReview) {
+      this.#session.returnFromBranch();
+      this.stopShow({ completed: true });
+      return;
     }
     this.#requestId += 1;
     this.#stopSpeech('branch-return');
@@ -1299,6 +1587,7 @@ export class PortfolioShowChat extends HTMLElement {
       index: Math.max(0, this.#sceneIndex),
       playing: this.$.isRunning && !this.$.isPaused,
       state: terminalState || (this.$.isPaused ? 'paused' : this.$.isRunning ? 'playing' : 'stopped'),
+      progress: { positionMs: captionPositionMs },
       caption: {
         speaker: this.$.inBranch ? this.#message('tour.details') : 'CV',
         text: captionTrack.length ? activeEntry?.speech || '' : activeEntry?.subtitle || scene?.subtitle || '',
@@ -1312,6 +1601,11 @@ export class PortfolioShowChat extends HTMLElement {
       } : {},
     });
     this.#notifyController(terminalState);
+    this.dispatchEvent(new CustomEvent('portfolio-show-route-change', {
+      bubbles: true,
+      composed: true,
+      detail: { state: this.routeSnapshot, terminalState },
+    }));
   }
 }
 

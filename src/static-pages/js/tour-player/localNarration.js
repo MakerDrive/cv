@@ -56,6 +56,7 @@ export function createLocalAudioSpeechController({
         paused: active ? Boolean(active.audio.paused) : true,
         prefetchedId,
         generationReceipt: active?.generationReceipt || null,
+        playBlocked: Boolean(active?.playBlocked),
         lastError,
       });
     },
@@ -82,6 +83,13 @@ export function createLocalAudioSpeechController({
       };
       let onFailed = (error) => {
         if (token !== generation || active?.audio !== audio) return;
+        if (error?.name === 'NotAllowedError') {
+          active.playBlocked = true;
+          lastError = 'autoplay-blocked';
+          releaseAudio(audio);
+          options.onBlocked?.(lastError, error);
+          return;
+        }
         let mediaError = audio.error;
         const receipt = error?.receipt || (error?.status ? error : null);
         lastError = receipt
@@ -98,12 +106,13 @@ export function createLocalAudioSpeechController({
         if (token !== generation || active?.audio !== audio) return false;
         const attempt = active.playAttempt + 1;
         active.playAttempt = attempt;
-        Promise.resolve(audio.play?.()).catch((error) => {
-          if (
-            token !== generation
-            || active?.audio !== audio
-            || active.playAttempt !== attempt
-          ) return;
+        Promise.resolve(audio.play?.()).then(() => {
+          if (token === generation && active?.audio === audio && active.playAttempt === attempt) {
+            active.playBlocked = false;
+            lastError = '';
+          }
+        }).catch((error) => {
+          if (token !== generation || active?.audio !== audio || active.playAttempt !== attempt) return;
           onFailed(error);
         });
         return true;
@@ -115,6 +124,8 @@ export function createLocalAudioSpeechController({
         onFailed,
         play,
         playAttempt: 0,
+        playBlocked: false,
+        resumeRequested: false,
         generationReceipt: null,
       };
       let setup;
@@ -138,17 +149,22 @@ export function createLocalAudioSpeechController({
           return;
         }
         active.generationReceipt = receipt;
-        if (options.startPaused !== true) play();
+        if (options.startPaused !== true || active.resumeRequested) play();
       }).catch(onFailed);
       return true;
     },
     pause() {
       if (!active) return;
       active.playAttempt += 1;
+      active.resumeRequested = false;
       active.audio.pause?.();
     },
     resume() {
       if (!active) return false;
+      if (active.generationReceipt?.status !== 'completed') {
+        active.resumeRequested = true;
+        return true;
+      }
       return active.play();
     },
     transition(id) {

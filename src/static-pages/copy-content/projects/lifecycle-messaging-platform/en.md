@@ -19,14 +19,21 @@ Technology profile:
 
 :::article-block product-surfaces
 - Product surfaces: Web/PWA interfaces, admin dashboards, role-based workflows, analytics views, and campaign-operations automation.
+
 :::article-block backend-runtime
 - Backend/runtime: JavaScript/Node.js, API services, PostgreSQL, WebSocket runtime sync, RabbitMQ-compatible intake, and Swagger/API documentation.
+
 :::article-block delivery-ops
+Distributed instances manage GSM modem pools through serialport/COM connections and AT commands.
+
 :::article-block tunnels
+SSH/WebSocket tunnels connect the server runtime with remote delivery instances.
+
 :::article-block modem-pools
+The modem runtime handles SMS inbox and USSD operations across the physical pools.
+
 :::article-block delivery-flow
-- Operations: PM2/nginx deployment, SSH/WebSocket tunnels, serialport/COM modem control, GSM modem pools, AT commands, and SMS inbox/USSD operations.
-- Data and integration: data-flow and segmentation tooling, API integrations, and repeatable operational workflows.
+Because links and devices can change state, a queue, repeatable execution, and monitoring keep the delivery process manageable. PM2/nginx deployment, data-flow and segmentation tooling, API integrations, and repeatable operational workflows support that route.
 
 :::article-block digital-twin
 For reproducible testing without continuous access to physical devices, I built a local Digital Twin with virtual modems and repeatable traffic scenarios. It mirrored the GSM modem pool in both directions: device behavior could be replayed locally, while the same operational flow remained applicable to the physical runtime.

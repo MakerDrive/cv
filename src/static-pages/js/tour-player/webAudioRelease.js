@@ -1,18 +1,17 @@
 import { SHOW_ALIGNED_SEQUENCE_VERSION } from 'symbiote-ui/chat/show-runtime';
-import {
-  CV_SHOW_AUDIO_RELEASE,
-  CV_SHOW_PRESENTATION_PROJECT,
-} from '../../data/cvShowPresentationProject.js';
+import { CV_SHOW_AUDIO_RELEASE } from '../../data/cvShowPresentationProject.js';
 
 const SELECTOR_SCHEMA = 'cv-show-web-audio-selector-v1';
 const RELEASE_SCHEMA = 'cv-show-web-audio-release-v1';
 const PROFILE_ID = 'ogg-opus-mono-48khz-48kbps-voip-v1';
 const SETTINGS_STORAGE_KEY = 'cv-show-settings';
 const RELEASE_ID_RE = /^cv-show-web-audio-release-v1:[a-f0-9]{64}$/u;
+const MASTER_RELEASE_ID_RE = /^cv-show-audio-release-v1:[a-f0-9]{64}$/u;
 const REVISION_RE = /^[a-f0-9]{64}$/u;
 const VOICE_ID_RE = /^[a-z0-9][a-z0-9-]*$/u;
 const SHA256_RE = /^[a-f0-9]{64}$/u;
 const SHA256_HASH_RE = /^sha256:[a-f0-9]{64}$/u;
+const AUTHORING_PROJECT_HASH_RE = /^workspace-presentation-authoring-project-v1:sha256-[A-Za-z0-9+/]{43}=$/u;
 const ALIGNED_HASH_RE = /^workspace-aligned-sequence-v3:sha256-[A-Za-z0-9+/]{43}=$/u;
 const TIMELINE_HASH_RE = /^presentation-timeline-v3:sha256-[A-Za-z0-9+/]{43}=$/u;
 const DELIVERY_FILE_RE = /^clips\/[a-z0-9][a-z0-9._-]*-([a-f0-9]{12,64})\.opus$/u;
@@ -202,15 +201,21 @@ function validateProfile(profile) {
 
 function validateSource(source) {
   let expected = {
-    masterReleaseId: CV_SHOW_AUDIO_RELEASE.releaseId,
     masterArtifactTreeHash: CV_SHOW_AUDIO_RELEASE.artifactTreeHash,
-    projectRevision: CV_SHOW_PRESENTATION_PROJECT.revision,
-    authoringProjectHash: CV_SHOW_PRESENTATION_PROJECT.hash,
     voiceIdentityHash: CV_SHOW_AUDIO_RELEASE.acceptedProvenance.voiceIdentityHash,
     audioManifestSha256: CV_SHOW_AUDIO_RELEASE.manifests.audio.sha256,
     alignmentManifestSha256: CV_SHOW_AUDIO_RELEASE.manifests.alignment.sha256,
   };
   if (!hasExactKeys(source, SOURCE_KEYS)) throw invalidRelease('source');
+  if (!MASTER_RELEASE_ID_RE.test(String(source.masterReleaseId || ''))) {
+    throw invalidRelease('source masterReleaseId');
+  }
+  if (!Number.isSafeInteger(source.projectRevision) || source.projectRevision < 1) {
+    throw invalidRelease('source projectRevision');
+  }
+  if (!AUTHORING_PROJECT_HASH_RE.test(String(source.authoringProjectHash || ''))) {
+    throw invalidRelease('source authoringProjectHash');
+  }
   for (let [key, value] of Object.entries(expected)) {
     if (source[key] !== value) throw invalidRelease(`source ${key}`);
   }

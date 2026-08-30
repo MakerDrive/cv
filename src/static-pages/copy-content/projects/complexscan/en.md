@@ -17,20 +17,28 @@ linkLabel: View project
 I invented ComplexScan as a commercial product after the PhotoPizza open-source line: professional equipment for photogrammetric 3D scanning, 360-degree photography, and industrial product shoots.
 
 :::article-block transparent-system
+The product reduced retouching and production time at the source while remaining compatible with studio workflows.
+
 :::article-block transparent-platform
+I designed the setup around a transparent rotating disc made from special tempered glass for shadow-free 360-degree photography and photogrammetric 3D scanning.
+
 :::article-block controlled-light
-The product reduced retouching and production time at the source. I designed the setup around a transparent rotating disc made from special tempered glass, stable mechanics, controlled lighting from below and around the object, and compatibility with studio workflows.
+The disc worked with stable mechanics and controlled lighting from below and around the object.
 
 :::article-block integrated-method
 ComplexScan was an original product line rather than a service around existing equipment. I designed the physical system and capture method together so the technology could produce cleaner masks, more consistent geometry, and higher-quality source textures before the object reached the 3D processing stage.
 
 :::article-block product-cycle
+My role covered the full early product cycle: product concept, R&D, mechanical and capture workflow design, testing, production setup, and early international sales while turning the prototype into a manufacturable product line.
+
 :::article-block product-gallery
-:::article-block international-delivery
-My role covered the full early product cycle: product concept, R&D, mechanical and capture workflow design, handmade prototype fabrication, testing, production setup, finished-product assembly, and early international sales. I designed complex protective packaging, prepared export documents, and organized deliveries to customers in different countries while turning the prototype into a manufacturable product line.
+I assembled the prototypes and the first finished units myself.
 
 :::article-block small-batch
-This was small-batch production rather than mass manufacturing. I assembled the prototypes and early units myself, broke the product into parts that could be fabricated by specialist contractors — including laser-cut metal and acrylic components — and coordinated those suppliers before final assembly, testing, packaging, and shipment.
+This was small-batch production rather than mass manufacturing. I broke the product into parts that could be fabricated by specialist contractors — including laser-cut metal and acrylic components — and coordinated those suppliers before final assembly and testing.
+
+:::article-block international-delivery
+I designed complex protective packaging, prepared export documents, and organized deliveries to customers in different countries.
 
 :::article-block transition
 :::article-block autobox

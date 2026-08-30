@@ -201,6 +201,8 @@ const PORTFOLIO_SUPPORTED_LOCALES = ['en', 'ru', 'es'];
 const PORTFOLIO_LINKEDIN_URL = 'https://www.linkedin.com/in/v-matiasevich/';
 const PORTFOLIO_TELEGRAM_URL = 'https://t.me/text2code';
 const PORTFOLIO_ONLINE_CV_URL = 'https://MakerDrive.github.io/cv/';
+const PORTFOLIO_TREE_SPLIT_RATIO = 0.25;
+const PORTFOLIO_THEME_SPLIT_RATIO = 0.72;
 const PORTFOLIO_PDF_DOWNLOADS = Object.freeze([
   { locale: 'en', href: 'downloads/vladimir-matiasevich-cv-en.pdf' },
   { locale: 'ru', href: 'downloads/vladimir-matiasevich-cv-ru.pdf' },
@@ -569,6 +571,12 @@ function startPortfolioChromeLocalization() {
   document.addEventListener('cascade-theme-change', onPortfolioCascadeThemeChange);
   document.addEventListener('cascade-theme-change', (event) => {
     let detail = event.detail;
+    if (detail?.source === 'reset') {
+      for (let workspace of document.querySelectorAll('portfolio-workspace')) {
+        workspace.resetPanelDefaults?.('appearance-reset');
+      }
+      return;
+    }
     if (!detail || detail.source !== 'mode') return;
     let widget = event.target?.closest?.('cascade-theme-widget, cascade-theme-editor');
     if (!widget || typeof widget.state !== 'object') return;
@@ -1019,6 +1027,17 @@ function getPortfolioEntryHref(id) {
   });
 }
 
+function getCvShowStartHref() {
+  let url = new URL(location.href);
+  url.pathname = getPortfolioBasePath();
+  for (let name of ['showMode', 'showEntry', 'showTime', 'showDetail', 'showPlay']) {
+    url.searchParams.delete(name);
+  }
+  url.searchParams.set('showMode', 'short');
+  url.searchParams.set('showEntry', 'positioning');
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 function protectMarkdownLinkTargets(markdown) {
   return String(markdown || '').replace(/\]\(([^)\n]+)\)/g, (match, href) => `](${href.replaceAll('_', '%5F')})`);
 }
@@ -1061,6 +1080,9 @@ function createMarkdown(entry, { interactive = true } = {}) {
     lines.push(`**${entry.kicker}**`, '');
   }
   lines.push(article.summary || tPortfolio('node.fallback'), '');
+  if (entry.id === 'profile/photo') {
+    lines.push(`[${tPortfolio('show.openPresentation')}](${getCvShowStartHref()})`, '');
+  }
   if (entry.meta) {
     lines.push(entry.meta, '');
   }
@@ -2312,6 +2334,7 @@ const portfolioRuntime = {
       raw: entry.sourceMarkdown,
       renderedRaw: entry.markdown,
       statsText: entry.displayType || entry.type,
+      saveAction: null,
     });
     this.viewer.scrollToTop({ behavior: 'auto' });
     if (!composeSlots) {
@@ -2593,7 +2616,7 @@ function createPortfolioLayoutTree() {
     },
     { lockRatio: true }
   );
-  return LayoutTree.createSplit('horizontal', treePanel, contentSplit, 0.25, {
+  return LayoutTree.createSplit('horizontal', treePanel, contentSplit, PORTFOLIO_TREE_SPLIT_RATIO, {
     importance: 90,
     minInlineSize: PORTFOLIO_LAYOUT_MIN_INLINE_SIZE,
     minBlockSize: 420,
@@ -3048,6 +3071,10 @@ class PortfolioGraphPanel extends HTMLElement {
       this.setStructuredGraphLoading(false);
       return;
     }
+    if (this._structuredBindingUrgent) {
+      this.queueStructuredGraphBinding({ immediate: true });
+      return;
+    }
     this._structuredBindingTimer = globalThis.setTimeout(() => {
       this._structuredBindingTimer = 0;
       if (!this.structuredMode || !this.canvas || this._structuredBound) return;
@@ -3055,14 +3082,19 @@ class PortfolioGraphPanel extends HTMLElement {
     }, 450);
   }
 
-  queueStructuredGraphBinding() {
+  queueStructuredGraphBinding({ immediate = false, allowHidden = false } = {}) {
+    if (immediate) this.cancelStructuredGraphBinding();
     if (this._structuredBindingFrame || this._structuredBindingIdleFrame) return;
     this.setStructuredGraphLoading(true);
     let callback = () => {
       this._structuredBindingFrame = 0;
       this._structuredBindingIdleFrame = 0;
-      this.bindStructuredGraphRenderer();
+      this.bindStructuredGraphRenderer({ allowHidden });
     };
+    if (immediate) {
+      callback();
+      return;
+    }
     if (typeof globalThis.requestIdleCallback === 'function') {
       this._structuredBindingIdleFrame = globalThis.requestIdleCallback(callback, { timeout: 600 });
       return;
@@ -3085,9 +3117,9 @@ class PortfolioGraphPanel extends HTMLElement {
     }
   }
 
-  bindStructuredGraphRenderer() {
+  bindStructuredGraphRenderer({ allowHidden = false } = {}) {
     if (this._structuredBound || !this.structuredMode || !this.canvas) return;
-    if (!this.isGraphPanelVisible()) {
+    if (!allowHidden && !this.isGraphPanelVisible()) {
       this.setStructuredGraphLoading(false);
       return;
     }
@@ -3101,6 +3133,7 @@ class PortfolioGraphPanel extends HTMLElement {
       setNodePositions(this.canvas, orderedPortfolioProjects);
       this.canvas._layoutReleasedDom = false;
       this._structuredBound = true;
+      this._structuredBindingUrgent = false;
       this._structuredPathReady = false;
       this._structuredPathReadyStyle = '';
       portfolioRuntime.syncCanvas({ focus: true, focusScope: 'node-fit' });
@@ -3112,6 +3145,35 @@ class PortfolioGraphPanel extends HTMLElement {
     } finally {
       this.setStructuredGraphLoading(false);
     }
+  }
+
+  /**
+   * Escalate the normally lazy structured renderer for an imminent host action.
+   * The host still waits for the exact semantic target; this method only removes
+   * background/idle latency once the native layout panel is actually visible.
+   * @returns {boolean} whether the structured graph is already bound
+   */
+  prepareShowTarget({ allowHidden = false } = {}) {
+    if (this._structuredBound) {
+      this._structuredBindingUrgent = false;
+      if (this.isGraphPanelVisible()) {
+        this.focusVisibleGraphNow();
+        this.scheduleVisibleGraphFocus();
+      }
+      return true;
+    }
+    this._structuredBindingUrgent = true;
+    this.setStructuredGraphLoading(true);
+    if (!this._graphReady || !this.structuredMode || !this.canvas) {
+      this.scheduleVisibleGraphFocus();
+      return false;
+    }
+    if (!allowHidden && !this.isGraphPanelVisible()) {
+      this.scheduleVisibleGraphFocus();
+      return false;
+    }
+    this.queueStructuredGraphBinding({ immediate: true, allowHidden });
+    return this._structuredBound === true;
   }
 
   setStructuredGraphLoading(active) {
@@ -3546,6 +3608,39 @@ class PortfolioThemePanel extends HTMLElement {
 }
 
 class PortfolioWorkspace extends HTMLElement {
+  resetPanelDefaults(source = 'api') {
+    let current = this._layout?.getLayout?.();
+    if (!current) return false;
+    let tree = LayoutTree.findPanelByType(current, 'portfolio-tree');
+    let viewer = LayoutTree.findPanelByType(current, 'portfolio-viewer');
+    let graph = LayoutTree.findPanelByType(current, 'portfolio-graph');
+    let theme = LayoutTree.findPanelByType(current, 'portfolio-theme', { uiInvoked: true });
+    if (!tree || !viewer || !graph) return false;
+
+    let resetRatios = (node) => {
+      if (node?.type !== 'split') return;
+      let childIds = new Set([node.first?.id, node.second?.id]);
+      if (childIds.has(viewer.id) && childIds.has(graph.id)) {
+        node.ratio = PORTFOLIO_CONTENT_SPLIT_RATIO;
+      } else if (childIds.has(tree.id)) {
+        node.ratio = PORTFOLIO_TREE_SPLIT_RATIO;
+      } else if (theme && childIds.has(theme.id)) {
+        node.ratio = PORTFOLIO_THEME_SPLIT_RATIO;
+      }
+      resetRatios(node.first);
+      resetRatios(node.second);
+    };
+    resetRatios(current);
+    this._layout.setLayout(current);
+    this._dock?.resetPanelLayout?.(source);
+    this.dispatchEvent(new CustomEvent('portfolio-layout-reset', {
+      bubbles: true,
+      composed: true,
+      detail: { source },
+    }));
+    return true;
+  }
+
   connectedCallback() {
     if (this._ready) return;
     this._ready = true;
@@ -3572,6 +3667,8 @@ class PortfolioWorkspace extends HTMLElement {
     let dock = /** @type {any} */ (template.content.querySelector('agent-dock-shell'));
     let layout = /** @type {any} */ (dock?.querySelector('.portfolio-layout'));
     if (!dock || !layout) return;
+    this._dock = dock;
+    this._layout = layout;
     dock.addEventListener('agent-dock-responsive-change', (event) => {
       layout.setLayoutBehavior({
         responsiveMode: event.detail?.mobile ? 'swipe' : 'preserve',
@@ -3617,6 +3714,7 @@ class PortfolioWorkspace extends HTMLElement {
     layout.registerPanelType('portfolio-theme', {
       title: tPortfolio('panel.theme'),
       icon: 'palette',
+      headerClose: true,
       component: 'portfolio-theme-panel',
       behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end', swipeControl: 'rail' },
     });

@@ -641,7 +641,7 @@ function normalizeAlignment(value, plan, synthesis, transcript) {
   }
   let media = requireObject(sequence.media, ['hash', 'durationMs', 'locale'], 'alignment media');
   if (
-    media.hash !== synthesis.wavHash
+    media.hash !== `sha256:${synthesis.wavHash}`
     || media.durationMs !== Math.round(synthesis.durationSec * 1000)
     || media.locale !== plan.locale
   ) {
@@ -1516,7 +1516,7 @@ async function advanceAlignment(run, plan, createObservedAlignment, context) {
   let synthesis = context.state.synthesis;
   let input = {
     media: {
-      hash: synthesis.wavHash,
+      hash: `sha256:${synthesis.wavHash}`,
       durationMs: milliseconds(synthesis.durationSec, 'WAV duration'),
       locale: plan.locale,
     },

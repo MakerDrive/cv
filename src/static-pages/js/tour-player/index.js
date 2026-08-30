@@ -6,6 +6,7 @@ import {
   ShowMediaController,
   monitorMeaningfulShowInteractions,
   waitForShowDomReadiness,
+  waitForShowVisualSettlement,
 } from 'symbiote-ui/chat/show-runtime';
 import { TOUR_LOCALE_MESSAGES } from '../../data/tourTranslations.js';
 import { activateCvShowTarget, activateCvShowUserAction } from './activation.js';
@@ -14,6 +15,20 @@ import {
   createCvShowDirectiveRunner,
   runCvShowPresentationOperation,
 } from './showAdapter.js';
+import { createCvShowPlaybackEntries } from './presentationContext.js';
+import {
+  canonicalizeCvShowRoute,
+  createCvShowRouteRequestCoordinator,
+  resolveCvShowEntryForPortfolioRoute,
+  serializeCvShowRoute,
+  stripCvShowRoute,
+} from './routing.js';
+import {
+  animateCvShowScrollIntoView,
+  isShowTargetReadyForAction,
+  resolveCvShowSelectionQuote,
+  resolvePortfolioMapTarget,
+} from './targetResolution.js';
 
 export const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
@@ -65,7 +80,9 @@ function resolveTargetElement(workspace, runtime, targetId) {
     return workspace.querySelector('agent-dock-shell chat-show-player')
       || workspace.querySelector('agent-dock-shell');
   }
-  if (targetId.startsWith('portfolio.map.')) return workspace.querySelector('sn-canvas-graph') || workspace;
+  if (targetId.startsWith('portfolio.map.')) {
+    return resolvePortfolioMapTarget(workspace, targetId);
+  }
   if (targetId.startsWith('project-card.')) {
     return findTreeRow(workspace, `projects/${targetId.slice('project-card.'.length)}`, runtime);
   }
@@ -97,7 +114,8 @@ function resolveMediaElement(workspace, runtime, targetId) {
     || null;
 }
 
-function panelTypeForTarget(targetId, runtime) {
+function panelTypeForTarget(targetId, runtime, actionId = '') {
+  if (String(actionId).endsWith('.map')) return 'portfolio-graph';
   if (targetId.startsWith('project-card.') || runtime.entries.has(targetId)) {
     return 'portfolio-tree';
   }
@@ -108,16 +126,60 @@ function panelTypeForTarget(targetId, runtime) {
   return '';
 }
 
+function panelActionSurfaceForTarget(targetId) {
+  const normalizedTargetId = String(targetId || '');
+  return normalizedTargetId === 'portfolio.show-stage' || normalizedTargetId.startsWith('chat.')
+    ? 'outer-dock'
+    : 'main-workspace';
+}
+
+function resolvePanelActionTarget(workspace, runtime, action) {
+  if (String(action?.id || '').endsWith('.map')) {
+    const nodeId = escapeAttributeSelectorValue(action?.target || '');
+    const panel = workspace.querySelector('portfolio-graph-panel');
+    const node = panel?.querySelector(`graph-node[node-id="${nodeId}"]`);
+    const canvas = panel?.querySelector('node-canvas, sn-canvas-graph');
+    return visibleElement(node)
+      || visibleElement(canvas)
+      || visibleElement(panel)
+      || node
+      || canvas
+      || panel;
+  }
+  return resolveTargetElement(workspace, runtime, action?.target);
+}
+
 function findPanelNode(node, panelType) {
   if (!node || !panelType) return null;
   if (node.type === 'panel' && node.panelType === panelType) return node;
   return findPanelNode(node.first, panelType) || findPanelNode(node.second, panelType);
 }
 
-function findPanelElement(layout, panelId) {
+function findPanelElement(layout, panelId, panelType = '') {
+  const typedOwner = panelType
+    ? layout?.querySelector?.(`${panelType}-panel`)?.closest?.('layout-node')
+    : null;
+  if (typedOwner) return typedOwner;
+  const owner = layout?.querySelector?.(
+    `[data-panel-id="${escapeAttributeSelectorValue(panelId)}"]`,
+  )?.closest?.('layout-node');
+  if (owner) return owner;
   return Array.from(layout?.querySelectorAll?.('layout-node') || [])
     .find((node) => node.dataset?.panelId === panelId || node.$?.nodeId === panelId)
     || null;
+}
+
+function setDesktopPanelCollapsed(layout, panelId, panelType, collapsed) {
+  const panel = findPanelElement(layout, panelId, panelType);
+  if (typeof panel?._setCollapsed === 'function') {
+    panel._setCollapsed(collapsed);
+    return;
+  }
+  layout?.dispatchEvent?.(new CustomEvent('panel-collapse-toggle', {
+    bubbles: true,
+    composed: true,
+    detail: { panelId, collapsed },
+  }));
 }
 
 function visibleElement(element) {
@@ -132,16 +194,20 @@ function visibleElement(element) {
     : null;
 }
 
-function inspectTargetPanel(workspace, runtime, targetId) {
-  const panelType = panelTypeForTarget(targetId, runtime);
+function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
+  const panelType = panelTypeForTarget(targetId, runtime, actionId);
+  const surface = panelActionSurfaceForTarget(targetId);
   const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
   const panel = findPanelNode(layout?.$.layoutTree, panelType);
+  const panelComponent = panelType ? layout?.querySelector?.(`${panelType}-panel`) : null;
+  const panelId = panel?.id || panelComponent?.dataset?.panelId || '';
   const agentDock = /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
   const outerMobile = Boolean(agentDock?.ref?.layout?.hasAttribute?.('drawer-mode-active'));
   const outerOpen = Boolean(agentDock?.hasAttribute?.('open'));
-  if (!layout || !panel) {
+  if (!layout || !panelId) {
     return Object.freeze({
       targetId,
+      surface,
       panelType,
       panelId: '',
       mobile: false,
@@ -152,42 +218,51 @@ function inspectTargetPanel(workspace, runtime, targetId) {
     });
   }
   const mobile = layout.hasAttribute('drawer-mode-active');
-  const dock = panel.behavior?.mobileDock === 'start' ? 'start' : 'end';
+  const dock = panel?.behavior?.mobileDock === 'start' ? 'start' : 'end';
   const drawerOpen = layout.hasAttribute(`drawer-${dock}-open`);
   const activeDrawerId = dock === 'start' ? layout.$.drawerStartPanelId : layout.$.drawerEndPanelId;
+  const desktopOpen = Boolean(visibleElement(panelComponent)) && panel?.collapsed !== true;
   return Object.freeze({
     targetId,
+    surface,
     panelType,
-    panelId: panel.id,
+    panelId,
     mobile,
     dock,
-    open: mobile ? drawerOpen && (!activeDrawerId || activeDrawerId === panel.id) : !panel.collapsed,
+    open: mobile ? drawerOpen && (!activeDrawerId || activeDrawerId === panelId) : desktopOpen,
     outerMobile,
     outerOpen,
   });
 }
 
-function createPanelActionAdapter(workspace, runtime) {
-  const inspect = ({ action }) => inspectTargetPanel(workspace, runtime, action.target);
+export function createPanelActionAdapter(workspace, runtime) {
+  const inspect = ({ action }) => inspectTargetPanel(workspace, runtime, action.target, action.id);
   const reveal = ({ action, inspected }) => {
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
     const agentDock = /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
     const innerChanged = Boolean(inspected?.panelId && !inspected.open);
-    const outerChanged = Boolean(inspected?.outerMobile && inspected.outerOpen);
+    const outerShouldOpen = inspected?.surface === 'outer-dock';
+    const outerChanged = Boolean(
+      inspected?.outerMobile && inspected.outerOpen !== outerShouldOpen,
+    );
+    const outerOpened = outerChanged && outerShouldOpen;
+    const outerClosed = outerChanged && !outerShouldOpen;
+    if (innerChanged && inspected.panelType === 'portfolio-graph') {
+      layout?.querySelector?.('portfolio-graph-panel')?.prepareShowTarget?.({ allowHidden: true });
+    }
     if (innerChanged && inspected.mobile) layout?.openDrawer?.(inspected.dock, inspected.panelId);
     else if (innerChanged) {
-      layout?.dispatchEvent?.(new CustomEvent('panel-collapse-toggle', {
-        bubbles: true,
-        composed: true,
-        detail: { panelId: inspected.panelId, collapsed: false },
-      }));
+      setDesktopPanelCollapsed(layout, inspected.panelId, inspected.panelType, false);
     }
-    if (outerChanged) agentDock?.close?.('show-action');
+    if (outerOpened) agentDock?.open?.('show-action');
+    else if (outerClosed) agentDock?.close?.('show-action');
     return {
       changed: innerChanged || outerChanged,
       innerChanged,
       outerChanged,
-      ...inspectTargetPanel(workspace, runtime, action.target),
+      outerOpened,
+      outerClosed,
+      ...inspectTargetPanel(workspace, runtime, action.target, action.id),
     };
   };
   const awaitTransition = async ({ action, inspected, signal }) => {
@@ -195,16 +270,24 @@ function createPanelActionAdapter(workspace, runtime) {
     const ready = await waitForShowDomReadiness({
       document,
       target: () => {
-        const state = inspectTargetPanel(workspace, runtime, action.target);
+        const state = inspectTargetPanel(workspace, runtime, action.target, action.id);
         const layout = workspace.querySelector('.portfolio-layout');
         const outerReady = !inspected.outerMobile
-          || !inspected.outerOpen
-          || !state.outerOpen;
+          || state.outerOpen === (inspected.surface === 'outer-dock');
         if (!outerReady) return null;
-        if (!inspected.panelId) return visibleElement(workspace);
-        const target = visibleElement(resolveTargetElement(workspace, runtime, action.target));
+        if (!inspected.panelId) {
+          return inspected.surface === 'outer-dock'
+            ? visibleElement(resolvePanelActionTarget(workspace, runtime, action))
+            : visibleElement(workspace);
+        }
+        if (state.open && state.panelType === 'portfolio-graph') {
+          layout?.querySelector?.('portfolio-graph-panel')?.prepareShowTarget?.();
+        }
+        const target = visibleElement(resolvePanelActionTarget(workspace, runtime, action));
         if (target) return target;
-        return state.open ? visibleElement(findPanelElement(layout, state.panelId)) : null;
+        return state.open
+          ? visibleElement(findPanelElement(layout, state.panelId, state.panelType))
+          : null;
       },
       signal,
       timeoutMs: 2_500,
@@ -212,31 +295,50 @@ function createPanelActionAdapter(workspace, runtime) {
     });
     return { ready: true, panelId: inspected.panelId, target: ready.target };
   };
-  const awaitTarget = ({ action, signal }) => waitForShowDomReadiness({
-    document,
-    target: () => visibleElement(resolveTargetElement(workspace, runtime, action.target)),
-    signal,
-    timeoutMs: 2_500,
-  });
-  const restore = ({ action, inspected, reveal: revealReceipt }) => {
+  const awaitTarget = async ({ action, context, signal }) => {
+    const ready = await waitForShowDomReadiness({
+      document,
+      target: () => {
+        const target = visibleElement(resolvePanelActionTarget(workspace, runtime, action));
+        return isShowTargetReadyForAction(target, action) ? target : null;
+      },
+      signal,
+      timeoutMs: 2_500,
+      scroll: context?.scrollOperation === true ? false : undefined,
+    });
+    if (context?.scrollOperation !== true || !ready.target?.scrollIntoView) return ready;
+    const visualSettlement = await waitForShowVisualSettlement(ready.target, {
+      document,
+      signal,
+      inactivityMs: 2_500,
+      start: () => animateCvShowScrollIntoView(ready.target, { document, signal }),
+    });
+    return Object.freeze({ ...ready, visualSettlement });
+  };
+  const restore = ({ action, context, inspected, reveal: revealReceipt }) => {
+    if (context?.retainRevealedPanel === true || String(action?.id).endsWith('.map')) {
+      return { changed: false, retainedOpen: true };
+    }
     if (revealReceipt?.changed !== true || inspected?.open || !inspected?.panelId) {
-      if (revealReceipt?.outerChanged) {
+      if (revealReceipt?.outerOpened) {
+        workspace.querySelector('agent-dock-shell')?.close?.('show-action');
+        return { changed: true, outerRestored: true };
+      }
+      if (revealReceipt?.outerClosed) {
         workspace.querySelector('agent-dock-shell')?.open?.('show-action');
         return { changed: true, outerRestored: true };
       }
       return { changed: false };
     }
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
-    const current = inspectTargetPanel(workspace, runtime, action.target);
+    const current = inspectTargetPanel(workspace, runtime, action.target, action.id);
     if (revealReceipt.innerChanged && current.mobile) layout?.closeDrawer?.(current.dock);
     else if (revealReceipt.innerChanged) {
-      layout?.dispatchEvent?.(new CustomEvent('panel-collapse-toggle', {
-        bubbles: true,
-        composed: true,
-        detail: { panelId: inspected.panelId, collapsed: true },
-      }));
+      setDesktopPanelCollapsed(layout, inspected.panelId, inspected.panelType, true);
     }
-    if (revealReceipt.outerChanged) {
+    if (revealReceipt.outerOpened) {
+      workspace.querySelector('agent-dock-shell')?.close?.('show-action');
+    } else if (revealReceipt.outerClosed) {
       workspace.querySelector('agent-dock-shell')?.open?.('show-action');
     }
     return {
@@ -253,6 +355,72 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const getDock = () => /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
   const getChat = () => /** @type {any} */ (workspace.querySelector('portfolio-show-chat'));
   const audioArbiter = new ShowAudioArbiter();
+  const routeRequests = createCvShowRouteRequestCoordinator();
+  let routeWriteTimer = null;
+  let lastRouteWriteAt = 0;
+  let lastRouteSemanticKey = '';
+  let reconcileRouteWhenIdle = false;
+  let stripRouteWhenIdle = false;
+
+  const cancelPendingRouteWrite = () => {
+    if (routeWriteTimer) clearTimeout(routeWriteTimer);
+    routeWriteTimer = null;
+    lastRouteSemanticKey = '';
+    reconcileRouteWhenIdle = false;
+    stripRouteWhenIdle = false;
+  };
+
+  const routePolicy = () => {
+    const view = cvShowRuntimeAuthority.getView();
+    const story = view.story;
+    const detailParents = Object.fromEntries(
+      Object.values(story?.branches || {}).map((branch) => [branch.id, branch.sceneId]),
+    );
+    return {
+      entryIdsByMode: {
+        short: new Set(createCvShowPlaybackEntries(story, 'short').map(({ id }) => id)),
+        full: new Set(createCvShowPlaybackEntries(story, 'full').map(({ id }) => id)),
+      },
+      detailParents,
+      getDurationMs: ({ entryId, detailId }) => Number(
+        view.mediaRegistry.entries[detailId || entryId]?.audio?.durationMilliseconds,
+      ),
+    };
+  };
+
+  const currentSceneEntryId = (requestedEntryId = '') => {
+    const view = cvShowRuntimeAuthority.getView();
+    const routeId = requestedEntryId || runtime.selectedId;
+    const selectedEntry = runtime.entries.get(routeId);
+    const ownerProjectId = (selectedEntry?.focusIds || [])
+      .find((id) => String(id).startsWith('projects/')) || '';
+    return resolveCvShowEntryForPortfolioRoute(view.story, routeId, { ownerProjectId })
+      || view.story?.short?.[0]
+      || '';
+  };
+
+  const replaceRouteUrl = (url) => {
+    if (typeof history === 'undefined' || typeof location === 'undefined') return;
+    if (url.href !== location.href) history.replaceState(history.state, '', url.href);
+  };
+
+  const writeRouteState = (state, { push = false } = {}) => {
+    if (typeof history === 'undefined' || typeof location === 'undefined' || !state?.mode) return;
+    let url;
+    try {
+      url = serializeCvShowRoute(location.href, state, routePolicy());
+    } catch {
+      return;
+    }
+    if (url.href === location.href) return;
+    history[push ? 'pushState' : 'replaceState'](history.state, '', url.href);
+    lastRouteWriteAt = Date.now();
+  };
+
+  const stripRouteState = () => {
+    if (typeof location === 'undefined') return;
+    replaceRouteUrl(stripCvShowRoute(location.href));
+  };
   const media = new ShowMediaController({
     audioArbiter,
     onEvent: (event) => {
@@ -280,6 +448,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       resolveTarget: (targetId) => resolveTargetElement(workspace, runtime, targetId),
       resolveMedia: (targetId) => resolveMediaElement(workspace, runtime, targetId),
       resolveText: getLocaleMessage,
+      resolveSelectionQuote: (source, target) => resolveCvShowSelectionQuote(target, source),
       activateTarget: (target, directive) => activateCvShowTarget(target, directive).handled,
       emit: (directive) => getChat()?.emitShowDirective?.(directive),
       actionAdapter: createPanelActionAdapter(workspace, runtime),
@@ -311,12 +480,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   const pausePresenter = (event) => {
     if (event.target !== getChat()) return;
-    if (event.detail?.reason === 'meaningful-interaction') {
-      presenter?.runner.meaningfulInteraction();
-      scheduleDocumentSelectionClear();
-    } else {
-      presenter?.runner.pause();
-    }
+    presenter?.runner.pause();
   };
 
   const resumePresenter = (event) => {
@@ -348,20 +512,29 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     return chat;
   };
 
-  const restoreOrigin = () => {
+  const restoreOrigin = (event) => {
+    cancelPendingRouteWrite();
     const wasRunning = running;
+    const reason = event?.detail?.reason || '';
+    const routeDriven = reason.startsWith('route-');
     running = false;
     disposePresenter();
     media.stop('show-terminal');
     audioArbiter.release({ reason: 'show-terminal' });
-    if (wasRunning && originTargetId && runtime.entries.has(originTargetId)) {
+    if (!routeDriven && wasRunning && originTargetId && runtime.entries.has(originTargetId)) {
       runtime.select(originTargetId, { focus: true, updateUrl: false });
     }
     originTargetId = '';
     scheduleDocumentSelectionClear();
+    if (event?.type === 'portfolio-show-complete' && event.detail?.routeState?.mode) {
+      writeRouteState(event.detail.routeState);
+    } else if (!routeDriven) {
+      if (routeRequests.applying) stripRouteWhenIdle = true;
+      else stripRouteState();
+    }
   };
 
-  const onOpen = () => {
+  const ensureTourOpen = () => {
     let dock = getDock();
     let chat = ensureChat();
     dock?.open?.('tour-button');
@@ -369,14 +542,118 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     queueMicrotask(() => requestAnimationFrame(() => requestAnimationFrame(
       () => getChat()?.focusFirstControl?.(),
     )));
+    return chat;
+  };
+
+  const scheduleRouteStateWrite = (state) => {
+    if (!state?.mode || !state.entryId) return;
+    const semanticKey = [state.mode, state.entryId, state.detailId, state.play ? '1' : '0'].join('|');
+    const immediate = semanticKey !== lastRouteSemanticKey;
+    lastRouteSemanticKey = semanticKey;
+    if (routeWriteTimer) clearTimeout(routeWriteTimer);
+    const write = () => {
+      routeWriteTimer = null;
+      writeRouteState(state);
+    };
+    if (immediate || Date.now() - lastRouteWriteAt >= 1_000) write();
+    else routeWriteTimer = setTimeout(write, Math.max(0, 1_000 - (Date.now() - lastRouteWriteAt)));
+  };
+
+  const reconcilePendingRouteState = () => {
+    if (routeRequests.applying) return;
+    if (stripRouteWhenIdle) {
+      stripRouteWhenIdle = false;
+      reconcileRouteWhenIdle = false;
+      stripRouteState();
+      return;
+    }
+    if (!reconcileRouteWhenIdle) return;
+    reconcileRouteWhenIdle = false;
+    scheduleRouteStateWrite(getChat()?.routeSnapshot);
+  };
+
+  const applyRouteState = async (state) => {
+    try {
+      return await routeRequests.run(async () => {
+        const chat = ensureTourOpen();
+        if (!chat) return false;
+        return await chat.applyShowRoute?.(state) || false;
+      });
+    } finally {
+      reconcilePendingRouteState();
+    }
+  };
+
+  const applyLocationRoute = async ({ source = 'location' } = {}) => {
+    if (typeof location === 'undefined') return false;
+    const parsed = canonicalizeCvShowRoute(location.href, routePolicy());
+    if (parsed.status === 'invalid') {
+      routeRequests.cancel();
+      replaceRouteUrl(parsed.url);
+      return false;
+    }
+    if (parsed.status === 'absent') {
+      const chat = getChat();
+      if (chat?.routeSnapshot?.running) {
+        return routeRequests.run(async () => {
+          chat.stopShow?.({ reason: `route-${source}` });
+          return false;
+        });
+      }
+      routeRequests.cancel();
+      return false;
+    }
+    if (parsed.changed) replaceRouteUrl(parsed.url);
+    return applyRouteState(parsed.state);
+  };
+
+  const onOpen = (event) => {
+    const entryId = currentSceneEntryId(event.detail?.entryId || '');
+    if (!entryId) {
+      ensureTourOpen();
+      return;
+    }
+    const state = { mode: 'short', entryId, detailId: '', timeMs: 0, play: true };
+    writeRouteState(state, { push: true });
+    void applyRouteState(state);
+  };
+
+  const onSourceViewerAction = (event) => {
+    if (event.detail?.action?.intent !== 'cv-show') return;
+    onOpen({ detail: { entryId: event.detail.action.payload?.entryId || runtime.selectedId } });
+  };
+
+  const onRouteChange = (event) => {
+    if (event.target !== getChat()) return;
+    if (routeRequests.applying) {
+      reconcileRouteWhenIdle = true;
+      return;
+    }
+    scheduleRouteStateWrite(event.detail?.state);
+  };
+
+  const onPopState = () => {
+    cancelPendingRouteWrite();
+    routeRequests.cancel();
+    // Cancelling the coordinator only suppresses a stale result. The player
+    // owns separate async media preparation, so invalidate that transport too
+    // before applying the newer browser location.
+    getChat()?.stopShow?.({ reason: 'route-popstate-replace' });
+    queueMicrotask(() => { void applyLocationRoute({ source: 'popstate' }); });
   };
 
   const onStart = () => {
+    workspace.querySelector('portfolio-graph-panel')
+      ?.prepareShowTarget?.({ allowHidden: true });
     ensurePresenter();
     originTargetId = runtime.selectedId;
     running = true;
     let chat = getChat();
     if (chat) chat.audioArbiter = audioArbiter;
+  };
+
+  const onSeek = () => {
+    ensurePresenter().runner.seek();
   };
 
   const dispatchResult = (chat, requestId, result) => {
@@ -419,6 +696,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   const onAlignedReset = (event) => {
     const reason = event.detail?.receipt?.reason || '';
+    // Caption-clock initialization establishes a media-time baseline. Neither
+    // its first sample nor the owned source-load restore replaces the
+    // presentation generation that is executing the scene setup cell.
+    if (reason === 'initial' || reason === 'alignment-ready') return;
     if (reason === 'branch-return') ensurePresenter().runner.branchReturn();
     else if (reason.includes('seek')) ensurePresenter().runner.seek();
     else ensurePresenter().runner.beginPhase();
@@ -480,7 +761,11 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   });
 
   document.addEventListener('portfolio-open-tour', onOpen);
+  document.addEventListener('source-viewer-action', onSourceViewerAction);
+  globalThis.addEventListener?.('popstate', onPopState);
   workspace.addEventListener('portfolio-show-start', onStart);
+  workspace.addEventListener('portfolio-show-seek', onSeek);
+  workspace.addEventListener('portfolio-show-route-change', onRouteChange);
   document.addEventListener('portfolio-show-pause', pausePresenter, { capture: true });
   document.addEventListener('portfolio-show-resume', resumePresenter, { capture: true });
   workspace.addEventListener('portfolio-show-phase', onPhase);
@@ -492,10 +777,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   workspace.addEventListener('portfolio-show-action', onShowAction);
   workspace.addEventListener('portfolio-show-skip-media', onSkipMedia);
   getDock()?.addEventListener('agent-dock-change', onDockChange);
+  queueMicrotask(() => { void applyLocationRoute({ source: 'load' }); });
 
   return () => {
     document.removeEventListener('portfolio-open-tour', onOpen);
+    document.removeEventListener('source-viewer-action', onSourceViewerAction);
+    globalThis.removeEventListener?.('popstate', onPopState);
     workspace.removeEventListener('portfolio-show-start', onStart);
+    workspace.removeEventListener('portfolio-show-seek', onSeek);
+    workspace.removeEventListener('portfolio-show-route-change', onRouteChange);
     document.removeEventListener('portfolio-show-pause', pausePresenter, { capture: true });
     document.removeEventListener('portfolio-show-resume', resumePresenter, { capture: true });
     workspace.removeEventListener('portfolio-show-phase', onPhase);
@@ -508,6 +798,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     workspace.removeEventListener('portfolio-show-skip-media', onSkipMedia);
     getDock()?.removeEventListener('agent-dock-change', onDockChange);
     interactionMonitor.dispose();
+    cancelPendingRouteWrite();
+    routeRequests.cancel();
     getChat()?.stopShow?.();
     disposePresenter();
     media.stop('tour-disposed');

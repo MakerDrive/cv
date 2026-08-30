@@ -1,8 +1,14 @@
 :::article-block intro
+Librería de ejecución del lado del servidor en la línea Symbiote.
+
 :::article-block layer-diagram
-Librería de ejecución del lado del servidor para crear servicios de backend, grafos (DAG) y bloques de automatización en la línea Symbiote.
+Crea servicios de backend y bloques de automatización.
+
+:::article-block execution-library
+Crea grafos (DAG) para la ejecución del backend.
+
+:::article-block readonly-graph-demo
+Su base son primitivas de servidor componibles. Los productos las combinan en un proceso de backend y Workspace conecta esa ejecución con una configuración portátil de interfaz.
 
 :::article-block workspace-join
-:::article-block execution-library
-:::article-block readonly-graph-demo
-symbiote-engine proporciona primitivas de servidor que los productos combinan para construir sus backends. No es un framework — no impone reglas sobre autenticación o enrutamiento. Como parte del vector Workspace-as-Config, el motor es el proveedor de ejecución del backend, sin acoplamiento a productos de UI.
+Como parte del vector Workspace-as-Config, el motor es el proveedor de ejecución del backend, sin acoplamiento a productos de UI. No es un framework — no impone reglas sobre autenticación o enrutamiento.

@@ -500,8 +500,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "За годы работы"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -532,8 +532,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "За годы работы"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -569,7 +569,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "quote": "Этот подход проходит"
         },
         "gestureDurationMs": 800,
-        "leadMs": 2500,
+        "leadMs": 3800,
         "settleBy": "anchor",
         "until": null
       },
@@ -601,8 +601,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Этот подход проходит"
         },
-        "gestureDurationMs": 1200,
-        "leadMs": 1500,
+        "gestureDurationMs": 2500,
+        "leadMs": 2800,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -637,8 +637,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "а дальше"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -669,8 +669,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "а дальше"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -698,7 +698,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0
         },
         "gestureDurationMs": 5800,
-        "leadMs": 6400,
+        "leadMs": 7250,
         "settleBy": "anchor",
         "until": null
       },
@@ -755,8 +755,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "я развиваю Symbiote Workspace"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 2200,
+        "leadMs": 3850,
         "settleBy": "anchor",
         "until": null
       },
@@ -787,8 +787,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "я развиваю Symbiote Workspace"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -823,8 +823,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Результат сохраняется"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1950,
+        "gestureDurationMs": 1000,
+        "leadMs": 2150,
         "settleBy": "anchor",
         "until": null
       },
@@ -889,8 +889,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Agent Portal"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -921,8 +921,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Agent Portal"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -982,8 +982,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "графовые инструменты"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 2200,
+        "leadMs": 3850,
         "settleBy": "anchor",
         "until": null
       },
@@ -1014,8 +1014,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "графовые инструменты"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -1050,8 +1050,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "эта интерактивная презентация"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -1082,8 +1082,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "эта интерактивная презентация"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -1143,8 +1143,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "серверная библиотека"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 2200,
+        "leadMs": 3850,
         "settleBy": "anchor",
         "until": null
       },
@@ -1175,8 +1175,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "серверная библиотека"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -1305,8 +1305,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "который я развиваю"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 2200,
+        "leadMs": 3850,
         "settleBy": "anchor",
         "until": null
       },
@@ -1337,8 +1337,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "который я развиваю"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -1443,7 +1443,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "quote": "конфликт возвращает"
         },
         "gestureDurationMs": 800,
-        "leadMs": 2500,
+        "leadMs": 3800,
         "settleBy": "anchor",
         "until": null
       },
@@ -1475,8 +1475,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "конфликт возвращает"
         },
-        "gestureDurationMs": 1200,
-        "leadMs": 1500,
+        "gestureDurationMs": 2500,
+        "leadMs": 2800,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -1536,8 +1536,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "предпросмотр и рендер"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1950,
+        "gestureDurationMs": 2200,
+        "leadMs": 3350,
         "settleBy": "anchor",
         "until": null
       },
@@ -1602,8 +1602,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Агент работает"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -1693,8 +1693,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "заявки, оборудование"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 2200,
+        "leadMs": 3850,
         "settleBy": "anchor",
         "until": null
       },
@@ -1725,8 +1725,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "заявки, оборудование"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -1761,8 +1761,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "общим актуальным контекстом"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -1793,8 +1793,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "общим актуальным контекстом"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -1948,8 +1948,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "компактный граф"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 2200,
+        "leadMs": 3850,
         "settleBy": "anchor",
         "until": null
       },
@@ -1980,8 +1980,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "компактный граф"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -2016,8 +2016,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "релевантную часть проекта"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1950,
+        "gestureDurationMs": 1000,
+        "leadMs": 2150,
         "settleBy": "anchor",
         "until": null
       },
@@ -2082,8 +2082,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "проверяемые факты"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -2173,8 +2173,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "маркетинговая платформа"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1950,
+        "gestureDurationMs": 2200,
+        "leadMs": 3350,
         "settleBy": "anchor",
         "until": null
       },
@@ -2471,8 +2471,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "В одном контуре"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 2200,
+        "leadMs": 3850,
         "settleBy": "anchor",
         "until": null
       },
@@ -2503,8 +2503,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "В одном контуре"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -2609,7 +2609,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "quote": "При изменении интерфейса"
         },
         "gestureDurationMs": 800,
-        "leadMs": 2500,
+        "leadMs": 3800,
         "settleBy": "anchor",
         "until": null
       },
@@ -2641,8 +2641,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "При изменении интерфейса"
         },
-        "gestureDurationMs": 1200,
-        "leadMs": 1500,
+        "gestureDurationMs": 2500,
+        "leadMs": 2800,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -2702,8 +2702,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "процесс от физической"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 2200,
+        "leadMs": 3850,
         "settleBy": "anchor",
         "until": null
       },
@@ -2734,8 +2734,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "процесс от физической"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -2770,8 +2770,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "готовой презентации модели"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -2999,8 +2999,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "реальными музейными коллекциями"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -3058,7 +3058,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0
         },
         "gestureDurationMs": 5800,
-        "leadMs": 6400,
+        "leadMs": 7850,
         "settleBy": "anchor",
         "until": null
       },
@@ -3090,8 +3090,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "более широкой линейки"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1799,
+        "gestureDurationMs": 2200,
+        "leadMs": 3850,
         "settleBy": "anchor",
         "until": null
       },
@@ -3122,8 +3122,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "более широкой линейки"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -3227,8 +3227,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "международных поставок"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1950,
+        "gestureDurationMs": 1000,
+        "leadMs": 2150,
         "settleBy": "anchor",
         "until": null
       },
@@ -3318,8 +3318,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Проект появился внутри"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1950,
+        "gestureDurationMs": 2200,
+        "leadMs": 3350,
         "settleBy": "anchor",
         "until": null
       },
@@ -3384,8 +3384,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Я продумал механику"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -3416,8 +3416,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Я продумал механику"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -3452,8 +3452,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Универсальный блок управления"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -3484,8 +3484,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Универсальный блок управления"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -3545,8 +3545,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "От программно-аппаратных систем"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -3577,8 +3577,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "От программно-аппаратных систем"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -3682,8 +3682,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Сейчас главным центром"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -3714,8 +3714,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Сейчас главным центром"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -3750,8 +3750,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Здесь можно продолжить"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1200,
+        "leadMs": 2450,
         "settleBy": "anchor",
         "until": null
       },
@@ -3816,8 +3816,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "связаться со мной"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -3978,8 +3978,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Конфигурацию можно обновлять"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -4010,8 +4010,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Конфигурацию можно обновлять"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -4046,8 +4046,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Секреты, авторизация"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -4078,8 +4078,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Секреты, авторизация"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -4139,8 +4139,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Компоненты публикуют"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -4171,8 +4171,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Компоненты публикуют"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -4207,8 +4207,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "манифесты"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -4369,8 +4369,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Продукт собирает"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1950,
+        "gestureDurationMs": 1000,
+        "leadMs": 2150,
         "settleBy": "anchor",
         "until": null
       },
@@ -4435,8 +4435,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Workspace связывает"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -4526,8 +4526,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "В центре находится"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -4558,8 +4558,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "В центре находится"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -4594,8 +4594,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "каждая колонка"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -4660,8 +4660,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Для задач с кодом"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -4692,8 +4692,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Для задач с кодом"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -4728,8 +4728,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Модели и подписки"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -4760,8 +4760,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Модели и подписки"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -4892,8 +4892,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "В рабочей среде"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -4958,8 +4958,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Видео-ядро уже работает"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -5049,8 +5049,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Панели связывают"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -5081,8 +5081,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Панели связывают"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -5117,8 +5117,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "работает через объявленные действия"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -5149,8 +5149,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "работает через объявленные действия"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -5446,8 +5446,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "скелеты кода"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -5478,8 +5478,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "скелеты кода"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -5514,8 +5514,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "факты браузерной проверки"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1950,
+        "gestureDurationMs": 1000,
+        "leadMs": 2150,
         "settleBy": "anchor",
         "until": null
       },
@@ -5580,8 +5580,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "сфокусированный контекст"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -5612,8 +5612,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "сфокусированный контекст"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -5675,8 +5675,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "API"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -5707,8 +5707,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "API"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -5743,8 +5743,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "управляли пулами"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -5775,8 +5775,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "управляли пулами"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -5976,8 +5976,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Сервер управляет расписанием"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -6008,8 +6008,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Сервер управляет расписанием"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -6044,8 +6044,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Готовый JSON-сценарий"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -6076,8 +6076,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Готовый JSON-сценарий"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -6112,8 +6112,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Если структура экрана изменилась"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -6178,8 +6178,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Исходящие действия"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -6210,8 +6210,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Исходящие действия"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -6246,8 +6246,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Демонстрация заканчивается"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -6339,8 +6339,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Публичные примеры"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -6405,8 +6405,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Студия завершила работу"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1950,
+        "gestureDurationMs": 1000,
+        "leadMs": 2150,
         "settleBy": "anchor",
         "until": null
       },
@@ -6567,8 +6567,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "в Эрмитаже я сканировал"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -6633,8 +6633,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "бенинской бронзы"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -6726,8 +6726,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "управляемый свет"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -6758,8 +6758,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "управляемый свет"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -6794,8 +6794,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "собирал прототипы"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -6954,8 +6954,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Arduino-версию"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -6986,8 +6986,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Arduino-версию"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -7022,8 +7022,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "я сам продолжил"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 2050,
+        "gestureDurationMs": 1000,
+        "leadMs": 2250,
         "settleBy": "anchor",
         "until": null
       },
@@ -7088,8 +7088,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "сборку с калибровкой"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1800,
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
         "settleBy": "anchor",
         "until": null
       },
@@ -7120,8 +7120,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "сборку с калибровкой"
         },
-        "gestureDurationMs": 550,
-        "leadMs": 800,
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "anchor",
         "until": {
           "anchor": "turn-end",
@@ -7179,7 +7179,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 1,
+  "revision": 10,
   "schemaVersion": "workspace-presentation-authoring-project-v1",
   "script": {
     "grounding": {
@@ -8527,9 +8527,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "entries": [
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-UfV9vvznYaadrPsBBU1u/xP+tUAlQM8sMTus8y+6chQ=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-HuEOV3UBvZ1J6MvIhzIhdvApgeFt42aaEd6Xkat5WV0=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-4oJB2ehokvfpW+eA+ZQpFe5bMKt1pf2nZ9XFKJRh+us=",
         "entryId": "positioning",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-7qz+n9DWlFHsX1rKCh5y/01I8r6UR2JOleuJ7qBchS4=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-sbh9tY0wTCS+eEJsXxytlfB/bpguH8sFhlGY7n7XT8g=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-+ZFtKIAMQAyUc3rZxl+CEh3nxHfLrSTi9nBwf6PojcE=",
         "sourceCellIds": [
           "cv-show:narration:positioning",
@@ -8545,9 +8545,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-P6CMhSwp4D0Gd6es2XxR2zMU6yLLLQODN0vgMFjcLgo=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-hkxPc6slYgS/zTwLJFU57qE6rhrvRUgp09qKztZ7ZIM=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-GrSVgMDMJnIrSCxJhfmlQkNopgPLB6tyAfkMEQgt2cU=",
         "entryId": "symbiote-workspace",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-x5n+UIC4DzNnwUIXmGcYdumrGxG7lKi32xhVGZlC3AA=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Q60fDIQ5b3blA9tNS9iyzx58MIWMAMzk6I6Lassr6Q8=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-NgqYFXwwmbUKL8qH9uYHuHxgCaE4aWC+wAD8/+zY0uE=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-workspace",
@@ -8563,9 +8563,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-isId7fG7lhzDnWfMzZv3IjyMhds1+0cqxr0ic58r4bg=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-bQuhVhKWyYE4Z/plML8ufRIL2QCORaveXbno/uVnlXY=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-K683xkbRvDauUwDIsMcTrDNHfv2E+9uNXpS4Ul81xTI=",
         "entryId": "symbiote-ui",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-JzP4e3UVTJBRVO5bAX+YqvVEBvAwJp9Foh5Gga2G/24=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Um2N159e+GnygjCFG4CRvNwefc5yM6nxJsi6MvBguj8=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-GLS82H5P87HCNWgzyIxEnhLOhFAxVCfpGbOgiAJrsig=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-ui",
@@ -8579,9 +8579,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-MHJhJN4//GIMq6RPi0uaFfJLkIA7h4/2axAfIKRADn8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-JjCO/NGcq13HBnM8z3f6m53f6DanOXXEeAa6dRcpGDU=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-LFp8wKwac/hIIH4m2SOzHRtDFW81YE5tijXCVn4Y49E=",
         "entryId": "symbiote-engine",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-tOjnnmHxyOwoy1IwJzzKwmm/cvuXxw1CCYZ6lzaYqYc=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-ir9h3QGH0aNPI1VpbPs9CJjylE5MZ0DTCG4zBtplZ7k=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-rPFrozOo8qk7JXLQWW5Red6QWTeq7aQg2Px44b28TV8=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-engine",
@@ -8595,9 +8595,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-SMhj7vgvkQXUFxey5+767HAJhG9bbm79lSqAp7zE5JQ=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-JuEjxYtU7ZC7ppVlS6phSq4G3EKH0SFwue7UUVGRiAg=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-UN68vWQfMbL+clLYOlztgsmU3+OmB2SbU1oDZhSJarM=",
         "entryId": "agent-portal",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-lgesCY1rV2Mc7zQ3d/HwhZBFZyJGPPqhYvzrqDxmzSE=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-54U8Hj0wx67FoBrMVx7aC3Pj0HfX7yFhDvYxSdrGCuk=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-BH/8cnOdiK2+MRHmC3FfBdze3QrWdbXc7Dy8b1KOXk8=",
         "sourceCellIds": [
           "cv-show:narration:agent-portal",
@@ -8613,9 +8613,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-7nMDkWQX3/9OelAIh5xuAEDQ9MCfw7spgmYC/F5Q2qo=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-gQgaxhGx4ehD7eTYrF1Vdk13aDeLYCWhGPuJB9hpbqY=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ePLVKIGbM72AiBoNYr5Z7D1iXsfY86UJ4jd6wH71czU=",
         "entryId": "symbiote-video-studio",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-ZsuRsLvYFKgR0WHn3Q1qGUH8Ue6KEty0MiKuPSB4p6E=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-lisx5aGuRsO476SXpkVpG+erz5tSXEc8wr1lAlDuq4U=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-/eFKH4MW9WnmDDMrwCWPRGZm65UeR1dn4nGkH9n6EiY=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-video-studio",
@@ -8629,9 +8629,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-XG99cKWgpMddBKxJJHureISezZ/1H6vcZm2x2S6ahoY=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-GWw/DnR3jlZL8cuee+ExceK7gq/jlPPJ4OmmwdE7gko=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-4pi3ZWJ2Aw/X6z6LwDS9XYiIV8MeFc1itg1gG90MUog=",
         "entryId": "adaptive-maximo-workbench",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-D6K7TuW8/A00MI28sz3ec+OjOenkLMKYbJvDi7QuQ+E=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Oj5ShPZXip5Dz1RXMACMehFnM9DxW8Eli3DUEzRUJys=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-Ze9BzvKLMIOQqh0iz3bwtW3NeLLWZkIaAbxjynnfz4E=",
         "sourceCellIds": [
           "cv-show:narration:adaptive-maximo-workbench",
@@ -8659,9 +8659,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-MFJWnWg5rGtyhlgjEDGnQYKaomaGFt4+Oe3I08fgbAs=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-wPmiZSt7yVhsHJTydVGRXbBL1Nmm+uUa4EP2nVFIrAM=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-iXrvNAHI7KJn+vSkxJwyqYmYK2YDpJ7CBPGQAupwXqA=",
         "entryId": "project-graph-mcp",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-16sycPYBMS4zgt9li18yGzfkCpaRlh49G9294/zhuvc=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-XNxOy+aUnohU2p3T9EW4jOcvReARdRLp/jfJUz4XN80=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-E9MNPbc88gL8yb/VAp3/ELemc1kDkvSqZ6eSiBzHiio=",
         "sourceCellIds": [
           "cv-show:narration:project-graph-mcp",
@@ -8677,9 +8677,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-7PCplvUJlzEEMhBh8GDTxxgyJa/AluMfyItekpyLJFU=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ybTf7IP46WzxC4WD0aab47gmsXJ2zBixXLyf8zJERsU=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-GxzF8nyPWcnkaZCYkuYINxmkARGVaOIcpnhoEpg4aMM=",
         "entryId": "lifecycle-messaging-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-EBLA5EDNz1paNKEtyFWxfHZ+rHtkiSr+sjRq2ZDBgKM=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-5ogkKPz7/tPV2BDH2y8tfcYxk8HIMT8S4bPB2eJvtrg=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-nwSQ7DGeZof7gfe//fD68o7PlV7sCrUm1OnPBkfWLw8=",
         "sourceCellIds": [
           "cv-show:narration:lifecycle-messaging-platform",
@@ -8697,9 +8697,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-h/SUoNOvc400IXqsYI50H/28V/1xtVGX8NoVEfHnJqc=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-zq12Q/al1IUpgTOvwwcuXsVzbseZcJBBBaNJ9zrTSXA=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-/7Rf4I08J9S2kvJ0BjwtP6IlPERfMvfuayMubRX805w=",
         "entryId": "mobile-smm-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-DWBpFTHvxXCqXrct0qC6PgQ0zj0Cc078yhQqLH9YhMM=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-nbK9HF2+8F58Pk4JpsXcX645UBlHCTLkYTTJqWXl0yk=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-c/sbymcOjVtD46jQjpU9cLMdCJzDhWSl2UYc4Y2NESY=",
         "sourceCellIds": [
           "cv-show:narration:mobile-smm-platform",
@@ -8715,9 +8715,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-rVl67pA0s+xXsYFJJVquywdT2ldVmQ7qHAMC+jhEtu8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-NiFx6z1slKdGwE3MyYtPTFfMse8qapTKixqWKwKGUIw=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-2krwOn725y4pbD4EXSLpha/rR+kZ85k9LUYAQcggXVQ=",
         "entryId": "f360-studio",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-XDqv107D+L72+vab9t81p/DPasBGDhhrx66lYkBX6gk=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-d8xHLhN0zWPXI5Amwyfo/uSEjjW6tT6jQusC82e76XA=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-cHpY7SOBjNdQnsUObaMytlMNiguA+M7VUx0yas6ZGXg=",
         "sourceCellIds": [
           "cv-show:narration:f360-studio",
@@ -8731,9 +8731,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-/lUQY/YMu9d4jMbJ+OxCoTiZ0vn4AvIUfzXJ1/3amDs=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-C7er4US3QWoYkibFupdEytNJA3YSGoPYeIyENp3OIFA=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-CDKaGbKI16ltxoZcI9KcCuCgxQAmrjTwNW2HcupdWSQ=",
         "entryId": "autobox",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-rxImbOK4/7OVxoscdzHbtNzYwvQQ7Iez2Y4ZEZQGDJA=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-n9UqrV9danbxX99YTpFEgNk6CmHz0zL+T46hoobZF5s=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-TucXljwfl4dwZyFSEcNyYjmtiP4yhYFJPUld/tXEFjY=",
         "sourceCellIds": [
           "cv-show:narration:autobox",
@@ -8749,9 +8749,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-cSod4+GmowJgMGzOLa1gNXOsmTa6VuS7sU1i8PQRwU4=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-+SYkEoXcgBKPrwki8cw8SDoGWxI5UGUM2VccWnFFL64=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-qbbOG0KBWIqfJam8ZZgKZcIwvy/J9t6T1GSD/f5W1vE=",
         "entryId": "complexscan",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Bh6v8lqRqvEIWyj3IxAlan8pkcoDxLfWSLcQBnhIgGY=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-E+0lGzNDMUCLoKaV8d2YyO62PaLH/ZbfB2a7+rMJkHo=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-N3tUn/fmaPvBF4W1zXMnLxX6QIjjmncEbpPEDuoNbww=",
         "sourceCellIds": [
           "cv-show:narration:complexscan",
@@ -8767,9 +8767,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-kEGF5JWhs09jZgzImdbETAqRaUEqojMSS0DN8VPRgpM=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-xuFmf/6bbJx0avPvjEuxuwUyDoyvA4Qc29TR0cdKpB4=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-KYqUrpPIpx/4OrnWcvw6YOHpNOr8mzcVJPszSAJroxY=",
         "entryId": "photopizza",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-872Z2o/dhKFQl7vZxDDi9gvz6gvXWrzk94kCfABgASM=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-DLGq9yiQAMJP+3lauUdst0jznsePKHBLYjOh/Fw2oXc=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-9SkN1jURWbGwdLO31cHQwXVgo0YAYacWgtJ9zX79kFc=",
         "sourceCellIds": [
           "cv-show:narration:photopizza",
@@ -8785,9 +8785,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-eF35+d3j+FTo0vgszljxaVoHaNAdigKW2VR1OTLSbxo=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-VPNduGG9hQ3bwjGWYDlOhdKrgeeugEUo8JYzslLmYAY=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-+EDxnxCQYgMycL+tZt/tawrRU2cUKu2KF8U0E/60OBY=",
         "entryId": "finale",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-cgm87g6vO03Bzc0eB3wumqjSlOyqmx5Q/YAGVApotCk=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-KT1Qme7E+OT6ljitQ8o/UvK5sxUobwlehE9p91SFHs8=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-BcabBttpbInDPu/kwUru5AmIeUyt5woUzwkETudnwtE=",
         "sourceCellIds": [
           "cv-show:narration:finale",
@@ -8807,9 +8807,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-I2xcNQBfH4ShOz0uQxtTvR4lbv3r+UiTypxgQpjD7W8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ek5+Ktwe/kpsAqlXSPg8c9kHEC1nw2DDQ3cWVu7O0d4=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-a+D0wFPzhuV2GGGRu2WUSho/HEGy3JVuOhvadcTOg9E=",
         "entryId": "workspace-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-5zwzQfeMOAHU/93W+BY+Wr0frEZWftCL2kU//ePq9B0=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-gJZIPt+xJ0K/4GAEhWLbRO9WXjsnyXx1cevZqaUo0eg=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-tiB1+KZ73hSqxn50Gi6Q6AjZLo/hoJ4cvlbAMbIObrk=",
         "sourceCellIds": [
           "cv-show:narration:workspace-details",
@@ -8825,9 +8825,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-FYe9HUlZD3hnz0FYDPetYgvVm/iIKbGddMZp+eC/hQM=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ELFQ5Pvm8BP3f87mdhvOnaTmTguovx/xfKBdlqGW+gg=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ijoDEBs8mKJqCanMWI43QYCmgUoxPHJcGT+gOEBQlPo=",
         "entryId": "symbiote-ui-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Vfs5sdCLy9F6S0x5lIREHVEC0C1g2+M0rIJ8hb6zITU=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-kS04RDdKdg07cb9096RBA4u9jX5X2u3OYnQiRrJMTU8=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-ocL+PPhzotor+2wU6+91cX2FOOIQWXQ/Lg6CP47T45I=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-ui-details",
@@ -8843,9 +8843,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-nIrt+ncXzQdJqIeDe2FlkUbHJkdlf6Il1G6zmbDXdFU=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-tO0JkGJ8OG57vn0elvLjY+Y4QrdIw9qs8XdpgrZz0To=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-n2+JeCPnXURGr218HDki6UaqqXwvA6kVaTAbmuKM6eU=",
         "entryId": "symbiote-engine-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-d61sikZNx/0oWYw8rbU36pxedtCth9zprh4nRmRPeEA=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-3in5L1MznaS68XLZnENZA4+0gzxSdMMRrzX6ilG1fcw=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-AMyZEHy00ukCVJbTWUrst0khhlktoo4b8k642sVy45U=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-engine-details",
@@ -8859,9 +8859,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-64ZOk4irzViJuHdOfd5jvaYC1T8QBCLX4x5ulIaPOBU=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-N2o0DHI5wu+FEYN9A/sJ89tJS0DDIYblbdAa6oUc6pQ=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-CnRh42tqu1WAwm/lNlFsYjTIGA2oBqnkukhWiv0vwj8=",
         "entryId": "agent-portal-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-QP1ZXzmO7hYqLlkfL3p/AClcIbaZvNYVQ1r2Zc2oBvc=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-RxxgTRTLIOZURY5kNNnSR5By+MkDHoqW6XRm6qbhh0o=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-eNCe6LMf91ZqHn31n15OcgHYYBy0aQP+PPw3SwZlzvY=",
         "sourceCellIds": [
           "cv-show:narration:agent-portal-details",
@@ -8879,9 +8879,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-mj1sdU4asyvrKHi23atvTbwT+4tMbbWeJIqHRoOAM3g=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-vfq0WoM7l9H6L+WquEn4O3Bpf/uzeRjwHMnge3RDj3k=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-0cVjN0OAiE3TjRBP9/QfaPDLcupeKIAM3RDhAQdsGV0=",
         "entryId": "video-studio-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-fWPxTHWNK7SlC4Qn2nh8R4/7AXoPlresiLDRx/+a3z4=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-rI3rRURbQn7zPFFnJBZMUiQ+3CJuXVV6XNnVW881vjE=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-vs4IF3iSo4tkOTjJWCnjYjLbCkF3zwDLpJrZM3MzFJ4=",
         "sourceCellIds": [
           "cv-show:narration:video-studio-details",
@@ -8897,9 +8897,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-yxKFR8EDsrWKGPThU/lDHnzNHHjr4Ee4JadXiZmOOU4=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-bZoYXdb7JVdwKlIPc1d/LwimsoymggwUDX4lxol4qfY=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-7atYy6+mWykrcBntzulqzq0C3l0p/aLCaosBfdV1YzE=",
         "entryId": "maximo-workbench-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-mYS/Oplx9yhEaCjb5IZaztAoEcsOvkNz12HoIQBe0t0=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-5qF1lmSy3plGDFpIJihteCNH+tanEkYXZrMJwtC9t2E=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-ypjBZRKrPbAmcN/yeg7aJ2n1L6/N7Z5l8NgJdehNz4E=",
         "sourceCellIds": [
           "cv-show:narration:maximo-workbench-details",
@@ -8931,9 +8931,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-3ptsQRNt1+O8UQ3ffTsKthdqJ/c/VDAyPvi7P1HfZrQ=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-V0EgOm4SpTDHVuOikPj2DwJtdgeRe/6sl24NXPe3Ydg=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-EDCEYIWpVUiaSugQSBt3vnZABjBPRgVhRnf4j/nyMZg=",
         "entryId": "project-graph-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-rciXVDKyo9hbTOSU0cH99+MLJAYsi9f3DAmpHPvYmQM=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-bWh3qwmWRLO5jk/xEXTZWTBsnALxjIzNrhBYGgQcNVo=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-lDGzFtBnppSvyLGrSfyd84peKskC0N/12iG2x86yHEQ=",
         "sourceCellIds": [
           "cv-show:narration:project-graph-details",
@@ -8949,9 +8949,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-tHZLi72iiJq8LYSZaYp166bAqSN3c+7r4fsBe2D6Go0=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-Zz0lfXxSwftTas8pczxp7fKPk2VKKIN2YZJDFOxw0Co=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-u5iKpR9S8Bc9IsXDn9WliPDL4v5pqG9S0swxBuVPGyY=",
         "entryId": "lifecycle-platform-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-6EYH3ajb4N86LNuc8umvD0MFz48k1aR8d4WFJ0SODcw=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-vynsgXU65aTecIC/6cO11r95l+ytjnoURH98tKCwJvw=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-+25no3KlXBzWrWZUPhG9us+iGyj40P6MDHCmI/Pb3QI=",
         "sourceCellIds": [
           "cv-show:narration:lifecycle-platform-details",
@@ -8969,9 +8969,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-bs9al8Yfz4Sk1zJWFb94/AZ5b6sNVAAbIW2KJ8SGB+Y=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-GXOkebZ4/ocr+bzscfWy0ZzwPi+7x9fosPl+rzZSVgE=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-DAj3fkBKPP1S5OOC7pDZKd6SighcRgmgESu62EwGakw=",
         "entryId": "mobile-smm-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-1fe+6k+dqb7En6N1AMMAXGK+ElxBqu299DneVSe55dk=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-S0jTfSf2h61QiZbg8iKty+GV3zktGlj+5WckO0L41RE=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-uNbHfsKyRsyupm9Q7sWKgTC2krCOsrR0IC/VmL6Lzko=",
         "sourceCellIds": [
           "cv-show:narration:mobile-smm-details",
@@ -8991,9 +8991,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-lUj7LLwMd/cwLYSQmpv48AehBOk11DKKj3r2r+1uYxk=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-pTufImP3LLE3O+oTcPZK9PncW4JoLwnZLG2P29upEpg=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-WoZmbRaOwhabl8dKPahs78diyLYx20uGIPzxKBvn5Vw=",
         "entryId": "f360-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-lJfh3K33LmRjDf6KtMCKq7qhzxaJBocrXrmVaiSSCIM=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-ChnFxmvGkDi/zFD1o+5pa9Iw36bIYoXCgqfZhmS0nx8=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-0ZEUAlsmhBEdOIPKTqo8Gj4UgZPb+GSKxeyzBtgSJUs=",
         "sourceCellIds": [
           "cv-show:narration:f360-details",
@@ -9007,9 +9007,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-eAXsohY/DfhdKozbW+ecJcTAX6bKtAa7h8QrWPCSC/c=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-jttrsV5tSCoSJxss1ChvHA2b6B4qgp8f5HiaclwfdRg=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-OO5nY/6Mm9oXPzEwlxIeFsy2vFmblD5d6MZpmbmUGCM=",
         "entryId": "autobox-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-5ReaAJnOa1nYU++Io/aBuDzCgyMlhQDVwzr6jzpJyqw=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-kLLPcBNazi2niiNhBzSHNESjKxNoKYqssvx8jt7Xabw=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-HJUTxlPPjwUToVnot1ybzSNNNfXEx9b1q+Uib6hT5To=",
         "sourceCellIds": [
           "cv-show:narration:autobox-details",
@@ -9025,9 +9025,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-G+mkBFeZ1GKPghStsuA0LTi/XmB0KW8WwNMHfxYzHr0=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ZvUHB6AjZ2vnZsdq4HYBMY8G2qXr3Glv3zB+uHXjLiE=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-U4eOw7tNpJn5bdZzTJHGYuUjH7oXGw5ZiKA8Uv9vado=",
         "entryId": "complexscan-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0mkk0iKqEeHXs1e1TmzXHqky+LHwtHgxUUoXuZK6hqk=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-mDVVIV7wgIlRYoNfwv88WR8lcnQOrlIROJ7F9w6wRBc=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-0tw1gfiGtDTJv3zgI6fMUZfnVvbjfACPUVkYgT45ehE=",
         "sourceCellIds": [
           "cv-show:narration:complexscan-details",
@@ -9043,9 +9043,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-eDG/Y2IVclDhoYI/XedK1t21tnBi2J+qsE81cBMozuM=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-t5Ua90SXN1V4X/vb1/LINtGFrQY1V85oNKy5Wx0s2TM=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-jJ3YvXIwXdJtWN9ri/CzeqG78/vXOgJClz1YkBM/i5k=",
         "entryId": "photopizza-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-q57g9PiRsEGhdm5spzGUKOvPW9Aw0KueUbsOteQF5kI=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-SPiBZESacRJ96c9C9N/mXHThPzB0Mr3OKBjCU456qUE=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-dKaNQ7CChtdYXLH0LB28/d5PWjEvla2krTUvGy0KASk=",
         "sourceCellIds": [
           "cv-show:narration:photopizza-details",
@@ -9060,7 +9060,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-SgEaflEyjb9U4ssSelo7BAchd9vgWDHLBCQfw9TEk/0="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-4KeFWWoSoh0bLZ6jzdm5CrkE2fRob0s35uOuqYorWQ8=",
+    "hash": "cv-show-audio-provenance-v1:sha256-DL+99lXlpLUNsizSHbn7Hlz7lPB+6Tr+mZQ5NVqsiXM=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
@@ -9120,8 +9120,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "manifestHash": "cv-show-media-manifest-v1:sha256-5DVgYxiVwYXx99g4SXUiiyDJI2Z9v1dwUqSEW4s7+jI=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:3ed44947397f6ef2d80f778764ae71376b5dc240e5ebaee5f2a88c105b5eaf7f",
-  "predecessorReleaseId": "cv-show-audio-release-v1:49e885925a3e97407c298532fc8056840460e982861c6724d6ccc448de465e27",
+  "planId": "cv-show-audio-release-plan-v1:227802e8bef9acf6f932020ab6036d00a7352d013a9ae2778324045605813ee4",
+  "predecessorReleaseId": "cv-show-audio-release-v1:72dba6c71068a42d0e3f89d9a2dcb22740623fadaa798967ff81e9f9eba1697b",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WJXMA0f9i4DwyS1CYrZ3FSAznMtAbhDA/lcaYjQVtNY=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-xkDP1BOrbemy4iknmMC7Vj4rwXfu/OsnY5Q7ZPGcfIc=",
@@ -9129,12 +9129,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v1:sha256-/tUvW3V7ZXLhcHJe9Fyhpupb/ifV+dO6S/goJrWXSPU=",
-    "revision": 1
+    "authoringProjectHash": "workspace-presentation-authoring-project-v1:sha256-yOG/UiS3IgXZbiDf3rr5YwVr6h04M4MODvRgx4k0M30=",
+    "revision": 10
   },
-  "releaseId": "cv-show-audio-release-v1:ccf41841bdbbe4b0f009ee66040f0eb99c1fda7bb4d4a8e6b3234abdb42f178f",
+  "releaseId": "cv-show-audio-release-v1:f8328f109db219a59e09adeb5d652c48563e0641a311e361728da62dd268c8b7",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:0e74185f18a4e05bee83b5e5f9060bd7f9c1d07352d04b71885a14f3fb5560ba"
+  "verificationHash": "cv-show-audio-release-verification-v1:5a291f9ef196616ddf2d69b1a5d4c37429e82af0527138e6fbf6aacc3e8892cc"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );

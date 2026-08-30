@@ -14,12 +14,22 @@ links: npm|https://www.npmjs.com/package/symbiote-ui; Demo|https://rnd-pro.githu
 # Symbiote UI
 
 :::article-block layout
+Reusable UI system researched for a specific constraint.
+
 :::article-block programmatic-composition
-Reusable UI system researched for a specific constraint: interfaces should be composable by software and understandable by agents.
+Library principle: interfaces should be composable by software and understandable by agents.
+
+:::article-block graph-tooling
+It covers graph editors and panel layouts.
 
 :::article-block resource-tree
-:::article-block graph-tooling
+It covers resource trees and toolbars.
+
 :::article-block provider-catalog
+It covers provider catalogs, structured UI metadata, and tool-discoverable contracts for agent-facing products.
+
 :::article-block manifest-demo
+In the current Symbiote architecture, this library provides visual primitives and component manifests (catalog).
+
 :::article-block workspace-link
-It covers graph editors, panel layouts, resource trees, toolbars, provider catalogs, structured UI metadata, and tool-discoverable contracts for agent-facing products. In the current Symbiote architecture, this library provides the visual primitives and component manifests (catalog) for the Symbiote Workspace orchestrator, acting as the building blocks from which AI agents dynamically assemble task-adaptive environments.
+For the Symbiote Workspace orchestrator, they act as the building blocks from which AI agents dynamically assemble task-adaptive environments.

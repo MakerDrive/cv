@@ -7,14 +7,21 @@
 
 :::article-block product-surfaces
 - Продуктовые поверхности: Web/PWA-интерфейсы, admin-панели, ролевые workflow, аналитические представления и автоматизация операционных кампаний.
+
 :::article-block backend-runtime
 - Backend/runtime: JavaScript/Node.js, API-сервисы, PostgreSQL, WebSocket-синхронизация runtime, RabbitMQ-совместимый intake и Swagger/API-документация.
+
 :::article-block delivery-ops
+Распределённые инстансы управляют пулами GSM-модемов через serialport/COM-соединения и AT-команды.
+
 :::article-block tunnels
+SSH/WebSocket-туннели связывают серверный runtime с удалёнными инстансами доставки.
+
 :::article-block modem-pools
+Модемный runtime выполняет SMS inbox и USSD-операции в физических пулах.
+
 :::article-block delivery-flow
-- Операции доставки: PM2/nginx deployment, SSH/WebSocket-туннели, serialport/COM-управление модемами, GSM-модемные пулы, AT-команды и SMS inbox/USSD-операции.
-- Данные и интеграции: data-flow, инструменты сегментации, API-интеграции и повторяемые операционные workflow.
+Поскольку связь и устройства могут менять состояние, очередь, повторяемое выполнение и мониторинг сохраняют управляемость доставки. PM2/nginx deployment, data-flow, инструменты сегментации, API-интеграции и повторяемые операционные workflow поддерживают этот маршрут.
 
 :::article-block digital-twin
 Для воспроизводимых проверок без постоянного доступа к физическим устройствам я создал локальный Digital Twin с виртуальными модемами и повторяемыми сценариями трафика. Он двусторонне отражал GSM-модемный пул: поведение устройств можно было воспроизводить локально, сохраняя тот же операционный поток для физического контура.

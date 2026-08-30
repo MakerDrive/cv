@@ -16,6 +16,9 @@ La programación crea trabajo explícito en cola con un objetivo y una hora plan
 :::article-block queue
 La cola muestra operaciones pendientes, activas, detenidas y completadas junto con el estado actual del dispositivo.
 
+:::article-block ui-change-demo
+La demostración de recuperación se detiene ante una interfaz local de prueba modificada, analiza la pantalla actual y prepara una revisión propuesta del escenario.
+
 :::article-block approval-log
 Los registros de aprobación y de acciones mantienen unidas la decisión y la evidencia local resultante.
 
@@ -24,7 +27,3 @@ Los dispositivos ejecutan escenarios declarados. Las credenciales y los datos de
 
 :::article-block local-demo
 La demostración pública termina con un borrador local, un objetivo de prueba y evidencia de aprobación o dry-run. No envía contenido a servicios externos.
-
-:::article-block ui-change-demo
-La demostración de recuperación se detiene ante una interfaz local de prueba modificada, analiza la pantalla actual y prepara una revisión propuesta del escenario.
-

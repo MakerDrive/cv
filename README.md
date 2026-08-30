@@ -56,18 +56,179 @@ The default dynamic server port is `3000`.
 
 ## CV Show audio workflow
 
-Master WAV files, voice references, Whisper recognition output, alignment
-receipts, and other reproducible authoring evidence stay outside Git in the
-ignored `TMP/cv-show-audio/` tree. Treat that tree as the local canonical source
-for the current voice revision; it is not copied into `dist/`.
+Scenario editing, the library-owned timeline contract, the local WebMCP tool
+surface, and the approval boundary are documented in
+[`docs/cv-show-authoring.md`](docs/cv-show-authoring.md). Edit the authored
+Project through that flow; do not edit the derived story or public audio
+projection directly.
 
-After changing narration text, voice, or alignment, explicitly publish a new
-content-addressed web projection:
+Master WAV files, voice references, Whisper recognition output, alignment, and
+durable runner state stay outside Git. Use an explicit absolute authoring base;
+do not use the worktree `TMP/` directory as the only copy because a reboot or
+worktree cleanup may remove it. The base contains immutable payloads at
+`<base>/<voice>/<artifact-tree-hash>/` and resumable workflow state under
+`<base>/.workflow/`.
+
+The production workflow composes the existing dirty planner, Qwen/Whisper model
+client, durable entry runner, aggregate release gate, private promotion, and
+Opus publisher. It does not infer either human decision:
+
+1. every newly synthesized exact WAV must be reviewed before Whisper can run;
+2. the exact aggregate release ID must be approved before staging or promotion.
+
+Create a private profile JSON outside Git. Its provenance fields must describe
+the desired voice and policies exactly; `readinessProfile` must equal `/readyz`
+from the model service for the entire run:
+
+```json
+{
+  "voice": {
+    "selectionId": "barzana-2",
+    "voiceRef": "qwen3:speaker:barzana2-review-20260827",
+    "model": "qwen3-clone",
+    "modelVersion": "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
+    "language": "ru",
+    "style": "warm natural product guide, continuous speech without long pauses",
+    "sampleRate": 24000,
+    "referenceSha256": "<normalized-reference-sha256>",
+    "referenceTranscriptSha256": "<reference-transcript-sha256>"
+  },
+  "synthesisPolicy": {
+    "format": "wav",
+    "normalize": true,
+    "normalization": {
+      "targetLufs": -19,
+      "truePeakLimitDbfs": -1,
+      "version": "bs1770-4-truepeak4x-v1"
+    },
+    "textPolicy": "English terms preserved in Latin script; digits expanded as context-aware Russian words"
+  },
+  "asr": {
+    "model": "large-v3-turbo",
+    "locale": "ru",
+    "recognitionVersion": "cv-show-whisper-recognition-v1"
+  },
+  "aligner": {
+    "alignedSequenceVersion": "workspace-aligned-sequence-v3",
+    "anchoringVersion": "workspace-transcript-word-anchoring-v1",
+    "contract": "workspace-observed-alignment"
+  },
+  "readinessProfile": {
+    "ready": true,
+    "status": "ready",
+    "model": "<exact-readyz-model>",
+    "modelVersion": "<exact-readyz-version>",
+    "accelerator": "cuda",
+    "capabilities": ["synthesize", "transcribe"]
+  }
+}
+```
+
+Plan and run a narration or voice revision with explicit absolute inputs:
 
 ```bash
-npm run publish:cv-show-web-audio
+export CV_SHOW_PRIVATE_ARTIFACT_BASE=/absolute/durable/cv-show-audio
+export CV_SHOW_MODEL_ENDPOINT=http://127.0.0.1:8000
+export CV_SHOW_AUDIO_PROFILE=/absolute/private/cv-show-audio-profile.json
+export CV_SHOW_AUDIO_PROJECT=/absolute/private/target-cv-show-project.json
+
+npm run cv-show:audio -- plan \
+  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
+  --project "$CV_SHOW_AUDIO_PROJECT" \
+  --profile "$CV_SHOW_AUDIO_PROFILE"
+
+npm run cv-show:audio -- advance \
+  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
+  --project "$CV_SHOW_AUDIO_PROJECT" \
+  --profile "$CV_SHOW_AUDIO_PROFILE" \
+  --endpoint "$CV_SHOW_MODEL_ENDPOINT"
+```
+
+`--project` is the absolute path to the target canonical Project projection
+produced by the scenario-authoring flow. Keep the selected source module at its
+accepted predecessor until `promote`; promotion atomically selects the target
+Project and its approved release together. For a voice-only revision, omit
+`--project` from every command and the workflow uses the selected Project. If an
+advancing command reports a missing model client, pass `--endpoint` or set
+`CV_SHOW_MODEL_ENDPOINT`.
+
+`advance` stops regenerated entries at `technical-verified`; it never invokes
+Whisper before review. Its `exactWav.path` is the immutable WAV artifact (the
+content-addressed file uses a `.bin` suffix); listen to that exact path, then bind
+the decision to the adjacent hashes printed by `advance`:
+
+```bash
+npm run cv-show:audio -- review \
+  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
+  --project "$CV_SHOW_AUDIO_PROJECT" \
+  --profile "$CV_SHOW_AUDIO_PROFILE" \
+  --endpoint "$CV_SHOW_MODEL_ENDPOINT" \
+  --entry positioning \
+  --wav-hash <exact-wav-sha256> \
+  --attempt-hash <exact-synthesis-attempt-sha256> \
+  --approve yes
+
+npm run cv-show:audio -- advance \
+  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
+  --project "$CV_SHOW_AUDIO_PROJECT" \
+  --profile "$CV_SHOW_AUDIO_PROFILE" \
+  --endpoint "$CV_SHOW_MODEL_ENDPOINT"
+```
+
+After all regenerated entries reach `entry-verified`, build the aggregate and
+review its printed `releaseId`. Approval must repeat that exact identity:
+
+```bash
+npm run cv-show:audio -- verify-release \
+  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
+  --project "$CV_SHOW_AUDIO_PROJECT" \
+  --profile "$CV_SHOW_AUDIO_PROFILE"
+
+npm run cv-show:audio -- approve-release \
+  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
+  --project "$CV_SHOW_AUDIO_PROJECT" \
+  --profile "$CV_SHOW_AUDIO_PROFILE" \
+  --release-id <exact-release-id> \
+  --approve yes
+
+npm run cv-show:audio -- stage \
+  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
+  --project "$CV_SHOW_AUDIO_PROJECT" \
+  --profile "$CV_SHOW_AUDIO_PROFILE"
+
+npm run cv-show:audio -- promote \
+  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
+  --project "$CV_SHOW_AUDIO_PROJECT" \
+  --profile "$CV_SHOW_AUDIO_PROFILE"
+
+npm run cv-show:audio -- publish \
+  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
+  --project "$CV_SHOW_AUDIO_PROJECT" \
+  --profile "$CV_SHOW_AUDIO_PROFILE"
 npm run verify:cv-show-web-audio
 ```
+
+After a reboot, run `status` with the same private base and profile. Immutable
+runner heads and generated cache files are resumed without synthesis or Whisper
+repetition. If the selected predecessor tree is missing, the command prints its
+exact expected path and stops; restore that content-addressed tree rather than
+silently regenerating accepted media.
+
+One narration-text change normally produces one `regenerate` disposition and 29
+byte-identical entry-release reuses. A voice-profile change produces 30
+regenerations. Timing-only Project changes reuse all 30 private media entries.
+Publish Opus only when the master artifact tree, audio/alignment manifests, or
+voice identity changes. When those media identities are unchanged, skip
+transcoding: `publish` first proves the accepted selector and exact manifest
+against the current private master with the production compatibility contract.
+An artifact-equivalent historical web projection produces a deterministic
+content-addressed reuse receipt under `<base>/.workflow/publication-receipts/`;
+the Opus publisher is not called. Changed media identity invokes the publisher.
+If the accepted proof was moved, pass both absolute `--public-selector` and
+`--public-manifest` paths. A missing or internally divergent selector/manifest
+proof fails actionably instead of guessing. This retains historical
+selector-to-manifest source linkage, so a timing-only successor does not
+transcode 30 unchanged WAV files.
 
 The publisher emits one immutable 61-file release under
 `src/static-pages/copy-cv-show-audio/`: 30 Ogg/Opus clips, 30 minimal aligned

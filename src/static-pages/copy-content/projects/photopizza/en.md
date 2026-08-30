@@ -16,21 +16,29 @@ links: PhotoPizza|https://www.youtube.com/@PhotoPizza|YouTube channel with produ
 :::article-block origin
 :::article-block intro
 :::article-block megavisor-origin
-I originally invented PhotoPizza inside the MEGAVISOR project, where we needed an affordable, fast, and repeatable way to shoot interactive 360-degree product media. The line started from an even earlier turntable prototype I built before PhotoPizza ([first build](https://www.youtube.com/watch?v=f1cB4X1wI50)).
+I originally invented PhotoPizza inside the MEGAVISOR project, where we needed an affordable, fast, and repeatable way to shoot interactive 360-degree product media.
+
+:::article-block mechanics
+The line started from an even earlier turntable prototype I built before PhotoPizza ([first build](https://www.youtube.com/watch?v=f1cB4X1wI50)).
 
 :::article-block control-software
-:::article-block controller
+Inside MEGAVISOR, I defined the capture logic and equipment requirements.
+
 :::article-block controller-attribution
+The first Arduino controller software was implemented by a contracted specialist.
+
 :::article-block controller-media
-Inside MEGAVISOR, I defined the capture logic and equipment requirements; the first Arduino controller software was implemented by a contracted specialist. After MEGAVISOR, I began developing the control software myself in JavaScript/Espruino, first for STM32-based controllers and later through Wi-Fi/browser-control configurations, while continuing the project as open-source hardware and software.
+After MEGAVISOR, I began developing the control software myself in JavaScript/Espruino, first for STM32-based controllers and later through Wi-Fi/browser-control configurations, while continuing the project as open-source hardware and software.
 
 :::article-block automation-platform
-:::article-block mechanics
+I positioned the control unit as a universal shooting-automation block.
+
 :::article-block browser-ui
 :::article-block turntable
 :::article-block camera-slider
 :::article-block panorama-head
-I positioned the control unit as a universal shooting-automation block: the same controller drove the turntable, a [camera slider](https://www.youtube.com/watch?v=t1xU6f-_lC0), and an [automatic panoramic head](https://www.youtube.com/watch?v=8qd0jA_UiWw), with a [browser control app](https://www.youtube.com/watch?v=1p85wa4FI5s).
+:::article-block controller
+The same controller drove the turntable, a [camera slider](https://www.youtube.com/watch?v=t1xU6f-_lC0), and an [automatic panoramic head](https://www.youtube.com/watch?v=8qd0jA_UiWw), with a [browser control app](https://www.youtube.com/watch?v=1p85wa4FI5s).
 
 :::article-block scope
 The project covered concept, mechanics, electronics, firmware, UI, documentation, photography, video, and 3D scanning workflows. It also scaled from accessible DIY builds to heavier versions such as PhotoPizza D1200 for large objects.
@@ -43,7 +51,9 @@ The same equipment-and-control R&D also branched into [BoothBot](../boothbot/): 
 :::article-block continuity
 I continued developing and maintaining PhotoPizza in parallel with ComplexScan and F360 until my 2022 relocation from Russia to Argentina.
 
-:::article-block documentation
 :::article-block assembly-calibration
+I selected accessible components and documented assembly and calibration in detail so people could build their own versions.
+
+:::article-block documentation
 :::article-block full-video
 Build history and hardware variants are documented on the [diy.photopizza Instagram](https://www.instagram.com/diy.photopizza/).

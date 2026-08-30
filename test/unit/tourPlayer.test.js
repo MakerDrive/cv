@@ -30,6 +30,7 @@ import {
   CV_SHOW_AUDIO_RELEASE,
   CV_SHOW_PRESENTATION_PROJECT,
 } from '../../src/static-pages/data/cvShowPresentationProject.js';
+import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../src/static-pages/data/cvShowWebAudioRelease.js';
 import {
   createCvShowAuthoringAuthority,
 } from '../../src/static-pages/js/tour-player/cvShowAuthoringAuthority.js';
@@ -81,6 +82,12 @@ import {
   createCvShowMessageStreamController,
 } from '../../src/static-pages/js/tour-player/messageStream.js';
 import {
+  animateCvShowScrollIntoView,
+  isShowTargetReadyForAction,
+  resolveCvShowSelectionQuote,
+  resolvePortfolioMapTarget,
+} from '../../src/static-pages/js/tour-player/targetResolution.js';
+import {
   createCvShowEntryProject,
   projectCvShowDirective,
 } from '../../src/static-pages/js/tour-player/presentationProjectAdapter.js';
@@ -124,6 +131,315 @@ const EXPECTED_DETAIL_BRANCHES = Object.freeze([
   'complexscan-details',
   'photopizza-details',
 ]);
+
+test('mobile panel actions preserve the surface that owns their target', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -2)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  t.after(() => {
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+
+  const { createPanelActionAdapter } = await import(
+    '../../src/static-pages/js/tour-player/index.js?panel-surface-ownership-test'
+  );
+  const createFixture = ({ open }) => {
+    const calls = [];
+    const workspace = document.createElement('main');
+    const layout = document.createElement('div');
+    layout.className = 'portfolio-layout';
+    layout.$ = { layoutTree: null };
+    const dock = document.createElement('agent-dock-shell');
+    const dockLayout = document.createElement('div');
+    dockLayout.setAttribute('drawer-mode-active', '');
+    dock.ref = { layout: dockLayout };
+    const player = document.createElement('chat-show-player');
+    const visibleRect = Object.freeze({
+      left: 10,
+      top: 20,
+      right: 210,
+      bottom: 120,
+      width: 200,
+      height: 100,
+    });
+    const hiddenRect = Object.freeze({
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      width: 0,
+      height: 0,
+    });
+    workspace.getBoundingClientRect = () => visibleRect;
+    player.getBoundingClientRect = () => (dock.hasAttribute('open') ? visibleRect : hiddenRect);
+    dock.open = (reason) => {
+      calls.push(['open', reason]);
+      dock.setAttribute('open', '');
+    };
+    dock.close = (reason) => {
+      calls.push(['close', reason]);
+      dock.removeAttribute('open');
+    };
+    if (open) dock.setAttribute('open', '');
+    dock.append(player);
+    workspace.append(layout, dock);
+    document.body.append(workspace);
+    const adapter = createPanelActionAdapter(workspace, { entries: new Map() });
+    return { adapter, calls, dock, player, workspace };
+  };
+  const reveal = (fixture, target, id = `${target}:scroll`) => {
+    const action = { id, target, type: 'scroll' };
+    const inspected = fixture.adapter.inspect({ action });
+    return { action, inspected, receipt: fixture.adapter.reveal({ action, inspected }) };
+  };
+
+  for (const target of ['portfolio.show-stage', 'chat.actions.finale']) {
+    const fixture = createFixture({ open: true });
+    reveal(fixture, target);
+    assert.deepEqual(fixture.calls, [], `${target} must preserve its open owning dock`);
+    assert.equal(fixture.dock.hasAttribute('open'), true);
+    fixture.workspace.remove();
+  }
+
+  const closed = createFixture({ open: false });
+  const closedAction = reveal(closed, 'chat.actions.finale');
+  assert.deepEqual(closed.calls, [['open', 'show-action']]);
+  await closed.adapter.awaitTransition(closedAction);
+  const ready = await closed.adapter.awaitTarget({
+    action: closedAction.action,
+    context: { scrollOperation: false },
+  });
+  assert.equal(ready.target, closed.player);
+  assert.equal(ready.target.getBoundingClientRect().width > 0, true);
+  closed.workspace.remove();
+
+  const main = createFixture({ open: true });
+  reveal(main, 'article.symbiote-ui.intro');
+  assert.deepEqual(main.calls, [['close', 'show-action']]);
+  assert.equal(main.dock.hasAttribute('open'), false);
+  main.workspace.remove();
+});
+
+test('CV Show scroll uses a bounded smooth trajectory to the browser-computed center', async () => {
+  let sequence = 0;
+  const callbacks = new Map();
+  const view = {
+    requestAnimationFrame(callback) {
+      const id = ++sequence;
+      callbacks.set(id, callback);
+      return id;
+    },
+    cancelAnimationFrame(id) {
+      callbacks.delete(id);
+    },
+    matchMedia() {
+      return { matches: false };
+    },
+  };
+  const container = {
+    parentElement: null,
+    scrollHeight: 1_000,
+    clientHeight: 200,
+    scrollWidth: 300,
+    clientWidth: 300,
+    scrollLeft: 0,
+    scrollTop: 0,
+    getRootNode() { return null; },
+  };
+  const target = {
+    parentElement: container,
+    scrollIntoView(options) {
+      assert.deepEqual(options, {
+        block: 'center',
+        inline: 'nearest',
+        behavior: 'instant',
+      });
+      container.scrollTop = 600;
+    },
+  };
+  const document = { defaultView: view, scrollingElement: container };
+  const pending = animateCvShowScrollIntoView(target, { document, durationMs: 300 });
+  assert.equal(container.scrollTop, 0, 'instant destination probe must not flash');
+
+  const step = (timestamp) => {
+    const [id, callback] = callbacks.entries().next().value;
+    callbacks.delete(id);
+    callback(timestamp);
+  };
+  step(0);
+  assert.equal(container.scrollTop, 0);
+  step(150);
+  assert.equal(container.scrollTop, 300);
+  step(300);
+  await pending;
+  assert.equal(container.scrollTop, 600);
+  assert.equal(callbacks.size, 0);
+});
+
+test('CV Show scroll settles an already-centered target without artificial animation frames', async () => {
+  let frameRequests = 0;
+  const view = {
+    requestAnimationFrame() {
+      frameRequests += 1;
+      return frameRequests;
+    },
+    cancelAnimationFrame() {},
+    matchMedia() {
+      return { matches: false };
+    },
+  };
+  const container = {
+    parentElement: null,
+    scrollHeight: 1_000,
+    clientHeight: 200,
+    scrollWidth: 300,
+    clientWidth: 300,
+    scrollLeft: 0,
+    scrollTop: 320,
+    getRootNode() { return null; },
+  };
+  const target = {
+    parentElement: container,
+    scrollIntoView(options) {
+      assert.deepEqual(options, {
+        block: 'center',
+        inline: 'nearest',
+        behavior: 'instant',
+      });
+      container.scrollTop = 320;
+    },
+  };
+
+  await animateCvShowScrollIntoView(target, {
+    document: { defaultView: view, scrollingElement: container },
+    durationMs: 300,
+  });
+
+  assert.equal(container.scrollTop, 320);
+  assert.equal(frameRequests, 0, 'a no-op scroll must not invent visual motion');
+});
+
+test('CV Show selection keeps an authored quote or derives a locale-safe semantic excerpt', () => {
+  const russianTarget = {
+    textContent: 'Результат сохраняется как переносимая исполняемая конфигурация.',
+  };
+  assert.equal(
+    resolveCvShowSelectionQuote(russianTarget, {
+      type: 'native-selection',
+      quote: 'переносимая исполняемая конфигурация',
+    }),
+    'переносимая исполняемая конфигурация',
+  );
+
+  const englishTarget = {
+    textContent: 'The result is saved as a portable executable configuration. It can be reopened.',
+  };
+  assert.equal(
+    resolveCvShowSelectionQuote(englishTarget, {
+      type: 'native-selection',
+      quote: 'переносимая исполняемая конфигурация',
+    }),
+    'The result is saved as a portable executable configuration.',
+  );
+  assert.equal(isShowTargetReadyForAction(englishTarget, {
+    type: 'native-selection',
+    quote: 'переносимая исполняемая конфигурация',
+  }), true);
+
+  const longEnglishTarget = {
+    textContent: 'It exposes dependency views, code skeletons, graph summaries, and browser-test evidence as compact structured context for engineering agents.',
+  };
+  const boundedQuote = resolveCvShowSelectionQuote(longEnglishTarget, {
+    type: 'native-selection',
+    quote: 'компактный структурированный инженерный контекст',
+  });
+  assert.equal(boundedQuote, 'It exposes dependency views, code skeletons, graph summaries, and browser-test');
+  assert.ok(boundedQuote.length <= 80);
+});
+
+test('finale map targets resolve the historical-to-current route instead of one generic node', () => {
+  const historicalNode = Object.freeze({ id: 'photopizza-node' });
+  const currentNode = Object.freeze({ id: 'agent-portal-node' });
+  const selectedNode = Object.freeze({ id: 'selected-node' });
+  const canvas = {
+    querySelector(selector) {
+      if (selector === 'graph-node[node-id="projects/photopizza"]') return historicalNode;
+      if (selector === 'graph-node[node-id="projects/agent-portal"]') return currentNode;
+      if (selector === 'graph-node[data-selected]') return selectedNode;
+      return null;
+    },
+  };
+  const workspace = {
+    querySelector(selector) {
+      return selector === 'node-canvas, sn-canvas-graph' ? canvas : null;
+    },
+  };
+
+  assert.equal(
+    resolvePortfolioMapTarget(workspace, 'portfolio.map.historical-branch'),
+    historicalNode,
+  );
+  assert.equal(
+    resolvePortfolioMapTarget(workspace, 'portfolio.map.engineering-scale-route'),
+    currentNode,
+  );
+  canvas.querySelector = () => null;
+  assert.equal(
+    resolvePortfolioMapTarget(workspace, 'portfolio.map.historical-branch'),
+    null,
+    'semantic map targets must wait for their exact graph node instead of framing the whole canvas',
+  );
+  assert.equal(
+    resolvePortfolioMapTarget(
+      { querySelector: () => null },
+      'portfolio.map.historical-branch',
+    ),
+    null,
+  );
+  assert.equal(resolvePortfolioMapTarget(workspace, 'profile.contacts'), null);
+});
+
+test('native selection waits for rendered text and permits the locale-safe fallback quote', () => {
+  const target = { textContent: 'Результат сохраняется как переносимая исполняемая конфигурация.' };
+  assert.equal(isShowTargetReadyForAction(target, { type: 'frame' }), true);
+  assert.equal(isShowTargetReadyForAction(target, {
+    type: 'native-selection',
+    quote: 'переносимая   исполняемая\nконфигурация',
+  }), true);
+  assert.equal(isShowTargetReadyForAction(target, {
+    type: 'native-selection',
+    quote: 'ещё не отрисованная цитата',
+  }), true);
+  assert.equal(isShowTargetReadyForAction({ textContent: '   ' }, {
+    type: 'native-selection',
+    quote: 'ещё не отрисованная цитата',
+  }), false);
+});
 
 test('CV Show data exposes the approved Russian Short and detail-branch contract', () => {
   assert.equal(CV_SHOW_STORY.version, 1);
@@ -335,6 +651,197 @@ test('branch return reruns subject setup before restoring paused narration', asy
   assert.doesNotMatch(logic, /CV_SHOW_PRESENTATION_PROJECT/u);
 });
 
+test('pending routed Show transport stops and restarts without stale lifecycle resurrection', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+    'speechSynthesis',
+    'SpeechSynthesisUtterance',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  const spoken = [];
+  globalThis.speechSynthesis = {
+    paused: false,
+    cancel() {},
+    pause() { this.paused = true; },
+    resume() { this.paused = false; },
+    speak(utterance) { spoken.push(utterance); },
+  };
+  globalThis.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+    constructor(text) { this.text = text; }
+  };
+
+  const fixtures = [];
+  t.after(() => {
+    for (const { dock } of fixtures) dock.remove();
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+
+  const { PortfolioShowChat } = await import(
+    '../../src/ui-components/client-only/tour-player/tour-player.js?pending-route-transport-test'
+  );
+  const createFixture = () => {
+    const dock = document.createElement('div');
+    const showPlayer = {
+      configs: [],
+      states: [],
+      bind(config) { this.configs.push(config); },
+      setState(state) { this.states.push(state); },
+    };
+    const fixture = {
+      dock,
+      mounts: 0,
+      showPlayer,
+      get config() { return showPlayer.configs.find(({ timeline }) => timeline?.turns?.length); },
+    };
+    dock.setAgentProvider = () => {};
+    dock.setMessages = () => {};
+    dock.getChat = () => null;
+    dock.setShow = (_key, config) => {
+      fixture.mounts += 1;
+      showPlayer.configs.push(config);
+      return showPlayer;
+    };
+    dock.removeShow = () => {};
+    const player = new PortfolioShowChat();
+    fixture.player = player;
+    player.agentDock = dock;
+    player.addEventListener('portfolio-show-phase', (event) => {
+      if (typeof event.detail?.complete !== 'function') return;
+      event.detail.handled = true;
+      event.detail.complete(Object.freeze({
+        status: 'success',
+        receipts: Object.freeze([Object.freeze({
+          status: 'success',
+          result: Object.freeze({ status: 'completed' }),
+        })]),
+      }));
+    });
+    dock.append(player);
+    document.body.append(dock);
+    fixtures.push(fixture);
+    return fixture;
+  };
+
+  const stopped = createFixture();
+  const stopEvents = [];
+  const stoppedStartEvents = [];
+  stopped.dock.addEventListener('portfolio-show-stop', (event) => stopEvents.push(event.detail));
+  stopped.dock.addEventListener('portfolio-show-start', (event) => stoppedStartEvents.push(event.detail));
+  const supersededStopStart = stopped.player.applyShowRoute({
+    mode: 'short',
+    entryId: 'positioning',
+    timeMs: 2_345,
+    play: true,
+  });
+  assert.equal(stopped.mounts, 1, 'the shared player mounts before narration preparation settles');
+  stopped.config.controller.stop();
+  assert.equal(await supersededStopStart, false);
+  await Promise.resolve();
+  stopped.player.stopShow();
+  assert.deepEqual(stopEvents, [{
+    reason: 'explicit',
+    routeState: {
+      mode: 'short',
+      entryId: 'positioning',
+      detailId: '',
+      timeMs: 2_345,
+      play: false,
+      running: false,
+      completed: false,
+    },
+  }]);
+  assert.deepEqual(stoppedStartEvents, []);
+  assert.equal(stopped.player.$.isRunning, false);
+
+  const restarted = createFixture();
+  const restartEvents = [];
+  const restartedStartEvents = [];
+  const restartedStopEvents = [];
+  restarted.dock.addEventListener('portfolio-show-seek', (event) => restartEvents.push(event.detail));
+  restarted.dock.addEventListener('portfolio-show-start', (event) => restartedStartEvents.push(event.detail));
+  restarted.dock.addEventListener('portfolio-show-stop', (event) => restartedStopEvents.push(event.detail));
+  const supersededRestartStart = restarted.player.applyShowRoute({
+    mode: 'short',
+    entryId: 'symbiote-ui',
+    timeMs: 3_456,
+    play: true,
+  });
+  assert.equal(restarted.mounts, 1);
+  restarted.config.controller.seek(0, 0);
+  assert.equal(await supersededRestartStart, false);
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(restartedStartEvents.length, 1, 'Restart publishes one surviving Show lifecycle');
+  assert.deepEqual(restartedStartEvents[0], { routeDriven: true });
+  assert.deepEqual(restartEvents, [{ index: 0, positionMs: 0 }]);
+  assert.deepEqual(restartedStopEvents, []);
+  assert.equal(restarted.mounts, 1, 'Restart reuses the player mounted by the pending route');
+  assert.equal(restarted.player.$.isRunning, true);
+  assert.equal(restarted.config.controller.isPlaying, true, 'Restart preserves routed play intent');
+  assert.deepEqual(restarted.player.routeSnapshot, {
+    mode: 'short',
+    entryId: 'positioning',
+    detailId: '',
+    timeMs: 0,
+    play: true,
+    running: true,
+    completed: false,
+  });
+  assert.equal(spoken.length, 1, 'the superseded route cannot start a duplicate narration');
+
+  const completionEvents = [];
+  restarted.dock.addEventListener('portfolio-show-complete', (event) => {
+    completionEvents.push(event.detail);
+  });
+  const finalIndex = restarted.config.timeline.turns.length - 1;
+  const finalTimeMs = Math.min(
+    4_321,
+    restarted.config.timeline.turns[finalIndex].durationMs,
+  );
+  restarted.config.controller.seek(finalIndex, finalTimeMs);
+  await new Promise((resolve) => setImmediate(resolve));
+  const finalUtterance = spoken.at(-1);
+  assert.equal(typeof finalUtterance?.onend, 'function');
+  finalUtterance.onend();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(completionEvents, [{
+    reason: 'explicit',
+    routeState: {
+      mode: 'short',
+      entryId: 'finale',
+      detailId: '',
+      timeMs: finalTimeMs,
+      play: false,
+      running: true,
+      completed: true,
+    },
+  }], 'natural completion preserves the last truthful narration position');
+});
+
 test('detail admission rejects stale live media before branch or presentation mutation', async (t) => {
   const authority = createCvShowAuthoringAuthority();
   const staleSnapshot = structuredClone(authority.read());
@@ -420,7 +927,12 @@ test('detail admission rejects stale live media before branch or presentation mu
     }
   });
 
-  const sessionCalls = { enterBranch: 0, setPlayback: 0, appendMessage: 0 };
+  const sessionCalls = {
+    enterBranch: 0,
+    returnFromBranch: 0,
+    setPlayback: 0,
+    appendMessage: 0,
+  };
   const sessionMethods = new Map();
   for (const method of Object.keys(sessionCalls)) {
     const original = ShowSessionState.prototype[method];
@@ -443,16 +955,19 @@ test('detail admission rejects stale live media before branch or presentation mu
   const showPlayer = {
     bindCalls: 0,
     stateCalls: 0,
-    bind() { this.bindCalls += 1; },
-    setState() { this.stateCalls += 1; },
+    configs: [],
+    states: [],
+    bind(config) { this.bindCalls += 1; this.configs.push(config); },
+    setState(state) { this.stateCalls += 1; this.states.push(state); },
   };
   let messages = [];
   let mountCalls = 0;
   dock.setAgentProvider = () => {};
   dock.setMessages = (value) => { messages = value; };
   dock.getChat = () => null;
-  dock.setShow = () => {
+  dock.setShow = (_key, config) => {
     mountCalls += 1;
+    showPlayer.configs.push(config);
     return showPlayer;
   };
   dock.removeShow = () => {};
@@ -486,6 +1001,23 @@ test('detail admission rejects stale live media before branch or presentation mu
   }));
   await Promise.all([started, initialPresentation]);
   assert.equal(player.$.isRunning, true);
+  const progressConfig = showPlayer.configs.find(({ timeline }) => timeline?.turns?.length);
+  const firstProgressTurn = progressConfig.timeline.turns[0];
+  assert.equal(
+    firstProgressTurn.durationMs,
+    authority.view.mediaRegistry.entries[firstProgressTurn.id].audio.durationMilliseconds,
+    'the shared player receives the authoritative duration for each Show segment',
+  );
+  assert.equal(
+    showPlayer.states.at(-1).progress.positionMs,
+    0,
+    'the shared player receives the live media position for the current segment',
+  );
+  assert.equal(
+    typeof progressConfig.controller.seek,
+    'function',
+    'the shared player receives a real CV runtime seek controller',
+  );
   const beforeStaleDetail = {
     sessionCalls: { ...sessionCalls },
     mountCalls,
@@ -540,6 +1072,126 @@ test('detail admission rejects stale live media before branch or presentation mu
     'a historical detail branch must first restore its owner article setup',
   );
   assert.equal(narrationHandoffs.length, beforeStaleDetail.narrationHandoffs + 1);
+
+  const beforeRestartReturnCalls = sessionCalls.returnFromBranch;
+  const restartWasPlaying = progressConfig.controller.isPlaying;
+  const restartEvents = [];
+  player.addEventListener('portfolio-show-seek', (event) => restartEvents.push(event.detail));
+  progressConfig.controller.seek(0, 0);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(player.$.inBranch, false, 'Restart leaves the active detail branch');
+  assert.equal(
+    sessionCalls.returnFromBranch,
+    beforeRestartReturnCalls + 1,
+    'Restart closes the branch in the shared Show session',
+  );
+  assert.equal(progressConfig.controller.index, 0, 'Restart selects the first main segment');
+  assert.equal(
+    progressConfig.controller.isPlaying,
+    restartWasPlaying,
+    'Restart preserves the active branch playing/paused state',
+  );
+  assert.deepEqual(player.routeSnapshot, {
+    mode: 'short',
+    entryId: 'positioning',
+    detailId: '',
+    timeMs: 0,
+    play: restartWasPlaying,
+    running: true,
+    completed: false,
+  });
+  assert.deepEqual(restartEvents, [{ index: 0, positionMs: 0 }]);
+
+  restartEvents.length = 0;
+  progressConfig.controller.seek(0, 1_111);
+  progressConfig.controller.seek(0, 2_222);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(
+    restartEvents,
+    [{ index: 0, positionMs: 2_222 }],
+    'two rapid seeks publish only the latest transport intent',
+  );
+
+  player.stopShow({ completed: true });
+  assert.equal(player.$.isRunning, false);
+  assert.equal(player.$.inBranch, false);
+  const beforeTerminalDetail = {
+    enterBranch: sessionCalls.enterBranch,
+    mountCalls,
+  };
+  const terminalDetailOpened = new Promise((resolve) => {
+    player.addEventListener('portfolio-show-phase', resolve, { once: true });
+  });
+  const terminalShowRestarted = new Promise((resolve) => {
+    player.addEventListener('portfolio-show-start', resolve, { once: true });
+  });
+  dock.dispatchEvent(new CustomEvent('agent-show-action', {
+    detail: {
+      id: 'symbiote-ui.actions',
+      actionId: 'details',
+      payload: { branchId: 'symbiote-ui-details', sceneId: 'symbiote-ui' },
+    },
+  }));
+  const [terminalPhaseEvent, terminalStartEvent] = await Promise.all([
+    terminalDetailOpened,
+    terminalShowRestarted,
+  ]);
+
+  assert.equal(player.$.isRunning, true, 'a completed Show can reopen an emitted detail action');
+  assert.equal(
+    terminalStartEvent.detail.completedDetailReview,
+    true,
+    'the reopened detail review restores the host presentation lifecycle',
+  );
+  assert.deepEqual(
+    terminalPhaseEvent.detail.directives.map(({ id }) => id),
+    ['symbiote-ui.open'],
+    'terminal detail review restores the owner article before branch setup',
+  );
+  assert.equal(player.$.inBranch, true);
+  assert.equal(sessionCalls.enterBranch, beforeTerminalDetail.enterBranch + 1);
+  assert.equal(mountCalls, beforeTerminalDetail.mountCalls + 1);
+
+  const beforeTerminalReturnMessages = messages.length;
+  const terminalCompletionEvents = [];
+  dock.addEventListener('portfolio-show-complete', (event) => {
+    terminalCompletionEvents.push(event.detail);
+  });
+  dock.dispatchEvent(new CustomEvent('agent-show-action', {
+    detail: { actionId: 'return' },
+  }));
+  assert.equal(player.$.isRunning, false, 'returning from a terminal review preserves completion');
+  assert.equal(player.$.inBranch, false);
+  assert.equal(
+    messages.length,
+    beforeTerminalReturnMessages,
+    'terminal detail return does not append a misleading resume action',
+  );
+  assert.deepEqual(
+    terminalCompletionEvents,
+    [{
+      reason: 'explicit',
+      routeState: {
+        mode: 'short',
+        entryId: 'symbiote-ui',
+        detailId: '',
+        timeMs: 0,
+        play: false,
+        running: true,
+        completed: true,
+      },
+    }],
+    'terminal detail return closes the external Show lifecycle with completion semantics',
+  );
+  dock.dispatchEvent(new CustomEvent('agent-show-action', {
+    detail: { actionId: 'return' },
+  }));
+  assert.equal(
+    terminalCompletionEvents.length,
+    1,
+    'a repeated return cannot close the same external Show lifecycle twice',
+  );
 });
 
 test('historical branch snapshot separates the current return parent from contextual ownership', () => {
@@ -788,6 +1440,7 @@ test('CV adapter explicitly maps all nine product directives to the accepted sha
 
 test('CV runner delegates navigation, attention, media, and chat events through shared APIs', async () => {
   const order = [];
+  const attentionRequests = [];
   const target = { id: 'target' };
   const mediaElement = { id: 'media' };
   const runtime = {
@@ -797,7 +1450,7 @@ test('CV runner delegates navigation, attention, media, and chat events through 
   const runner = createCvShowDirectiveRunner({
     document: {},
     runtime,
-    attention: { present: (request) => { order.push(['attention', request.mode, request.target]); return { presented: true }; }, clearTransient() {} },
+    attention: { present: (request) => { attentionRequests.push(request); order.push(['attention', request.mode, request.target]); return { presented: true }; }, clearTransient() {} },
     media: { play: async (element, directive) => { order.push(['media', element, directive.mode]); return { played: true }; } },
     emit: (directive) => order.push(['emit', directive.type]),
     resolveTarget: () => target,
@@ -828,6 +1481,10 @@ test('CV runner delegates navigation, attention, media, and chat events through 
     { focus: true, updateUrl: false },
   ]);
   assert.equal(order.filter(([name]) => name === 'attention').length, 5);
+  assert.equal(
+    attentionRequests.find(({ gestureId }) => gestureId === 'd.marker')?.annotation?.intent,
+    'emphasize',
+  );
   assert.equal(order.filter(([name]) => name === 'media').length, 1);
   assert.equal(order.filter(([name]) => name === 'activate').length, 1);
   assert.equal(order.filter(([name]) => name === 'emit').length, 8);
@@ -888,6 +1545,55 @@ test('CV navigation re-resolves its target after selection and waits for the sel
     result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.mode,
     'click',
   );
+});
+
+test('CV map navigation preserves the graph target supplied by the panel lifecycle', async () => {
+  const treeRow = { id: 'projects-tree-row' };
+  const graphNode = { id: 'projects-graph-node' };
+  const presented = [];
+  const runtime = {
+    entries: new Map([['projects/index', {}]]),
+    selectedId: 'projects/photopizza',
+    viewer: { getAttribute: () => null },
+    select(id) {
+      this.selectedId = id;
+      return true;
+    },
+  };
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime,
+    attention: {
+      present({ target }) {
+        presented.push(target.id);
+        return { presented: true };
+      },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    actionAdapter: {
+      inspect: () => ({ open: false }),
+      reveal: () => ({ changed: true }),
+      awaitTransition: () => ({ ready: true }),
+      awaitTarget: () => ({ target: graphNode }),
+      restore: () => ({ changed: false }),
+    },
+    resolveTarget: () => treeRow,
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({
+      target: typeof target === 'function' ? target() : target,
+    }),
+  });
+
+  const result = await runner.run([{
+    id: 'finale.map',
+    type: 'navigate',
+    target: 'projects/index',
+    policy: 'required',
+  }]);
+
+  assert.equal(result.status, 'success');
+  assert.deepEqual(presented, ['projects-graph-node']);
 });
 
 test('CV runner distinguishes required and optional missing targets', async () => {
@@ -1164,6 +1870,34 @@ function providerScenarioRunner(attention, options = {}) {
     ...options,
   });
 }
+
+test('optional media failure settles the Workspace operation without failing the tour', async () => {
+  const fixture = workspaceOperationFixture({
+    kind: 'interaction',
+    interaction: { type: 'click' },
+    source: {
+      id: 'optional.media',
+      type: 'media',
+      target: 'article.example.video',
+      mode: 'short-muted-montage',
+      policy: 'optional',
+    },
+  });
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    resolveMedia: () => ({}),
+    media: {
+      async play() {
+        throw Object.assign(new Error('autoplay unavailable'), { code: 'media-unavailable' });
+      },
+    },
+    waitForReadiness: async ({ target }) => ({ target }),
+    observePerformance: () => providerObservation(100),
+  });
+
+  assert.equal(await runCvShowPresentationOperation(runner, fixture.operation), undefined);
+  assert.deepEqual(fixture.receipts.map(({ status }) => status), ['acted', 'settled']);
+});
 
 async function assertAdmittedProviderRelay({ kind, interaction, mode, firstStatus }) {
   let admission = providerAdmissionFixture({ mode, gestureId: `example.${mode}` });
@@ -1504,10 +2238,19 @@ test('native scroll reports actual acted and settled receipts without provider a
     },
     resolveTarget: () => ({ id: 'target' }),
     resolveText: (key) => key,
-    waitForReadiness: async () => {
-      lifecycle.push('scroll');
-      await scrollGate;
-      return { id: 'target' };
+    actionAdapter: {
+      inspect() { lifecycle.push('inspect'); return { open: false, panelId: 'graph' }; },
+      reveal() { lifecycle.push('reveal'); return { changed: true, panelId: 'graph' }; },
+      awaitTransition() { lifecycle.push('transition'); return { ready: true }; },
+      async awaitTarget() {
+        lifecycle.push('scroll');
+        await scrollGate;
+        return { target: { id: 'target' } };
+      },
+      restore({ context }) {
+        lifecycle.push(['restore', context.retainRevealedPanel]);
+        return { changed: false, retainedOpen: context.retainRevealedPanel };
+      },
     },
     observePerformance: () => {
       lifecycle.push('status');
@@ -1521,15 +2264,20 @@ test('native scroll reports actual acted and settled receipts without provider a
   });
   fixture.operation.projectCell.id = 'cv-show:cue:example:scroll';
   let pending = runCvShowPresentationOperation(runner, fixture.operation);
+  await new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual(lifecycle, [
     'clear-markers',
     ['clear-transient', 'scroll', { preserveInk: false, preserveCursor: true }],
     'status',
+    'inspect',
+    'reveal',
+    'transition',
     'scroll',
   ]);
   assert.deepEqual(fixture.receipts.map(({ status }) => status), ['acted']);
   releaseScroll();
   assert.equal(await pending, undefined);
+  assert.deepEqual(lifecycle.slice(-2), [['restore', true], 'status']);
   assert.deepEqual(fixture.admissions, []);
   assert.deepEqual(fixture.receipts.map(({ status }) => status), ['acted', 'settled']);
   assert.equal(fixture.receipts[0].observedAt, actedAt);
@@ -1647,7 +2395,7 @@ function createInstalledPresenterCursor(events, durationMs = 220) {
     events.push(frame?.planOnly ? `ui:plan:${mode}` : `ui:pixel:${mode}`);
     return Object.freeze({
       presented: true,
-      planVersion: 'symbiote-presenter-kinematics-v1',
+      planVersion: 'symbiote-presenter-kinematics-v2',
       planIdentity: `installed-plan:${mode}:${target.id}`,
       normalizedPathHash: `installed-path:${mode}:${target.id}`,
       geometryIdentity: `installed-geometry:${target.id}`,
@@ -1938,7 +2686,7 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
       let record = harness.recordFor(harness.targetCellId);
       assert.equal(providerAdmission.version, SHOW_ATTENTION_ADMISSION_VERSION);
       assert.equal(providerAdmission.status, 'admitted');
-      assert.equal(providerAdmission.budget.limitMs, 550);
+      assert.equal(providerAdmission.budget.limitMs, 1_200);
       assert.equal(providerAdmission.budget.plannedDurationMs, 220);
       assert.equal(record.admissionInputs[0].providerAdmission, providerAdmission);
       assert.equal(harness.events.some((event) => event.startsWith('ui:pixel:')), false);
@@ -2074,12 +2822,12 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
     name: 'rejected admissions preserve exact over-budget and unresolved-target evidence',
     run: async () => {
       let rejections = [{
-        options: { focusDurationMs: 551 },
+        options: { focusDurationMs: 1_201 },
         assertEvidence(providerAdmission) {
           assert.equal(providerAdmission.reason.code, 'budget-exceeded');
           assert.deepEqual(
             providerAdmission.budget,
-            { limitMs: 550, plannedDurationMs: 551 },
+            { limitMs: 1_200, plannedDurationMs: 1_201 },
           );
         },
       }, {
@@ -2246,15 +2994,15 @@ test('Pause keeps an in-flight gesture inside the same transition barrier until 
   assert.equal(paused, false);
 });
 
-test('the presenter pause bridge cancels actual work only for meaningful interaction', async () => {
+test('the presenter pause bridge preserves presenter work and document selection for every pause reason', async () => {
   const logic = await readFile(new URL(
     '../../src/static-pages/js/tour-player/index.js',
     import.meta.url,
   ), 'utf8');
   const pauseBody = logic.match(/const pausePresenter = \(event\) => \{([\s\S]*?)\n  \};\n\n  const resumePresenter/u)?.[1] || '';
-  assert.match(pauseBody, /if \(event\.detail\?\.reason === 'meaningful-interaction'\) \{\s*presenter\?\.runner\.meaningfulInteraction\(\);/u);
+  assert.match(pauseBody, /presenter\?\.runner\.pause\(\);/u);
+  assert.doesNotMatch(pauseBody, /meaningfulInteraction|scheduleDocumentSelectionClear/u);
   assert.doesNotMatch(pauseBody, /\b(?:Queue|enqueue|tail)\b/u);
-  assert.match(pauseBody, /else \{\s*presenter\?\.runner\.pause\(\);\s*\}/u);
 });
 
 test('CV runner retains pre-presentation attention across Pause and resumes the same cue', async () => {
@@ -2664,6 +3412,31 @@ test('web audio release maps all 30 Opus clips and aligned sequences to current 
   );
 });
 
+test('selected public web audio loads from its artifact-equivalent historical Project source', async () => {
+  let appConfig = projectCvShowWebAudioReleaseConfig(CV_SHOW_WEB_AUDIO_RELEASE);
+  let config = resolveCvShowWebAudioConfig({
+    url: 'https://portfolio.example/cv/?showAudio=local',
+    baseUrl: 'https://portfolio.example/cv/',
+    appConfig,
+  });
+  let manifestBytes = await readFile(new URL(
+    `../../src/static-pages/copy-cv-show-audio/${CV_SHOW_WEB_AUDIO_RELEASE.manifest.path}`,
+    import.meta.url,
+  ));
+  clearCvShowWebAudioReleaseCache();
+  let release = await loadCvShowWebAudioRelease({
+    story: CV_SHOW_STORY,
+    config,
+    fetchImpl: async () => new Response(manifestBytes),
+  });
+
+  assert.equal(release.clips.length, 30);
+  assert.equal(release.source.masterReleaseId, CV_SHOW_WEB_AUDIO_RELEASE.sourceMasterReleaseId);
+  assert.equal(release.source.masterArtifactTreeHash, CV_SHOW_AUDIO_RELEASE.artifactTreeHash);
+  assert.equal(release.source.audioManifestSha256, CV_SHOW_AUDIO_RELEASE.manifests.audio.sha256);
+  assert.equal(release.source.alignmentManifestSha256, CV_SHOW_AUDIO_RELEASE.manifests.alignment.sha256);
+});
+
 test('web audio release rejects stale ancestry, profile, order, paths, hashes, and private fields', async () => {
   let { config, manifest } = createWebAudioHarness();
   let cases = [
@@ -2918,10 +3691,13 @@ test('local audio waits for the shared alignment handoff before playback', async
   assert.equal(speech.speak(CV_SHOW_STORY.scenes[0].speech, {
     id: 'positioning',
     lang: 'ru',
+    startPaused: true,
     onMedia: () => alignmentReady,
   }), true);
   await Promise.resolve();
   assert.equal(audio.playCalls, 0);
+  assert.equal(speech.resume(), true);
+  assert.equal(audio.playCalls, 0, 'Resume waits for the owned media generation');
   releaseAlignment(Object.freeze({
     status: 'completed',
     reason: 'alignment-ready',
@@ -2931,8 +3707,48 @@ test('local audio waits for the shared alignment handoff before playback', async
   }));
   await alignmentReady;
   await Promise.resolve();
-  assert.equal(audio.playCalls, 1);
+  assert.equal(audio.playCalls, 1, 'the queued Resume plays after alignment settles');
   assert.equal(speech.snapshot.generationReceipt.status, 'completed');
+});
+
+test('local audio retains aligned media when autoplay is blocked and resumes after a gesture', async () => {
+  let manifest = await validatedWebAudioManifest();
+  let blocked = [];
+  let sourceReleased = false;
+  let playCalls = 0;
+  let audio = {
+    paused: true,
+    currentTime: 1.25,
+    addEventListener() {},
+    removeEventListener() {},
+    play() {
+      playCalls += 1;
+      if (playCalls === 1) return Promise.reject(new DOMException('Gesture required', 'NotAllowedError'));
+      this.paused = false;
+      return Promise.resolve();
+    },
+    pause() { this.paused = true; },
+    removeAttribute(name) { if (name === 'src') sourceReleased = true; },
+  };
+  const speech = createLocalAudioSpeechController({ manifest, createAudio: () => audio });
+  assert.equal(speech.speak(CV_SHOW_STORY.scenes[0].speech, {
+    id: 'positioning',
+    lang: 'ru',
+    onMedia: () => Object.freeze({ status: 'completed', reason: 'alignment-ready' }),
+    onBlocked: (reason) => blocked.push(reason),
+  }), true);
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.deepEqual(blocked, ['autoplay-blocked']);
+  assert.equal(speech.snapshot.activeId, 'positioning');
+  assert.equal(speech.snapshot.playBlocked, true);
+  assert.equal(sourceReleased, false, 'policy blocking must retain the prepared media source');
+  assert.equal(speech.resume(), true);
+  await Promise.resolve();
+  assert.equal(playCalls, 2);
+  assert.equal(speech.snapshot.playBlocked, false);
+  assert.equal(speech.snapshot.lastError, '');
 });
 
 test('local audio rejects failed or cancelled media generations without playing', async () => {
@@ -3117,7 +3933,17 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8'),
   ]);
   assert.doesNotMatch(`${logic}\n${runtime}`, /onboundary|voiceschanged|triggerWord|querySelector\(directive\.target/);
-  assert.doesNotMatch(runtime, /history\.(?:pushState|replaceState)/);
+  assert.doesNotMatch(logic, /history\.(?:pushState|replaceState)/, 'the reusable player remains URL-agnostic');
+  assert.match(runtime, /serializeCvShowRoute/);
+  assert.match(runtime, /history\[push \? 'pushState' : 'replaceState'\]/);
+  assert.match(
+    runtime,
+    /const onPopState = \(\) => \{[\s\S]*?cancelPendingRouteWrite\(\);[\s\S]*?applyLocationRoute/u,
+  );
+  assert.match(logic, /async applyShowRoute\(/);
+  assert.doesNotMatch(main, /intent: 'cv-show'/, 'the obsolete viewer-toolbar launch action stays removed');
+  assert.match(main, /show\.openPresentation/);
+  assert.match(main, /getCvShowStartHref\(\)/);
   assert.match(`${logic}\n${runtime}\n${adapter}`, /symbiote-ui\/chat\/show-runtime/);
   assert.match(logic, /ShowSessionState/);
   assert.match(runtime, /ShowAttentionController/);
@@ -3134,6 +3960,11 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(runtime, /monitorMeaningfulShowInteractions/);
   assert.match(logic, /portfolio-show-pause/);
   assert.match(logic, /portfolio-show-resume/);
+  assert.match(
+    logic,
+    /release\?\.\(\{ \.\.\.activeToken, reason: 'paused' \}\)/,
+    'autoplay fallback releases the audio lease without cancelling resumable media',
+  );
   assert.match(runtime, /runner\.meaningfulInteraction\(\)/);
   assert.match(adapter, /createShowActionLifecycle/);
   assert.match(runtime, /cursor\.dispose\(\)/);
@@ -3179,6 +4010,16 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(logic, /this\.#advanceAfterAttention\(requestId\)/);
   assert.match(runtime, /portfolio-show-presentation-operation/);
   assert.match(runtime, /runCvShowPresentationOperation/);
+  assert.match(
+    runtime,
+    /const onSeek = \(\) => \{\s*ensurePresenter\(\)\.runner\.seek\(\);\s*\};[\s\S]*?addEventListener\('portfolio-show-seek', onSeek\)/u,
+    'a player seek cancels the prior presenter generation before the replacement setup starts',
+  );
+  assert.match(
+    runtime,
+    /if \(reason === 'initial' \|\| reason === 'alignment-ready'\) return;[\s\S]*?reason === 'branch-return'[\s\S]*?reason\.includes\('seek'\)/u,
+    'caption-clock initialization must not cancel an in-flight pre-audio setup operation',
+  );
   assert.match(logic, /portfolio-show-presentation-receipt/);
   assert.match(logic, /lastExecutionReceipt/);
   assert.doesNotMatch(logic, /portfolio-show-aligned-cue|lastCueId|lastCueTimeMs|lastAlignmentSource/u);
