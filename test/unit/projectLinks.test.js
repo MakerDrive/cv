@@ -104,7 +104,7 @@ test('project entries expose content paths while Markdown bodies stay out of ser
   assert.match(agentPortal?.summary || '', /graph-based context/);
   assert.match(agentPortal?.summary || '', /RAG-style context retrieval/);
   assert.match(agentPortal?.summary || '', /model\/resource routing/);
-  assert.match(agentPortal?.details || '', /resource-aware agent development/);
+  assert.match(agentPortal?.details || '', /open-source control plane/);
   assert.match(agentPortal?.details || '', /human-in-the-loop control/);
   assert.match(agentPortal?.details || '', /cheaper\/faster models/);
   assert.match(projectGraph?.summary || '', /RAG-style project retrieval/);
@@ -114,7 +114,7 @@ test('project entries expose content paths while Markdown bodies stay out of ser
   assert.match(projectGraph?.details || '', /faster\/cheaper model/);
   assert.match(agentPool?.summary || '', /assigning model\/resource tiers/);
   assert.match(agentPool?.summary || '', /handoffs/);
-  assert.match(agentPool?.details || '', /cross-model consensus/);
+  assert.match(agentPool?.details || '', /Cross-model consensus/);
   assert.match(agentPool?.details || '', /eval-style checks/);
   assert.match(agentPool?.details || '', /cheaper\/faster workers/);
   assert.match(megavisor?.summary || '', /photo-360 sequences/);
@@ -159,11 +159,11 @@ test('project entries expose content paths while Markdown bodies stay out of ser
   assert.match(loadProjectContent('complexscan', 'ru'), /экспортные документы/);
   assert.match(loadProjectContent('megavisor', 'ru'), /Gate9/);
   assert.match(loadProjectContent('megavisor', 'ru'), /магазинах/);
-  assert.match(loadProjectContent('agent-portal', 'ru'), /оптимизация ресурсов/);
+  assert.match(loadProjectContent('agent-portal', 'ru'), /группы ресурсов/);
   assert.match(loadProjectContent('agent-portal', 'ru'), /RAG-style context retrieval/);
   assert.match(loadProjectContent('project-graph-mcp', 'ru'), /10-50 раз/);
   assert.match(loadProjectContent('project-graph-mcp', 'ru'), /GraphRAG-style retrieval/);
-  assert.match(loadProjectContent('agent-pool-mcp', 'ru'), /кросс-модельный консенсус/);
+  assert.match(loadProjectContent('agent-pool-mcp', 'ru'), /Кросс-модельный консенсус/);
   assert.match(loadProjectContent('agent-pool-mcp', 'ru'), /eval-style проверки/);
   assert.match(loadProjectContent('autobox-v1', 'es'), /línea propia de tecnología de captura/);
   assert.match(loadProjectContent('autobox-v1', 'es'), /Diez netsuke japoneses/);
@@ -180,7 +180,7 @@ test('project entries expose content paths while Markdown bodies stay out of ser
   assert.match(loadProjectContent('complexscan', 'es'), /documentos de exportación/);
   assert.match(loadProjectContent('megavisor', 'es'), /Gate9/);
   assert.match(loadProjectContent('megavisor', 'es'), /tiendas/);
-  assert.match(loadProjectContent('agent-portal', 'es'), /optimización de recursos/);
+  assert.match(loadProjectContent('agent-portal', 'es'), /resource groups/);
   assert.match(loadProjectContent('agent-portal', 'es'), /RAG-style context retrieval/);
   assert.match(loadProjectContent('project-graph-mcp', 'es'), /10-50x/);
   assert.match(loadProjectContent('project-graph-mcp', 'es'), /GraphRAG-style retrieval/);
@@ -231,7 +231,7 @@ test('equipment-control R&D attribution and bottle-catalog branch stay explicit'
   assert.match(bySlug.get('photopizza')?.details || '', /BoothBot/);
   assert.match(bySlug.get('boothbot')?.details || '', /important branch of my equipment and control-software R&D/);
   assert.match(loadProjectContent('photopizza', 'ru'), /сам начал разрабатывать управляющее ПО на JavaScript\/Espruino/);
-  assert.match(loadProjectContent('photopizza', 'ru'), /первую Arduino-версию.*реализовал привлечённый специалист/);
+  assert.match(loadProjectContent('photopizza', 'ru'), /Первую Arduino-версию.*реализовал привлечённый специалист/);
   assert.match(loadProjectContent('megavisor', 'ru'), /от телефонов до мотоциклов/);
   assert.match(loadProjectContent('megavisor', 'ru'), /составлял техническое задание на управляющее ПО/);
   assert.doesNotMatch(loadProjectContent('photopizza', 'ru'), /формир/);
@@ -277,7 +277,7 @@ test('lifecycle messaging platform describes a public-safe technology profile', 
   );
   assert.match(
     loadProjectContent('lifecycle-messaging-platform', 'ru'),
-    /GSM-модемные пулы/
+    /пулами GSM-модемов/
   );
   assert.match(
     loadProjectContent('lifecycle-messaging-platform', 'ru'),
