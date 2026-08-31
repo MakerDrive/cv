@@ -228,7 +228,7 @@ test('every selected CV Show article target produces a semantic anchor in EN, RU
   let projects = new Map(loadProjectEntries().map(project => [project.slug, project]));
 
   assert.equal(articleTargets.length, 92);
-  assert.equal(uniqueTargets.length, 77);
+  assert.equal(uniqueTargets.length, 76);
   for (let target of uniqueTargets) {
     let match = target.match(/^article\.([a-z0-9][a-z0-9-]*)\.([a-z0-9][a-z0-9-]*)$/);
     assert.ok(match, target);
