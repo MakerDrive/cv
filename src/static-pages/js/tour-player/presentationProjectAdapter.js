@@ -55,6 +55,7 @@ const ATTENTION_CONTRACT_SCHEMA = 'cv-show-attention-contract-v1';
 const ENTRY_SLICE_SCHEMA = 'cv-show-entry-slice-v1';
 const AUTHORING_COMMAND_SCHEMA = 'workspace-presentation-authoring-command-v1';
 const DIRECTIVE_REFINEMENTS_COMMAND = 'cv-show.directive.set-refinements';
+const ENTRY_SUBTITLE_COMMAND = 'cv-show.entry.set-subtitle';
 const SHA256_HASH_RE = /^sha256:[a-f0-9]{64}$/u;
 const SHA256_INTEGRITY_RE = /:sha256-[A-Za-z0-9+/]{43}=$/u;
 
@@ -106,7 +107,7 @@ function exactKeys(value, expected) {
     && keys.every((key, index) => key === expectedKeys[index]);
 }
 
-function normalizeDirectiveRefinementsCommand(project, commandInput) {
+function normalizeDirectiveRefinementsCommand(project, commandInput, directiveProject = project) {
   if (!isPlainRecord(commandInput) || !exactKeys(
     commandInput,
     ['schemaVersion', 'id', 'base', 'type', 'payload'],
@@ -142,13 +143,13 @@ function normalizeDirectiveRefinementsCommand(project, commandInput) {
   }
   const cellId = payload.cellId;
   const cell = typeof cellId === 'string'
-    ? project.cells.find(({ id }) => id === cellId)
+    ? directiveProject.cells.find(({ id }) => id === cellId)
     : null;
   if (
     !cell
     || cell.kind !== 'cue'
     || cellId.endsWith(':scroll')
-    || !Object.hasOwn(metadata(project).directives, cellId)
+    || !Object.hasOwn(metadata(directiveProject).directives, cellId)
   ) {
     throw invalidAuthoringCommand('directive cell', { commandId: commandInput.id, cellId });
   }
@@ -163,6 +164,54 @@ function normalizeDirectiveRefinementsCommand(project, commandInput) {
     cellId,
     refinements: clone(payload.refinements),
   };
+}
+
+function normalizeEntrySubtitleCommand(project, commandInput) {
+  if (!isPlainRecord(commandInput) || !exactKeys(
+    commandInput,
+    ['schemaVersion', 'id', 'base', 'type', 'payload'],
+  )) {
+    throw invalidAuthoringCommand('command shape');
+  }
+  if (
+    commandInput.schemaVersion !== AUTHORING_COMMAND_SCHEMA
+    || typeof commandInput.id !== 'string'
+    || !commandInput.id
+    || commandInput.type !== ENTRY_SUBTITLE_COMMAND
+  ) {
+    throw invalidAuthoringCommand('command identity', { commandId: commandInput.id });
+  }
+  const base = commandInput.base;
+  if (!isPlainRecord(base) || !exactKeys(base, ['revision', 'authoringProjectHash'])) {
+    throw invalidAuthoringCommand('command base', { commandId: commandInput.id });
+  }
+  if (base.revision !== project.revision || base.authoringProjectHash !== project.hash) {
+    throw invalidAuthoringCommand(
+      `command "${commandInput.id}" base does not match the current master`,
+      {
+        commandId: commandInput.id,
+        expected: { revision: project.revision, authoringProjectHash: project.hash },
+        received: clone(base),
+      },
+      'CV_SHOW_AUTHORING_COMMAND_STALE',
+    );
+  }
+  const payload = commandInput.payload;
+  if (!isPlainRecord(payload) || !exactKeys(payload, ['entryId', 'subtitle'])) {
+    throw invalidAuthoringCommand('command payload', { commandId: commandInput.id });
+  }
+  if (
+    typeof payload.entryId !== 'string'
+    || !Object.hasOwn(metadata(project).entries, payload.entryId)
+    || typeof payload.subtitle !== 'string'
+    || !payload.subtitle.trim()
+  ) {
+    throw invalidAuthoringCommand('entry subtitle', {
+      commandId: commandInput.id,
+      entryId: payload.entryId,
+    });
+  }
+  return { id: commandInput.id, entryId: payload.entryId, subtitle: payload.subtitle.trim() };
 }
 
 function staleMedia(entryId, details = {}) {
@@ -351,6 +400,7 @@ export function applyCvShowMasterProjectCommands(projectInput, commandInputs = [
   }
   const ids = new Set();
   const directiveCommands = [];
+  const subtitleCommands = [];
   const genericCommands = [];
   for (const commandInput of commandInputs) {
     const commandId = isPlainRecord(commandInput) ? commandInput.id : null;
@@ -359,7 +409,9 @@ export function applyCvShowMasterProjectCommands(projectInput, commandInputs = [
     }
     if (typeof commandId === 'string') ids.add(commandId);
     if (commandInput?.type === DIRECTIVE_REFINEMENTS_COMMAND) {
-      directiveCommands.push(normalizeDirectiveRefinementsCommand(current, commandInput));
+      directiveCommands.push(commandInput);
+    } else if (commandInput?.type === ENTRY_SUBTITLE_COMMAND) {
+      subtitleCommands.push(normalizeEntrySubtitleCommand(current, commandInput));
     } else {
       genericCommands.push(commandInput);
     }
@@ -370,11 +422,19 @@ export function applyCvShowMasterProjectCommands(projectInput, commandInputs = [
   delete draft.hash;
   if (!genericCommands.length) draft.revision = current.revision + 1;
   for (const change of application.changes) {
+    const added = change.type === 'cell.add' ? change.cell : null;
+    if (added?.kind === 'cue' && !added.id.endsWith(':scroll')) {
+      draft.script.metadata.cvShow.directives[added.id] = {
+        policy: 'required',
+        refinements: {},
+      };
+    }
     const removed = change.type === 'cell.remove' ? change.cell : null;
     if (removed?.kind !== 'cue' || removed.id.endsWith(':scroll')) continue;
     delete draft.script.metadata.cvShow.directives[removed.id];
   }
-  for (const command of directiveCommands) {
+  for (const commandInput of directiveCommands) {
+    const command = normalizeDirectiveRefinementsCommand(current, commandInput, draft);
     const directive = draft.script.metadata.cvShow.directives[command.cellId];
     if (!directive) {
       throw invalidAuthoringCommand('directive cell was removed by the command batch', {
@@ -383,6 +443,9 @@ export function applyCvShowMasterProjectCommands(projectInput, commandInputs = [
       });
     }
     directive.refinements = clone(command.refinements);
+  }
+  for (const command of subtitleCommands) {
+    draft.script.metadata.cvShow.entries[command.entryId].subtitle = command.subtitle;
   }
   return validateCvShowMasterProject(createPresentationAuthoringProject(draft));
 }

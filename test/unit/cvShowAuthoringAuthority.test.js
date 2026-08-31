@@ -922,6 +922,112 @@ test('narration mutation invalidates only its clip and topology-invalid candidat
   assert.equal(transport.calls.transact, 4, 'invalid candidate must not reach host CAS');
 });
 
+test('local CV cue batch adds a complete attention group and directive metadata atomically', async () => {
+  const authority = createCvShowAuthoringAuthority();
+  const transport = createHostTransport(authority.read());
+  const session = await enable(authority, transport);
+  const project = authority.view.project;
+  const sourceAttention = project.cells.filter((cell) => (
+    cell.kind === 'cue'
+    && cell.turnId === 'positioning'
+    && !cell.id.endsWith(':scroll')
+    && cell.timing.at.anchor === 'speech'
+  )).at(-1);
+  const sourceScroll = project.cells.find(({ id }) => (
+    id === `${sourceAttention.id}:scroll`
+  ));
+  const attentionId = 'cv-show:cue:positioning.atomic-extra';
+  const scrollId = `${attentionId}:scroll`;
+  const insertIndex = project.cells.indexOf(sourceAttention) + 1;
+  const currentBase = base(project);
+  const result = await session.invoke('presentation_authoring_cv_show_cue_batch', {
+    id: 'test-add-complete-attention-group',
+    base: currentBase,
+    payload: {
+      commands: [
+        {
+          schemaVersion: 'workspace-presentation-authoring-command-v1',
+          id: 'test-add-complete-attention-scroll',
+          base: currentBase,
+          type: 'cell.add',
+          payload: {
+            cell: {
+              ...structuredClone(sourceScroll),
+              id: scrollId,
+              dependsOn: [{ cellId: sourceAttention.id, barrier: 'settled' }],
+            },
+            index: insertIndex,
+          },
+        },
+        {
+          schemaVersion: 'workspace-presentation-authoring-command-v1',
+          id: 'test-add-complete-attention-cue',
+          base: currentBase,
+          type: 'cell.add',
+          payload: {
+            cell: {
+              ...structuredClone(sourceAttention),
+              id: attentionId,
+              dependsOn: [{ cellId: scrollId, barrier: 'settled' }],
+            },
+            index: insertIndex + 1,
+          },
+        },
+        {
+          schemaVersion: 'workspace-presentation-authoring-command-v1',
+          id: 'test-add-complete-attention-refinements',
+          base: currentBase,
+          type: 'cv-show.directive.set-refinements',
+          payload: {
+            cellId: attentionId,
+            refinements: { action: 'watch-full-video', mode: 'short-muted-montage' },
+          },
+        },
+      ],
+    },
+  });
+
+  assert.equal(result.project.revision, currentBase.revision + 1);
+  assert.equal(authority.view.project.cells.some(({ id }) => id === scrollId), true);
+  assert.equal(authority.view.project.cells.some(({ id }) => id === attentionId), true);
+  assert.deepEqual(
+    authority.view.project.script.metadata.cvShow.directives[attentionId],
+    {
+      policy: 'required',
+      refinements: { action: 'watch-full-video', mode: 'short-muted-montage' },
+    },
+  );
+  assert.equal(result.cvMediaDisposition.status, 'preserved');
+  assert.equal(transport.calls.transact, 1);
+});
+
+test('local CV subtitle mutation preserves narration media and updates only entry metadata', async () => {
+  const authority = createCvShowAuthoringAuthority();
+  const transport = createHostTransport(authority.read());
+  const session = await enable(authority, transport);
+  const project = authority.view.project;
+  const narration = project.cells.find(({ id }) => id === 'cv-show:narration:positioning');
+  const subtitle = 'Обычный экранный текст для отдельной TTS-реплики.';
+  const result = await session.invoke('presentation_authoring_cv_show_entry_set_subtitle', {
+    id: 'test-set-positioning-subtitle',
+    base: base(project),
+    payload: { entryId: 'positioning', subtitle },
+  });
+
+  assert.equal(result.project.revision, project.revision + 1);
+  assert.equal(
+    authority.view.project.script.metadata.cvShow.entries.positioning.subtitle,
+    subtitle,
+  );
+  assert.equal(
+    authority.view.project.cells.find(({ id }) => id === narration.id).turn.text,
+    narration.turn.text,
+  );
+  assert.equal(result.cvMediaDisposition.status, 'preserved');
+  assert.equal(authority.view.mediaRegistry.entries.positioning.playable, true);
+  assert.equal(transport.calls.transact, 1);
+});
+
 test('a committed host result is not converted to failure when replica notification fails', async () => {
   const authority = createCvShowAuthoringAuthority();
   const transport = createHostTransport(authority.read());

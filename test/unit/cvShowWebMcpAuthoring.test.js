@@ -3,7 +3,9 @@ import test from 'node:test';
 
 globalThis.HTMLElement ||= class HTMLElement {};
 
-let { listPresentationAuthoringToolDescriptors } = await import('symbiote-workspace');
+let { listCvShowAuthoringToolDescriptors } = await import(
+  '../../src/static-pages/js/tour-player/cvShowAuthoringTools.js'
+);
 let { createCvShowWebMcpAuthoring } = await import(
   '../../src/static-pages/js/tour-player/cvShowWebMcpAuthoring.js'
 );
@@ -95,7 +97,7 @@ function createSession({
   invoke,
   getView,
   sessionId = 'cv-authoring-session',
-  tools = listPresentationAuthoringToolDescriptors(),
+  tools = listCvShowAuthoringToolDescriptors(),
 } = {}) {
   let calls = [];
   let defaultResult = Object.freeze({
@@ -316,7 +318,7 @@ test('session context accessors fail before any getter read or native registrati
 test('mutationSession accessors fail before any getter read or native registration', async () => {
   let getterReads = 0;
   let mutationSession = frozenDescriptorObject({
-    tools: listPresentationAuthoringToolDescriptors(),
+    tools: listCvShowAuthoringToolDescriptors(),
     invoke: async () => ({}),
   }, {
     accessorKey: 'tools',
@@ -405,7 +407,7 @@ test('local authoring registers all provider tools and returns exact typed resul
     registerTool: native.registerTool,
     unregisterTools: native.unregisterTools,
   });
-  let expectedNames = listPresentationAuthoringToolDescriptors().map(({ name }) => name);
+  let expectedNames = listCvShowAuthoringToolDescriptors().map(({ name }) => name);
 
   assert.equal(lifecycle.state.status, 'active');
   assert.deepEqual(lifecycle.state.activeToolNames, expectedNames);
@@ -444,7 +446,7 @@ test('local authoring registers all provider tools and returns exact typed resul
 });
 
 test('local authoring rejects missing or substituted provider tools', async () => {
-  let providerTools = listPresentationAuthoringToolDescriptors();
+  let providerTools = listCvShowAuthoringToolDescriptors();
   let substitutedTool = Object.freeze({
     name: 'presentation_authoring_unexpected',
     description: 'Unexpected provider tool used to prove exact surface validation.',
@@ -576,7 +578,7 @@ test('installed native WebMCP surface exposes all tools and keeps typed callback
       pageTarget: null,
     });
     assert.equal(lifecycle.state.status, 'active');
-    let expectedToolNames = listPresentationAuthoringToolDescriptors()
+    let expectedToolNames = listCvShowAuthoringToolDescriptors()
       .map(({ name }) => name)
       .sort();
     assert.equal(nativeTools.length, expectedToolNames.length);

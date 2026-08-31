@@ -355,6 +355,20 @@ test('model client performs one exact synthesis request and validates receipt ev
   assert.equal(Object.hasOwn(result.receipt, 'verified'), false);
 });
 
+test('model client sends the explicitly selected synthesis model', async () => {
+  let transport = captureFetch(() => synthesisResponse());
+  let client = createCvShowModelServiceClient({
+    endpoint: 'https://models.example.test/',
+    headers: { 'x-cv-run': 'fixture' },
+    fetchImpl: transport.fetchImpl,
+    model: 'qwen3-clone',
+  });
+
+  await client.synthesize(SYNTHESIS_ITEM);
+
+  assert.equal(JSON.parse(transport.calls[0].init.body).model, 'qwen3-clone');
+});
+
 test('model client rejects malformed readiness without fallback or polling', async () => {
   let invalidReadiness = [
     {

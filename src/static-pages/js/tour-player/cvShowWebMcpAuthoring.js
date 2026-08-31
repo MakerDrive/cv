@@ -3,12 +3,12 @@ import {
   registerWebMCPTool,
   unregisterWebMCPTools,
 } from '@symbiotejs/symbiote/webmcp';
-import { listPresentationAuthoringToolDescriptors } from 'symbiote-workspace/browser';
+import { listCvShowAuthoringToolDescriptors } from './cvShowAuthoringTools.js';
 
 const RESULT_SCHEMA_VERSION = 'cv-show-webmcp-result-v1';
 const LIFECYCLE_SCHEMA_VERSION = 'cv-show-webmcp-lifecycle-v1';
 const EXPECTED_TOOL_NAMES = Object.freeze(
-  listPresentationAuthoringToolDescriptors()
+  listCvShowAuthoringToolDescriptors()
     .map(({ name }) => name)
     .sort(),
 );

@@ -1,5 +1,5 @@
-import { createPresentationAuthoringToolPack } from 'symbiote-workspace/browser';
 import { CV_SHOW_PRESENTATION_PROJECT } from '../../data/cvShowPresentationProject.js';
+import { createCvShowAuthoringToolPack } from './cvShowAuthoringTools.js';
 import {
   createCvShowRuntimeSnapshotIdentity,
   createCvShowRuntimeState,
@@ -300,7 +300,7 @@ function createUnavailableRegeneration() {
  */
 export function createCvShowAuthoringAuthority({
   seedProject = CV_SHOW_PRESENTATION_PROJECT,
-  createToolPack = createPresentationAuthoringToolPack,
+  createToolPack = createCvShowAuthoringToolPack,
 } = {}) {
   let initial = createCvShowRuntimeState({ project: seedProject });
   let snapshot = initial.snapshot;

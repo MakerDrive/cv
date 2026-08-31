@@ -475,8 +475,10 @@ export function createCvShowModelServiceClient({
   endpoint,
   headers,
   fetchImpl,
+  model = 'qwen3',
 } = {}) {
   let origin = normalizeEndpoint(endpoint);
+  let synthesisModel = requireNormalizedString(model, 'synthesis model');
   if (typeof fetchImpl !== 'function') {
     invalid('CV Show model service client requires an explicitly injected fetch implementation');
   }
@@ -509,7 +511,7 @@ export function createCvShowModelServiceClient({
         'content-type': 'application/json',
         ...optionalHeaders,
       },
-      body: JSON.stringify({ model: 'qwen3', items: [item] }),
+      body: JSON.stringify({ model: synthesisModel, items: [item] }),
     });
     requireContentType(response, ['audio/wav', 'audio/x-wav'], '/synthesize');
     let durationSec = parsePositiveHeader(

@@ -1174,7 +1174,12 @@ async function cli(argv, environment = process.env) {
   let targetProject = await loadTargetProject(options.project, current.CV_SHOW_PRESENTATION_PROJECT);
   let endpoint = options.endpoint || environment.CV_SHOW_MODEL_ENDPOINT;
   let modelClient = endpoint
-    ? createCvShowModelServiceClient({ endpoint, headers: {}, fetchImpl: globalThis.fetch })
+    ? createCvShowModelServiceClient({
+        endpoint,
+        headers: {},
+        fetchImpl: globalThis.fetch,
+        model: profile.voice.model || 'qwen3',
+      })
     : null;
   let handle = await createCvShowAudioWorkflow({
     privateRoot,
