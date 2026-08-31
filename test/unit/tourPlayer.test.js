@@ -4043,7 +4043,6 @@ test('deferred aligned startup loads paused media without presentation admission
   assert.deepEqual(restoredOperations, [
     'cv-show:cue:workspace.open',
     'cv-show:cue:workspace.intro-frame',
-    'cv-show:cue:workspace.agent-portal-card',
   ], 'a paused checkpoint restores setup and only the attention still held at that time');
 });
 

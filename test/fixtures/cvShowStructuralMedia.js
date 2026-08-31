@@ -86,6 +86,10 @@ function createFixture() {
   for (let [index, { kind, entry }] of entries.entries()) {
     let sourceBinding = CV_SHOW_PRESENTATION_PROJECT.script.metadata.cvShow
       .entries[entry.id].media;
+    sourceBinding = {
+      ...sourceBinding,
+      durationMilliseconds: sourceBinding.durationMilliseconds * 2,
+    };
     let wavSha256 = sha256(`${FIXTURE_SCHEMA}:audio:${entry.id}`);
     let sequence = structuralSequence(entry, sourceBinding, `sha256:${wavSha256}`);
     let rawSequence = `${JSON.stringify(sequence, null, 2)}\n`;

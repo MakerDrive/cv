@@ -285,15 +285,18 @@ function mediaInputFor(plan, entryId) {
 
 function normalizePlan(input) {
   let source = clone(input, 'plan');
+  let baseFields = [
+    'schemaVersion',
+    'project',
+    'provenance',
+    'predecessor',
+    'entries',
+  ];
   if (
-    !exactKeys(source, [
-      'schemaVersion',
-      'project',
-      'provenance',
-      'predecessor',
-      'entries',
-    ])
+    !exactKeys(source, baseFields)
+      && !exactKeys(source, [...baseFields, 'refreshArtifacts'])
     || source.schemaVersion !== PLAN_SCHEMA
+    || (Object.hasOwn(source, 'refreshArtifacts') && source.refreshArtifacts !== true)
     || !Array.isArray(source.entries)
     || source.entries.length !== 30
     || !exactKeys(source.predecessor, ['release', 'projectBase'])
@@ -437,11 +440,17 @@ function createGeneratedEntryEvidence(result, plan, disposition) {
     entryId: disposition.entryId,
     mediaInput: mediaInputFor(plan, disposition.entryId),
   });
+  let runnerSequence = result.state.alignment.sequence;
+  let runnerSequenceHash = String(runnerSequence?.hash || '');
+  let releaseSequenceHash = typeof runnerSequence?.contractVersion === 'string'
+    && !runnerSequenceHash.startsWith(`${runnerSequence.contractVersion}:`)
+    ? `${runnerSequence.contractVersion}:${runnerSequenceHash}`
+    : runnerSequenceHash;
   if (
     release.wav.sha256 !== result.state.synthesis.wavHash
     || release.verification.timingCoverage !== result.state.alignment.metrics?.timingCoverage
-    || release.verification.alignedSequenceHash !== result.state.alignment.sequence?.hash
-    || release.verification.timelineHash !== result.state.alignment.sequence?.timelineHash
+    || release.verification.alignedSequenceHash !== releaseSequenceHash
+    || release.verification.timelineHash !== runnerSequence?.timelineHash
   ) {
     fail(
       'CV_SHOW_AUDIO_RELEASE_ENTRY_INVALID',
@@ -903,7 +912,10 @@ export function createCvShowAudioReleasePipeline(input = {}) {
           });
           let mediaCollectionIdentity;
           let manifests;
-          if (plan.entries.every(({ mode }) => mode === 'reuse')) {
+          if (
+            plan.entries.every(({ mode }) => mode === 'reuse')
+            && plan.refreshArtifacts !== true
+          ) {
             mediaCollectionIdentity = plan.predecessor.release.mediaCollectionIdentity;
             manifests = {
               locale: plan.predecessor.release.manifests.locale,

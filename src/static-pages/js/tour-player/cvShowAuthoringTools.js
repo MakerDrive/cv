@@ -162,11 +162,21 @@ export function listCvShowAuthoringToolDescriptors() {
   ].map(freezeDeep));
 }
 
-export function createCvShowAuthoringToolPack({ authority, regeneration } = {}) {
+/**
+ * @param {{ authority?: any, regeneration?: any }} [options]
+ */
+export function createCvShowAuthoringToolPack(options = {}) {
+  const { authority, regeneration } = options;
   const generic = createPresentationAuthoringToolPack({ authority, regeneration });
   const tools = listCvShowAuthoringToolDescriptors();
 
-  async function invoke(name, input = {}, { signal } = {}) {
+  /**
+   * @param {string} name
+   * @param {Record<string, any>} [input]
+   * @param {{ signal?: AbortSignal }} [options]
+   */
+  async function invoke(name, input = {}, options = {}) {
+    const { signal } = options;
     if (![CUE_BATCH_TOOL_NAME, ENTRY_SUBTITLE_TOOL_NAME].includes(name)) {
       return generic.invoke(name, input, { signal });
     }

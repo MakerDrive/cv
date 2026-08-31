@@ -1,0 +1,421 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-zUGqeZY57jwR2IOKDRgjRy4b26ZFte1RMJ8bnxr8EMs=",
+  "media": {
+    "durationMs": 38810,
+    "hash": "sha256:470f154c45eba3426bf95f4346f16d9971483ba4872919ac03bbfbaaf186dba9",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-724/UnGUjLxE6dgIc82SmehIWVg4+M7RBD/R68YQwPs=",
+  "turns": [
+    {
+      "endMs": 38810,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Второй инструмент Project Graph MCP – самостоятельный Open Source MCP сервер для навигации по кодовой базе. Он строит компактный граф-репозитория, который в Agent Portal отображается как визуальная карта проекта. Человек может выбрать интересующий узел, а агент раскрыть для нужной части зависимости скелеты кода, документацию и более подробный контекст. Так, человек и агент работают с одной структурой проекта, а модель получает релевантные проверяемые факты, не перечитывая весь репозиторий. Исходный код доступен на GitHub, а интерактивная демо доступна по соседней ссылке.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 320,
+          "startMs": 0,
+          "text": "Второй"
+        },
+        {
+          "endMs": 660,
+          "startMs": 320,
+          "text": "инструмент"
+        },
+        {
+          "endMs": 1180,
+          "startMs": 660,
+          "text": "Project"
+        },
+        {
+          "endMs": 1760,
+          "startMs": 1180,
+          "text": "Graph"
+        },
+        {
+          "endMs": 2680,
+          "startMs": 1760,
+          "text": "MCP"
+        },
+        {
+          "endMs": 4060,
+          "startMs": 3080,
+          "text": "самостоятельный"
+        },
+        {
+          "endMs": 4560,
+          "startMs": 4060,
+          "text": "Open"
+        },
+        {
+          "endMs": 5100,
+          "startMs": 4560,
+          "text": "Source"
+        },
+        {
+          "endMs": 6060,
+          "startMs": 5100,
+          "text": "MCP"
+        },
+        {
+          "endMs": 6640,
+          "startMs": 6060,
+          "text": "сервер"
+        },
+        {
+          "endMs": 6860,
+          "startMs": 6640,
+          "text": "для"
+        },
+        {
+          "endMs": 7580,
+          "startMs": 6860,
+          "text": "навигации"
+        },
+        {
+          "endMs": 8120,
+          "startMs": 7580,
+          "text": "по"
+        },
+        {
+          "endMs": 8580,
+          "startMs": 8120,
+          "text": "кодовой"
+        },
+        {
+          "endMs": 9060,
+          "startMs": 8580,
+          "text": "базе."
+        },
+        {
+          "endMs": 9460,
+          "startMs": 9200,
+          "text": "Он"
+        },
+        {
+          "endMs": 9820,
+          "startMs": 9460,
+          "text": "строит"
+        },
+        {
+          "endMs": 10320,
+          "startMs": 9820,
+          "text": "компактный"
+        },
+        {
+          "endMs": 10540,
+          "startMs": 10320,
+          "text": "граф"
+        },
+        {
+          "endMs": 11380,
+          "startMs": 10540,
+          "text": "-репозитория,"
+        },
+        {
+          "endMs": 11860,
+          "startMs": 11560,
+          "text": "который"
+        },
+        {
+          "endMs": 12140,
+          "startMs": 11860,
+          "text": "в"
+        },
+        {
+          "endMs": 12420,
+          "startMs": 12140,
+          "text": "Agent"
+        },
+        {
+          "endMs": 12840,
+          "startMs": 12420,
+          "text": "Portal"
+        },
+        {
+          "endMs": 13760,
+          "startMs": 12840,
+          "text": "отображается"
+        },
+        {
+          "endMs": 14000,
+          "startMs": 13760,
+          "text": "как"
+        },
+        {
+          "endMs": 14620,
+          "startMs": 14000,
+          "text": "визуальная"
+        },
+        {
+          "endMs": 15100,
+          "startMs": 14620,
+          "text": "карта"
+        },
+        {
+          "endMs": 15620,
+          "startMs": 15100,
+          "text": "проекта."
+        },
+        {
+          "endMs": 16080,
+          "startMs": 15720,
+          "text": "Человек"
+        },
+        {
+          "endMs": 16340,
+          "startMs": 16080,
+          "text": "может"
+        },
+        {
+          "endMs": 16860,
+          "startMs": 16340,
+          "text": "выбрать"
+        },
+        {
+          "endMs": 17940,
+          "startMs": 16860,
+          "text": "интересующий"
+        },
+        {
+          "endMs": 18480,
+          "startMs": 17940,
+          "text": "узел,"
+        },
+        {
+          "endMs": 19100,
+          "startMs": 18760,
+          "text": "а"
+        },
+        {
+          "endMs": 19380,
+          "startMs": 19100,
+          "text": "агент"
+        },
+        {
+          "endMs": 19820,
+          "startMs": 19380,
+          "text": "раскрыть"
+        },
+        {
+          "endMs": 19960,
+          "startMs": 19820,
+          "text": "для"
+        },
+        {
+          "endMs": 20280,
+          "startMs": 19960,
+          "text": "нужной"
+        },
+        {
+          "endMs": 20600,
+          "startMs": 20280,
+          "text": "части"
+        },
+        {
+          "endMs": 21280,
+          "startMs": 20600,
+          "text": "зависимости"
+        },
+        {
+          "endMs": 21820,
+          "startMs": 21280,
+          "text": "скелеты"
+        },
+        {
+          "endMs": 22200,
+          "startMs": 21820,
+          "text": "кода,"
+        },
+        {
+          "endMs": 23440,
+          "startMs": 22520,
+          "text": "документацию"
+        },
+        {
+          "endMs": 23660,
+          "startMs": 23440,
+          "text": "и"
+        },
+        {
+          "endMs": 24000,
+          "startMs": 23660,
+          "text": "более"
+        },
+        {
+          "endMs": 24720,
+          "startMs": 24000,
+          "text": "подробный"
+        },
+        {
+          "endMs": 25200,
+          "startMs": 24720,
+          "text": "контекст."
+        },
+        {
+          "endMs": 25800,
+          "startMs": 25200,
+          "text": "Так,"
+        },
+        {
+          "endMs": 26240,
+          "startMs": 26000,
+          "text": "человек"
+        },
+        {
+          "endMs": 26440,
+          "startMs": 26240,
+          "text": "и"
+        },
+        {
+          "endMs": 26740,
+          "startMs": 26440,
+          "text": "агент"
+        },
+        {
+          "endMs": 27300,
+          "startMs": 26740,
+          "text": "работают"
+        },
+        {
+          "endMs": 27460,
+          "startMs": 27300,
+          "text": "с"
+        },
+        {
+          "endMs": 27700,
+          "startMs": 27460,
+          "text": "одной"
+        },
+        {
+          "endMs": 28300,
+          "startMs": 27700,
+          "text": "структурой"
+        },
+        {
+          "endMs": 28880,
+          "startMs": 28300,
+          "text": "проекта,"
+        },
+        {
+          "endMs": 29300,
+          "startMs": 29000,
+          "text": "а"
+        },
+        {
+          "endMs": 29580,
+          "startMs": 29300,
+          "text": "модель"
+        },
+        {
+          "endMs": 30060,
+          "startMs": 29580,
+          "text": "получает"
+        },
+        {
+          "endMs": 30640,
+          "startMs": 30060,
+          "text": "релевантные"
+        },
+        {
+          "endMs": 31280,
+          "startMs": 30640,
+          "text": "проверяемые"
+        },
+        {
+          "endMs": 31700,
+          "startMs": 31280,
+          "text": "факты,"
+        },
+        {
+          "endMs": 32160,
+          "startMs": 31880,
+          "text": "не"
+        },
+        {
+          "endMs": 32860,
+          "startMs": 32160,
+          "text": "перечитывая"
+        },
+        {
+          "endMs": 33120,
+          "startMs": 32860,
+          "text": "весь"
+        },
+        {
+          "endMs": 33420,
+          "startMs": 33120,
+          "text": "репозиторий."
+        },
+        {
+          "endMs": 34440,
+          "startMs": 33920,
+          "text": "Исходный"
+        },
+        {
+          "endMs": 34660,
+          "startMs": 34440,
+          "text": "код"
+        },
+        {
+          "endMs": 35160,
+          "startMs": 34660,
+          "text": "доступен"
+        },
+        {
+          "endMs": 35280,
+          "startMs": 35160,
+          "text": "на"
+        },
+        {
+          "endMs": 35500,
+          "startMs": 35280,
+          "text": "GitHub,"
+        },
+        {
+          "endMs": 36140,
+          "startMs": 35940,
+          "text": "а"
+        },
+        {
+          "endMs": 36780,
+          "startMs": 36140,
+          "text": "интерактивная"
+        },
+        {
+          "endMs": 37120,
+          "startMs": 36780,
+          "text": "демо"
+        },
+        {
+          "endMs": 37620,
+          "startMs": 37120,
+          "text": "доступна"
+        },
+        {
+          "endMs": 37800,
+          "startMs": 37620,
+          "text": "по"
+        },
+        {
+          "endMs": 38320,
+          "startMs": 37800,
+          "text": "соседней"
+        },
+        {
+          "endMs": 38720,
+          "startMs": 38320,
+          "text": "ссылке."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

@@ -517,6 +517,36 @@ test('model client sends exact WAV transcription request and preserves observati
   assert.equal(Object.isFrozen(result.words[0]), true);
 });
 
+test('model client removes punctuation-only timestamp rows from ASR observations', async () => {
+  let transcript = {
+    text: 'Точный текст — без служебного токена.',
+    durationSec: 1,
+    words: [
+      { word: 'Точный', startSec: 0, endSec: 0.2 },
+      { word: 'текст', startSec: 0.2, endSec: 0.4 },
+      { word: '—', startSec: 0.4, endSec: 0.5 },
+      { word: 'без', startSec: 0.5, endSec: 0.65 },
+      { word: 'служебного', startSec: 0.65, endSec: 0.85 },
+      { word: 'токена.', startSec: 0.85, endSec: 1 },
+    ],
+  };
+  let transport = captureFetch(() => jsonResponse(transcript));
+
+  let result = await createClient(transport.fetchImpl).transcribe({
+    wavBytes: wavBytes(),
+    language: 'ru',
+  });
+
+  assert.equal(result.text, transcript.text);
+  assert.deepEqual(result.words, [
+    transcript.words[0],
+    transcript.words[1],
+    transcript.words[3],
+    transcript.words[4],
+    transcript.words[5],
+  ]);
+});
+
 test('model client rejects missing, reordered, or overlapping observed words', async () => {
   let invalidTranscripts = [
     { text: '', durationSec: 1, words: [{ word: 'x', startSec: 0, endSec: 1 }] },

@@ -52,7 +52,7 @@ function anchorVariant(entryId = 'positioning') {
       `cv-show:cue:${entryId}.tenure-marker`,
     ]);
     for (let cell of input.cells.filter(({ id }) => cellIds.has(id))) {
-      cell.timing.at.quote = 'За годы';
+      cell.timing.at.quote = 'программные платформы и агентные продукты';
     }
   });
 }

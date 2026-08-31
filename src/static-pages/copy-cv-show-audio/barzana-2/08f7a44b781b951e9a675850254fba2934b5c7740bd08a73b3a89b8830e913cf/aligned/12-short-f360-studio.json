@@ -1,0 +1,256 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-aovfyEab5R6JAT2sTJXYOQVTsPyfsU6Uz9SjoN27NfU=",
+  "media": {
+    "durationMs": 25970,
+    "hash": "sha256:04fe967fd516062f0e7fdd44f50df0e4adeb0eac8a4ee773613e78f87451e768",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-I8FoyCyAiYHgN+1qMcJVS+XcV1ndBT5a+irziAvQjvI=",
+  "turns": [
+    {
+      "endMs": 25970,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Теперь вернусь по истории программно-аппаратных проектов. В 2021-2022 годах я основал и вел F360, студиопроект высокоточного 3D-сканирования. Я выстраивал процесс от физической съемочной установки и управляемого света до геометрии, текстур и готовой презентации модели. При переезде в Аргентину физическую производственную базу пришлось закрыть.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 260,
+          "startMs": 0,
+          "text": "Теперь"
+        },
+        {
+          "endMs": 740,
+          "startMs": 260,
+          "text": "вернусь"
+        },
+        {
+          "endMs": 960,
+          "startMs": 740,
+          "text": "по"
+        },
+        {
+          "endMs": 1300,
+          "startMs": 960,
+          "text": "истории"
+        },
+        {
+          "endMs": 1900,
+          "startMs": 1300,
+          "text": "программно"
+        },
+        {
+          "endMs": 2520,
+          "startMs": 1900,
+          "text": "-аппаратных"
+        },
+        {
+          "endMs": 3100,
+          "startMs": 2520,
+          "text": "проектов."
+        },
+        {
+          "endMs": 3800,
+          "startMs": 3340,
+          "text": "В"
+        },
+        {
+          "endMs": 4660,
+          "startMs": 3800,
+          "text": "2021"
+        },
+        {
+          "endMs": 6620,
+          "startMs": 4660,
+          "text": "-2022"
+        },
+        {
+          "endMs": 7180,
+          "startMs": 6620,
+          "text": "годах"
+        },
+        {
+          "endMs": 7520,
+          "startMs": 7180,
+          "text": "я"
+        },
+        {
+          "endMs": 8060,
+          "startMs": 7520,
+          "text": "основал"
+        },
+        {
+          "endMs": 8280,
+          "startMs": 8060,
+          "text": "и"
+        },
+        {
+          "endMs": 8480,
+          "startMs": 8280,
+          "text": "вел"
+        },
+        {
+          "endMs": 9520,
+          "startMs": 8480,
+          "text": "F360,"
+        },
+        {
+          "endMs": 11380,
+          "startMs": 10460,
+          "text": "студиопроект"
+        },
+        {
+          "endMs": 12220,
+          "startMs": 11380,
+          "text": "высокоточного"
+        },
+        {
+          "endMs": 12840,
+          "startMs": 12220,
+          "text": "3D"
+        },
+        {
+          "endMs": 13760,
+          "startMs": 12840,
+          "text": "-сканирования."
+        },
+        {
+          "endMs": 14160,
+          "startMs": 13920,
+          "text": "Я"
+        },
+        {
+          "endMs": 14700,
+          "startMs": 14160,
+          "text": "выстраивал"
+        },
+        {
+          "endMs": 15040,
+          "startMs": 14700,
+          "text": "процесс"
+        },
+        {
+          "endMs": 15280,
+          "startMs": 15040,
+          "text": "от"
+        },
+        {
+          "endMs": 15840,
+          "startMs": 15280,
+          "text": "физической"
+        },
+        {
+          "endMs": 16440,
+          "startMs": 15840,
+          "text": "съемочной"
+        },
+        {
+          "endMs": 17020,
+          "startMs": 16440,
+          "text": "установки"
+        },
+        {
+          "endMs": 17320,
+          "startMs": 17020,
+          "text": "и"
+        },
+        {
+          "endMs": 18020,
+          "startMs": 17320,
+          "text": "управляемого"
+        },
+        {
+          "endMs": 18400,
+          "startMs": 18020,
+          "text": "света"
+        },
+        {
+          "endMs": 18580,
+          "startMs": 18400,
+          "text": "до"
+        },
+        {
+          "endMs": 19240,
+          "startMs": 18580,
+          "text": "геометрии,"
+        },
+        {
+          "endMs": 19940,
+          "startMs": 19520,
+          "text": "текстур"
+        },
+        {
+          "endMs": 20140,
+          "startMs": 19940,
+          "text": "и"
+        },
+        {
+          "endMs": 20560,
+          "startMs": 20140,
+          "text": "готовой"
+        },
+        {
+          "endMs": 21160,
+          "startMs": 20560,
+          "text": "презентации"
+        },
+        {
+          "endMs": 21600,
+          "startMs": 21160,
+          "text": "модели."
+        },
+        {
+          "endMs": 21940,
+          "startMs": 21760,
+          "text": "При"
+        },
+        {
+          "endMs": 22440,
+          "startMs": 21940,
+          "text": "переезде"
+        },
+        {
+          "endMs": 22560,
+          "startMs": 22440,
+          "text": "в"
+        },
+        {
+          "endMs": 23080,
+          "startMs": 22560,
+          "text": "Аргентину"
+        },
+        {
+          "endMs": 23720,
+          "startMs": 23080,
+          "text": "физическую"
+        },
+        {
+          "endMs": 24560,
+          "startMs": 23720,
+          "text": "производственную"
+        },
+        {
+          "endMs": 24920,
+          "startMs": 24560,
+          "text": "базу"
+        },
+        {
+          "endMs": 25400,
+          "startMs": 24920,
+          "text": "пришлось"
+        },
+        {
+          "endMs": 25860,
+          "startMs": 25400,
+          "text": "закрыть."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

@@ -7,6 +7,7 @@ const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const SAFE_TOKEN_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$/u;
 const HEADER_NAME_PATTERN = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/u;
 const BASE64URL_PATTERN = /^[A-Za-z0-9_-]+$/u;
+const LEXICAL_TOKEN_PATTERN = /[\p{L}\p{N}]/u;
 const SERVICE_SENTINELS = new Set(['None', 'null', 'undefined']);
 const FORBIDDEN_HEADERS = new Set([
   'accept',
@@ -448,7 +449,7 @@ function validateTranscript(value) {
     invalid('CV Show model service transcription words must be nonempty observed timing');
   }
   let previousEnd = 0;
-  let words = value.words.map((word, index) => {
+  let words = value.words.flatMap((word, index) => {
     requireExactKeys(word, ['word', 'startSec', 'endSec'], `transcription word ${index}`);
     let startSec = requireNonnegativeNumber(
       word.startSec,
@@ -462,12 +463,17 @@ function validateTranscript(value) {
       invalid(`CV Show model service transcription word ${index} timing is reordered or overlapping`);
     }
     previousEnd = endSec;
-    return {
-      word: requireString(word.word, `transcription word ${index} text`),
+    let wordText = requireString(word.word, `transcription word ${index} text`);
+    if (!LEXICAL_TOKEN_PATTERN.test(wordText)) return [];
+    return [{
+      word: wordText,
       startSec,
       endSec,
-    };
+    }];
   });
+  if (words.length === 0) {
+    invalid('CV Show model service transcription words contain no lexical observations');
+  }
   return freezeDeep({ text, durationSec, words });
 }
 

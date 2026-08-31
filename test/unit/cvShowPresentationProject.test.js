@@ -473,8 +473,8 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
     EXPECTED_DETAIL_PARENTS,
   );
   assert.equal(setupCells.length, 30);
-  assert.equal(groups.length, 86);
-  assert.equal(cueCells.length, 30 + (86 * 2));
+  assert.equal(groups.length, 102);
+  assert.equal(cueCells.length, 30 + (102 * 2));
   assert.deepEqual(project.layers.map(({ id }) => id), [
     'cv-show:layer:narration',
     'cv-show:layer:focus',
@@ -486,11 +486,11 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v1:sha256-AJNvdfmDRLj19Qf7shV9vCtm60PyHZfGGKqvHLoGh8Q=',
+    'workspace-presentation-authoring-project-v1:sha256-4KOmgBJqmH2AIA2doEQk1LSESzC6v8YwxxwhiH300fo=',
   );
   assert.equal(
     timeline.hash,
-    'presentation-timeline-v3:sha256-rNZXrzMKdRhHZNBrW8OAiqEed+Smz5raUiUruhpOWAE=',
+    'presentation-timeline-v3:sha256-BBXHufiDPO6t1VmP0h9qnu7mfbjoaOPmOgG2oztpNQ8=',
   );
 
   const manifestSource = await readFile(
@@ -519,14 +519,14 @@ test('CV Show master owns literal anchors, authored order, and portable refineme
   const project = CV_SHOW_PRESENTATION_PROJECT;
   const timeline = CV_SHOW_PRESENTATION_TIMELINE;
   const requiredAnchors = [
-    'а дальше',
-    'я развиваю Symbiote Workspace',
-    'Agent Portal',
+    'в разных предметных областях',
+    'С середины две тысячи двадцать шестого года',
+    'Мы решили открыть управляющий контур',
     'Workspace соединяет',
-    'который я развиваю',
+    'Проект появился внутри Мегавизор',
     'сегментация аудитории',
     'Digital Twin',
-    'Android-устройства',
+    'Андроид-устройства',
     'предпросмотр и рендер',
     'Workspace использует',
     'Workspace связывает',
@@ -541,14 +541,14 @@ test('CV Show master owns literal anchors, authored order, and portable refineme
     .map(({ at }) => at.anchor === 'speech' ? at.quote : null)
     .filter(Boolean));
   for (let value of requiredAnchors) assert.ok(anchors.includes(value), value);
-  assert.equal(anchors.filter((value) => value === 'Digital Twin').length, 4);
+  assert.equal(anchors.filter((value) => value === 'Digital Twin').length, 2);
   assert.equal(
     Object.keys(project.script.metadata.cvShow.directives)
       .map((cellId) => project.cells.find((cell) => cell.id === cellId))
       .filter((cell) => cell?.timing.at.anchor === 'speech')
       .map((cell) => cell.timing.at.quote)
       .filter((value) => value === 'Digital Twin').length,
-    2,
+    1,
   );
 
   const orderFor = (turnId) => project.cells
@@ -612,7 +612,6 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
   });
   const expandedRuntimeOvalMarkers = new Set([
     'cv-show:cue:positioning.tenure-marker',
-    'cv-show:cue:agent-portal.human-decision',
     'cv-show:cue:mobile-smm.agent-update',
   ]);
   const expectedSetupMarginOverrides = Object.freeze({
@@ -620,23 +619,28 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     'cv-show:cue:complexscan.open': 2_050,
   });
   const routeReadinessScrollActions = new Set([
-    'cv-show:cue:workspace.intro-frame',
     'cv-show:cue:symbiote-ui.graph-tooling',
     'cv-show:cue:symbiote-engine.intro',
     'cv-show:cue:agent-portal.open-source',
     'cv-show:cue:video-studio.visible-process',
     'cv-show:cue:maximo.work-orders',
-    'cv-show:cue:agent-pool.flow',
     'cv-show:cue:project-graph.example',
     'cv-show:cue:lifecycle.scope',
     'cv-show:cue:mobile-smm.overview',
     'cv-show:cue:f360.process',
-    'cv-show:cue:autobox.buddha',
-    'cv-show:cue:complexscan.line',
-    'cv-show:cue:photopizza.origin',
+  ]);
+  const compactMediaTurns = new Set(['autobox', 'complexscan', 'photopizza']);
+  const scrollDurationOverrides = new Map([
+    ['cv-show:cue:workspace.intro-frame', 1_800],
+  ]);
+  const scrollLeadOverrides = new Map([
+    ['cv-show:cue:agent-portal.human-decision', 3_800],
+  ]);
+  const markerLeadOverrides = new Map([
+    ['cv-show:cue:complexscan.boothbot-catalog-ready', 1_450],
   ]);
 
-  assert.equal(attentionCells.length, 116);
+  assert.equal(attentionCells.length, 132);
   assert.equal(new Set(attentionCells.map(({ turnId }) => turnId)).size, 30);
   assert.deepEqual(
     Object.fromEntries(Object.entries(Object.groupBy(
@@ -658,6 +662,8 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
       : '';
     const durationMs = setup
       ? expectedSetupDuration[action]
+      : compactMediaTurns.has(cell.turnId) && ['navigate', 'select'].includes(action)
+        ? 800
       : action === 'annotation' && expandedRuntimeOvalMarkers.has(cell.id)
         ? 2_500
         : expectedVisualDuration[action];
@@ -675,14 +681,18 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     assert.equal(cell.timing.gestureDurationMs, durationMs, `${cell.id}: hard budget`);
     if (!setup && action === 'annotation') {
       assert.equal(
-        runtimeMarker === 'oval',
+        durationMs === 2_500,
         expandedRuntimeOvalMarkers.has(cell.id),
-        `${cell.id}: measured runtime-oval budget class`,
+        `${cell.id}: measured expanded-marker budget class`,
       );
-      const expectedMarkerLeadMs = durationMs + 300;
+      if (expandedRuntimeOvalMarkers.has(cell.id)) {
+        assert.equal(runtimeMarker, 'oval', `${cell.id}: expanded oval marker`);
+      }
+      const expectedMarkerLeadMs = markerLeadOverrides.get(cell.id) ?? durationMs + 300;
       assert.equal(cell.timing.leadMs, expectedMarkerLeadMs, `${cell.id}: marker lead`);
+      const expectedMarkerSettlementMs = markerLeadOverrides.has(cell.id) ? 250 : 300;
       assert.ok(
-        cell.timing.leadMs - durationMs >= 300,
+        cell.timing.leadMs - durationMs >= expectedMarkerSettlementMs,
         `${cell.id}: marker settles before narration`,
       );
     }
@@ -702,11 +712,12 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     if (!setup) {
       const scroll = byId.get(`${cell.id}:scroll`);
       assert.ok(scroll, `${cell.id}: scroll`);
-      const scrollDurationMs = action === 'annotation'
-        ? 800
-        : routeReadinessScrollActions.has(cell.id)
-        ? 2_200
-        : cell.id === 'cv-show:cue:finale.actions' ? 1_200 : 1_000;
+      const scrollDurationMs = scrollDurationOverrides.get(cell.id)
+        ?? (action === 'annotation' || compactMediaTurns.has(cell.turnId)
+          ? 800
+          : routeReadinessScrollActions.has(cell.id)
+          ? 2_200
+          : cell.id === 'cv-show:cue:finale.actions' ? 1_200 : 1_000);
       assert.equal(
         scroll.timing.gestureDurationMs,
         scrollDurationMs,
@@ -715,13 +726,15 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
       assert.equal(scroll.cue.targetId, cell.cue.targetId, `${scroll.id}: target`);
       assert.equal(
         scroll.timing.leadMs,
-        cell.timing.leadMs + scrollDurationMs + 200,
+        scrollLeadOverrides.get(cell.id)
+          ?? (compactMediaTurns.has(cell.turnId)
+            ? 2_500
+            : cell.timing.leadMs + scrollDurationMs + 200),
         `${scroll.id}: exact scroll-to-action gap`,
       );
       if (action === 'annotation') {
-        assert.equal(
-          scroll.timing.leadMs - scroll.timing.gestureDurationMs - cell.timing.leadMs,
-          200,
+        assert.ok(
+          scroll.timing.leadMs - scroll.timing.gestureDurationMs - cell.timing.leadMs >= 200,
           `${cell.id}: scroll-to-marker gap`,
         );
       }
@@ -741,6 +754,11 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
 
     if (action !== 'select') continue;
     const refinement = directives[cell.id]?.refinements;
+    if (typeof refinement?.quote !== 'string') {
+      assert.match(cell.cue.targetId, /^media\//u, `${cell.id}: semantic media target`);
+      assert.ok(Array.isArray(refinement?.frames), `${cell.id}: authored media sequence`);
+      continue;
+    }
     assert.equal(typeof refinement?.quote, 'string', `${cell.id}: selection quote`);
     assert.ok(refinement.quote.length >= 12, `${cell.id}: meaningful selection quote`);
     assert.equal(refinement.occurrence, 1, `${cell.id}: selection occurrence`);
@@ -809,7 +827,10 @@ test('the structural fixture joins all 30 Project entries without media authorit
     );
     const sourceEntry = CV_SHOW_STORY.scenes.find(({ id }) => id === clip.id)
       || CV_SHOW_STORY.branches[clip.id];
-    assert.equal(sourceEntry.subtitle, audioClip.speech);
+    assert.equal(
+      sourceEntry.subtitle,
+      CV_SHOW_PRESENTATION_PROJECT.script.metadata.cvShow.entries[clip.id].subtitle,
+    );
     const projected = projectCvShowStory(tuple.project);
     const projectedEntry = projected.scenes[0] || Object.values(projected.branches)[0];
     const speechGroups = sourceEntry.directives.filter(({ timing }) => timing.phase === 'speech');
@@ -853,8 +874,8 @@ test('the structural fixture joins all 30 Project entries without media authorit
 
   assert.equal(tupleCoverage.length, 30);
   assert.equal(new Set(tupleCoverage.map(({ projectHash }) => projectHash)).size, 30);
-  assert.equal(tupleCoverage.reduce((total, item) => total + item.speechGroupCount, 0), 86);
-  assert.deepEqual(anchorDispositions, { exact: 200, fuzzy: 2 });
+  assert.equal(tupleCoverage.reduce((total, item) => total + item.speechGroupCount, 0), 102);
+  assert.deepEqual(anchorDispositions, { exact: 234 });
 });
 
 test('runtime admission joins Project master ancestry without treating delivery bytes as WAV', () => {
@@ -1105,7 +1126,7 @@ test('positioning introduces experience once with the authored marker gesture', 
     id: 'positioning.tenure-marker',
     type: 'marker',
     target: 'profile.experience.15-plus',
-    quote: 'За годы работы',
+    quote: 'в разных предметных областях',
   }]);
 });
 
@@ -1873,7 +1894,7 @@ test('aligned media waits for physical playback and completes preroll before nar
         mediaMuted: media.muted,
         mediaTimeMs: Math.round(media.currentTime * 1_000),
       }));
-      if (operation.projectCell.id === 'cv-show:cue:positioning.tenure-marker') {
+      if (operation.projectCell.id === 'cv-show:cue:positioning.open') {
         if (requiresProviderAdmission(operation)) {
           operation.reportAdmission(Object.freeze({
             providerAdmission: testProviderAdmission(operation),
@@ -1881,7 +1902,7 @@ test('aligned media waits for physical playback and completes preroll before nar
         }
         const observedAt = operationObservation();
         operation.reportReceipt(Object.freeze({
-          status: 'first-frame',
+          status: 'acted',
           observedAt,
           providerReceipt: TEST_PROVIDER_RECEIPT,
         }));
@@ -1937,18 +1958,6 @@ test('aligned media waits for physical playback and completes preroll before nar
       mediaMuted: true,
       mediaTimeMs: 0,
     },
-    {
-      id: 'cv-show:cue:positioning.tenure-marker:scroll',
-      mediaPaused: true,
-      mediaMuted: true,
-      mediaTimeMs: 0,
-    },
-    {
-      id: 'cv-show:cue:positioning.tenure-marker',
-      mediaPaused: true,
-      mediaMuted: true,
-      mediaTimeMs: 0,
-    },
   ]);
   assert.equal(media.playCount, 2, 'one admitted play is followed by one post-preroll resume');
   assert.equal(media.paused, false);
@@ -1956,7 +1965,7 @@ test('aligned media waits for physical playback and completes preroll before nar
   assert.equal(media.currentTime, 0);
   assert.equal(
     aligned.execution.snapshot.terminal
-      .filter(({ cellId }) => cellId.includes('positioning.tenure-marker'))
+      .filter(({ cellId }) => cellId === 'cv-show:cue:positioning.open')
       .every(({ status }) => status === 'completed'),
     true,
   );

@@ -7,6 +7,7 @@ import test from 'node:test';
 
 import {
   createPresentationAuthoringProject,
+  createPresentationAuthoringProjectHashes,
   presentationAuthoringProjectCanonicalProjection,
 } from 'symbiote-workspace';
 import { canonicalize } from 'symbiote-workspace/schema/canonical-json.js';
@@ -14,10 +15,14 @@ import { canonicalize } from 'symbiote-workspace/schema/canonical-json.js';
 import {
   createCvShowAudioWorkflow,
   createCvShowAudioWorkflowAdapters,
+  createCvShowAudioBoundProject,
   createCvShowAudioWorkflowPlan,
   loadCvShowPredecessorEntryReleases,
   publishCvShowAudioWorkflowRelease,
 } from '../../scripts/cv-show-audio-workflow.js';
+import {
+  createCvShowMediaBindingRegistry,
+} from '../../src/static-pages/js/tour-player/presentationProjectAdapter.js';
 import {
   createCvShowAudioReleaseDescriptor,
   createCvShowAudioReleasePipeline,
@@ -245,6 +250,51 @@ function changedNarrationProject() {
   return createPresentationAuthoringProject(input);
 }
 
+function verifiedManifestFixtures(project) {
+  let entries = project.cells
+    .filter(({ kind }) => kind === 'narration')
+    .map(({ turnId }) => turnId);
+  let sourceEntries = CV_SHOW_PRESENTATION_PROJECT.script.metadata.cvShow.entries;
+  return {
+    audioManifest: {
+      clips: entries.map((id) => ({
+        id,
+        sha256: sourceEntries[id].media.wavHash.replace(/^sha256:/u, ''),
+      })),
+    },
+    alignmentManifest: {
+      clips: entries.map((id) => ({
+        id,
+        mediaDurationMs: sourceEntries[id].media.durationMilliseconds,
+        alignedSequenceHash: sourceEntries[id].media.sourceAlignedSequenceHash,
+        alignedSequenceSha256: sourceEntries[id].media.sourceAlignmentFileHash
+          .replace(/^sha256:/u, ''),
+        timelineHash: sourceEntries[id].media.sourceTimelineHash,
+      })),
+    },
+  };
+}
+
+test('verified manifests bind all 30 Project media entries to exact narration cells', () => {
+  let project = changedNarrationProject();
+  let bound = createCvShowAudioBoundProject({
+    project,
+    ...verifiedManifestFixtures(project),
+  });
+  let registry = createCvShowMediaBindingRegistry(bound);
+  let narrationHashes = new Map(createPresentationAuthoringProjectHashes(bound).cellHashes
+    .map(({ cellId, hash }) => [cellId, hash]));
+
+  assert.equal(bound.revision, project.revision);
+  assert.notEqual(bound.hash, project.hash);
+  assert.equal(Object.keys(registry.entries).length, 30);
+  assert.equal(Object.values(registry.entries).every(({ playable }) => playable), true);
+  assert.equal(
+    bound.script.metadata.cvShow.entries.positioning.media.sourceNarrationCellHash,
+    narrationHashes.get('cv-show:narration:positioning'),
+  );
+});
+
 function workflowPlan({ project = CV_SHOW_PRESENTATION_PROJECT, voice = PROFILE.voice } = {}) {
   let predecessor = predecessorFixture();
   return {
@@ -466,6 +516,26 @@ test('exact WAV review gates Whisper and durable materialization resumes without
   let first = await firstAdapter.ensureMaterialized();
   let release = first.entryReleases.get('positioning').entryRelease;
   let wavPath = path.join(first.cacheRoot, release.wav.path);
+  let audioManifest = JSON.parse(await readFile(path.join(
+    first.cacheRoot,
+    first.audioManifestArtifact.path,
+  ), 'utf8'));
+  assert.equal(audioManifest.story.detailCount, 14);
+  let alignmentManifest = JSON.parse(await readFile(path.join(
+    first.cacheRoot,
+    first.alignmentManifestArtifact.path,
+  ), 'utf8'));
+  let generatedAlignment = alignmentManifest.clips.find(({ id }) => id === 'positioning');
+  let alignedSequence = JSON.parse(await readFile(path.join(
+    first.cacheRoot,
+    path.posix.dirname(first.alignmentManifestArtifact.path),
+    generatedAlignment.alignedSequenceFile,
+  ), 'utf8'));
+  assert.match(
+    generatedAlignment.alignedSequenceHash,
+    /^workspace-aligned-sequence-v3:sha256-/u,
+  );
+  assert.equal(alignedSequence.hash, generatedAlignment.alignedSequenceHash);
   let before = await stat(wavPath);
   let secondAdapter = createCvShowAudioWorkflowAdapters({
     privateRoot: root,
@@ -589,6 +659,20 @@ test('all regenerated states produce a verifier-clean release and missing endpoi
     assert.match(error.message, /CV_SHOW_MODEL_ENDPOINT/u);
     return true;
   });
+  await assert.rejects(
+    missingEndpoint.retryEntryVerification({
+      entryId: 'positioning',
+      ownerToken: 'owner-without-endpoint',
+    }),
+    { code: 'CV_SHOW_AUDIO_WORKFLOW_MODEL_CLIENT_REQUIRED' },
+  );
+  await assert.rejects(
+    missingEndpoint.retryEntrySynthesis({
+      entryId: 'positioning',
+      ownerToken: 'owner-without-endpoint',
+    }),
+    { code: 'CV_SHOW_AUDIO_WORKFLOW_MODEL_CLIENT_REQUIRED' },
+  );
 });
 
 test('selected public publication contains only Opus delivery audio, never WAV', async () => {

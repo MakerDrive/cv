@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import {
   createPresentationAuthoringProject,
+  createPresentationAuthoringProjectHashes,
   createPresentationAuthoringTimelineProjection,
   presentationAuthoringProjectCanonicalProjection,
 } from 'symbiote-workspace';
@@ -46,6 +47,7 @@ import {
 } from './cv-show-authoring-materializer.js';
 import {
   createCvShowEntryProject,
+  createCvShowMediaBindingRegistry,
   projectCvShowStory,
 } from '../src/static-pages/js/tour-player/presentationProjectAdapter.js';
 
@@ -197,6 +199,96 @@ function runnerPlan({ project, entryId, voice, readinessProfile }) {
 }
 
 /**
+ * Bind one exact verified 30-entry audio/alignment projection back into its Project.
+ * Audio generation is intentionally separate from authoring; source promotion only accepts the
+ * completed Project whose media bindings name the verified artifacts and current narration cells.
+ */
+export function createCvShowAudioBoundProject({
+  project,
+  audioManifest,
+  alignmentManifest,
+} = {}) {
+  let current;
+  try {
+    current = createPresentationAuthoringProject(record(project, 'project'));
+  } catch (error) {
+    fail(
+      'CV_SHOW_AUDIO_WORKFLOW_PROJECT_INVALID',
+      'The Project cannot be normalized before media binding.',
+      { causeCode: error?.code || 'UNKNOWN' },
+    );
+  }
+  let audioClips = record(audioManifest, 'audioManifest').clips;
+  let alignmentClips = record(alignmentManifest, 'alignmentManifest').clips;
+  let entryIds = current.cells
+    .filter(({ kind }) => kind === 'narration')
+    .map(({ turnId }) => turnId);
+  if (
+    !Array.isArray(audioClips)
+    || !Array.isArray(alignmentClips)
+    || entryIds.length !== 30
+    || audioClips.length !== 30
+    || alignmentClips.length !== 30
+    || entryIds.some((entryId, index) => (
+      audioClips[index]?.id !== entryId || alignmentClips[index]?.id !== entryId
+    ))
+  ) {
+    fail(
+      'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID',
+      'Verified audio/alignment manifests must contain the exact 30 Project entries in order.',
+    );
+  }
+  let narrationHashes = new Map(createPresentationAuthoringProjectHashes(current).cellHashes
+    .map(({ cellId, hash }) => [cellId, hash]));
+  let input = presentationAuthoringProjectCanonicalProjection(current);
+  let entries = input.script?.metadata?.cvShow?.entries;
+  for (let [index, entryId] of entryIds.entries()) {
+    let audio = audioClips[index];
+    let alignment = alignmentClips[index];
+    let sourceNarrationCellHash = narrationHashes.get(`cv-show:narration:${entryId}`);
+    if (
+      !entries?.[entryId]
+      || !/^[a-f0-9]{64}$/u.test(String(audio.sha256 || ''))
+      || !Number.isInteger(alignment.mediaDurationMs)
+      || alignment.mediaDurationMs <= 0
+      || !String(alignment.alignedSequenceHash || '')
+        .startsWith('workspace-aligned-sequence-v3:')
+      || !/^[a-f0-9]{64}$/u.test(String(alignment.alignedSequenceSha256 || ''))
+      || !String(alignment.timelineHash || '').startsWith('presentation-timeline-v3:')
+      || typeof sourceNarrationCellHash !== 'string'
+    ) {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID',
+        `Verified media evidence for ${entryId} is incomplete.`,
+        { entryId },
+      );
+    }
+    entries[entryId].media = {
+      durationMilliseconds: alignment.mediaDurationMs,
+      sourceAlignedSequenceHash: alignment.alignedSequenceHash,
+      sourceAlignmentFileHash: `sha256:${alignment.alignedSequenceSha256}`,
+      sourceNarrationCellHash,
+      sourceTimelineHash: alignment.timelineHash,
+      wavHash: `sha256:${audio.sha256}`,
+    };
+  }
+  let bound = createPresentationAuthoringProject(input);
+  let registry = createCvShowMediaBindingRegistry(bound);
+  if (
+    Object.keys(registry.entries).length !== 30
+    || Object.values(registry.entries).some(({ status, playable }) => (
+      status !== 'accepted' || playable !== true
+    ))
+  ) {
+    fail(
+      'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID',
+      'The completed Project does not expose 30 accepted playable media bindings.',
+    );
+  }
+  return bound;
+}
+
+/**
  * Build the canonical aggregate plan from the current Project and predecessor media.
  */
 export function createCvShowAudioWorkflowPlan({
@@ -210,6 +302,7 @@ export function createCvShowAudioWorkflowPlan({
   readinessProfile,
   sourceSha256,
   dependants = {},
+  refreshArtifacts = false,
 } = {}) {
   record(project, 'project');
   record(predecessorRelease, 'predecessorRelease');
@@ -226,6 +319,12 @@ export function createCvShowAudioWorkflowPlan({
   }
   if (typeof sourceSha256 !== 'string' || !/^sha256:[a-f0-9]{64}$/u.test(sourceSha256)) {
     fail('CV_SHOW_AUDIO_WORKFLOW_SOURCE_INVALID', 'sourceSha256 must bind the current source bytes.');
+  }
+  if (typeof refreshArtifacts !== 'boolean') {
+    fail(
+      'CV_SHOW_AUDIO_WORKFLOW_INVALID',
+      'refreshArtifacts must be an explicit boolean.',
+    );
   }
   let dirtyPlan = planCvShowAudioDirtySet({
     accepted: predecessorRelease.acceptedProvenance,
@@ -281,6 +380,7 @@ export function createCvShowAudioWorkflowPlan({
       },
     },
     entries,
+    ...(refreshArtifacts ? { refreshArtifacts: true } : {}),
   };
   return freezeDeep({
     schemaVersion: WORKFLOW_SCHEMA,
@@ -385,12 +485,28 @@ function storyIdentity(project) {
     contractRevision: contract.contractRevision,
     narrationLocale: contract.narrationLocale,
     shortCount: contract.short.length,
-    detailCount: contract.branches.length,
+    detailCount: Object.keys(contract.branches).length,
   };
 }
 
 function jsonBytes(value) {
   return Buffer.from(`${JSON.stringify(value, null, 2)}\n`, 'utf8');
+}
+
+function releaseAlignedSequence(sequence) {
+  let source = record(sequence, 'aligned sequence');
+  let contractVersion = source.contractVersion;
+  let hash = String(source.hash || '');
+  if (contractVersion !== 'workspace-aligned-sequence-v3' || !hash) {
+    fail(
+      'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID',
+      'Generated aligned sequence identity is incomplete.',
+    );
+  }
+  let releaseHash = hash.startsWith(`${contractVersion}:`)
+    ? hash
+    : `${contractVersion}:${hash}`;
+  return { ...clone(source), hash: releaseHash };
 }
 
 function generatedFileNames(project, entryId, speechHash, alignmentDirectory) {
@@ -671,8 +787,9 @@ export function createCvShowAudioWorkflowAdapters({
         wavPath: names.wav,
         story,
       });
+      let alignedSequence = releaseAlignedSequence(state.alignment.sequence);
       let recognitionBytes = jsonBytes(recognition);
-      let alignmentBytes = jsonBytes(state.alignment.sequence);
+      let alignmentBytes = jsonBytes(alignedSequence);
       let wav = await writeCache(cacheRoot, names.wav, wavBytes);
       let recognitionArtifact = await writeCache(cacheRoot, names.recognition, recognitionBytes);
       let alignmentArtifact = await writeCache(cacheRoot, names.alignment, alignmentBytes);
@@ -705,8 +822,8 @@ export function createCvShowAudioWorkflowAdapters({
         recognitionSha256: recognitionArtifact.sha256,
         alignedSequenceFile: path.posix.relative(alignmentDirectory, names.alignment),
         alignedSequenceSha256: alignmentArtifact.sha256,
-        alignedSequenceHash: state.alignment.sequence.hash,
-        timelineHash: state.alignment.sequence.timelineHash,
+        alignedSequenceHash: alignedSequence.hash,
+        timelineHash: alignedSequence.timelineHash,
         mediaDurationMs: Math.round(state.synthesis.durationSec * 1_000),
         recognizedWordCount: state.transcript.words.length,
         recognizedSegmentCount: 0,
@@ -723,8 +840,8 @@ export function createCvShowAudioWorkflowAdapters({
         alignment: alignmentArtifact,
         verification: {
           timingCoverage: 1,
-          alignedSequenceHash: state.alignment.sequence.hash,
-          timelineHash: state.alignment.sequence.timelineHash,
+          alignedSequenceHash: alignedSequence.hash,
+          timelineHash: alignedSequence.timelineHash,
         },
       });
       entryReleases.set(disposition.entryId, {
@@ -917,6 +1034,7 @@ export async function createCvShowAudioWorkflow({
   storage,
   publisher = publishCvShowWebAudio,
   verifyMasterCompatibility = verifyCvShowWebAudioMasterCompatibility,
+  refreshArtifacts = false,
 } = {}) {
   let base = absoluteRoot(privateRoot);
   record(profile, 'profile');
@@ -933,6 +1051,7 @@ export async function createCvShowAudioWorkflow({
     predecessorEntryReleases,
     ...profile,
     sourceSha256,
+    refreshArtifacts,
   });
   let durableStorage = storage || createCvShowAudioPipelineStorage({
     storageRoot: path.join(base, '.workflow', 'pipeline'),
@@ -1019,6 +1138,32 @@ export async function createCvShowAudioWorkflow({
       synthesisAttemptHash: input.synthesisAttemptHash,
     });
   };
+  let retryEntryVerification = async (input) => {
+    if (!runner) {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_MODEL_CLIENT_REQUIRED',
+        'A model client is required to retry entry verification. Pass --endpoint or set CV_SHOW_MODEL_ENDPOINT.',
+      );
+    }
+    let disposition = workflow.plan.entries.find(({ entryId }) => entryId === input.entryId);
+    if (!disposition || disposition.mode !== 'regenerate') {
+      fail('CV_SHOW_AUDIO_WORKFLOW_ENTRY_UNKNOWN', `No regenerated entry ${input.entryId}.`);
+    }
+    return runner.openEntry(disposition.runnerPlan).retryVerification(input.ownerToken);
+  };
+  let retryEntrySynthesis = async (input) => {
+    if (!runner) {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_MODEL_CLIENT_REQUIRED',
+        'A model client is required to retry entry synthesis. Pass --endpoint or set CV_SHOW_MODEL_ENDPOINT.',
+      );
+    }
+    let disposition = workflow.plan.entries.find(({ entryId }) => entryId === input.entryId);
+    if (!disposition || disposition.mode !== 'regenerate') {
+      fail('CV_SHOW_AUDIO_WORKFLOW_ENTRY_UNKNOWN', `No regenerated entry ${input.entryId}.`);
+    }
+    return runner.openEntry(disposition.runnerPlan).retrySynthesis(input.ownerToken);
+  };
   let inspectEntries = async () => {
     let states = [];
     for (let disposition of workflow.plan.entries) {
@@ -1033,6 +1178,51 @@ export async function createCvShowAudioWorkflow({
     let head = await aggregateRun.readHead();
     if (!head?.state.releaseObjectHash) return null;
     return aggregateRun.readObject(head.state.releaseObjectHash);
+  };
+  let createBoundProject = async () => {
+    let release = await inspectVerifiedRelease();
+    if (!release) {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_RELEASE_NOT_VERIFIED',
+        'Verify the aggregate release before binding its media into the Project.',
+      );
+    }
+    let releaseRoot = path.join(
+      base,
+      release.manifests.voice,
+      release.manifests.directory,
+    );
+    let [audioManifest, alignmentManifest] = await Promise.all([
+      readJson(
+        path.join(releaseRoot, release.manifests.audio.path),
+        'staged audio manifest',
+      ),
+      readJson(
+        path.join(releaseRoot, release.manifests.alignment.path),
+        'staged alignment manifest',
+      ),
+    ]);
+    let normalizedAlignmentManifest = clone(alignmentManifest);
+    let alignmentDirectory = path.posix.dirname(release.manifests.alignment.path);
+    for (let clip of normalizedAlignmentManifest.clips || []) {
+      let sequence = await readJson(
+        path.join(
+          releaseRoot,
+          alignmentDirectory,
+          portablePath(clip.alignedSequenceFile, `aligned sequence ${clip.id}`),
+        ),
+        `staged aligned sequence ${clip.id}`,
+      );
+      let normalized = releaseAlignedSequence(sequence);
+      let bytes = jsonBytes(normalized);
+      clip.alignedSequenceHash = normalized.hash;
+      clip.alignedSequenceSha256 = sha256(bytes);
+    }
+    return createCvShowAudioBoundProject({
+      project,
+      audioManifest,
+      alignmentManifest: normalizedAlignmentManifest,
+    });
   };
   let publishWebAudio = async ({ acceptedPublic } = {}) => {
     if (
@@ -1059,8 +1249,11 @@ export async function createCvShowAudioWorkflow({
     workflow,
     advanceEntries,
     reviewClip,
+    retryEntryVerification,
+    retryEntrySynthesis,
     inspectEntries,
     inspectVerifiedRelease,
+    createBoundProject,
     publishWebAudio,
     aggregate,
     adapters,
@@ -1181,6 +1374,15 @@ async function cli(argv, environment = process.env) {
         model: profile.voice.model || 'qwen3',
       })
     : null;
+  if (
+    options['refresh-artifacts'] !== undefined
+    && !['yes', 'no'].includes(options['refresh-artifacts'])
+  ) {
+    fail(
+      'CV_SHOW_AUDIO_WORKFLOW_ARGUMENT_INVALID',
+      '--refresh-artifacts accepts only yes or no.',
+    );
+  }
   let handle = await createCvShowAudioWorkflow({
     privateRoot,
     repoRoot,
@@ -1189,6 +1391,7 @@ async function cli(argv, environment = process.env) {
     profile,
     sourceSha256: `sha256:${sha256(current.bytes)}`,
     modelClient,
+    refreshArtifacts: options['refresh-artifacts'] === 'yes',
   });
   let owner = options.owner || 'cv-show-owner';
   let result;
@@ -1215,11 +1418,64 @@ async function cli(argv, environment = process.env) {
       wavHash: options['wav-hash'],
       synthesisAttemptHash: options['attempt-hash'],
     });
+  } else if (command === 'retry-verification') {
+    if (typeof options.entry !== 'string' || !options.entry) {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_RETRY_ARGUMENT_INVALID',
+        'retry-verification requires --entry.',
+      );
+    }
+    result = await handle.retryEntryVerification({
+      entryId: options.entry,
+      ownerToken: owner,
+    });
+  } else if (command === 'retry-synthesis') {
+    if (typeof options.entry !== 'string' || !options.entry) {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_RETRY_ARGUMENT_INVALID',
+        'retry-synthesis requires --entry.',
+      );
+    }
+    result = await handle.retryEntrySynthesis({
+      entryId: options.entry,
+      ownerToken: owner,
+    });
   } else if (command === 'verify-release') {
     await handle.aggregate.initialize();
     result = await handle.aggregate.verifyEntries(owner);
     if (result.phase === 'entries-verified') result = await handle.aggregate.verifyEntries(owner);
     result = { state: result, release: await handle.inspectVerifiedRelease() };
+  } else if (command === 'bind-project') {
+    if (typeof options.output !== 'string' || !path.isAbsolute(options.output)) {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_PROJECT_OUTPUT_REQUIRED',
+        'bind-project requires an absolute --output path.',
+      );
+    }
+    let bound = await handle.createBoundProject();
+    let bytes = Buffer.from(`${JSON.stringify(
+      presentationAuthoringProjectCanonicalProjection(bound),
+      null,
+      2,
+    )}\n`, 'utf8');
+    try {
+      await fs.writeFile(options.output, bytes, { flag: 'wx', mode: 0o600 });
+    } catch (error) {
+      if (error?.code !== 'EEXIST') throw error;
+      let existing = await fs.readFile(options.output);
+      if (!existing.equals(bytes)) {
+        fail(
+          'CV_SHOW_AUDIO_WORKFLOW_PROJECT_OUTPUT_CONFLICT',
+          `The bound Project output already exists with different bytes: ${options.output}`,
+        );
+      }
+    }
+    result = {
+      path: options.output,
+      revision: bound.revision,
+      authoringProjectHash: bound.hash,
+      sha256: `sha256:${sha256(bytes)}`,
+    };
   } else if (command === 'approve-release') {
     let release = await handle.inspectVerifiedRelease();
     if (

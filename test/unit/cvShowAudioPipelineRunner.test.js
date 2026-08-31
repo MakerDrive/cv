@@ -244,7 +244,9 @@ async function createScenario(t, {
       let attemptHash = head.state.attemptHashes.at(-1);
       let attempt = await run.readObject(attemptHash);
       assert.equal(attempt.status, 'dispatched');
-      assert.equal(attempt.kind, EXPECTED_ATTEMPT_KINDS[index]);
+      let expectedKind = EXPECTED_ATTEMPT_KINDS[index]
+        ?? EXPECTED_ATTEMPT_KINDS[3 + ((index - EXPECTED_ATTEMPT_KINDS.length) % 3)];
+      assert.equal(attempt.kind, expectedKind);
       dispatchSnapshots.push({ pathname, attemptHash, attempt });
     },
   });
@@ -299,7 +301,7 @@ test('completes six durable fake requests, review, strict v3 alignment and ancho
   assert.deepEqual(Object.keys(runner), ['openEntry']);
   assert.deepEqual(
     Object.keys(handle).sort(),
-    ['advance', 'initialize', 'inspect', 'reviewClip'],
+    ['advance', 'initialize', 'inspect', 'retrySynthesis', 'retryVerification', 'reviewClip'],
   );
   let initialized = await handle.initialize();
   let initialHead = await run.readHead();
@@ -696,6 +698,92 @@ test('rejects fabricated alignment mappings and forged terminal anchor coverage'
     forged.handle.inspect(),
     { code: 'CV_SHOW_AUDIO_PIPELINE_STATE_INVALID' },
   );
+});
+
+test('retries blocked transcription verification without replacing the approved WAV', async (t) => {
+  let alignmentCalls = 0;
+  let scenario = await createScenario(t, {
+    readiness: [READY, READY, READY, READY, READY, READY],
+    createObservedAlignment: (...args) => {
+      alignmentCalls += 1;
+      if (alignmentCalls === 1) {
+        throw Object.assign(new TypeError('simulated punctuation normalization failure'), {
+          code: 'PRESENTATION_OBSERVED_ALIGNMENT_TRANSCRIPT_WORD_MISMATCH',
+        });
+      }
+      return createPresentationObservedAlignment(...args);
+    },
+  });
+  await scenario.handle.initialize();
+  let reviewed = await synthesizeAndApprove(scenario);
+  let approvedWavHash = reviewed.synthesis.wavHash;
+  let approvedAttemptHash = reviewed.synthesis.attemptHash;
+  let transcribed = await scenario.handle.advance('owner-a');
+  assert.equal(transcribed.phase, 'transcribed');
+  let blocked = await scenario.handle.advance('owner-a');
+  assert.equal(blocked.phase, 'blocked');
+  assert.equal(blocked.failure.stage, 'alignment');
+
+  let retried = await scenario.handle.retryVerification('owner-a');
+
+  assert.equal(retried.phase, 'clip-reviewed');
+  assert.equal(retried.synthesis.wavHash, approvedWavHash);
+  assert.equal(retried.synthesis.attemptHash, approvedAttemptHash);
+  assert.equal(retried.review.approved, true);
+  assert.equal(retried.transcript, null);
+  assert.equal(retried.alignment, null);
+  assert.equal(retried.verification, null);
+  assert.equal(retried.failure, null);
+  assert.equal(retried.attemptHashes.length, 3);
+
+  assert.equal((await scenario.handle.advance('owner-a')).phase, 'transcribed');
+  assert.equal((await scenario.handle.advance('owner-a')).phase, 'aligned');
+  assert.equal((await scenario.handle.advance('owner-a')).phase, 'entry-verified');
+  assert.equal(alignmentCalls, 2);
+});
+
+test('retries outcome-unknown transcription without replacing the approved WAV', async (t) => {
+  let scenario = await createScenario(t, { throwAtCall: 5 });
+  await scenario.handle.initialize();
+  let reviewed = await synthesizeAndApprove(scenario);
+  let unknown = await scenario.handle.advance('owner-a');
+  assert.equal(unknown.phase, 'outcome-unknown');
+  assert.equal(unknown.failure.stage, 'transcription');
+
+  let retried = await scenario.handle.retryVerification('owner-a');
+
+  assert.equal(retried.phase, 'clip-reviewed');
+  assert.equal(retried.synthesis.wavHash, reviewed.synthesis.wavHash);
+  assert.equal(retried.review.approved, true);
+  assert.equal(retried.transcript, null);
+  assert.equal(retried.failure, null);
+  assert.equal(retried.attemptHashes.length, 3);
+});
+
+test('retries a blocked entry from synthesis without retaining stale media evidence', async (t) => {
+  let scenario = await createScenario(t, {
+    createObservedAlignment: () => {
+      throw Object.assign(new TypeError('simulated audible mismatch'), {
+        code: 'PRESENTATION_OBSERVED_ALIGNMENT_TRANSCRIPT_WORD_MISMATCH',
+      });
+    },
+  });
+  await scenario.handle.initialize();
+  await synthesizeAndApprove(scenario);
+  assert.equal((await scenario.handle.advance('owner-a')).phase, 'transcribed');
+  let blocked = await scenario.handle.advance('owner-a');
+  assert.equal(blocked.phase, 'blocked');
+
+  let retried = await scenario.handle.retrySynthesis('owner-a');
+
+  assert.equal(retried.phase, 'planned');
+  assert.deepEqual(retried.attemptHashes, []);
+  assert.equal(retried.synthesis, null);
+  assert.equal(retried.review, null);
+  assert.equal(retried.transcript, null);
+  assert.equal(retried.alignment, null);
+  assert.equal(retried.verification, null);
+  assert.equal(retried.failure, null);
 });
 
 test('rejects forged synthesis, transcript, and transcription-intent state linkage', async (t) => {

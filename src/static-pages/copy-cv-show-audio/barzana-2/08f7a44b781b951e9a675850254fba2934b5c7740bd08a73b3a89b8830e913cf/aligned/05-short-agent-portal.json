@@ -1,0 +1,751 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-H5gAsEoW1cyHBBMCgv7OuJwm1VuqV0S88mWwQFoDBqI=",
+  "media": {
+    "durationMs": 69920,
+    "hash": "sha256:1a6799d9624a41f4f2658cbcfc38ecd4b4f87e30dca00d340f34165da87bc387",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-dN41DuEBpzm6ETMpb+Bp4S1ydjjm+iAKTjk7W9Yjcic=",
+  "turns": [
+    {
+      "endMs": 69920,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Agent Portal — один из проектов, которые я сейчас переношу в Symbiote Workspace как конфигурации. Я развиваю его с начала 2026 года. Проект появился как собственный управляющий слой над разными агентными средами своего рода Harness над Harnesses. Он объединяет их в один видимый процесс и позволяет сохранять контроль над контекстом, задачами и ресурсами, при этом быстро меняя агентов, модели и способы доступа к ним. Когда я начинал эту линию, я не нашел готового решения с таким сочетанием возможностей, поэтому стал развивать собственный вариант. Мы решили открыть управляющий контур mcp-agent-portal, хотя развиваем агент-портал прежде всего для собственной практической работы. Исходный код этого контура доступен на GitHub, а интерфейс агент-портал можно посмотреть в интерактивном демо. Чтобы показать его внутренние устройства, дальше я разберу два отдельных инструмента. Агент-пул-мcp отвечает за исполнение и распределение ресурсов, а проект-граф-мcp за структуру и контекст проекта.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 380,
+          "startMs": 0,
+          "text": "Agent"
+        },
+        {
+          "endMs": 780,
+          "startMs": 380,
+          "text": "Portal"
+        },
+        {
+          "endMs": 1220,
+          "startMs": 1100,
+          "text": "один"
+        },
+        {
+          "endMs": 1440,
+          "startMs": 1220,
+          "text": "из"
+        },
+        {
+          "endMs": 1980,
+          "startMs": 1440,
+          "text": "проектов,"
+        },
+        {
+          "endMs": 2500,
+          "startMs": 2120,
+          "text": "которые"
+        },
+        {
+          "endMs": 2720,
+          "startMs": 2500,
+          "text": "я"
+        },
+        {
+          "endMs": 3200,
+          "startMs": 2720,
+          "text": "сейчас"
+        },
+        {
+          "endMs": 4300,
+          "startMs": 3200,
+          "text": "переношу"
+        },
+        {
+          "endMs": 4520,
+          "startMs": 4300,
+          "text": "в"
+        },
+        {
+          "endMs": 5020,
+          "startMs": 4520,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 5880,
+          "startMs": 5020,
+          "text": "Workspace"
+        },
+        {
+          "endMs": 6260,
+          "startMs": 5880,
+          "text": "как"
+        },
+        {
+          "endMs": 7180,
+          "startMs": 6260,
+          "text": "конфигурации."
+        },
+        {
+          "endMs": 7520,
+          "startMs": 7300,
+          "text": "Я"
+        },
+        {
+          "endMs": 8060,
+          "startMs": 7520,
+          "text": "развиваю"
+        },
+        {
+          "endMs": 8280,
+          "startMs": 8060,
+          "text": "его"
+        },
+        {
+          "endMs": 8440,
+          "startMs": 8280,
+          "text": "с"
+        },
+        {
+          "endMs": 8760,
+          "startMs": 8440,
+          "text": "начала"
+        },
+        {
+          "endMs": 10160,
+          "startMs": 8760,
+          "text": "2026"
+        },
+        {
+          "endMs": 10760,
+          "startMs": 10160,
+          "text": "года."
+        },
+        {
+          "endMs": 11360,
+          "startMs": 10960,
+          "text": "Проект"
+        },
+        {
+          "endMs": 11920,
+          "startMs": 11360,
+          "text": "появился"
+        },
+        {
+          "endMs": 12220,
+          "startMs": 11920,
+          "text": "как"
+        },
+        {
+          "endMs": 13000,
+          "startMs": 12220,
+          "text": "собственный"
+        },
+        {
+          "endMs": 13660,
+          "startMs": 13000,
+          "text": "управляющий"
+        },
+        {
+          "endMs": 14000,
+          "startMs": 13660,
+          "text": "слой"
+        },
+        {
+          "endMs": 14620,
+          "startMs": 14000,
+          "text": "над"
+        },
+        {
+          "endMs": 15060,
+          "startMs": 14620,
+          "text": "разными"
+        },
+        {
+          "endMs": 15640,
+          "startMs": 15060,
+          "text": "агентными"
+        },
+        {
+          "endMs": 16260,
+          "startMs": 15640,
+          "text": "средами"
+        },
+        {
+          "endMs": 16640,
+          "startMs": 16260,
+          "text": "своего"
+        },
+        {
+          "endMs": 17040,
+          "startMs": 16640,
+          "text": "рода"
+        },
+        {
+          "endMs": 17440,
+          "startMs": 17040,
+          "text": "Harness"
+        },
+        {
+          "endMs": 17680,
+          "startMs": 17440,
+          "text": "над"
+        },
+        {
+          "endMs": 18340,
+          "startMs": 17680,
+          "text": "Harnesses."
+        },
+        {
+          "endMs": 18640,
+          "startMs": 18440,
+          "text": "Он"
+        },
+        {
+          "endMs": 19180,
+          "startMs": 18640,
+          "text": "объединяет"
+        },
+        {
+          "endMs": 19340,
+          "startMs": 19180,
+          "text": "их"
+        },
+        {
+          "endMs": 19520,
+          "startMs": 19340,
+          "text": "в"
+        },
+        {
+          "endMs": 19680,
+          "startMs": 19520,
+          "text": "один"
+        },
+        {
+          "endMs": 20080,
+          "startMs": 19680,
+          "text": "видимый"
+        },
+        {
+          "endMs": 20460,
+          "startMs": 20080,
+          "text": "процесс"
+        },
+        {
+          "endMs": 20840,
+          "startMs": 20460,
+          "text": "и"
+        },
+        {
+          "endMs": 21440,
+          "startMs": 20840,
+          "text": "позволяет"
+        },
+        {
+          "endMs": 21900,
+          "startMs": 21440,
+          "text": "сохранять"
+        },
+        {
+          "endMs": 22360,
+          "startMs": 21900,
+          "text": "контроль"
+        },
+        {
+          "endMs": 22500,
+          "startMs": 22360,
+          "text": "над"
+        },
+        {
+          "endMs": 23220,
+          "startMs": 22500,
+          "text": "контекстом,"
+        },
+        {
+          "endMs": 24260,
+          "startMs": 23720,
+          "text": "задачами"
+        },
+        {
+          "endMs": 24520,
+          "startMs": 24260,
+          "text": "и"
+        },
+        {
+          "endMs": 25220,
+          "startMs": 24520,
+          "text": "ресурсами,"
+        },
+        {
+          "endMs": 25600,
+          "startMs": 25380,
+          "text": "при"
+        },
+        {
+          "endMs": 25740,
+          "startMs": 25600,
+          "text": "этом"
+        },
+        {
+          "endMs": 26080,
+          "startMs": 25740,
+          "text": "быстро"
+        },
+        {
+          "endMs": 26440,
+          "startMs": 26080,
+          "text": "меняя"
+        },
+        {
+          "endMs": 26940,
+          "startMs": 26440,
+          "text": "агентов,"
+        },
+        {
+          "endMs": 27740,
+          "startMs": 27340,
+          "text": "модели"
+        },
+        {
+          "endMs": 27940,
+          "startMs": 27740,
+          "text": "и"
+        },
+        {
+          "endMs": 28360,
+          "startMs": 27940,
+          "text": "способы"
+        },
+        {
+          "endMs": 28900,
+          "startMs": 28360,
+          "text": "доступа"
+        },
+        {
+          "endMs": 29000,
+          "startMs": 28900,
+          "text": "к"
+        },
+        {
+          "endMs": 29180,
+          "startMs": 29000,
+          "text": "ним."
+        },
+        {
+          "endMs": 29540,
+          "startMs": 29180,
+          "text": "Когда"
+        },
+        {
+          "endMs": 29660,
+          "startMs": 29540,
+          "text": "я"
+        },
+        {
+          "endMs": 30080,
+          "startMs": 29660,
+          "text": "начинал"
+        },
+        {
+          "endMs": 30360,
+          "startMs": 30080,
+          "text": "эту"
+        },
+        {
+          "endMs": 30840,
+          "startMs": 30360,
+          "text": "линию,"
+        },
+        {
+          "endMs": 31360,
+          "startMs": 31000,
+          "text": "я"
+        },
+        {
+          "endMs": 31800,
+          "startMs": 31360,
+          "text": "не"
+        },
+        {
+          "endMs": 32180,
+          "startMs": 31800,
+          "text": "нашел"
+        },
+        {
+          "endMs": 32600,
+          "startMs": 32180,
+          "text": "готового"
+        },
+        {
+          "endMs": 33060,
+          "startMs": 32600,
+          "text": "решения"
+        },
+        {
+          "endMs": 33200,
+          "startMs": 33060,
+          "text": "с"
+        },
+        {
+          "endMs": 33460,
+          "startMs": 33200,
+          "text": "таким"
+        },
+        {
+          "endMs": 34280,
+          "startMs": 33460,
+          "text": "сочетанием"
+        },
+        {
+          "endMs": 35040,
+          "startMs": 34280,
+          "text": "возможностей,"
+        },
+        {
+          "endMs": 35820,
+          "startMs": 35220,
+          "text": "поэтому"
+        },
+        {
+          "endMs": 36140,
+          "startMs": 35820,
+          "text": "стал"
+        },
+        {
+          "endMs": 36660,
+          "startMs": 36140,
+          "text": "развивать"
+        },
+        {
+          "endMs": 37200,
+          "startMs": 36660,
+          "text": "собственный"
+        },
+        {
+          "endMs": 37600,
+          "startMs": 37200,
+          "text": "вариант."
+        },
+        {
+          "endMs": 38100,
+          "startMs": 37860,
+          "text": "Мы"
+        },
+        {
+          "endMs": 38460,
+          "startMs": 38100,
+          "text": "решили"
+        },
+        {
+          "endMs": 38840,
+          "startMs": 38460,
+          "text": "открыть"
+        },
+        {
+          "endMs": 39500,
+          "startMs": 38840,
+          "text": "управляющий"
+        },
+        {
+          "endMs": 39940,
+          "startMs": 39500,
+          "text": "контур"
+        },
+        {
+          "endMs": 40820,
+          "startMs": 39940,
+          "text": "mcp"
+        },
+        {
+          "endMs": 41360,
+          "startMs": 40820,
+          "text": "-agent"
+        },
+        {
+          "endMs": 41880,
+          "startMs": 41360,
+          "text": "-portal,"
+        },
+        {
+          "endMs": 42860,
+          "startMs": 42320,
+          "text": "хотя"
+        },
+        {
+          "endMs": 43440,
+          "startMs": 42860,
+          "text": "развиваем"
+        },
+        {
+          "endMs": 43980,
+          "startMs": 43440,
+          "text": "агент"
+        },
+        {
+          "endMs": 44480,
+          "startMs": 43980,
+          "text": "-портал"
+        },
+        {
+          "endMs": 44860,
+          "startMs": 44480,
+          "text": "прежде"
+        },
+        {
+          "endMs": 45140,
+          "startMs": 44860,
+          "text": "всего"
+        },
+        {
+          "endMs": 45340,
+          "startMs": 45140,
+          "text": "для"
+        },
+        {
+          "endMs": 45940,
+          "startMs": 45340,
+          "text": "собственной"
+        },
+        {
+          "endMs": 46580,
+          "startMs": 45940,
+          "text": "практической"
+        },
+        {
+          "endMs": 47000,
+          "startMs": 46580,
+          "text": "работы."
+        },
+        {
+          "endMs": 47680,
+          "startMs": 47240,
+          "text": "Исходный"
+        },
+        {
+          "endMs": 47980,
+          "startMs": 47680,
+          "text": "код"
+        },
+        {
+          "endMs": 48420,
+          "startMs": 47980,
+          "text": "этого"
+        },
+        {
+          "endMs": 49020,
+          "startMs": 48420,
+          "text": "контура"
+        },
+        {
+          "endMs": 49520,
+          "startMs": 49020,
+          "text": "доступен"
+        },
+        {
+          "endMs": 49700,
+          "startMs": 49520,
+          "text": "на"
+        },
+        {
+          "endMs": 49940,
+          "startMs": 49700,
+          "text": "GitHub,"
+        },
+        {
+          "endMs": 50640,
+          "startMs": 50420,
+          "text": "а"
+        },
+        {
+          "endMs": 51180,
+          "startMs": 50640,
+          "text": "интерфейс"
+        },
+        {
+          "endMs": 51660,
+          "startMs": 51180,
+          "text": "агент"
+        },
+        {
+          "endMs": 52100,
+          "startMs": 51660,
+          "text": "-портал"
+        },
+        {
+          "endMs": 52580,
+          "startMs": 52100,
+          "text": "можно"
+        },
+        {
+          "endMs": 53080,
+          "startMs": 52580,
+          "text": "посмотреть"
+        },
+        {
+          "endMs": 53260,
+          "startMs": 53080,
+          "text": "в"
+        },
+        {
+          "endMs": 53920,
+          "startMs": 53260,
+          "text": "интерактивном"
+        },
+        {
+          "endMs": 54320,
+          "startMs": 53920,
+          "text": "демо."
+        },
+        {
+          "endMs": 54780,
+          "startMs": 54320,
+          "text": "Чтобы"
+        },
+        {
+          "endMs": 55320,
+          "startMs": 54780,
+          "text": "показать"
+        },
+        {
+          "endMs": 55480,
+          "startMs": 55320,
+          "text": "его"
+        },
+        {
+          "endMs": 56020,
+          "startMs": 55480,
+          "text": "внутренние"
+        },
+        {
+          "endMs": 56660,
+          "startMs": 56020,
+          "text": "устройства,"
+        },
+        {
+          "endMs": 57320,
+          "startMs": 56840,
+          "text": "дальше"
+        },
+        {
+          "endMs": 57760,
+          "startMs": 57320,
+          "text": "я"
+        },
+        {
+          "endMs": 58180,
+          "startMs": 57760,
+          "text": "разберу"
+        },
+        {
+          "endMs": 58500,
+          "startMs": 58180,
+          "text": "два"
+        },
+        {
+          "endMs": 59300,
+          "startMs": 58500,
+          "text": "отдельных"
+        },
+        {
+          "endMs": 60140,
+          "startMs": 59300,
+          "text": "инструмента."
+        },
+        {
+          "endMs": 61120,
+          "startMs": 60380,
+          "text": "Агент"
+        },
+        {
+          "endMs": 61440,
+          "startMs": 61120,
+          "text": "-пул"
+        },
+        {
+          "endMs": 62560,
+          "startMs": 61440,
+          "text": "-мcp"
+        },
+        {
+          "endMs": 63440,
+          "startMs": 62560,
+          "text": "отвечает"
+        },
+        {
+          "endMs": 63540,
+          "startMs": 63440,
+          "text": "за"
+        },
+        {
+          "endMs": 64120,
+          "startMs": 63540,
+          "text": "исполнение"
+        },
+        {
+          "endMs": 64340,
+          "startMs": 64120,
+          "text": "и"
+        },
+        {
+          "endMs": 64940,
+          "startMs": 64340,
+          "text": "распределение"
+        },
+        {
+          "endMs": 65560,
+          "startMs": 64940,
+          "text": "ресурсов,"
+        },
+        {
+          "endMs": 65900,
+          "startMs": 65660,
+          "text": "а"
+        },
+        {
+          "endMs": 66300,
+          "startMs": 65900,
+          "text": "проект"
+        },
+        {
+          "endMs": 66760,
+          "startMs": 66300,
+          "text": "-граф"
+        },
+        {
+          "endMs": 67580,
+          "startMs": 66760,
+          "text": "-мcp"
+        },
+        {
+          "endMs": 67780,
+          "startMs": 67580,
+          "text": "за"
+        },
+        {
+          "endMs": 68320,
+          "startMs": 67780,
+          "text": "структуру"
+        },
+        {
+          "endMs": 68600,
+          "startMs": 68320,
+          "text": "и"
+        },
+        {
+          "endMs": 69120,
+          "startMs": 68600,
+          "text": "контекст"
+        },
+        {
+          "endMs": 69840,
+          "startMs": 69120,
+          "text": "проекта."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

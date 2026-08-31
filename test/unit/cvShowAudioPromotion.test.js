@@ -847,6 +847,27 @@ test('persisted global artifact evidence is reused after a post-CAS exception', 
   assert.equal(releaseInspections, 1);
 });
 
+test('an explicit all-reuse artifact refresh rebuilds aggregate manifest evidence', async (t) => {
+  let fixture = await planFixture();
+  fixture.plan.refreshArtifacts = true;
+  let inspections = 0;
+  let handle = pipelineFor(
+    await temporaryRoot(t, 'cv-show-refresh-artifacts-'),
+    async () => {
+      throw new Error('all-reuse refresh must not inspect entry runners');
+    },
+    {
+      inspectReleaseArtifacts: async () => {
+        inspections += 1;
+        return releaseArtifactEvidence(fixture);
+      },
+    },
+  ).openRelease(fixture.plan);
+
+  await advanceToVerified(handle);
+  assert.equal(inspections, 1);
+});
+
 test('timing-only all-reuse release preserves media IDs while aggregate provenance advances', async (t) => {
   let root = await temporaryRoot(t, 'cv-audio-timing-');
   let baseline = await planFixture();

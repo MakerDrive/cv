@@ -1,13 +1,13 @@
 export const CV_SHOW_WEB_AUDIO_RELEASE = Object.freeze({
   "schemaVersion": "cv-show-web-audio-selector-v1",
-  "releaseId": "cv-show-web-audio-release-v1:dfaea667c8ab7a29b819e432751dbc4acc731c875203e8391cc85935b4dc3360",
-  "sourceMasterReleaseId": "cv-show-audio-release-v1:72dba6c71068a42d0e3f89d9a2dcb22740623fadaa798967ff81e9f9eba1697b",
+  "releaseId": "cv-show-web-audio-release-v1:08f7a44b781b951e9a675850254fba2934b5c7740bd08a73b3a89b8830e913cf",
+  "sourceMasterReleaseId": "cv-show-audio-release-v1:2608856b8fda0b9d23636b7454f8f5b893efb099bf961c1e0d741a9862a5200e",
   "voiceId": "barzana-2",
   "locale": "ru",
-  "revision": "dfaea667c8ab7a29b819e432751dbc4acc731c875203e8391cc85935b4dc3360",
+  "revision": "08f7a44b781b951e9a675850254fba2934b5c7740bd08a73b3a89b8830e913cf",
   "manifest": {
-    "path": "barzana-2/dfaea667c8ab7a29b819e432751dbc4acc731c875203e8391cc85935b4dc3360/manifest.json",
-    "sha256": "57768ac8cab56e5bbc2c8335b0eb490b3b4d6793542099e5ed85727ba5eb4a4b",
-    "bytes": 49891
+    "path": "barzana-2/08f7a44b781b951e9a675850254fba2934b5c7740bd08a73b3a89b8830e913cf/manifest.json",
+    "sha256": "b5b40d2b6965349ecaf24a1947c9e12d290611c5857bcc87b6d0494976c2cb81",
+    "bytes": 58353
   }
 });

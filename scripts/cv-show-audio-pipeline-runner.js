@@ -1744,7 +1744,69 @@ export function createCvShowAudioPipelineRunner(input = {}) {
       });
     };
 
-    return Object.freeze({ initialize, inspect, advance, reviewClip });
+    let retryVerification = async (...args) => {
+      if (args.length !== 1) {
+        fail(
+          'CV_SHOW_AUDIO_PIPELINE_INVALID',
+          'CV Show audio pipeline verification retry needs one owner token',
+        );
+      }
+      let [ownerToken] = args;
+      return withOwnerLock(run, ownerToken, async () => {
+        let context = await loadContext(run, plan);
+        if (
+          !['blocked', 'outcome-unknown'].includes(context.state.phase)
+          || !['transcription', 'alignment'].includes(context.state.failure?.stage)
+          || context.state.review?.approved !== true
+          || context.state.attemptHashes.length < 3
+        ) {
+          fail(
+            'CV_SHOW_AUDIO_PIPELINE_RETRY_NOT_PERMITTED',
+            'CV Show audio pipeline verification retry requires an approved WAV interrupted during transcription or alignment',
+          );
+        }
+        let next = await replaceState(run, plan, context, {
+          ...context.state,
+          phase: 'clip-reviewed',
+          attemptHashes: context.state.attemptHashes.slice(0, 3),
+          transcript: null,
+          alignment: null,
+          verification: null,
+          failure: null,
+        });
+        return publicValue(next.state);
+      });
+    };
+
+    let retrySynthesis = async (...args) => {
+      if (args.length !== 1) {
+        fail(
+          'CV_SHOW_AUDIO_PIPELINE_INVALID',
+          'CV Show audio pipeline synthesis retry needs one owner token',
+        );
+      }
+      let [ownerToken] = args;
+      return withOwnerLock(run, ownerToken, async () => {
+        let context = await loadContext(run, plan);
+        if (context.state.phase !== 'blocked') {
+          fail(
+            'CV_SHOW_AUDIO_PIPELINE_RETRY_NOT_PERMITTED',
+            'CV Show audio pipeline synthesis retry requires a blocked entry',
+          );
+        }
+        let next = await replaceState(run, plan, context, createInitialState(plan));
+        return publicValue(next.state);
+      });
+    };
+
+    return Object.freeze({
+      initialize,
+      inspect,
+      advance,
+      reviewClip,
+      retryVerification,
+      retrySynthesis,
+    });
   };
 
   return Object.freeze({ openEntry });

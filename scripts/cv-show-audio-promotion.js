@@ -316,9 +316,15 @@ export function createCvShowAudioPromotion(input = {}) {
       generatedPaths.add(entry.recognition.path);
       generatedPaths.add(entry.alignment.path);
     }
-    if (aggregate.plan.entries.some(({ mode }) => mode === 'regenerate')) {
-      generatedPaths.add(aggregate.release.manifests.audio.path);
-      generatedPaths.add(aggregate.release.manifests.alignment.path);
+    for (let kind of ['audio', 'alignment']) {
+      let selected = aggregate.release.manifests[kind];
+      let prior = predecessor.manifests[kind];
+      if (
+        aggregate.plan.refreshArtifacts === true
+        || selected.path !== prior.path
+        || selected.sha256 !== prior.sha256
+        || selected.size !== prior.size
+      ) generatedPaths.add(selected.path);
     }
     for (let row of tree.inventory) {
       let bytes;
