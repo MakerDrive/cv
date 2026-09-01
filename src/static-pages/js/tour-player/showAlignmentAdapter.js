@@ -666,6 +666,8 @@ export function createCvShowAlignmentController({
           const checkpoint = tuple.playbackCheckpoint?.projectTimeMs === requestedProjectTimeMs
             ? tuple.playbackCheckpoint
             : projectCvShowPlaybackCheckpoint(tuple.playbackPlan, requestedProjectTimeMs);
+          const presentationComplete = checkpoint.phase === 'after'
+            && checkpoint.projectTimeMs >= tuple.projectDurationMs;
           restoredProjectPositionMs = checkpoint.projectTimeMs;
           deferredMediaStartSeconds = checkpoint.sourceTimeMs / 1_000;
           if (!deferPresentation) {
@@ -674,6 +676,17 @@ export function createCvShowAlignmentController({
             await runHeldCheckpointAttention();
           }
           await tuple.execution.pause();
+          if (presentationComplete) {
+            media.pause?.();
+            if (!deferPresentation) await runCrossBoundaryAttentionGate();
+            return Object.freeze({
+              status: 'completed',
+              reason: 'presentation-complete',
+              requestedMs: checkpoint.sourceTimeMs,
+              observedMs: checkpoint.sourceTimeMs,
+              presentationComplete: true,
+            });
+          }
           const generation = await mediaRuntime.loadAndRestorePlayback({
             ...snapshot,
             positionMs: checkpoint.sourceTimeMs,
@@ -682,8 +695,7 @@ export function createCvShowAlignmentController({
           if (!deferPresentation) await runCrossBoundaryAttentionGate();
           return Object.freeze({
             ...generation,
-            presentationComplete: checkpoint.phase === 'after'
-              && checkpoint.projectTimeMs >= tuple.projectDurationMs,
+            presentationComplete,
           });
         },
         pause() {

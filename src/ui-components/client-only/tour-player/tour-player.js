@@ -1446,6 +1446,7 @@ export class PortfolioShowChat extends HTMLElement {
         Math.max(projectDurationMs, this.#projectDurationMsByEntry.get(entry.id) || 0),
       );
       this.#showPlayer?.bind?.(this.#showConfig());
+      this.#syncPlayer();
     }
     const receipt = await aligned.runtime.loadAndRestorePlayback({
       source: clip.audioUrl,

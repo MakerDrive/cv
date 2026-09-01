@@ -47,31 +47,11 @@ import { createYouTubeNoCookieEmbedUrl } from './youtubeEmbedUrl.js';
 
 export const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
-export function createCvShowYouTubePosterDocument(videoId) {
-  const posterUrl = `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`;
-  return `<!doctype html>
-<meta name="color-scheme" content="dark">
-<style>
-  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17191c}
-  body{display:grid;place-items:stretch}
-  img{width:100%;height:100%;object-fit:cover;filter:saturate(.78) brightness(.78)}
-</style>
-<img src="${posterUrl}" alt="">`;
-}
-
-/** Keeps Show video blocks passive while preserving ordinary article playback. */
+/** Keeps the real player visible while Show cues remain passive and never press Play. */
 export function configurePortfolioYouTubeIframe(iframe, videoId) {
   if (!iframe) return false;
   iframe.dataset.youtubeVideoId = videoId;
-  const mode = typeof location === 'undefined'
-    ? ''
-    : new URLSearchParams(location.search).get('showMode');
-  if (mode === 'short' || mode === 'full') {
-    iframe.srcdoc = createCvShowYouTubePosterDocument(videoId);
-    iframe.dataset.showPosterOnly = 'true';
-  } else {
-    iframe.src = createYouTubeNoCookieEmbedUrl(videoId, { origin: location.origin });
-  }
+  iframe.src = createYouTubeNoCookieEmbedUrl(videoId, { origin: location.origin });
   return true;
 }
 

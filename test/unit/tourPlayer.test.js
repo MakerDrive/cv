@@ -4450,6 +4450,87 @@ test('deferred aligned startup loads paused media without presentation admission
   assert.equal(media.paused, true);
   assert.deepEqual(operations, [], 'paused preparation cannot admit presenter operations');
 
+  const completedProjectCheckpointMs = Math.max(
+    ...aligned.playbackPlan.cells.map(({ span }) => Number(span.endMs) || 0),
+  );
+  const completedMedia = new FakeMedia();
+  const completed = await alignment.createEntryRuntime({
+    entry,
+    media: completedMedia,
+    audioClip: clip,
+    checkpointMs: completedProjectCheckpointMs,
+    restorePausedCheckpoint: true,
+    runPresentationOperation: async (operation) => {
+      const observedAt = freezeProviderValue({
+        domain: 'performance',
+        timeOriginMs: performance.timeOrigin,
+        monotonicTimeMs: performance.now(),
+      });
+      if (operation.kind === 'attention') {
+        operation.reportAdmission({
+          providerAdmission: providerAdmissionFixture({
+            mode: operation.source.type,
+            gestureId: operation.source.id,
+            targetId: operation.scheduleCell.targetId,
+            limitMs: operation.scheduleCell.gesture.endMs - operation.scheduleCell.gesture.startMs,
+            plannedDurationMs: Math.min(
+              500,
+              operation.scheduleCell.gesture.endMs - operation.scheduleCell.gesture.startMs,
+            ),
+          }),
+        });
+        operation.reportReceipt({
+          status: 'first-frame',
+          observedAt,
+          providerReceipt: { status: 'presenting' },
+        });
+        operation.reportReceipt({
+          status: 'settled',
+          observedAt,
+          providerReceipt: { status: 'settled' },
+        });
+        return undefined;
+      }
+      if (operation.projectCell.cue.interaction?.type === 'select') {
+        operation.reportAdmission({
+          providerAdmission: providerAdmissionFixture({
+            mode: 'frame',
+            gestureId: operation.source.id,
+            targetId: operation.scheduleCell.targetId,
+            limitMs: operation.scheduleCell.gesture.endMs - operation.scheduleCell.gesture.startMs,
+            plannedDurationMs: Math.min(
+              500,
+              operation.scheduleCell.gesture.endMs - operation.scheduleCell.gesture.startMs,
+            ),
+          }),
+        });
+      }
+      operation.reportReceipt({
+        status: 'acted',
+        observedAt,
+        providerReceipt: { status: 'acted' },
+      });
+      operation.reportReceipt({
+        status: 'settled',
+        observedAt,
+        providerReceipt: { status: 'settled' },
+      });
+    },
+  });
+  t.after(() => completed.runtime.dispose());
+  const completedReceipt = await completed.runtime.loadAndRestorePlayback({
+    source: 'https://portfolio.example/cv/cv-show-audio/symbiote-workspace.opus',
+    positionMs: completedProjectCheckpointMs,
+    paused: true,
+    preload: 'auto',
+  }, { reason: 'completed-checkpoint-restore' });
+
+  assert.equal(completedReceipt.status, 'completed');
+  assert.equal(completedReceipt.presentationComplete, true);
+  assert.equal(completedMedia.loadCount, 0, 'a completed checkpoint must not reload media at EOF');
+  assert.equal(completedMedia.playCount, 0);
+  assert.equal(completed.runtime.presentationPositionMs, completedProjectCheckpointMs);
+
   const sourceCheckpointMs = 20_210;
   const fullSpeechClip = aligned.playbackPlan.clips[0];
   const restoredProjectCheckpointMs = fullSpeechClip.span.startMs
@@ -5647,6 +5728,16 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     'a non-playable live media view must be rejected before the shared Show mounts',
   );
   assert.match(logic, /this\.#alignedEntry\?\.runtime\?\.presentationPositionMs/u);
+  const alignedDurationBindingAt = logic.indexOf(
+    'this.#projectDurationMsByEntry.set(',
+    logic.indexOf('async #attachAlignedEntry'),
+  );
+  const alignedDurationBinding = logic.slice(alignedDurationBindingAt, alignedDurationBindingAt + 500);
+  assert.match(
+    alignedDurationBinding,
+    /this\.#showPlayer\?\.bind\?\.\(this\.#showConfig\(\)\);\s*this\.#syncPlayer\(\);/u,
+    'an aligned Project duration must redraw the clock even when completed media is not loaded',
+  );
   assert.doesNotMatch(logic, /semantics: 'pointer-only'/);
   assert.match(
     logic,
