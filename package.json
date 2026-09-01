@@ -50,8 +50,8 @@
     "@symbiotejs/symbiote": "3.8.0-webmcp.2",
     "immersive-media-spots": "^1.3.7",
     "jsda-kit": "1.6.0",
-    "symbiote-ui": "git+https://github.com/rnd-pro/symbiote-ui.git#529b00c97f3712660e2a18f4ecf16aa6a1cab742",
-    "symbiote-workspace": "git+https://github.com/rnd-pro/symbiote-workspace.git#f3f649c10309c0ceb561bc94501849010ac45c99"
+    "symbiote-ui": "https://codeload.github.com/rnd-pro/symbiote-ui/tar.gz/529b00c97f3712660e2a18f4ecf16aa6a1cab742",
+    "symbiote-workspace": "https://codeload.github.com/rnd-pro/symbiote-workspace/tar.gz/f3f649c10309c0ceb561bc94501849010ac45c99"
   },
   "overrides": {
     "@symbiotejs/symbiote": "$@symbiotejs/symbiote",
