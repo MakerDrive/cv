@@ -1,0 +1,5 @@
+Agent Pool valida los límites del sistema de archivos usados por la delegación y las herramientas de memoria. El working directory solicitado y cada directorio adicional se resuelven antes del lanzamiento; se rechazan si coinciden con raíces del sistema configuradas. El worker recibe de forma explícita el workspace scope resultante dentro del prompt.
+
+La creación de skills aplica una regla más estrecha. Se rechazan los nombres que contienen separadores de ruta o `..` antes de construir la ruta del archivo. Las rutas de policies incorporadas se resuelven y solo se aceptan si permanecen dentro del directorio de policies del paquete. Estas comprobaciones cubren las operaciones de skills y policies implementadas.
+
+El aislamiento se expresa mediante un `cwd` asignado, directorios incluidos de forma explícita, modos de permisos del proveedor y gestión del ciclo de vida del process group. La implementación Node.js no reconstruye un entorno completo para cada proceso hijo. Cada control mantiene una responsabilidad distinta.

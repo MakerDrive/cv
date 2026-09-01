@@ -1,0 +1,5 @@
+I developed Symbiote Workspace as the portable construction layer between Symbiote UI, Symbiote Engine, and a host application. A workspace is plain JSON describing layouts, modules, actions, wires, theme state, runtime slots, and host requirements. The host keeps authentication, model routing, storage, and identity.
+
+Construction starts from a user intent, selects provider modules, and validates the resulting config before browser mounting. One dispatch registry supplies the same tool definitions to the CLI and MCP transport. Mutating calls carry a base revision, so a stale update returns a revision conflict instead of replacing newer state.
+
+Sharing uses strict export and import. Portable configs exclude credentials, local paths, session data, and user identity, while the host-integration contract records the imports and services needed to reopen the workspace. Validated patches can update a mounted workspace without replacing its browser runtime. Presentation journeys and media evidence remain versioned portable artifacts within this boundary.

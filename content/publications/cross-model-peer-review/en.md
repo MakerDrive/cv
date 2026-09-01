@@ -1,0 +1,5 @@
+Agent Pool MCP exposes `delegate_task_readonly` for peer review in Codex workflows. The orchestrator sends a bounded analysis prompt through the configured `review` resource group. The call runs in plan mode and returns a task identifier immediately; `get_task_result` provides status and the completed report. The package guide identifies `consult_peer` as a legacy Gemini-only helper outside the Codex resource-group workflow.
+
+A review assignment can name Claude Sonnet 5 as the reviewer of work produced by GPT-5.6 Sol. The pairing is illustrative and comes from the orchestration policy. Agent Pool takes its route from the resource-group profile or explicit task parameters and supports other configured providers and models.
+
+The review worker returns findings, risks, and suggested changes as evidence. The orchestrator checks that evidence against current files and verification results, classifies each finding, and retains authority over the plan and acceptance decision. No public outcome benchmark is part of the package evidence.

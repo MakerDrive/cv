@@ -1,0 +1,261 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-I6uoUqUBCRp76sfJ0e4oSg3OG96y5XuEQWi9RKrRYss=",
+  "media": {
+    "durationMs": 23910,
+    "hash": "sha256:04def085eccc94eec8b21327dab5e6e5c454cc3c498ebc9ff8e2064461358c5a",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-ZGwQrurNHOr9u7x+ZQ6A6rEVOAn4gjlJPOIV09xgSUo=",
+  "turns": [
+    {
+      "endMs": 23910,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Начну с текущего центра моей работы. С середины 2026 года я развиваю симбиот Workspace в универсальную среду, где агент собирает рабочее пространство под конкретную задачу. Результат сохраняется в виде исполняемой конфигурации, которую можно переносить. Некоторые мои текущие проекты появились раньше Workspace и теперь постепенно становятся его конфигурациями.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 380,
+          "startMs": 0,
+          "text": "Начну"
+        },
+        {
+          "endMs": 520,
+          "startMs": 380,
+          "text": "с"
+        },
+        {
+          "endMs": 980,
+          "startMs": 520,
+          "text": "текущего"
+        },
+        {
+          "endMs": 1340,
+          "startMs": 980,
+          "text": "центра"
+        },
+        {
+          "endMs": 1520,
+          "startMs": 1340,
+          "text": "моей"
+        },
+        {
+          "endMs": 1920,
+          "startMs": 1520,
+          "text": "работы."
+        },
+        {
+          "endMs": 2660,
+          "startMs": 2360,
+          "text": "С"
+        },
+        {
+          "endMs": 3100,
+          "startMs": 2660,
+          "text": "середины"
+        },
+        {
+          "endMs": 4280,
+          "startMs": 3100,
+          "text": "2026"
+        },
+        {
+          "endMs": 4900,
+          "startMs": 4280,
+          "text": "года"
+        },
+        {
+          "endMs": 5440,
+          "startMs": 4900,
+          "text": "я"
+        },
+        {
+          "endMs": 6060,
+          "startMs": 5440,
+          "text": "развиваю"
+        },
+        {
+          "endMs": 6560,
+          "startMs": 6060,
+          "text": "симбиот"
+        },
+        {
+          "endMs": 7100,
+          "startMs": 6560,
+          "text": "Workspace"
+        },
+        {
+          "endMs": 7300,
+          "startMs": 7100,
+          "text": "в"
+        },
+        {
+          "endMs": 7820,
+          "startMs": 7300,
+          "text": "универсальную"
+        },
+        {
+          "endMs": 8260,
+          "startMs": 7820,
+          "text": "среду,"
+        },
+        {
+          "endMs": 8480,
+          "startMs": 8400,
+          "text": "где"
+        },
+        {
+          "endMs": 8820,
+          "startMs": 8480,
+          "text": "агент"
+        },
+        {
+          "endMs": 9380,
+          "startMs": 8820,
+          "text": "собирает"
+        },
+        {
+          "endMs": 9880,
+          "startMs": 9380,
+          "text": "рабочее"
+        },
+        {
+          "endMs": 10500,
+          "startMs": 9880,
+          "text": "пространство"
+        },
+        {
+          "endMs": 10680,
+          "startMs": 10500,
+          "text": "под"
+        },
+        {
+          "endMs": 11300,
+          "startMs": 10680,
+          "text": "конкретную"
+        },
+        {
+          "endMs": 11900,
+          "startMs": 11300,
+          "text": "задачу."
+        },
+        {
+          "endMs": 12800,
+          "startMs": 12220,
+          "text": "Результат"
+        },
+        {
+          "endMs": 13460,
+          "startMs": 12800,
+          "text": "сохраняется"
+        },
+        {
+          "endMs": 13640,
+          "startMs": 13460,
+          "text": "в"
+        },
+        {
+          "endMs": 13840,
+          "startMs": 13640,
+          "text": "виде"
+        },
+        {
+          "endMs": 14580,
+          "startMs": 13840,
+          "text": "исполняемой"
+        },
+        {
+          "endMs": 15360,
+          "startMs": 14580,
+          "text": "конфигурации,"
+        },
+        {
+          "endMs": 15960,
+          "startMs": 15540,
+          "text": "которую"
+        },
+        {
+          "endMs": 16260,
+          "startMs": 15960,
+          "text": "можно"
+        },
+        {
+          "endMs": 16860,
+          "startMs": 16260,
+          "text": "переносить."
+        },
+        {
+          "endMs": 17620,
+          "startMs": 17060,
+          "text": "Некоторые"
+        },
+        {
+          "endMs": 17840,
+          "startMs": 17620,
+          "text": "мои"
+        },
+        {
+          "endMs": 18300,
+          "startMs": 17840,
+          "text": "текущие"
+        },
+        {
+          "endMs": 18700,
+          "startMs": 18300,
+          "text": "проекты"
+        },
+        {
+          "endMs": 19180,
+          "startMs": 18700,
+          "text": "появились"
+        },
+        {
+          "endMs": 19460,
+          "startMs": 19180,
+          "text": "раньше"
+        },
+        {
+          "endMs": 20040,
+          "startMs": 19460,
+          "text": "Workspace"
+        },
+        {
+          "endMs": 20820,
+          "startMs": 20040,
+          "text": "и"
+        },
+        {
+          "endMs": 21200,
+          "startMs": 20820,
+          "text": "теперь"
+        },
+        {
+          "endMs": 21960,
+          "startMs": 21200,
+          "text": "постепенно"
+        },
+        {
+          "endMs": 22560,
+          "startMs": 21960,
+          "text": "становятся"
+        },
+        {
+          "endMs": 22820,
+          "startMs": 22560,
+          "text": "его"
+        },
+        {
+          "endMs": 23780,
+          "startMs": 22820,
+          "text": "конфигурациями."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

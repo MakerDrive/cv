@@ -1,0 +1,5 @@
+El diseño actual de memoria utiliza una sola raíz configurada de team memory. Las skills reutilizables viven en `skills/`. Las skills específicas de un proyecto están en `workspace/<project>/skills/`, junto al contexto que las activa. La implementación no contiene una jerarquía `/global/skills` ni un directorio local `.workspace/skills`.
+
+El resolver identifica primero los contextos activos mediante la ruta del repositorio y las pistas de archivos relevantes. Después enumera los directorios globales y los de esos workspaces. Cada elemento conserva su tier y workspace, lo que permite al orquestador aplicar las reglas específicas con mayor prioridad y usar las globales para los huecos restantes.
+
+La separación mantiene los hechos de cada proyecto dentro de su área de memoria. El prompt delegado recibe únicamente el paquete de contexto y las skills seleccionadas para la tarea. El clon compartido sigue siendo la única fuente de verdad; el estado de ejecución y los archivos del repositorio mantienen límites de propiedad independientes.

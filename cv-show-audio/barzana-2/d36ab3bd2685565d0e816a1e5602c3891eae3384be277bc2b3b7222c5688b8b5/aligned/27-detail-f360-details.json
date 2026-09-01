@@ -1,0 +1,336 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-pXFp+LVNNCB2UJynyllogkFdFcZ6fBpldgbtN8C6eZs=",
+  "media": {
+    "hash": "sha256:0f9415d586250df8c1ee6e94f226cb9abb2d0c0af4580b95cc3f2edaaae26863",
+    "durationMs": 32270,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 32270,
+      "speaker": "guide",
+      "transcript": "F-360 переносила дисциплину музейной съемки в коммерческий студийный процесс. Для каждого объекта я планировал ракурсы и свет, контролировал исходные фотографии, проводил фотограмметрическую обработку и проверял геометрию с текстурами. Я собрал единый производственный путь от установки до финальной 3D модели и ее публикации. Публичные примеры сохранились на YouTube и в портфолио Sketchfab. Студия завершила работу в 2022 году во время моего переезда.",
+      "words": [
+        {
+          "text": "F",
+          "startMs": 0,
+          "endMs": 300
+        },
+        {
+          "text": "-360",
+          "startMs": 300,
+          "endMs": 1100
+        },
+        {
+          "text": "переносила",
+          "startMs": 1100,
+          "endMs": 2080
+        },
+        {
+          "text": "дисциплину",
+          "startMs": 2080,
+          "endMs": 2820
+        },
+        {
+          "text": "музейной",
+          "startMs": 2820,
+          "endMs": 3420
+        },
+        {
+          "text": "съемки",
+          "startMs": 3420,
+          "endMs": 3980
+        },
+        {
+          "text": "в",
+          "startMs": 3980,
+          "endMs": 4260
+        },
+        {
+          "text": "коммерческий",
+          "startMs": 4260,
+          "endMs": 4900
+        },
+        {
+          "text": "студийный",
+          "startMs": 4900,
+          "endMs": 5440
+        },
+        {
+          "text": "процесс.",
+          "startMs": 5440,
+          "endMs": 5780
+        },
+        {
+          "text": "Для",
+          "startMs": 6080,
+          "endMs": 6240
+        },
+        {
+          "text": "каждого",
+          "startMs": 6240,
+          "endMs": 6740
+        },
+        {
+          "text": "объекта",
+          "startMs": 6740,
+          "endMs": 7280
+        },
+        {
+          "text": "я",
+          "startMs": 7280,
+          "endMs": 7540
+        },
+        {
+          "text": "планировал",
+          "startMs": 7540,
+          "endMs": 8300
+        },
+        {
+          "text": "ракурсы",
+          "startMs": 8300,
+          "endMs": 8800
+        },
+        {
+          "text": "и",
+          "startMs": 8800,
+          "endMs": 8980
+        },
+        {
+          "text": "свет,",
+          "startMs": 8980,
+          "endMs": 9220
+        },
+        {
+          "text": "контролировал",
+          "startMs": 9360,
+          "endMs": 10060
+        },
+        {
+          "text": "исходные",
+          "startMs": 10060,
+          "endMs": 10680
+        },
+        {
+          "text": "фотографии,",
+          "startMs": 10680,
+          "endMs": 11360
+        },
+        {
+          "text": "проводил",
+          "startMs": 11560,
+          "endMs": 12080
+        },
+        {
+          "text": "фотограмметрическую",
+          "startMs": 12080,
+          "endMs": 13280
+        },
+        {
+          "text": "обработку",
+          "startMs": 13280,
+          "endMs": 13980
+        },
+        {
+          "text": "и",
+          "startMs": 13980,
+          "endMs": 14160
+        },
+        {
+          "text": "проверял",
+          "startMs": 14160,
+          "endMs": 14700
+        },
+        {
+          "text": "геометрию",
+          "startMs": 14700,
+          "endMs": 15480
+        },
+        {
+          "text": "с",
+          "startMs": 15480,
+          "endMs": 15660
+        },
+        {
+          "text": "текстурами.",
+          "startMs": 15660,
+          "endMs": 16340
+        },
+        {
+          "text": "Я",
+          "startMs": 16640,
+          "endMs": 16880
+        },
+        {
+          "text": "собрал",
+          "startMs": 16880,
+          "endMs": 17380
+        },
+        {
+          "text": "единый",
+          "startMs": 17380,
+          "endMs": 17980
+        },
+        {
+          "text": "производственный",
+          "startMs": 17980,
+          "endMs": 18800
+        },
+        {
+          "text": "путь",
+          "startMs": 18800,
+          "endMs": 19100
+        },
+        {
+          "text": "от",
+          "startMs": 19100,
+          "endMs": 19420
+        },
+        {
+          "text": "установки",
+          "startMs": 19420,
+          "endMs": 20040
+        },
+        {
+          "text": "до",
+          "startMs": 20040,
+          "endMs": 20200
+        },
+        {
+          "text": "финальной",
+          "startMs": 20200,
+          "endMs": 20780
+        },
+        {
+          "text": "3D",
+          "startMs": 20780,
+          "endMs": 21340
+        },
+        {
+          "text": "модели",
+          "startMs": 21340,
+          "endMs": 22200
+        },
+        {
+          "text": "и",
+          "startMs": 22200,
+          "endMs": 22500
+        },
+        {
+          "text": "ее",
+          "startMs": 22500,
+          "endMs": 22740
+        },
+        {
+          "text": "публикации.",
+          "startMs": 22740,
+          "endMs": 23520
+        },
+        {
+          "text": "Публичные",
+          "startMs": 23660,
+          "endMs": 24180
+        },
+        {
+          "text": "примеры",
+          "startMs": 24180,
+          "endMs": 24680
+        },
+        {
+          "text": "сохранились",
+          "startMs": 24680,
+          "endMs": 25380
+        },
+        {
+          "text": "на",
+          "startMs": 25380,
+          "endMs": 25540
+        },
+        {
+          "text": "YouTube",
+          "startMs": 25540,
+          "endMs": 25860
+        },
+        {
+          "text": "и",
+          "startMs": 25860,
+          "endMs": 26120
+        },
+        {
+          "text": "в",
+          "startMs": 26120,
+          "endMs": 26240
+        },
+        {
+          "text": "портфолио",
+          "startMs": 26240,
+          "endMs": 26800
+        },
+        {
+          "text": "Sketchfab.",
+          "startMs": 26800,
+          "endMs": 27400
+        },
+        {
+          "text": "Студия",
+          "startMs": 27400,
+          "endMs": 27800
+        },
+        {
+          "text": "завершила",
+          "startMs": 27800,
+          "endMs": 28280
+        },
+        {
+          "text": "работу",
+          "startMs": 28280,
+          "endMs": 28680
+        },
+        {
+          "text": "в",
+          "startMs": 28680,
+          "endMs": 28860
+        },
+        {
+          "text": "2022",
+          "startMs": 28860,
+          "endMs": 29720
+        },
+        {
+          "text": "году",
+          "startMs": 29720,
+          "endMs": 30700
+        },
+        {
+          "text": "во",
+          "startMs": 30700,
+          "endMs": 30880
+        },
+        {
+          "text": "время",
+          "startMs": 30880,
+          "endMs": 31140
+        },
+        {
+          "text": "моего",
+          "startMs": 31140,
+          "endMs": 31520
+        },
+        {
+          "text": "переезда.",
+          "startMs": 31520,
+          "endMs": 32140
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-m4Cd//n0sh1fVnRbIkKz/cF5j6PnarE5bf3yEw3gILE="
+}

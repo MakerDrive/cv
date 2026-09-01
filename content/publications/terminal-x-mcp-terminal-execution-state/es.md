@@ -1,0 +1,5 @@
+El prototipo Terminal X definió operaciones MCP separadas para ejecutar comandos, monitorear procesos, evaluar seguridad y planificar un workflow. Cada operación declaró su esquema de entrada, con texto del comando, timeout, working directory, filtros o dependencias.
+
+Ese trabajo de esquemas estableció un límite explícito para el estado de ejecución: el caller debe conocer la operación solicitada y recibir una respuesta MCP estructurada. Sin embargo, los handlers del repositorio devolvían texto placeholder. No ejecutaban comandos, no aplicaban una allowlist ni producían logs de monitoreo; tampoco existía una ruta de ejecución mediante Python `subprocess.run`.
+
+El experimento implementó contratos de herramientas y cableado del servidor stdio. La ejecución, la validación de seguridad y el monitoreo en tiempo real quedaron como trabajo previsto. La evidencia de producción sobre comandos delegados pertenece al ciclo de procesos de Agent Pool, que rastrea PID, eventos, stderr, resultado, cancelación y limpieza del process group.

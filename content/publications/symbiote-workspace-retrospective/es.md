@@ -1,0 +1,5 @@
+Desarrollé Symbiote Workspace como la capa portátil de construcción entre Symbiote UI, Symbiote Engine y una aplicación host. Un workspace se describe con JSON: layouts, módulos, acciones, conexiones, estado del tema, slots de runtime y requisitos del host. La autenticación, el enrutamiento de modelos, el almacenamiento y la identidad permanecen en el host.
+
+La construcción parte de una intención del usuario, selecciona módulos de proveedores y valida la configuración antes de montarla en el navegador. Un único registro de despacho ofrece las mismas definiciones de herramientas por CLI y MCP. Las operaciones que modifican estado incluyen una revisión base; una actualización obsoleta recibe un conflicto de revisión.
+
+La exportación estricta excluye credenciales, rutas locales, datos de sesión e identidad del usuario. El contrato de integración enumera los imports y servicios requeridos para reabrir el workspace. Los parches validados actualizan el workspace montado sin sustituir el runtime del navegador, y los recorridos de presentación y la evidencia multimedia se conservan como artefactos portátiles versionados.

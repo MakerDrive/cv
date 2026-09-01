@@ -1,0 +1,5 @@
+Inventé PhotoPizza dentro de MEGAVISOR como una plataforma giratoria motorizada para captura foto-360 de producto accesible. En MEGAVISOR definí la lógica de captura y los requisitos del equipo; un especialista contratado implementó el primer software de control para Arduino. Después de MEGAVISOR empecé a desarrollar personalmente el software en JavaScript y Espruino.
+
+El proyecto open-source público contiene planos de plataformas para corte láser, hardware de la unidad de control, firmware y documentación para operadores. Los controladores admiten mando infrarrojo, Wi-Fi/navegador y Android para ajustar número de fotogramas, velocidad, pausa, retardo, dirección, calibración y rotación continua.
+
+PhotoPizza sirve para fotografía y video, además de escaneo 3D fotogramétrico. El flujo documentado gira el objeto por posiciones de captura configuradas y permite definir la pausa y el retardo de cada toma. El equipo se utilizó en trabajos posteriores de escaneo, incluida la línea tecnológica que condujo a ComplexScan y AUTOBOX.

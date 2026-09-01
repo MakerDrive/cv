@@ -1,0 +1,5 @@
+Context X MCP documenta un experimento temprano para preparar el contexto antes de ejecutar una tarea con agentes. El repositorio registró herramientas MCP sobre stdio para enriquecimiento de contexto, búsqueda de historial y evaluación de calidad. También definió un límite de coordinación para seleccionar el tema y orquestar herramientas.
+
+La implementación fue más estrecha que la descripción pública original. El coordinator devolvía respuestas placeholder para enriquecimiento y búsqueda, y la memoria vectorial prevista quedó en el roadmap. Esta retrospectiva canónica trata Context X como prototipo del contrato y no presenta el repositorio como un sistema de recuperación terminado.
+
+La idea duradera pasó al stack actual de Agent Portal. Team memory aporta una raíz de contenido configurada, skills globales y skills específicas de cada proyecto dentro de workspace. El resolver selecciona los elementos relevantes para una tarea y construye un paquete acotado antes de delegar. Esa implementación mantiene la pregunta de investigación original sobre qué debe conocer el agente antes de actuar y deja explícitos los límites del prototipo histórico.

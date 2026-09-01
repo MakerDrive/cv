@@ -1,0 +1,5 @@
+Agent Portal became the public orchestration entry point for my agent-tooling line. One MCP configuration exposes portal operations and selected child tools. The execution runtime stays behind that boundary, while the dashboard presents chats, workflows, project structure, task state, and live diagnostics from the same backend.
+
+The runtime uses a detached singleton backend for several IDE windows. Each local client starts through stdio and connects to the backend over WebSocket; the backend owns child MCP processes and the shared portal state. Standalone, client, and master modes extend the same boundary to local or remote tool sets.
+
+The StateGraph work added versioned operations to the control plane. A browser reconnecting with a known version receives the missing patches when they are still available. An older client receives a full snapshot. Together with explicit task ownership, process liveness, tool history, and completion evidence, this delta-and-snapshot contract gives the operator a concrete basis for the next action. The repository records no performance benchmark for this synchronization path.

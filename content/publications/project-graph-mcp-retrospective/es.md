@@ -1,0 +1,5 @@
+Project Graph MCP es la capa de code intelligence que separé en un servidor MCP stdio y un paquete npm independientes. Construye un skeleton del proyecto a partir de la estructura del código y expone operaciones focalizadas para dependencias, usos, documentación, compact code y análisis de calidad.
+
+El análisis de JavaScript usa una copia vendorizada de Acorn. TypeScript, Python y Go tienen parsers estructurales propios, con rutas basadas en expresiones regulares cuando no se utiliza un AST completo. El parsing está separado de la construcción del grafo, de modo que los mismos datos estructurales alimentan las herramientas MCP y el explorador de Agent Portal.
+
+Compact mode conserva los identificadores y reduce el formato; los archivos `.ctx` guardan contratos de documentación que pueden validarse contra las firmas del código o inyectarse como JSDoc. El paquete también ofrece skeletons y carga de focus zone. Estas rutas están implementadas en JavaScript; el repositorio no contiene un pipeline equivalente en Python o SWC ni registra un benchmark del resultado de compresión.

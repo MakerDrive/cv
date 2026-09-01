@@ -1,0 +1,301 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-sjBAP3KVDuNGZFjDkffKUuwRLIMEU7bTSoa7W1JnnN0=",
+  "media": {
+    "durationMs": 28370,
+    "hash": "sha256:5ab8a4dddf5c59baee600e12b107d52bd632621cc0d5f2a1ae778fbfd46233ff",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-U5sb1Db6R5BabMkraBMEASUguVduNKE+cph9WT4GXBs=",
+  "turns": [
+    {
+      "endMs": 28370,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Визуальная часть Workspace построена на Open Source библиотеке Symbiote UI. В ней собраны компоненты, компоновки, графовые инструменты и семантические контракты интерфейса. На ее основе построен и весь интерфейс этого CV, навигация, рабочие панели, чат и плеер презентации. Исходный код и техническое описание доступны на GitHub, а прямо в этой презентации можно открыть подробный разбор проекта.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 720,
+          "startMs": 0,
+          "text": "Визуальная"
+        },
+        {
+          "endMs": 1100,
+          "startMs": 720,
+          "text": "часть"
+        },
+        {
+          "endMs": 1640,
+          "startMs": 1100,
+          "text": "Workspace"
+        },
+        {
+          "endMs": 2440,
+          "startMs": 1640,
+          "text": "построена"
+        },
+        {
+          "endMs": 3000,
+          "startMs": 2440,
+          "text": "на"
+        },
+        {
+          "endMs": 3580,
+          "startMs": 3000,
+          "text": "Open"
+        },
+        {
+          "endMs": 4000,
+          "startMs": 3580,
+          "text": "Source"
+        },
+        {
+          "endMs": 5100,
+          "startMs": 4000,
+          "text": "библиотеке"
+        },
+        {
+          "endMs": 5680,
+          "startMs": 5100,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 6040,
+          "startMs": 5680,
+          "text": "UI."
+        },
+        {
+          "endMs": 6780,
+          "startMs": 6500,
+          "text": "В"
+        },
+        {
+          "endMs": 6960,
+          "startMs": 6780,
+          "text": "ней"
+        },
+        {
+          "endMs": 7540,
+          "startMs": 6960,
+          "text": "собраны"
+        },
+        {
+          "endMs": 8240,
+          "startMs": 7540,
+          "text": "компоненты,"
+        },
+        {
+          "endMs": 9440,
+          "startMs": 8660,
+          "text": "компоновки,"
+        },
+        {
+          "endMs": 10020,
+          "startMs": 9560,
+          "text": "графовые"
+        },
+        {
+          "endMs": 10720,
+          "startMs": 10020,
+          "text": "инструменты"
+        },
+        {
+          "endMs": 10880,
+          "startMs": 10720,
+          "text": "и"
+        },
+        {
+          "endMs": 11560,
+          "startMs": 10880,
+          "text": "семантические"
+        },
+        {
+          "endMs": 12140,
+          "startMs": 11560,
+          "text": "контракты"
+        },
+        {
+          "endMs": 12920,
+          "startMs": 12140,
+          "text": "интерфейса."
+        },
+        {
+          "endMs": 13380,
+          "startMs": 13120,
+          "text": "На"
+        },
+        {
+          "endMs": 13620,
+          "startMs": 13380,
+          "text": "ее"
+        },
+        {
+          "endMs": 14160,
+          "startMs": 13620,
+          "text": "основе"
+        },
+        {
+          "endMs": 14720,
+          "startMs": 14160,
+          "text": "построен"
+        },
+        {
+          "endMs": 14920,
+          "startMs": 14720,
+          "text": "и"
+        },
+        {
+          "endMs": 15160,
+          "startMs": 14920,
+          "text": "весь"
+        },
+        {
+          "endMs": 15720,
+          "startMs": 15160,
+          "text": "интерфейс"
+        },
+        {
+          "endMs": 16000,
+          "startMs": 15720,
+          "text": "этого"
+        },
+        {
+          "endMs": 16340,
+          "startMs": 16000,
+          "text": "CV,"
+        },
+        {
+          "endMs": 17220,
+          "startMs": 16560,
+          "text": "навигация,"
+        },
+        {
+          "endMs": 18160,
+          "startMs": 17560,
+          "text": "рабочие"
+        },
+        {
+          "endMs": 18600,
+          "startMs": 18160,
+          "text": "панели,"
+        },
+        {
+          "endMs": 19040,
+          "startMs": 18820,
+          "text": "чат"
+        },
+        {
+          "endMs": 19240,
+          "startMs": 19040,
+          "text": "и"
+        },
+        {
+          "endMs": 19720,
+          "startMs": 19240,
+          "text": "плеер"
+        },
+        {
+          "endMs": 20580,
+          "startMs": 19720,
+          "text": "презентации."
+        },
+        {
+          "endMs": 21400,
+          "startMs": 20800,
+          "text": "Исходный"
+        },
+        {
+          "endMs": 21760,
+          "startMs": 21400,
+          "text": "код"
+        },
+        {
+          "endMs": 22040,
+          "startMs": 21760,
+          "text": "и"
+        },
+        {
+          "endMs": 22660,
+          "startMs": 22040,
+          "text": "техническое"
+        },
+        {
+          "endMs": 23100,
+          "startMs": 22660,
+          "text": "описание"
+        },
+        {
+          "endMs": 23640,
+          "startMs": 23100,
+          "text": "доступны"
+        },
+        {
+          "endMs": 23780,
+          "startMs": 23640,
+          "text": "на"
+        },
+        {
+          "endMs": 24080,
+          "startMs": 23780,
+          "text": "GitHub,"
+        },
+        {
+          "endMs": 24720,
+          "startMs": 24440,
+          "text": "а"
+        },
+        {
+          "endMs": 24980,
+          "startMs": 24720,
+          "text": "прямо"
+        },
+        {
+          "endMs": 25160,
+          "startMs": 24980,
+          "text": "в"
+        },
+        {
+          "endMs": 25320,
+          "startMs": 25160,
+          "text": "этой"
+        },
+        {
+          "endMs": 26000,
+          "startMs": 25320,
+          "text": "презентации"
+        },
+        {
+          "endMs": 26300,
+          "startMs": 26000,
+          "text": "можно"
+        },
+        {
+          "endMs": 26760,
+          "startMs": 26300,
+          "text": "открыть"
+        },
+        {
+          "endMs": 27360,
+          "startMs": 26760,
+          "text": "подробный"
+        },
+        {
+          "endMs": 27780,
+          "startMs": 27360,
+          "text": "разбор"
+        },
+        {
+          "endMs": 28280,
+          "startMs": 27780,
+          "text": "проекта."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

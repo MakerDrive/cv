@@ -1,0 +1,5 @@
+Agent Portal expone el mismo registro de herramientas bajo distintos límites de transporte. El IDE inicia el punto de entrada MCP mediante stdio. El proxy local conecta ese cliente con el backend singleton desacoplado por WebSocket, donde se gestionan los servidores hijos y el estado compartido del portal.
+
+Los subagentes pueden conectarse a `/mcp` mediante Streamable HTTP. El handler admite inicialización MCP, identificadores de sesión, `tools/list` y llamadas validadas. Usa la fuente dinámica de herramientas del gateway, por lo que descubrimiento y ejecución no mantienen copias independientes del registro público.
+
+El producto está implementado en Node.js y la ruta HTTP pública usa un handler MCP separado, no un enum de transporte en Rust. El contrato reutilizable está en los mensajes y la superficie de herramientas: los adaptadores transportan las mismas solicitudes hacia el routing propiedad del portal. El ciclo de sesión y la entrega de respuestas siguen siendo específicos de cada transporte.

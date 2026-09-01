@@ -1,0 +1,376 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-mPjlYYnwRUeq4nt5oZuntS0G1S0wEtehh8fLSc5u0Ho=",
+  "media": {
+    "hash": "sha256:25dbd5b963b9cc8c7c4197af98df3b95ac3b9c6bc8f9dd2710455f2201a20d5d",
+    "durationMs": 38000,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 38000,
+      "speaker": "guide",
+      "transcript": "В центре системы находится модель профилей аккаунтов, медиаматериалов и публикаций. Сервер управляет расписанием, очередью и подключенными Android-устройствами. Готовый JSON сценарий выполняет стабильный путь и записывает результат в журнал. Если структура экрана изменилась, исполнитель останавливается в безопасной точке. Агент анализирует актуальный экран, готовит обновленный сценарий и передает его на проверку. Исходящие действия проходят через лимиты, устойчивую дедупликацию и апрувал. Демонстрация заканчивается dry run или подтверждением в журнале без внешней отправки.",
+      "words": [
+        {
+          "text": "В",
+          "startMs": 0,
+          "endMs": 120
+        },
+        {
+          "text": "центре",
+          "startMs": 120,
+          "endMs": 420
+        },
+        {
+          "text": "системы",
+          "startMs": 420,
+          "endMs": 880
+        },
+        {
+          "text": "находится",
+          "startMs": 880,
+          "endMs": 1240
+        },
+        {
+          "text": "модель",
+          "startMs": 1240,
+          "endMs": 1640
+        },
+        {
+          "text": "профилей",
+          "startMs": 1640,
+          "endMs": 2260
+        },
+        {
+          "text": "аккаунтов,",
+          "startMs": 2260,
+          "endMs": 3000
+        },
+        {
+          "text": "медиаматериалов",
+          "startMs": 3200,
+          "endMs": 4020
+        },
+        {
+          "text": "и",
+          "startMs": 4020,
+          "endMs": 4300
+        },
+        {
+          "text": "публикаций.",
+          "startMs": 4300,
+          "endMs": 5000
+        },
+        {
+          "text": "Сервер",
+          "startMs": 5300,
+          "endMs": 5860
+        },
+        {
+          "text": "управляет",
+          "startMs": 5860,
+          "endMs": 6560
+        },
+        {
+          "text": "расписанием,",
+          "startMs": 6560,
+          "endMs": 7360
+        },
+        {
+          "text": "очередью",
+          "startMs": 7600,
+          "endMs": 8040
+        },
+        {
+          "text": "и",
+          "startMs": 8040,
+          "endMs": 8260
+        },
+        {
+          "text": "подключенными",
+          "startMs": 8260,
+          "endMs": 8980
+        },
+        {
+          "text": "Android",
+          "startMs": 8980,
+          "endMs": 9360
+        },
+        {
+          "text": "-устройствами.",
+          "startMs": 9360,
+          "endMs": 10340
+        },
+        {
+          "text": "Готовый",
+          "startMs": 10520,
+          "endMs": 11060
+        },
+        {
+          "text": "JSON",
+          "startMs": 11060,
+          "endMs": 11420
+        },
+        {
+          "text": "сценарий",
+          "startMs": 11420,
+          "endMs": 12280
+        },
+        {
+          "text": "выполняет",
+          "startMs": 12280,
+          "endMs": 12880
+        },
+        {
+          "text": "стабильный",
+          "startMs": 12880,
+          "endMs": 13480
+        },
+        {
+          "text": "путь",
+          "startMs": 13480,
+          "endMs": 13780
+        },
+        {
+          "text": "и",
+          "startMs": 13780,
+          "endMs": 14380
+        },
+        {
+          "text": "записывает",
+          "startMs": 14380,
+          "endMs": 14900
+        },
+        {
+          "text": "результат",
+          "startMs": 14900,
+          "endMs": 15280
+        },
+        {
+          "text": "в",
+          "startMs": 15280,
+          "endMs": 15480
+        },
+        {
+          "text": "журнал.",
+          "startMs": 15480,
+          "endMs": 15840
+        },
+        {
+          "text": "Если",
+          "startMs": 16200,
+          "endMs": 16560
+        },
+        {
+          "text": "структура",
+          "startMs": 16560,
+          "endMs": 17240
+        },
+        {
+          "text": "экрана",
+          "startMs": 17240,
+          "endMs": 17760
+        },
+        {
+          "text": "изменилась,",
+          "startMs": 17760,
+          "endMs": 18320
+        },
+        {
+          "text": "исполнитель",
+          "startMs": 18600,
+          "endMs": 19180
+        },
+        {
+          "text": "останавливается",
+          "startMs": 19180,
+          "endMs": 20060
+        },
+        {
+          "text": "в",
+          "startMs": 20060,
+          "endMs": 20200
+        },
+        {
+          "text": "безопасной",
+          "startMs": 20200,
+          "endMs": 20860
+        },
+        {
+          "text": "точке.",
+          "startMs": 20860,
+          "endMs": 21260
+        },
+        {
+          "text": "Агент",
+          "startMs": 21560,
+          "endMs": 21960
+        },
+        {
+          "text": "анализирует",
+          "startMs": 21960,
+          "endMs": 22620
+        },
+        {
+          "text": "актуальный",
+          "startMs": 22620,
+          "endMs": 23240
+        },
+        {
+          "text": "экран,",
+          "startMs": 23240,
+          "endMs": 23540
+        },
+        {
+          "text": "готовит",
+          "startMs": 23940,
+          "endMs": 24360
+        },
+        {
+          "text": "обновленный",
+          "startMs": 24360,
+          "endMs": 25120
+        },
+        {
+          "text": "сценарий",
+          "startMs": 25120,
+          "endMs": 25680
+        },
+        {
+          "text": "и",
+          "startMs": 25680,
+          "endMs": 25840
+        },
+        {
+          "text": "передает",
+          "startMs": 25840,
+          "endMs": 26320
+        },
+        {
+          "text": "его",
+          "startMs": 26320,
+          "endMs": 26620
+        },
+        {
+          "text": "на",
+          "startMs": 26620,
+          "endMs": 26880
+        },
+        {
+          "text": "проверку.",
+          "startMs": 26880,
+          "endMs": 27400
+        },
+        {
+          "text": "Исходящие",
+          "startMs": 27400,
+          "endMs": 28200
+        },
+        {
+          "text": "действия",
+          "startMs": 28200,
+          "endMs": 28640
+        },
+        {
+          "text": "проходят",
+          "startMs": 28640,
+          "endMs": 29180
+        },
+        {
+          "text": "через",
+          "startMs": 29180,
+          "endMs": 29400
+        },
+        {
+          "text": "лимиты,",
+          "startMs": 29400,
+          "endMs": 29920
+        },
+        {
+          "text": "устойчивую",
+          "startMs": 30080,
+          "endMs": 30920
+        },
+        {
+          "text": "дедупликацию",
+          "startMs": 30920,
+          "endMs": 31780
+        },
+        {
+          "text": "и",
+          "startMs": 31780,
+          "endMs": 32120
+        },
+        {
+          "text": "апрувал.",
+          "startMs": 32120,
+          "endMs": 32560
+        },
+        {
+          "text": "Демонстрация",
+          "startMs": 32720,
+          "endMs": 33480
+        },
+        {
+          "text": "заканчивается",
+          "startMs": 33480,
+          "endMs": 34260
+        },
+        {
+          "text": "dry",
+          "startMs": 34260,
+          "endMs": 34520
+        },
+        {
+          "text": "run",
+          "startMs": 34520,
+          "endMs": 34820
+        },
+        {
+          "text": "или",
+          "startMs": 34820,
+          "endMs": 35100
+        },
+        {
+          "text": "подтверждением",
+          "startMs": 35100,
+          "endMs": 35960
+        },
+        {
+          "text": "в",
+          "startMs": 35960,
+          "endMs": 36120
+        },
+        {
+          "text": "журнале",
+          "startMs": 36120,
+          "endMs": 36560
+        },
+        {
+          "text": "без",
+          "startMs": 36560,
+          "endMs": 36840
+        },
+        {
+          "text": "внешней",
+          "startMs": 36840,
+          "endMs": 37320
+        },
+        {
+          "text": "отправки.",
+          "startMs": 37320,
+          "endMs": 37860
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-zu/jiPi4Y8Z1k9hcLyPQvGqj/6MoG2rHtawiA2TWPDI="
+}

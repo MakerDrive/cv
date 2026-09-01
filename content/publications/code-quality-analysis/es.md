@@ -1,0 +1,5 @@
+Project Graph MCP expone el análisis de calidad mediante una herramienta MCP con acciones específicas. Los controles implementados abarcan código muerto, complejidad ciclomática, funciones similares, archivos grandes, patrones obsoletos, documentación ausente, consistencia JSDoc y un resumen combinado.
+
+Algunos controles usan datos AST de Acorn. Otros son heurísticos de forma deliberada. El uso de variables e imports incluye evidencia basada en expresiones regulares, y la similitud compara estructura normalizada del control flow. El análisis completo combina resultados por archivo con controles entre archivos y mantiene visibles los hallazgos que contribuyen a la evaluación.
+
+La función combina aristas entrantes con heurísticas estructurales y sensibles a la sintaxis; no se reduce a un umbral fijo de líneas. Estas herramientas aportan evidencia para agentes y revisores, mientras que compilador, tests y linters del proyecto siguen siendo capas de verificación separadas. El módulo no pretende sustituirlos.

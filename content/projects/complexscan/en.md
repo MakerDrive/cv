@@ -1,0 +1,46 @@
+---
+title: ComplexScan
+order: 4
+period: 2017-2022
+kicker: Selected project
+summary: Commercial hardware product I invented after PhotoPizza: professional transparent-disc equipment for 3D scanning, 360 capture, and product photography.
+image: https://rnd-pro.com/svg/logo/index.svg
+alt: ComplexScan transparent-disc 3D scanning hardware
+href: https://rnd-pro.com/pulse/complex-scan/
+linkLabel: View project
+---
+
+# ComplexScan
+
+:::article-block product-origin
+:::article-block product-line
+I invented ComplexScan as a commercial product after the PhotoPizza open-source line: professional equipment for photogrammetric 3D scanning, 360-degree photography, and industrial product shoots.
+
+:::article-block transparent-system
+The product reduced retouching and production time at the source while remaining compatible with studio workflows.
+
+:::article-block transparent-platform
+I designed the setup around a transparent rotating disc made from special tempered glass for shadow-free 360-degree photography and photogrammetric 3D scanning.
+
+:::article-block controlled-light
+The disc worked with stable mechanics and controlled lighting from below and around the object.
+
+:::article-block integrated-method
+ComplexScan was an original product line rather than a service around existing equipment. I designed the physical system and capture method together so the technology could produce cleaner masks, more consistent geometry, and higher-quality source textures before the object reached the 3D processing stage.
+
+:::article-block product-cycle
+My role covered the full early product cycle: product concept, R&D, mechanical and capture workflow design, testing, production setup, and early international sales while turning the prototype into a manufacturable product line.
+
+:::article-block product-gallery
+I assembled the prototypes and the first finished units myself.
+
+:::article-block small-batch
+This was small-batch production rather than mass manufacturing. I broke the product into parts that could be fabricated by specialist contractors — including laser-cut metal and acrylic components — and coordinated those suppliers before final assembly and testing.
+
+:::article-block international-delivery
+I designed complex protective packaging, prepared export documents, and organized deliveries to customers in different countries.
+
+:::article-block transition
+:::article-block autobox
+:::article-block autobox-museum-link
+ComplexScan remained active alongside PhotoPizza and the later F360 studio until my 2022 relocation from Russia to Argentina. The production line had to be closed at an early growth stage, after its R&D had already become part of the technical foundation for museum-grade systems such as AUTOBOX.

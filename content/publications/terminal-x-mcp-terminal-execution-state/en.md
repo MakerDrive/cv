@@ -1,0 +1,5 @@
+The Terminal X prototype defined separate MCP operations for executing a command, monitoring processes, assessing command security, and planning a workflow. Each operation declared its input schema, including command text, timeout, working directory, filters, or dependencies.
+
+That schema work established an explicit execution-state boundary: a caller should know which operation is requested and receive a structured MCP response. The repository's handlers, however, returned placeholder text. They did not launch commands, enforce an allowlist, or produce monitoring logs, and no Python `subprocess.run` execution path was implemented.
+
+The experiment implemented tool contracts and stdio server wiring. Terminal execution, security validation, and real-time monitoring remained planned work. Production evidence for delegated command state belongs to the Agent Pool process lifecycle, which tracks PIDs, events, stderr, exit results, cancellation, and process-group cleanup in the current stack.

@@ -1,0 +1,5 @@
+Añadí `workspace-presentation-journey-v1` para registrar una ejecución de origen ya terminada y presentarla después. Cada evento conserva su `sourceOffsetMs` observado y un `presentationOffsetMs` independiente. Un mapa monótono de segmentos une ambas líneas de tiempo y comprime de forma explícita las esperas sin volver a ejecutar el modelo.
+
+Los eventos declaran su procedencia como entrada del operador, progreso de herramienta, resultado de recurso o texto del asistente. Las acciones provienen de una lista de permisos propia del recorrido y los recursos incluyen hashes de contenido. El resultado terminal se elige de un conjunto fijo que cubre finalización, tiempo de espera, error y cancelación.
+
+El JSON canónico genera un hash `sha256-<base64>` sobre la proyección de reproducción. El validador rechaza identidades incoherentes, campos desconocidos, desplazamientos no monótonos, rutas locales, credenciales, identificadores de sesión, URL y selectores privados. El hash del recorrido se integra en el registro de acciones de la evidencia multimedia, usando el mismo grafo de artefactos.

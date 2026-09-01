@@ -1,0 +1,5 @@
+Browser X MCP was an early public browser-automation experiment built as a Playwright-based MCP server over stdio. The beta repository exposes browser startup and navigation, structured page extraction, form input, scrolling, element inspection, atomic actions, screenshots, and page-context evaluation.
+
+Its distinctive representation is the virtual canvas: a structured description derived from the live DOM with stable element identifiers and coordinates for interaction. Agents can list navigation elements, request details for one target, and execute the resulting action. Screenshots remain available as separate evidence and for size comparison. The package uses stdio transport and does not implement a generic secure WebSocket context protocol.
+
+The project also records its prototype constraints. The browser instance is process-local, actions require an active page, and failures return explicit MCP errors. This makes Browser X useful evidence of the early interface exploration. Current Agent Portal browser access is treated as a configurable tool boundary, so the retrospective does not present the beta as the whole modern browser-control stack.

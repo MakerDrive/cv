@@ -1,0 +1,3 @@
+PhotoSnail was an open motorized camera-slider prototype for time-lapse and video. Automatic object tracking appeared in the project description as part of the intended system, alongside an idea for partial 360-degree capture.
+
+The public project page marks the implementation boundary clearly: PhotoSnail was still in development, and only carriage movement along the rails with configurable travel distance, frame count, direction, acceleration, and shutter pause was implemented. The repository documents the hardware concept and its public presentation; it does not substantiate a production tracker, computer-vision pipeline, machine-learning model, or tracking algorithm.

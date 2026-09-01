@@ -1,0 +1,3 @@
+PhotoSnail fue un prototipo abierto de deslizador motorizado para timelapse y vídeo. El seguimiento automático de objetos aparecía en la descripción del proyecto como parte del sistema previsto, junto con una idea para captura parcial de 360 grados.
+
+La página pública delimita la implementación con precisión: PhotoSnail seguía en desarrollo y solo se había implementado el movimiento del carro por las guías, con ajustes de distancia, número de tomas, dirección, aceleración y pausa para el disparo. El repositorio acredita el concepto de hardware y su presentación pública; no acredita un sistema de seguimiento en producción, una solución de visión artificial, un modelo de aprendizaje automático ni un algoritmo de seguimiento.

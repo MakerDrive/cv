@@ -1,0 +1,326 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-OB7OEHyj11TqEft0b+OZrVjmcJh/Fom+zzUEJWv8oAk=",
+  "media": {
+    "hash": "sha256:55998a1fdce049efe8d88425076289eb53c1f64d6991d556a06729665fe06700",
+    "durationMs": 30550,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 30550,
+      "speaker": "guide",
+      "transcript": "А теперь вернусь в настоящее. От программно-аппаратных систем для съемки я пришел к распределенной инфраструктуре и текущим агентным рабочим средам. Во всех этих проектах я соединяю исследования, архитектуру и реализацию в работающий процесс с понятными границами и проверяемым результатом. Сейчас главным центром этой работы стал Symbiote Workspace. Здесь можно продолжить знакомство с проектами, открыть резюме или связаться со мной.",
+      "words": [
+        {
+          "text": "А",
+          "startMs": 0,
+          "endMs": 140
+        },
+        {
+          "text": "теперь",
+          "startMs": 140,
+          "endMs": 380
+        },
+        {
+          "text": "вернусь",
+          "startMs": 380,
+          "endMs": 900
+        },
+        {
+          "text": "в",
+          "startMs": 900,
+          "endMs": 1100
+        },
+        {
+          "text": "настоящее.",
+          "startMs": 1100,
+          "endMs": 1760
+        },
+        {
+          "text": "От",
+          "startMs": 2200,
+          "endMs": 2360
+        },
+        {
+          "text": "программно",
+          "startMs": 2360,
+          "endMs": 2980
+        },
+        {
+          "text": "-аппаратных",
+          "startMs": 2980,
+          "endMs": 3740
+        },
+        {
+          "text": "систем",
+          "startMs": 3740,
+          "endMs": 4120
+        },
+        {
+          "text": "для",
+          "startMs": 4120,
+          "endMs": 4440
+        },
+        {
+          "text": "съемки",
+          "startMs": 4440,
+          "endMs": 5080
+        },
+        {
+          "text": "я",
+          "startMs": 5080,
+          "endMs": 5460
+        },
+        {
+          "text": "пришел",
+          "startMs": 5460,
+          "endMs": 6000
+        },
+        {
+          "text": "к",
+          "startMs": 6000,
+          "endMs": 6180
+        },
+        {
+          "text": "распределенной",
+          "startMs": 6180,
+          "endMs": 7000
+        },
+        {
+          "text": "инфраструктуре",
+          "startMs": 7000,
+          "endMs": 7960
+        },
+        {
+          "text": "и",
+          "startMs": 7960,
+          "endMs": 8180
+        },
+        {
+          "text": "текущим",
+          "startMs": 8180,
+          "endMs": 8820
+        },
+        {
+          "text": "агентным",
+          "startMs": 8820,
+          "endMs": 9660
+        },
+        {
+          "text": "рабочим",
+          "startMs": 9660,
+          "endMs": 10280
+        },
+        {
+          "text": "средам.",
+          "startMs": 10280,
+          "endMs": 11260
+        },
+        {
+          "text": "Во",
+          "startMs": 11460,
+          "endMs": 11720
+        },
+        {
+          "text": "всех",
+          "startMs": 11720,
+          "endMs": 11940
+        },
+        {
+          "text": "этих",
+          "startMs": 11940,
+          "endMs": 12140
+        },
+        {
+          "text": "проектах",
+          "startMs": 12140,
+          "endMs": 12700
+        },
+        {
+          "text": "я",
+          "startMs": 12700,
+          "endMs": 12980
+        },
+        {
+          "text": "соединяю",
+          "startMs": 12980,
+          "endMs": 13660
+        },
+        {
+          "text": "исследования,",
+          "startMs": 13660,
+          "endMs": 14360
+        },
+        {
+          "text": "архитектуру",
+          "startMs": 14640,
+          "endMs": 15380
+        },
+        {
+          "text": "и",
+          "startMs": 15380,
+          "endMs": 15580
+        },
+        {
+          "text": "реализацию",
+          "startMs": 15580,
+          "endMs": 16180
+        },
+        {
+          "text": "в",
+          "startMs": 16180,
+          "endMs": 16340
+        },
+        {
+          "text": "работающий",
+          "startMs": 16340,
+          "endMs": 16820
+        },
+        {
+          "text": "процесс",
+          "startMs": 16820,
+          "endMs": 17160
+        },
+        {
+          "text": "с",
+          "startMs": 17160,
+          "endMs": 17520
+        },
+        {
+          "text": "понятными",
+          "startMs": 17520,
+          "endMs": 18000
+        },
+        {
+          "text": "границами",
+          "startMs": 18000,
+          "endMs": 18640
+        },
+        {
+          "text": "и",
+          "startMs": 18640,
+          "endMs": 19060
+        },
+        {
+          "text": "проверяемым",
+          "startMs": 19060,
+          "endMs": 19680
+        },
+        {
+          "text": "результатом.",
+          "startMs": 19680,
+          "endMs": 20360
+        },
+        {
+          "text": "Сейчас",
+          "startMs": 20520,
+          "endMs": 20960
+        },
+        {
+          "text": "главным",
+          "startMs": 20960,
+          "endMs": 21560
+        },
+        {
+          "text": "центром",
+          "startMs": 21560,
+          "endMs": 22140
+        },
+        {
+          "text": "этой",
+          "startMs": 22140,
+          "endMs": 22540
+        },
+        {
+          "text": "работы",
+          "startMs": 22540,
+          "endMs": 23000
+        },
+        {
+          "text": "стал",
+          "startMs": 23000,
+          "endMs": 23460
+        },
+        {
+          "text": "Symbiote",
+          "startMs": 23460,
+          "endMs": 24040
+        },
+        {
+          "text": "Workspace.",
+          "startMs": 24040,
+          "endMs": 24680
+        },
+        {
+          "text": "Здесь",
+          "startMs": 24680,
+          "endMs": 25580
+        },
+        {
+          "text": "можно",
+          "startMs": 25580,
+          "endMs": 25980
+        },
+        {
+          "text": "продолжить",
+          "startMs": 25980,
+          "endMs": 26600
+        },
+        {
+          "text": "знакомство",
+          "startMs": 26600,
+          "endMs": 27200
+        },
+        {
+          "text": "с",
+          "startMs": 27200,
+          "endMs": 27340
+        },
+        {
+          "text": "проектами,",
+          "startMs": 27340,
+          "endMs": 27920
+        },
+        {
+          "text": "открыть",
+          "startMs": 28060,
+          "endMs": 28460
+        },
+        {
+          "text": "резюме",
+          "startMs": 28460,
+          "endMs": 28920
+        },
+        {
+          "text": "или",
+          "startMs": 28920,
+          "endMs": 29320
+        },
+        {
+          "text": "связаться",
+          "startMs": 29320,
+          "endMs": 29980
+        },
+        {
+          "text": "со",
+          "startMs": 29980,
+          "endMs": 30180
+        },
+        {
+          "text": "мной.",
+          "startMs": 30180,
+          "endMs": 30380
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-3/v7C4dnMpHww9y4a+TtyT+RaePlpg7SpC30BVlwJ8g="
+}

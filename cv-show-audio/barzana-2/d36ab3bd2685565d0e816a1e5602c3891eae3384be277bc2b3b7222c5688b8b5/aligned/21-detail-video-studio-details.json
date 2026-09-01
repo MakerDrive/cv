@@ -1,0 +1,331 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-R7OvxsS9ivnHAFOKshj0fpBISNrqy0DAJFzmlTD/k9U=",
+  "media": {
+    "durationMs": 29640,
+    "hash": "sha256:823eb69844948acb90bcad1e6b7cfd94372699e3ece8db42ea9e72bc05c3d817",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-x/zZnT9bQPi4eXVwDxJpZeJquDnTpiqoOKTg8NiOg64=",
+  "turns": [
+    {
+      "endMs": 29640,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "В основе студии лежит ядро Symbiote Video. Агент описывает структуру ролика семантическим описанием в формате JSON. Сцены, слои, клипы и переходы. Движок превращает описание в граф, таймлайн и композицию. В рабочей среде можно проверить нод Graph, запустить Live Preview, сохранить состояние и перейти к экспорту. Видео ядро уже работает, а студия как универсальная конфигурация Workspace продолжает развиваться в альфа и режиме.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 140,
+          "startMs": 0,
+          "text": "В"
+        },
+        {
+          "endMs": 540,
+          "startMs": 140,
+          "text": "основе"
+        },
+        {
+          "endMs": 1020,
+          "startMs": 540,
+          "text": "студии"
+        },
+        {
+          "endMs": 1480,
+          "startMs": 1020,
+          "text": "лежит"
+        },
+        {
+          "endMs": 1920,
+          "startMs": 1480,
+          "text": "ядро"
+        },
+        {
+          "endMs": 2580,
+          "startMs": 1920,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 3000,
+          "startMs": 2580,
+          "text": "Video."
+        },
+        {
+          "endMs": 4040,
+          "startMs": 3440,
+          "text": "Агент"
+        },
+        {
+          "endMs": 4620,
+          "startMs": 4040,
+          "text": "описывает"
+        },
+        {
+          "endMs": 5240,
+          "startMs": 4620,
+          "text": "структуру"
+        },
+        {
+          "endMs": 5620,
+          "startMs": 5240,
+          "text": "ролика"
+        },
+        {
+          "endMs": 6400,
+          "startMs": 5620,
+          "text": "семантическим"
+        },
+        {
+          "endMs": 7060,
+          "startMs": 6400,
+          "text": "описанием"
+        },
+        {
+          "endMs": 7200,
+          "startMs": 7060,
+          "text": "в"
+        },
+        {
+          "endMs": 7580,
+          "startMs": 7200,
+          "text": "формате"
+        },
+        {
+          "endMs": 8000,
+          "startMs": 7580,
+          "text": "JSON."
+        },
+        {
+          "endMs": 9120,
+          "startMs": 8380,
+          "text": "Сцены,"
+        },
+        {
+          "endMs": 9680,
+          "startMs": 9340,
+          "text": "слои,"
+        },
+        {
+          "endMs": 10180,
+          "startMs": 9840,
+          "text": "клипы"
+        },
+        {
+          "endMs": 10300,
+          "startMs": 10180,
+          "text": "и"
+        },
+        {
+          "endMs": 10880,
+          "startMs": 10300,
+          "text": "переходы."
+        },
+        {
+          "endMs": 11640,
+          "startMs": 11160,
+          "text": "Движок"
+        },
+        {
+          "endMs": 12260,
+          "startMs": 11640,
+          "text": "превращает"
+        },
+        {
+          "endMs": 12840,
+          "startMs": 12260,
+          "text": "описание"
+        },
+        {
+          "endMs": 13040,
+          "startMs": 12840,
+          "text": "в"
+        },
+        {
+          "endMs": 13300,
+          "startMs": 13040,
+          "text": "граф,"
+        },
+        {
+          "endMs": 14040,
+          "startMs": 13560,
+          "text": "таймлайн"
+        },
+        {
+          "endMs": 14320,
+          "startMs": 14040,
+          "text": "и"
+        },
+        {
+          "endMs": 15000,
+          "startMs": 14320,
+          "text": "композицию."
+        },
+        {
+          "endMs": 15380,
+          "startMs": 15180,
+          "text": "В"
+        },
+        {
+          "endMs": 15760,
+          "startMs": 15380,
+          "text": "рабочей"
+        },
+        {
+          "endMs": 16120,
+          "startMs": 15760,
+          "text": "среде"
+        },
+        {
+          "endMs": 16480,
+          "startMs": 16120,
+          "text": "можно"
+        },
+        {
+          "endMs": 17040,
+          "startMs": 16480,
+          "text": "проверить"
+        },
+        {
+          "endMs": 17380,
+          "startMs": 17040,
+          "text": "нод"
+        },
+        {
+          "endMs": 17740,
+          "startMs": 17380,
+          "text": "Graph,"
+        },
+        {
+          "endMs": 18540,
+          "startMs": 18020,
+          "text": "запустить"
+        },
+        {
+          "endMs": 18940,
+          "startMs": 18540,
+          "text": "Live"
+        },
+        {
+          "endMs": 19400,
+          "startMs": 18940,
+          "text": "Preview,"
+        },
+        {
+          "endMs": 20160,
+          "startMs": 19720,
+          "text": "сохранить"
+        },
+        {
+          "endMs": 20860,
+          "startMs": 20160,
+          "text": "состояние"
+        },
+        {
+          "endMs": 21020,
+          "startMs": 20860,
+          "text": "и"
+        },
+        {
+          "endMs": 21380,
+          "startMs": 21020,
+          "text": "перейти"
+        },
+        {
+          "endMs": 21520,
+          "startMs": 21380,
+          "text": "к"
+        },
+        {
+          "endMs": 22040,
+          "startMs": 21520,
+          "text": "экспорту."
+        },
+        {
+          "endMs": 22740,
+          "startMs": 22220,
+          "text": "Видео"
+        },
+        {
+          "endMs": 23100,
+          "startMs": 22740,
+          "text": "ядро"
+        },
+        {
+          "endMs": 23360,
+          "startMs": 23100,
+          "text": "уже"
+        },
+        {
+          "endMs": 23940,
+          "startMs": 23360,
+          "text": "работает,"
+        },
+        {
+          "endMs": 24500,
+          "startMs": 24240,
+          "text": "а"
+        },
+        {
+          "endMs": 24920,
+          "startMs": 24500,
+          "text": "студия"
+        },
+        {
+          "endMs": 25080,
+          "startMs": 24920,
+          "text": "как"
+        },
+        {
+          "endMs": 25800,
+          "startMs": 25080,
+          "text": "универсальная"
+        },
+        {
+          "endMs": 26560,
+          "startMs": 25800,
+          "text": "конфигурация"
+        },
+        {
+          "endMs": 27060,
+          "startMs": 26560,
+          "text": "Workspace"
+        },
+        {
+          "endMs": 27840,
+          "startMs": 27060,
+          "text": "продолжает"
+        },
+        {
+          "endMs": 28440,
+          "startMs": 27840,
+          "text": "развиваться"
+        },
+        {
+          "endMs": 28640,
+          "startMs": 28440,
+          "text": "в"
+        },
+        {
+          "endMs": 28900,
+          "startMs": 28640,
+          "text": "альфа"
+        },
+        {
+          "endMs": 29080,
+          "startMs": 28900,
+          "text": "и"
+        },
+        {
+          "endMs": 29540,
+          "startMs": 29080,
+          "text": "режиме."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

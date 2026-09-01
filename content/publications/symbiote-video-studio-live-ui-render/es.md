@@ -1,0 +1,5 @@
+Conecté Symbiote Video Studio con el proveedor local de captura del navegador de Symbiote Engine. Un manifiesto de render identifica la superficie web, el área de visualización, la frecuencia de fotogramas, la duración, las acciones de preparación y la salida. El proveedor abre la página activa y captura su estado renderizado como una secuencia de fotogramas.
+
+Para el recorrido narrado de la interfaz, el script de Studio inicia la reproducción mediante un método exportado por la página y deriva la duración de la línea de tiempo de señales aceptada. Los fotogramas capturados se indexan y se escriben en un manifiesto de origen. El script rechaza cualquier manifiesto que vuelva a usar el antiguo `track-demo` como fuente visual.
+
+La secuencia permanece separada del ensamblado de audio y de la prueba final. Los fotogramas pueden conservarse para inspección, normalizarse en la caché de Studio y pasar después a la codificación y la mezcla de audio. La evidencia consiste en el manifiesto, la secuencia capturada, el resultado de la inspección técnica y el registro del artefacto final.

@@ -1,0 +1,1 @@
+Proyecto web público temprano conectado con el I+D de PhotoSnail: sistemas de movimiento de cámara, ideas de seguimiento de objetos y experimentos de presentación multimedia alrededor de captura automatizada.

@@ -1,0 +1,5 @@
+Agent Portal supports standalone, client, and master operating modes. A standalone node owns local child MCP servers. A client connects to a master over WebSocket and presents its local tool surface. The master combines local children with remote client nodes behind one portal boundary.
+
+On each host, IDE windows connect through stdio proxies to a detached singleton backend. The implementation is part of the Node.js repository; there is no separate Go gateway or recorded concurrency guarantee.
+
+The smart gateway exposes meta-tools instead of publishing every child tool directly. `discover_tools` searches the indexed public tools, `call_tool` validates and dispatches a selected public call, and `get_portal_status` reports public servers plus internal runtime health. Agent Pool remains private to portal chat orchestration. The repository records no latency benchmark for this routing path. Disconnect handling remains explicit: the WebSocket client reports the loss and attempts a bounded reconnect.

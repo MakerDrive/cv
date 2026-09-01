@@ -1,0 +1,5 @@
+Agent Pool programa tareas locales de agentes con un parser cron de cinco campos y un daemon desacoplado. Las definiciones y los resultados se guardan en archivos, por lo que el daemon puede continuar después de que el IDE o el cliente MCP se desconecten. Las tareas one-shot diferidas usan el mismo límite de ejecución.
+
+El daemon posee un archivo de bloqueo con PID. Antes de reemplazar una propiedad obsoleta, comprueba si el proceso registrado sigue vivo. En cada minuto, el scheduler también registra qué tarea ya se ejecutó y evita un segundo lanzamiento para el mismo intervalo. Las señales de ejecución de pipelines usan operaciones atómicas de archivos para comunicar el servidor MCP con el daemon.
+
+El diseño usa un parser cron mínimo, estado JSON persistido, un proceso Node.js desacoplado y propiedad basada en archivos. No depende de filas SQLite, bloqueo con `ON CONFLICT` ni un scheduler separado en Python. Sus garantías deben evaluarse en el límite del sistema de archivos que realmente implementa.

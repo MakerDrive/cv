@@ -1,0 +1,3 @@
+Después de MEGAVISOR empecé a desarrollar personalmente el software de control de PhotoPizza en JavaScript y Espruino. El historial público de firmware incluye controladores Iskra JS y versiones posteriores para ESP32, con la lógica de captura ejecutándose en JavaScript en el dispositivo.
+
+PhotoPizza ofrece el mismo flujo de captura mediante varias interfaces. El mando infrarrojo permite operación directa, Wi-Fi conecta la interfaz de navegador y la app Android funciona como cliente móvil nativo. Desde ellas se configuran número de fotogramas, velocidad, pausa, retardo, dirección, calibración y rotación continua, mientras el controlador ejecuta la secuencia de movimiento.

@@ -1,0 +1,5 @@
+Project Graph MCP uses two cache boundaries. The project graph cache records source modification times and can be invalidated through the MCP tool surface. When a relevant file changes, the current graph path rebuilds the graph rather than applying a single-file edge patch.
+
+Full quality analysis has a narrower incremental cache. It computes a content hash for each file and reuses cached per-file complexity, undocumented-symbol, and JSDoc results when the hash and analysis signature still match. Changed files are parsed again. Cross-file checks such as dead-code and similar-function analysis are recomputed because their result depends on relationships outside one file.
+
+The implemented content hash belongs to quality-analysis records; the graph cache remains a full graph snapshot. Graph nodes are not SHA-256 identities, and graph updates are not incremental at the cross-file level. Keeping these boundaries explicit prevents stale cross-file conclusions from being accepted as fresh evidence.

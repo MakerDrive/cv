@@ -1,0 +1,296 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-93nUeU+vEC5yVQ2KM+RwWnTCYQq4l/SP0Uo39liQtB8=",
+  "media": {
+    "hash": "sha256:f6b4b332ed56db47716f0bc579c49897ddcee2e13419f3b5f2b6dfc9c7e3d003",
+    "durationMs": 29280,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 29280,
+      "speaker": "guide",
+      "transcript": "Я создавал Agent Pool MCP как независимый слой исполнения для разных CLI агентов и моделей. Он поддерживает параллельные задачи, последовательные pipelines, handoff-сессии, политики и группы ресурсов. Один процесс может поручить реализацию одному агенту, а независимую проверку другому. В сценариях Cross Model Peer Review агенты разных провайдеров сравнивают выводы и возвращают общий структурированный результат.",
+      "words": [
+        {
+          "text": "Я",
+          "startMs": 0,
+          "endMs": 200
+        },
+        {
+          "text": "создавал",
+          "startMs": 200,
+          "endMs": 900
+        },
+        {
+          "text": "Agent",
+          "startMs": 900,
+          "endMs": 1260
+        },
+        {
+          "text": "Pool",
+          "startMs": 1260,
+          "endMs": 1560
+        },
+        {
+          "text": "MCP",
+          "startMs": 1560,
+          "endMs": 2340
+        },
+        {
+          "text": "как",
+          "startMs": 2340,
+          "endMs": 2920
+        },
+        {
+          "text": "независимый",
+          "startMs": 2920,
+          "endMs": 3680
+        },
+        {
+          "text": "слой",
+          "startMs": 3680,
+          "endMs": 3920
+        },
+        {
+          "text": "исполнения",
+          "startMs": 3920,
+          "endMs": 4520
+        },
+        {
+          "text": "для",
+          "startMs": 4520,
+          "endMs": 4840
+        },
+        {
+          "text": "разных",
+          "startMs": 4840,
+          "endMs": 5320
+        },
+        {
+          "text": "CLI",
+          "startMs": 5320,
+          "endMs": 5980
+        },
+        {
+          "text": "агентов",
+          "startMs": 5980,
+          "endMs": 6540
+        },
+        {
+          "text": "и",
+          "startMs": 6540,
+          "endMs": 6880
+        },
+        {
+          "text": "моделей.",
+          "startMs": 6880,
+          "endMs": 7520
+        },
+        {
+          "text": "Он",
+          "startMs": 7680,
+          "endMs": 7820
+        },
+        {
+          "text": "поддерживает",
+          "startMs": 7820,
+          "endMs": 8500
+        },
+        {
+          "text": "параллельные",
+          "startMs": 8500,
+          "endMs": 9080
+        },
+        {
+          "text": "задачи,",
+          "startMs": 9080,
+          "endMs": 9660
+        },
+        {
+          "text": "последовательные",
+          "startMs": 9940,
+          "endMs": 10880
+        },
+        {
+          "text": "pipelines,",
+          "startMs": 10880,
+          "endMs": 11300
+        },
+        {
+          "text": "handoff",
+          "startMs": 11800,
+          "endMs": 12180
+        },
+        {
+          "text": "-сессии,",
+          "startMs": 12180,
+          "endMs": 12740
+        },
+        {
+          "text": "политики",
+          "startMs": 12980,
+          "endMs": 13500
+        },
+        {
+          "text": "и",
+          "startMs": 13500,
+          "endMs": 13760
+        },
+        {
+          "text": "группы",
+          "startMs": 13760,
+          "endMs": 14120
+        },
+        {
+          "text": "ресурсов.",
+          "startMs": 14120,
+          "endMs": 14680
+        },
+        {
+          "text": "Один",
+          "startMs": 14800,
+          "endMs": 15180
+        },
+        {
+          "text": "процесс",
+          "startMs": 15180,
+          "endMs": 15580
+        },
+        {
+          "text": "может",
+          "startMs": 15580,
+          "endMs": 16040
+        },
+        {
+          "text": "поручить",
+          "startMs": 16040,
+          "endMs": 16560
+        },
+        {
+          "text": "реализацию",
+          "startMs": 16560,
+          "endMs": 17320
+        },
+        {
+          "text": "одному",
+          "startMs": 17320,
+          "endMs": 17680
+        },
+        {
+          "text": "агенту,",
+          "startMs": 17680,
+          "endMs": 18240
+        },
+        {
+          "text": "а",
+          "startMs": 18320,
+          "endMs": 18460
+        },
+        {
+          "text": "независимую",
+          "startMs": 18460,
+          "endMs": 19100
+        },
+        {
+          "text": "проверку",
+          "startMs": 19100,
+          "endMs": 19560
+        },
+        {
+          "text": "другому.",
+          "startMs": 19560,
+          "endMs": 20180
+        },
+        {
+          "text": "В",
+          "startMs": 20320,
+          "endMs": 20420
+        },
+        {
+          "text": "сценариях",
+          "startMs": 20420,
+          "endMs": 20960
+        },
+        {
+          "text": "Cross",
+          "startMs": 20960,
+          "endMs": 21300
+        },
+        {
+          "text": "Model",
+          "startMs": 21300,
+          "endMs": 21620
+        },
+        {
+          "text": "Peer",
+          "startMs": 21620,
+          "endMs": 22120
+        },
+        {
+          "text": "Review",
+          "startMs": 22120,
+          "endMs": 22460
+        },
+        {
+          "text": "агенты",
+          "startMs": 22460,
+          "endMs": 23420
+        },
+        {
+          "text": "разных",
+          "startMs": 23420,
+          "endMs": 23760
+        },
+        {
+          "text": "провайдеров",
+          "startMs": 23760,
+          "endMs": 24480
+        },
+        {
+          "text": "сравнивают",
+          "startMs": 24480,
+          "endMs": 25720
+        },
+        {
+          "text": "выводы",
+          "startMs": 25720,
+          "endMs": 26260
+        },
+        {
+          "text": "и",
+          "startMs": 26260,
+          "endMs": 26500
+        },
+        {
+          "text": "возвращают",
+          "startMs": 26500,
+          "endMs": 27280
+        },
+        {
+          "text": "общий",
+          "startMs": 27280,
+          "endMs": 27820
+        },
+        {
+          "text": "структурированный",
+          "startMs": 27820,
+          "endMs": 28640
+        },
+        {
+          "text": "результат.",
+          "startMs": 28640,
+          "endMs": 29060
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-MAysqc9Y7SwZuCDHHgAFlayKnUqynu2DRr6Lrmf3TXM="
+}

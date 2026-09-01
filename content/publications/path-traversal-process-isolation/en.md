@@ -1,0 +1,5 @@
+Agent Pool validates the filesystem boundaries used by delegation and memory tools. A requested working directory and each additional directory are resolved before launch, then rejected if they match configured system roots. The worker receives the resulting workspace scope explicitly in its prompt.
+
+Skill creation applies a narrower rule. Skill names containing path separators or `..` are rejected before a file path is built. Built-in policy paths are resolved and accepted only when they remain inside the package's policy directory. These checks cover the implemented skill and policy operations described by the package documentation.
+
+Process isolation is expressed through an assigned `cwd`, explicit included directories, provider permission modes, and process-group lifecycle management. The Node.js implementation does not rebuild a complete environment for every child process. These controls have different responsibilities and should remain visible rather than being summarized as one generic sandbox.

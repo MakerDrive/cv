@@ -1,0 +1,156 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-PzOY4auoLHXP92JPnCcEw4RwAimCNQx+OgZpuC/74qo=",
+  "media": {
+    "hash": "sha256:103b25038b75b5de107d3d9c3d13165ade0cde21de4a694032fafe254d35af97",
+    "durationMs": 15200,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 15200,
+      "speaker": "guide",
+      "transcript": "Функциональные блоки дает Symbiote Engine. Это серверная библиотека для сервисов, графов, выполнения и автоматизации. Workspace соединяет визуальные блоки UI с этим исполнительным слоем в одной конфигурации.",
+      "words": [
+        {
+          "text": "Функциональные",
+          "startMs": 0,
+          "endMs": 780
+        },
+        {
+          "text": "блоки",
+          "startMs": 780,
+          "endMs": 1260
+        },
+        {
+          "text": "дает",
+          "startMs": 1260,
+          "endMs": 1580
+        },
+        {
+          "text": "Symbiote",
+          "startMs": 1580,
+          "endMs": 2220
+        },
+        {
+          "text": "Engine.",
+          "startMs": 2220,
+          "endMs": 2640
+        },
+        {
+          "text": "Это",
+          "startMs": 3240,
+          "endMs": 3740
+        },
+        {
+          "text": "серверная",
+          "startMs": 3740,
+          "endMs": 4320
+        },
+        {
+          "text": "библиотека",
+          "startMs": 4320,
+          "endMs": 5000
+        },
+        {
+          "text": "для",
+          "startMs": 5000,
+          "endMs": 5200
+        },
+        {
+          "text": "сервисов,",
+          "startMs": 5200,
+          "endMs": 5880
+        },
+        {
+          "text": "графов,",
+          "startMs": 6100,
+          "endMs": 6600
+        },
+        {
+          "text": "выполнения",
+          "startMs": 6740,
+          "endMs": 7240
+        },
+        {
+          "text": "и",
+          "startMs": 7240,
+          "endMs": 7520
+        },
+        {
+          "text": "автоматизации.",
+          "startMs": 7520,
+          "endMs": 8440
+        },
+        {
+          "text": "Workspace",
+          "startMs": 8940,
+          "endMs": 9480
+        },
+        {
+          "text": "соединяет",
+          "startMs": 9480,
+          "endMs": 10160
+        },
+        {
+          "text": "визуальные",
+          "startMs": 10160,
+          "endMs": 10780
+        },
+        {
+          "text": "блоки",
+          "startMs": 10780,
+          "endMs": 11200
+        },
+        {
+          "text": "UI",
+          "startMs": 11200,
+          "endMs": 11480
+        },
+        {
+          "text": "с",
+          "startMs": 11480,
+          "endMs": 12040
+        },
+        {
+          "text": "этим",
+          "startMs": 12040,
+          "endMs": 12280
+        },
+        {
+          "text": "исполнительным",
+          "startMs": 12280,
+          "endMs": 13260
+        },
+        {
+          "text": "слоем",
+          "startMs": 13260,
+          "endMs": 13720
+        },
+        {
+          "text": "в",
+          "startMs": 13720,
+          "endMs": 14000
+        },
+        {
+          "text": "одной",
+          "startMs": 14000,
+          "endMs": 14220
+        },
+        {
+          "text": "конфигурации.",
+          "startMs": 14220,
+          "endMs": 15080
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-GeID0VUpGpUtgSGxmpT+YAXZC9NcdkC4A/f3IqcKRW4="
+}

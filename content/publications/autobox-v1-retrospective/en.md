@@ -1,0 +1,5 @@
+I developed AUTOBOX v1 equipment and capture technology for the cultural-heritage platform now operating as OBJET.art. The system combined photogrammetry, repeatable multi-angle capture, modular lighting with wireless control and cross-polarization, source-data discipline, and a defined 3D-processing workflow.
+
+The prototype moved from laboratory tests to museum fieldwork. I took part in planning the equipment logistics, personally scanned the Japanese netsuke collection at the State Hermitage Museum during production validation, and applied the same technology line to Benin bronze objects at the Kunstkamera. The equipment belonged to the OBJET.art / ArtClub Digital Heritage product line; the museums were partners and application settings.
+
+I also helped organize the production handoff around the scans: field photography, color calibration, retouching, retopology, and transfer between photographers and 3D specialists. I participated in recruiting and training the people who operated that workflow.

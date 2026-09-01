@@ -1,0 +1,266 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "timelineHash": "presentation-timeline-v3:sha256-msxvkmt7a+94R3uRMdpfDhNYqQKcUMVLV54Rxc4bYds=",
+  "media": {
+    "hash": "sha256:cc5a97dfc66b8fcb508def6c9d1ede2babf65fa712e8c4350b4884181aa1af7e",
+    "durationMs": 23360,
+    "locale": "ru"
+  },
+  "voice": {
+    "mode": "single",
+    "speakerId": "guide"
+  },
+  "turns": [
+    {
+      "turnIndex": 0,
+      "startMs": 0,
+      "endMs": 23360,
+      "speaker": "guide",
+      "transcript": "Project Graph MCP анализирует структуру репозитория и готовит несколько представлений. Зависимости, скелеты кода, краткую карту проекта и факты браузерной проверки. Более быстрая модель может собрать эту карту, а сильная модель получает сфокусированный контекст для решения. Я использую этот слой как Context Engineering и структурированное извлечение с графовыми связями.",
+      "words": [
+        {
+          "text": "Project",
+          "startMs": 0,
+          "endMs": 460
+        },
+        {
+          "text": "Graph",
+          "startMs": 460,
+          "endMs": 760
+        },
+        {
+          "text": "MCP",
+          "startMs": 760,
+          "endMs": 1420
+        },
+        {
+          "text": "анализирует",
+          "startMs": 1420,
+          "endMs": 2200
+        },
+        {
+          "text": "структуру",
+          "startMs": 2200,
+          "endMs": 2640
+        },
+        {
+          "text": "репозитория",
+          "startMs": 2640,
+          "endMs": 3440
+        },
+        {
+          "text": "и",
+          "startMs": 3440,
+          "endMs": 3700
+        },
+        {
+          "text": "готовит",
+          "startMs": 3700,
+          "endMs": 4160
+        },
+        {
+          "text": "несколько",
+          "startMs": 4160,
+          "endMs": 4680
+        },
+        {
+          "text": "представлений.",
+          "startMs": 4680,
+          "endMs": 5620
+        },
+        {
+          "text": "Зависимости,",
+          "startMs": 6200,
+          "endMs": 7000
+        },
+        {
+          "text": "скелеты",
+          "startMs": 7160,
+          "endMs": 7620
+        },
+        {
+          "text": "кода,",
+          "startMs": 7620,
+          "endMs": 7940
+        },
+        {
+          "text": "краткую",
+          "startMs": 8080,
+          "endMs": 8460
+        },
+        {
+          "text": "карту",
+          "startMs": 8460,
+          "endMs": 8840
+        },
+        {
+          "text": "проекта",
+          "startMs": 8840,
+          "endMs": 9340
+        },
+        {
+          "text": "и",
+          "startMs": 9340,
+          "endMs": 9480
+        },
+        {
+          "text": "факты",
+          "startMs": 9480,
+          "endMs": 9860
+        },
+        {
+          "text": "браузерной",
+          "startMs": 9860,
+          "endMs": 10440
+        },
+        {
+          "text": "проверки.",
+          "startMs": 10440,
+          "endMs": 11040
+        },
+        {
+          "text": "Более",
+          "startMs": 11200,
+          "endMs": 11460
+        },
+        {
+          "text": "быстрая",
+          "startMs": 11460,
+          "endMs": 11880
+        },
+        {
+          "text": "модель",
+          "startMs": 11880,
+          "endMs": 12120
+        },
+        {
+          "text": "может",
+          "startMs": 12120,
+          "endMs": 12460
+        },
+        {
+          "text": "собрать",
+          "startMs": 12460,
+          "endMs": 12860
+        },
+        {
+          "text": "эту",
+          "startMs": 12860,
+          "endMs": 13040
+        },
+        {
+          "text": "карту,",
+          "startMs": 13040,
+          "endMs": 13440
+        },
+        {
+          "text": "а",
+          "startMs": 13500,
+          "endMs": 13580
+        },
+        {
+          "text": "сильная",
+          "startMs": 13580,
+          "endMs": 14000
+        },
+        {
+          "text": "модель",
+          "startMs": 14000,
+          "endMs": 14380
+        },
+        {
+          "text": "получает",
+          "startMs": 14380,
+          "endMs": 14900
+        },
+        {
+          "text": "сфокусированный",
+          "startMs": 14900,
+          "endMs": 15700
+        },
+        {
+          "text": "контекст",
+          "startMs": 15700,
+          "endMs": 16220
+        },
+        {
+          "text": "для",
+          "startMs": 16220,
+          "endMs": 16460
+        },
+        {
+          "text": "решения.",
+          "startMs": 16460,
+          "endMs": 16980
+        },
+        {
+          "text": "Я",
+          "startMs": 17180,
+          "endMs": 17340
+        },
+        {
+          "text": "использую",
+          "startMs": 17340,
+          "endMs": 17800
+        },
+        {
+          "text": "этот",
+          "startMs": 17800,
+          "endMs": 18020
+        },
+        {
+          "text": "слой",
+          "startMs": 18020,
+          "endMs": 18420
+        },
+        {
+          "text": "как",
+          "startMs": 18420,
+          "endMs": 18660
+        },
+        {
+          "text": "Context",
+          "startMs": 18660,
+          "endMs": 19280
+        },
+        {
+          "text": "Engineering",
+          "startMs": 19280,
+          "endMs": 19820
+        },
+        {
+          "text": "и",
+          "startMs": 19820,
+          "endMs": 20400
+        },
+        {
+          "text": "структурированное",
+          "startMs": 20400,
+          "endMs": 21340
+        },
+        {
+          "text": "извлечение",
+          "startMs": 21340,
+          "endMs": 21840
+        },
+        {
+          "text": "с",
+          "startMs": 21840,
+          "endMs": 22100
+        },
+        {
+          "text": "графовыми",
+          "startMs": 22100,
+          "endMs": 22700
+        },
+        {
+          "text": "связями.",
+          "startMs": 22700,
+          "endMs": 23220
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-doJGQbCkN59UhduTpqaVNRJsgq+xij6XDGURXsmks2A="
+}

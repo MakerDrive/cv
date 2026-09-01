@@ -1,0 +1,163 @@
+# Vladimir Matiasevich Portfolio
+
+> Lead R&D Engineer — designing and developing systems and platforms for complex process automation across software, media, and hardware.
+
+Curated R&D portfolio covering AI tooling, agent systems, product platforms, media systems, process automation, and selected hardware-backed/open-source case studies. The site supports English, Russian, and Spanish through the `lang` query parameter.
+
+Use `llms-full.txt` for a fuller markdown export of profile text, project case studies, and Pulse publications across all supported locales.
+
+## Professional profile
+
+15+ years in software development and engineering R&D across product platforms, media systems, hardware, and process automation. I design and develop automation loops for complex processes and systems across domains at the intersection of software, media, and hardware.
+
+I work remotely, either independently as a hands-on lead or senior individual contributor, or by integrating the [RND-PRO team](https://rnd-pro.com/workflow/en/) into the client project for broader-scope work.
+
+## Expertise
+- **Loop automation and MCP/WebMCP engineering**: MCP/WebMCP, context engineering, RAG/GraphRAG, Project Graph, planning, execution, evals, explicit transitions and completion criteria, retry/replan, guardrails, observability, model/resource routing, multi-agent orchestration, browser evidence, and audit gates.
+- **Full-stack, platforms, backend and ops**: JavaScript/Node.js, Web/PWA, Web Components, APIs, PostgreSQL, WebSockets, PM2/nginx, deployment automation, tunnels, and integration across frontend, backend, runtime, and ops; SMM and digital presence automation.
+- **Cross-cutting R&D and technical leadership**: Domain research, architecture, prototyping, field validation, clear ownership, documented context, review gates, repeatable verification, and coordination of teams, specialists, and contractors.
+- **Hardware and process automation**: JavaScript/Espruino, GSM modems, serial/AT commands, photogrammetry, high-detail 3D scanning, controlled light and motion, physical prototypes, and field operation.
+
+## Outcomes
+- **Loop automation tooling and infrastructure**: Developed reusable MCP/WebMCP tools and loop infrastructure for applied automation: context retrieval, planning, execution, evals, resource-aware orchestration, guardrails, observability, and verifiable results.
+- **Museum high-detail 3D scanning**: Developed technology and equipment for OBJET.art / ArtClub Digital Heritage, used at the State Hermitage, Kunstkamera, other museums, and private collections; helped train and scale the 3D team.
+- **Hardware projects: open-source and commercial products**: Created open-source PhotoPizza and the commercial ComplexScan/AUTOBOX line; built prototypes and early units, coordinated contractor and small-batch fabrication, testing, protective packaging, export documents, and international delivery.
+- **MEGAVISOR / Gate9 photo-360 workflows**: Developed rapid automated photo-360 capture technology and equipment, deployed workflows in warehouses and stores, coordinated 3D photographers and retouchers, prepared training materials, and contributed to player features.
+
+## Products and systems
+
+R&D is the shared method across these areas, spanning domain research and prototyping, software/hardware integration, field validation, and operation.
+
+- **Agent Portal and MCP/WebMCP automation toolchain**: A thin host for portable workspaces (Workspace-as-Config) and infrastructure for loop-based automation: Project Graph, agent pools, routing, evals, and verifiable execution.
+- **Symbiote Workspace / UI / Engine / Node**: My product line: an AI-driven constructor for task-adaptive workspaces, reusable UI, executable process graphs, and runtimes.
+- **Symbiote Video Studio**: AI-assisted video production workspace combining editing, reusable interfaces, and automation workflows.
+- **Lifecycle Messaging Platform**: Platform for lifecycle messaging and process automation with APIs, PostgreSQL, WebSockets, PM2/nginx, GSM modems, and serial/AT control.
+- **ComplexScan / AUTOBOX**: Commercial equipment for automated capture and high-detail 3D scanning, spanning prototypes, small-batch production, and museum workflows.
+- **PhotoPizza**: Open-source project: automated turntable and control systems built with JavaScript/Espruino for 360° photography and photogrammetry.
+- **OBJET.art / ArtClub Digital Heritage**: Museum-object digitization workflow and platform for storing, presenting, and publishing digitized objects.
+- **BoothBot**: Automated wine-bottle catalog photography with controlled light, camera movement, presets, and image processing.
+
+## Professional experience
+- **RND-PRO — Lead R&D Engineer · Jan 2023–present**: I lead applied R&D for loop automation systems, MCP/WebMCP tooling, and full-stack platforms across domains. Previously: Full-Stack Product Engineer, Jan 2020–Dec 2022.
+  - **Projects**: [Agent Portal and MCP/WebMCP automation toolchain](https://makerdrive.github.io/cv/projects/agent-portal/?lang=en) · [Symbiote Workspace / UI / Engine / Node](https://makerdrive.github.io/cv/projects/symbiote-workspace/?lang=en) · [Symbiote Video Studio](https://makerdrive.github.io/cv/projects/symbiote-video-studio/?lang=en) · [Lifecycle Messaging Platform](https://makerdrive.github.io/cv/projects/lifecycle-messaging-platform/?lang=en)
+- **F360 — Founder / Studio Lead · 2021–2022**: Founded and led a high-detail 3D-scanning studio spanning capture, photogrammetry, geometry and texture processing, and finished models.
+- **MEGAVISOR / Gate9 — Technical Director & Co-founder · Oct 2011–May 2014**: Led R&D for capture technology and equipment, photo-360 field workflows, the Gate9 3D photo studio, and player features.
+
+## Portfolio resources
+- [Portfolio home](https://makerdrive.github.io/cv/?lang=en): Open to new opportunities. Location: Buenos Aires, Argentina (GMT-3). Available across time zones. Languages: Russian (native) · English (written and async) · Spanish (A1, actively learning) · Multilingual voice meetings: simultaneous AI interpretation. 15+ years in software development and engineering R&D.
+- [Full LLM context](https://makerdrive.github.io/cv/llms-full.txt): Complete generated markdown export for the portfolio.
+- [Sitemap](https://makerdrive.github.io/cv/sitemap.xml): Machine-readable list of generated site routes.
+- [English CV PDF](https://makerdrive.github.io/cv/downloads/vladimir-matiasevich-cv-en.pdf): Downloadable PDF CV in English.
+- [Russian CV PDF](https://makerdrive.github.io/cv/downloads/vladimir-matiasevich-cv-ru.pdf): Downloadable PDF CV in Russian.
+- [Spanish CV PDF](https://makerdrive.github.io/cv/downloads/vladimir-matiasevich-cv-es.pdf): Downloadable PDF CV in Spanish.
+
+## Project case studies
+
+### AI tooling and agent systems
+- [Agent Portal](https://makerdrive.github.io/cv/projects/agent-portal/?lang=en): 2025-2026. R&D workspace for AI-assisted engineering and loop engineering: project memory, context engineering, RAG-style context retrieval, graph-based context, model/resource routing, task orchestration, evals/guardrails, and controlled delivery.
+- [Symbiote Workspace](https://makerdrive.github.io/cv/projects/symbiote-workspace/?lang=en): 2026. Agent-driven workspace R&D for turning intent into plans, graph state, builds, and shareable artifacts in the Symbiote Workspace / UI / Engine line.
+- [Symbiote Engine](https://makerdrive.github.io/cv/projects/symbiote-engine/?lang=en): 2026. Server-side execution library for composable backend services, graph runtimes, and handler systems with zero coupling to UI products.
+- [Project Graph MCP](https://makerdrive.github.io/cv/projects/project-graph-mcp/?lang=en): 2026. Code-intelligence MCP server for RAG-style project retrieval: turning repositories into compact graphs, compressed project skeletons, structured context, and evidence agents can reason over.
+- [Agent Pool MCP](https://makerdrive.github.io/cv/projects/agent-pool-mcp/?lang=en): 2026. Multi-agent orchestration runtime for delegating CLI work, assigning model/resource tiers, handling handoffs, tracking ownership, and returning structured execution state.
+- [Browser X MCP](https://makerdrive.github.io/cv/projects/browser-x-mcp/?lang=en): 2025. Browser automation R&D for agent observability: page inspection, form workflows, browser evidence, and UI evals usable by agents.
+- [Context X MCP](https://makerdrive.github.io/cv/projects/context-x-mcp/?lang=en): 2025. Context engineering and RAG-style retrieval R&D for multi-agent work: detect task shape, collect relevant project memory, and choose tools.
+- [Terminal X MCP](https://makerdrive.github.io/cv/projects/terminal-x-mcp/?lang=en): 2025. Terminal automation R&D for planned command execution, validation, monitoring, observability, and agent-safe feedback.
+
+### Product platforms and interfaces
+- [Symbiote Video Studio](https://makerdrive.github.io/cv/projects/symbiote-video-studio/?lang=en): 2025-2026. R&D video workspace for testing how AI can assist editing, media structure, and production workflows.
+- [MEGAVISOR](https://makerdrive.github.io/cv/projects/megavisor/?lang=en): 2010-2014. Co-founded product media platform combining cloud publishing, photo-360 sequences, spherical 3D panoramas, shooting automation, and custom lighting hardware.
+- [Lifecycle Messaging Platform](https://makerdrive.github.io/cv/projects/lifecycle-messaging-platform/?lang=en): 2022-2026. Confidential lifecycle messaging platform for consent-based customer communications, opt-in SMS scenarios, campaign operations, modem-backed SMS runtime, audience segmentation, analytics, and internal workflow automation.
+- [Symbiote UI](https://makerdrive.github.io/cv/projects/symbiote-ui/?lang=en): 2026. Web Component system for agent-built interfaces: provider catalogs, layout contracts, resource trees, graph tooling, structured UI metadata, and WebMCP contracts.
+- [PhotoPizza Remote](https://makerdrive.github.io/cv/projects/photopizza-remote/?lang=en): 2018-2019. Browser control interface for PhotoPizza capture workflows and field operation of the turntable.
+- [PhotoSnail Public](https://makerdrive.github.io/cv/projects/photosnail-public/?lang=en): 2016. Early PhotoSnail web project around motion-control camera systems and media presentation experiments.
+
+### Archived projects
+- [Symbiote Node](https://makerdrive.github.io/cv/projects/symbiote-node/?lang=en): 2026. Early package workspace from the RND-PRO Symbiote line: integration, migration tooling, package organization, and links between UI primitives and execution-engine prototypes.
+
+### Hardware and process automation
+- [AUTOBOX v1](https://makerdrive.github.io/cv/projects/autobox-v1/?lang=en): 2019-2021. Museum-grade 3D scanning equipment, capture technology, and artistic 3D visualization of Hermitage and Kunstkamera artifacts: photogrammetry, custom light matrices, field scanning, and production workflow.
+- [F360 Studio](https://makerdrive.github.io/cv/projects/f360-studio/?lang=en): 2021-2022. High-precision 3D scanning studio I founded and ran after the museum-scanning work, bringing that experience into a commercial studio workflow.
+- [ComplexScan](https://makerdrive.github.io/cv/projects/complexscan/?lang=en): 2017-2022. Commercial hardware product I invented after PhotoPizza: professional transparent-disc equipment for 3D scanning, 360 capture, and product photography.
+- [BoothBot](https://makerdrive.github.io/cv/projects/boothbot/?lang=en): 2018. Commercial capture-automation project for wine bottles: warehouse equipment, controlled lighting, motorized camera, and catalog photo processing.
+- [PhotoPizza](https://makerdrive.github.io/cv/projects/photopizza/?lang=en): 2010-2022. Motorized 360 turntable invented inside MEGAVISOR, then developed as an open-source PhotoPizza project for photography, video, and photogrammetry.
+
+## Pulse publications
+- [Agent Portal: Shared Runtime and Versioned Control Plane R&D note](https://makerdrive.github.io/cv/pulse/agent-portal-retrospective/?lang=en): A detached backend connects IDE clients to shared MCP processes, while versioned StateGraph operations provide patches, snapshots, and task evidence.
+- [Symbiote Video Studio: Graph-Based Media Workflows R&D note](https://makerdrive.github.io/cv/pulse/symbiote-video-studio-retrospective/?lang=en): A serializable media graph, typed timeline, plugin packs, and frame manifests connect graph, timeline, provider, and render contracts.
+- [AUTOBOX v1: A Repeatable Museum-Scanning Process R&D note](https://makerdrive.github.io/cv/pulse/autobox-v1-retrospective/?lang=en): AUTOBOX v1 combines equipment, light, capture protocol, and production process for cultural-heritage digitization.
+- [F360 Studio: Museum Capture Discipline in Commercial Photogrammetry R&D note](https://makerdrive.github.io/cv/pulse/f360-studio-retrospective/?lang=en): Capture planning and controlled lighting connect source photography to geometry, textures, and presentation in a commercial 3D workflow.
+- [ComplexScan: From Open Hardware to a Commercial Capture System R&D note](https://makerdrive.github.io/cv/pulse/complexscan-retrospective/?lang=en): A transparent turntable, controlled lighting, and a full-cycle equipment line extended the PhotoPizza work into commercial 3D capture.
+- [BoothBot: Warehouse Capture as an Automated Process R&D note](https://makerdrive.github.io/cv/pulse/boothbot-retrospective/?lang=en): Camera, lighting, turntable control, and processing formed a repeatable wine-bottle catalog workflow inside a customer warehouse.
+- [PhotoPizza: From MEGAVISOR Prototype to Open-Source Platform R&D note](https://makerdrive.github.io/cv/pulse/photopizza-retrospective/?lang=en): PhotoPizza grew from a hardware line born inside MEGAVISOR into an open-source platform for capture and scanning experiments.
+- [MEGAVISOR: Capture R&D as a Product Line R&D note](https://makerdrive.github.io/cv/pulse/megavisor-retrospective/?lang=en): Photo-360 equipment, spherical 3D panoramas, the Gate9 studio, controller specifications, and field production established the capture-automation line.
+- [MCP Agent Portal: Public Gateway for Portal Tools R&D note](https://makerdrive.github.io/cv/pulse/mcp-agent-portal-retrospective/?lang=en): A JavaScript MCP gateway exposes owned chat and orchestration tools while keeping raw Agent Pool operations inside the product runtime.
+- [Project Graph MCP: Compact Codebase Context for Agents R&D note](https://makerdrive.github.io/cv/pulse/project-graph-mcp-retrospective/?lang=en): Vendored Acorn analysis, language-specific structural parsers, compact code, and `.ctx` contracts provide focused codebase context.
+- [Agent Pool MCP: Delegation with Visible Ownership R&D note](https://makerdrive.github.io/cv/pulse/agent-pool-mcp-retrospective/?lang=en): CLI delegation returns task IDs immediately, preserves process ownership and diagnostics, and supports pipelines plus scheduled work.
+- [Browser X MCP: Browser Automation as Agent Evidence R&D note](https://makerdrive.github.io/cv/pulse/browser-x-mcp-retrospective/?lang=en): A Playwright MCP prototype exposes DOM-derived virtual-canvas targets, browser actions, screenshots, and explicit page-state errors.
+- [Context X MCP: An Early Context-Preparation Prototype R&D note](https://makerdrive.github.io/cv/pulse/context-x-mcp-retrospective/?lang=en): The stdio prototype defined enrichment and history-search contracts; the implemented resolver later moved into the Agent Portal team-memory stack.
+- [Terminal X MCP: An Early Tool-Contract Prototype R&D note](https://makerdrive.github.io/cv/pulse/terminal-x-mcp-retrospective/?lang=en): The stdio prototype defined schemas for execution, monitoring, security assessment, and workflow planning, while its handlers remained placeholders.
+- [Symbiote Workspace: Portable UI and Execution Configuration R&D note](https://makerdrive.github.io/cv/pulse/symbiote-workspace-retrospective/?lang=en): Portable JSON connects Symbiote UI and Engine through validated construction, revision-aware dispatch, strict sharing, and live patching.
+- [Symbiote UI: Discoverable Interface Contracts R&D note](https://makerdrive.github.io/cv/pulse/symbiote-ui-retrospective/?lang=en): Web Components, provider metadata, schemas, themes, and reusable UI primitives form a host-neutral contract that agents can inspect.
+- [Symbiote Node: Migration Facade After the Package Split R&D note](https://makerdrive.github.io/cv/pulse/symbiote-node-retrospective/?lang=en): The remaining package is a migration facade that delegates public entry points to Symbiote UI and Engine after ownership was separated.
+- [Symbiote Engine: Graph Execution Across Node and Browser R&D note](https://makerdrive.github.io/cv/pulse/symbiote-engine-retrospective/?lang=en): Typed graph execution, driver packs, optional server transports, and a browser-safe entry point share one execution contract.
+- [PhotoSnail: Early Camera-Motion Experiments R&D note](https://makerdrive.github.io/cv/pulse/photosnail-public-retrospective/?lang=en): PhotoSnail preserves an early public experiment around camera motion, object-tracking ideas, and media presentation.
+- [Lifecycle Messaging: Product Architecture and GSM Delivery R&D note](https://makerdrive.github.io/cv/pulse/lifecycle-messaging-platform-retrospective/?lang=en): A confidential consent-based messaging platform combines Node.js APIs, PostgreSQL, WebSocket state, campaign workflows, and GSM modem delivery.
+- [Maintenance Workspace: Shared Context with a Safe Demo Boundary R&D note](https://makerdrive.github.io/cv/pulse/adaptive-maximo-workbench-retrospective/?lang=en): A Demo / Alpha Workspace configuration connects work orders, assets, locations, crews, and declared actions while production Maximo integration remains separate.
+- [Controlled Mobile SMM Operations: Stable Paths and Reviewed Recovery R&D note](https://makerdrive.github.io/cv/pulse/mobile-smm-platform-retrospective/?lang=en): Profiles, media, schedules, queues, Android execution, approvals, limits, deduplication, and action logs form a local dry-run demonstration with no external send.
+- [Bounded Task Diagnostics in Agent Pool release](https://makerdrive.github.io/cv/pulse/agent-pool-mcp-transparent-task-diagnostics/?lang=en): A bounded stderr tail, provider rate-limit signals, live events, PID liveness, and exit results make delegated tasks inspectable.
+- [Compact Code Mode with External Context Contracts release](https://makerdrive.github.io/cv/pulse/project-graph-mcp-compact-code-mode-v1-5/?lang=en): Project Graph MCP preserves identifiers in compact JavaScript and validates `.ctx` documentation against exported functions and signatures.
+- [Tiered Cascade Theme Tokens release](https://makerdrive.github.io/cv/pulse/symbiote-ui-tiered-cascade-token-architecture/?lang=en): T0-T3 token tiers enforce source, reference, system, and component alias direction; Symbiote UI owns the T2 system roles.
+- [Browser X MCP 1.0.0-beta.1 release](https://makerdrive.github.io/cv/pulse/browser-x-mcp-browser-x-mcp-v1-beta/?lang=en): The first public Playwright stdio server exposes browser actions and a DOM-derived virtual canvas with target IDs and coordinates.
+- [Recorded Execution Timelines for Presentation release](https://makerdrive.github.io/cv/pulse/symbiote-workspace-workspace-presentation-journey-v1/?lang=en): `workspace-presentation-journey-v1` maps observed source time to presentation time while preserving event provenance and completion evidence.
+- [Release of PhotoPizza Remote for Android release](https://makerdrive.github.io/cv/pulse/photopizza-remote-photopizza-remote-android-release/?lang=en): Native Android client for managing the PhotoPizza hardware platform.
+- [Live Browser Capture in Symbiote Video Studio release](https://makerdrive.github.io/cv/pulse/symbiote-video-studio-live-ui-render/?lang=en): A render manifest drives browser capture through Symbiote Engine, while the Studio derives duration from an accepted cue timeline.
+- [Coordinating Motion, Lighting, and Capture in AUTOBOX field note](https://makerdrive.github.io/cv/pulse/autobox-v1-hardware-lighting-sync-postmortem/?lang=en): AUTOBOX treated positioning, modular lighting, camera capture, and material-specific settings as one repeatable museum-scanning configuration.
+- [Capture-System Trade-offs Before Mesh Processing field note](https://makerdrive.github.io/cv/pulse/complexscan-mesh-decimation-tradeoffs/?lang=en): ComplexScan moved masking, geometry consistency, and texture quality into the capture system; mesh processing remained downstream.
+- [Controlled Lighting in the F360 Photogrammetry Workflow field note](https://makerdrive.github.io/cv/pulse/f360-studio-photogrammetry-lighting-rig/?lang=en): Capture planning and the physical studio setup connected source-image quality to geometry, texture processing, and model presentation.
+- [GSM Modem Control as a Delivery Subsystem field note](https://makerdrive.github.io/cv/pulse/lifecycle-messaging-platform-gsm-modem-pool-isolation/?lang=en): Serial and AT-command modem control stays inside the delivery subsystem behind Node.js APIs, WebSocket state, and server operations.
+- [Browser X Page-Liveness Recovery field note](https://makerdrive.github.io/cv/pulse/mcp-agent-portal-agent-browser-context-lost/?lang=en): Browser X probes the stored Playwright page before reuse, clears a failed instance, and exposes explicit errors for actions without an active page.
+- [Gate9 Field-Capture Logistics field note](https://makerdrive.github.io/cv/pulse/megavisor-gate9-logistics-bottleneck/?lang=en): Photo-360 sequence and spherical 3D panorama shoots, access to real inventory, and handoff to retouchers formed the warehouse and retail process.
+- [PhotoSnail Controller Timing: An Evidence Boundary field note](https://makerdrive.github.io/cv/pulse/photosnail-public-arduino-interrupt-limitations/?lang=en): The public project supports early camera-motion and media-presentation research; controller architecture and timing require separate evidence.
+- [Buildable Open-Source PhotoPizza Turntables R&D note](https://makerdrive.github.io/cv/pulse/hardware-arch-opensource-turntables/?lang=en): Published laser-cut drawings, stepper mechanics, an ESP32 control unit, and Espruino firmware define a complete turntable system.
+- [PhotoPizza Control with Espruino, IR, Wi-Fi, and Android field note](https://makerdrive.github.io/cv/pulse/espruino-multi-platform-control/?lang=en): JavaScript firmware runs the capture sequence on Iskra JS and ESP32 controllers while three operator surfaces configure the same workflow.
+- [Renderer-Neutral Spatial Evidence for XR research note](https://makerdrive.github.io/cv/pulse/xr-spatial-evidence-and-projections/?lang=en): Metric observations, orthographic views, stereo projection, and explicit `UNAVAILABLE` results keep XR evidence separate from visual reference panes.
+- [Independent Speech Channels for Narrated Tours field note](https://makerdrive.github.io/cv/pulse/multi-voice-narrated-tour-architecture/?lang=en): Separate `speechSynthesis` channels in hidden iframes support overlapping personas on a cue-driven dialogue timeline.
+- [Deterministic Browser Capture for Offline Rendering research note](https://makerdrive.github.io/cv/pulse/deterministic-browser-capture-offline-rendering/?lang=en): An explicit `renderClock` asks the page for a timeline state; native timers remain unchanged while isolated workers render contiguous frame ranges.
+- [Chat-Led Workspace Construction Protocol research note](https://makerdrive.github.io/cv/pulse/chat-intent-driven-workspace-construction-protocol/?lang=en): Explicit stages cover request classification, planning, provider selection, and validation before a portable config reaches browser assembly.
+- [Strict Export and Import of Portable Workspace Configs field note](https://makerdrive.github.io/cv/pulse/strict-export-import-portable-workspace-configs/?lang=en): Portable JSON excludes credentials, identity, endpoints, session data, and local paths, then validates host requirements before mounting.
+- [Workspace Patching Without a Browser Reload field note](https://makerdrive.github.io/cv/pulse/no-reload-browser-updates-workspace-patching/?lang=en): Symbiote Workspace applies validated config patches with diagnostics, structural diffs, evidence, and revision checks while the UI stays mounted.
+- [One MCP Tool Registry Across stdio, WebSocket, and HTTP field note](https://makerdrive.github.io/cv/pulse/dual-mode-transport-stdio-http/?lang=en): IDE clients and HTTP sub-agents reach the same portal-owned tool registry through transport-specific session and response boundaries.
+- [Workspace Registration by Exact Path research note](https://makerdrive.github.io/cv/pulse/dynamic-workspace-registration-deduplication/?lang=en): Agent Portal registers MCP workspace roots in StateGraph and deduplicates only identical stored path strings, without realpath or hash canonicalization.
+- [Agent Portal Master-Client MCP Orchestration release](https://makerdrive.github.io/cv/pulse/distributed-master-client-mcp-orchestration/?lang=en): Standalone, client, and master modes combine local child servers with remote client tool sets behind one portal routing boundary.
+- [Cross-Model Peer Review: Evidence Before Acceptance research note](https://makerdrive.github.io/cv/pulse/cross-model-peer-review/?lang=en): `delegate_task_readonly` routes a bounded review through Agent Pool; the worker returns evidence while the orchestrator retains acceptance authority, with Claude Sonnet 5 and GPT-5.6 Sol as an illustrative pairing.
+- [Cron Scheduling for Local Agent Tasks field note](https://makerdrive.github.io/cv/pulse/atomic-cron-scheduling-local-agents/?lang=en): A detached daemon uses a five-field cron parser with file-backed definitions, results, a PID lock, and overlap policy.
+- [Team Memory: Reusable and Project-Specific Skills release](https://makerdrive.github.io/cv/pulse/workspace-vs-global-team-memory/?lang=en): One configured content root separates reusable `skills/` from project-specific `workspace/<project>/skills/`, selected by a resolver.
+- [Filesystem Boundary Validation in Agent Pool field note](https://makerdrive.github.io/cv/pulse/path-traversal-process-isolation/?lang=en): Delegation resolves working roots before launch, rejects configured system roots, and passes the resulting workspace scope to the worker.
+- [JavaScript Structure Analysis with Vendored Acorn research note](https://makerdrive.github.io/cv/pulse/ast-codebase-analysis-acorn/?lang=en): AST traversal extracts declarations, imports, exports, calls, and signatures for project skeletons and focused analysis tools.
+- [Structural Parsers for TypeScript, Python, and Go release](https://makerdrive.github.io/cv/pulse/multi-language-regex-parsers/?lang=en): Language-specific parsers extract declarations and dependency signals, with masked source preserving positions for regex-based paths.
+- [Two Cache Boundaries in Project Graph MCP research note](https://makerdrive.github.io/cv/pulse/incremental-analysis-caching/?lang=en): The graph cache tracks source modification times, while full quality analysis reuses results by content hash and analysis type.
+- [Code Quality Analysis in Project Graph MCP field note](https://makerdrive.github.io/cv/pulse/code-quality-analysis/?lang=en): One MCP tool combines AST-backed and heuristic checks for dead code, complexity, similar functions, large files, and documentation consistency.
+- [Composable Driver Packs for Symbiote Engine field note](https://makerdrive.github.io/cv/pulse/composable-automation-packs-node-types/?lang=en): Self-describing driver records register node sockets, parameters, and execution handlers; domain packs add namespaced node and socket types.
+- [Cross-Polarized AUTOBOX Lighting for Museum Scanning field note](https://makerdrive.github.io/cv/pulse/autobox-v1-hardware-cross-polarization-museum/?lang=en): I developed modular lights with wireless control, cooling, sensors, and cross-polarization, validated on detailed Hermitage objects.
+- [Source-Data Handoff in Museum Scanning research note](https://makerdrive.github.io/cv/pulse/autobox-v1-photogrammetry-data-workflow/?lang=en): AUTOBOX field datasets moved through color calibration, retouching, retopology, and handoff between photographers and 3D specialists.
+- [GSM Modem Pool Orchestration with Node.js field note](https://makerdrive.github.io/cv/pulse/lifecycle-messaging-platform-gsm-modem-pool-orchestration/?lang=en): Node.js APIs connect to physical modem pools through serial ports and AT commands, with WebSocket state and RabbitMQ-compatible intake.
+- [Browser Control for PhotoPizza Turntables release](https://makerdrive.github.io/cv/pulse/photopizza-remote-browser-hardware-control/?lang=en): The browser connects to a local controller over WebSocket to configure capture parameters, start or stop motion, and show remaining frames.
+- [PhotoSnail: Implemented Motion and Planned Object Tracking research note](https://makerdrive.github.io/cv/pulse/photosnail-public-motion-control-object-tracking/?lang=en): The open motorized slider implements carriage movement and capture settings; object tracking, CV, and ML remain unevidenced plans.
+- [Terminal X Execution-State Contracts field note](https://makerdrive.github.io/cv/pulse/terminal-x-mcp-terminal-execution-state/?lang=en): The prototype defines MCP schemas for command, monitoring, security, and workflow operations; its handlers remained placeholders.
+
+## Skill pages
+- [R&D Engineering](https://makerdrive.github.io/cv/skills/rnd-engineering/?lang=en): Full-stack research, prototyping, constraint discovery, and practical delivery across AI, software, media, operations, and physical systems when useful.
+- [Loop Automation / MCP-WebMCP Tooling](https://makerdrive.github.io/cv/skills/agentic-ai/?lang=en): Loop-based automation systems and MCP/WebMCP tooling for applied workflows: context engineering, RAG/GraphRAG retrieval, explicit planning/execution/eval stages, retry/replan, guardrails, and observability.
+- [Product Interfaces](https://makerdrive.github.io/cv/skills/product-ui/?lang=en): Product portals, editors, dashboards, media tools, design systems, and Web Components that turn prototypes into usable workflows.
+- [SMM & Digital Presence Automation](https://makerdrive.github.io/cv/skills/digital-presence/?lang=en): SMM workflows for content planning and adaptation, channel publishing, profile synchronization, monitoring, and analytics.
+- [3D Capture & Visualization / Hardware](https://makerdrive.github.io/cv/skills/hardware-capture/?lang=en): Photogrammetry, museum-grade 3D scanning, artistic 3D visualization, controlled motion and light, AT-command control, and hardware-backed process automation for physical workflows.
+
+## Public profiles
+- [GitHub](https://github.com/MakerDrive): Code, open-source work, and project repositories
+- [LinkedIn](https://www.linkedin.com/in/v-matiasevich/): Professional profile and work history
+- [YouTube](https://www.youtube.com/@VladimirMatiasevich): Video demos and project notes
+- [Facebook](https://www.facebook.com/v.matiasevich): Personal profile and public updates
+
+## Optional
+- [Russian portfolio home](https://makerdrive.github.io/cv/?lang=ru): Localized Russian portfolio view.
+- [Spanish portfolio home](https://makerdrive.github.io/cv/?lang=es): Localized Spanish portfolio view.
