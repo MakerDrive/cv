@@ -118,7 +118,7 @@ export function describeCvShowMissingTarget(receipt) {
  *   error?: null | string | { code?: unknown, name?: unknown, message?: unknown },
  *   receipt?: null | { status?: unknown, reason?: unknown, terminalReason?: unknown,
  *     operationId?: unknown, phase?: unknown, requestedMs?: unknown, observedMs?: unknown,
- *     details?: { message?: unknown } },
+ *     details?: { message?: unknown, cause?: unknown, targets?: unknown } },
  *   entryId?: unknown,
  * }} [failure]
  * @returns {{ causeKey: string, code: string, detail: string }}
@@ -133,6 +133,8 @@ export function describeCvShowSpeechFailure({ error, receipt, entryId } = {}) {
     typeof source?.name === 'string' ? source.name : '',
   );
   const code = boundedPart(reason) || 'unknown-error';
+  const innerCause = boundedPart(receipt?.details?.cause, 80);
+  const targets = boundedPart(receipt?.details?.targets, 120);
   const detailParts = [];
   const entry = boundedPart(entryId, 80);
   if (entry) detailParts.push(`entry=${entry}`);
@@ -144,14 +146,18 @@ export function describeCvShowSpeechFailure({ error, receipt, entryId } = {}) {
   if (mediaKey) detailParts.push(`media=${code}`);
   const receiptStatus = boundedPart(receipt?.status, 40);
   if (receiptStatus && receiptStatus !== 'completed') detailParts.push(`status=${receiptStatus}`);
+  if (targets) detailParts.push(`targets=${targets}`);
   const message = boundedPart(
     receipt?.details?.message ?? source?.message ?? '',
     DETAIL_MESSAGE_LIMIT,
   );
   if (message && message !== code) detailParts.push(message);
   const assembledDetail = boundedPart(detailParts.join(' '));
+  const causeKey = TARGET_REASON_KEYS.get(innerCause)
+    || resolveCauseKey(innerCause)
+    || resolveCauseKey(code);
   return Object.freeze({
-    causeKey: resolveCauseKey(code),
+    causeKey,
     code,
     detail: assembledDetail || (code === 'unknown-error' ? '' : code),
   });

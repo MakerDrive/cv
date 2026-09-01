@@ -1930,6 +1930,60 @@ test('CV adapter explicitly maps all nine product directives to the accepted sha
   assert.equal(mapped.idle.type, 'status');
 });
 
+test('CV runner opens the owning article project for media targets before resolving them', async () => {
+  const order = [];
+  const mediaTarget = { id: 'media-target', element: { matches: () => false } };
+  const runtime = {
+    entries: new Map([['projects/boothbot', {}]]),
+    selectedId: 'projects/complexscan',
+    select(id, options) { order.push(['select', id, options]); },
+  };
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime,
+    media: { play: async (element) => { order.push(['media', element]); return { played: true }; } },
+    resolveMedia: (targetId) => {
+      order.push(['resolveMedia', targetId]);
+      return mediaTarget;
+    },
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({ target }),
+  });
+
+  const result = await runner.run([
+    { id: 'd.gallery', type: 'media', target: 'media/boothbot/ims/gallery', mode: 'short-muted-montage' },
+  ]);
+  assert.equal(result.status, 'success');
+  assert.deepEqual(order, [
+    ['select', 'projects/boothbot', { focus: true, updateUrl: false }],
+    ['resolveMedia', 'media/boothbot/ims/gallery'],
+    ['media', mediaTarget],
+  ]);
+});
+
+test('CV runner skips article selection for media targets already owned by the selected project', async () => {
+  const order = [];
+  const runtime = {
+    entries: new Map([['projects/boothbot', {}]]),
+    selectedId: 'projects/boothbot',
+    select: () => { order.push('select'); },
+  };
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime,
+    media: { play: async () => ({ played: true }) },
+    resolveMedia: () => ({ element: { matches: () => false } }),
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({ target }),
+  });
+
+  const result = await runner.run([
+    { id: 'd.gallery', type: 'media', target: 'media/boothbot/ims/gallery', mode: 'short-muted-montage' },
+  ]);
+  assert.equal(result.status, 'success');
+  assert.deepEqual(order, []);
+});
+
 test('CV runner delegates navigation, attention, media, and chat events through shared APIs', async () => {
   const order = [];
   const attentionRequests = [];

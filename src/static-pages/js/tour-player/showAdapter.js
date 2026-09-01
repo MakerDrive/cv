@@ -294,8 +294,20 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
   });
 }
 
-function missingReceipt(adapted, reason, details = null) {
-  return Object.freeze({
+/**
+ * Deep-linked runs can start past the authored navigation cue that opens the
+ * article owning a media target. Select that project before resolving media
+ * so mid-show required media cells cannot fail on an unmounted host.
+ */
+function ensureMediaArticleProject(targetId, runtime) {
+  const match = String(targetId || '').match(/^media\/([a-z0-9][a-z0-9-]*)\//u);
+  if (!match) return;
+  const projectId = `projects/${match[1]}`;
+  if (!runtime?.entries?.has?.(projectId) || runtime.selectedId === projectId) return;
+  runtime.select?.(projectId, { focus: true, updateUrl: false });
+}
+
+function missingReceipt(adapted, reason, details = null) {  return Object.freeze({
     id: adapted.source.id,
     ...(adapted.source.target ? { target: adapted.source.target } : {}),
     sourceType: adapted.sourceType,
@@ -807,6 +819,7 @@ export function createCvShowDirectiveRunner(options = {}) {
         }
 
         if (adapted.directive.type === 'media') {
+          ensureMediaArticleProject(source.target, runtime);
           const mediaTarget = resolveMedia(source.target);
           if (!mediaTarget) {
             let receipt = missingReceipt(adapted, 'media-unresolved');

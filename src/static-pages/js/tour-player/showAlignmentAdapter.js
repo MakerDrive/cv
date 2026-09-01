@@ -58,6 +58,22 @@ function invalidAlignment(reason) {
   );
 }
 
+/**
+ * Extracts the inner cause of a failed presentation operation: the missing
+ * directive receipts and provider details carried by the operation error.
+ */
+function describePresentationOperationCause(error) {
+  const missing = (error?.result?.receipts || [])
+    .filter(({ status }) => status === 'missing')
+    .map(({ id, target, reason }) => `${target || id}:${reason}`);
+  const providerReason = String(error?.details?.providerReceipt?.status || '');
+  return Object.freeze({
+    ...(missing.length ? { targets: missing.join(', ') } : {}),
+    ...(missing.length === 1 ? { cause: missing[0].split(':').pop() } : {}),
+    ...(!missing.length && providerReason ? { cause: providerReason } : {}),
+  });
+}
+
 function attentionGateFailure(entryId, cellId, receipt = null, snapshot = null) {
   const status = receipt?.status || snapshot?.state || 'missing';
   return Object.assign(
@@ -419,7 +435,10 @@ export function createCvShowAlignmentController({
           requestedMs: tuple.execution.snapshot.mediaTimeMs || 0,
           observedMs: Math.max(0, Math.round(Number(media.currentTime || 0) * 1_000)),
           phase: 'presentation-playback',
-          details: Object.freeze({ message: String(error?.message || error || '') }),
+          details: Object.freeze({
+            message: String(error?.message || error || ''),
+            ...describePresentationOperationCause(error),
+          }),
         })),
       });
       const mediaListeners = {

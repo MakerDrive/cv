@@ -87,6 +87,26 @@ test('describes a missing target readiness timeout without a cause key', () => {
   assert.equal(unknown.code, 'something-new');
 });
 
+test('surfaces the inner operation cause and failed targets', () => {
+  const description = describeCvShowSpeechFailure({
+    error: 'PRESENTATION_PLAYBACK_CELL_FAILED',
+    receipt: {
+      status: 'failed',
+      reason: 'PRESENTATION_PLAYBACK_CELL_FAILED',
+      phase: 'presentation-playback',
+      details: {
+        message: 'Presentation cell failed: cv-show:cue:complexscan.boothbot-gallery',
+        cause: 'media-unresolved',
+        targets: 'media/boothbot/ims/gallery:media-unresolved',
+      },
+    },
+    entryId: 'complexscan',
+  });
+  assert.equal(description.causeKey, 'tour.error.reason.mediaMissing');
+  assert.equal(description.code, 'PRESENTATION_PLAYBACK_CELL_FAILED');
+  assert.match(description.detail, /targets=media\/boothbot\/ims\/gallery:media-unresolved/);
+});
+
 test('produces an empty detail without failure context', () => {
   const description = describeCvShowSpeechFailure({});
   assert.equal(description.causeKey, '');
