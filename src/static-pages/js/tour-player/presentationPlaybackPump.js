@@ -43,7 +43,13 @@
  * @typedef {{
  *   execution: PresentationExecution,
  *   playbackPlan: { cells: PresentationPlaybackCell[] },
- *   media: { currentTime: number, pause?: () => void },
+ *   media: {
+ *     currentTime: number,
+ *     seeking?: boolean,
+ *     pause?: () => void,
+ *     addEventListener?: (type: string, listener: () => void) => void,
+ *     removeEventListener?: (type: string, listener: () => void) => void,
+ *   },
  *   onFailure?: ((error: any) => any) | null,
  * }} PresentationPlaybackPumpOptions
  */
@@ -162,6 +168,23 @@ export function createPresentationPlaybackPump({
     return error;
   };
 
+  const sampleMediaClock = (reason) => {
+    if (!requested || disposed || media.seeking === true) return execution.snapshot;
+    const mediaTimeMs = presentationPositionMs();
+    const previousMs = Number(execution.snapshot.mediaTimeMs);
+    if (Number.isFinite(previousMs) && mediaTimeMs < previousMs) return execution.snapshot;
+    try {
+      return execution.sample({ mediaTimeMs, reason });
+    } catch (error) {
+      reportFailure(error);
+      return execution.snapshot;
+    }
+  };
+  const onMediaTimeUpdate = () => {
+    sampleMediaClock('project-playback:media-timeupdate');
+  };
+  media.addEventListener?.('timeupdate', onMediaTimeUpdate);
+
   const run = async (reason) => {
     while (requested && !disposed) {
       let snapshot = execution.snapshot;
@@ -258,6 +281,7 @@ export function createPresentationPlaybackPump({
       disposed = true;
       requested = false;
       queuedResume = false;
+      media.removeEventListener?.('timeupdate', onMediaTimeUpdate);
       media.pause?.();
       return execution.dispose(reason);
     },

@@ -910,7 +910,7 @@ test('timing-only all-reuse release preserves media IDs while aggregate provenan
   );
 });
 
-test('bootstrap provenance reopens directly for zero, scoped narration, and all-voice dirtiness', () => {
+test('bootstrap provenance reopens directly for runtime, scoped narration, and all-voice dirtiness', () => {
   assert.equal(CV_SHOW_AUDIO_RELEASE.acceptedProvenance.schemaVersion, 'cv-show-audio-provenance-v1');
   let same = planCvShowAudioDirtySet({
     accepted: CV_SHOW_AUDIO_RELEASE.acceptedProvenance,
@@ -921,7 +921,7 @@ test('bootstrap provenance reopens directly for zero, scoped narration, and all-
     synthesis: [],
     transcription: [],
     alignment: [],
-    runtimeProjection: [],
+    runtimeProjection: CV_SHOW_AUDIO_RELEASE.acceptedProvenance.entries.map(({ entryId }) => entryId),
   });
   let narrationInput = presentationAuthoringProjectCanonicalProjection(CV_SHOW_PRESENTATION_PROJECT);
   narrationInput.revision += 1;

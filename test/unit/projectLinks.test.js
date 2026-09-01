@@ -212,7 +212,7 @@ test('CV Show case cards expose honest pending dates and maturity boundaries', (
   assert.equal(maximo?.kicker, 'Demo / Alpha');
   assert.match(maximo?.details || '', /production Maximo system is separate integration work/);
   assert.equal(mobileSmm?.period, 'Date pending');
-  assert.equal(mobileSmm?.kicker, 'Selected R&D case');
+  assert.equal(mobileSmm?.kicker, 'Selected project');
   assert.match(mobileSmm?.details || '', /does not send content to an external service/);
   for (let locale of ['ru', 'es']) {
     assert.ok(PROJECT_TRANSLATIONS[locale]?.['adaptive-maximo-workbench']?.summary);

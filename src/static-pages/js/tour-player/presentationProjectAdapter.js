@@ -661,6 +661,61 @@ function selectedDirectiveProjection(project, sourceCellIds) {
     }));
 }
 
+function projectContinuousSpeechCells(project, cells, setupCellId) {
+  const cloned = cells.map(clone);
+  const audioClips = cloned
+    .filter(({ kind }) => kind === 'audio-clip')
+    .sort((left, right) => left.audio.sourceInMs - right.audio.sourceInMs);
+  if (audioClips.length === 0) return cloned;
+
+  const audioAsset = project.assets.find(({ id }) => id === audioClips[0].audio.assetId);
+  const sourceInMs = 0;
+  const sourceOutMs = audioAsset?.durationMs ?? audioClips.at(-1).audio.sourceOutMs;
+  const continuousAudio = {
+    ...audioClips[0],
+    dependsOn: [{ cellId: setupCellId, barrier: 'settled' }],
+    timing: {
+      at: { anchor: 'turn-start', offsetMs: sourceInMs },
+    },
+    audio: {
+      assetId: audioClips[0].audio.assetId,
+      sourceInMs,
+      sourceOutMs,
+    },
+  };
+  const speechCells = cloned.filter((cell) => (
+    cell.kind === 'cue' && cell.id !== setupCellId
+  ));
+  let previousVisualCellId = setupCellId;
+  const projectedSpeechCells = speechCells.map((cell) => {
+    if (cell.id.endsWith(':scroll')) {
+      const projected = {
+        ...cell,
+        dependsOn: [{ cellId: previousVisualCellId, barrier: 'settled' }],
+      };
+      return projected;
+    }
+    const scrollCellId = `${cell.id}:scroll`;
+    const hasScroll = speechCells.some(({ id }) => id === scrollCellId);
+    const projected = {
+      ...cell,
+      dependsOn: [{
+        cellId: hasScroll ? scrollCellId : previousVisualCellId,
+        barrier: 'settled',
+      }],
+    };
+    previousVisualCellId = cell.id;
+    return projected;
+  });
+  const projectedSpeechById = new Map(projectedSpeechCells.map((cell) => [cell.id, cell]));
+  return cloned.flatMap((cell) => {
+    if (cell.kind === 'audio-clip') {
+      return cell.id === audioClips[0].id ? [continuousAudio] : [];
+    }
+    return [projectedSpeechById.get(cell.id) || cell];
+  });
+}
+
 function createEntrySelection(
   project,
   entryId,
@@ -684,7 +739,11 @@ function createEntrySelection(
   let setupCellId = setupMetadata[0];
   let setup = source.find(({ id }) => id === setupCellId);
   if (speechDirectiveIds === null && heldAttentionDirectiveIds.length === 0) {
-    const selectedCells = source.map(clone);
+    const selectedCells = projectContinuousSpeechCells(
+      project,
+      source,
+      setupCellId,
+    );
     const narrationCell = selectedCells.find(({ kind }) => kind === 'narration');
     delete narrationCell.turn.replyTo;
     return Object.freeze({
@@ -719,6 +778,11 @@ function createEntrySelection(
       selectedCells.push(cell);
       previousCellId = cell.id;
     }
+    selectedCells = projectContinuousSpeechCells(
+      project,
+      selectedCells,
+      setupCellId,
+    );
     delete selectedCells[0].turn.replyTo;
     return Object.freeze({
       cells: Object.freeze(selectedCells),
@@ -760,6 +824,11 @@ function createEntrySelection(
   let sourceCellIds = project.cells
     .filter(({ id }) => selected.has(id))
     .map(({ id }) => id);
+  selectedCells = projectContinuousSpeechCells(
+    project,
+    selectedCells,
+    setupCellId,
+  );
   let narrationCell = clone(selectedCells[0]);
   delete narrationCell.turn.replyTo;
   selectedCells[0] = narrationCell;

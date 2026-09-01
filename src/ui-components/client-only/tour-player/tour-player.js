@@ -1198,6 +1198,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.hasDetails = this.#mode === 'short' && Boolean(entry.branchId);
     this.$.isError = false;
     this.$.errorText = '';
+    this.#clearSystemErrors();
     this.$.statusText = startPaused ? this.#message('tour.status.paused') : '';
     this.$.progressText = `${this.#sceneIndex + 1} / ${this.#playbackEntries.length}`;
     this.$.progressLabel = formatProgress(
@@ -1553,8 +1554,13 @@ export class PortfolioShowChat extends HTMLElement {
         beforeDeferredPresentation,
         restorePausedCheckpoint,
       }),
+      beforeEnd: () => this.#alignedEntry?.runtime?.whenIdle?.(),
       onEnd: () => {
         if (requestId !== this.#requestId) return;
+        if (this.#lastAlignedSeekFailure) {
+          releaseSpeech();
+          return;
+        }
         this.#transportPlaying = false;
         this.#syncPlayer();
         releaseSpeech();
@@ -1819,26 +1825,43 @@ export class PortfolioShowChat extends HTMLElement {
       ? speechAccepted
       : alignedRuntime.resume();
     const accepted = speechAccepted !== false && mediaAccepted !== false;
+    const completedCheckpoint = this.#lastAlignedGenerationReceipt?.presentationComplete === true;
     if (accepted === false) {
       this.#speech.pause();
       this.#playRequested = false;
       this.#resumePending = false;
-    } else if (resumeAdmittedPresentation && alignedRuntime) {
-      const wasPaused = this.$.isPaused;
-      this.#resumePending = false;
-      this.#transportPlaying = true;
-      this.$.isPaused = false;
-      this.$.resumeRequired = false;
-      this.$.statusText = '';
-      if (wasPaused) this.#session.resume();
-      this.#session.setPlayback({
-        ...this.#session.snapshot.playback,
-        playbackState: 'playing',
-      });
-      this.dispatchEvent(new CustomEvent('portfolio-show-resume', {
-        bubbles: true,
-        composed: true,
-      }));
+    } else {
+      this.$.isError = false;
+      this.$.errorText = '';
+      this.#clearSystemErrors();
+      if (alignedRuntime && (resumeAdmittedPresentation || completedCheckpoint)) {
+        const wasPaused = this.$.isPaused;
+        this.#resumePending = false;
+        this.#transportPlaying = true;
+        this.$.isPaused = false;
+        this.$.resumeRequired = false;
+        this.$.statusText = '';
+        if (wasPaused) this.#session.resume();
+        this.#session.setPlayback({
+          ...this.#session.snapshot.playback,
+          playbackState: 'playing',
+        });
+        if (completedCheckpoint && !resumeAdmittedPresentation) {
+          this.#presentationAdmitted = true;
+          const detail = this.#pendingStartDetail || Object.freeze({});
+          this.#pendingStartDetail = null;
+          this.dispatchEvent(new CustomEvent('portfolio-show-start', {
+            bubbles: true,
+            composed: true,
+            detail,
+          }));
+        } else {
+          this.dispatchEvent(new CustomEvent('portfolio-show-resume', {
+            bubbles: true,
+            composed: true,
+          }));
+        }
+      }
     }
     this.#syncPlayer();
   }
@@ -1912,6 +1935,15 @@ export class PortfolioShowChat extends HTMLElement {
     const parts = [{ type: error ? 'error' : 'status', text, status: error ? 'error' : 'idle' }];
     if (actions.length) parts.push(actionPart(actionId || `show-actions-${this.#messages.length}`, actions));
     this.#messages.push({ id: `show.status.${this.#messages.length}`, role: 'system', parts });
+    this.#syncMessages();
+  }
+
+  #clearSystemErrors() {
+    const messages = this.#messages.filter(({ role, parts = [] }) => (
+      role !== 'system' || parts.every((part) => part.type !== 'error')
+    ));
+    if (messages.length === this.#messages.length) return;
+    this.#messages = messages;
     this.#syncMessages();
   }
 

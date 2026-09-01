@@ -81,9 +81,30 @@ export function createLocalAudioSpeechController({
       lastError = '';
       let token = generation;
       let onEnded = () => {
-        if (token !== generation || active?.audio !== audio) return;
-        clear();
-        options.onEnd?.();
+        if (token !== generation || active?.audio !== audio || active.ending) return;
+        if (active.playRequested !== true) {
+          active.endPending = true;
+          return;
+        }
+        active.endPending = false;
+        if (typeof options.beforeEnd !== 'function') {
+          clear();
+          options.onEnd?.();
+          return;
+        }
+        active.ending = true;
+        let alignedCompletion;
+        try {
+          alignedCompletion = options.beforeEnd();
+        } catch (error) {
+          onFailed(error);
+          return;
+        }
+        Promise.resolve(alignedCompletion).then(() => {
+          if (token !== generation || active?.audio !== audio) return;
+          clear();
+          options.onEnd?.();
+        }).catch(onFailed);
       };
       let onFailed = (error) => {
         if (token !== generation || active?.audio !== audio) return;
@@ -116,6 +137,10 @@ export function createLocalAudioSpeechController({
           || active?.audio !== audio
           || active.playRequested !== true
         ) return false;
+        if (active.generationReceipt?.presentationComplete === true) {
+          onEnded();
+          return true;
+        }
         const attempt = active.playAttempt + 1;
         active.playAttempt = attempt;
         const reportStarted = () => {
@@ -155,6 +180,8 @@ export function createLocalAudioSpeechController({
         playAttempt: 0,
         playBlocked: false,
         playRequested: options.startPaused !== true,
+        endPending: false,
+        ending: false,
         reportStarted: null,
         reportedStartAttempt: 0,
         generationReceipt: null,

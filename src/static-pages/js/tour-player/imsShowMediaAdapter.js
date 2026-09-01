@@ -1,5 +1,6 @@
 const IMS_PUBLIC_PLAYER_SELECTOR = 'ims-gallery';
 const IMS_READY_EVENT = 'ims-ready';
+const MIN_GALLERY_FRAME_HOLD_MS = 500;
 const IMS_READY_PLAYERS = new WeakSet();
 
 function abortError(signal) {
@@ -253,7 +254,10 @@ export function createImsShowMediaTarget(root, {
         });
       }
       const frames = normalizeFrames(options.frames);
-      const frameHoldMs = Math.max(0, Number(options.frameHoldMs) || 0);
+      const frameHoldMs = Math.max(
+        MIN_GALLERY_FRAME_HOLD_MS,
+        Number(options.frameHoldMs) || 0,
+      );
       const finalFrame = Number.isInteger(Number(options.finalFrame))
         && Number(options.finalFrame) >= 1
         ? Number(options.finalFrame)

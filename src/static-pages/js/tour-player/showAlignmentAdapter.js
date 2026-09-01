@@ -680,7 +680,11 @@ export function createCvShowAlignmentController({
           }, context);
           if (generation?.status !== 'completed') return generation;
           if (!deferPresentation) await runCrossBoundaryAttentionGate();
-          return generation;
+          return Object.freeze({
+            ...generation,
+            presentationComplete: checkpoint.phase === 'after'
+              && checkpoint.projectTimeMs >= tuple.projectDurationMs,
+          });
         },
         pause() {
           playbackRequested = false;

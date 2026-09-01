@@ -1651,6 +1651,37 @@ test('slice identity binds ordered source cells without master or media state', 
   assert.equal(new Set(variants.map(([slice]) => slice.hash)).size, variants.length);
 });
 
+test('entry slices keep narration continuous while speech-timed visuals use an independent layer', () => {
+  const entryId = 'symbiote-ui';
+  const slice = createCvShowEntryProject(CV_SHOW_PRESENTATION_PROJECT, entryId);
+  const sourceAsset = CV_SHOW_PRESENTATION_PROJECT.assets.find(
+    ({ id }) => id === `cv-show:audio:${entryId}`,
+  );
+  const audioClips = slice.cells.filter(({ kind }) => kind === 'audio-clip');
+  const speechVisuals = slice.cells.filter((cell) => (
+    cell.kind === 'cue' && cell.timing.at.anchor === 'speech'
+  ));
+
+  assert.equal(audioClips.length, 1, 'a visual accent must not split the narration');
+  assert.deepEqual(audioClips[0].audio, {
+    assetId: sourceAsset.id,
+    sourceInMs: 0,
+    sourceOutMs: sourceAsset.durationMs,
+  });
+  assert.ok(
+    speechVisuals.every((cell) => cell.dependsOn.every(({ cellId }) => (
+      !cellId.startsWith(`cv-show:audio-clip:${entryId}:`)
+    ))),
+    'speech-timed visuals must not wait for an audio boundary',
+  );
+  const setup = slice.cells.find((cell) => (
+    cell.kind === 'cue' && cell.timing.at.anchor === 'turn-start'
+  ));
+  assert.deepEqual(audioClips[0].dependsOn, [
+    { cellId: setup.id, barrier: 'settled' },
+  ], 'continuous narration waits only for the pre-speech scene setup');
+});
+
 test('CV authoring authority rejects slices, structural cells, and broken group dependencies atomically', async () => {
   const slice = createCvShowEntryProject(CV_SHOW_PRESENTATION_PROJECT, 'positioning');
   await assert.rejects(
@@ -2018,9 +2049,9 @@ test('checkpoint omits completed one-shot attention and preserves the remaining 
   );
   assert.equal(filtered.project.script.metadata.cvShow.slice.parent, null);
   assert.deepEqual(filtered.project.cells.find(({ id }) => id.endsWith(':scroll')).dependsOn, [{
-    cellId: 'cv-show:audio-clip:positioning:02',
-    barrier: 'ended',
-  }], 'the next scroll remains sequenced after the retained audio clip');
+    cellId: 'cv-show:cue:positioning.open',
+    barrier: 'settled',
+  }], 'the next scroll remains on the visual layer after scene setup');
 
   filtered.execution.sample({ mediaTimeMs: 0, reason: 'branch-setup' });
   await filtered.execution.whenIdle();
@@ -2050,24 +2081,20 @@ test('checkpoint omits completed one-shot attention and preserves the remaining 
 test('checkpoint held attention restores its state without replaying the completed scroll', () => {
   const entryId = 'symbiote-workspace';
   const attentionCellId = 'cv-show:cue:workspace.intro-frame';
-  const followingAudioCellId = 'cv-show:audio-clip:symbiote-workspace:02';
   const projectInput = structuredClone(STRUCTURAL_PROJECT);
   delete projectInput.hash;
   projectInput.cells.find(({ id }) => id === attentionCellId).timing.until = {
     anchor: 'turn-end',
     offsetMs: 0,
   };
-  projectInput.cells.find(({ id }) => id === followingAudioCellId).timing.at.offsetMs += 5_000;
   const project = createPresentationAuthoringProject(projectInput);
   const sequence = structuralSequence(entryId);
   const full = createCvShowEntryTuple(project, entryId, sequence, {
     adapter: immediateAdapter(),
   });
   const attention = full.schedule.cells.find(({ cellId }) => cellId === attentionCellId);
-  const followingAudio = full.schedule.cells.find(({ cellId }) => cellId === followingAudioCellId);
   const checkpointMs = attention.gesture.endMs + 1;
   assert.ok(checkpointMs < attention.visibility.endMs);
-  assert.ok(checkpointMs < followingAudio.startMs, 'fixture must expose a held-state gap');
 
   const restored = createCvShowEntryTuple(project, entryId, sequence, {
     checkpointMs,

@@ -4451,10 +4451,10 @@ test('deferred aligned startup loads paused media without presentation admission
   assert.deepEqual(operations, [], 'paused preparation cannot admit presenter operations');
 
   const sourceCheckpointMs = 20_210;
-  const fullSecondClip = aligned.playbackPlan.clips[1];
-  const restoredProjectCheckpointMs = fullSecondClip.span.startMs
+  const fullSpeechClip = aligned.playbackPlan.clips[0];
+  const restoredProjectCheckpointMs = fullSpeechClip.span.startMs
     + sourceCheckpointMs
-    - fullSecondClip.audio.sourceInMs;
+    - fullSpeechClip.audio.sourceInMs;
 
   const restoredOperations = [];
   const restoredMedia = new FakeMedia();
@@ -4554,48 +4554,28 @@ test('deferred aligned startup loads paused media without presentation admission
       .map(({ id }) => id),
     [
       'cv-show:cue:workspace.open',
-      'cv-show:audio-clip:symbiote-workspace:02',
+      'cv-show:audio-clip:symbiote-workspace:01',
       'cv-show:cue:workspace.portable-config:scroll',
       'cv-show:cue:workspace.portable-config',
-      'cv-show:audio-clip:symbiote-workspace:03',
       'cv-show:cue:workspace.agent-portal-card:scroll',
       'cv-show:cue:workspace.agent-portal-card',
-      'cv-show:audio-clip:symbiote-workspace:04',
     ],
-    'the checkpoint preserves the exact future clip/event sequence',
+    'the checkpoint preserves one continuous speech layer and only future visual events',
   );
   assert.deepEqual(
     restored.playbackPlan.clips.map(({ id, audio, dependsOn }) => ({ id, audio, dependsOn })),
     [
       {
-        id: 'cv-show:audio-clip:symbiote-workspace:02',
+        id: 'cv-show:audio-clip:symbiote-workspace:01',
         audio: {
           assetId: 'cv-show:audio:symbiote-workspace',
-          sourceInMs: 4_596,
-          sourceOutMs: 24_440,
+          sourceInMs: 0,
+          sourceOutMs: 47_820,
         },
         dependsOn: [{ cellId: 'cv-show:cue:workspace.open', barrier: 'settled' }],
       },
-      {
-        id: 'cv-show:audio-clip:symbiote-workspace:03',
-        audio: {
-          assetId: 'cv-show:audio:symbiote-workspace',
-          sourceInMs: 24_440,
-          sourceOutMs: 34_120,
-        },
-        dependsOn: [{ cellId: 'cv-show:cue:workspace.portable-config', barrier: 'settled' }],
-      },
-      {
-        id: 'cv-show:audio-clip:symbiote-workspace:04',
-        audio: {
-          assetId: 'cv-show:audio:symbiote-workspace',
-          sourceInMs: 34_120,
-          sourceOutMs: 47_820,
-        },
-        dependsOn: [{ cellId: 'cv-show:cue:workspace.agent-portal-card', barrier: 'settled' }],
-      },
     ],
-    'only the in-progress clip rewires its missing past dependency; later graph edges remain exact',
+    'checkpoint restoration seeks inside the same uninterrupted narration clip',
   );
 });
 
@@ -4607,7 +4587,7 @@ async function waitForCvShowPlayback(condition, message) {
   assert.ok(condition(), message);
 }
 
-test('Project playback sequences clip-ended, settled actions, then the next audio clip', async (t) => {
+test('Project playback keeps narration active while speech-timed actions settle', async (t) => {
   let { appConfig, manifest, raw } = createWebAudioHarness();
   clearCvShowWebAudioReleaseCache();
   const authority = createCvShowAuthoringAuthority({
@@ -4730,45 +4710,68 @@ test('Project playback sequences clip-ended, settled actions, then the next audi
   events.length = 0;
   operations.length = 0;
   resets.length = 0;
-  const [firstClip, secondClip] = aligned.playbackPlan.clips;
+  assert.equal(aligned.playbackPlan.clips.length, 1);
+  const [speechClip] = aligned.playbackPlan.clips;
+  const originScroll = aligned.playbackPlan.events.find(({ id }) => (
+    id === 'cv-show:cue:photopizza.origin:scroll'
+  ));
+  const originFocus = aligned.playbackPlan.events.find(({ id }) => (
+    id === 'cv-show:cue:photopizza.origin'
+  ));
   aligned.runtime.resume();
   await waitForCvShowPlayback(
-    () => events.includes(`audio:play:${firstClip.audio.sourceInMs}`),
-    'the first Project audio clip must start from its authored source range',
+    () => events.includes(`audio:play:${speechClip.audio.sourceInMs}`),
+    'the continuous Project audio clip must start from its authored source range',
   );
-  assert.deepEqual(operations, [], 'speech-timed actions cannot run before the clip ends');
-
-  media.finishClip(firstClip.audio.sourceOutMs);
+  const originSourcePositionMs = speechClip.audio.sourceInMs
+    + originScroll.span.startMs
+    - speechClip.span.startMs;
+  media.finishClip(originSourcePositionMs);
   await waitForCvShowPlayback(
-    () => events.includes(`audio:play:${secondClip.audio.sourceInMs}`),
-    'the next Project clip must start after the intervening actions settle',
+    () => operations.includes(originScroll.id),
+    'the scroll action must start from the live narration clock',
+  );
+  assert.equal(media.paused, false, 'speech continues while the visual action runs');
+  const originFocusSourcePositionMs = speechClip.audio.sourceInMs
+    + originFocus.span.startMs
+    - speechClip.span.startMs;
+  media.finishClip(originFocusSourcePositionMs);
+  await waitForCvShowPlayback(
+    () => operations.includes(originFocus.id),
+    'the dependent focus follows without interrupting narration',
   );
   assert.deepEqual(
     resets,
     [],
-    'Project-owned audio clip seeks cannot masquerade as external timeline resets',
+    'Project-owned narration progress cannot masquerade as an external timeline reset',
   );
 
   const sequence = [
-    `receipt:${firstClip.id}:ended`,
+    `audio:play:${speechClip.audio.sourceInMs}`,
     'receipt:cv-show:cue:photopizza.origin:scroll:settled',
     'receipt:cv-show:cue:photopizza.origin:settled',
-    `audio:play:${secondClip.audio.sourceInMs}`,
   ].map((event) => events.indexOf(event));
   assert.ok(sequence.every((index) => index >= 0), `missing playback evidence: ${events.join(', ')}`);
   assert.deepEqual(
     [...sequence].sort((left, right) => left - right),
     sequence,
-    'the shared dependency graph enforces clip-ended -> action-settled -> next clip',
+    'the visual dependency graph settles in order while narration remains active',
   );
   assert.deepEqual(operations, [
     'cv-show:cue:photopizza.origin:scroll',
     'cv-show:cue:photopizza.origin',
   ]);
+  media.finishClip(speechClip.audio.sourceOutMs);
+  media.ended = true;
+  media.dispatchEvent(new Event('ended'));
+  await waitForCvShowPlayback(
+    () => events.includes(`receipt:${speechClip.id}:ended`),
+    'the continuous narration clip must end only at the authored entry boundary',
+  );
   await aligned.runtime.stop();
 });
 
-test('Project playback waits for a framed media-block focus and retries the same clip after pause', async (t) => {
+test('Project playback keeps speech running through a framed media focus and retries after pause', async (t) => {
   let { appConfig, manifest, raw } = createWebAudioHarness();
   clearCvShowWebAudioReleaseCache();
   const authority = createCvShowAuthoringAuthority({
@@ -4922,42 +4925,56 @@ test('Project playback waits for a framed media-block focus and retries the same
   }, { reason: 'alignment-ready' });
   events.length = 0;
   operations.length = 0;
-  const [firstClip, secondClip, thirdClip] = aligned.playbackPlan.clips;
+  assert.equal(aligned.playbackPlan.clips.length, 1);
+  const [speechClip] = aligned.playbackPlan.clips;
+  const videoScroll = aligned.playbackPlan.events.find(({ id }) => (
+    id === 'cv-show:cue:photopizza.video-01:scroll'
+  ));
+  const videoFocus = aligned.playbackPlan.events.find(({ id }) => (
+    id === 'cv-show:cue:photopizza.video-01'
+  ));
   aligned.runtime.resume();
-  await waitForCvShowPlayback(() => media.playCount === 1, 'first clip did not start');
-  media.finishClip(firstClip.audio.sourceOutMs);
-  await waitForCvShowPlayback(() => media.playCount === 2, 'second clip did not start');
-  media.finishClip(secondClip.audio.sourceOutMs);
+  await waitForCvShowPlayback(() => media.playCount === 1, 'narration did not start');
+  const sourcePositionFor = ({ span }) => speechClip.audio.sourceInMs
+    + span.startMs
+    - speechClip.span.startMs;
+  const eventsBeforeFocus = aligned.playbackPlan.events.filter(({ span }) => (
+    span.startMs >= speechClip.span.startMs
+      && span.startMs <= videoScroll.span.startMs
+  ));
+  for (const event of eventsBeforeFocus) {
+    media.finishClip(sourcePositionFor(event));
+    await waitForCvShowPlayback(
+      () => operations.some(({ id }) => id === event.id),
+      `${event.id} did not start from the narration clock`,
+    );
+  }
+  media.finishClip(sourcePositionFor(videoFocus));
   await attentionStarted;
-  assert.equal(media.playCount, 2, 'the next clip cannot start while its focus action is pending');
-  assert.equal(media.paused, true, 'audio remains paused at the authored clip boundary');
-  assert.equal(events.includes(`audio:play:${thirdClip.audio.sourceInMs}`), false);
+  assert.equal(media.playCount, 1, 'a visual action cannot restart narration');
+  assert.equal(media.paused, false, 'narration remains active while the focus is pending');
 
   releaseAttentionReadiness();
   await waitForCvShowPlayback(
-    () => events.includes(`audio:play:${thirdClip.audio.sourceInMs}`),
-    'the third clip must start after the required media-block focus settles',
+    () => events.includes('receipt:cv-show:cue:photopizza.video-01:settled'),
+    'the required media-block focus must settle on its own visual layer',
   );
-  assert.ok(
-    events.indexOf('receipt:cv-show:cue:photopizza.video-01:settled')
-      < events.indexOf(`audio:play:${thirdClip.audio.sourceInMs}`),
-    'the focus settlement opens the dependency barrier for the next clip',
-  );
+  assert.equal(media.playCount, 1, 'focus settlement does not create an audio boundary');
 
-  const resumeSourceMs = thirdClip.audio.sourceInMs + 1_000;
+  const resumeSourceMs = sourcePositionFor(videoFocus) + 1_000;
   media.advanceSilentlyTo(resumeSourceMs);
   await aligned.runtime.pause();
   assert.equal(media.paused, true);
   assert.ok(
-    events.includes(`receipt:${thirdClip.id}:cancelled`),
+    events.includes(`receipt:${speechClip.id}:cancelled`),
     'pausing cancels only the active attempt without completing the Project clip',
   );
   aligned.runtime.resume();
-  await waitForCvShowPlayback(() => media.playCount === 4, 'paused clip was not retried');
+  await waitForCvShowPlayback(() => media.playCount === 2, 'paused narration was not retried');
   assert.equal(
     events.at(-1),
     `audio:play:${resumeSourceMs}`,
-    'resume replays the same Project clip from the observed source position',
+    'resume continues the same Project speech clip from the observed source position',
   );
   await aligned.runtime.stop();
 });
@@ -5073,6 +5090,83 @@ test('local audio controller plays, pauses, resumes and cancels the exact manife
   assert.equal(audios[1].currentTimeAssignments, 0);
   assert.equal(speech.snapshot.activeId, '');
   assert.equal(speech.speak(CV_SHOW_STORY.scenes[0].speech, { id: 'positioning', lang: 'en' }), false);
+});
+
+test('local audio waits for the aligned presentation layer before completing a scene', async () => {
+  const manifest = await validatedWebAudioManifest();
+  const audio = new EventTarget();
+  audio.paused = true;
+  audio.currentTime = 0;
+  audio.play = () => {
+    audio.paused = false;
+    return Promise.resolve();
+  };
+  audio.pause = () => { audio.paused = true; };
+
+  let resolveAlignedEnd;
+  const alignedEnd = new Promise((resolve) => { resolveAlignedEnd = resolve; });
+  const order = [];
+  const speech = createLocalAudioSpeechController({ manifest, createAudio: () => audio });
+  assert.equal(speech.speak(CV_SHOW_STORY.scenes[0].speech, {
+    id: 'positioning',
+    lang: 'ru',
+    onMedia: () => {
+      audio.addEventListener('ended', () => {
+        order.push('aligned-ended');
+        resolveAlignedEnd();
+      }, { once: true });
+      return Object.freeze({ status: 'completed', reason: 'alignment-ready' });
+    },
+    beforeEnd: () => alignedEnd,
+    onEnd: () => order.push('scene-ended'),
+  }), true);
+  await Promise.resolve();
+
+  audio.dispatchEvent(new Event('ended'));
+  assert.deepEqual(order, ['aligned-ended']);
+  await alignedEnd;
+  await Promise.resolve();
+  assert.deepEqual(order, ['aligned-ended', 'scene-ended']);
+});
+
+test('local audio completes an exact end checkpoint without replaying the media element', async () => {
+  const manifest = await validatedWebAudioManifest();
+  const audio = new EventTarget();
+  audio.paused = true;
+  audio.currentTime = 31.42;
+  audio.playCalls = 0;
+  audio.play = () => {
+    audio.playCalls += 1;
+    audio.paused = false;
+    return Promise.resolve();
+  };
+  audio.pause = () => { audio.paused = true; };
+
+  let ended = 0;
+  const speech = createLocalAudioSpeechController({ manifest, createAudio: () => audio });
+  assert.equal(speech.speak(CV_SHOW_STORY.scenes[10].speech, {
+    id: 'mobile-smm-platform',
+    lang: 'ru',
+    startPaused: true,
+    onMedia: () => Object.freeze({
+      status: 'completed',
+      reason: 'paused-checkpoint',
+      presentationComplete: true,
+    }),
+    beforeEnd: () => Promise.resolve(),
+    onEnd: () => { ended += 1; },
+  }), true);
+  await Promise.resolve();
+
+  audio.dispatchEvent(new Event('ended'));
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(ended, 0, 'a paused end checkpoint waits for an explicit Resume');
+  assert.equal(speech.resume(), true);
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(audio.playCalls, 0, 'an exhausted clip must not be replayed at its physical end');
+  assert.equal(ended, 1);
 });
 
 test('local audio selects the Project-bound clip by id while captions retain authored text', async () => {
@@ -5494,6 +5588,26 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(runtime, /monitorMeaningfulShowInteractions/);
   assert.match(logic, /portfolio-show-pause/);
   assert.match(logic, /portfolio-show-resume/);
+  assert.match(
+    logic,
+    /#clearSystemErrors\(\) \{[\s\S]*?part\.type !== 'error'[\s\S]*?this\.#syncMessages\(\);[\s\S]*?\n  \}/u,
+    'successful recovery removes obsolete speech error cards from the retained chat history',
+  );
+  assert.match(
+    logic,
+    /#presentScene\([\s\S]*?this\.\$\.errorText = '';\s*this\.#clearSystemErrors\(\);/u,
+    'presenting a valid scene clears errors left by an earlier failed scene',
+  );
+  assert.match(
+    logic,
+    /const accepted = [\s\S]*?if \(accepted === false\)[\s\S]*?else \{\s*this\.\$\.isError = false;\s*this\.\$\.errorText = '';\s*this\.#clearSystemErrors\(\);/u,
+    'an accepted resume clears the obsolete error state before playback continues',
+  );
+  assert.match(
+    logic,
+    /const completedCheckpoint = this\.#lastAlignedGenerationReceipt\?\.presentationComplete === true;[\s\S]*?if \(alignedRuntime && \(resumeAdmittedPresentation \|\| completedCheckpoint\)\)[\s\S]*?this\.#presentationAdmitted = true;/u,
+    'Resume at an exact scene-end checkpoint admits the logical start so the scene can advance',
+  );
   assert.match(
     logic,
     /release\?\.\(\{ \.\.\.activeToken, reason: 'paused' \}\)/,

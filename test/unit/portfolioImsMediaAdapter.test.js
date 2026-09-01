@@ -416,6 +416,32 @@ test('IMS Show gallery maps authored frames 1 through 5 to public zero-based goT
   assert.equal(result.finalFrame, 5);
 });
 
+test('IMS Show gallery enforces at least 500 ms between frame changes', async () => {
+  const waits = [];
+  const gallery = {
+    localName: 'ims-gallery',
+    goTo() {},
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    clock: {
+      wait: async (durationMs) => {
+        waits.push(durationMs);
+      },
+    },
+  });
+
+  const result = await target.playShowMedia({
+    frames: [1, 2],
+    frameHoldMs: 250,
+    finalFrame: 2,
+  }, { signal: new AbortController().signal });
+  await result.completion;
+
+  assert.deepEqual(waits, [500, 500]);
+  assert.equal(result.frameHoldMs, 500);
+});
+
 test('IMS Show target prewarms one public player and reuses it for capture and playback', async () => {
   let resolutions = 0;
   const gallery = {
