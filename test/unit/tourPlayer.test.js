@@ -485,10 +485,16 @@ test('CV Show selection keeps an authored quote or derives a locale-safe semanti
 
 test('finale map targets resolve the historical-to-current route instead of one generic node', () => {
   const focusCalls = [];
+  const focusHolds = [];
   const historicalNode = Object.freeze({ id: 'photopizza-node' });
   const currentNode = Object.freeze({ id: 'agent-portal-node' });
   const selectedNode = Object.freeze({ id: 'selected-node' });
   const canvas = {
+    closest(selector) {
+      return selector === 'portfolio-graph-panel'
+        ? { holdShowMapFocus: durationMs => focusHolds.push(durationMs) }
+        : null;
+    },
     focusNodes(nodeIds, options) {
       focusCalls.push([nodeIds, options]);
     },
@@ -518,9 +524,10 @@ test('finale map targets resolve the historical-to-current route instead of one 
     true,
   );
   assert.deepEqual(focusCalls, [[
-    ['projects/photopizza'],
-    { select: false, padding: 56, maxZoom: 0.8 },
-  ]]);
+    'projects/photopizza',
+    { select: false, padding: 56, maxZoom: 0.8, marker: false },
+  ]], 'one semantic map node must use the stable single-node camera path');
+  assert.deepEqual(focusHolds, [12_000], 'map focus must remain stable through the following speech clip');
   assert.equal(
     resolvePortfolioMapTarget(workspace, 'portfolio.map.engineering-scale-route'),
     currentNode,

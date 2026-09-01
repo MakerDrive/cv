@@ -6524,6 +6524,79 @@ test('finale deeplink prepares the native graph panel before sequential scroll a
   assert.equal(cdp.exceptions.length, 0);
 });
 
+test('finale PhotoPizza camera keeps one legible card centered on the narrow graph panel', {
+  timeout: 40_000,
+}, async (t) => {
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
+  const focused = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const inspect = () => {
+        const panel = document.querySelector('portfolio-graph-panel');
+        const owner = panel?.closest('layout-node');
+        if (owner?.hasAttribute('collapsed')) owner._setCollapsed?.(false);
+        panel?.prepareShowTarget?.({ allowHidden: true });
+        const canvas = panel?.querySelector('node-canvas, sn-canvas-graph');
+        if (!panel?._structuredBound || typeof canvas?.focusNodes !== 'function') {
+          if (performance.now() - started > 15_000) {
+            reject(new Error('structured graph did not become focusable'));
+            return;
+          }
+          requestAnimationFrame(inspect);
+          return;
+        }
+        panel.holdShowMapFocus?.(12_000);
+        const didFocus = canvas.focusNodes('projects/photopizza', {
+          select: false,
+          padding: 56,
+          maxZoom: 0.8,
+          marker: false,
+          transitionMs: 0,
+        });
+        if (didFocus === false) {
+          reject(new Error('PhotoPizza focus was rejected'));
+          return;
+        }
+        panel.scheduleVisibleGraphFocus?.();
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const viewport = canvas.ref?.canvasContainer || canvas;
+          const target = canvas.querySelector('graph-node[node-id="projects/photopizza"]');
+          const viewportRect = viewport?.getBoundingClientRect();
+          const rect = target?.getBoundingClientRect();
+          resolve({
+            inside: Boolean(rect && viewportRect
+              && rect.left >= viewportRect.left - 1
+              && rect.top >= viewportRect.top - 1
+              && rect.right <= viewportRect.right + 1
+              && rect.bottom <= viewportRect.bottom + 1),
+            width: rect?.width || 0,
+            holdRemainingMs: Math.round((panel._showMapFocusUntil || 0) - performance.now()),
+          });
+        }));
+      };
+      inspect();
+    })`,
+  }, { label: 'focus PhotoPizza with finale camera policy', timeoutMs: 20_000 });
+  assert.equal(focused.result.value.inside, true, JSON.stringify(focused.result.value));
+  assert.ok(focused.result.value.width >= 220, JSON.stringify(focused.result.value));
+  assert.ok(focused.result.value.holdRemainingMs >= 10_000, JSON.stringify(focused.result.value));
+  assert.equal(cdp.exceptions.length, 0);
+});
+
 test('boothbot Short Show advances five gallery frames before the catalog-result oval', {
   timeout: 110_000,
 }, async (t) => {

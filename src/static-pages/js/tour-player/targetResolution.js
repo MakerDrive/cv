@@ -30,6 +30,7 @@ const PORTFOLIO_MAP_NODE_TARGETS = Object.freeze({
   'historical-branch': 'projects/photopizza',
   'engineering-scale-route': 'projects/agent-portal',
 });
+const PORTFOLIO_MAP_FOCUS_HOLD_MS = 12_000;
 
 export function isPortfolioMapTarget(targetId) {
   return String(targetId || '').startsWith(PORTFOLIO_MAP_TARGET_PREFIX);
@@ -98,9 +99,13 @@ export function focusPortfolioMapTarget(workspace, targetId, {
   if (typeof canvas?.focusNodes !== 'function') return false;
   const budget = Number(presentationBudgetMs);
   const transitionOptions = {};
-  const focusHoldMs = Number.isFinite(budget) && budget > 0 ? budget : 2_500;
-  workspace?.querySelector?.('portfolio-graph-panel')
-    ?.holdShowMapFocus?.(focusHoldMs);
+  const focusHoldMs = Math.max(
+    PORTFOLIO_MAP_FOCUS_HOLD_MS,
+    Number.isFinite(budget) && budget > 0 ? budget : 0,
+  );
+  const graphPanel = canvas?.closest?.('portfolio-graph-panel')
+    || workspace?.querySelector?.('portfolio-graph-panel');
+  graphPanel?.holdShowMapFocus?.(focusHoldMs);
   if (Number.isFinite(budget) && budget > 0) {
     const actualDurationMs = Math.max(0, budget - Math.max(0, settlementReserveMs));
     const normalizedDurationMs = actualDurationMs / portfolioMapMotionScale(canvas);
@@ -112,10 +117,11 @@ export function focusPortfolioMapTarget(workspace, targetId, {
       transitionOptions.transitionStartTime = transitionStartTime;
     }
   }
-  return canvas.focusNodes([nodeId], {
+  return canvas.focusNodes(nodeId, {
     select: false,
     padding: 56,
     maxZoom: 0.8,
+    marker: false,
     ...transitionOptions,
   }) !== false;
 }
