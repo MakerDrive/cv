@@ -29,8 +29,14 @@ import {
 const ROOT = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
 const DIST_DIR = path.join(ROOT, 'dist');
 const OUTPUT_DIR = path.join(DIST_DIR, 'portfolio-graph-snapshots');
-const CHROME_PATH = process.env.CV_CHROME_PATH
-  || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME_CANDIDATES = Object.freeze([
+  process.env.CV_CHROME_PATH,
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/usr/bin/google-chrome-stable',
+  '/usr/bin/google-chrome',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/chromium',
+].filter(Boolean));
 const VIEWPORTS = Object.freeze({
   wide: Object.freeze({ width: 1440, height: 900 }),
   narrow: Object.freeze({ width: 390, height: 844 }),
@@ -153,12 +159,17 @@ async function waitForFile(filePath, timeoutMs = 30_000) {
   throw new Error(`Timed out waiting for ${filePath}`);
 }
 
-async function launchChrome() {
-  if (!await fileExists(CHROME_PATH)) {
-    throw new Error(`Chrome is required to render graph snapshots: ${CHROME_PATH}`);
+async function resolveChromePath() {
+  for (let candidate of CHROME_CANDIDATES) {
+    if (await fileExists(candidate)) return candidate;
   }
+  throw new Error(`Chrome is required to render graph snapshots: ${CHROME_CANDIDATES.join(', ')}`);
+}
+
+async function launchChrome() {
+  const chromePath = await resolveChromePath();
   let userDataDir = await mkdtemp(path.join(tmpdir(), 'cv-graph-snapshot-chrome-'));
-  let chrome = spawn(CHROME_PATH, [
+  let chrome = spawn(chromePath, [
     '--headless=new',
     '--remote-debugging-port=0',
     '--disable-background-networking',
