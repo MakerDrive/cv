@@ -420,7 +420,7 @@ const EXPECTED_DETAIL_PARENTS = Object.freeze({
   'photopizza-details': 'photopizza',
 });
 
-test('provider dependencies are portable immutable Git identities', async () => {
+test('provider dependencies are portable immutable repository identities', async () => {
   const packageJson = JSON.parse(await readFile(new URL('../../package.json', import.meta.url), 'utf8'));
   const packageLock = JSON.parse(await readFile(
     new URL('../../package-lock.json', import.meta.url),
@@ -433,9 +433,9 @@ test('provider dependencies are portable immutable Git identities', async () => 
   ]) {
     const spec = packageJson.dependencies?.[dependency];
     const match = spec?.match(new RegExp(
-      `^git\\+https://github\\.com/rnd-pro/${repository}\\.git#([0-9a-f]{40})$`,
+      `^(?:git\\+https://github\\.com/rnd-pro/${repository}\\.git#|https://codeload\\.github\\.com/rnd-pro/${repository}/tar\\.gz/)([0-9a-f]{40})$`,
     ));
-    assert.ok(match, `${dependency} must use one immutable HTTPS Git identity`);
+    assert.ok(match, `${dependency} must use one immutable HTTPS repository identity`);
     assert.equal(rootDependencies[dependency], spec);
     const resolved = packageLock.packages[`node_modules/${dependency}`]?.resolved;
     assert.ok(
