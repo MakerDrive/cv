@@ -5728,6 +5728,16 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     'a non-playable live media view must be rejected before the shared Show mounts',
   );
   assert.match(logic, /this\.#alignedEntry\?\.runtime\?\.presentationPositionMs/u);
+  const alignedDurationBindingAt = logic.indexOf(
+    'this.#projectDurationMsByEntry.set(',
+    logic.indexOf('async #attachAlignedEntry'),
+  );
+  const alignedDurationBinding = logic.slice(alignedDurationBindingAt, alignedDurationBindingAt + 500);
+  assert.match(
+    alignedDurationBinding,
+    /this\.#showPlayer\?\.bind\?\.\(this\.#showConfig\(\)\);\s*this\.#syncPlayer\(\);/u,
+    'an aligned Project duration must redraw the clock even when completed media is not loaded',
+  );
   assert.doesNotMatch(logic, /semantics: 'pointer-only'/);
   assert.match(
     logic,
