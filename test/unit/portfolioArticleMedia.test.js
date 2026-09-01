@@ -492,10 +492,8 @@ test('portfolio routes selected media into article content instead of a graph pl
     'utf8',
   );
   assert.match(tourSource, /createYouTubeNoCookieEmbedUrl\(videoId, \{ origin: location\.origin \}\)/);
-  assert.match(tourSource, /iframe\.srcdoc = createCvShowYouTubePosterDocument\(videoId\)/);
-  assert.match(tourSource, /iframe\.dataset\.showPosterOnly = 'true'/);
-  assert.doesNotMatch(tourSource, /<span[^>]*>▶<\/span>/);
-  assert.match(tourSource, /i\.ytimg\.com\/vi\/\$\{encodeURIComponent\(videoId\)\}\/hqdefault\.jpg/);
+  assert.doesNotMatch(tourSource, /iframe\.srcdoc/);
+  assert.doesNotMatch(tourSource, /showPosterOnly/);
   assert.match(source, /iframe\.loading = 'lazy'/);
   assert.match(source, /iframe\.referrerPolicy = 'strict-origin-when-cross-origin'/);
   assert.doesNotMatch(source, /youtube-nocookie\.com\/embed\/[^`]*autoplay=1/);
