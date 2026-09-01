@@ -297,6 +297,7 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
 function missingReceipt(adapted, reason, details = null) {
   return Object.freeze({
     id: adapted.source.id,
+    ...(adapted.source.target ? { target: adapted.source.target } : {}),
     sourceType: adapted.sourceType,
     providerType: adapted.directive.type,
     policy: adapted.policy,

@@ -20,6 +20,7 @@ import {
   projectCvShowScheduleDuration,
 } from '../../../static-pages/js/tour-player/presentationProjectAdapter.js';
 import { createBrowserSpeechController } from '../../../static-pages/js/tour-player/speech.js';
+import { describeCvShowMissingTarget, describeCvShowSpeechFailure } from '../../../static-pages/js/tour-player/speechFailure.js';
 import {
   createCvShowMessageStreamController,
 } from '../../../static-pages/js/tour-player/messageStream.js';
@@ -283,11 +284,40 @@ export class PortfolioShowChat extends HTMLElement {
     this.$ = { ...this.init$ };
   }
 
+  #causeSuffix(causeKey, code) {
+    const cause = causeKey
+      ? `${this.#message(causeKey)} (${code})`
+      : code;
+    return this.#message('tour.error.cause').replace('{detail}', cause);
+  }
+
+  /**
+   * @param {{
+   *   receipts?: null | Array<Record<string, unknown>>,
+   *   error?: unknown,
+   * }} [result]
+   */
+  #requiredMissingText({ receipts, error } = {}) {
+    const missing = Array.isArray(receipts)
+      ? receipts.find(({ status }) => status === 'missing')
+      : null;
+    if (missing) {
+      const description = describeCvShowMissingTarget(missing);
+      return `${this.#message('tour.error.required')} ${
+        this.#causeSuffix(description.causeKey, description.code)
+      } ${description.detail}`;
+    }
+    const description = describeCvShowSpeechFailure({ error });
+    return `${this.#message('tour.error.required')} ${
+      this.#causeSuffix(description.causeKey, description.code)
+    } ${description.detail}`.trim();
+  }
+
   #onResult = (event) => {
     if (event.detail?.requestId !== this.#requestId) return;
     const requiredMissing = event.detail?.status === 'required-missing';
     this.$.isError = requiredMissing;
-    this.$.errorText = requiredMissing ? this.#message('tour.error.required') : '';
+    this.$.errorText = requiredMissing ? this.#requiredMissingText(event.detail) : '';
     if (requiredMissing) {
       this.#appendSystemMessage(this.$.errorText, { error: true });
     } else if (event.detail?.status === 'optional-missing') {
@@ -1327,13 +1357,28 @@ export class PortfolioShowChat extends HTMLElement {
     this.#lastAlignedGenerationReceipt = null;
   }
 
+  /**
+   * @param {{
+   *   error?: null | string | { code?: unknown, name?: unknown, message?: unknown },
+   *   receipt?: null | Record<string, unknown>,
+   *   entryId?: string,
+   * }} [failure]
+   */
+  #speechFailureText({ error = null, receipt = null, entryId = '' } = {}) {
+    const description = describeCvShowSpeechFailure({ error, receipt, entryId });
+    if (!description.detail) return this.#message('tour.error.speech');
+    return `${this.#message('tour.error.speech')} ${
+      this.#causeSuffix(description.causeKey, description.code)
+    } ${description.detail}`;
+  }
+
   #recordAlignedSeekFailure(receipt, requestId, entryId) {
     if (requestId !== this.#requestId) return;
     if (this.#lastAlignedSeekFailure?.operationId === receipt?.operationId) return;
     this.#lastAlignedSeekFailure = receipt;
     this.#lastAlignedGenerationReceipt = receipt;
     this.$.isError = true;
-    this.$.errorText = this.#message('tour.error.speech');
+    this.$.errorText = this.#speechFailureText({ receipt, entryId });
     this.pauseShow('alignment-seek-error');
     this.#appendSystemMessage(this.$.errorText, { error: true });
     this.dispatchEvent(new CustomEvent('portfolio-show-aligned-seek-failure', {
@@ -1484,10 +1529,10 @@ export class PortfolioShowChat extends HTMLElement {
       if (sceneSetupReceipt !== null) {
         requireCvShowSceneSetupSuccess(sceneSetupReceipt, entry.id);
       }
-    } catch {
+    } catch (error) {
       if (requestId !== this.#requestId) return;
       this.$.isError = true;
-      this.$.errorText = this.#message('tour.error.speech');
+      this.$.errorText = this.#speechFailureText({ error, entryId: entry.id });
       this.pauseShow('scene-setup-error');
       this.#appendSystemMessage(this.$.errorText, { error: true });
       return;
@@ -1538,10 +1583,10 @@ export class PortfolioShowChat extends HTMLElement {
       onStart: () => {
         if (!this.#publishPhysicalStart(entry, requestId)) return;
         if (typeof onPhysicalStart !== 'function') return;
-        void onPhysicalStart().catch(() => {
+        void onPhysicalStart().catch((error) => {
           if (requestId !== this.#requestId) return;
           this.$.isError = true;
-          this.$.errorText = this.#message('tour.error.speech');
+          this.$.errorText = this.#speechFailureText({ error, entryId: entry.id });
           this.pauseShow('scene-setup-error');
           this.#appendSystemMessage(this.$.errorText, { error: true });
         });
@@ -1567,15 +1612,18 @@ export class PortfolioShowChat extends HTMLElement {
         releaseSpeech();
         if (!startedInBranch) void this.#advanceAfterAttention(requestId);
       },
-      onError: (_error, receipt) => {
+      onError: (error, receipt) => {
         if (requestId !== this.#requestId) return;
         releaseSpeech();
+        const failureText = this.#speechFailureText({ error, receipt, entryId: entry.id });
         if (receipt) {
           this.#recordAlignedSeekFailure(receipt, requestId, entry.id);
           return;
         }
+        this.$.isError = true;
+        this.$.errorText = failureText;
         this.pauseShow('narration-error');
-        this.#appendSystemMessage(this.#message('tour.error.speech'), { error: true });
+        this.#appendSystemMessage(failureText, { error: true });
       },
       onBlocked: () => {
         if (requestId !== this.#requestId) return;
