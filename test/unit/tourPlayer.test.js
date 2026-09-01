@@ -42,7 +42,9 @@ import {
   adaptCvShowDirective,
   createCvShowBranchReturnSnapshot,
   createCvShowDirectiveRunner,
+  createCvShowRuntimeCleanup,
   runCvShowPresentationOperation,
+  shouldInstantlySettleCvShowAttention,
   validateCvShowBranchReturnSnapshot,
 } from '../../src/static-pages/js/tour-player/showAdapter.js';
 import {
@@ -83,9 +85,20 @@ import {
 } from '../../src/static-pages/js/tour-player/messageStream.js';
 import {
   animateCvShowScrollIntoView,
+  ensureCvShowArticleProject,
+  focusPortfolioMapTarget,
+  isPortfolioMapTarget,
   isShowTargetReadyForAction,
+  resolveCvShowActionTargetScroll,
+  resolveCvShowScrollDuration,
   resolveCvShowSelectionQuote,
+  resolveCvShowSemanticTarget,
   resolvePortfolioMapTarget,
+  restoreCvShowHeldAttentionTarget,
+  shouldRestoreCvShowSetupAttentionTarget,
+  waitForPortfolioMapTargetVisualSettlement,
+  shouldBypassCvShowScrollSettlement,
+  shouldDeferCvShowNavigationTarget,
 } from '../../src/static-pages/js/tour-player/targetResolution.js';
 import {
   createCvShowEntryProject,
@@ -344,6 +357,94 @@ test('CV Show scroll settles an already-centered target without artificial anima
   assert.equal(frameRequests, 0, 'a no-op scroll must not invent visual motion');
 });
 
+test('CV Show scroll motion reserves settlement time inside the authored hard deadline', () => {
+  assert.equal(resolveCvShowScrollDuration(800), 0);
+  assert.equal(resolveCvShowScrollDuration(1_000), 200);
+  assert.equal(resolveCvShowScrollDuration(2_200), 300);
+  assert.equal(resolveCvShowScrollDuration(null), 300);
+  assert.equal(shouldBypassCvShowScrollSettlement(800), true);
+  assert.equal(shouldBypassCvShowScrollSettlement(1_000), false);
+  assert.equal(shouldBypassCvShowScrollSettlement(1_200, {
+    action: { type: 'frame', target: 'media/photopizza/youtube/example' },
+  }), true);
+  assert.equal(shouldBypassCvShowScrollSettlement(1_200, {
+    action: { type: 'frame', target: 'article.photopizza.mechanics' },
+  }), false);
+});
+
+test('CV Show setup navigation never scrolls the tree before selecting its article', () => {
+  assert.equal(resolveCvShowActionTargetScroll({ type: 'navigate' }), false);
+  assert.equal(resolveCvShowActionTargetScroll({ type: 'frame' }), false);
+  assert.equal(resolveCvShowActionTargetScroll({ type: 'frame' }, { scrollOperation: true }), false);
+  assert.equal(shouldRestoreCvShowSetupAttentionTarget({
+    type: 'frame',
+    target: 'article.autobox-v1.working-system',
+    timing: { phase: 'setup' },
+  }), true);
+  assert.equal(shouldRestoreCvShowSetupAttentionTarget({
+    type: 'frame',
+    target: 'article.autobox-v1.working-system',
+    timing: { phase: 'speech' },
+  }), false);
+  assert.equal(shouldRestoreCvShowSetupAttentionTarget({
+    type: 'frame',
+    target: 'article.autobox-v1.working-system',
+    timing: { phase: 'setup' },
+  }, { scrollOperation: true }), false);
+  assert.equal(shouldDeferCvShowNavigationTarget({ type: 'navigate', id: 'example.open' }), true);
+  assert.equal(shouldDeferCvShowNavigationTarget({ type: 'navigate', id: 'finale.map' }), false);
+});
+
+test('checkpoint-held attention restores its target instantly before provider admission', async () => {
+  const callbacks = new Map();
+  let sequence = 0;
+  const view = {
+    requestAnimationFrame(callback) {
+      const id = ++sequence;
+      callbacks.set(id, callback);
+      return id;
+    },
+    cancelAnimationFrame(id) {
+      callbacks.delete(id);
+    },
+  };
+  const calls = [];
+  const target = {
+    scrollIntoView(options) { calls.push(options); },
+  };
+  const pending = restoreCvShowHeldAttentionTarget(target, {
+    document: { defaultView: view, visibilityState: 'visible' },
+  });
+  assert.deepEqual(calls, [{
+    block: 'center',
+    inline: 'nearest',
+    behavior: 'instant',
+  }]);
+  for (let index = 0; index < 2; index += 1) {
+    const [id, callback] = callbacks.entries().next().value;
+    callbacks.delete(id);
+    callback(index * 16);
+    await Promise.resolve();
+  }
+  assert.deepEqual(await pending, { status: 'settled', frames: 2 });
+});
+
+test('CV Show resolves mounted article media as semantic scroll targets', () => {
+  const media = {
+    dataset: { mediaId: 'media/photopizza/youtube/example' },
+    isConnected: true,
+    getBoundingClientRect: () => ({ width: 640, height: 360 }),
+  };
+  const viewer = {
+    querySelectorAll: (selector) => selector === '[data-media-id]' ? [media] : [],
+  };
+  const document = {
+    defaultView: { getComputedStyle: () => ({ display: 'block', visibility: 'visible' }) },
+  };
+
+  assert.equal(resolveCvShowSemanticTarget(null, { viewer }, media.dataset.mediaId, { document }), media);
+});
+
 test('CV Show selection keeps an authored quote or derives a locale-safe semantic excerpt', () => {
   const russianTarget = {
     textContent: 'Результат сохраняется как переносимая исполняемая конфигурация.',
@@ -383,10 +484,14 @@ test('CV Show selection keeps an authored quote or derives a locale-safe semanti
 });
 
 test('finale map targets resolve the historical-to-current route instead of one generic node', () => {
+  const focusCalls = [];
   const historicalNode = Object.freeze({ id: 'photopizza-node' });
   const currentNode = Object.freeze({ id: 'agent-portal-node' });
   const selectedNode = Object.freeze({ id: 'selected-node' });
   const canvas = {
+    focusNodes(nodeIds, options) {
+      focusCalls.push([nodeIds, options]);
+    },
     querySelector(selector) {
       if (selector === 'graph-node[node-id="projects/photopizza"]') return historicalNode;
       if (selector === 'graph-node[node-id="projects/agent-portal"]') return currentNode;
@@ -400,10 +505,22 @@ test('finale map targets resolve the historical-to-current route instead of one 
     },
   };
 
+  assert.equal(isPortfolioMapTarget('portfolio.map.historical-branch'), true);
+  assert.equal(isPortfolioMapTarget('portfolio.map.engineering-scale-route'), true);
+  assert.equal(isPortfolioMapTarget('projects/photopizza'), false);
+
   assert.equal(
     resolvePortfolioMapTarget(workspace, 'portfolio.map.historical-branch'),
     historicalNode,
   );
+  assert.equal(
+    focusPortfolioMapTarget(workspace, 'portfolio.map.historical-branch'),
+    true,
+  );
+  assert.deepEqual(focusCalls, [[
+    ['projects/photopizza'],
+    { select: false, padding: 56, maxZoom: 0.8 },
+  ]]);
   assert.equal(
     resolvePortfolioMapTarget(workspace, 'portfolio.map.engineering-scale-route'),
     currentNode,
@@ -422,6 +539,129 @@ test('finale map targets resolve the historical-to-current route instead of one 
     null,
   );
   assert.equal(resolvePortfolioMapTarget(workspace, 'profile.contacts'), null);
+});
+
+test('finale map settlement waits until the exact node is inside the canvas and viewport motion stops', async () => {
+  const frames = [];
+  let targetRect = {
+    left: 80,
+    top: 400,
+    right: 200,
+    bottom: 450,
+    width: 120,
+    height: 50,
+  };
+  let viewportAnimating = false;
+  const node = {
+    isConnected: true,
+    getBoundingClientRect: () => targetRect,
+  };
+  const canvas = {
+    ref: {
+      canvasContainer: {
+        getBoundingClientRect: () => ({
+          left: 0,
+          top: 0,
+          right: 640,
+          bottom: 300,
+          width: 640,
+          height: 300,
+        }),
+      },
+    },
+    hasAttribute: name => name === 'data-viewport-animating' && viewportAnimating,
+    getBoundingClientRect: () => ({
+      left: 0,
+      top: 0,
+      right: 640,
+      bottom: 1_200,
+      width: 640,
+      height: 1_200,
+    }),
+    querySelector: selector => selector === 'graph-node[node-id="projects/agent-portal"]'
+      ? node
+      : null,
+  };
+  const workspace = {
+    querySelector: selector => selector === 'node-canvas, sn-canvas-graph' ? canvas : null,
+  };
+  const requestAnimationFrame = callback => {
+    frames.push(callback);
+    return frames.length;
+  };
+  let settled = false;
+  const settlement = waitForPortfolioMapTargetVisualSettlement(
+    workspace,
+    'portfolio.map.engineering-scale-route',
+    {
+      document: { defaultView: { innerWidth: 1024, innerHeight: 768 } },
+      requestAnimationFrame,
+      cancelAnimationFrame: () => {},
+      timeoutMs: 1_000,
+    },
+  ).then((value) => {
+    settled = true;
+    return value;
+  });
+
+  frames.shift()(0);
+  await Promise.resolve();
+  assert.equal(settled, false, 'an off-canvas node must not settle');
+  frames.shift()(8);
+  await Promise.resolve();
+  assert.equal(settled, false, 'the canvas host is not the clipped graph viewport');
+
+  targetRect = {
+    left: 240,
+    top: 180,
+    right: 360,
+    bottom: 230,
+    width: 120,
+    height: 50,
+  };
+  viewportAnimating = true;
+  frames.shift()(16);
+  await Promise.resolve();
+  assert.equal(settled, false, 'an in-canvas node must not settle while the viewport animates');
+
+  viewportAnimating = false;
+  frames.shift()(32);
+  await Promise.resolve();
+  assert.equal(settled, false, 'one visible frame is not enough evidence');
+  frames.shift()(48);
+
+  const result = await settlement;
+  assert.equal(result.target, node);
+  assert.equal(result.visualSettlement.reason, 'exact-map-node-visible');
+});
+
+test('direct detail targets open their owning project article before readiness', () => {
+  const selections = [];
+  const runtime = {
+    selectedId: 'profile/vladimir-matiasevich',
+    entries: new Map([['projects/symbiote-workspace', Object.freeze({})]]),
+    select(projectId, options) {
+      selections.push([projectId, options]);
+      this.selectedId = projectId;
+      return true;
+    },
+  };
+
+  assert.deepEqual(
+    ensureCvShowArticleProject(runtime, 'article.symbiote-workspace.config-flow'),
+    { projectId: 'projects/symbiote-workspace', changed: true },
+  );
+  assert.deepEqual(selections, [[
+    'projects/symbiote-workspace',
+    { focus: true, updateUrl: false },
+  ]]);
+  assert.deepEqual(
+    ensureCvShowArticleProject(runtime, 'article.symbiote-workspace.artifact'),
+    { projectId: 'projects/symbiote-workspace', changed: false },
+  );
+  assert.equal(ensureCvShowArticleProject(runtime, 'profile.contacts'), null);
+  assert.equal(ensureCvShowArticleProject(runtime, 'article.unknown.block'), null);
+  assert.equal(selections.length, 1);
 });
 
 test('native selection waits for rendered text and permits the locale-safe fallback quote', () => {
@@ -639,7 +879,7 @@ test('branch return reruns subject setup before restoring paused narration', asy
   assert.match(logic, /this\.#unsubscribeAuthoring\?\.\(\)/u);
   assert.match(
     logic,
-    /if \(this\.\$\.isRunning \|\| this\.#mode \|\| this\.#alignedEntry \|\| this\.\$\.inBranch\) \{\s*this\.stopShow\(\);[\s\S]*?this\.#authoringView = nextView;\s*this\.#acceptStory\(nextView\.story\);/u,
+    /if \(this\.\$\.isRunning \|\| this\.#mode \|\| this\.#alignedEntry \|\| this\.\$\.inBranch\) \{\s*this\.stopShow\(\);[\s\S]*?this\.#authoringView = nextView;\s*this\.#projectDurationMsByEntry\.clear\(\);\s*this\.#acceptStory\(nextView\.story\);/u,
   );
   assert.match(
     logic,
@@ -1223,8 +1463,8 @@ test('detail admission rejects stale live media before branch or presentation mu
   const firstProgressTurn = progressConfig.timeline.turns[0];
   assert.equal(
     firstProgressTurn.durationMs,
-    authority.view.mediaRegistry.entries[firstProgressTurn.id].audio.durationMilliseconds,
-    'the shared player receives the authoritative duration for each Show segment',
+    null,
+    'the shared player cannot advertise raw source-audio duration as Project duration',
   );
   assert.equal(
     showPlayer.states.at(-1).progress.positionMs,
@@ -1627,9 +1867,28 @@ test('CV adapter explicitly maps all nine product directives to the accepted sha
       quote: 'meaningful source quote',
       occurrence: 1,
     },
-    marker: { id: 'd.marker', type: 'marker', target: 'article.example.map', shape: 'ovals', text: 'A' },
+    marker: {
+      id: 'd.marker',
+      type: 'marker',
+      target: 'article.example.map',
+      shape: 'ovals',
+      text: 'A',
+      quote: 'exact marker phrase',
+      occurrence: 2,
+    },
     activate: { id: 'd.activate', type: 'activate', target: 'article.example.demo' },
-    media: { id: 'd.media', type: 'media', target: 'article.example.video', mode: 'short-muted-montage' },
+    media: {
+      id: 'd.media',
+      type: 'media',
+      target: 'article.example.video',
+      mode: 'short-muted-montage',
+      segments: [0.2, 0.5, 0.8],
+      segmentDurationMs: 450,
+      frames: [1, 2, 3, 4, 5],
+      frameHoldMs: 600,
+      finalFrame: 5,
+      keepPlayingDuringQuote: true,
+    },
     'chat-note': { id: 'd.note', type: 'chat-note', target: 'chat.note.example' },
     'chat-action': { id: 'd.actions', type: 'chat-action', target: 'chat.actions.example', actions: ['projects'] },
     idle: { id: 'd.idle', type: 'idle' },
@@ -1649,8 +1908,16 @@ test('CV adapter explicitly maps all nine product directives to the accepted sha
   assert.equal(mapped.marker.mode, 'marker');
   assert.equal(mapped.marker.marker, 'multi-oval');
   assert.equal(mapped.marker.requestedMarker, 'ovals');
+  assert.equal(mapped.marker.quote, 'exact marker phrase');
+  assert.equal(mapped.marker.occurrence, 2);
   assert.equal(mapped.activate.mode, 'click');
   assert.equal(mapped.media.type, 'media');
+  assert.deepEqual(mapped.media.segments, [0.2, 0.5, 0.8]);
+  assert.equal(mapped.media.segmentDurationMs, 450);
+  assert.deepEqual(mapped.media.frames, [1, 2, 3, 4, 5]);
+  assert.equal(mapped.media.frameHoldMs, 600);
+  assert.equal(mapped.media.finalFrame, 5);
+  assert.equal(mapped.media.keepPlayingDuringQuote, true);
   assert.equal(mapped['chat-note'].type, 'footnote');
   assert.equal(mapped['chat-action'].type, 'actions');
   assert.equal(mapped.idle.type, 'status');
@@ -1659,8 +1926,11 @@ test('CV adapter explicitly maps all nine product directives to the accepted sha
 test('CV runner delegates navigation, attention, media, and chat events through shared APIs', async () => {
   const order = [];
   const attentionRequests = [];
+  const readinessRequests = [];
   const target = { id: 'target' };
-  const mediaElement = { id: 'media' };
+  const markerTarget = { id: 'marker-range-proxy' };
+  const mediaElement = { id: 'media-element', matches: () => false };
+  const mediaTarget = { id: 'media-target', element: mediaElement };
   const runtime = {
     entries: new Map([['projects/example', {}]]),
     select(id, options) { order.push(['select', id, options]); },
@@ -1672,16 +1942,21 @@ test('CV runner delegates navigation, attention, media, and chat events through 
     media: { play: async (element, directive) => { order.push(['media', element, directive.mode]); return { played: true }; } },
     emit: (directive) => order.push(['emit', directive.type]),
     resolveTarget: () => target,
-    resolveMedia: () => mediaElement,
+    resolveMedia: () => mediaTarget,
+    resolveMarkerTarget: (_target, directive) => directive.quote ? markerTarget : target,
     resolveText: (key) => key,
     activateTarget: () => { order.push(['activate']); return true; },
-    waitForReadiness: async ({ target: requested, media }) => ({ target: typeof requested === 'function' ? requested() : requested, media }),
+    waitForReadiness: async ({ target: requested, media }) => {
+      const resolved = typeof requested === 'function' ? requested() : requested;
+      readinessRequests.push({ target: resolved, media });
+      return { target: resolved, media };
+    },
   });
   const sources = [
     { id: 'd.navigate', type: 'navigate', target: 'projects/example' },
     { id: 'd.frame', type: 'frame', target: 'article.example.intro' },
-    { id: 'd.selection', type: 'native-selection', target: 'article.example.quote' },
-    { id: 'd.marker', type: 'marker', target: 'article.example.map', shape: 'oval' },
+    { id: 'd.selection', type: 'native-selection', target: 'article.example.quote', quote: 'meaningful', occurrence: 2 },
+    { id: 'd.marker', type: 'marker', target: 'article.example.map', shape: 'oval', quote: 'exact phrase', occurrence: 2 },
     { id: 'd.activate', type: 'activate', target: 'article.example.demo' },
     { id: 'd.media', type: 'media', target: 'article.example.video', mode: 'short-muted-montage' },
     { id: 'd.note', type: 'chat-note', target: 'chat.note.example' },
@@ -1703,16 +1978,73 @@ test('CV runner delegates navigation, attention, media, and chat events through 
     attentionRequests.find(({ gestureId }) => gestureId === 'd.marker')?.annotation?.intent,
     'emphasize',
   );
+  assert.equal(
+    attentionRequests.find(({ gestureId }) => gestureId === 'd.marker')?.target,
+    markerTarget,
+  );
+  assert.equal(
+    attentionRequests.find(({ gestureId }) => gestureId === 'd.selection')?.occurrence,
+    2,
+  );
   assert.equal(order.filter(([name]) => name === 'media').length, 1);
+  assert.equal(order.find(([name]) => name === 'media')?.[1], mediaTarget);
+  assert.deepEqual(
+    readinessRequests.find(request => request.target === mediaElement)?.media,
+    [],
+  );
   assert.equal(order.filter(([name]) => name === 'activate').length, 1);
   assert.equal(order.filter(([name]) => name === 'emit').length, 8);
   assert.equal(order.some(([name, type]) => name === 'emit' && type === 'status'), false);
 });
 
-test('CV navigation re-resolves its target after selection and waits for the selected article', async () => {
+test('CV runner keeps a bounded media Project cell active until its completion barrier settles', async () => {
+  let releaseCompletion;
+  const completion = new Promise((resolve) => { releaseCompletion = resolve; });
+  let mediaStarted = false;
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime: { entries: new Map() },
+    resolveMedia: () => ({ element: { matches: () => false } }),
+    media: {
+      async play() {
+        mediaStarted = true;
+        return Object.freeze({
+          mode: 'short-muted-montage',
+          completion,
+        });
+      },
+    },
+    waitForReadiness: async ({ target }) => ({ target }),
+  });
+
+  const pending = runner.run([{
+    id: 'bounded.media',
+    type: 'media',
+    target: 'media/example/youtube/demo',
+    mode: 'short-muted-montage',
+    segments: [0.2, 0.5, 0.8],
+    segmentDurationMs: 450,
+    policy: 'required',
+  }]);
+  await Promise.resolve();
+  await Promise.resolve();
+
+  let settled = false;
+  void pending.then(() => { settled = true; });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(mediaStarted, true);
+  assert.equal(settled, false, 'the next Project cell must wait for the media completion barrier');
+
+  releaseCompletion(Object.freeze({ status: 'completed' }));
+  const result = await pending;
+  assert.equal(result.status, 'success');
+  assert.equal(result.receipts[0].result.mode, 'short-muted-montage');
+});
+
+test('CV navigation presents the selected article instead of a hidden tree row', async () => {
   const staleRow = { id: 'stale-row' };
   const freshRow = { id: 'fresh-row' };
-  const viewer = { getAttribute: () => null };
+  const viewer = { id: 'viewer', getAttribute: () => null };
   const order = [];
   const runtime = {
     entries: new Map([['projects/example', {}]]),
@@ -1757,7 +2089,7 @@ test('CV navigation re-resolves its target after selection and waits for the sel
     'ready:stale-row',
     'select:projects/example',
     'ready:viewer',
-    'present:fresh-row',
+    'present:viewer',
   ]);
   assert.equal(
     result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.mode,
@@ -1886,6 +2218,94 @@ test('CV phase replacement preserves the presenter arrow while Stop performs ter
     'stop',
     { preserveInk: false, preserveCursor: false },
   ]);
+});
+
+test('CV runtime cleanup consumes rejected stop, skip, and release tasks with one deterministic report', async () => {
+  const reports = [];
+  const order = [];
+  const stopError = new AggregateError([new Error('pause failed')], 'stop failed');
+  const releaseError = new AggregateError([new Error('lease failed')], 'release failed');
+  const skipError = new AggregateError([new Error('skip restore failed')], 'skip failed');
+  const cleanup = createCvShowRuntimeCleanup({
+    media: {
+      async stop(reason) {
+        order.push(`stop:${reason}`);
+        throw stopError;
+      },
+      async skip() {
+        order.push('skip');
+        throw skipError;
+      },
+    },
+    audioArbiter: {
+      async release({ reason }) {
+        order.push(`release:${reason}`);
+        throw releaseError;
+      },
+    },
+    reportError: (report) => reports.push(report),
+  });
+
+  const terminal = await cleanup.stopAndRelease('show-terminal', {
+    operation: 'show-terminal-cleanup',
+  });
+  const skipped = await cleanup.skip({ operation: 'media-skip' });
+
+  assert.deepEqual(order, [
+    'stop:show-terminal',
+    'release:show-terminal',
+    'skip',
+  ]);
+  assert.equal(terminal.status, 'failed');
+  assert.equal(skipped.status, 'failed');
+  assert.equal(reports.length, 2);
+  assert.deepEqual(
+    reports.map(({ type, operation, reason, code, message }) => ({
+      type,
+      operation,
+      reason,
+      code,
+      message,
+    })),
+    [
+      {
+        type: 'show:runtime-error',
+        operation: 'show-terminal-cleanup',
+        reason: 'show-terminal',
+        code: 'show-runtime-error',
+        message: 'CV Show runtime cleanup failed for "show-terminal"',
+      },
+      {
+        type: 'show:runtime-error',
+        operation: 'media-skip',
+        reason: 'skipped',
+        code: 'show-runtime-error',
+        message: 'skip failed',
+      },
+    ],
+  );
+  assert.deepEqual(reports[0].error.errors, [stopError, releaseError]);
+  assert.equal(reports[1].error, skipError);
+});
+
+test('CV runner consumes a rejected phase media stop through its runtime reporter', async () => {
+  const stopError = new AggregateError([new Error('restore failed')], 'phase stop failed');
+  const reports = [];
+  const runner = createCvShowDirectiveRunner({
+    attention: { clearMarkers() {}, clearTransient() {} },
+    media: { stop: async () => { throw stopError; } },
+    reportRuntimeError: (report) => reports.push(report),
+  });
+
+  runner.beginPhase();
+  await Promise.resolve();
+  await Promise.resolve();
+
+  assert.equal(reports.length, 1);
+  assert.equal(reports[0].type, 'show:runtime-error');
+  assert.equal(reports[0].operation, 'media-stop:replacement');
+  assert.equal(reports[0].reason, 'phase-changed');
+  assert.equal(reports[0].error, stopError);
 });
 
 function freezeProviderValue(value) {
@@ -2231,6 +2651,21 @@ test('checkpoint-held attention seeks the admitted provider to its settled visua
   );
   assert.deepEqual(seekCalls, [650]);
   assert.deepEqual(fixture.receipts.map(({ status }) => status), ['first-frame', 'settled']);
+});
+
+test('frame-only article media settles immediately without starting a media action', () => {
+  assert.equal(shouldInstantlySettleCvShowAttention({
+    type: 'frame',
+    target: 'media/photopizza/youtube/example',
+  }), true);
+  assert.equal(shouldInstantlySettleCvShowAttention({
+    type: 'media',
+    target: 'media/complexscan/ims/gallery',
+  }), false);
+  assert.equal(shouldInstantlySettleCvShowAttention({
+    type: 'frame',
+    target: 'article.photopizza.mechanics',
+  }), false);
 });
 
 test('target-unresolved rejection relays the exact nested v2 provider detail', async () => {
@@ -3372,6 +3807,41 @@ test('CV runner uses the shared hidden-panel lifecycle and restores only after a
   );
 });
 
+test('CV runner preserves DOM targets whose public target property is link metadata', async () => {
+  const link = { id: 'github-link', target: '_blank' };
+  const presented = [];
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime: { entries: new Map() },
+    attention: {
+      present({ target }) {
+        presented.push(target);
+        return { presented: true };
+      },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    resolveText: (key) => key,
+    actionAdapter: {
+      inspect: () => ({ open: true }),
+      reveal: () => ({ changed: false }),
+      awaitTransition: () => ({ ready: true }),
+      awaitTarget: () => ({ target: link }),
+      restore: () => ({ changed: false }),
+    },
+  });
+
+  const result = await runner.run([{
+    id: 'symbiote-ui.github-link',
+    type: 'frame',
+    target: 'project-link.symbiote-ui.github',
+    policy: 'required',
+  }]);
+
+  assert.equal(result.status, 'success');
+  assert.deepEqual(presented, [link]);
+});
+
 test('meaningful interaction cancels hidden-panel work without stale action or restore', async () => {
   const calls = [];
   const runner = createCvShowDirectiveRunner({
@@ -3743,7 +4213,7 @@ test('selected public web audio loads from its artifact-equivalent historical Pr
   assert.equal(release.source.alignmentManifestSha256, CV_SHOW_AUDIO_RELEASE.manifests.alignment.sha256);
 });
 
-test('web audio release rejects stale ancestry, profile, order, paths, hashes, and private fields', async () => {
+test('web audio release rejects tampering while retaining immutable historical speech', async () => {
   let { config, manifest } = createWebAudioHarness();
   let cases = [
     ['source masterArtifactTreeHash', (value) => {
@@ -3786,9 +4256,20 @@ test('web audio release rejects stale ancestry, profile, order, paths, hashes, a
   );
   let evolvedStory = structuredClone(CV_SHOW_STORY);
   evolvedStory.scenes[0].speech = `${evolvedStory.scenes[0].speech} Изменено.`;
-  await assert.rejects(
-    validateCvShowWebAudioRelease(manifest, evolvedStory, config),
-    /release is invalid: clip 1/u,
+  const historicalRelease = await validateCvShowWebAudioRelease(manifest, evolvedStory, config);
+  assert.notEqual(
+    historicalRelease.byId.get('positioning').speech,
+    evolvedStory.scenes[0].speech,
+    'an accepted immutable audio release may preserve its historical spoken text',
+  );
+  assert.equal(
+    historicalRelease.byId.get('positioning').speech,
+    manifest.clips[0].speech,
+  );
+  assert.equal(
+    historicalRelease.byId.get('positioning').audioUrl,
+    new URL(manifest.clips[0].deliveryFile, new URL('.', config.manifestUrl)).href,
+    'runtime still binds the accepted delivery asset instead of regenerating it from display text',
   );
   await assert.rejects(
     validateCvShowWebAudioRelease({ ...manifest, voiceId: 'replacement-voice' }, CV_SHOW_STORY, config),
@@ -3962,13 +4443,19 @@ test('deferred aligned startup loads paused media without presentation admission
   assert.equal(media.paused, true);
   assert.deepEqual(operations, [], 'paused preparation cannot admit presenter operations');
 
+  const sourceCheckpointMs = 20_210;
+  const fullSecondClip = aligned.playbackPlan.clips[1];
+  const restoredProjectCheckpointMs = fullSecondClip.span.startMs
+    + sourceCheckpointMs
+    - fullSecondClip.audio.sourceInMs;
+
   const restoredOperations = [];
   const restoredMedia = new FakeMedia();
   const restored = await alignment.createEntryRuntime({
     entry,
     media: restoredMedia,
     audioClip: clip,
-    checkpointMs: 20_210,
+    checkpointMs: restoredProjectCheckpointMs,
     deferPresentationUntilPlayback: true,
     restorePausedCheckpoint: true,
     runPresentationOperation: async (operation) => {
@@ -4032,18 +4519,440 @@ test('deferred aligned startup loads paused media without presentation admission
   t.after(() => restored.runtime.dispose());
   const restoredReceipt = await restored.runtime.loadAndRestorePlayback({
     source: 'https://portfolio.example/cv/cv-show-audio/symbiote-workspace.opus',
-    positionMs: 20_210,
+    positionMs: restoredProjectCheckpointMs,
     paused: true,
     preload: 'auto',
   }, { reason: 'checkpoint-restore' });
 
   assert.equal(restoredReceipt.status, 'completed');
+  assert.equal(restoredReceipt.requestedMs, sourceCheckpointMs);
+  assert.equal(restoredReceipt.observedMs, sourceCheckpointMs);
   assert.equal(restoredMedia.playCount, 0, 'static checkpoint restoration cannot autoplay media');
   assert.equal(restoredMedia.paused, true);
-  assert.deepEqual(restoredOperations, [
-    'cv-show:cue:workspace.open',
-    'cv-show:cue:workspace.intro-frame',
-  ], 'a paused checkpoint restores setup and only the attention still held at that time');
+  assert.equal(Math.round(restoredMedia.currentTime * 1_000), sourceCheckpointMs);
+  assert.equal(restored.runtime.presentationPositionMs, restoredProjectCheckpointMs);
+  assert.deepEqual(
+    restoredOperations,
+    ['cv-show:cue:workspace.open'],
+    'a paused checkpoint restores setup without inventing an attention cue that is no longer held',
+  );
+  assert.deepEqual(restored.heldAttentionDirectiveIds, []);
+  assert.deepEqual(restored.includedSpeechDirectiveIds, [
+    'workspace.portable-config',
+    'workspace.agent-portal-card',
+  ]);
+  assert.deepEqual(
+    restored.playbackPlan.cells
+      .filter(({ kind }) => kind !== 'narration')
+      .map(({ id }) => id),
+    [
+      'cv-show:cue:workspace.open',
+      'cv-show:audio-clip:symbiote-workspace:02',
+      'cv-show:cue:workspace.portable-config:scroll',
+      'cv-show:cue:workspace.portable-config',
+      'cv-show:audio-clip:symbiote-workspace:03',
+      'cv-show:cue:workspace.agent-portal-card:scroll',
+      'cv-show:cue:workspace.agent-portal-card',
+      'cv-show:audio-clip:symbiote-workspace:04',
+    ],
+    'the checkpoint preserves the exact future clip/event sequence',
+  );
+  assert.deepEqual(
+    restored.playbackPlan.clips.map(({ id, audio, dependsOn }) => ({ id, audio, dependsOn })),
+    [
+      {
+        id: 'cv-show:audio-clip:symbiote-workspace:02',
+        audio: {
+          assetId: 'cv-show:audio:symbiote-workspace',
+          sourceInMs: 4_596,
+          sourceOutMs: 24_440,
+        },
+        dependsOn: [{ cellId: 'cv-show:cue:workspace.open', barrier: 'settled' }],
+      },
+      {
+        id: 'cv-show:audio-clip:symbiote-workspace:03',
+        audio: {
+          assetId: 'cv-show:audio:symbiote-workspace',
+          sourceInMs: 24_440,
+          sourceOutMs: 34_120,
+        },
+        dependsOn: [{ cellId: 'cv-show:cue:workspace.portable-config', barrier: 'settled' }],
+      },
+      {
+        id: 'cv-show:audio-clip:symbiote-workspace:04',
+        audio: {
+          assetId: 'cv-show:audio:symbiote-workspace',
+          sourceInMs: 34_120,
+          sourceOutMs: 47_820,
+        },
+        dependsOn: [{ cellId: 'cv-show:cue:workspace.agent-portal-card', barrier: 'settled' }],
+      },
+    ],
+    'only the in-progress clip rewires its missing past dependency; later graph edges remain exact',
+  );
+});
+
+async function waitForCvShowPlayback(condition, message) {
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    if (condition()) return;
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+  assert.ok(condition(), message);
+}
+
+test('Project playback sequences clip-ended, settled actions, then the next audio clip', async (t) => {
+  let { appConfig, manifest, raw } = createWebAudioHarness();
+  clearCvShowWebAudioReleaseCache();
+  const authority = createCvShowAuthoringAuthority({
+    seedProject: CV_SHOW_STRUCTURAL_MEDIA_FIXTURE.project,
+  });
+  const fetchImpl = async (url) => {
+    const clip = manifest.clips.find(({ alignedSequenceFile }) => (
+      String(url).endsWith(alignedSequenceFile)
+    ));
+    return new Response(
+      clip ? CV_SHOW_STRUCTURAL_MEDIA_FIXTURE.sequenceJson(clip.id) : raw,
+      { headers: { 'content-type': 'application/json' } },
+    );
+  };
+  const alignment = createCvShowAlignmentController({
+    url: 'https://portfolio.example/cv/?showAudio=local',
+    baseUrl: 'https://portfolio.example/cv/',
+    appConfig,
+    fetchImpl,
+    getAuthoringView: () => authority.getView(),
+  });
+  t.after(() => {
+    alignment.cancel();
+    authority.dispose();
+  });
+  assert.equal((await alignment.prepare(CV_SHOW_STORY)).available, true);
+
+  const events = [];
+  const resets = [];
+  class ProjectAudioMedia extends EventTarget {
+    #currentTime = 0;
+    #src = '';
+    paused = true;
+    ended = false;
+    error = null;
+    readyState = 2;
+    preload = '';
+    seekable = { length: 1, start: () => 0, end: () => 200 };
+
+    get currentTime() { return this.#currentTime; }
+    set currentTime(value) {
+      this.#currentTime = Number(value) || 0;
+      this.dispatchEvent(new Event('seeking'));
+      this.dispatchEvent(new Event('seeked'));
+    }
+    finishClip(milliseconds) {
+      this.#currentTime = milliseconds / 1_000;
+      this.dispatchEvent(new Event('timeupdate'));
+    }
+    get src() { return this.#src; }
+    set src(value) { this.#src = String(value); }
+    get currentSrc() { return this.#src; }
+    pause() {
+      this.paused = true;
+      this.dispatchEvent(new Event('pause'));
+    }
+    play() {
+      this.paused = false;
+      events.push(`audio:play:${Math.round(this.#currentTime * 1_000)}`);
+      this.dispatchEvent(new Event('play'));
+      this.dispatchEvent(new Event('playing'));
+      return Promise.resolve();
+    }
+    load() {
+      this.dispatchEvent(new Event('loadstart'));
+      this.dispatchEvent(new Event('loadedmetadata'));
+      this.dispatchEvent(new Event('loadeddata'));
+    }
+  }
+
+  const operations = [];
+  const media = new ProjectAudioMedia();
+  const entry = CV_SHOW_STORY.scenes.find(({ id }) => id === 'photopizza');
+  const clip = manifest.clips.find(({ id }) => id === entry.id);
+  const aligned = await alignment.createEntryRuntime({
+    entry,
+    media,
+    audioClip: clip,
+    runPresentationOperation: async (operation) => {
+      operations.push(operation.projectCell.id);
+      events.push(`action:start:${operation.projectCell.id}`);
+      const observedAt = freezeProviderValue({
+        domain: 'performance',
+        timeOriginMs: performance.timeOrigin,
+        monotonicTimeMs: performance.now(),
+      });
+      if (operation.projectCell.cue.interaction?.type === 'select') {
+        operation.reportAdmission({
+          providerAdmission: providerAdmissionFixture({
+            mode: 'frame',
+            gestureId: operation.source.id,
+            targetId: operation.scheduleCell.targetId,
+            limitMs: operation.scheduleCell.gesture.endMs - operation.scheduleCell.gesture.startMs,
+            plannedDurationMs: 100,
+          }),
+        });
+      }
+      operation.reportReceipt({
+        status: 'acted',
+        observedAt,
+        providerReceipt: { status: 'acted' },
+      });
+      operation.reportReceipt({
+        status: 'settled',
+        observedAt,
+        providerReceipt: { status: 'settled' },
+      });
+      events.push(`action:return:${operation.projectCell.id}`);
+    },
+    onReceipt: ({ cellId, status }) => events.push(`receipt:${cellId}:${status}`),
+    onReset: (receipt) => resets.push(receipt),
+  });
+  t.after(() => aligned.runtime.dispose());
+  await aligned.runtime.loadAndRestorePlayback({
+    source: 'https://portfolio.example/cv/cv-show-audio/photopizza.opus',
+    positionMs: 0,
+    paused: true,
+    preload: 'auto',
+  }, { reason: 'alignment-ready' });
+  events.length = 0;
+  operations.length = 0;
+  resets.length = 0;
+  const [firstClip, secondClip] = aligned.playbackPlan.clips;
+  aligned.runtime.resume();
+  await waitForCvShowPlayback(
+    () => events.includes(`audio:play:${firstClip.audio.sourceInMs}`),
+    'the first Project audio clip must start from its authored source range',
+  );
+  assert.deepEqual(operations, [], 'speech-timed actions cannot run before the clip ends');
+
+  media.finishClip(firstClip.audio.sourceOutMs);
+  await waitForCvShowPlayback(
+    () => events.includes(`audio:play:${secondClip.audio.sourceInMs}`),
+    'the next Project clip must start after the intervening actions settle',
+  );
+  assert.deepEqual(
+    resets,
+    [],
+    'Project-owned audio clip seeks cannot masquerade as external timeline resets',
+  );
+
+  const sequence = [
+    `receipt:${firstClip.id}:ended`,
+    'receipt:cv-show:cue:photopizza.origin:scroll:settled',
+    'receipt:cv-show:cue:photopizza.origin:settled',
+    `audio:play:${secondClip.audio.sourceInMs}`,
+  ].map((event) => events.indexOf(event));
+  assert.ok(sequence.every((index) => index >= 0), `missing playback evidence: ${events.join(', ')}`);
+  assert.deepEqual(
+    [...sequence].sort((left, right) => left - right),
+    sequence,
+    'the shared dependency graph enforces clip-ended -> action-settled -> next clip',
+  );
+  assert.deepEqual(operations, [
+    'cv-show:cue:photopizza.origin:scroll',
+    'cv-show:cue:photopizza.origin',
+  ]);
+  await aligned.runtime.stop();
+});
+
+test('Project playback waits for a framed media-block focus and retries the same clip after pause', async (t) => {
+  let { appConfig, manifest, raw } = createWebAudioHarness();
+  clearCvShowWebAudioReleaseCache();
+  const authority = createCvShowAuthoringAuthority({
+    seedProject: CV_SHOW_STRUCTURAL_MEDIA_FIXTURE.project,
+  });
+  const fetchImpl = async (url) => {
+    const clip = manifest.clips.find(({ alignedSequenceFile }) => (
+      String(url).endsWith(alignedSequenceFile)
+    ));
+    return new Response(
+      clip ? CV_SHOW_STRUCTURAL_MEDIA_FIXTURE.sequenceJson(clip.id) : raw,
+      { headers: { 'content-type': 'application/json' } },
+    );
+  };
+  const alignment = createCvShowAlignmentController({
+    url: 'https://portfolio.example/cv/?showAudio=local',
+    baseUrl: 'https://portfolio.example/cv/',
+    appConfig,
+    fetchImpl,
+    getAuthoringView: () => authority.getView(),
+  });
+  t.after(() => {
+    alignment.cancel();
+    authority.dispose();
+  });
+  assert.equal((await alignment.prepare(CV_SHOW_STORY)).available, true);
+
+  const events = [];
+  class ControlledMedia extends EventTarget {
+    #currentTime = 0;
+    #src = '';
+    paused = true;
+    ended = false;
+    error = null;
+    readyState = 2;
+    preload = '';
+    playCount = 0;
+    seekable = { length: 1, start: () => 0, end: () => 200 };
+
+    get currentTime() { return this.#currentTime; }
+    set currentTime(value) {
+      this.#currentTime = Number(value) || 0;
+      this.dispatchEvent(new Event('seeking'));
+      this.dispatchEvent(new Event('seeked'));
+    }
+    finishClip(milliseconds) {
+      this.#currentTime = milliseconds / 1_000;
+      this.dispatchEvent(new Event('timeupdate'));
+    }
+    advanceSilentlyTo(milliseconds) { this.#currentTime = milliseconds / 1_000; }
+    get src() { return this.#src; }
+    set src(value) { this.#src = String(value); }
+    get currentSrc() { return this.#src; }
+    pause() {
+      this.paused = true;
+      this.dispatchEvent(new Event('pause'));
+    }
+    play() {
+      this.playCount += 1;
+      this.paused = false;
+      events.push(`audio:play:${Math.round(this.#currentTime * 1_000)}`);
+      this.dispatchEvent(new Event('play'));
+      this.dispatchEvent(new Event('playing'));
+      return Promise.resolve();
+    }
+    load() {
+      this.dispatchEvent(new Event('loadstart'));
+      this.dispatchEvent(new Event('loadedmetadata'));
+      this.dispatchEvent(new Event('loadeddata'));
+    }
+  }
+
+  const media = new ControlledMedia();
+  const entry = CV_SHOW_STORY.scenes.find(({ id }) => id === 'photopizza');
+  const clip = manifest.clips.find(({ id }) => id === entry.id);
+  let releaseAttentionReadiness;
+  let reportAttentionStarted;
+  const attentionReadiness = new Promise((resolve) => { releaseAttentionReadiness = resolve; });
+  const attentionStarted = new Promise((resolve) => { reportAttentionStarted = resolve; });
+  const operations = [];
+  const aligned = await alignment.createEntryRuntime({
+    entry,
+    media,
+    audioClip: clip,
+    runPresentationOperation: async (operation) => {
+      events.push(`action:start:${operation.projectCell.id}`);
+      operations.push(Object.freeze({
+        id: operation.projectCell.id,
+        mediaPaused: media.paused,
+        mediaTimeMs: Math.round(media.currentTime * 1_000),
+      }));
+      if (operation.projectCell.id === 'cv-show:cue:photopizza.video-01') {
+        reportAttentionStarted();
+        await attentionReadiness;
+      }
+      const observedAt = freezeProviderValue({
+        domain: 'performance',
+        timeOriginMs: performance.timeOrigin,
+        monotonicTimeMs: performance.now(),
+      });
+      if (operation.kind === 'attention') {
+        operation.reportAdmission({
+          providerAdmission: providerAdmissionFixture({
+            mode: operation.source.type,
+            gestureId: operation.source.id,
+            targetId: operation.scheduleCell.targetId,
+            limitMs: operation.scheduleCell.gesture.endMs
+              - operation.scheduleCell.gesture.startMs,
+            plannedDurationMs: 100,
+          }),
+        });
+        operation.reportReceipt({
+          status: 'first-frame',
+          observedAt,
+          providerReceipt: { status: 'presenting' },
+        });
+        operation.reportReceipt({
+          status: 'settled',
+          observedAt,
+          providerReceipt: { status: 'settled' },
+        });
+        events.push(`action:return:${operation.projectCell.id}`);
+        return;
+      }
+      if (operation.projectCell.cue.interaction?.type === 'select') {
+        operation.reportAdmission({
+          providerAdmission: providerAdmissionFixture({
+            mode: 'frame',
+            gestureId: operation.source.id,
+            targetId: operation.scheduleCell.targetId,
+            limitMs: operation.scheduleCell.gesture.endMs
+              - operation.scheduleCell.gesture.startMs,
+            plannedDurationMs: 100,
+          }),
+        });
+      }
+      operation.reportReceipt({ status: 'acted', observedAt, providerReceipt: { status: 'acted' } });
+      operation.reportReceipt({
+        status: 'settled', observedAt, providerReceipt: { status: 'settled' },
+      });
+      events.push(`action:return:${operation.projectCell.id}`);
+    },
+    onReceipt: ({ cellId, status }) => events.push(`receipt:${cellId}:${status}`),
+  });
+  t.after(() => aligned.runtime.dispose());
+  await aligned.runtime.loadAndRestorePlayback({
+    source: 'https://portfolio.example/cv/cv-show-audio/photopizza.opus',
+    positionMs: 0,
+    paused: true,
+    preload: 'auto',
+  }, { reason: 'alignment-ready' });
+  events.length = 0;
+  operations.length = 0;
+  const [firstClip, secondClip, thirdClip] = aligned.playbackPlan.clips;
+  aligned.runtime.resume();
+  await waitForCvShowPlayback(() => media.playCount === 1, 'first clip did not start');
+  media.finishClip(firstClip.audio.sourceOutMs);
+  await waitForCvShowPlayback(() => media.playCount === 2, 'second clip did not start');
+  media.finishClip(secondClip.audio.sourceOutMs);
+  await attentionStarted;
+  assert.equal(media.playCount, 2, 'the next clip cannot start while its focus action is pending');
+  assert.equal(media.paused, true, 'audio remains paused at the authored clip boundary');
+  assert.equal(events.includes(`audio:play:${thirdClip.audio.sourceInMs}`), false);
+
+  releaseAttentionReadiness();
+  await waitForCvShowPlayback(
+    () => events.includes(`audio:play:${thirdClip.audio.sourceInMs}`),
+    'the third clip must start after the required media-block focus settles',
+  );
+  assert.ok(
+    events.indexOf('receipt:cv-show:cue:photopizza.video-01:settled')
+      < events.indexOf(`audio:play:${thirdClip.audio.sourceInMs}`),
+    'the focus settlement opens the dependency barrier for the next clip',
+  );
+
+  const resumeSourceMs = thirdClip.audio.sourceInMs + 1_000;
+  media.advanceSilentlyTo(resumeSourceMs);
+  await aligned.runtime.pause();
+  assert.equal(media.paused, true);
+  assert.ok(
+    events.includes(`receipt:${thirdClip.id}:cancelled`),
+    'pausing cancels only the active attempt without completing the Project clip',
+  );
+  aligned.runtime.resume();
+  await waitForCvShowPlayback(() => media.playCount === 4, 'paused clip was not retried');
+  assert.equal(
+    events.at(-1),
+    `audio:play:${resumeSourceMs}`,
+    'resume replays the same Project clip from the observed source position',
+  );
+  await aligned.runtime.stop();
 });
 
 test('fresh scene turn-start navigation is the one Project setup cell', () => {
@@ -4056,8 +4965,9 @@ test('fresh scene turn-start navigation is the one Project setup cell', () => {
     'workspace.agent-portal-card',
   ]);
 
-  const setup = CV_SHOW_PRESENTATION_PROJECT.cells.filter(({ id, turnId, timing }) => (
+  const setup = CV_SHOW_PRESENTATION_PROJECT.cells.filter(({ id, kind, turnId, timing }) => (
     turnId === entry.id
+    && kind === 'cue'
     && !id.endsWith(':scroll')
     && timing?.at.anchor === 'turn-start'
   ));
@@ -4156,6 +5066,33 @@ test('local audio controller plays, pauses, resumes and cancels the exact manife
   assert.equal(audios[1].currentTimeAssignments, 0);
   assert.equal(speech.snapshot.activeId, '');
   assert.equal(speech.speak(CV_SHOW_STORY.scenes[0].speech, { id: 'positioning', lang: 'en' }), false);
+});
+
+test('local audio selects the Project-bound clip by id while captions retain authored text', async () => {
+  const manifest = await validatedWebAudioManifest();
+  const audio = {
+    paused: true,
+    currentTime: 0,
+    addEventListener() {},
+    removeEventListener() {},
+    play() { this.paused = false; return Promise.resolve(); },
+    pause() { this.paused = true; },
+  };
+  const speech = createLocalAudioSpeechController({ manifest, createAudio: () => audio });
+  const authoredCaption = `${CV_SHOW_STORY.scenes[0].speech} `;
+  assert.notEqual(authoredCaption, manifest.byId.get('positioning').speech);
+  let admittedClip = null;
+  assert.equal(speech.speak(authoredCaption, {
+    id: 'positioning',
+    lang: 'ru',
+    startPaused: true,
+    onMedia: (_media, clip) => {
+      admittedClip = clip;
+      return Object.freeze({ status: 'completed', reason: 'project-binding-accepted' });
+    },
+  }), true);
+  await Promise.resolve();
+  assert.equal(admittedClip?.id, 'positioning');
 });
 
 test('local audio waits for the shared alignment handoff before playback', async () => {
@@ -4541,6 +5478,12 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(logic, /payload: \{ intent: 'show-mode' \},\s*\}, \{ stream: false \}\)/u);
   assert.match(runtime, /ShowAudioArbiter/);
   assert.match(runtime, /ShowMediaController/);
+  assert.match(runtime, /portfolio-show-runtime-error/);
+  assert.match(runtime, /runtimeCleanup\.stopAndRelease\('show-terminal'/);
+  assert.match(runtime, /runtimeCleanup\.skip\(\{ operation: 'media-skip' \}\)/);
+  assert.match(runtime, /runtimeCleanup\.stopAndRelease\('tour-disposed'/);
+  assert.doesNotMatch(runtime, /\bmedia\.(?:stop|skip)\(/);
+  assert.doesNotMatch(runtime, /\baudioArbiter\.release\(/);
   assert.match(runtime, /monitorMeaningfulShowInteractions/);
   assert.match(logic, /portfolio-show-pause/);
   assert.match(logic, /portfolio-show-resume/);
@@ -4582,7 +5525,13 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     logic.indexOf('unavailableEntryIds.length') < logic.indexOf('this.#mountSharedShow()'),
     'a non-playable live media view must be rejected before the shared Show mounts',
   );
-  assert.match(logic, /semantics: detail \? 'detail' : 'pointer-only'/);
+  assert.match(logic, /this\.#alignedEntry\?\.runtime\?\.presentationPositionMs/u);
+  assert.doesNotMatch(logic, /semantics: 'pointer-only'/);
+  assert.match(
+    logic,
+    /#returnFromDetails\(\) \{[\s\S]*?this\.\$\.inBranch = false;[\s\S]*?this\.#showPlayer\?\.bind\?\.\(this\.#showConfig\(\)\);[\s\S]*?this\.#syncPlayer\(\);/u,
+    'returning from details must rebind the Short controls before redrawing the player',
+  );
   assert.match(logic, /partitionCvShowAlignedDirectives\(entry\.directives\)/);
   assert.match(
     logic,
@@ -4600,7 +5549,7 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     'a static checkpoint must not publish the destructive branch-return reset reason',
   );
   assert.match(logic, /requireCvShowSceneSetupSuccess\(sceneSetupReceipt, entry\.id\)/);
-  assert.match(logic, /captionTrack/);
+  assert.match(logic, /#alignedEntry\?\.media\?\.currentTime/);
   assert.match(logic, /addEventListener\?\.\('timeupdate'/);
   assert.match(logic, /removeEventListener\?\.\('timeupdate'/);
   assert.match(logic, /portfolio-show-before-advance/);
@@ -4614,8 +5563,8 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   );
   assert.match(
     runtime,
-    /if \(!running && event\.detail\?\.restorePausedCheckpoint !== true\) return;/u,
-    'only an explicit paused-checkpoint projection may admit presenter operations before media starts',
+    /if \(\s*!running\s*&& event\.detail\?\.restorePausedCheckpoint !== true\s*&& getChat\(\)\?\.\$\.isRunning !== true\s*\) return;/u,
+    'a route-prepared chat or an explicit paused checkpoint may admit setup before physical media starts',
   );
   assert.match(
     runtime,
@@ -4639,6 +5588,94 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     'the main panel layout must register before the independently built Show entrypoint loads',
   );
   assert.doesNotMatch(main, /client-only\/tour-player\/tour-player\.js/);
+});
+
+test('Show captions keep canonical Whisper timing and non-actionable video controls stay hidden', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="ru"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -2)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  t.after(() => {
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+
+  const {
+    createCvShowCanonicalCaption,
+    createCvShowVideoControls,
+    resolveCvShowPlayerEntry,
+  } = await import(
+    '../../src/ui-components/client-only/tour-player/tour-player.js?canonical-caption-unit-test'
+  );
+  const caption = createCvShowCanonicalCaption(
+    'На PhotoPizza мы снимали предметы.',
+    [
+      { text: 'На', startMs: 0, endMs: 180 },
+      { text: 'фотоэтица', startMs: 200, endMs: 620 },
+      { text: 'мы', startMs: 640, endMs: 780 },
+      { text: 'снимали', startMs: 800, endMs: 1_080 },
+      { text: 'предметы', startMs: 1_100, endMs: 1_420 },
+    ],
+    360,
+  );
+
+  assert.equal(caption.text, 'На PhotoPizza мы снимали предметы.');
+  assert.deepEqual(caption.words.map(({ text }) => text), [
+    'На',
+    'PhotoPizza',
+    'мы',
+    'снимали',
+    'предметы.',
+  ]);
+  assert.equal(caption.activeWordIndex, 1);
+  assert.equal(caption.words[1].startMs, 200);
+  assert.equal(caption.words[1].endMs, 620);
+  assert.equal(caption.words.some(({ text }) => text.includes('фотоэтица')), false);
+
+  const controls = createCvShowVideoControls([
+    { id: 'autobox.video-01', type: 'media', mode: 'short-muted-montage' },
+    { id: 'autobox.video-02', type: 'media', mode: 'short-muted-montage' },
+    { id: 'autobox.video-03', type: 'media', mode: 'short-muted-montage' },
+    { id: 'autobox.full-video', type: 'media', mode: 'full-with-media-audio' },
+  ], (key) => key);
+  assert.deepEqual(controls, []);
+
+  const branchEntry = {
+    id: 'autobox-details',
+    directives: [{
+      id: 'autobox.full-video',
+      type: 'media',
+      mode: 'full-with-media-audio',
+    }],
+  };
+  assert.equal(resolveCvShowPlayerEntry({
+    inBranch: true,
+    activeBranchEntry: branchEntry,
+    currentEntry: { id: 'autobox' },
+  }), branchEntry, 'detail controls resolve from the active branch before speech starts');
 });
 
 test('trusted document interaction pauses the Show without destructively clearing presenter attention', async () => {

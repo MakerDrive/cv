@@ -1,0 +1,246 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-u0MHeXyYJgfALT5I2lz0hqmUXHSekfAZwVNg54qkTiY=",
+  "media": {
+    "durationMs": 25520,
+    "hash": "sha256:cf509267118d43e06c9c40e5d7eb91ed33cd9ecb689cda5522f6bf97644f79ba",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-ALb50OuzZ9noME4rLOqneulQtnHXvSEIhadSuI+h29U=",
+  "turns": [
+    {
+      "endMs": 25520,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Следующий пример Adaptive Maxima Workbench. Он показывает, как заявки, оборудование, локации, бригады и доступные действия собираются в одном рабочем пространстве с общим актуальным контекстом. Сейчас это демонстрационный проект на стадии альфа, версии, показывающей возможности воркспейса. Подключение к реальной системе Maxima выполняется как отдельная интеграция.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 620,
+          "startMs": 0,
+          "text": "Следующий"
+        },
+        {
+          "endMs": 980,
+          "startMs": 620,
+          "text": "пример"
+        },
+        {
+          "endMs": 1740,
+          "startMs": 980,
+          "text": "Adaptive"
+        },
+        {
+          "endMs": 2420,
+          "startMs": 1740,
+          "text": "Maxima"
+        },
+        {
+          "endMs": 3240,
+          "startMs": 2420,
+          "text": "Workbench."
+        },
+        {
+          "endMs": 3860,
+          "startMs": 3460,
+          "text": "Он"
+        },
+        {
+          "endMs": 4420,
+          "startMs": 3860,
+          "text": "показывает,"
+        },
+        {
+          "endMs": 4620,
+          "startMs": 4440,
+          "text": "как"
+        },
+        {
+          "endMs": 5240,
+          "startMs": 4620,
+          "text": "заявки,"
+        },
+        {
+          "endMs": 6020,
+          "startMs": 5400,
+          "text": "оборудование,"
+        },
+        {
+          "endMs": 6780,
+          "startMs": 6180,
+          "text": "локации,"
+        },
+        {
+          "endMs": 7960,
+          "startMs": 7220,
+          "text": "бригады"
+        },
+        {
+          "endMs": 8140,
+          "startMs": 7960,
+          "text": "и"
+        },
+        {
+          "endMs": 8660,
+          "startMs": 8140,
+          "text": "доступные"
+        },
+        {
+          "endMs": 9200,
+          "startMs": 8660,
+          "text": "действия"
+        },
+        {
+          "endMs": 9840,
+          "startMs": 9200,
+          "text": "собираются"
+        },
+        {
+          "endMs": 10020,
+          "startMs": 9840,
+          "text": "в"
+        },
+        {
+          "endMs": 10220,
+          "startMs": 10020,
+          "text": "одном"
+        },
+        {
+          "endMs": 10820,
+          "startMs": 10220,
+          "text": "рабочем"
+        },
+        {
+          "endMs": 11620,
+          "startMs": 10820,
+          "text": "пространстве"
+        },
+        {
+          "endMs": 12120,
+          "startMs": 11620,
+          "text": "с"
+        },
+        {
+          "endMs": 12460,
+          "startMs": 12120,
+          "text": "общим"
+        },
+        {
+          "endMs": 13060,
+          "startMs": 12460,
+          "text": "актуальным"
+        },
+        {
+          "endMs": 13760,
+          "startMs": 13060,
+          "text": "контекстом."
+        },
+        {
+          "endMs": 14640,
+          "startMs": 14200,
+          "text": "Сейчас"
+        },
+        {
+          "endMs": 14900,
+          "startMs": 14640,
+          "text": "это"
+        },
+        {
+          "endMs": 15640,
+          "startMs": 14900,
+          "text": "демонстрационный"
+        },
+        {
+          "endMs": 16000,
+          "startMs": 15640,
+          "text": "проект"
+        },
+        {
+          "endMs": 16220,
+          "startMs": 16000,
+          "text": "на"
+        },
+        {
+          "endMs": 16640,
+          "startMs": 16220,
+          "text": "стадии"
+        },
+        {
+          "endMs": 17200,
+          "startMs": 16640,
+          "text": "альфа,"
+        },
+        {
+          "endMs": 17900,
+          "startMs": 17280,
+          "text": "версии,"
+        },
+        {
+          "endMs": 18820,
+          "startMs": 18100,
+          "text": "показывающей"
+        },
+        {
+          "endMs": 19540,
+          "startMs": 18820,
+          "text": "возможности"
+        },
+        {
+          "endMs": 20240,
+          "startMs": 19540,
+          "text": "воркспейса."
+        },
+        {
+          "endMs": 21160,
+          "startMs": 20420,
+          "text": "Подключение"
+        },
+        {
+          "endMs": 21300,
+          "startMs": 21160,
+          "text": "к"
+        },
+        {
+          "endMs": 21720,
+          "startMs": 21300,
+          "text": "реальной"
+        },
+        {
+          "endMs": 22300,
+          "startMs": 21720,
+          "text": "системе"
+        },
+        {
+          "endMs": 22940,
+          "startMs": 22300,
+          "text": "Maxima"
+        },
+        {
+          "endMs": 23600,
+          "startMs": 22940,
+          "text": "выполняется"
+        },
+        {
+          "endMs": 23780,
+          "startMs": 23600,
+          "text": "как"
+        },
+        {
+          "endMs": 24360,
+          "startMs": 23780,
+          "text": "отдельная"
+        },
+        {
+          "endMs": 25180,
+          "startMs": 24360,
+          "text": "интеграция."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

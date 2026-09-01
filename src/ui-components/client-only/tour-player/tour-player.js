@@ -16,6 +16,9 @@ import {
   createCvShowPlaybackEntries,
   createCvShowPresentationContext,
 } from '../../../static-pages/js/tour-player/presentationContext.js';
+import {
+  projectCvShowScheduleDuration,
+} from '../../../static-pages/js/tour-player/presentationProjectAdapter.js';
 import { createBrowserSpeechController } from '../../../static-pages/js/tour-player/speech.js';
 import {
   createCvShowMessageStreamController,
@@ -43,12 +46,151 @@ function actionPart(id, actions, payload = null) {
   };
 }
 
-/** @param {any} story @param {'short' | 'full'} [mode] @param {any} [mediaRegistry] */
-function playerTimeline(story, mode = 'short', mediaRegistry = null) {
+function normalizeCaptionWord(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .toLocaleLowerCase('ru')
+    .replace(/[^\p{L}\p{N}]+/gu, '');
+}
+
+function alignCanonicalCaptionWords(canonicalWords, captionTrack) {
+  const source = canonicalWords.map(normalizeCaptionWord);
+  const observed = captionTrack.map(({ text }) => normalizeCaptionWord(text));
+  const rows = source.length + 1;
+  const columns = observed.length + 1;
+  const costs = Array.from({ length: rows }, () => new Uint16Array(columns));
+  for (let row = 0; row < rows; row += 1) costs[row][0] = row;
+  for (let column = 0; column < columns; column += 1) costs[0][column] = column;
+  for (let row = 1; row < rows; row += 1) {
+    for (let column = 1; column < columns; column += 1) {
+      const substitution = costs[row - 1][column - 1]
+        + (source[row - 1] === observed[column - 1] ? 0 : 1);
+      costs[row][column] = Math.min(
+        substitution,
+        costs[row - 1][column] + 1,
+        costs[row][column - 1] + 1,
+      );
+    }
+  }
+  const matches = new Array(source.length).fill(-1);
+  let row = source.length;
+  let column = observed.length;
+  while (row > 0 || column > 0) {
+    if (row > 0 && column > 0) {
+      const substitutionCost = source[row - 1] === observed[column - 1] ? 0 : 1;
+      if (costs[row][column] === costs[row - 1][column - 1] + substitutionCost) {
+        matches[row - 1] = column - 1;
+        row -= 1;
+        column -= 1;
+        continue;
+      }
+    }
+    if (row > 0 && costs[row][column] === costs[row - 1][column] + 1) {
+      row -= 1;
+      continue;
+    }
+    column -= 1;
+  }
+  return matches;
+}
+
+function interpolateCanonicalCaptionTiming(index, matches, captionTrack) {
+  const direct = matches[index];
+  if (direct >= 0) return captionTrack[direct];
+  let previous = index - 1;
+  while (previous >= 0 && matches[previous] < 0) previous -= 1;
+  let next = index + 1;
+  while (next < matches.length && matches[next] < 0) next += 1;
+  const startMs = previous >= 0
+    ? captionTrack[matches[previous]].endMs
+    : captionTrack[0].startMs;
+  const endMs = next < matches.length
+    ? captionTrack[matches[next]].startMs
+    : captionTrack.at(-1).endMs;
+  const ordinal = index - previous;
+  const count = next - previous;
+  return {
+    startMs: startMs + ((endMs - startMs) * (ordinal - 1)) / Math.max(1, count),
+    endMs: startMs + ((endMs - startMs) * ordinal) / Math.max(1, count),
+  };
+}
+
+const canonicalCaptionWordCache = new WeakMap();
+
+function createCanonicalCaptionWords(canonicalText, captionTrack) {
+  let trackCache = canonicalCaptionWordCache.get(captionTrack);
+  if (!trackCache) {
+    trackCache = new Map();
+    canonicalCaptionWordCache.set(captionTrack, trackCache);
+  }
+  if (trackCache.has(canonicalText)) return trackCache.get(canonicalText);
+  const canonicalWords = canonicalText.match(/\S+/gu) || [];
+  const timedWords = captionTrack
+    .map((word) => ({
+      text: String(word?.text || ''),
+      startMs: Math.max(0, Number(word?.startMs) || 0),
+      endMs: Math.max(0, Number(word?.endMs) || Number(word?.startMs) || 0),
+    }))
+    .filter(({ text }) => text.trim());
+  if (!canonicalWords.length || !timedWords.length) return Object.freeze([]);
+  const matches = alignCanonicalCaptionWords(canonicalWords, timedWords);
+  const words = Object.freeze(canonicalWords.map((word, index) => {
+    const timing = interpolateCanonicalCaptionTiming(index, matches, timedWords);
+    return Object.freeze({
+      text: word,
+      startMs: Math.max(0, Number(timing.startMs) || 0),
+      endMs: Math.max(0, Number(timing.endMs) || Number(timing.startMs) || 0),
+    });
+  }));
+  trackCache.set(canonicalText, words);
+  return words;
+}
+
+/**
+ * Keep the authored caption as the visible source of truth while borrowing only
+ * timing from the recognized word track.
+ */
+export function createCvShowCanonicalCaption(text, captionTrack = [], positionMs = 0) {
+  const canonicalText = String(text || '');
+  if (!Array.isArray(captionTrack) || !captionTrack.length || !canonicalText.trim()) {
+    return Object.freeze({ text: canonicalText, words: Object.freeze([]), activeWordIndex: -1 });
+  }
+  const words = createCanonicalCaptionWords(canonicalText, captionTrack);
+  if (!words.length) {
+    return Object.freeze({ text: canonicalText, words, activeWordIndex: -1 });
+  }
+  const currentPositionMs = Math.max(0, Number(positionMs) || 0);
+  let activeWordIndex = -1;
+  for (let index = 0; index < words.length; index += 1) {
+    if (currentPositionMs < words[index].startMs) break;
+    activeWordIndex = index;
+    if (currentPositionMs <= words[index].endMs) break;
+  }
+  return Object.freeze({ text: canonicalText, words, activeWordIndex });
+}
+
+export function createCvShowVideoControls(directives = [], resolveMessage = value => value) {
+  void directives;
+  void resolveMessage;
+  return Object.freeze([]);
+}
+
+export function resolveCvShowPlayerEntry({
+  inBranch = false,
+  activeSpeechEntry = null,
+  activeBranchEntry = null,
+  currentEntry = null,
+} = {}) {
+  if (!inBranch) return currentEntry || null;
+  return activeSpeechEntry || activeBranchEntry || currentEntry || null;
+}
+
+/** @param {any} story @param {'short' | 'full'} [mode] @param {Map<string, number>} [projectDurations] */
+function playerTimeline(story, mode = 'short', projectDurations = new Map()) {
   return Object.freeze({
     title: 'CV Show',
     turns: Object.freeze(createCvShowPlaybackEntries(story, mode).map((entry) => {
-      let durationMs = Number(mediaRegistry?.entries?.[entry.id]?.audio?.durationMilliseconds);
+      let durationMs = Number(projectDurations.get(entry.id));
       return Object.freeze({
         id: entry.id,
         persona: entry.sceneId ? 'Detail' : 'CV',
@@ -116,6 +258,7 @@ export class PortfolioShowChat extends HTMLElement {
   /** @type {Promise<any>} */
   #alignmentReady = Promise.resolve();
   #alignedEntry = null;
+  #projectDurationMsByEntry = new Map();
   #lastExecutionReceipt = null;
   #lastAlignedReset = null;
   #lastAlignedSeekFailure = null;
@@ -222,6 +365,7 @@ export class PortfolioShowChat extends HTMLElement {
       this.#stopSpeech('authoring-revision-changed');
     }
     this.#authoringView = nextView;
+    this.#projectDurationMsByEntry.clear();
     this.#acceptStory(nextView.story);
   };
 
@@ -278,6 +422,16 @@ export class PortfolioShowChat extends HTMLElement {
     return this.#speech.snapshot;
   }
 
+  #presentationPositionMs(fallbackMs = this.#session.snapshot.playback.positionMs) {
+    const projectPositionMs = Number(this.#alignedEntry?.runtime?.presentationPositionMs);
+    if (Number.isFinite(projectPositionMs)) return Math.max(0, projectPositionMs);
+    const legacyMediaPosition = Number(
+      this.#alignedEntry?.media?.currentTime ?? this.#speech.media?.currentTime,
+    );
+    if (Number.isFinite(legacyMediaPosition)) return Math.max(0, legacyMediaPosition * 1_000);
+    return Math.max(0, Number(fallbackMs) || 0);
+  }
+
   get alignmentSnapshot() {
     return Object.freeze({
       ...this.#alignment.snapshot,
@@ -290,7 +444,7 @@ export class PortfolioShowChat extends HTMLElement {
       lastSeekFailure: this.#lastAlignedSeekFailure,
       lastGenerationReceipt: this.#lastAlignedGenerationReceipt,
       playbackClockState: this.#alignedEntry?.runtime?.playbackClockState || null,
-      narrationPositionMs: Math.max(0, Math.round(Number(this.#speech.media?.currentTime || 0) * 1000)),
+      narrationPositionMs: Math.round(this.#presentationPositionMs()),
     });
   }
 
@@ -298,17 +452,14 @@ export class PortfolioShowChat extends HTMLElement {
     const currentEntry = this.#currentEntry();
     const activeBranchId = this.$.inBranch ? this.#session.snapshot.playback.episodeId : '';
     const branch = activeBranchId ? this.#story?.branches?.[activeBranchId] : null;
-    const mediaPosition = Number(
-      this.#speech.media?.currentTime ?? this.#alignedEntry?.media?.currentTime,
-    );
     const fallbackPosition = this.#pendingTransportIntent?.positionMs
       ?? this.#session.snapshot.playback.positionMs;
     return Object.freeze({
       mode: this.#mode,
       entryId: branch?.sceneId || currentEntry?.id || '',
       detailId: branch?.id || this.#pendingTransportIntent?.detailId || '',
-      timeMs: Number.isFinite(mediaPosition)
-        ? Math.max(0, Math.round(mediaPosition * 1_000))
+      timeMs: this.$.isRunning
+        ? Math.round(this.#presentationPositionMs())
         : Math.max(0, Math.round(Number(fallbackPosition) || 0)),
       play: this.$.isRunning
         ? this.#playRequested
@@ -373,10 +524,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.resumeRequired = true;
     this.#speech.pause();
     this.#alignedEntry?.runtime?.pause?.();
-    const positionMs = Math.max(
-      0,
-      Math.round(Number(this.#speech.media?.currentTime || 0) * 1000),
-    );
+    const positionMs = Math.round(this.#presentationPositionMs());
     this.#session.setPlayback({
       ...this.#session.snapshot.playback,
       positionMs,
@@ -523,22 +671,19 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   #showConfig() {
-    const entry = this.#currentEntry();
+    const entry = this.#playerEntry();
     return {
       controller: this.#controller,
       timeline: playerTimeline(
         this.#story,
         this.#mode || 'short',
-        this.#authoringView.mediaRegistry,
+        this.#projectDurationMsByEntry,
       ),
       state: {
         index: Math.max(0, this.#sceneIndex),
         playing: this.#transportPlaying,
         progress: {
-          positionMs: Math.max(
-            0,
-            Number(this.#alignedEntry?.media?.currentTime || 0) * 1_000,
-          ),
+          positionMs: this.#presentationPositionMs(),
         },
         caption: {
           speaker: entry?.sceneId ? this.#message('tour.details') : 'CV',
@@ -626,7 +771,7 @@ export class PortfolioShowChat extends HTMLElement {
 
   #videoController = Object.freeze({
     play: (request) => {
-      const entry = this.#currentEntry();
+      const entry = this.#playerEntry();
       const directive = entry?.directives?.find(({ type, id }) => (
         type === 'media' && id === request?.id
       ));
@@ -645,16 +790,7 @@ export class PortfolioShowChat extends HTMLElement {
   });
 
   #videoControls(entry) {
-    return (entry?.directives || []).filter(({ type }) => type === 'media').map((directive) => {
-      const detail = directive.mode === 'full-with-media-audio';
-      return {
-        id: directive.id,
-        action: 'play',
-        semantics: detail ? 'detail' : 'pointer-only',
-        label: this.#message(detail ? 'tour.video.detail' : 'tour.video.pointer'),
-        glyph: detail ? 'play_circle' : 'visibility',
-      };
-    });
+    return createCvShowVideoControls(entry?.directives, key => this.#message(key));
   }
 
   #notifyController(state = null) {
@@ -752,14 +888,7 @@ export class PortfolioShowChat extends HTMLElement {
       return false;
     }
     const requestedEntry = playbackEntries[requestedIndex];
-    const durationMs = Number(
-      this.#authoringView.mediaRegistry.entries[detailId || requestedEntry.id]
-        ?.audio?.durationMilliseconds,
-    );
-    const targetMs = Math.min(
-      Number.isFinite(durationMs) && durationMs > 0 ? durationMs : Number.MAX_SAFE_INTEGER,
-      Math.max(0, Math.round(Number(positionMs) || 0)),
-    );
+    const targetMs = Math.max(0, Math.round(Number(positionMs) || 0));
     this.#sceneIndex = requestedIndex;
     const pendingTransportIntent = Object.freeze({
       detailId: String(detailId || ''),
@@ -879,14 +1008,7 @@ export class PortfolioShowChat extends HTMLElement {
   async #seek(index, positionMs = 0) {
     if (!this.$.isReady || !Number.isInteger(index)) return false;
     if (index < 0 || index >= this.#playbackEntries.length) return false;
-    const durationMs = Number(
-      this.#authoringView.mediaRegistry.entries[this.#playbackEntries[index]?.id]
-        ?.audio?.durationMilliseconds,
-    );
-    const targetMs = Math.min(
-      Number.isFinite(durationMs) && durationMs > 0 ? durationMs : Number.MAX_SAFE_INTEGER,
-      Math.max(0, Math.round(Number(positionMs) || 0)),
-    );
+    const targetMs = Math.max(0, Math.round(Number(positionMs) || 0));
     const pendingTransportIntent = !this.$.isRunning && this.#pendingTransportIntent
       ? Object.freeze({
         ...this.#pendingTransportIntent,
@@ -951,6 +1073,18 @@ export class PortfolioShowChat extends HTMLElement {
 
   #currentEntry() {
     return this.#playbackEntries[this.#sceneIndex] || null;
+  }
+
+  #playerEntry() {
+    const activeBranchId = this.$.inBranch
+      ? this.#session?.snapshot?.playback?.episodeId
+      : '';
+    return resolveCvShowPlayerEntry({
+      inBranch: this.$.inBranch,
+      activeSpeechEntry: this.#activeSpeechEntry,
+      activeBranchEntry: this.#story?.branches?.[activeBranchId] || null,
+      currentEntry: this.#currentEntry(),
+    });
   }
 
   #step(direction) {
@@ -1267,7 +1401,7 @@ export class PortfolioShowChat extends HTMLElement {
         this.#lastExecutionReceipt = receipt;
         this.#session.setPlayback({
           ...this.#session.snapshot.playback,
-          positionMs: Math.max(0, Math.round(Number(media.currentTime || 0) * 1_000)),
+          positionMs: Math.round(this.#presentationPositionMs()),
         });
         this.dispatchEvent(new CustomEvent('portfolio-show-presentation-receipt', {
           bubbles: true,
@@ -1304,6 +1438,14 @@ export class PortfolioShowChat extends HTMLElement {
       onCaptionTimeUpdate,
     }) : null;
     if (!aligned) return Object.freeze({ status: 'failed', reason: 'alignment-unavailable' });
+    const projectDurationMs = projectCvShowScheduleDuration(aligned);
+    if (Number.isFinite(projectDurationMs) && projectDurationMs > 0) {
+      this.#projectDurationMsByEntry.set(
+        entry.id,
+        Math.max(projectDurationMs, this.#projectDurationMsByEntry.get(entry.id) || 0),
+      );
+      this.#showPlayer?.bind?.(this.#showConfig());
+    }
     const receipt = await aligned.runtime.loadAndRestorePlayback({
       source: clip.audioUrl,
       positionMs,
@@ -1493,10 +1635,7 @@ export class PortfolioShowChat extends HTMLElement {
       || !returnParentEntry
       || !this.$.isRunning
     ) return;
-    const parentPositionMs = Math.max(
-      0,
-      Math.round(Number(this.#speech.media?.currentTime || 0) * 1000),
-    );
+    const parentPositionMs = Math.round(this.#presentationPositionMs());
     const shortPlayback = {
       ...this.#session.snapshot.playback,
       positionMs: parentPositionMs,
@@ -1629,6 +1768,7 @@ export class PortfolioShowChat extends HTMLElement {
       actionId: 'show-resume-after-branch',
     });
     this.#branchReturnPlayback = null;
+    this.#showPlayer?.bind?.(this.#showConfig());
     this.#syncPlayer();
     if (restore) void this.#restoreAfterBranch(restore, this.#requestId);
   }
@@ -1671,7 +1811,8 @@ export class PortfolioShowChat extends HTMLElement {
       this.#speechToken = token;
     }
     this.#playRequested = true;
-    this.#resumePending = this.#presentationAdmitted;
+    const resumeAdmittedPresentation = this.#presentationAdmitted;
+    this.#resumePending = resumeAdmittedPresentation;
     const alignedRuntime = this.#alignedEntry?.runtime || null;
     const speechAccepted = this.#speech.resume({ deferMedia: Boolean(alignedRuntime) });
     const mediaAccepted = speechAccepted === false || !alignedRuntime
@@ -1682,6 +1823,22 @@ export class PortfolioShowChat extends HTMLElement {
       this.#speech.pause();
       this.#playRequested = false;
       this.#resumePending = false;
+    } else if (resumeAdmittedPresentation && alignedRuntime) {
+      const wasPaused = this.$.isPaused;
+      this.#resumePending = false;
+      this.#transportPlaying = true;
+      this.$.isPaused = false;
+      this.$.resumeRequired = false;
+      this.$.statusText = '';
+      if (wasPaused) this.#session.resume();
+      this.#session.setPlayback({
+        ...this.#session.snapshot.playback,
+        playbackState: 'playing',
+      });
+      this.dispatchEvent(new CustomEvent('portfolio-show-resume', {
+        bubbles: true,
+        composed: true,
+      }));
     }
     this.#syncPlayer();
   }
@@ -1780,18 +1937,13 @@ export class PortfolioShowChat extends HTMLElement {
 
   #syncPlayer(terminalState = null) {
     const scene = this.#currentScene();
-    const activeEntry = this.$.inBranch ? this.#activeSpeechEntry : this.#currentEntry();
-    const captionTrack = this.#alignedEntry?.captionTrack || [];
-    const captionPositionMs = Math.max(
-      0,
-      Number(this.#alignedEntry?.media?.currentTime || 0) * 1_000,
+    const activeEntry = this.#playerEntry();
+    const captionPositionMs = this.#presentationPositionMs();
+    const caption = createCvShowCanonicalCaption(
+      activeEntry?.subtitle || scene?.subtitle || '',
+      this.#alignedEntry?.captionTrack,
+      captionPositionMs,
     );
-    let activeWordIndex = -1;
-    for (let index = 0; index < captionTrack.length; index += 1) {
-      if (captionPositionMs < captionTrack[index].startMs) break;
-      activeWordIndex = index;
-      if (captionPositionMs <= captionTrack[index].endMs) break;
-    }
     this.#showPlayer?.setState?.({
       index: Math.max(0, this.#sceneIndex),
       playing: this.#transportPlaying,
@@ -1799,9 +1951,7 @@ export class PortfolioShowChat extends HTMLElement {
       progress: { positionMs: captionPositionMs },
       caption: {
         speaker: this.$.inBranch ? this.#message('tour.details') : 'CV',
-        text: captionTrack.length ? activeEntry?.speech || '' : activeEntry?.subtitle || scene?.subtitle || '',
-        words: captionTrack,
-        activeWordIndex,
+        ...caption,
       },
       tts: activeEntry ? {
         label: this.#message('tour.tts'),

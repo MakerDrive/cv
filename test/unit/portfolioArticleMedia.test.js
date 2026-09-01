@@ -208,6 +208,15 @@ test('semantic article blocks expose stable CV Show DOM anchors', () => {
   assert.doesNotMatch(stripPortfolioArticleBlockMarkers(result.details), /:::article-block/);
 });
 
+test('AUTOBOX full-video target owns the exact playable netsuke media', () => {
+  assert.equal(
+    PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS['autobox-v1'][
+      'media/autobox-v1/youtube/FugBzpZqXZ0'
+    ],
+    'netsuke-video',
+  );
+});
+
 test('every selected CV Show article target produces a semantic anchor in EN, RU, and ES', () => {
   for (let [cellId, targetId] of [
     ['cv-show:cue:video-studio.visible-process', 'article.symbiote-video-studio.semantic-flow'],
@@ -227,8 +236,8 @@ test('every selected CV Show article target produces a semantic anchor in EN, RU
   let uniqueTargets = [...new Set(articleTargets)];
   let projects = new Map(loadProjectEntries().map(project => [project.slug, project]));
 
-  assert.equal(articleTargets.length, 89);
-  assert.equal(uniqueTargets.length, 75);
+  assert.equal(articleTargets.length, 88);
+  assert.equal(uniqueTargets.length, 74);
   for (let target of uniqueTargets) {
     let match = target.match(/^article\.([a-z0-9][a-z0-9-]*)\.([a-z0-9][a-z0-9-]*)$/);
     assert.ok(match, target);
@@ -476,7 +485,17 @@ test('portfolio routes selected media into article content instead of a graph pl
   assert.match(source, /globalThis\.requestAnimationFrame\(\(\) => \{\s*this\.canvasSyncFrame = globalThis\.requestAnimationFrame\(sync\)/);
   assert.match(source, /createElement\('sn-media-host'\)/);
   assert.match(source, /createElement\('iframe'\)/);
-  assert.match(source, /youtube-nocookie\.com\/embed/);
+  assert.match(source, /tourModule\?\.configurePortfolioYouTubeIframe\?\.\(iframe, videoId\)/);
+  assert.match(source, /youtube-nocookie\.com\/embed\/\$\{encodeURIComponent\(videoId\)\}\?rel=0/);
+  const tourSource = await readFile(
+    new URL('../../src/static-pages/js/tour-player/index.js', import.meta.url),
+    'utf8',
+  );
+  assert.match(tourSource, /createYouTubeNoCookieEmbedUrl\(videoId, \{ origin: location\.origin \}\)/);
+  assert.match(tourSource, /iframe\.srcdoc = createCvShowYouTubePosterDocument\(videoId\)/);
+  assert.match(tourSource, /iframe\.dataset\.showPosterOnly = 'true'/);
+  assert.doesNotMatch(tourSource, /<span[^>]*>▶<\/span>/);
+  assert.match(tourSource, /i\.ytimg\.com\/vi\/\$\{encodeURIComponent\(videoId\)\}\/hqdefault\.jpg/);
   assert.match(source, /iframe\.loading = 'lazy'/);
   assert.match(source, /iframe\.referrerPolicy = 'strict-origin-when-cross-origin'/);
   assert.doesNotMatch(source, /youtube-nocookie\.com\/embed\/[^`]*autoplay=1/);

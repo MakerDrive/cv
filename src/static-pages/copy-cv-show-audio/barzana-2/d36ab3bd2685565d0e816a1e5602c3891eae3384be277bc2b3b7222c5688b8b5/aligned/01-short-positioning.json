@@ -1,0 +1,376 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-+F/LbfxEcmB2hnTnvdQAdG+9+1QfDYRRPAeieHY6laU=",
+  "media": {
+    "durationMs": 32160,
+    "hash": "sha256:f2ad321ede2c25296cb5c89aecdf16ac7f0eb06a67f54261801dc9b4a0f0ee82",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-2u3hU+KHdynv0+zLGxqPisQIIlylyFqeDioCz1l3GbM=",
+  "turns": [
+    {
+      "endMs": 32160,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Привет, я Владимир. Я R&D-инженер. Нахожу проблемы и продуктовые возможности, формулирую задачи, придумываю решения и довожу их до работающего результата, самостоятельно или отвечая за свою часть работы в команде. Сейчас мой основной фокус — программные платформы и агентные продукты. В этой презентации я покажу, как этот R&D-подход работает в разных предметных областях, от программных платформ до медиа и оборудования. В каждом проекте я отдельно обозначу свою роль.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 440,
+          "startMs": 0,
+          "text": "Привет,"
+        },
+        {
+          "endMs": 960,
+          "startMs": 840,
+          "text": "я"
+        },
+        {
+          "endMs": 1520,
+          "startMs": 960,
+          "text": "Владимир."
+        },
+        {
+          "endMs": 2180,
+          "startMs": 1760,
+          "text": "Я"
+        },
+        {
+          "endMs": 2520,
+          "startMs": 2180,
+          "text": "R"
+        },
+        {
+          "endMs": 3080,
+          "startMs": 2520,
+          "text": "&D"
+        },
+        {
+          "endMs": 3740,
+          "startMs": 3080,
+          "text": "-инженер."
+        },
+        {
+          "endMs": 4420,
+          "startMs": 4060,
+          "text": "Нахожу"
+        },
+        {
+          "endMs": 4960,
+          "startMs": 4420,
+          "text": "проблемы"
+        },
+        {
+          "endMs": 5300,
+          "startMs": 4960,
+          "text": "и"
+        },
+        {
+          "endMs": 5920,
+          "startMs": 5300,
+          "text": "продуктовые"
+        },
+        {
+          "endMs": 6640,
+          "startMs": 5920,
+          "text": "возможности,"
+        },
+        {
+          "endMs": 7560,
+          "startMs": 7020,
+          "text": "формулирую"
+        },
+        {
+          "endMs": 8040,
+          "startMs": 7560,
+          "text": "задачи,"
+        },
+        {
+          "endMs": 8580,
+          "startMs": 8160,
+          "text": "придумываю"
+        },
+        {
+          "endMs": 9060,
+          "startMs": 8580,
+          "text": "решения"
+        },
+        {
+          "endMs": 9280,
+          "startMs": 9060,
+          "text": "и"
+        },
+        {
+          "endMs": 9640,
+          "startMs": 9280,
+          "text": "довожу"
+        },
+        {
+          "endMs": 9920,
+          "startMs": 9640,
+          "text": "их"
+        },
+        {
+          "endMs": 10060,
+          "startMs": 9920,
+          "text": "до"
+        },
+        {
+          "endMs": 10740,
+          "startMs": 10060,
+          "text": "работающего"
+        },
+        {
+          "endMs": 11320,
+          "startMs": 10740,
+          "text": "результата,"
+        },
+        {
+          "endMs": 12520,
+          "startMs": 11500,
+          "text": "самостоятельно"
+        },
+        {
+          "endMs": 12780,
+          "startMs": 12520,
+          "text": "или"
+        },
+        {
+          "endMs": 13320,
+          "startMs": 12780,
+          "text": "отвечая"
+        },
+        {
+          "endMs": 13440,
+          "startMs": 13320,
+          "text": "за"
+        },
+        {
+          "endMs": 13700,
+          "startMs": 13440,
+          "text": "свою"
+        },
+        {
+          "endMs": 13920,
+          "startMs": 13700,
+          "text": "часть"
+        },
+        {
+          "endMs": 14320,
+          "startMs": 13920,
+          "text": "работы"
+        },
+        {
+          "endMs": 14440,
+          "startMs": 14320,
+          "text": "в"
+        },
+        {
+          "endMs": 14880,
+          "startMs": 14440,
+          "text": "команде."
+        },
+        {
+          "endMs": 15540,
+          "startMs": 15080,
+          "text": "Сейчас"
+        },
+        {
+          "endMs": 15800,
+          "startMs": 15540,
+          "text": "мой"
+        },
+        {
+          "endMs": 16200,
+          "startMs": 15800,
+          "text": "основной"
+        },
+        {
+          "endMs": 16660,
+          "startMs": 16200,
+          "text": "фокус"
+        },
+        {
+          "endMs": 17500,
+          "startMs": 17040,
+          "text": "программные"
+        },
+        {
+          "endMs": 18120,
+          "startMs": 17500,
+          "text": "платформы"
+        },
+        {
+          "endMs": 18360,
+          "startMs": 18120,
+          "text": "и"
+        },
+        {
+          "endMs": 18940,
+          "startMs": 18360,
+          "text": "агентные"
+        },
+        {
+          "endMs": 19480,
+          "startMs": 18940,
+          "text": "продукты."
+        },
+        {
+          "endMs": 19920,
+          "startMs": 19620,
+          "text": "В"
+        },
+        {
+          "endMs": 20080,
+          "startMs": 19920,
+          "text": "этой"
+        },
+        {
+          "endMs": 20660,
+          "startMs": 20080,
+          "text": "презентации"
+        },
+        {
+          "endMs": 20800,
+          "startMs": 20660,
+          "text": "я"
+        },
+        {
+          "endMs": 21140,
+          "startMs": 20800,
+          "text": "покажу,"
+        },
+        {
+          "endMs": 21400,
+          "startMs": 21240,
+          "text": "как"
+        },
+        {
+          "endMs": 21640,
+          "startMs": 21400,
+          "text": "этот"
+        },
+        {
+          "endMs": 21940,
+          "startMs": 21640,
+          "text": "R"
+        },
+        {
+          "endMs": 22440,
+          "startMs": 21940,
+          "text": "&D"
+        },
+        {
+          "endMs": 22780,
+          "startMs": 22440,
+          "text": "-подход"
+        },
+        {
+          "endMs": 23360,
+          "startMs": 22780,
+          "text": "работает"
+        },
+        {
+          "endMs": 23880,
+          "startMs": 23360,
+          "text": "в"
+        },
+        {
+          "endMs": 24180,
+          "startMs": 23880,
+          "text": "разных"
+        },
+        {
+          "endMs": 24760,
+          "startMs": 24180,
+          "text": "предметных"
+        },
+        {
+          "endMs": 25420,
+          "startMs": 24760,
+          "text": "областях,"
+        },
+        {
+          "endMs": 25840,
+          "startMs": 25640,
+          "text": "от"
+        },
+        {
+          "endMs": 26420,
+          "startMs": 25840,
+          "text": "программных"
+        },
+        {
+          "endMs": 26920,
+          "startMs": 26420,
+          "text": "платформ"
+        },
+        {
+          "endMs": 27520,
+          "startMs": 26920,
+          "text": "до"
+        },
+        {
+          "endMs": 28000,
+          "startMs": 27520,
+          "text": "медиа"
+        },
+        {
+          "endMs": 28240,
+          "startMs": 28000,
+          "text": "и"
+        },
+        {
+          "endMs": 29080,
+          "startMs": 28240,
+          "text": "оборудования."
+        },
+        {
+          "endMs": 29500,
+          "startMs": 29080,
+          "text": "В"
+        },
+        {
+          "endMs": 29820,
+          "startMs": 29500,
+          "text": "каждом"
+        },
+        {
+          "endMs": 30280,
+          "startMs": 29820,
+          "text": "проекте"
+        },
+        {
+          "endMs": 30540,
+          "startMs": 30280,
+          "text": "я"
+        },
+        {
+          "endMs": 31020,
+          "startMs": 30540,
+          "text": "отдельно"
+        },
+        {
+          "endMs": 31540,
+          "startMs": 31020,
+          "text": "обозначу"
+        },
+        {
+          "endMs": 31780,
+          "startMs": 31540,
+          "text": "свою"
+        },
+        {
+          "endMs": 32040,
+          "startMs": 31780,
+          "text": "роль."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

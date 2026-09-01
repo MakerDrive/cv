@@ -1,11 +1,16 @@
 import {
   applyPresentationAuthoringProjectCommands,
   createPresentationAlignedSequence,
+  createPresentationAudioComposition,
   createPresentationAuthoringProject,
   createPresentationAuthoringProjectHashes,
   createPresentationAuthoringTimelineProjection,
+  createPresentationTimelineEditorModel,
   createPresentationExecutionController,
+  createPresentationPlaybackPlan,
   createPresentationScheduleV2,
+  projectPresentationNle,
+  PRESENTATION_AUTHORING_PROJECT_SCHEMA_VERSION,
   validatePresentationAuthoringProject,
 } from 'symbiote-workspace/browser';
 import { computeIntegrity } from 'symbiote-workspace/schema/canonical-json.js';
@@ -40,7 +45,7 @@ export {
  * }} CvShowEntryTupleOptions
  */
 
-const PROJECT_SCHEMA = 'workspace-presentation-authoring-project-v1';
+const PROJECT_SCHEMA = PRESENTATION_AUTHORING_PROJECT_SCHEMA_VERSION;
 const SOURCE_ALIGNMENT_SCHEMA = 'workspace-aligned-sequence-v3';
 const MEDIA_REGISTRY_SCHEMA = 'cv-show-media-binding-registry-v1';
 const MEDIA_ENTRY_SCHEMA = 'cv-show-media-binding-entry-v1';
@@ -262,10 +267,15 @@ function directiveMetadataForTurn(project, entryId) {
     }]);
 }
 
-function exactDependency(cell, ownerId) {
-  return cell.dependsOn.length === 1
-    && cell.dependsOn[0].cellId === ownerId
-    && cell.dependsOn[0].barrier === 'settled';
+function transitivelyDependsOn(cells, cellId, ancestorId, visiting = new Set()) {
+  if (cellId === ancestorId) return true;
+  if (visiting.has(cellId)) return false;
+  const cell = cells.find(({ id }) => id === cellId);
+  if (!cell) return false;
+  const nextVisiting = new Set(visiting).add(cellId);
+  return (cell.dependsOn || []).some(({ cellId: dependencyId }) => (
+    transitivelyDependsOn(cells, dependencyId, ancestorId, nextVisiting)
+  ));
 }
 
 function projectShape(project) {
@@ -283,6 +293,7 @@ const CANONICAL_MASTER_SHAPE = projectShape(CV_SHOW_PRESENTATION_PROJECT);
 
 function expectedCellLayer(cell) {
   if (cell.kind === 'narration') return 'cv-show:layer:narration';
+  if (cell.kind === 'audio-clip') return 'cv-show:layer:audio';
   if (cell.cue?.kind === 'focus') return 'cv-show:layer:focus';
   if (cell.cue?.kind === 'annotation') return 'cv-show:layer:annotation';
   if (cell.cue?.kind === 'interaction') return 'cv-show:layer:interaction';
@@ -294,12 +305,15 @@ export function validateCvShowMasterProject(projectInput) {
   const cvShow = metadata(project);
   const timeline = createPresentationAuthoringTimelineProjection(project);
   const narrationCells = project.cells.filter(({ kind }) => kind === 'narration');
+  const audioCells = project.cells.filter(({ kind }) => kind === 'audio-clip');
   if (
     project.id !== 'cv-show'
     || cvShow.slice
     || timeline.turns.length !== 30
     || timeline.turns.filter(({ replyTo }) => !replyTo).length !== 16
     || narrationCells.length !== 30
+    || project.assets.length !== 30
+    || audioCells.length < 30
     || Object.keys(cvShow.entries).length !== 30
   ) {
     throw invalidProject('canonical 30-turn master required');
@@ -329,6 +343,7 @@ export function validateCvShowMasterProject(projectInput) {
     if (
       expectedCellLayer(cell) !== cell.layerId
       || (cell.kind === 'narration' && cell.id !== `cv-show:narration:${cell.turnId}`)
+      || (cell.kind === 'audio-clip' && !cell.id.startsWith('cv-show:audio-clip:'))
       || (cell.kind === 'cue' && !cell.id.startsWith('cv-show:cue:'))
       || (cell.kind === 'cue' && cell.id.endsWith(':scroll')
         && cell.cue?.interaction?.type !== 'scroll')
@@ -363,29 +378,37 @@ export function validateCvShowMasterProject(projectInput) {
       && cell.id.endsWith(':scroll')
       && cell.timing.at.anchor === 'speech'
     ));
+    const audio = source.filter(({ kind }) => kind === 'audio-clip')
+      .sort((left, right) => left.audio.sourceInMs - right.audio.sourceInMs);
     if (
       narration.length !== 1
       || setup.length !== 1
       || speech.length === 0
       || speechScrolls.length !== speech.length
+      || audio.length === 0
     ) {
       throw invalidProject(`incomplete master turn ${entryId}`);
     }
-    let previousCellId = null;
-    for (let cell of speech) {
+    const asset = project.assets.find(({ id }) => id === audio[0].audio.assetId);
+    if (
+      !asset
+      || asset.kind !== 'audio'
+      || audio.some(({ audio: range }) => range.assetId !== asset.id)
+      || audio.some(({ id }) => !transitivelyDependsOn(source, id, setup[0].id))
+    ) {
+      throw invalidProject(`audio chain ${entryId}`);
+    }
+    for (const cell of speech) {
       const scroll = source.find(({ id }) => id === `${cell.id}:scroll`);
       if (
         !scroll
         || scroll.cue?.interaction?.type !== 'scroll'
         || scroll.cue.targetId !== cell.cue.targetId
-        || (previousCellId === null
-          ? !(scroll.dependsOn.length === 0 || exactDependency(scroll, setup[0].id))
-          : !exactDependency(scroll, previousCellId))
-        || !exactDependency(cell, scroll.id)
+        || !transitivelyDependsOn(source, scroll.id, setup[0].id)
+        || !transitivelyDependsOn(source, cell.id, scroll.id)
       ) {
         throw invalidProject(`group dependency ${cell.id}`);
       }
-      previousCellId = cell.id;
     }
   }
   projectCvShowStory(project);
@@ -450,7 +473,7 @@ export function applyCvShowMasterProjectCommands(projectInput, commandInputs = [
   return validateCvShowMasterProject(createPresentationAuthoringProject(draft));
 }
 
-function mediaBindingIssue(binding, narrationCellHash) {
+function mediaBindingIssue(binding, narrationCellHash, audioAsset) {
   if (!binding || typeof binding !== 'object' || Array.isArray(binding)) return 'binding';
   if (!Number.isInteger(binding.durationMilliseconds) || binding.durationMilliseconds <= 0) {
     return 'durationMilliseconds';
@@ -473,12 +496,22 @@ function mediaBindingIssue(binding, narrationCellHash) {
   }
   if (
     !String(binding.sourceNarrationCellHash || '')
-      .startsWith(`${PROJECT_SCHEMA}:cell:`)
+      .match(/^workspace-presentation-authoring-project-v[12]:cell:/u)
     || !SHA256_INTEGRITY_RE.test(binding.sourceNarrationCellHash)
-    || binding.sourceNarrationCellHash !== narrationCellHash
   ) {
     return 'sourceNarrationCellHash';
   }
+  if (
+    !audioAsset
+    || audioAsset.kind !== 'audio'
+    || audioAsset.contentHash !== binding.wavHash
+    || audioAsset.durationMs !== binding.durationMilliseconds
+    || audioAsset.alignmentHash !== binding.sourceAlignedSequenceHash
+    || audioAsset.sourceTimelineHash !== binding.sourceTimelineHash
+  ) {
+    return 'audioAsset';
+  }
+  void narrationCellHash;
   return null;
 }
 
@@ -532,7 +565,8 @@ function createCvShowMediaBindingRegistryFromMaster(project, mediaCollection = n
   const entries = Object.fromEntries(Object.entries(cvShow.entries).map(([entryId, value]) => {
     const binding = value.media;
     const narrationCellHash = cellHashes.get(`cv-show:narration:${entryId}`) || '';
-    const accepted = mediaBindingIssue(binding, narrationCellHash) === null;
+    const audioAsset = project.assets.find(({ id }) => id === `cv-show:audio:${entryId}`);
+    const accepted = mediaBindingIssue(binding, narrationCellHash, audioAsset) === null;
     const status = accepted ? 'accepted' : 'stale';
     const exactBinding = clone(binding || {});
     const collectionEntry = collectionEntries?.get(entryId) || null;
@@ -630,7 +664,11 @@ function selectedDirectiveProjection(project, sourceCellIds) {
 function createEntrySelection(
   project,
   entryId,
-  { speechDirectiveIds = null, heldAttentionDirectiveIds = [] } = {},
+  {
+    speechDirectiveIds = null,
+    heldAttentionDirectiveIds = [],
+    runtimeCellIds = null,
+  } = {},
 ) {
   let cvShow = metadata(project);
   if (!cvShow.entries[entryId]) throw invalidProject(`unknown entry ${entryId}`);
@@ -645,6 +683,52 @@ function createEntrySelection(
   if (!narration || !setupMetadata) throw invalidProject(`incomplete entry ${entryId}`);
   let setupCellId = setupMetadata[0];
   let setup = source.find(({ id }) => id === setupCellId);
+  if (speechDirectiveIds === null && heldAttentionDirectiveIds.length === 0) {
+    const selectedCells = source.map(clone);
+    const narrationCell = selectedCells.find(({ kind }) => kind === 'narration');
+    delete narrationCell.turn.replyTo;
+    return Object.freeze({
+      cells: Object.freeze(selectedCells),
+      sourceCellIds: Object.freeze(selectedCells.map(({ id }) => id)),
+      heldAttentionCellIds: Object.freeze([]),
+      parent: narration.turn.replyTo || cvShow.slice?.parent || null,
+    });
+  }
+  if (runtimeCellIds !== null) {
+    let requested = new Set(runtimeCellIds);
+    let heldCellIds = new Set(heldAttentionDirectiveIds.map((id) => `cv-show:cue:${id}`));
+    let selectedCells = [clone(narration), clone(setup)];
+    let previousCellId = setup.id;
+    for (let cell of source.filter(({ id }) => heldCellIds.has(id))) {
+      selectedCells.push({
+        ...clone(cell),
+        dependsOn: [{ cellId: previousCellId, barrier: 'settled' }],
+      });
+      previousCellId = cell.id;
+    }
+    for (let cellId of runtimeCellIds) {
+      if (heldCellIds.has(cellId)) continue;
+      let sourceCell = source.find(({ id }) => id === cellId);
+      if (!sourceCell) throw invalidProject(`unknown checkpoint cell ${cellId}`);
+      let cell = clone(sourceCell);
+      cell.dependsOn = cell.dependsOn.map((dependency) => (
+        requested.has(dependency.cellId) || heldCellIds.has(dependency.cellId)
+          ? dependency
+          : { cellId: previousCellId, barrier: 'settled' }
+      ));
+      selectedCells.push(cell);
+      previousCellId = cell.id;
+    }
+    delete selectedCells[0].turn.replyTo;
+    return Object.freeze({
+      cells: Object.freeze(selectedCells),
+      sourceCellIds: Object.freeze(selectedCells.map(({ id }) => id)),
+      heldAttentionCellIds: Object.freeze(
+        selectedCells.filter(({ id }) => heldCellIds.has(id)).map(({ id }) => id),
+      ),
+      parent: narration.turn.replyTo || cvShow.slice?.parent || null,
+    });
+  }
   let groups = directiveMetadataForTurn(project, entryId)
     .filter(([, value]) => value.phase === 'speech')
     .filter(([, value]) => (
@@ -865,6 +949,9 @@ function createCvShowEntryProjectFromMaster(project, entryId, options = {}) {
     policy: slicePolicy(project),
     layers: sliceLayers(project, selection.cells),
     cells: clone(selection.cells),
+    assets: project.assets.filter((asset) => selection.cells.some((cell) => (
+      cell.kind === 'audio-clip' && cell.audio.assetId === asset.id
+    ))).map(clone),
   };
   return createPresentationAuthoringProject(sliceInput);
 }
@@ -895,13 +982,19 @@ function validateSourceSequence(project, entryId, sequence) {
 function validateNarrationMediaBinding(project, entryId, binding, mediaAncestry) {
   const registry = createCvShowMediaBindingRegistryFromMaster(project);
   const authoritative = registry.entries[entryId];
+  const audioAsset = project.assets.find(({ id }) => id === `cv-show:audio:${entryId}`);
+  const bindingIssue = mediaBindingIssue(
+    binding,
+    authoritative?.narrationCellHash || '',
+    audioAsset,
+  );
   if (
     !authoritative?.playable
     || authoritative.status !== 'accepted'
-    || mediaBindingIssue(binding, authoritative?.narrationCellHash || '')
+    || bindingIssue
   ) {
     throw staleMedia(entryId, {
-      bindingIssue: mediaBindingIssue(binding, authoritative?.narrationCellHash || ''),
+      bindingIssue,
       expectedNarrationCellHash: binding?.sourceNarrationCellHash || '',
       narrationCellHash: authoritative?.narrationCellHash || '',
       playable: authoritative?.playable ?? false,
@@ -1013,9 +1106,126 @@ function createSliceAlignment(slice, sourceSequence) {
   });
 }
 
+function createSliceAudioComposition(project, schedule, sourceSequence) {
+  const sourceTurn = sourceSequence.turns[0];
+  return createPresentationAudioComposition(project, schedule, {
+    sources: project.assets.map((asset) => ({
+      assetId: asset.id,
+      contentHash: asset.contentHash,
+      alignmentHash: asset.alignmentHash,
+      durationMs: asset.durationMs,
+      words: clone(sourceTurn.words),
+    })),
+  });
+}
+
+export function projectCvShowScheduleDuration(value) {
+  const projectDurationMs = Number(
+    value?.projectDurationMs ?? value?.schedule?.totalDurationMs ?? value?.totalDurationMs,
+  );
+  return Number.isFinite(projectDurationMs) && projectDurationMs > 0
+    ? projectDurationMs
+    : 0;
+}
+
+/**
+ * Resolves one canonical Project-timeline checkpoint to the physical source
+ * position of the segmented narration asset. Project time remains the public
+ * transport coordinate; source time is only the native media seek coordinate.
+ */
+export function projectCvShowPlaybackCheckpoint(playbackPlan, projectTimeMs) {
+  const cells = Array.isArray(playbackPlan?.cells) ? playbackPlan.cells : [];
+  const clips = Array.isArray(playbackPlan?.clips) ? playbackPlan.clips : [];
+  const projectEndMs = Math.max(0, ...cells.map(({ span }) => Number(span?.endMs) || 0));
+  const projectTime = Math.min(
+    projectEndMs || Number.MAX_SAFE_INTEGER,
+    Math.max(0, Math.round(Number(projectTimeMs) || 0)),
+  );
+  if (clips.length === 0) {
+    return Object.freeze({
+      phase: 'empty',
+      projectTimeMs: projectTime,
+      sourceTimeMs: 0,
+      clipId: '',
+      clipIndex: -1,
+      previousClipId: '',
+      nextClipId: '',
+      nextClipIndex: -1,
+    });
+  }
+  let previous = null;
+  for (let [index, clip] of clips.entries()) {
+    const startMs = Number(clip.span?.startMs) || 0;
+    const endMs = Number(clip.span?.endMs) || startMs;
+    if (projectTime < startMs) {
+      return Object.freeze({
+        phase: 'gap',
+        projectTimeMs: projectTime,
+        sourceTimeMs: previous
+          ? Number(previous.audio.sourceOutMs)
+          : Number(clip.audio.sourceInMs),
+        clipId: '',
+        clipIndex: -1,
+        previousClipId: previous?.id || '',
+        nextClipId: clip.id,
+        nextClipIndex: index,
+      });
+    }
+    if (projectTime < endMs) {
+      const sourceInMs = Number(clip.audio.sourceInMs) || 0;
+      const sourceOutMs = Number(clip.audio.sourceOutMs) || sourceInMs;
+      return Object.freeze({
+        phase: 'clip',
+        projectTimeMs: projectTime,
+        sourceTimeMs: Math.min(sourceOutMs, sourceInMs + projectTime - startMs),
+        clipId: clip.id,
+        clipIndex: index,
+        previousClipId: previous?.id || '',
+        nextClipId: clips[index + 1]?.id || '',
+        nextClipIndex: index + 1 < clips.length ? index + 1 : -1,
+      });
+    }
+    previous = clip;
+  }
+  const last = clips.at(-1);
+  return Object.freeze({
+    phase: 'after',
+    projectTimeMs: projectTime,
+    sourceTimeMs: Number(last.audio.sourceOutMs) || 0,
+    clipId: '',
+    clipIndex: -1,
+    previousClipId: last.id,
+    nextClipId: '',
+    nextClipIndex: -1,
+  });
+}
+
 function checkpointDirectiveProjection(project, schedule, entryId, checkpointMs) {
   const byCellId = new Map(schedule.cells.map((cell) => [cell.cellId, cell]));
-  const checkpointScheduleMs = schedule.presentationStartMs + checkpointMs;
+  const playbackPlan = createPresentationPlaybackPlan(project, schedule);
+  const audioClips = playbackPlan.clips;
+  const checkpoint = projectCvShowPlaybackCheckpoint(playbackPlan, checkpointMs);
+  let firstFutureIndex = playbackPlan.cells.length;
+  const checkpointScheduleMs = checkpoint.projectTimeMs;
+  if (checkpoint.phase === 'clip') {
+    firstFutureIndex = playbackPlan.cells.findIndex(({ id }) => id === checkpoint.clipId);
+  } else if (checkpoint.nextClipIndex >= 0) {
+    if (checkpoint.nextClipIndex === 0) {
+      firstFutureIndex = playbackPlan.cells.findIndex(
+        ({ id }) => id === audioClips[0].id,
+      );
+    } else {
+      const previousIndex = playbackPlan.cells.findIndex(
+        ({ id }) => id === audioClips[checkpoint.nextClipIndex - 1].id,
+      );
+      firstFutureIndex = previousIndex + 1;
+    }
+  }
+  const futureCellIds = playbackPlan.cells.slice(firstFutureIndex)
+    .filter(({ kind }) => kind !== 'narration')
+    .map(({ id }) => id);
+  const futureCellIdSet = new Set(futureCellIds);
+  const excludedSpeechCellIds = new Set();
   const future = [];
   const held = [];
   for (let [cellId, value] of directiveMetadataForTurn(project, entryId)
@@ -1024,12 +1234,19 @@ function checkpointDirectiveProjection(project, schedule, entryId, checkpointMs)
     const scroll = byCellId.get(`${cellId}:scroll`);
     const attention = byCellId.get(cellId);
     if (!scroll || !attention) throw invalidProject(`incomplete scheduled group ${cellId}`);
-    const groupStartMs = Math.min(scroll.startMs, attention.startMs)
-      - schedule.presentationStartMs;
-    if (groupStartMs > checkpointMs) {
+    const groupStartMs = Math.min(
+      Number(scroll.startMs) || 0,
+      Number(attention.startMs) || 0,
+    );
+    if (
+      checkpointScheduleMs <= groupStartMs
+      && (futureCellIdSet.has(scroll.cellId) || futureCellIdSet.has(attention.cellId))
+    ) {
       future.push(value.id);
       continue;
     }
+    excludedSpeechCellIds.add(scroll.cellId);
+    excludedSpeechCellIds.add(attention.cellId);
     if (
       Number.isFinite(attention.gesture?.endMs)
       && attention.gesture.endMs < checkpointScheduleMs
@@ -1037,11 +1254,15 @@ function checkpointDirectiveProjection(project, schedule, entryId, checkpointMs)
       && checkpointScheduleMs < attention.visibility.endMs
     ) {
       held.push(value.id);
+      continue;
     }
   }
+  const retainedFutureCellIds = futureCellIds.filter((id) => !excludedSpeechCellIds.has(id));
   return Object.freeze({
     future: Object.freeze(future),
     held: Object.freeze(held),
+    futureCellIds: Object.freeze(retainedFutureCellIds),
+    playbackCheckpoint: checkpoint,
   });
 }
 
@@ -1072,22 +1293,26 @@ export function createCvShowEntryTuple(
   let project = createCvShowEntryProjectFromMaster(master, entryId);
   let alignedSequence = createSliceAlignment(project, sourceSequence);
   let schedule = createPresentationScheduleV2(project, alignedSequence);
+  const projectDurationMs = schedule.totalDurationMs;
   let includedSpeechDirectiveIds = directiveMetadataForTurn(master, entryId)
     .filter(([, value]) => value.phase === 'speech')
     .map(([, value]) => value.id);
   let heldAttentionDirectiveIds = [];
+  let playbackCheckpoint = null;
   if (checkpointMs !== null) {
     const checkpointProjection = checkpointDirectiveProjection(
-      master,
+      project,
       schedule,
       entryId,
       checkpointMs,
     );
     includedSpeechDirectiveIds = [...checkpointProjection.future];
     heldAttentionDirectiveIds = [...checkpointProjection.held];
+    playbackCheckpoint = checkpointProjection.playbackCheckpoint;
     project = createCvShowEntryProjectFromMaster(master, entryId, {
       speechDirectiveIds: includedSpeechDirectiveIds,
       heldAttentionDirectiveIds,
+      runtimeCellIds: checkpointProjection.futureCellIds,
     });
     alignedSequence = createSliceAlignment(project, sourceSequence);
     schedule = createPresentationScheduleV2(project, alignedSequence);
@@ -1099,6 +1324,10 @@ export function createCvShowEntryTuple(
     adapter,
     onReceipt,
   });
+  const playbackPlan = createPresentationPlaybackPlan(project, schedule);
+  const nle = projectPresentationNle(project, schedule);
+  const timelineEditorModel = createPresentationTimelineEditorModel(project, schedule);
+  const audioComposition = createSliceAudioComposition(project, schedule, sourceSequence);
   return Object.freeze({
     masterProjectHash: master.hash,
     masterRevision: master.revision,
@@ -1110,7 +1339,13 @@ export function createCvShowEntryTuple(
     timeline: createPresentationAuthoringTimelineProjection(project),
     alignedSequence,
     schedule,
+    projectDurationMs,
+    playbackPlan,
+    nle,
+    timelineEditorModel,
+    audioComposition,
     execution,
+    playbackCheckpoint,
     includedSpeechDirectiveIds: Object.freeze(includedSpeechDirectiveIds),
     heldAttentionDirectiveIds: Object.freeze(heldAttentionDirectiveIds),
   });

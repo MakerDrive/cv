@@ -5,15 +5,51 @@ import {
 import { getCvShowRuntimeAuthority } from './cvShowRuntimeAuthority.js';
 import {
   createCvShowEntryTuple,
+  projectCvShowPlaybackCheckpoint,
   projectCvShowDirective,
 } from './presentationProjectAdapter.js';
 import {
   loadCvShowWebAudioRelease,
   resolveCvShowWebAudioConfig,
 } from './webAudioRelease.js';
+import { playPresentationAudioClip } from './presentationAudioTransport.js';
+import { createPresentationPlaybackPump } from './presentationPlaybackPump.js';
 
 const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 const MAX_PRESENTATION_PREROLL_MEDIA_DRIFT_MS = 50;
+const CV_SHOW_PRESENTATION_SAMPLE_INTERVAL_MS = 250;
+
+/**
+ * Keeps the presentation executor sampled even when a browser throttles or
+ * coalesces native `timeupdate` events. The aligned runtime owns pause, seek,
+ * visibility and disposal lifecycle for this clock, while execution still
+ * rejects every cell before its authored start.
+ */
+export function createCvShowPresentationSamplingSchedule(mediaDurationMs, {
+  intervalMs = CV_SHOW_PRESENTATION_SAMPLE_INTERVAL_MS,
+} = {}) {
+  const duration = Math.max(0, Math.round(Number(mediaDurationMs) || 0));
+  const interval = Math.max(1, Math.round(Number(intervalMs) || 0));
+  if (!duration) return Object.freeze([]);
+  const schedule = [];
+  for (let timeMs = interval; timeMs < duration; timeMs += interval) {
+    schedule.push(Object.freeze({
+      cueId: `cv-show:presentation-sample:${timeMs}`,
+      timeMs,
+      alignment: Object.freeze({
+        provenance: Object.freeze({ mediaDurationMs: duration }),
+      }),
+    }));
+  }
+  schedule.push(Object.freeze({
+    cueId: `cv-show:presentation-sample:${duration}`,
+    timeMs: duration,
+    alignment: Object.freeze({
+      provenance: Object.freeze({ mediaDurationMs: duration }),
+    }),
+  }));
+  return Object.freeze(schedule);
+}
 
 function invalidAlignment(reason) {
   return Object.assign(
@@ -164,6 +200,7 @@ export function requireCvShowSceneSetupSuccess(receipt, entryId = '') {
  *   appConfig?: any,
  *   userSettings?: any,
  *   getAuthoringView?: () => any,
+ *   playbackClock?: { request?: Function, cancel?: Function, document?: Document },
  * }} [options]
  */
 export function createCvShowAlignmentController({
@@ -173,6 +210,7 @@ export function createCvShowAlignmentController({
   appConfig,
   userSettings,
   getAuthoringView = () => cvShowRuntimeAuthority.getView(),
+  playbackClock,
 } = {}) {
   let manifest = null;
   let config = null;
@@ -301,21 +339,30 @@ export function createCvShowAlignmentController({
       const sequence = await loadSequence(entry.id);
       const alignmentClip = manifest.byId.get(entry.id);
       let tuple = null;
+      let mediaRuntime = null;
       const receiptObservers = new Set();
       const receiveAcceptedReceipt = (receipt) => {
         onReceipt?.(receipt);
         for (const observer of [...receiptObservers]) observer(receipt);
       };
-      const adapterMethod = async (operation, kind) => runPresentationOperation(Object.freeze({
-        ...operation,
-        kind,
-        source: projectCvShowDirective(operation.projectCell, tuple.project),
-      }));
+      const adapterMethod = async (operation, kind) => {
+        const source = projectCvShowDirective(operation.projectCell, tuple.project);
+        return runPresentationOperation(Object.freeze({
+          ...operation,
+          kind,
+          source,
+        }));
+      };
       tuple = createCvShowEntryTuple(authoringView.project, entry.id, sequence, {
         checkpointMs,
         mediaAdmission: { audioClip, alignmentClip },
         mediaAncestry: authoringView.mediaRegistry,
         adapter: {
+          playAudioClip: (operation) => playPresentationAudioClip(media, operation, {
+            seekTransport: (mediaTimeMs) => mediaRuntime.seekTransport(mediaTimeMs, {
+              reason: `project-audio-clip:${operation.projectCell.id}`,
+            }),
+          }),
           runInteraction: (operation) => adapterMethod(operation, 'interaction'),
           runAttention: (operation) => adapterMethod(operation, 'attention'),
           waitForState: (operation) => adapterMethod(operation, 'state'),
@@ -328,12 +375,6 @@ export function createCvShowAlignmentController({
       ) {
         throw invalidAlignment(`authoring base ${entry.id}`);
       }
-      const mediaRuntime = new ShowAlignedMediaRuntime({
-        media,
-        schedule: [],
-        onReset,
-        onSeekFailure,
-      });
       let disposed = false;
       let attentionGateInProgress = false;
       let physicalPlaybackStarted = false;
@@ -343,6 +384,8 @@ export function createCvShowAlignmentController({
       let deferredPresentationPromise = null;
       let deferredPresentationError = null;
       let deferredMediaStartSeconds = 0;
+      let restoredProjectPositionMs = 0;
+      let playbackPump = null;
       const deferPresentation = deferPresentationUntilPlayback && !restorePausedCheckpoint;
       const mutedAdmission = deferPresentation && media.muted === true;
       const normalizeDeferredMediaStart = () => {
@@ -358,30 +401,27 @@ export function createCvShowAlignmentController({
           });
         }
       };
-      const sampleExecution = (reason) => {
-        if (
-          disposed
-          || (deferPresentation && !deferredPresentationCompleted)
-          || tuple.execution.snapshot.state !== 'running'
-        ) {
-          return tuple.execution.snapshot;
-        }
-        const mediaTimeMs = tuple.schedule.presentationStartMs
-          + Math.max(0, Math.round(Number(media.currentTime || 0) * 1_000));
-        try {
-          return tuple.execution.sample({ mediaTimeMs, reason });
-        } catch (error) {
-          onSeekFailure?.(Object.freeze({
-            status: 'failed',
-            reason: error.code || 'presentation-sample-failed',
-            operationId: tuple.execution.snapshot.activeOperationId,
-            requestedMs: mediaTimeMs,
-            observedMs: tuple.execution.snapshot.mediaTimeMs,
-            phase: 'presentation-sample',
-          }));
-          return tuple.execution.snapshot;
-        }
-      };
+      mediaRuntime = new ShowAlignedMediaRuntime({
+        media,
+        schedule: [],
+        onReset,
+        onSeekFailure,
+        playbackClock,
+      });
+      playbackPump = createPresentationPlaybackPump({
+        execution: tuple.execution,
+        playbackPlan: tuple.playbackPlan,
+        media,
+        onFailure: (error) => onSeekFailure?.(Object.freeze({
+          status: 'failed',
+          reason: error?.code || 'presentation-playback-failed',
+          operationId: tuple.execution.snapshot.activeOperationId,
+          requestedMs: tuple.execution.snapshot.mediaTimeMs || 0,
+          observedMs: Math.max(0, Math.round(Number(media.currentTime || 0) * 1_000)),
+          phase: 'presentation-playback',
+          details: Object.freeze({ message: String(error?.message || error || '') }),
+        })),
+      });
       const mediaListeners = {
         playing: () => {
           physicalPlaybackStarted = true;
@@ -390,14 +430,11 @@ export function createCvShowAlignmentController({
             if (!deferredPresentationStarted) void startDeferredPresentation();
             return;
           }
-          if (tuple.execution.snapshot.state === 'paused') tuple.execution.resume();
-          sampleExecution('media-playing');
+          playbackPump.resume('media-playing');
         },
-        timeupdate: () => sampleExecution('media-timeupdate'),
         seeking: () => {
           if (attentionGateInProgress) void tuple.execution.seek();
         },
-        ended: () => sampleExecution('media-ended'),
       };
       for (let [type, listener] of Object.entries(mediaListeners)) {
         media.addEventListener?.(type, listener);
@@ -587,7 +624,7 @@ export function createCvShowAlignmentController({
           if (!disposed && playbackRequested) {
             normalizeDeferredMediaStart();
             if (mutedAdmission) media.muted = false;
-            await Promise.resolve(mediaRuntime.resume());
+            playbackPump.resume('deferred-presentation-ready');
           }
           return tuple.execution.snapshot;
         })().catch((error) => {
@@ -618,25 +655,36 @@ export function createCvShowAlignmentController({
       };
       const runtime = Object.freeze({
         media,
+        get presentationPositionMs() {
+          return Math.max(restoredProjectPositionMs, playbackPump.positionMs);
+        },
         async loadAndRestorePlayback(snapshot, context) {
-          deferredMediaStartSeconds = Math.max(
+          const requestedProjectTimeMs = Math.max(
             0,
-            Number(snapshot?.positionMs || 0) / 1_000,
+            Math.round(Number(snapshot?.positionMs) || 0),
           );
+          const checkpoint = tuple.playbackCheckpoint?.projectTimeMs === requestedProjectTimeMs
+            ? tuple.playbackCheckpoint
+            : projectCvShowPlaybackCheckpoint(tuple.playbackPlan, requestedProjectTimeMs);
+          restoredProjectPositionMs = checkpoint.projectTimeMs;
+          deferredMediaStartSeconds = checkpoint.sourceTimeMs / 1_000;
           if (!deferPresentation) {
             await beforeDeferredPresentation?.();
             await runSetup();
             await runHeldCheckpointAttention();
           }
           await tuple.execution.pause();
-          const generation = await mediaRuntime.loadAndRestorePlayback(snapshot, context);
+          const generation = await mediaRuntime.loadAndRestorePlayback({
+            ...snapshot,
+            positionMs: checkpoint.sourceTimeMs,
+          }, context);
           if (generation?.status !== 'completed') return generation;
           if (!deferPresentation) await runCrossBoundaryAttentionGate();
           return generation;
         },
         pause() {
           playbackRequested = false;
-          return mediaRuntime.pause();
+          return playbackPump.pause('runtime-pause');
         },
         resume() {
           if (attentionGateInProgress) {
@@ -655,11 +703,9 @@ export function createCvShowAlignmentController({
             playbackRequested = true;
             return true;
           }
-          tuple.execution.resume();
-          sampleExecution('runtime-resume');
           playbackRequested = true;
           if (mutedAdmission) media.muted = false;
-          return mediaRuntime.resume();
+          return playbackPump.resume('runtime-resume');
         },
         async whenIdle() {
           if (deferredPresentationPromise) await deferredPresentationPromise;
@@ -668,8 +714,7 @@ export function createCvShowAlignmentController({
         },
         stop() {
           playbackRequested = false;
-          void tuple.execution.stop();
-          return mediaRuntime.pause();
+          return playbackPump.stop('runtime-stop');
         },
         dispose() {
           if (disposed) return;
@@ -678,12 +723,12 @@ export function createCvShowAlignmentController({
           for (let [type, listener] of Object.entries(mediaListeners)) {
             media.removeEventListener?.(type, listener);
           }
-          void tuple.execution.dispose();
+          void playbackPump.dispose('runtime-dispose');
           mediaRuntime.dispose();
         },
       });
-      const captionTrack = Object.freeze((sequence.turns || []).flatMap((turn) => (
-        (turn.words || []).map((word) => Object.freeze({
+      const captionTrack = Object.freeze(tuple.audioComposition.clips.flatMap((clip) => (
+        (clip.words || []).map((word) => Object.freeze({
           text: String(word.text || ''),
           startMs: Number(word.startMs) || 0,
           endMs: Number(word.endMs) || Number(word.startMs) || 0,
@@ -698,6 +743,8 @@ export function createCvShowAlignmentController({
         schedule: tuple.schedule,
         project: tuple.project,
         timeline: tuple.timeline,
+        playbackPlan: tuple.playbackPlan,
+        audioComposition: tuple.audioComposition,
         alignedSequence: tuple.alignedSequence,
         captionTrack,
         alignedSequenceHash: tuple.alignedSequence.hash,

@@ -1,0 +1,436 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-GIJGRE3C0ISUoNh4V2V3zCMHnVJ9T5cQlBRSlvZbkvk=",
+  "media": {
+    "durationMs": 44510,
+    "hash": "sha256:24949f922f59f73033da998490726bba4659ddeb3d1bf623401d57d12d97d7f1",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-pnvHjRrludIscnnDwPMziVFN079XLsaR6XgV92bKpms=",
+  "turns": [
+    {
+      "endMs": 44510,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Я придумал комплекс CAN, как коммерческую линию профессионального оборудования после open-source работы над фотопицей. Прозрачный вращающийся диск, стабильная механика и управляемый свет добавили чистые исходники для съемки объектов в формате 360 градусов и фотограмметрии. Я собственноручно собирал прототипы и первые изделия, разбивал конструкцию на детали для профильных подрядчиков, затем выполнял финальную сборку и тестирование. Отдельно я проектировал защитную упаковку, оформлял экспортные документы и организовывал доставки клиентам в разные страны. Позже RND этой линии стала частью технической базы музейных систем вроде AutoBox.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 200,
+          "startMs": 0,
+          "text": "Я"
+        },
+        {
+          "endMs": 680,
+          "startMs": 200,
+          "text": "придумал"
+        },
+        {
+          "endMs": 1200,
+          "startMs": 680,
+          "text": "комплекс"
+        },
+        {
+          "endMs": 1580,
+          "startMs": 1200,
+          "text": "CAN,"
+        },
+        {
+          "endMs": 2120,
+          "startMs": 1900,
+          "text": "как"
+        },
+        {
+          "endMs": 2840,
+          "startMs": 2120,
+          "text": "коммерческую"
+        },
+        {
+          "endMs": 3200,
+          "startMs": 2840,
+          "text": "линию"
+        },
+        {
+          "endMs": 4160,
+          "startMs": 3200,
+          "text": "профессионального"
+        },
+        {
+          "endMs": 4920,
+          "startMs": 4160,
+          "text": "оборудования"
+        },
+        {
+          "endMs": 5400,
+          "startMs": 4920,
+          "text": "после"
+        },
+        {
+          "endMs": 5900,
+          "startMs": 5400,
+          "text": "open"
+        },
+        {
+          "endMs": 6340,
+          "startMs": 5900,
+          "text": "-source"
+        },
+        {
+          "endMs": 6860,
+          "startMs": 6340,
+          "text": "работы"
+        },
+        {
+          "endMs": 7460,
+          "startMs": 6860,
+          "text": "над"
+        },
+        {
+          "endMs": 8180,
+          "startMs": 7460,
+          "text": "фотопицей."
+        },
+        {
+          "endMs": 8960,
+          "startMs": 8300,
+          "text": "Прозрачный"
+        },
+        {
+          "endMs": 9860,
+          "startMs": 8960,
+          "text": "вращающийся"
+        },
+        {
+          "endMs": 10300,
+          "startMs": 9860,
+          "text": "диск,"
+        },
+        {
+          "endMs": 11160,
+          "startMs": 10660,
+          "text": "стабильная"
+        },
+        {
+          "endMs": 11780,
+          "startMs": 11160,
+          "text": "механика"
+        },
+        {
+          "endMs": 11980,
+          "startMs": 11780,
+          "text": "и"
+        },
+        {
+          "endMs": 12700,
+          "startMs": 11980,
+          "text": "управляемый"
+        },
+        {
+          "endMs": 13020,
+          "startMs": 12700,
+          "text": "свет"
+        },
+        {
+          "endMs": 13500,
+          "startMs": 13020,
+          "text": "добавили"
+        },
+        {
+          "endMs": 13920,
+          "startMs": 13500,
+          "text": "чистые"
+        },
+        {
+          "endMs": 14540,
+          "startMs": 13920,
+          "text": "исходники"
+        },
+        {
+          "endMs": 15120,
+          "startMs": 14540,
+          "text": "для"
+        },
+        {
+          "endMs": 15680,
+          "startMs": 15120,
+          "text": "съемки"
+        },
+        {
+          "endMs": 16380,
+          "startMs": 15680,
+          "text": "объектов"
+        },
+        {
+          "endMs": 16580,
+          "startMs": 16380,
+          "text": "в"
+        },
+        {
+          "endMs": 17000,
+          "startMs": 16580,
+          "text": "формате"
+        },
+        {
+          "endMs": 17660,
+          "startMs": 17000,
+          "text": "360"
+        },
+        {
+          "endMs": 18780,
+          "startMs": 17660,
+          "text": "градусов"
+        },
+        {
+          "endMs": 19000,
+          "startMs": 18780,
+          "text": "и"
+        },
+        {
+          "endMs": 19500,
+          "startMs": 19000,
+          "text": "фотограмметрии."
+        },
+        {
+          "endMs": 20260,
+          "startMs": 19500,
+          "text": "Я"
+        },
+        {
+          "endMs": 21060,
+          "startMs": 20260,
+          "text": "собственноручно"
+        },
+        {
+          "endMs": 21500,
+          "startMs": 21060,
+          "text": "собирал"
+        },
+        {
+          "endMs": 22100,
+          "startMs": 21500,
+          "text": "прототипы"
+        },
+        {
+          "endMs": 22240,
+          "startMs": 22100,
+          "text": "и"
+        },
+        {
+          "endMs": 22620,
+          "startMs": 22240,
+          "text": "первые"
+        },
+        {
+          "endMs": 23060,
+          "startMs": 22620,
+          "text": "изделия,"
+        },
+        {
+          "endMs": 23800,
+          "startMs": 23220,
+          "text": "разбивал"
+        },
+        {
+          "endMs": 24520,
+          "startMs": 23800,
+          "text": "конструкцию"
+        },
+        {
+          "endMs": 24700,
+          "startMs": 24520,
+          "text": "на"
+        },
+        {
+          "endMs": 25200,
+          "startMs": 24700,
+          "text": "детали"
+        },
+        {
+          "endMs": 25520,
+          "startMs": 25200,
+          "text": "для"
+        },
+        {
+          "endMs": 26160,
+          "startMs": 25520,
+          "text": "профильных"
+        },
+        {
+          "endMs": 26920,
+          "startMs": 26160,
+          "text": "подрядчиков,"
+        },
+        {
+          "endMs": 27280,
+          "startMs": 27060,
+          "text": "затем"
+        },
+        {
+          "endMs": 27960,
+          "startMs": 27280,
+          "text": "выполнял"
+        },
+        {
+          "endMs": 28520,
+          "startMs": 27960,
+          "text": "финальную"
+        },
+        {
+          "endMs": 29080,
+          "startMs": 28520,
+          "text": "сборку"
+        },
+        {
+          "endMs": 29320,
+          "startMs": 29080,
+          "text": "и"
+        },
+        {
+          "endMs": 29820,
+          "startMs": 29320,
+          "text": "тестирование."
+        },
+        {
+          "endMs": 30760,
+          "startMs": 30160,
+          "text": "Отдельно"
+        },
+        {
+          "endMs": 30900,
+          "startMs": 30760,
+          "text": "я"
+        },
+        {
+          "endMs": 31580,
+          "startMs": 30900,
+          "text": "проектировал"
+        },
+        {
+          "endMs": 32060,
+          "startMs": 31580,
+          "text": "защитную"
+        },
+        {
+          "endMs": 32660,
+          "startMs": 32060,
+          "text": "упаковку,"
+        },
+        {
+          "endMs": 33580,
+          "startMs": 32880,
+          "text": "оформлял"
+        },
+        {
+          "endMs": 34200,
+          "startMs": 33580,
+          "text": "экспортные"
+        },
+        {
+          "endMs": 34740,
+          "startMs": 34200,
+          "text": "документы"
+        },
+        {
+          "endMs": 34960,
+          "startMs": 34740,
+          "text": "и"
+        },
+        {
+          "endMs": 35680,
+          "startMs": 34960,
+          "text": "организовывал"
+        },
+        {
+          "endMs": 36200,
+          "startMs": 35680,
+          "text": "доставки"
+        },
+        {
+          "endMs": 36880,
+          "startMs": 36200,
+          "text": "клиентам"
+        },
+        {
+          "endMs": 37060,
+          "startMs": 36880,
+          "text": "в"
+        },
+        {
+          "endMs": 37400,
+          "startMs": 37060,
+          "text": "разные"
+        },
+        {
+          "endMs": 37900,
+          "startMs": 37400,
+          "text": "страны."
+        },
+        {
+          "endMs": 38540,
+          "startMs": 38060,
+          "text": "Позже"
+        },
+        {
+          "endMs": 39220,
+          "startMs": 38540,
+          "text": "RND"
+        },
+        {
+          "endMs": 39640,
+          "startMs": 39220,
+          "text": "этой"
+        },
+        {
+          "endMs": 40100,
+          "startMs": 39640,
+          "text": "линии"
+        },
+        {
+          "endMs": 40440,
+          "startMs": 40100,
+          "text": "стала"
+        },
+        {
+          "endMs": 40940,
+          "startMs": 40440,
+          "text": "частью"
+        },
+        {
+          "endMs": 41580,
+          "startMs": 40940,
+          "text": "технической"
+        },
+        {
+          "endMs": 41980,
+          "startMs": 41580,
+          "text": "базы"
+        },
+        {
+          "endMs": 42460,
+          "startMs": 41980,
+          "text": "музейных"
+        },
+        {
+          "endMs": 42860,
+          "startMs": 42460,
+          "text": "систем"
+        },
+        {
+          "endMs": 43480,
+          "startMs": 42860,
+          "text": "вроде"
+        },
+        {
+          "endMs": 44300,
+          "startMs": 43480,
+          "text": "AutoBox."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

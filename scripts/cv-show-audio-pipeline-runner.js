@@ -599,6 +599,10 @@ function validateObservedWord(value, field, { mediaDurationMs = Number.MAX_SAFE_
   return source;
 }
 
+function retainedTranscriptText(transcript) {
+  return transcript.words.map(({ word }) => word).join(' ');
+}
+
 function normalizeAlignment(value, plan, synthesis, transcript) {
   if (!synthesis || !transcript) {
     fail(
@@ -652,12 +656,23 @@ function normalizeAlignment(value, plan, synthesis, transcript) {
     startMs: wordMilliseconds(word.startSec, 'observed word start'),
     endMs: wordMilliseconds(word.endSec, 'observed word end'),
   }));
+  let expectedObservedTranscript = retainedTranscriptText(transcript);
+  let alignedTranscript = sequence.turns[0]?.transcript;
+  if (
+    alignedTranscript !== transcript.text
+    && alignedTranscript !== expectedObservedTranscript
+  ) {
+    fail(
+      'CV_SHOW_AUDIO_PIPELINE_INVALID',
+      'CV Show audio pipeline observed aligned turn changed the recognized transcript evidence',
+    );
+  }
   let expectedTurn = {
     turnIndex: 0,
     startMs: 0,
     endMs: milliseconds(transcript.durationSec, 'transcript duration'),
     speaker: plan.voice.speakerId,
-    transcript: transcript.text,
+    transcript: alignedTranscript,
     words: expectedWords,
   };
   requireObject(
@@ -698,7 +713,7 @@ function normalizeAlignment(value, plan, synthesis, transcript) {
   if (
     authored.text !== plan.timeline.turns[0].text
     || !Array.isArray(authored.tokens)
-    || observed.transcript !== transcript.text
+    || observed.transcript !== alignedTranscript
     || !Array.isArray(observed.tokens)
     || !sameJson(observed.words, expectedWords)
   ) {
@@ -1514,6 +1529,7 @@ function wordMilliseconds(seconds, field) {
 async function advanceAlignment(run, plan, createObservedAlignment, context) {
   let transcript = context.state.transcript;
   let synthesis = context.state.synthesis;
+  let retainedTranscript = retainedTranscriptText(transcript);
   let input = {
     media: {
       hash: `sha256:${synthesis.wavHash}`,
@@ -1535,8 +1551,23 @@ async function advanceAlignment(run, plan, createObservedAlignment, context) {
   };
   let alignment;
   try {
+    let observedAlignment;
+    try {
+      observedAlignment = createObservedAlignment(plan.timeline, input);
+    } catch (error) {
+      let canUseRetainedTranscript = (
+        error?.code === 'PRESENTATION_OBSERVED_ALIGNMENT_TRANSCRIPT_WORD_MISMATCH'
+        && Number.isSafeInteger(error?.details?.tokenIndex)
+        && transcript.text !== retainedTranscript
+      );
+      if (!canUseRetainedTranscript) throw error;
+      // Preserve the raw ASR response in durable state. Only the strict alignment projection
+      // falls back to the exact lexical stream represented by retained timed observations.
+      input.observations[0].transcript = retainedTranscript;
+      observedAlignment = createObservedAlignment(plan.timeline, input);
+    }
     alignment = normalizeAlignment(
-      createObservedAlignment(plan.timeline, input),
+      observedAlignment,
       plan,
       synthesis,
       transcript,

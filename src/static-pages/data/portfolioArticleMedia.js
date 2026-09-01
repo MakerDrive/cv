@@ -27,7 +27,7 @@ export const PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS = Object.freeze({
     'media/autobox-v1/youtube/8XsSHyQFtV8': 'capture-technology',
     'media/autobox-v1/youtube/zb47xAYQBcE': 'fabrication',
     'media/autobox-v1/youtube/us3vQHuTYPw': 'museum-fieldwork',
-    'media/autobox-v1/youtube/FugBzpZqXZ0': 'netsuke-collaboration',
+    'media/autobox-v1/youtube/FugBzpZqXZ0': 'netsuke-video',
     'media/autobox-v1/youtube/iNqxRJgrqM8': 'visualization',
     'media/autobox-v1/youtube/M0cHqy3cScc': 'visualization',
     'media/autobox-v1/youtube/o4XzMKW8a2E': 'visualization',

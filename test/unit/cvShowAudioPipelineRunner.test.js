@@ -54,6 +54,17 @@ const DELETED_TOKEN_TRANSCRIPT = Object.freeze({
     Object.freeze({ word: 'gamma', startSec: 0.5, endSec: 0.9 }),
   ]),
 });
+const FILTERED_ZERO_DURATION_TRANSCRIPT = Object.freeze({
+  text: 'Alpha beta gamma. Продолжение следует...',
+  durationSec: 1,
+  words: Object.freeze([
+    Object.freeze({ word: 'Alpha', startSec: 0, endSec: 0.2 }),
+    Object.freeze({ word: 'beta', startSec: 0.25, endSec: 0.5 }),
+    Object.freeze({ word: 'gamma', startSec: 0.55, endSec: 0.9 }),
+    Object.freeze({ word: 'Продолжение', startSec: 0.9, endSec: 0.9 }),
+    Object.freeze({ word: 'следует...', startSec: 0.9, endSec: 0.98 }),
+  ]),
+});
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -515,6 +526,28 @@ test('blocks a required authored token deleted by strict observed alignment', as
   assert.equal(blocked.phase, 'blocked');
   assert.equal(blocked.failure.code, 'CV_SHOW_AUDIO_PIPELINE_REQUIRED_ANCHOR_MISSING');
   assert.equal(scenario.transport.calls.length, 6);
+});
+
+test('aligns from retained timed words when ASR text still names a filtered zero-duration token', async (t) => {
+  let scenario = await createScenario(t, {
+    transcript: FILTERED_ZERO_DURATION_TRANSCRIPT,
+  });
+  await scenario.handle.initialize();
+  await synthesizeAndApprove(scenario);
+
+  let transcribed = await scenario.handle.advance('owner-a');
+  assert.equal(transcribed.phase, 'transcribed');
+  let aligned = await scenario.handle.advance('owner-a');
+  assert.equal(aligned.phase, 'aligned', JSON.stringify(aligned.failure));
+
+  assert.equal(aligned.transcript.text, FILTERED_ZERO_DURATION_TRANSCRIPT.text);
+  assert.deepEqual(
+    aligned.transcript.words.map(({ word }) => word),
+    ['Alpha', 'beta', 'gamma', 'следует...'],
+  );
+  assert.equal(aligned.alignment.metrics.timingCoverage, 1);
+  assert.equal(aligned.alignment.metrics.editDistance, 1);
+  assert.equal((await scenario.handle.advance('owner-a')).phase, 'entry-verified');
 });
 
 test('rejects unexpected public input keys and stale timeline hashes', async (t) => {

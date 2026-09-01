@@ -16,6 +16,96 @@ export const CV_SHOW_DIRECTIVE_TYPES = Object.freeze([
   'idle',
 ]);
 
+function runtimeCleanupReport(operation, reason, error) {
+  return Object.freeze({
+    type: 'show:runtime-error',
+    operation,
+    reason,
+    code: String(error?.code || 'show-runtime-error'),
+    message: String(error?.message || error),
+    error,
+  });
+}
+
+/**
+ * Starts Show media cleanup synchronously while consuming every async failure.
+ * Terminal cleanup remains failure-independent: a rejected media stop cannot
+ * prevent the final shared-audio release from running.
+ */
+export function createCvShowRuntimeCleanup({
+  media = null,
+  audioArbiter = null,
+  reportError = null,
+} = {}) {
+  const report = (operation, reason, error) => {
+    const detail = runtimeCleanupReport(operation, reason, error);
+    if (typeof reportError === 'function') {
+      try {
+        reportError(detail);
+        return;
+      } catch (reportFailure) {
+        globalThis.console?.error?.('CV Show runtime error reporter failed', reportFailure, detail);
+        return;
+      }
+    }
+    globalThis.console?.error?.('CV Show runtime cleanup failed', detail);
+  };
+
+  const consume = (operation, reason, task) => {
+    let result;
+    try {
+      result = task();
+    } catch (error) {
+      report(operation, reason, error);
+      return Promise.resolve(Object.freeze({
+        status: 'failed',
+        operation,
+        reason,
+        error,
+      }));
+    }
+    return Promise.resolve(result).then(
+      (value) => Object.freeze({ status: 'completed', operation, reason, value }),
+      (error) => {
+        report(operation, reason, error);
+        return Object.freeze({ status: 'failed', operation, reason, error });
+      },
+    );
+  };
+
+  const stop = (reason = 'phase-changed', { operation = 'media-stop' } = {}) => (
+    consume(operation, reason, () => media?.stop?.(reason))
+  );
+  const skip = ({ operation = 'media-skip' } = {}) => (
+    consume(operation, 'skipped', () => media?.skip?.())
+  );
+  const stopAndRelease = (
+    reason,
+    { operation = 'show-terminal-cleanup' } = {},
+  ) => consume(operation, reason, async () => {
+    const errors = [];
+    let stopped;
+    let released;
+    try {
+      stopped = await media?.stop?.(reason);
+    } catch (error) {
+      errors.push(error);
+    }
+    try {
+      released = await audioArbiter?.release?.({ reason });
+    } catch (error) {
+      errors.push(error);
+    }
+    if (errors.length === 1) throw errors[0];
+    if (errors.length > 1) {
+      throw new AggregateError(errors, `CV Show runtime cleanup failed for "${reason}"`);
+    }
+    return Object.freeze({ stopped: Boolean(stopped), released: Boolean(released) });
+  });
+
+  return Object.freeze({ stop, skip, stopAndRelease });
+}
+
 function branchSnapshotMismatch(field, expected, observed) {
   return Object.assign(
     new TypeError(`CV Show branch return snapshot mismatch: ${field}`),
@@ -99,6 +189,18 @@ function policyOf(directive) {
   return directive?.policy === 'optional' ? 'optional' : 'required';
 }
 
+/**
+ * A frame-only media cue is a static visual reference, not a media playback
+ * request. Render its final focus frame synchronously so iframe/player startup
+ * cannot consume the authored presentation deadline.
+ */
+export function shouldInstantlySettleCvShowAttention(source = {}) {
+  return source?.checkpointMode === 'restore-held' || (
+    source?.type === 'frame'
+    && String(source?.target || '').startsWith('media/')
+  );
+}
+
 function createAction(action, resolveText) {
   return {
     id: action,
@@ -137,6 +239,8 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
       targetId: directive.target,
       marker: directive.shape,
       ...(directive.text ? { label: directive.text } : {}),
+      ...(directive.quote ? { quote: directive.quote } : {}),
+      ...(directive.occurrence ? { occurrence: directive.occurrence } : {}),
     };
   } else if (directive.type === 'activate') {
     shared = { type: 'attention', id: directive.id, mode: 'click', targetId: directive.target };
@@ -148,6 +252,16 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
       mode: directive.mode,
       ...(directive.startMs === undefined ? {} : { startMs: directive.startMs }),
       ...(directive.endMs === undefined ? {} : { endMs: directive.endMs }),
+      ...(directive.segments === undefined ? {} : { segments: directive.segments }),
+      ...(directive.segmentDurationMs === undefined
+        ? {}
+        : { segmentDurationMs: directive.segmentDurationMs }),
+      ...(directive.frames === undefined ? {} : { frames: directive.frames }),
+      ...(directive.frameHoldMs === undefined ? {} : { frameHoldMs: directive.frameHoldMs }),
+      ...(directive.finalFrame === undefined ? {} : { finalFrame: directive.finalFrame }),
+      ...(directive.keepPlayingDuringQuote === undefined
+        ? {}
+        : { keepPlayingDuringQuote: directive.keepPlayingDuringQuote }),
     };
   } else if (directive.type === 'chat-note') {
     shared = {
@@ -389,6 +503,7 @@ export function createCvShowDirectiveRunner(options = {}) {
     emit,
     resolveTarget,
     resolveMedia,
+    resolveMarkerTarget = (target) => target,
     resolveText,
     resolveSelectionQuote = (source) => source?.quote || '',
     activateTarget = () => false,
@@ -396,11 +511,16 @@ export function createCvShowDirectiveRunner(options = {}) {
     waitForReadiness = waitForShowDomReadiness,
     timeoutMs = 2_500,
     observePerformance = observePresentationPerformance,
+    reportRuntimeError = null,
   } = options;
   let activeController = null;
   let markerSeries = '';
   let paused = false;
   const resumeWaiters = new Set();
+  const runtimeCleanup = createCvShowRuntimeCleanup({
+    media,
+    reportError: reportRuntimeError,
+  });
 
   const waitUntilResumed = (signal) => {
     if (!paused) return Promise.resolve();
@@ -440,7 +560,7 @@ export function createCvShowDirectiveRunner(options = {}) {
         signal: input.signal,
         timeoutMs,
       }),
-    act: async (input) => input.context.act(input.target?.target ?? input.target),
+    act: async (input) => input.context.act(input.target),
     restore: (input) => actionAdapter?.restore?.(input),
   });
 
@@ -476,7 +596,9 @@ export function createCvShowDirectiveRunner(options = {}) {
 
   const cancel = (reason = 'stop') => {
     clearAttention(reason);
-    media?.stop?.('phase-changed');
+    void runtimeCleanup.stop('phase-changed', {
+      operation: `media-stop:${reason}`,
+    });
   };
 
   const run = async (
@@ -557,7 +679,13 @@ export function createCvShowDirectiveRunner(options = {}) {
                   // the active gesture during an automatic scene transition.
                   presentationTarget = String(source.id || '').endsWith('.map')
                     ? target
-                    : resolveTarget(source.target) || target;
+                    : runtime.viewer || resolveTarget(source.target) || target;
+                }
+                if (source.type === 'marker') {
+                  presentationTarget = resolveMarkerTarget(
+                    presentationTarget,
+                    adapted.directive,
+                  ) || presentationTarget;
                 }
                 const providerPlanned = presentation?.requiresProviderAdmission === true;
                 if (
@@ -567,7 +695,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                     || typeof attention?.whenSettled !== 'function'
                     || typeof attention?.cancel !== 'function'
                     || (
-                      source.checkpointMode === 'restore-held'
+                      shouldInstantlySettleCvShowAttention(source)
                       && typeof attention?.seek !== 'function'
                     )
                   )
@@ -583,7 +711,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                     ? {
                         ...adapted.directive,
                         quote: resolveSelectionQuote(source, presentationTarget),
-                        occurrence: 1,
+                        occurrence: adapted.directive.occurrence || source.occurrence || 1,
                       }
                     : adapted.directive;
                   let result;
@@ -613,7 +741,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                   } catch (error) {
                     presentFailure = error;
                   }
-                  if (!presentFailure && source.checkpointMode === 'restore-held') {
+                  if (!presentFailure && shouldInstantlySettleCvShowAttention(source)) {
                     attention?.seek?.(presentation.budgetMs);
                   }
                   if (source.type === 'activate') {
@@ -678,8 +806,8 @@ export function createCvShowDirectiveRunner(options = {}) {
         }
 
         if (adapted.directive.type === 'media') {
-          let mediaElement = resolveMedia(source.target);
-          if (!mediaElement) {
+          const mediaTarget = resolveMedia(source.target);
+          if (!mediaTarget) {
             let receipt = missingReceipt(adapted, 'media-unresolved');
             receipts.push(receipt);
             if (adapted.policy === 'required') {
@@ -691,10 +819,12 @@ export function createCvShowDirectiveRunner(options = {}) {
             continue;
           }
           try {
+            const mediaElement = mediaTarget.element || mediaTarget;
+            const nativeMedia = mediaElement.matches?.('video, audio') ? [mediaElement] : [];
             await waitForReadiness({
               document,
               target: mediaElement,
-              media: [mediaElement],
+              media: nativeMedia,
               signal: controller.signal,
               timeoutMs,
             });
@@ -702,7 +832,9 @@ export function createCvShowDirectiveRunner(options = {}) {
             await waitUntilResumed(controller.signal);
             throwIfAborted(controller.signal);
             reportInteractionActed();
-            let result = await media.play(mediaElement, adapted.directive);
+            let result = await media.play(mediaTarget, adapted.directive);
+            if (result?.completion) await result.completion;
+            throwIfAborted(controller.signal);
             reportInteractionSettled();
             receipts.push(successReceipt(adapted, result));
           } catch (error) {
@@ -750,6 +882,7 @@ export function createCvShowDirectiveRunner(options = {}) {
     const context = {
       retainRevealedPanel: false,
       scrollOperation: true,
+      presentationBudgetMs: presentation?.budgetMs,
       act: async () => {
         await waitUntilResumed(signal);
         throwIfAborted(signal);

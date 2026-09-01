@@ -69,7 +69,10 @@ export function createLocalAudioSpeechController({
     },
     speak(text, options = {}) {
       let clip = manifest?.byId?.get?.(String(options.id || ''));
-      if (!clip || clip.speech !== String(text || '')) return false;
+      // The immutable media clip is admitted by its Project/manifest binding.
+      // Authored captions may intentionally use display spelling that differs
+      // from the synthesis transcript carried by the audio release.
+      if (!clip || !String(text || '').trim()) return false;
       if (primaryLocale(options.lang) !== manifest.locale) return false;
       generation += 1;
       clear({ releaseSource: true });

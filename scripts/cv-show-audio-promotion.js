@@ -8,7 +8,6 @@ import {
   rename,
 } from 'node:fs/promises';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 
 import { createPresentationAuthoringProject } from 'symbiote-workspace';
 import { canonicalize } from 'symbiote-workspace/schema/canonical-json.js';
@@ -18,6 +17,7 @@ import {
 } from './cv-show-audio-pipeline.js';
 import {
   CV_SHOW_SOURCE_RELATIVE_PATH,
+  loadCvShowSourceSelection,
   replaceCvShowSource,
   withCvShowSourceLock,
 } from './cv-show-authoring-materializer.js';
@@ -217,12 +217,13 @@ async function inspectTree(root) {
 
 async function selectedSource(repoRoot) {
   let target = path.join(repoRoot, CV_SHOW_SOURCE_RELATIVE_PATH);
-  let bytes = await readFile(target);
-  let url = `${pathToFileURL(target).href}?cv-promotion-selected=${randomUUID()}`;
-  let source = await import(url);
+  let source = await loadCvShowSourceSelection({
+    sourcePath: target,
+    phase: 'promotion-selected',
+  });
   return {
-    bytes,
-    sourceSha256: sourceSha256(bytes),
+    bytes: source.bytes,
+    sourceSha256: sourceSha256(source.bytes),
     project: source.CV_SHOW_PRESENTATION_PROJECT,
     release: source.CV_SHOW_AUDIO_RELEASE,
   };

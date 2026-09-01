@@ -4,13 +4,16 @@ import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { pathToFileURL } from 'node:url';
 
 import {
   createPresentationAuthoringProject,
-  createPresentationAuthoringProjectHashes,
   presentationAuthoringProjectCanonicalProjection,
 } from 'symbiote-workspace';
-import { canonicalize } from 'symbiote-workspace/schema/canonical-json.js';
+import {
+  canonicalize,
+  computeIntegrity,
+} from 'symbiote-workspace/schema/canonical-json.js';
 
 import {
   createCvShowAudioWorkflow,
@@ -18,6 +21,7 @@ import {
   createCvShowAudioBoundProject,
   createCvShowAudioWorkflowPlan,
   loadCvShowPredecessorEntryReleases,
+  loadCvShowAudioWorkflowCurrentSource,
   publishCvShowAudioWorkflowRelease,
 } from '../../scripts/cv-show-audio-workflow.js';
 import {
@@ -43,6 +47,9 @@ import {
 import {
   verifyCvShowPrivateArtifacts,
 } from '../../scripts/verify-cv-show-private-artifacts.js';
+import {
+  CV_SHOW_STRUCTURAL_MEDIA_FIXTURE,
+} from '../fixtures/cvShowStructuralMedia.js';
 
 const PROFILE = Object.freeze({
   voice: {
@@ -85,6 +92,10 @@ const PROFILE = Object.freeze({
   },
 });
 
+const PROJECT_FACTORY_URL = pathToFileURL(path.resolve(
+  'node_modules/symbiote-workspace/browser.js',
+)).href;
+
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
@@ -92,6 +103,107 @@ function sha256(value) {
 function contentId(schemaVersion, value) {
   return `${schemaVersion}:${sha256(Buffer.from(canonicalize(value), 'utf8'))}`;
 }
+
+function sourceSelectionModule({ projectInput, release, projectExport }) {
+  return `import { createPresentationAuthoringProject } from ${JSON.stringify(PROJECT_FACTORY_URL)};
+export const CV_SHOW_AUTHORING_PROJECT_INPUT =
+/* CV_SHOW_AUTHORING_PROJECT_INPUT:START */
+${JSON.stringify(projectInput, null, 2)}
+/* CV_SHOW_AUTHORING_PROJECT_INPUT:END */;
+export const CV_SHOW_AUDIO_RELEASE =
+/* CV_SHOW_AUDIO_RELEASE_INPUT:START */
+${JSON.stringify(release, null, 2)}
+/* CV_SHOW_AUDIO_RELEASE_INPUT:END */;
+export const CV_SHOW_PRESENTATION_PROJECT = ${projectExport
+    || 'createPresentationAuthoringProject(CV_SHOW_AUTHORING_PROJECT_INPUT)'};
+`;
+}
+
+function releaseForProject(project) {
+  let input = structuredClone(CV_SHOW_AUDIO_RELEASE);
+  delete input.releaseId;
+  input.project = {
+    revision: project.revision,
+    authoringProjectHash: project.hash,
+  };
+  return createCvShowAudioReleaseDescriptor(input);
+}
+
+async function writeSourceSelectionRepo(root, source) {
+  let sourcePath = path.join(root, 'src/static-pages/data/cvShowPresentationProject.js');
+  await mkdir(path.dirname(sourcePath), { recursive: true });
+  await writeFile(path.join(root, 'package.json'), '{"type":"module"}\n');
+  await writeFile(sourcePath, source);
+  return sourcePath;
+}
+
+test('workflow current-source loader reads a real-shaped legacy v1 factory without executing it', async (t) => {
+  let repoRoot = await mkdtemp(path.join(tmpdir(), 'cv-show-workflow-legacy-source-'));
+  t.after(() => rm(repoRoot, { recursive: true, force: true }));
+  let projectInput = presentationAuthoringProjectCanonicalProjection(
+    CV_SHOW_PRESENTATION_PROJECT,
+  );
+  projectInput.schemaVersion = 'workspace-presentation-authoring-project-v1';
+  projectInput.revision = 53;
+  let project = {
+    ...projectInput,
+    hash: `${projectInput.schemaVersion}:${computeIntegrity(projectInput)}`,
+  };
+  let release = releaseForProject(project);
+  let source = sourceSelectionModule({ projectInput, release });
+  let sourcePath = await writeSourceSelectionRepo(repoRoot, source);
+
+  await assert.rejects(import(
+    `${pathToFileURL(sourcePath).href}?unguarded-factory=${Date.now()}`
+  ));
+
+  let loaded = await loadCvShowAudioWorkflowCurrentSource(repoRoot);
+
+  assert.equal(loaded.sourcePath, sourcePath);
+  assert.equal(loaded.bytes.toString('utf8'), source);
+  assert.equal(loaded.CV_SHOW_PRESENTATION_PROJECT.hash, project.hash);
+  assert.equal(loaded.CV_SHOW_AUDIO_RELEASE.releaseId, release.releaseId);
+  assert.equal(await readFile(sourcePath, 'utf8'), source);
+});
+
+test('workflow current-source loader rejects forged legacy and invalid v2 evidence without a write', async (t) => {
+  let repoRoot = await mkdtemp(path.join(tmpdir(), 'cv-show-workflow-source-reject-'));
+  t.after(() => rm(repoRoot, { recursive: true, force: true }));
+  let projectInput = presentationAuthoringProjectCanonicalProjection(
+    CV_SHOW_PRESENTATION_PROJECT,
+  );
+  projectInput.schemaVersion = 'workspace-presentation-authoring-project-v1';
+  projectInput.revision = 53;
+  let project = {
+    ...projectInput,
+    hash: `${projectInput.schemaVersion}:${computeIntegrity(projectInput)}`,
+  };
+  let forgedRelease = {
+    ...releaseForProject(project),
+    releaseId: `cv-show-audio-release-v1:${'f'.repeat(64)}`,
+  };
+  let forgedSource = sourceSelectionModule({ projectInput, release: forgedRelease });
+  let sourcePath = await writeSourceSelectionRepo(repoRoot, forgedSource);
+  await assert.rejects(loadCvShowAudioWorkflowCurrentSource(repoRoot), {
+    code: 'CV_SHOW_AUTHORING_SOURCE_STALE',
+  });
+  assert.equal(await readFile(sourcePath, 'utf8'), forgedSource);
+
+  let v2Input = presentationAuthoringProjectCanonicalProjection(CV_SHOW_PRESENTATION_PROJECT);
+  let invalidV2Source = sourceSelectionModule({
+    projectInput: v2Input,
+    release: CV_SHOW_AUDIO_RELEASE,
+    projectExport: JSON.stringify({
+      schemaVersion: 'workspace-presentation-authoring-project-v2',
+      id: 'cv-show',
+    }),
+  });
+  await writeFile(sourcePath, invalidV2Source);
+  await assert.rejects(loadCvShowAudioWorkflowCurrentSource(repoRoot), {
+    code: 'PRESENTATION_AUTHORING_PROJECT_INVALID',
+  });
+  assert.equal(await readFile(sourcePath, 'utf8'), invalidV2Source);
+});
 
 function acceptedPublicFixture(release = CV_SHOW_AUDIO_RELEASE) {
   let manifest = {
@@ -250,20 +362,47 @@ function changedNarrationProject() {
   return createPresentationAuthoringProject(input);
 }
 
-function verifiedManifestFixtures(project) {
-  let entries = project.cells
+function structuralBindingFixtures() {
+  let audioManifest = structuredClone(CV_SHOW_STRUCTURAL_MEDIA_FIXTURE.audioManifest);
+  let alignmentManifest = structuredClone(CV_SHOW_STRUCTURAL_MEDIA_FIXTURE.alignmentManifest);
+  let sequences = new Map();
+  for (let audio of audioManifest.clips) audio.speechSha256 = sha256(audio.speech);
+  for (let alignment of alignmentManifest.clips) {
+    let sequence = CV_SHOW_STRUCTURAL_MEDIA_FIXTURE.sequence(alignment.id);
+    let projection = structuredClone(sequence);
+    delete projection.hash;
+    sequence.hash = `${sequence.contractVersion}:${computeIntegrity(projection)}`;
+    alignment.alignedSequenceHash = sequence.hash;
+    alignment.alignedSequenceSha256 = sha256(Buffer.from(
+      `${JSON.stringify(sequence, null, 2)}\n`,
+      'utf8',
+    ));
+    sequences.set(alignment.id, sequence);
+  }
+  return {
+    audioManifest,
+    alignmentManifest,
+    sequences,
+  };
+}
+
+function currentManifestFixtures() {
+  let narrationById = new Map(CV_SHOW_PRESENTATION_PROJECT.cells
     .filter(({ kind }) => kind === 'narration')
-    .map(({ turnId }) => turnId);
+    .map(({ turnId, turn }) => [turnId, turn.text]));
   let sourceEntries = CV_SHOW_PRESENTATION_PROJECT.script.metadata.cvShow.entries;
+  let entryIds = [...narrationById.keys()];
   return {
     audioManifest: {
-      clips: entries.map((id) => ({
+      clips: entryIds.map((id) => ({
         id,
+        speech: narrationById.get(id),
+        speechSha256: sha256(narrationById.get(id)),
         sha256: sourceEntries[id].media.wavHash.replace(/^sha256:/u, ''),
       })),
     },
     alignmentManifest: {
-      clips: entries.map((id) => ({
+      clips: entryIds.map((id) => ({
         id,
         mediaDurationMs: sourceEntries[id].media.durationMilliseconds,
         alignedSequenceHash: sourceEntries[id].media.sourceAlignedSequenceHash,
@@ -275,24 +414,122 @@ function verifiedManifestFixtures(project) {
   };
 }
 
-test('verified manifests bind all 30 Project media entries to exact narration cells', () => {
+test('changed canonical narration rejects an old WAV before rewriting its narration hash', () => {
   let project = changedNarrationProject();
+  assert.throws(() => createCvShowAudioBoundProject({
+    project,
+    ...structuralBindingFixtures(),
+  }), { code: 'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID' });
+});
+
+test('v2 binding rejects an omitted aligned-sequence set', () => {
+  let { audioManifest, alignmentManifest } = currentManifestFixtures();
+  assert.throws(() => createCvShowAudioBoundProject({
+    project: CV_SHOW_PRESENTATION_PROJECT,
+    audioManifest,
+    alignmentManifest,
+  }), { code: 'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID' });
+});
+
+test('v2 binding rejects a stale declared aligned-sequence SHA', () => {
+  let binding = structuralBindingFixtures();
+  binding.alignmentManifest.clips[0].alignedSequenceSha256 = '0'.repeat(64);
+  assert.throws(() => createCvShowAudioBoundProject({
+    project: CV_SHOW_PRESENTATION_PROJECT,
+    ...binding,
+  }), { code: 'CV_SHOW_AUDIO_CLIP_MIGRATION_INVALID' });
+});
+
+test('binding rejects a forged speech hash even when canonical speech matches', () => {
+  let binding = structuralBindingFixtures();
+  binding.audioManifest.clips[0].speechSha256 = '0'.repeat(64);
+  assert.throws(() => createCvShowAudioBoundProject({
+    project: CV_SHOW_PRESENTATION_PROJECT,
+    ...binding,
+  }), { code: 'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID' });
+});
+
+test('changed verified media rebuilds the v2 audio graph without losing newer authored cues', () => {
+  let project = CV_SHOW_PRESENTATION_PROJECT;
+  let binding = structuralBindingFixtures();
+  let semanticMetadata = (value) => {
+    let metadata = structuredClone(value.script.metadata.cvShow);
+    for (let entry of Object.values(metadata.entries)) delete entry.media;
+    return metadata;
+  };
+  let nonAudioCellIds = project.cells
+    .filter(({ kind }) => kind !== 'audio-clip')
+    .map(({ id }) => id);
+  let nonAudioLayerIds = project.layers
+    .filter(({ kind }) => kind !== 'audio')
+    .map(({ id }) => id);
+  let authoredMetadata = semanticMetadata(project);
+  let authoredCues = new Map(project.cells
+    .filter(({ kind }) => kind === 'cue')
+    .map(({ id, cue }) => [id, structuredClone(cue)]));
+  let sequences = binding.sequences;
+
   let bound = createCvShowAudioBoundProject({
     project,
-    ...verifiedManifestFixtures(project),
+    audioManifest: binding.audioManifest,
+    alignmentManifest: binding.alignmentManifest,
+    sequences,
   });
   let registry = createCvShowMediaBindingRegistry(bound);
-  let narrationHashes = new Map(createPresentationAuthoringProjectHashes(bound).cellHashes
-    .map(({ cellId, hash }) => [cellId, hash]));
+  let positioningAudio = binding.audioManifest.clips
+    .find(({ id }) => id === 'positioning');
+  let positioningAlignment = binding.alignmentManifest.clips
+    .find(({ id }) => id === 'positioning');
+  let positioningAsset = bound.assets.find(({ id }) => id === 'cv-show:audio:positioning');
+  let positioningClips = bound.cells
+    .filter(({ kind, turnId }) => kind === 'audio-clip' && turnId === 'positioning')
+    .sort((left, right) => left.audio.sourceInMs - right.audio.sourceInMs);
 
-  assert.equal(bound.revision, project.revision);
-  assert.notEqual(bound.hash, project.hash);
+  assert.equal(bound.schemaVersion, 'workspace-presentation-authoring-project-v2');
+  assert.equal(bound.revision, project.revision + 1);
+  assert.deepEqual(
+    bound.cells.filter(({ kind }) => kind !== 'audio-clip').map(({ id }) => id),
+    nonAudioCellIds,
+  );
+  assert.deepEqual(
+    bound.layers.filter(({ kind }) => kind !== 'audio').map(({ id }) => id),
+    nonAudioLayerIds,
+  );
+  assert.deepEqual(semanticMetadata(bound), authoredMetadata);
+  assert.deepEqual(
+    new Map(bound.cells
+      .filter(({ kind }) => kind === 'cue')
+      .map(({ id, cue }) => [id, cue])),
+    authoredCues,
+  );
+  assert.equal(positioningAsset.contentHash, `sha256:${positioningAudio.sha256}`);
+  assert.equal(positioningAsset.durationMs, positioningAlignment.mediaDurationMs);
+  assert.equal(positioningAsset.alignmentHash, positioningAlignment.alignedSequenceHash);
+  assert.equal(positioningClips.at(-1).audio.sourceOutMs, positioningAlignment.mediaDurationMs);
   assert.equal(Object.keys(registry.entries).length, 30);
   assert.equal(Object.values(registry.entries).every(({ playable }) => playable), true);
-  assert.equal(
-    bound.script.metadata.cvShow.entries.positioning.media.sourceNarrationCellHash,
-    narrationHashes.get('cv-show:narration:positioning'),
-  );
+
+  let tamperedSequences = new Map(sequences);
+  let tampered = structuredClone(tamperedSequences.get('positioning'));
+  tampered.media.durationMs += 1;
+  tamperedSequences.set('positioning', tampered);
+  assert.throws(() => createCvShowAudioBoundProject({
+    project,
+    audioManifest: binding.audioManifest,
+    alignmentManifest: binding.alignmentManifest,
+    sequences: tamperedSequences,
+  }), { code: 'CV_SHOW_AUDIO_CLIP_MIGRATION_INVALID' });
+
+  let staleHashSequences = new Map(sequences);
+  let staleHashSequence = structuredClone(staleHashSequences.get('positioning'));
+  staleHashSequence.turns[0].words[0].text = 'подменено';
+  staleHashSequences.set('positioning', staleHashSequence);
+  assert.throws(() => createCvShowAudioBoundProject({
+    project,
+    audioManifest: binding.audioManifest,
+    alignmentManifest: binding.alignmentManifest,
+    sequences: staleHashSequences,
+  }), { code: 'CV_SHOW_AUDIO_CLIP_MIGRATION_INVALID' });
 });
 
 function workflowPlan({ project = CV_SHOW_PRESENTATION_PROJECT, voice = PROFILE.voice } = {}) {

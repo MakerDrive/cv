@@ -27,7 +27,10 @@ import { loadPortfolioMarkdownContent } from '../../src/static-pages/data/markdo
 import { CV_SHOW_PRESENTATION_PROJECT } from '../../src/static-pages/data/cvShowPresentationProject.js';
 import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../src/static-pages/data/cvShowWebAudioRelease.js';
 import { CV_SHOW_STORY } from '../../src/static-pages/data/tourScripts.js';
-import { createCvShowEntryTuple } from '../../src/static-pages/js/tour-player/presentationProjectAdapter.js';
+import {
+  createCvShowEntryTuple,
+  projectCvShowPlaybackCheckpoint,
+} from '../../src/static-pages/js/tour-player/presentationProjectAdapter.js';
 import { startCvShowAuthoringHost } from '../../scripts/cv-show-authoring-host.js';
 
 const ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -117,7 +120,7 @@ function assertSelectedCvShowWebAudioRequests(requestedUrls) {
   return paths;
 }
 
-async function loadCvShowFutureCueSchedule(entryId, afterMs) {
+async function loadCvShowEntryTuple(entryId, checkpointMs = null) {
   let { manifest, manifestPath } = await loadSelectedCvShowWebAudioManifest();
   let clip = manifest.clips.find((candidate) => candidate.id === entryId);
   assert.ok(clip, `missing aligned CV Show clip: ${entryId}`);
@@ -125,22 +128,26 @@ async function loadCvShowFutureCueSchedule(entryId, afterMs) {
     path.join(path.dirname(manifestPath), clip.alignedSequenceFile),
     'utf8',
   ));
-  let tuple = createCvShowEntryTuple(CV_SHOW_PRESENTATION_PROJECT, entryId, sequence, {
-    checkpointMs: afterMs,
+  return createCvShowEntryTuple(CV_SHOW_PRESENTATION_PROJECT, entryId, sequence, {
+    checkpointMs,
     adapter: {
       runInteraction: async () => [],
       runAttention: async () => [],
       waitForState: async () => [],
     },
   });
+}
+
+async function loadCvShowFutureCueSchedule(entryId, afterMs) {
+  let tuple = await loadCvShowEntryTuple(entryId);
   return tuple.schedule.cells
     .filter(({ kind, startMs }) => (
-      kind !== 'narration' && startMs > tuple.schedule.presentationStartMs + afterMs
+      kind !== 'narration' && startMs > afterMs
     ))
     .map(({ cellId, kind, startMs }) => ({
       cellId,
       kind,
-      startMs: startMs - tuple.schedule.presentationStartMs,
+      startMs,
     }));
 }
 
@@ -654,6 +661,158 @@ function verifyNoBlockedRequests(cdp) {
   }
 }
 
+async function installDeterministicYouTubePlayerHarness(cdp) {
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(() => {
+      const calls = [];
+      const players = [];
+      const record = (player, method, args = []) => {
+        calls.push({
+          at: performance.now(),
+          mediaId: player.mediaId,
+          videoId: player.videoId,
+          method,
+          args: Array.from(args),
+        });
+      };
+      class Player {
+        constructor(iframe, options = {}) {
+          this.iframe = iframe;
+          this.events = options.events || {};
+          this.mediaId = iframe?.closest?.('[data-media-id]')?.dataset?.mediaId || '';
+          try {
+            this.videoId = new URL(iframe?.src || '', location.href)
+              .pathname.split('/').filter(Boolean).at(-1) || '';
+          } catch {
+            this.videoId = '';
+          }
+          this.duration = 100;
+          this.currentTime = 0;
+          this.muted = false;
+          this.volume = 100;
+          this.playerState = -1;
+          players.push(this);
+          record(this, 'construct');
+          queueMicrotask(() => this.events.onReady?.({ target: this }));
+        }
+        getDuration() { return this.duration; }
+        getCurrentTime() { return this.currentTime; }
+        getPlayerState() { return this.playerState; }
+        isMuted() { return this.muted; }
+        getVolume() { return this.volume; }
+        mute() {
+          this.muted = true;
+          record(this, 'mute');
+        }
+        unMute() {
+          this.muted = false;
+          record(this, 'unMute');
+        }
+        setVolume(value) {
+          this.volume = Number(value);
+          record(this, 'setVolume', [this.volume]);
+        }
+        seekTo(seconds, allowSeekAhead) {
+          this.currentTime = Number(seconds);
+          record(this, 'seekTo', [this.currentTime, Boolean(allowSeekAhead)]);
+        }
+        playVideo() {
+          this.playerState = 1;
+          record(this, 'playVideo');
+          this.events.onStateChange?.({ target: this, data: this.playerState });
+        }
+        pauseVideo() {
+          this.playerState = 2;
+          record(this, 'pauseVideo');
+          this.events.onStateChange?.({ target: this, data: this.playerState });
+        }
+      }
+      Object.defineProperty(globalThis, 'YT', {
+        configurable: true,
+        value: Object.freeze({ Player, PlayerState: Object.freeze({ ENDED: 0 }) }),
+      });
+      Object.defineProperty(globalThis, '__cvYouTubePlayerTestHarness', {
+        configurable: true,
+        value: Object.freeze({
+          snapshot: () => ({
+            calls: calls.map((entry) => ({ ...entry, args: [...entry.args] })),
+            players: players.map((player) => ({
+              mediaId: player.mediaId,
+              videoId: player.videoId,
+              duration: player.duration,
+              currentTime: player.currentTime,
+              muted: player.muted,
+              volume: player.volume,
+              playerState: player.playerState,
+            })),
+          }),
+        }),
+      });
+    })();`,
+  });
+}
+
+async function installDeterministicImsPlayerHarness(cdp) {
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `(async () => {
+      const calls = [];
+      await customElements.whenDefined('sn-media-host');
+      const prototype = customElements.get('sn-media-host')?.prototype;
+      const originalActivate = prototype?.activate;
+      if (!prototype || typeof originalActivate !== 'function') {
+        throw new Error('sn-media-host public activation seam unavailable');
+      }
+      prototype.activate = function activateForCvShowTest() {
+          if (this.descriptor?.activation?.provider !== 'ims') {
+            return originalActivate.call(this);
+          }
+          const existing = this.querySelector('ims-gallery, ims-spinner');
+          calls.push({ method: 'activate', mediaId: this.closest('[data-media-id]')?.dataset?.mediaId || '' });
+          if (existing) return;
+          const viewer = document.createElement('ims-viewer');
+          const kind = this.descriptor?.kind === 'gallery' ? 'gallery' : 'spinner';
+          const player = document.createElement('ims-' + kind);
+          if (kind === 'spinner') {
+            player.currentFrame = 0;
+            player.play = () => {
+              player.setAttribute('data-playing', '');
+              calls.push({ method: 'play', mediaId: this.closest('[data-media-id]')?.dataset?.mediaId || '' });
+            };
+            player.pause = () => {
+              player.removeAttribute('data-playing');
+              calls.push({ method: 'pause', mediaId: this.closest('[data-media-id]')?.dataset?.mediaId || '' });
+            };
+          } else {
+            player.hotspotState = { image: 0 };
+            player.goTo = (index) => {
+              const frame = Number(index);
+              player.hotspotState.image = frame;
+              calls.push({
+                method: 'goTo',
+                mediaId: this.closest('[data-media-id]')?.dataset?.mediaId || '',
+                args: [frame],
+              });
+            };
+          }
+          viewer.append(player);
+          this.ref?.stage?.replaceChildren(viewer);
+          this.setAttribute('data-activated', '');
+          queueMicrotask(() => player.dispatchEvent(new CustomEvent('ims-ready', {
+            bubbles: true,
+            composed: true,
+          })));
+      };
+      Object.defineProperty(globalThis, '__cvImsPlayerTestHarness', {
+        configurable: true,
+        value: Object.freeze({ snapshot: () => calls.map((entry) => ({ ...entry })) }),
+      });
+      return true;
+    })()`,
+    returnByValue: true,
+  }, { label: 'install deterministic IMS player harness', timeoutMs: 5_000 });
+}
+
 async function createPortfolioPage(t, options = {}) {
   await stat(path.join(DIST_DIR, 'index.html'));
   let server = await startStaticServer(options);
@@ -690,12 +849,15 @@ async function createPortfolioPage(t, options = {}) {
       'https://rnd-pro.com/*',
       'https://img.youtube.com/*',
       'https://www.youtube.com/*',
+      'https://www.youtube-nocookie.com/*',
       'https://github.com/*',
       'https://www.npmjs.com/*',
       'https://cdn.jsdelivr.net/*',
     ],
   });
-
+  if (options.youtubePlayerStub === true) {
+    await installDeterministicYouTubePlayerHarness(cdp);
+  }
   return { cdp, server };
 }
 
@@ -789,6 +951,17 @@ async function installCvShowTerminalHarness(cdp) {
         const selectionRect = selection?.rangeCount
           ? selection.getRangeAt(0).getBoundingClientRect()
           : null;
+        const graphPanel = document.querySelector('portfolio-graph-panel');
+        const graphCanvas = graphPanel?.querySelector('node-canvas, sn-canvas-graph');
+        const graphViewport = graphCanvas?.ref?.canvasContainer || graphCanvas;
+        const graphNodes = Object.fromEntries([
+          'projects/index',
+          'projects/photopizza',
+          'projects/agent-portal',
+        ].map((nodeId) => [
+          nodeId,
+          rectOf(graphCanvas?.querySelector('graph-node[node-id="' + nodeId + '"]')),
+        ]));
         return {
           at,
           activeId: host?.narrationSnapshot?.active?.activeId || '',
@@ -829,6 +1002,12 @@ async function installCvShowTerminalHarness(cdp) {
             scrollTop: scroller?.scrollTop ?? null,
             scrollHeight: scroller?.scrollHeight ?? null,
             clientHeight: scroller?.clientHeight ?? null,
+          },
+          graph: {
+            panel: rectOf(graphPanel),
+            viewport: rectOf(graphViewport),
+            animating: graphCanvas?.hasAttribute('data-viewport-animating') === true,
+            nodes: graphNodes,
           },
         };
       };
@@ -1557,13 +1736,13 @@ function assertCvShowAuthoredMarkerEvidence(snapshot, label) {
       `${label}: ${operation.cellId} lacks provider width evidence`,
     );
     assert.ok(
-      ['open', 'open-gap'].includes(provider?.tailPolicy?.mode),
+      ['open', 'displaced-overlap'].includes(provider?.tailPolicy?.mode),
       `${label}: ${operation.cellId} has an unexpected authored tail policy`,
     );
   }
   assert.deepEqual(
     [...new Set(markers.map(({ provider }) => provider.tailPolicy.mode))].sort(),
-    ['open', 'open-gap'],
+    ['displaced-overlap', 'open'],
     `${label}: authored markers must cover open and displaced endpoint geometry`,
   );
 }
@@ -1670,7 +1849,7 @@ function assertCvShowStreamJournal(snapshot, label) {
 function assertPresenterMarkerProbes(probes) {
   assert.deepEqual(
     probes.map(({ receipt }) => receipt.tailPolicy.mode),
-    ['open', 'underdraw', 'open-gap'],
+    ['open', 'underdraw', 'displaced-overlap'],
     'public presenter conformance must exercise every endpoint policy',
   );
   for (const probe of probes) {
@@ -1693,7 +1872,9 @@ function assertPresenterMarkerProbes(probes) {
   }
   assert.equal(probes[0].receipt.tailPolicy.sourceEnd, 1);
   assert.ok(probes[1].receipt.tailPolicy.sourceEnd < 1);
-  assert.ok(probes[2].receipt.tailPolicy.sourceEnd < 1);
+  assert.ok(probes[2].receipt.tailPolicy.sourceEnd > 1);
+  assert.ok(probes[2].receipt.tailPolicy.lateralOffsetPx > 0);
+  assert.equal(probes[2].receipt.tailPolicy.direction, -1);
 }
 
 async function createMobilePage(t) {
@@ -2831,7 +3012,7 @@ async function getDrawerState(cdp, label) {
   let result = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
     expression: `(() => {
-      const layout = document.querySelector('panel-layout');
+      const layout = document.querySelector('panel-layout.portfolio-layout');
       const primary = layout?.querySelector('layout-node[drawer-primary]');
       const content = primary?.querySelector('.panel-content') || primary;
       const rect = content?.getBoundingClientRect?.();
@@ -3066,7 +3247,7 @@ test('portfolio mobile content surface opens and closes drawers with pointer swi
   await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     expression: `(async () => {
-      const layout = document.querySelector('panel-layout');
+      const layout = document.querySelector('panel-layout.portfolio-layout');
       const panelId = layout?.openPanel?.('portfolio-theme', {
         direction: 'horizontal',
         ratio: 0.72,
@@ -4019,12 +4200,19 @@ test('CV Show blocks narration and aligned media when required scene setup fails
   assert.equal(failed.result.value.error, true);
   assert.ok(failed.result.value.errorText);
   assert.equal(failed.result.value.narration.source, 'local');
-  assert.equal(failed.result.value.narration.active?.activeId || '', '');
-  assert.equal(failed.result.value.narration.active?.generationReceipt || null, null);
+  assert.equal(failed.result.value.narration.active?.activeId, 'positioning');
+  assert.equal(failed.result.value.narration.active?.paused, true);
+  assert.equal(failed.result.value.narration.active?.generationReceipt?.status, 'completed');
   assert.equal(failed.result.value.alignment.available, true);
   assert.equal(failed.result.value.injected, true);
-  assert.equal(failed.result.value.alignment.lastGenerationReceipt, null);
-  assert.deepEqual(failed.result.value.generations, []);
+  assert.equal(failed.result.value.alignment.lastGenerationReceipt?.status, 'failed');
+  assert.deepEqual(
+    failed.result.value.generations.map(({ entryId, receipt }) => ({
+      entryId,
+      status: receipt?.status,
+    })),
+    [{ entryId: 'positioning', status: 'completed' }],
+  );
   assert.deepEqual(failed.result.value.receipts.map((receipt) => ({
     cellId: receipt.cellId,
     kind: receipt.kind,
@@ -4036,7 +4224,13 @@ test('CV Show blocks narration and aligned media when required scene setup fails
     kind: 'interaction',
     status: 'failed',
     generation: 0,
-    reason: 'injected required setup failure',
+    reason: {
+      code: 'PRESENTATION_EFFECT_OPERATION_FAILED',
+      message: 'injected required setup failure',
+      details: {
+        causeCode: 'CV_SHOW_TEST_REQUIRED_SETUP_FAILURE',
+      },
+    },
   }]);
   let publicAudioRequests = assertSelectedCvShowWebAudioRequests(cdp.requestedUrls);
   assert.deepEqual(
@@ -4044,10 +4238,10 @@ test('CV Show blocks narration and aligned media when required scene setup fails
     [WEB_AUDIO_MANIFEST_REQUEST_PATH],
   );
   assert.equal(
-    publicAudioRequests.some((pathname) => pathname.startsWith(
+    publicAudioRequests.filter((pathname) => pathname.startsWith(
       `${WEB_AUDIO_REQUEST_ROOT}clips/`,
-    )),
-    false,
+    )).length,
+    1,
   );
   assert.deepEqual(cdp.exceptions, []);
 });
@@ -4163,7 +4357,7 @@ test('profile presentation link completes one marker preroll before Opus narrati
         ));
         const failure = globalThis.__profileLinkFailures?.at(-1) || null;
         if (failure || marker.some(({ status }) => status === 'settled')
-          || performance.now() - started > 20000) {
+          || performance.now() - started > 38000) {
           const host = document.querySelector('portfolio-show-chat');
           const player = document.querySelector('agent-dock-shell')?.getChat?.()
             ?.querySelector('chat-show-player');
@@ -4186,7 +4380,7 @@ test('profile presentation link completes one marker preroll before Opus narrati
       };
       check();
     })`,
-  }, { label: 'wait for profile marker preroll', timeoutMs: 23_000 });
+  }, { label: 'wait for profile marker preroll', timeoutMs: 41_000 });
   assert.equal(terminal.exceptionDetails, undefined);
   assert.equal(
     terminal.result.value.timedOut,
@@ -4332,6 +4526,12 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
   if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
   let { manifest: webAudioManifest } = await loadSelectedCvShowWebAudioManifest();
   let firstWebAudioClip = webAudioManifest.clips[0];
+  let symbioteUiTuple = await loadCvShowEntryTuple('symbiote-ui');
+  let symbioteUiFirstClip = symbioteUiTuple.playbackPlan.clips[0];
+  let historicalProjectWindow = Object.freeze({
+    startMs: symbioteUiFirstClip.span.startMs + 260,
+    endMs: symbioteUiFirstClip.span.startMs + 700,
+  });
   let page = await createPortfolioPage(t, {
     viewport: {
       width: 1087,
@@ -4533,7 +4733,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     sharedDock: true,
     sharedWorkspace: true,
     sharedTranscript: true,
-    playerBeforeChoice: true,
+    playerBeforeChoice: false,
     embedBeforeChoice: false,
     activeComposer: true,
     voiceInput: true,
@@ -4542,8 +4742,8 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
   });
   assert.deepEqual(
     cvShowAudioRequestPaths(cdp.requestedUrls),
-    [WEB_AUDIO_MANIFEST_REQUEST_PATH],
-    'the native player may preload metadata, but no clip or alignment before mode selection',
+    [],
+    'opening the mode chooser must not load narration before the user chooses a Show mode',
   );
   await clickVisible(
     cdp,
@@ -4653,17 +4853,25 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
           receipt: observed,
           lastExecutionReceipt: snapshot.lastExecutionReceipt,
         });
-        if (performance.now() - started > 12000) return resolve({
+        if (performance.now() - started > 26000) return resolve({
           timeout: true,
           activeId: snapshot?.activeId || '',
           lastExecutionReceipt: snapshot?.lastExecutionReceipt || null,
           history: globalThis.__cvShowExecutionReceiptHistory || [],
+          media: Array.from(document.querySelectorAll('audio, video')).map((media) => ({
+            currentTime: media.currentTime,
+            duration: media.duration,
+            paused: media.paused,
+            playbackRate: media.playbackRate,
+            readyState: media.readyState,
+            src: media.currentSrc || media.src || '',
+          })),
         });
         setTimeout(check, 25);
       };
       check();
     })`,
-  }, { label: 'wait for first Execution attention receipt', timeoutMs: 14_000 });
+  }, { label: 'wait for first Execution attention receipt', timeoutMs: 28_000 });
   if (recognizedCue.result.value.timeout) {
     assert.fail(`recognized positioning cue did not fire: ${JSON.stringify(recognizedCue.result.value)}`);
   }
@@ -4675,6 +4883,23 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
   assert.equal(recognizedCue.result.value.receipt.status, 'first-frame');
   assert.match(recognizedCue.result.value.receipt.operationId, /^presentation-effect-/u);
   assert.equal(recognizedCue.result.value.receipt.generation, 0);
+
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const ink = document.querySelector('.symbiote-presenter-cursor .pc-ink path')
+          ?.getAttribute('d') || '';
+        if (ink) return resolve(true);
+        if (performance.now() - started > 1000) {
+          return reject(new Error('positioning marker ink did not become visible after first-frame'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for visible positioning marker ink', timeoutMs: 2_000 });
 
   await cdp.send('Runtime.evaluate', {
     expression: `document.querySelector('agent-dock-shell')?.getChat?.()
@@ -4763,17 +4988,27 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
   let resumed = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
-    expression: `new Promise((resolve) => requestAnimationFrame(() => resolve((() => {
-      const host = document.querySelector('portfolio-show-chat');
-      return {
-        activeId: host?.narrationSnapshot?.active?.activeId,
-        paused: host?.narrationSnapshot?.active?.paused,
-        lastError: host?.narrationSnapshot?.active?.lastError,
-        playerPlaying: document.querySelector('agent-dock-shell')?.getChat?.()
-          ?.querySelector('chat-show-player')?.$.playing,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const host = document.querySelector('portfolio-show-chat');
+        const player = document.querySelector('agent-dock-shell')?.getChat?.()
+          ?.querySelector('chat-show-player');
+        const value = {
+          activeId: host?.narrationSnapshot?.active?.activeId,
+          paused: host?.narrationSnapshot?.active?.paused,
+          lastError: host?.narrationSnapshot?.active?.lastError,
+          playerPlaying: player?.$.playing,
+        };
+        if (value.paused === false && value.playerPlaying === true) return resolve(value);
+        if (value.lastError || performance.now() - started > 5000) {
+          return reject(new Error('shared transport did not resume: ' + JSON.stringify(value)));
+        }
+        requestAnimationFrame(check);
       };
-    })())))`,
-  });
+      check();
+    })`,
+  }, { label: 'wait for shared transport resume', timeoutMs: 7_000 });
   assert.deepEqual(resumed.result.value, {
     activeId: 'positioning',
     paused: false,
@@ -4822,128 +5057,6 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
       check();
     })`,
   }, { label: 'wait for tenure marker settlement before media arbitration', timeoutMs: 22_000 });
-
-  let arbitrationPoint = await cdp.send('Runtime.evaluate', {
-    returnByValue: true,
-    expression: `(() => {
-      const workspace = document.querySelector('portfolio-workspace');
-      const anchor = document.createElement('span');
-      anchor.dataset.tourTarget = 'browser.audio-arbitration-fixture';
-      const media = document.createElement('audio');
-      media.id = 'browser-audio-arbitration-fixture';
-      media.preload = 'auto';
-      media.src = new URL(
-        'cv-show-audio/${WEB_AUDIO_RELEASE_DIRECTORY}/${firstWebAudioClip.deliveryFile}',
-        document.baseURI,
-      ).href;
-      const trigger = document.createElement('button');
-      trigger.id = 'browser-audio-arbitration-trigger';
-      trigger.textContent = 'media arbitration fixture';
-      Object.assign(trigger.style, {
-        position: 'fixed', left: '8px', top: '8px', width: '180px', height: '48px', zIndex: '999999',
-      });
-      trigger.addEventListener('click', () => workspace.dispatchEvent(new CustomEvent(
-        'portfolio-show-phase', {
-          bubbles: true,
-          composed: true,
-          detail: {
-            requestId: -1,
-            directives: [{
-              id: 'browser.audio-arbitration',
-              type: 'media',
-              target: 'browser.audio-arbitration-fixture',
-              policy: 'required',
-              mode: 'full-with-media-audio',
-            }],
-          },
-        },
-      )), { once: true });
-      trigger.addEventListener('click', () => { window.__browserAudioArbitrationClicked = true; }, { once: true });
-      workspace.append(anchor, media);
-      document.body.append(trigger);
-      media.load();
-      const rect = trigger.getBoundingClientRect();
-      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-    })()`,
-  }, { label: 'prepare shared audio arbitration fixture', timeoutMs: 5_000 });
-  await cdp.send('Input.dispatchMouseEvent', {
-    type: 'mousePressed', button: 'left', clickCount: 1, ...arbitrationPoint.result.value,
-  }, { label: 'press shared media arbitration trigger', timeoutMs: 5_000 });
-  await cdp.send('Input.dispatchMouseEvent', {
-    type: 'mouseReleased', button: 'left', clickCount: 1, ...arbitrationPoint.result.value,
-  }, { label: 'start shared media arbitration fixture', timeoutMs: 5_000 });
-  let preempted = await cdp.send('Runtime.evaluate', {
-    awaitPromise: true,
-    returnByValue: true,
-    expression: `new Promise((resolve, reject) => {
-      const started = performance.now();
-      const check = () => {
-        const host = document.querySelector('portfolio-show-chat');
-        const media = document.getElementById('browser-audio-arbitration-fixture');
-        if (host?.narrationSnapshot?.active?.paused && host.$?.mediaBlocksResume && media && !media.paused) {
-          return resolve({ narrationPaused: true, mediaPlaying: true, resumeBlocked: true });
-        }
-        if (performance.now() - started > 5000) return resolve({
-          timeout: true,
-          clicked: window.__browserAudioArbitrationClicked === true,
-          narration: host?.narrationSnapshot || null,
-          mediaPaused: media?.paused,
-          mediaReadyState: media?.readyState,
-          resumeBlocked: host?.$?.mediaBlocksResume,
-          phases: globalThis.__cvShowPhaseHistory || [],
-          results: globalThis.__cvShowResultHistory || [],
-        });
-        setTimeout(check, 25);
-      };
-      check();
-    })`,
-  }, { label: 'verify shared audio preemption', timeoutMs: 7_000 });
-  assert.equal(
-    preempted.exceptionDetails,
-    undefined,
-    preempted.exceptionDetails?.exception?.description || 'shared media preemption evaluation failed',
-  );
-  assert.deepEqual(preempted.result.value, {
-    narrationPaused: true,
-    mediaPlaying: true,
-    resumeBlocked: true,
-  });
-  await cdp.send('Runtime.evaluate', {
-    expression: `document.querySelector('portfolio-show-chat')?.dispatchEvent(new CustomEvent(
-      'portfolio-show-skip-media', { bubbles: true, composed: true }
-    ))`,
-  }, { label: 'release shared media audio lease', timeoutMs: 5_000 });
-  let released = await cdp.send('Runtime.evaluate', {
-    awaitPromise: true,
-    returnByValue: true,
-    expression: `new Promise((resolve) => requestAnimationFrame(() => resolve((() => {
-      const host = document.querySelector('portfolio-show-chat');
-      const media = document.getElementById('browser-audio-arbitration-fixture');
-      return { mediaPaused: media?.paused, resumeBlocked: host?.$?.mediaBlocksResume };
-    })())))`,
-  });
-  assert.deepEqual(released.result.value, { mediaPaused: true, resumeBlocked: false });
-  await cdp.send('Runtime.evaluate', {
-    expression: `document.getElementById('browser-audio-arbitration-trigger')?.remove()`,
-  }, { label: 'remove shared media arbitration trigger', timeoutMs: 5_000 });
-  await clickVisible(
-    cdp,
-    'agent-dock-shell agent-show-chat chat-show-player [data-control="play"]',
-    'resume narration after shared media',
-  );
-  await cdp.send('Runtime.evaluate', {
-    awaitPromise: true,
-    expression: `new Promise((resolve, reject) => {
-      const started = performance.now();
-      const check = () => {
-        const active = document.querySelector('portfolio-show-chat')?.narrationSnapshot?.active;
-        if (active?.activeId === 'positioning' && !active.paused) return resolve(true);
-        if (performance.now() - started > 5000) return reject(new Error('narration did not resume after media'));
-        setTimeout(check, 25);
-      };
-      check();
-    })`,
-  }, { label: 'verify narration resumes after shared media', timeoutMs: 7_000 });
 
   let shortBeforeBranch = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
@@ -5018,7 +5131,9 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     'Проекты/ИИ-инструменты/Symbiote Workspace',
   );
   assert.equal(workspaceOpenReceipts[1].viewerPath, 'Symbiote Workspace.md');
-  assert.equal(workspaceOpenReceipts[1].targetReady, true, 'workspace article intro must be ready after scene setup');
+  // Route settlement proves that the article is selected. Its asynchronously
+  // composed content is required to be visible by the dependent intro cue,
+  // which is asserted below from that cue's first-frame receipt.
   let workspaceIntroCue = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
     expression: `globalThis.__cvShowExecutionReceiptHistory?.find(({ cellId, status }) => (
@@ -5071,21 +5186,29 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
       return ids.map((id) => {
         const cellId = 'cv-show:cue:' + id;
         const receipts = executionReceipts.filter((entry) => entry.cellId === cellId);
-        const firstFrame = receipts.find(({ status }) => status === 'first-frame');
         const settled = receipts.find(({ status }) => status === 'settled');
+        const firstFrames = receipts.filter(({ status }) => status === 'first-frame');
+        const firstFrame = firstFrames.find(({ operationId }) => (
+          operationId === settled?.operationId
+        ));
         return {
           id,
           firstFrame,
           settled,
-          firstFrameCount: receipts.filter(({ status }) => status === 'first-frame').length,
+          firstFrameCount: firstFrames.length,
           settledCount: receipts.filter(({ status }) => status === 'settled').length,
+          cancelledCount: receipts.filter(({ status }) => status === 'cancelled').length,
+          operationIds: [...new Set(receipts.map(({ operationId }) => operationId))],
         };
       });
     })()`,
   }, { label: 'verify strict positioning Execution receipt sequences', timeoutMs: 5_000 });
   for (let timing of positioningTiming.result.value) {
-    assert.equal(timing.firstFrameCount, 1, JSON.stringify(timing));
+    const pausedMidGesture = timing.id === 'positioning.tenure-marker';
+    assert.equal(timing.firstFrameCount, pausedMidGesture ? 2 : 1, JSON.stringify(timing));
     assert.equal(timing.settledCount, 1, JSON.stringify(timing));
+    assert.equal(timing.cancelledCount, pausedMidGesture ? 1 : 0, JSON.stringify(timing));
+    assert.equal(timing.operationIds.length, pausedMidGesture ? 2 : 1, JSON.stringify(timing));
     assert.equal(timing.firstFrame.version, 'workspace-presentation-effect-receipt-v2');
     assert.equal(timing.firstFrame.kind, 'attention');
     assert.equal(timing.firstFrame.status, 'first-frame');
@@ -5210,7 +5333,9 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
         const host = document.querySelector('portfolio-show-chat');
         const activeId = host?.narrationSnapshot?.active?.activeId;
         const positionMs = host?.alignmentSnapshot?.narrationPositionMs || 0;
-        if (activeId === 'symbiote-ui' && positionMs >= 260 && positionMs <= 700) {
+        if (activeId === 'symbiote-ui'
+          && positionMs >= ${historicalProjectWindow.startMs}
+          && positionMs <= ${historicalProjectWindow.endMs}) {
           const target = document.querySelector(selector);
           const rect = target?.getBoundingClientRect();
           const hit = rect && document.elementFromPoint(
@@ -5226,7 +5351,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
           });
         }
         if (performance.now() - started > 5000) {
-          return reject(new Error('historical branch checkpoint did not enter the 260-700ms window: '
+          return reject(new Error('historical branch checkpoint did not enter the Project window: '
             + JSON.stringify({ activeId, positionMs })));
         }
         setTimeout(check, 5);
@@ -5304,7 +5429,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     JSON.stringify(historicalBranchAction.result.value),
   );
   assert.ok(
-    historicalBranchAction.result.value.action.checkpoint <= 1_000,
+    historicalBranchAction.result.value.action.checkpoint <= historicalProjectWindow.endMs + 300,
     JSON.stringify(historicalBranchAction.result.value),
   );
   await cdp.send('Runtime.evaluate', {
@@ -5480,6 +5605,10 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     returnByValue: true,
     expression: `globalThis.__cvShowBranchClickPosition`,
   });
+  const nativeBranchCheckpoint = projectCvShowPlaybackCheckpoint(
+    symbioteUiTuple.playbackPlan,
+    branchCheckpoint.result.value,
+  ).sourceTimeMs;
   assert.ok(Math.abs(restored.result.value.positionMs - branchCheckpoint.result.value) <= 75);
 
   await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -5554,7 +5683,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
   assert.equal(stableBranchReturn.result.value.lastGenerationReceipt.status, 'completed');
   assert.equal(stableBranchReturn.result.value.lastGenerationReceipt.reason, 'branch-return');
   assert.ok(Math.abs(
-    stableBranchReturn.result.value.lastGenerationReceipt.observedMs - branchCheckpoint.result.value,
+    stableBranchReturn.result.value.lastGenerationReceipt.observedMs - nativeBranchCheckpoint,
   ) <= 25);
   assert.equal(stableBranchReturn.result.value.playbackClockState, null);
   assert.equal(stableBranchReturn.result.value.nativeSeeking, true);
@@ -5562,7 +5691,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
   assert.equal(stableBranchReturn.result.value.nativeSeeked, true);
   assert.equal(typeof stableBranchReturn.result.value.initialQuantizedZero, 'boolean');
   assert.ok(Math.abs(
-    stableBranchReturn.result.value.finalSeekedPositionMs - branchCheckpoint.result.value,
+    stableBranchReturn.result.value.finalSeekedPositionMs - nativeBranchCheckpoint,
   ) <= 25);
   assert.equal(stableBranchReturn.result.value.resetReasons.at(-1), 'branch-return');
   assert.deepEqual(stableBranchReturn.result.value.presenter, {
@@ -6320,10 +6449,14 @@ test('finale deeplink prepares the native graph panel before sequential scroll a
     'chat-show-player [data-control="play"]',
     'play paused finale deeplink',
   );
-  await cdp.send('Runtime.evaluate', {
-    awaitPromise: true,
-    expression: 'new Promise((resolve) => setTimeout(resolve, 10_000))',
-  }, { label: 'settle resumed finale playback', timeoutMs: 12_000 });
+  await harness.waitFor(
+    runId,
+    ({ type, receipt }) => type === 'receipt'
+      && receipt?.cellId === 'cv-show:cue:finale.history'
+      && ['settled', 'failed', 'expired'].includes(receipt?.status),
+    'finale history frame terminal receipt',
+    { afterIndex: pageEventIndex, inactivityMs: 30_000 },
+  );
   const snapshot = await harness.snapshot('finale native graph readiness');
   const operations = snapshot.operations.filter(({ cellId }) => (
     cellId === 'cv-show:cue:finale.history:scroll'
@@ -6338,6 +6471,7 @@ test('finale deeplink prepares the native graph panel before sequential scroll a
     diagnostics: snapshot.diagnostics,
     phases: snapshot.phases,
     lifecycle: snapshot.lifecycle,
+    frames: snapshot.frames.slice(-80),
   }));
   const receipts = snapshot.receipts.filter(({ cellId }) => (
     cellId === 'cv-show:cue:finale.history:scroll'
@@ -6390,8 +6524,345 @@ test('finale deeplink prepares the native graph panel before sequential scroll a
   assert.equal(cdp.exceptions.length, 0);
 });
 
-test('automatic photopizza to finale transition retains aligned audio generation ownership', {
+test('boothbot Short Show advances five gallery frames before the catalog-result oval', {
+  timeout: 110_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('BoothBot gallery evidence requires the local deterministic IMS seam');
+  const page = await createPortfolioPage(t, {
+    viewport: DESKTOP_VIEWPORT,
+    touch: false,
+    providerModules: true,
+    youtubePlayerStub: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  const boothBotDirectiveIds = new Set([
+    'complexscan.boothbot-gallery',
+    'complexscan.boothbot-catalog-ready',
+  ]);
+  const boothBotDirectives = CV_SHOW_STORY.scenes
+    .find(({ id }) => id === 'complexscan')
+    ?.directives.filter(({ id }) => boothBotDirectiveIds.has(id)) || [];
+  assert.deepEqual(boothBotDirectives.map((directive) => ({
+    id: directive.id,
+    type: directive.type,
+    target: directive.target,
+    frames: directive.frames || null,
+    quote: directive.quote || null,
+    shape: directive.shape || null,
+  })), [
+    {
+      id: 'complexscan.boothbot-gallery',
+      type: 'media',
+      target: 'media/boothbot/ims/gallery',
+      frames: [1, 2, 3, 4, 5],
+      quote: null,
+      shape: null,
+    },
+    {
+      id: 'complexscan.boothbot-catalog-ready',
+      type: 'marker',
+      target: 'article.boothbot.solution',
+      frames: null,
+      quote: 'готовый материал для каталога',
+      shape: 'oval',
+    },
+  ]);
+
+  await navigate(
+    cdp,
+    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=complexscan&showTime=51850&showPlay=0`,
+    { expectedMode: 'structured' },
+  );
+  const runId = 'boothbot-five-frame-gallery-and-catalog-oval';
+  const runEventIndex = await harness.reset(runId);
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const player = document.querySelector('chat-show-player');
+        const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
+        if (play && player.textContent?.includes('14 / 16')) return resolve(true);
+        if (performance.now() - started > 15_000) {
+          return reject(new Error('paused complexscan deeplink did not become ready'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for paused BoothBot gallery probe', timeoutMs: 17_000 });
+  await installDeterministicImsPlayerHarness(cdp);
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const host = document.querySelector('portfolio-show-chat');
+        const receipt = host?.alignmentSnapshot?.lastGenerationReceipt;
+        if (receipt?.status === 'completed'
+          && host?.narrationSnapshot?.active?.paused === true
+          && host?.alignmentSnapshot?.narrationPositionMs === 51850) {
+          return resolve(true);
+        }
+        if (receipt?.status === 'failed') {
+          return reject(new Error('paused BoothBot deeplink failed: ' + JSON.stringify(receipt)));
+        }
+        if (performance.now() - started > 20_000) {
+          return reject(new Error('paused BoothBot deeplink did not settle'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'settle paused BoothBot deeplink before resume', timeoutMs: 22_000 });
+  await clickVisible(cdp, 'chat-show-player [data-control="play"]', 'play BoothBot gallery probe');
+  await harness.waitFor(
+    runId,
+    ({ type, receipt }) => type === 'receipt'
+      && receipt?.cellId === 'cv-show:cue:complexscan.boothbot-catalog-ready'
+      && ['settled', 'failed', 'expired'].includes(receipt?.status),
+    'BoothBot catalog-result marker terminal receipt',
+    { afterIndex: runEventIndex, inactivityMs: 60_000 },
+  );
+
+  const terminal = await harness.snapshot('BoothBot gallery and catalog-result oval');
+  const galleryReceipts = terminal.receipts.filter(
+    ({ cellId }) => cellId === 'cv-show:cue:complexscan.boothbot-gallery',
+  );
+  assert.equal(galleryReceipts.some(({ status }) => status === 'acted'), true, JSON.stringify(galleryReceipts));
+  assert.equal(galleryReceipts.some(({ status }) => status === 'settled'), true, JSON.stringify(galleryReceipts));
+  const markerOperations = terminal.operations.filter((operation) => (
+    isCvShowAuthoredEffectOperation(operation, 'marker')
+    && String(operation.source?.target || '').includes('boothbot')
+  ));
+  assert.deepEqual(markerOperations.map(({ cellId, source }) => ({
+    cellId,
+    target: source.target,
+    shape: source.shape,
+  })), [{
+    cellId: 'cv-show:cue:complexscan.boothbot-catalog-ready',
+    target: 'article.boothbot.solution',
+    shape: 'oval',
+  }]);
+  assert.equal(terminal.operations.some((operation) => (
+    isCvShowAuthoredEffectOperation(operation, 'marker')
+    && operation.source?.target === 'media/boothbot/ims/gallery'
+  )), false, JSON.stringify(markerOperations));
+  const markerReceipt = terminal.receipts.find(({ cellId, status }) => (
+    cellId === 'cv-show:cue:complexscan.boothbot-catalog-ready' && status === 'settled'
+  ));
+  const markerProvider = unwrapProviderReceipt(markerReceipt);
+  assert.equal(markerProvider?.kind, 'marker', JSON.stringify(markerReceipt));
+  assert.equal(markerProvider?.name, 'oval', JSON.stringify(markerReceipt));
+
+  const media = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      return {
+        calls: globalThis.__cvImsPlayerTestHarness?.snapshot?.() || [],
+      };
+    })()`,
+  }, { label: 'inspect BoothBot gallery calls', timeoutMs: 5_000 });
+  const goToCalls = media.result.value.calls.filter(({ mediaId, method }) => (
+    mediaId === 'media/boothbot/ims/gallery' && method === 'goTo'
+  ));
+  assert.deepEqual(goToCalls.map(({ args }) => args[0]), [0, 1, 2, 3, 4]);
+  assert.deepEqual(
+    terminal.receipts.filter(({ status }) => status === 'failed' || status === 'expired'),
+    [],
+  );
+  assert.equal(cdp.exceptions.length, 0);
+});
+
+test('photopizza YouTube block is framed without starting media playback', {
+  timeout: 50_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('YouTube frame evidence requires the local deterministic player seam');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+    youtubePlayerStub: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  await navigate(
+    cdp,
+    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=photopizza&showTime=46000&showPlay=0`,
+    { expectedMode: 'structured' },
+  );
+  const runId = 'photopizza-youtube-frame';
+  const runEventIndex = await harness.reset(runId);
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const player = document.querySelector('chat-show-player');
+        const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
+        if (play && player.textContent?.includes('15 / 16')) return resolve(true);
+        if (performance.now() - started > 15_000) {
+          return reject(new Error('paused photopizza deeplink did not become ready'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for paused photopizza YouTube probe', timeoutMs: 17_000 });
+  await clickVisible(cdp, 'chat-show-player [data-control="play"]', 'play photopizza YouTube probe');
+  await harness.waitFor(
+    runId,
+    ({ type, receipt }) => (
+      type === 'receipt'
+      && receipt?.cellId === 'cv-show:cue:photopizza.video-03'
+      && receipt?.status === 'settled'
+    ),
+    'photopizza video-03 settled receipt',
+    { afterIndex: runEventIndex, inactivityMs: 25_000 },
+  );
+  const youtube = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: 'globalThis.__cvYouTubePlayerTestHarness?.snapshot?.() || null',
+  }, { label: 'collect photopizza YouTube frame calls', timeoutMs: 5_000 });
+  assert.deepEqual(
+    youtube.result.value.calls.filter(({ mediaId }) => (
+      mediaId === 'media/photopizza/youtube/f1cB4X1wI50'
+    )),
+    [],
+  );
+  const terminal = await harness.snapshot('photopizza YouTube frame');
+  const operation = terminal.operations.find(
+    ({ cellId }) => cellId === 'cv-show:cue:photopizza.video-03',
+  );
+  assert.equal(operation?.kind, 'attention', JSON.stringify(operation));
+  assert.equal(operation?.source?.type, 'frame', JSON.stringify(operation));
+  const video03Statuses = terminal.receipts
+    .filter(({ cellId }) => cellId === 'cv-show:cue:photopizza.video-03')
+    .map(({ status }) => status);
+  assert.equal(video03Statuses.includes('first-frame'), true, JSON.stringify(video03Statuses));
+  assert.equal(video03Statuses.includes('settled'), true, JSON.stringify(video03Statuses));
+  assert.deepEqual(
+    terminal.receipts.filter(({ status }) => status === 'failed' || status === 'expired'),
+    [],
+  );
+  assert.equal(cdp.exceptions.length, 0);
+});
+
+test('photopizza IMS spinner is framed without starting continuous playback', {
   timeout: 120_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('IMS spinner evidence requires the local deterministic public-player seam');
+  const page = await createPortfolioPage(t, {
+    viewport: {
+      width: 1087,
+      height: 719,
+      deviceScaleFactor: 1,
+      mobile: false,
+    },
+    touch: false,
+    providerModules: true,
+    youtubePlayerStub: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  await navigate(
+    cdp,
+    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=photopizza&showTime=46000&showPlay=0`,
+    { expectedMode: 'structured' },
+  );
+  const runId = 'photopizza-ims-spinner';
+  const runEventIndex = await harness.reset(runId);
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const player = document.querySelector('chat-show-player');
+        const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
+        if (play && player.textContent?.includes('15 / 16')) return resolve(true);
+        if (performance.now() - started > 15_000) {
+          return reject(new Error('paused photopizza spinner deeplink did not become ready'));
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for paused photopizza spinner probe', timeoutMs: 17_000 });
+  await installDeterministicImsPlayerHarness(cdp);
+  await clickVisible(cdp, 'chat-show-player [data-control="play"]', 'play photopizza spinner probe');
+  await harness.waitFor(
+    runId,
+    ({ type, receipt }) => type === 'receipt'
+      && receipt?.cellId === 'cv-show:cue:photopizza.spinner'
+      && ['settled', 'failed', 'expired'].includes(receipt?.status),
+    'photopizza spinner terminal receipt',
+    { afterIndex: runEventIndex, inactivityMs: 90_000 },
+  );
+  const terminal = await harness.snapshot('photopizza IMS spinner');
+  const operation = terminal.operations.find(
+    ({ cellId }) => cellId === 'cv-show:cue:photopizza.spinner',
+  );
+  const receipts = terminal.receipts.filter(
+    ({ cellId }) => cellId === 'cv-show:cue:photopizza.spinner',
+  );
+  const media = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const slot = document.querySelector('[data-media-id="media/photopizza/ims/spinner"]');
+      const host = slot?.querySelector('sn-media-host');
+      const viewer = host?.querySelector('ims-viewer');
+      const spinner = viewer?.querySelector('ims-spinner');
+      return {
+        slot: Boolean(slot),
+        host: Boolean(host),
+        viewer: Boolean(viewer),
+        spinner: Boolean(spinner),
+        currentFrame: Number.isInteger(Number(spinner?.currentFrame))
+          ? Number(spinner.currentFrame)
+          : null,
+        playing: spinner?.hasAttribute('data-playing') === true,
+        calls: globalThis.__cvImsPlayerTestHarness?.snapshot?.() || [],
+      };
+    })()`,
+  }, { label: 'inspect photopizza spinner media state', timeoutMs: 5_000 });
+  assert.equal(receipts.some(({ status }) => status === 'settled'), true, JSON.stringify({
+    operation,
+    receipts,
+    media: media.result.value,
+    exceptions: cdp.exceptions,
+  }));
+  assert.equal(media.result.value.spinner, true);
+  assert.equal(operation?.kind, 'attention', JSON.stringify(operation));
+  assert.equal(operation?.source?.type, 'frame', JSON.stringify(operation));
+  assert.equal(media.result.value.playing, false);
+  const imsMethods = media.result.value.calls
+    .filter(({ mediaId }) => mediaId === 'media/photopizza/ims/spinner')
+    .map(({ method }) => method);
+  assert.deepEqual(
+    imsMethods,
+    ['activate'],
+    `the static IMS frame may mount, but the tour must not play, pause, or seek it: ${JSON.stringify(imsMethods)}`,
+  );
+  assert.equal(cdp.exceptions.length, 0);
+});
+
+test('automatic photopizza to finale transition retains aligned audio generation ownership', {
+  timeout: 180_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('transition ownership requires the selected public Opus release');
   const page = await createPortfolioPage(t, {
@@ -6403,6 +6874,7 @@ test('automatic photopizza to finale transition retains aligned audio generation
     },
     touch: false,
     providerModules: true,
+    youtubePlayerStub: true,
   });
   if (!page) return;
   const { cdp, server } = page;
@@ -6411,7 +6883,7 @@ test('automatic photopizza to finale transition retains aligned audio generation
 
   await navigate(
     cdp,
-    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=photopizza&showTime=30000&showPlay=0`,
+    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=photopizza&showTime=46000&showPlay=0`,
     { expectedMode: 'structured' },
   );
   const runId = 'photopizza-finale-transition';
@@ -6446,11 +6918,26 @@ test('automatic photopizza to finale transition retains aligned audio generation
     false,
     JSON.stringify(terminal.lifecycle),
   );
-  assert.equal(
-    terminal.receipts.some(({ status }) => status === 'failed' || status === 'expired'),
-    false,
-    JSON.stringify(terminal.receipts),
+  const failedReceipts = terminal.receipts.filter(
+    ({ status }) => status === 'failed' || status === 'expired',
   );
+  assert.deepEqual(failedReceipts, []);
+  const youtube = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: 'globalThis.__cvYouTubePlayerTestHarness?.snapshot?.() || null',
+  }, { label: 'inspect deterministic YouTube montage calls', timeoutMs: 5_000 });
+  assert.ok(youtube.result.value, 'deterministic YouTube test harness was not installed');
+  const video03Seeks = youtube.result.value.calls
+    .filter(({ mediaId, method }) => (
+      mediaId === 'media/photopizza/youtube/f1cB4X1wI50' && method === 'seekTo'
+    ))
+    .map(({ args }) => args[0]);
+  assert.deepEqual(video03Seeks, []);
+  const video03Statuses = terminal.receipts
+    .filter(({ cellId }) => cellId === 'cv-show:cue:photopizza.video-03')
+    .map(({ status }) => status);
+  assert.equal(video03Statuses.includes('first-frame'), true, JSON.stringify(video03Statuses));
+  assert.equal(video03Statuses.includes('settled'), true, JSON.stringify(video03Statuses));
   assert.equal(cdp.exceptions.length, 0);
 });
 
@@ -6532,10 +7019,17 @@ test('authored workspace scroll settles inside its hard cell before selection st
   assert.equal(cdp.exceptions.length, 0);
 });
 
-test('paused workspace checkpoint restores held attention without starting media', {
+test('paused workspace checkpoint restores the scene without replaying completed attention or media', {
   timeout: 60_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('paused checkpoint acceptance requires the selected public Opus release');
+  const workspaceTuple = await loadCvShowEntryTuple('symbiote-workspace');
+  const projectCheckpointMs = 33_460;
+  const sourceCheckpointMs = 20_210;
+  assert.equal(
+    projectCvShowPlaybackCheckpoint(workspaceTuple.playbackPlan, projectCheckpointMs).sourceTimeMs,
+    sourceCheckpointMs,
+  );
   const page = await createPortfolioPage(t, {
     viewport: {
       width: 1087,
@@ -6559,7 +7053,7 @@ test('paused workspace checkpoint restores held attention without starting media
   try {
     await navigate(
       cdp,
-      `${server.origin}/cv/profile/photo/?showMode=short&showEntry=symbiote-workspace&showTime=20210&showPlay=0`,
+      `${server.origin}/cv/profile/photo/?showMode=short&showEntry=symbiote-workspace&showTime=${projectCheckpointMs}&showPlay=0`,
       { expectedMode: 'structured' },
     );
   } finally {
@@ -6571,29 +7065,28 @@ test('paused workspace checkpoint restores held attention without starting media
   assert.equal(armed.runId, runId, 'terminal harness must be armed before route autorun');
   await harness.waitFor(
     runId,
-    ({ type, receipt }) => type === 'receipt'
-      && receipt.cellId === 'cv-show:cue:workspace.agent-portal-card'
-      && ['settled', 'failed', 'skipped', 'expired'].includes(receipt.status),
-    'workspace paused checkpoint terminal receipt',
-    { afterIndex: runEventIndex, inactivityMs: 30_000 },
-  );
-  await harness.waitFor(
-    runId,
     ({ type, entryId }) => type === 'generation' && entryId === 'symbiote-workspace',
     'workspace paused checkpoint media generation',
     { afterIndex: runEventIndex, inactivityMs: 30_000 },
   );
   const terminal = await harness.snapshot('workspace paused checkpoint');
-  const heldIds = [
+  const generation = terminal.generations.find(({ entryId }) => entryId === 'symbiote-workspace');
+  assert.equal(generation?.receipt?.requestedMs, sourceCheckpointMs, JSON.stringify(generation));
+  assert.ok(
+    Math.abs(generation?.receipt?.observedMs - sourceCheckpointMs) <= 25,
+    JSON.stringify(generation),
+  );
+  const completedAttentionIds = [
     'cv-show:cue:workspace.intro-frame',
+    'cv-show:cue:workspace.portable-config',
     'cv-show:cue:workspace.agent-portal-card',
   ];
-  for (const cellId of heldIds) {
+  for (const cellId of completedAttentionIds) {
     assert.deepEqual(
       terminal.receipts
         .filter((receipt) => receipt.cellId === cellId)
         .map(({ status }) => status),
-      ['first-frame', 'settled'],
+      [],
       JSON.stringify({ cellId, receipts: terminal.receipts, operations: terminal.operations }),
     );
     assert.equal(
@@ -6620,8 +7113,15 @@ test('paused workspace checkpoint restores held attention without starting media
       const cursor = overlay?.querySelector('.pc-cursor');
       const marquee = overlay?.querySelector('.pc-marquee');
       const marqueeRect = marquee?.getBoundingClientRect();
+      const player = document.querySelector('chat-show-player');
+      const timelineTurn = player?._timeline?.turns?.find(({ id }) => (
+        id === 'symbiote-workspace'
+      ));
       return {
         source: viewer?.textContent?.replace(/\\s+/g, ' ').trim().slice(0, 120) || '',
+        projectDurationMs: timelineTurn?.durationMs ?? null,
+        projectPositionMs: document.querySelector('portfolio-show-chat')
+          ?.alignmentSnapshot?.narrationPositionMs ?? null,
         cursorVisible: Boolean(overlay?.classList.contains('is-visible')
           && Number(getComputedStyle(cursor).opacity) > 0),
         frameVisible: Boolean(
@@ -6631,14 +7131,14 @@ test('paused workspace checkpoint restores held attention without starting media
         ),
       };
     })()`,
-  }, { label: 'verify paused checkpoint attention pair remains visible', timeoutMs: 5_000 });
+  }, { label: 'verify paused checkpoint does not replay completed attention', timeoutMs: 5_000 });
   assert.match(visual.result.value.source, /Symbiote Workspace/u);
-  assert.deepEqual(
-    {
-      cursorVisible: visual.result.value.cursorVisible,
-      frameVisible: visual.result.value.frameVisible,
-    },
-    { cursorVisible: true, frameVisible: true },
+  assert.equal(visual.result.value.projectDurationMs, workspaceTuple.schedule.totalDurationMs);
+  assert.equal(visual.result.value.projectPositionMs, projectCheckpointMs);
+  assert.equal(
+    visual.result.value.frameVisible,
+    false,
+    'checkpoint restoration must not replay a completed frame',
   );
   assert.equal(cdp.exceptions.length, 0);
 });
@@ -6664,7 +7164,7 @@ test('agent portal decision marker settles as authored ink after its companion s
 
   await navigate(
     cdp,
-    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=agent-portal&showTime=17000&showPlay=0`,
+    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=agent-portal&showTime=23400&showPlay=0`,
     { expectedMode: 'structured' },
   );
   const runId = 'agent-portal-human-decision-marker';
@@ -6710,12 +7210,12 @@ test('agent portal decision marker settles as authored ink after its companion s
   assert.equal(provider?.gesturePolicy?.reason, 'explicit-emphasis', JSON.stringify(provider));
   assert.ok(provider?.pathSamples?.length >= 8, JSON.stringify(provider));
   assert.ok(provider?.widthSamples?.length >= 8, JSON.stringify(provider));
-  assert.ok(['open', 'open-gap'].includes(provider?.tailPolicy?.mode), JSON.stringify(provider));
+  assert.equal(provider?.tailPolicy?.mode, 'displaced-overlap', JSON.stringify(provider));
   assert.equal(cdp.exceptions.length, 0);
 });
 
 test('all authored CV Show markers fit their hard budgets at real desktop and mobile geometry', {
-  timeout: 300_000,
+  timeout: 900_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('marker budget acceptance requires the selected local provider');
   const entries = [
@@ -6755,7 +7255,19 @@ test('all authored CV Show markers fit their hard budgets at real desktop and mo
         };
       });
   });
-  assert.equal(probes.length, 24, 'the geometry gate must cover every authored marker cue');
+  const authoredMarkerCells = CV_SHOW_PRESENTATION_PROJECT.cells.filter((cell) => (
+    cell.kind === 'cue' && cell.cue?.kind === 'annotation'
+  ));
+  assert.equal(
+    probes.length,
+    authoredMarkerCells.length,
+    'the geometry gate must cover every authored marker cue',
+  );
+  assert.equal(
+    new Set(probes.map(({ projectCell }) => projectCell?.id)).size,
+    probes.length,
+    'the geometry gate must cover each authored marker cue exactly once',
+  );
   assert.ok(probes.every(({
     budgetMs,
     projectCell,
@@ -6888,6 +7400,7 @@ test('all authored CV Show markers fit their hard budgets at real desktop and mo
                 const detail = {
                   requestId: 'marker-budget-probe:' + probe.entryId,
                   entryId: probe.entryId,
+                  restorePausedCheckpoint: true,
                   handled: false,
                   complete: finish,
                   operation: {
@@ -7098,7 +7611,7 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
   );
   assert.equal(
     CV_SHOW_WEB_AUDIO_RELEASE.revision,
-    'dfaea667c8ab7a29b819e432751dbc4acc731c875203e8391cc85935b4dc3360',
+    'd36ab3bd2685565d0e816a1e5602c3891eae3384be277bc2b3b7222c5688b8b5',
   );
   const page = await createPortfolioPage(t, {
     viewport: {

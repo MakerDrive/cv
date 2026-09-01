@@ -11,7 +11,7 @@ const REVISION_RE = /^[a-f0-9]{64}$/u;
 const VOICE_ID_RE = /^[a-z0-9][a-z0-9-]*$/u;
 const SHA256_RE = /^[a-f0-9]{64}$/u;
 const SHA256_HASH_RE = /^sha256:[a-f0-9]{64}$/u;
-const AUTHORING_PROJECT_HASH_RE = /^workspace-presentation-authoring-project-v1:sha256-[A-Za-z0-9+/]{43}=$/u;
+const AUTHORING_PROJECT_HASH_RE = /^workspace-presentation-authoring-project-v[12]:sha256-[A-Za-z0-9+/]{43}=$/u;
 const ALIGNED_HASH_RE = /^workspace-aligned-sequence-v3:sha256-[A-Za-z0-9+/]{43}=$/u;
 const TIMELINE_HASH_RE = /^presentation-timeline-v3:sha256-[A-Za-z0-9+/]{43}=$/u;
 const DELIVERY_FILE_RE = /^clips\/[a-z0-9][a-z0-9._-]*-([a-f0-9]{12,64})\.opus$/u;
@@ -375,7 +375,8 @@ export async function validateCvShowWebAudioRelease(manifest, story, config) {
       || clip.kind !== expectedItem.kind
       || clip.order !== expectedOrder
       || clip.id !== entry.id
-      || clip.speech !== entry.speech
+      || typeof clip.speech !== 'string'
+      || clip.speech.length === 0
       || !SHA256_RE.test(String(clip.speechSha256 || ''))
       || !SHA256_RE.test(String(clip.masterWavSha256 || ''))
       || !Number.isSafeInteger(clip.masterDurationMs)

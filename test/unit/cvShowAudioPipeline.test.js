@@ -547,6 +547,27 @@ test('model client removes punctuation-only timestamp rows from ASR observations
   ]);
 });
 
+test('model client removes zero-duration ASR observations', async () => {
+  let transcript = {
+    text: 'Точный текст. Продолжение следует.',
+    durationSec: 1,
+    words: [
+      { word: 'Точный', startSec: 0, endSec: 0.4 },
+      { word: 'текст', startSec: 0.4, endSec: 0.8 },
+      { word: 'Продолжение', startSec: 0.9, endSec: 0.9 },
+    ],
+  };
+  let transport = captureFetch(() => jsonResponse(transcript));
+
+  let result = await createClient(transport.fetchImpl).transcribe({
+    wavBytes: wavBytes(),
+    language: 'ru',
+  });
+
+  assert.equal(result.text, transcript.text);
+  assert.deepEqual(result.words, transcript.words.slice(0, 2));
+});
+
 test('model client rejects missing, reordered, or overlapping observed words', async () => {
   let invalidTranscripts = [
     { text: '', durationSec: 1, words: [{ word: 'x', startSec: 0, endSec: 1 }] },

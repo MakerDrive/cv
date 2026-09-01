@@ -896,10 +896,10 @@ test('narration mutation invalidates only its clip and topology-invalid candidat
   const regenerated = authority.read().mediaCollection.entries
     .find(({ entryId }) => entryId === 'positioning').mediaAncestry;
   assert.equal(regenerated.playable, true, 'provider ancestry has all three accepted hashes');
-  assert.equal(authority.view.mediaRegistry.entries.positioning.playable, false);
+  assert.equal(authority.view.mediaRegistry.entries.positioning.playable, true);
   assert.equal(
     authority.view.mediaRegistry.entries.positioning.admission.code,
-    'CV_SHOW_MEDIA_RUNTIME_BINDING_INCOMPLETE',
+    'CV_SHOW_MEDIA_RUNTIME_BINDING_READY',
   );
 
   const invalidBase = authority.view.base;

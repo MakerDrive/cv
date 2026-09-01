@@ -746,6 +746,7 @@ document.addEventListener('click', (event) => {
 
   if (shouldHandleCvShowStartActivation(event, anchor)) {
     event.preventDefault();
+    event.stopImmediatePropagation();
     document.dispatchEvent(new CustomEvent('portfolio-open-tour', {
       detail: { entryId: 'positioning', source: 'cv-presentation-link' },
     }));
@@ -1828,7 +1829,9 @@ function createPortfolioYouTubeIframe(descriptor) {
   if (!/^[A-Za-z0-9_-]+$/.test(videoId)) return null;
   let iframe = document.createElement('iframe');
   iframe.className = 'portfolio-article-youtube';
-  iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?rel=0`;
+  if (!tourModule?.configurePortfolioYouTubeIframe?.(iframe, videoId)) {
+    iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?rel=0`;
+  }
   iframe.title = String(descriptor.alt || descriptor.label || 'YouTube video');
   iframe.loading = 'lazy';
   iframe.referrerPolicy = 'strict-origin-when-cross-origin';
@@ -2877,6 +2880,8 @@ class PortfolioGraphPanel extends HTMLElement {
     this._graphWasVisible = false;
     this._graphViewportSize = '';
     this._graphVisibleFocusUntil = 0;
+    this._showMapFocusUntil = 0;
+    this._structuredBindingAllowHidden = false;
     this.cancelStructuredGraphBinding();
     this.cancelStructuredPathUpgrade({ clear: true });
     this._graphSnapshotRuntime?.stop?.();
@@ -2990,6 +2995,12 @@ class PortfolioGraphPanel extends HTMLElement {
     }
 
     let now = globalThis.performance?.now?.() || Date.now();
+    if (now < Number(this._showMapFocusUntil || 0)) {
+      this._graphWasVisible = true;
+      this._graphViewportSize = viewportSize;
+      this.cancelDeferredVisibleGraphFocus();
+      return;
+    }
     let viewportChanged = Boolean(
       this._graphViewportSize
       && this._graphViewportSize !== viewportSize
@@ -3014,6 +3025,16 @@ class PortfolioGraphPanel extends HTMLElement {
   focusVisibleGraphNow() {
     this.canvas?.refreshConnections?.();
     portfolioRuntime.syncCanvas({ focus: true, focusScope: 'node-fit' });
+  }
+
+  holdShowMapFocus(durationMs = 0) {
+    const now = globalThis.performance?.now?.() || Date.now();
+    this._showMapFocusUntil = Math.max(
+      Number(this._showMapFocusUntil || 0),
+      now + Math.max(0, Number(durationMs) || 0),
+    );
+    this.cancelVisibleGraphFocus();
+    this.cancelDeferredVisibleGraphFocus();
   }
 
   initializeGraphCanvases() {
@@ -3121,18 +3142,19 @@ class PortfolioGraphPanel extends HTMLElement {
       || this._structuredBindingIdleFrame
       || !this.canvas
     ) return;
-    if (!this.isGraphPanelVisible()) {
+    const allowHidden = this._structuredBindingAllowHidden === true;
+    if (!allowHidden && !this.isGraphPanelVisible()) {
       this.setStructuredGraphLoading(false);
       return;
     }
     if (this._structuredBindingUrgent) {
-      this.queueStructuredGraphBinding({ immediate: true });
+      this.queueStructuredGraphBinding({ immediate: true, allowHidden });
       return;
     }
     this._structuredBindingTimer = globalThis.setTimeout(() => {
       this._structuredBindingTimer = 0;
       if (!this.structuredMode || !this.canvas || this._structuredBound) return;
-      this.queueStructuredGraphBinding();
+      this.queueStructuredGraphBinding({ allowHidden });
     }, 450);
   }
 
@@ -3188,6 +3210,7 @@ class PortfolioGraphPanel extends HTMLElement {
       this.canvas._layoutReleasedDom = false;
       this._structuredBound = true;
       this._structuredBindingUrgent = false;
+      this._structuredBindingAllowHidden = false;
       this._structuredPathReady = false;
       this._structuredPathReadyStyle = '';
       portfolioRuntime.syncCanvas({ focus: true, focusScope: 'node-fit' });
@@ -3210,6 +3233,7 @@ class PortfolioGraphPanel extends HTMLElement {
   prepareShowTarget({ allowHidden = false } = {}) {
     if (this._structuredBound) {
       this._structuredBindingUrgent = false;
+      this._structuredBindingAllowHidden = false;
       if (this.isGraphPanelVisible()) {
         this.focusVisibleGraphNow();
         this.scheduleVisibleGraphFocus();
@@ -3217,6 +3241,7 @@ class PortfolioGraphPanel extends HTMLElement {
       return true;
     }
     this._structuredBindingUrgent = true;
+    this._structuredBindingAllowHidden ||= allowHidden;
     this.setStructuredGraphLoading(true);
     if (!this._graphReady || !this.structuredMode || !this.canvas) {
       this.scheduleVisibleGraphFocus();

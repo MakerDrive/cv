@@ -30,7 +30,7 @@ function storyEntries() {
   ];
 }
 
-function fixtureWords(entry, durationMs) {
+function fixtureWords(entry, durationMs, clipBoundaries = []) {
   let tokens = entry.speech.match(/[\p{L}\p{N}]+/gu) || [];
   let slotMs = durationMs / (tokens.length + 1);
   return tokens.map((source, index) => {
@@ -42,12 +42,17 @@ function fixtureWords(entry, durationMs) {
       durationMs,
       Math.max(startMs + 1, Math.round((index + 0.15) * slotMs)),
     );
+    for (const boundaryMs of clipBoundaries) {
+      if (!(startMs < boundaryMs && boundaryMs < endMs)) continue;
+      if (boundaryMs - startMs >= endMs - boundaryMs) endMs = boundaryMs;
+      else startMs = boundaryMs;
+    }
     return Object.freeze({ text, startMs, endMs });
   });
 }
 
-function structuralSequence(entry, sourceBinding, wavHash) {
-  let words = fixtureWords(entry, sourceBinding.durationMilliseconds);
+function structuralSequence(entry, sourceBinding, wavHash, clipBoundaries) {
+  let words = fixtureWords(entry, sourceBinding.durationMilliseconds, clipBoundaries);
   let sequenceBody = {
     contractVersion: ALIGNED_SEQUENCE_VERSION,
     timelineHash: sourceBinding.sourceTimelineHash,
@@ -84,14 +89,27 @@ function createFixture() {
   let alignmentClips = [];
   let webClips = [];
   for (let [index, { kind, entry }] of entries.entries()) {
-    let sourceBinding = CV_SHOW_PRESENTATION_PROJECT.script.metadata.cvShow
+    let originalBinding = CV_SHOW_PRESENTATION_PROJECT.script.metadata.cvShow
       .entries[entry.id].media;
-    sourceBinding = {
-      ...sourceBinding,
-      durationMilliseconds: sourceBinding.durationMilliseconds * 2,
+    let sourceBinding = {
+      ...originalBinding,
+      durationMilliseconds: originalBinding.durationMilliseconds * 2,
     };
+    let clipBoundaries = CV_SHOW_PRESENTATION_PROJECT.cells
+      .filter((cell) => cell.kind === 'audio-clip' && cell.turnId === entry.id)
+      .slice(0, -1)
+      .map((cell) => Math.round(
+        cell.audio.sourceOutMs
+          * sourceBinding.durationMilliseconds
+          / originalBinding.durationMilliseconds,
+      ));
     let wavSha256 = sha256(`${FIXTURE_SCHEMA}:audio:${entry.id}`);
-    let sequence = structuralSequence(entry, sourceBinding, `sha256:${wavSha256}`);
+    let sequence = structuralSequence(
+      entry,
+      sourceBinding,
+      `sha256:${wavSha256}`,
+      clipBoundaries,
+    );
     let rawSequence = `${JSON.stringify(sequence, null, 2)}\n`;
     let alignedSequenceSha256 = sha256(rawSequence);
     let number = String(index + 1).padStart(2, '0');
@@ -152,6 +170,26 @@ function createFixture() {
       sourceTimelineHash: clip.timelineHash,
       wavHash: `sha256:${audioClip.sha256}`,
     });
+    let asset = projectInput.assets.find(({ id }) => id === `cv-show:audio:${clip.id}`);
+    let sourceDurationMs = asset.durationMs;
+    Object.assign(asset, {
+      durationMs: clip.mediaDurationMs,
+      contentHash: `sha256:${audioClip.sha256}`,
+      alignmentHash: clip.alignedSequenceHash,
+      sourceTimelineHash: clip.timelineHash,
+    });
+    let entryAudioClips = projectInput.cells.filter((cell) => (
+      cell.kind === 'audio-clip' && cell.turnId === clip.id
+    ));
+    for (let [clipIndex, cell] of entryAudioClips.entries()) {
+      cell.audio.sourceInMs = Math.round(
+        cell.audio.sourceInMs * clip.mediaDurationMs / sourceDurationMs,
+      );
+      cell.audio.sourceOutMs = clipIndex === entryAudioClips.length - 1
+        ? clip.mediaDurationMs
+        : Math.round(cell.audio.sourceOutMs * clip.mediaDurationMs / sourceDurationMs);
+      cell.timing.at.offsetMs = cell.audio.sourceInMs;
+    }
   }
   let project = createPresentationAuthoringProject(projectInput);
   let mediaBindings = Object.freeze(Object.fromEntries(Object.entries(

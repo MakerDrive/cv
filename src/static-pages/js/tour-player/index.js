@@ -13,6 +13,7 @@ import { activateCvShowTarget, activateCvShowUserAction } from './activation.js'
 import { getCvShowRuntimeAuthority } from './cvShowRuntimeAuthority.js';
 import {
   createCvShowDirectiveRunner,
+  createCvShowRuntimeCleanup,
   runCvShowPresentationOperation,
 } from './showAdapter.js';
 import { createCvShowPlaybackEntries } from './presentationContext.js';
@@ -25,12 +26,54 @@ import {
 } from './routing.js';
 import {
   animateCvShowScrollIntoView,
+  createCvShowTextMarkerTarget,
+  ensureCvShowArticleProject,
+  focusPortfolioMapTarget,
+  isPortfolioMapTarget,
   isShowTargetReadyForAction,
+  resolveCvShowActionTargetScroll,
+  resolveCvShowScrollDuration,
   resolveCvShowSelectionQuote,
+  resolveCvShowSemanticTarget,
   resolvePortfolioMapTarget,
+  restoreCvShowHeldAttentionTarget,
+  shouldRestoreCvShowSetupAttentionTarget,
+  shouldBypassCvShowScrollSettlement,
+  shouldDeferCvShowNavigationTarget,
+  waitForPortfolioMapTargetVisualSettlement,
 } from './targetResolution.js';
+import { createCvShowMediaTargetResolver } from './showMediaTargetResolution.js';
+import { createYouTubeNoCookieEmbedUrl } from './youtubeEmbedUrl.js';
 
 export const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
+
+export function createCvShowYouTubePosterDocument(videoId) {
+  const posterUrl = `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`;
+  return `<!doctype html>
+<meta name="color-scheme" content="dark">
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17191c}
+  body{display:grid;place-items:stretch}
+  img{width:100%;height:100%;object-fit:cover;filter:saturate(.78) brightness(.78)}
+</style>
+<img src="${posterUrl}" alt="">`;
+}
+
+/** Keeps Show video blocks passive while preserving ordinary article playback. */
+export function configurePortfolioYouTubeIframe(iframe, videoId) {
+  if (!iframe) return false;
+  iframe.dataset.youtubeVideoId = videoId;
+  const mode = typeof location === 'undefined'
+    ? ''
+    : new URLSearchParams(location.search).get('showMode');
+  if (mode === 'short' || mode === 'full') {
+    iframe.srcdoc = createCvShowYouTubePosterDocument(videoId);
+    iframe.dataset.showPosterOnly = 'true';
+  } else {
+    iframe.src = createYouTubeNoCookieEmbedUrl(videoId, { origin: location.origin });
+  }
+  return true;
+}
 
 function getLocaleMessage(key) {
   const locale = document.documentElement.lang || 'en';
@@ -73,6 +116,8 @@ function resolveTargetElement(workspace, runtime, targetId) {
   const directTarget = direct ? firstVisibleSibling(direct) : null;
   if (directTarget?.matches?.('video, audio')) return directTarget;
   if (visibleElement(directTarget)) return directTarget;
+  const semanticTarget = resolveCvShowSemanticTarget(workspace, runtime, targetId, { document });
+  if (semanticTarget) return semanticTarget;
   if (targetId === 'portfolio/header') return document.querySelector('body > header');
   if (targetId === 'portfolio/workspace') return workspace;
   if (targetId === 'portfolio/viewer') return runtime.viewer || workspace.querySelector('.portfolio-viewer');
@@ -105,22 +150,17 @@ function resolveTargetElement(workspace, runtime, targetId) {
   return null;
 }
 
-function resolveMediaElement(workspace, runtime, targetId) {
-  const target = resolveTargetElement(workspace, runtime, targetId);
-  if (!target) return null;
-  if (target.matches?.('video, audio')) return target;
-  return target.querySelector?.('video, audio')
-    || target.parentElement?.querySelector?.('video, audio')
-    || null;
-}
-
 function panelTypeForTarget(targetId, runtime, actionId = '') {
   if (String(actionId).endsWith('.map')) return 'portfolio-graph';
   if (targetId.startsWith('project-card.') || runtime.entries.has(targetId)) {
     return 'portfolio-tree';
   }
   if (targetId.startsWith('portfolio.map.')) return 'portfolio-graph';
-  if (targetId.startsWith('article.') || targetId.startsWith('profile.')) {
+  if (
+    targetId.startsWith('article.')
+    || targetId.startsWith('profile.')
+    || targetId.startsWith('project-link.')
+  ) {
     return 'portfolio-viewer';
   }
   return '';
@@ -235,7 +275,7 @@ function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
   });
 }
 
-export function createPanelActionAdapter(workspace, runtime) {
+export function createPanelActionAdapter(workspace, runtime, { prepareMedia = null } = {}) {
   const inspect = ({ action }) => inspectTargetPanel(workspace, runtime, action.target, action.id);
   const reveal = ({ action, inspected }) => {
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
@@ -296,22 +336,93 @@ export function createPanelActionAdapter(workspace, runtime) {
     return { ready: true, panelId: inspected.panelId, target: ready.target };
   };
   const awaitTarget = async ({ action, context, signal }) => {
+    ensureCvShowArticleProject(runtime, action?.target);
+    // Graph culling hides offscreen nodes. Focus the exact semantic node after
+    // panel reveal/settlement and before requiring visible target geometry.
+    focusPortfolioMapTarget(workspace, action?.target, {
+      presentationBudgetMs: context?.presentationBudgetMs,
+    });
     const ready = await waitForShowDomReadiness({
       document,
       target: () => {
-        const target = visibleElement(resolvePanelActionTarget(workspace, runtime, action));
+        const target = shouldDeferCvShowNavigationTarget(action)
+          ? visibleElement(runtime.viewer || workspace.querySelector('.portfolio-viewer'))
+          : visibleElement(resolvePanelActionTarget(workspace, runtime, action));
         return isShowTargetReadyForAction(target, action) ? target : null;
       },
       signal,
       timeoutMs: 2_500,
-      scroll: context?.scrollOperation === true ? false : undefined,
+      scroll: resolveCvShowActionTargetScroll(action, context),
     });
+    if (
+      action?.checkpointMode === 'restore-held'
+      || shouldRestoreCvShowSetupAttentionTarget(action, context)
+    ) {
+      const visualSettlement = await restoreCvShowHeldAttentionTarget(ready.target, {
+        document,
+        signal,
+      });
+      return Object.freeze({ ...ready, visualSettlement });
+    }
+    if (
+      context?.scrollOperation === true
+      && action?.type === 'media'
+      && String(action?.target || '').startsWith('media/')
+      && typeof prepareMedia === 'function'
+    ) {
+      try {
+        const preparation = prepareMedia(action.target, { signal });
+        void Promise.resolve(preparation).catch(() => undefined);
+      } catch {}
+    }
+    if (context?.scrollOperation === true && isPortfolioMapTarget(action?.target)) {
+      const mapSettlement = await waitForPortfolioMapTargetVisualSettlement(
+        workspace,
+        action?.target,
+        {
+          document,
+          signal,
+          timeoutMs: signal ? 0 : 2_500,
+        },
+      );
+      return Object.freeze({
+        ...ready,
+        target: mapSettlement.target,
+        visualSettlement: mapSettlement.visualSettlement,
+      });
+    }
     if (context?.scrollOperation !== true || !ready.target?.scrollIntoView) return ready;
+    const bypassScrollSettlement = shouldBypassCvShowScrollSettlement(
+      context?.presentationBudgetMs,
+      { action },
+    );
+    const scrollDurationMs = bypassScrollSettlement
+      ? 0
+      : resolveCvShowScrollDuration(context?.presentationBudgetMs);
+    if (bypassScrollSettlement) {
+      await animateCvShowScrollIntoView(ready.target, {
+        document,
+        signal,
+        durationMs: scrollDurationMs,
+      });
+      return Object.freeze({
+        ...ready,
+        visualSettlement: Object.freeze({
+          status: 'settled',
+          motion: 'instant',
+          reason: 'hard-deadline-instant-scroll',
+        }),
+      });
+    }
     const visualSettlement = await waitForShowVisualSettlement(ready.target, {
       document,
       signal,
       inactivityMs: 2_500,
-      start: () => animateCvShowScrollIntoView(ready.target, { document, signal }),
+      start: () => animateCvShowScrollIntoView(ready.target, {
+        document,
+        signal,
+        durationMs: scrollDurationMs,
+      }),
     });
     return Object.freeze({ ...ready, visualSettlement });
   };
@@ -382,9 +493,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         full: new Set(createCvShowPlaybackEntries(story, 'full').map(({ id }) => id)),
       },
       detailParents,
-      getDurationMs: ({ entryId, detailId }) => Number(
-        view.mediaRegistry.entries[detailId || entryId]?.audio?.durationMilliseconds,
-      ),
     };
   };
 
@@ -433,6 +541,19 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       }
     },
   });
+  const reportRuntimeError = (detail) => workspace.dispatchEvent(new CustomEvent(
+    'portfolio-show-runtime-error',
+    { bubbles: true, composed: true, detail },
+  ));
+  const runtimeCleanup = createCvShowRuntimeCleanup({
+    media,
+    audioArbiter,
+    reportError: reportRuntimeError,
+  });
+  const resolveShowMedia = createCvShowMediaTargetResolver({
+    document,
+    resolveTarget: (targetId) => resolveTargetElement(workspace, runtime, targetId),
+  });
 
   const createPresenterSession = () => {
     const cursor = createPresenterCursor();
@@ -446,12 +567,20 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       attention,
       media,
       resolveTarget: (targetId) => resolveTargetElement(workspace, runtime, targetId),
-      resolveMedia: (targetId) => resolveMediaElement(workspace, runtime, targetId),
+      resolveMedia: resolveShowMedia,
+      resolveMarkerTarget: (target, directive) => (
+        createCvShowTextMarkerTarget(target, directive)
+      ),
       resolveText: getLocaleMessage,
       resolveSelectionQuote: (source, target) => resolveCvShowSelectionQuote(target, source),
       activateTarget: (target, directive) => activateCvShowTarget(target, directive).handled,
       emit: (directive) => getChat()?.emitShowDirective?.(directive),
-      actionAdapter: createPanelActionAdapter(workspace, runtime),
+      actionAdapter: createPanelActionAdapter(workspace, runtime, {
+        prepareMedia: (targetId, options) => (
+          resolveShowMedia(targetId)?.prepareShowMedia?.(options)
+        ),
+      }),
+      reportRuntimeError,
     });
     return { cursor, attention, runner };
   };
@@ -530,8 +659,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     const routeDriven = reason.startsWith('route-');
     running = false;
     disposePresenter();
-    media.stop('show-terminal');
-    audioArbiter.release({ reason: 'show-terminal' });
+    void runtimeCleanup.stopAndRelease('show-terminal', {
+      operation: 'show-terminal-cleanup',
+    });
     if (
       !routeDriven
       && (wasRunning || wasPresenting)
@@ -591,6 +721,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const applyRouteState = async (state) => {
     try {
       return await routeRequests.run(async () => {
+        if (state?.entryId === 'finale') {
+          workspace.querySelector('portfolio-graph-panel')
+            ?.prepareShowTarget?.({ allowHidden: true });
+        }
         const chat = ensureTourOpen();
         if (!chat) return false;
         return await chat.applyShowRoute?.(state) || false;
@@ -624,7 +758,12 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onOpen = (event) => {
-    const entryId = currentSceneEntryId(event.detail?.entryId || '');
+    const requestedEntryId = String(event.detail?.entryId || '').trim();
+    if (!requestedEntryId) {
+      ensureTourOpen();
+      return;
+    }
+    const entryId = currentSceneEntryId(requestedEntryId);
     if (!entryId) {
       ensureTourOpen();
       return;
@@ -676,7 +815,12 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onPhase = async (event) => {
-    if (!running && event.detail?.restorePausedCheckpoint !== true) return;
+    if (event.target !== getChat()) return;
+    if (
+      !running
+      && event.detail?.restorePausedCheckpoint !== true
+      && getChat()?.$.isRunning !== true
+    ) return;
     const chat = getChat();
     const requestId = event.detail?.requestId;
     const complete = event.detail?.complete;
@@ -725,7 +869,12 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onPresentationOperation = (event) => {
-    if (!running && event.detail?.restorePausedCheckpoint !== true) return;
+    if (event.target !== getChat()) return;
+    if (
+      !running
+      && event.detail?.restorePausedCheckpoint !== true
+      && getChat()?.$.isRunning !== true
+    ) return;
     const complete = event.detail?.complete;
     const operation = event.detail?.operation;
     if (typeof complete !== 'function' || !operation) return;
@@ -776,7 +925,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     }
   };
 
-  const onSkipMedia = () => media.skip();
+  const onSkipMedia = () => {
+    void runtimeCleanup.skip({ operation: 'media-skip' });
+  };
 
   const interactionMonitor = monitorMeaningfulShowInteractions(document, {
     accept: (event) => !(typeof event.composedPath === 'function'
@@ -830,7 +981,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     routeRequests.cancel();
     getChat()?.stopShow?.();
     disposePresenter();
-    media.stop('tour-disposed');
-    audioArbiter.release({ reason: 'tour-disposed' });
+    void runtimeCleanup.stopAndRelease('tour-disposed', {
+      operation: 'tour-disposed-cleanup',
+    });
   };
 }

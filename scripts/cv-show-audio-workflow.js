@@ -31,6 +31,9 @@ import {
   planCvShowAudioDirtySet,
 } from './cv-show-audio-provenance.js';
 import {
+  createCvShowAudioClipProject,
+} from './cv-show-audio-clips.js';
+import {
   createCvShowModelServiceClient,
 } from './cv-show-model-service-client.js';
 import {
@@ -44,6 +47,7 @@ import {
 } from './verify-production-build.js';
 import {
   CV_SHOW_SOURCE_RELATIVE_PATH,
+  loadCvShowSourceSelection,
 } from './cv-show-authoring-materializer.js';
 import {
   createCvShowEntryProject,
@@ -207,6 +211,7 @@ export function createCvShowAudioBoundProject({
   project,
   audioManifest,
   alignmentManifest,
+  sequences,
 } = {}) {
   let current;
   try {
@@ -223,6 +228,9 @@ export function createCvShowAudioBoundProject({
   let entryIds = current.cells
     .filter(({ kind }) => kind === 'narration')
     .map(({ turnId }) => turnId);
+  let narrationByEntryId = new Map(current.cells
+    .filter(({ kind }) => kind === 'narration')
+    .map(({ turnId, turn }) => [turnId, turn.text]));
   if (
     !Array.isArray(audioClips)
     || !Array.isArray(alignmentClips)
@@ -238,6 +246,22 @@ export function createCvShowAudioBoundProject({
       'Verified audio/alignment manifests must contain the exact 30 Project entries in order.',
     );
   }
+  if (current.schemaVersion === 'workspace-presentation-authoring-project-v2') {
+    let sequenceIds = sequences instanceof Map
+      ? [...sequences.keys()]
+      : sequences && typeof sequences === 'object' && !Array.isArray(sequences)
+        ? Object.keys(sequences)
+        : [];
+    if (
+      sequenceIds.length !== entryIds.length
+      || sequenceIds.some((entryId) => !narrationByEntryId.has(entryId))
+    ) {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID',
+        'A v2 Project requires the exact complete 30-entry aligned-sequence set.',
+      );
+    }
+  }
   let narrationHashes = new Map(createPresentationAuthoringProjectHashes(current).cellHashes
     .map(({ cellId, hash }) => [cellId, hash]));
   let input = presentationAuthoringProjectCanonicalProjection(current);
@@ -245,9 +269,13 @@ export function createCvShowAudioBoundProject({
   for (let [index, entryId] of entryIds.entries()) {
     let audio = audioClips[index];
     let alignment = alignmentClips[index];
+    let narration = narrationByEntryId.get(entryId);
     let sourceNarrationCellHash = narrationHashes.get(`cv-show:narration:${entryId}`);
     if (
       !entries?.[entryId]
+      || typeof audio.speech !== 'string'
+      || audio.speech !== narration
+      || audio.speechSha256 !== sha256(Buffer.from(audio.speech, 'utf8'))
       || !/^[a-f0-9]{64}$/u.test(String(audio.sha256 || ''))
       || !Number.isInteger(alignment.mediaDurationMs)
       || alignment.mediaDurationMs <= 0
@@ -273,12 +301,21 @@ export function createCvShowAudioBoundProject({
     };
   }
   let bound = createPresentationAuthoringProject(input);
+  if (current.schemaVersion === 'workspace-presentation-authoring-project-v2') {
+    bound = createCvShowAudioClipProject({
+      project: bound,
+      audioManifest,
+      alignmentManifest,
+      sequences,
+    });
+  }
   let registry = createCvShowMediaBindingRegistry(bound);
-  if (
-    Object.keys(registry.entries).length !== 30
+  let incomplete = Object.keys(registry.entries).length !== 30
     || Object.values(registry.entries).some(({ status, playable }) => (
       status !== 'accepted' || playable !== true
-    ))
+    ));
+  if (
+    incomplete
   ) {
     fail(
       'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID',
@@ -503,9 +540,19 @@ function releaseAlignedSequence(sequence) {
       'Generated aligned sequence identity is incomplete.',
     );
   }
-  let releaseHash = hash.startsWith(`${contractVersion}:`)
-    ? hash
-    : `${contractVersion}:${hash}`;
+  let projection = clone(source);
+  delete projection.hash;
+  let expectedHash = computeIntegrity(projection);
+  let observedHash = hash.startsWith(`${contractVersion}:`)
+    ? hash.slice(contractVersion.length + 1)
+    : hash;
+  if (observedHash !== expectedHash) {
+    fail(
+      'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID',
+      'Generated aligned sequence hash does not match its canonical content.',
+    );
+  }
+  let releaseHash = `${contractVersion}:${expectedHash}`;
   return { ...clone(source), hash: releaseHash };
 }
 
@@ -1204,6 +1251,7 @@ export async function createCvShowAudioWorkflow({
     ]);
     let normalizedAlignmentManifest = clone(alignmentManifest);
     let alignmentDirectory = path.posix.dirname(release.manifests.alignment.path);
+    let sequences = new Map();
     for (let clip of normalizedAlignmentManifest.clips || []) {
       let sequence = await readJson(
         path.join(
@@ -1215,13 +1263,23 @@ export async function createCvShowAudioWorkflow({
       );
       let normalized = releaseAlignedSequence(sequence);
       let bytes = jsonBytes(normalized);
-      clip.alignedSequenceHash = normalized.hash;
-      clip.alignedSequenceSha256 = sha256(bytes);
+      if (
+        clip.alignedSequenceHash !== normalized.hash
+        || clip.alignedSequenceSha256 !== sha256(bytes)
+      ) {
+        fail(
+          'CV_SHOW_AUDIO_WORKFLOW_MEDIA_BINDING_INVALID',
+          `Staged aligned sequence evidence for ${clip.id} does not match its manifest.`,
+          { entryId: clip.id },
+        );
+      }
+      sequences.set(clip.id, normalized);
     }
     return createCvShowAudioBoundProject({
       project,
       audioManifest,
       alignmentManifest: normalizedAlignmentManifest,
+      sequences,
     });
   };
   let publishWebAudio = async ({ acceptedPublic } = {}) => {
@@ -1308,11 +1366,9 @@ async function loadTargetProject(filePath, currentProject) {
   }
 }
 
-async function importCurrentSource(repoRoot) {
+export async function loadCvShowAudioWorkflowCurrentSource(repoRoot) {
   let sourcePath = path.join(repoRoot, CV_SHOW_SOURCE_RELATIVE_PATH);
-  let bytes = await fs.readFile(sourcePath);
-  let source = await import(`${pathToFileURL(sourcePath).href}?workflow=${Date.now()}`);
-  return { sourcePath, bytes, ...source };
+  return loadCvShowSourceSelection({ sourcePath, phase: 'workflow-current' });
 }
 
 async function loadAcceptedPublicProof(repoRoot, options) {
@@ -1363,7 +1419,7 @@ async function cli(argv, environment = process.env) {
   let privateRoot = absoluteRoot(options['private-root'] || environment.CV_SHOW_PRIVATE_ARTIFACT_BASE);
   let repoRoot = path.resolve(options['repo-root'] || REPOSITORY_ROOT);
   let profile = await loadProfile(options.profile);
-  let current = await importCurrentSource(repoRoot);
+  let current = await loadCvShowAudioWorkflowCurrentSource(repoRoot);
   let targetProject = await loadTargetProject(options.project, current.CV_SHOW_PRESENTATION_PROJECT);
   let endpoint = options.endpoint || environment.CV_SHOW_MODEL_ENDPOINT;
   let modelClient = endpoint

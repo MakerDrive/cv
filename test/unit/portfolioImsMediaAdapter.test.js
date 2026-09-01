@@ -3,6 +3,10 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import { createPortfolioImsMediaAdapter } from '../../src/static-pages/js/portfolioImsMediaAdapter.js';
+import {
+  createImsShowMediaTarget,
+  waitForImsPublicPlayer,
+} from '../../src/static-pages/js/tour-player/imsShowMediaAdapter.js';
 
 function createFakeElement(tagName) {
   return {
@@ -68,6 +72,25 @@ function installBrowserStubs() {
 
 function findByTag(elements, tagName) {
   return elements.find((element) => element.tagName === tagName);
+}
+
+function listenerRoot(querySelector) {
+  const listeners = new Map();
+  return {
+    querySelector,
+    addEventListener(type, listener) {
+      if (!listeners.has(type)) listeners.set(type, new Set());
+      listeners.get(type).add(listener);
+    },
+    removeEventListener(type, listener) {
+      listeners.get(type)?.delete(listener);
+    },
+    dispatch(type, target) {
+      for (const listener of [...(listeners.get(type) || [])]) {
+        listener({ type, target });
+      }
+    },
+  };
 }
 
 test('IMS adapter module imports without browser globals', () => {
@@ -340,4 +363,301 @@ test('IMS adapter does not enable forwarding when autoplay is absent', async () 
   } finally {
     env.teardown();
   }
+});
+
+test('IMS Show gallery maps authored frames 1 through 5 to public zero-based goTo calls', async () => {
+  const events = [];
+  let releaseHold;
+  const hold = new Promise((resolve) => { releaseHold = resolve; });
+  const gallery = {
+    localName: 'ims-gallery',
+    goTo(index) {
+      events.push(['goTo', index]);
+    },
+  };
+  const viewer = { localName: 'ims-viewer' };
+  const target = createImsShowMediaTarget(viewer, {
+    resolvePlayer: async () => gallery,
+    clock: {
+      wait: async (durationMs, { signal }) => {
+        assert.equal(signal.aborted, false);
+        events.push(['wait', durationMs]);
+        await hold;
+      },
+    },
+  });
+
+  const result = await Promise.race([
+    target.playShowMedia({
+      frames: [1, 2, 3, 4, 5],
+      frameHoldMs: 600,
+      finalFrame: 5,
+    }, { signal: new AbortController().signal }),
+    new Promise((_, reject) => setTimeout(() => reject(
+      new Error('gallery choreography blocked its start receipt'),
+    ), 50)),
+  ]);
+
+  assert.equal(result.running, true);
+  assert.equal(typeof result.completion?.then, 'function');
+  assert.deepEqual(events, [['goTo', 0], ['wait', 600]]);
+
+  releaseHold();
+  await result.completion;
+
+  assert.deepEqual(events, [
+    ['goTo', 0], ['wait', 600],
+    ['goTo', 1], ['wait', 600],
+    ['goTo', 2], ['wait', 600],
+    ['goTo', 3], ['wait', 600],
+    ['goTo', 4], ['wait', 600],
+  ]);
+  assert.deepEqual(result.frames, [1, 2, 3, 4, 5]);
+  assert.equal(result.finalFrame, 5);
+});
+
+test('IMS Show target prewarms one public player and reuses it for capture and playback', async () => {
+  let resolutions = 0;
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    goTo() {},
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => {
+      resolutions += 1;
+      return gallery;
+    },
+    clock: { wait: async () => {} },
+  });
+
+  assert.deepEqual(await target.prepareShowMedia(), {
+    kind: 'ims-gallery',
+    ready: true,
+  });
+  await target.captureShowMediaState();
+  const started = await target.playShowMedia({
+    frames: [1, 2, 3, 4, 5],
+    frameHoldMs: 0,
+    finalFrame: 5,
+  });
+  await started.completion;
+
+  assert.equal(resolutions, 1);
+});
+
+test('IMS Show target explicitly activates a lazy media host before resolving its player', async () => {
+  const calls = [];
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    goTo(index) { calls.push(['goTo', index]); },
+  };
+  const host = {
+    localName: 'sn-media-host',
+    activate() { calls.push('activate'); },
+  };
+  const target = createImsShowMediaTarget(host, {
+    resolvePlayer: async (root) => {
+      assert.equal(root, host);
+      assert.deepEqual(calls, ['activate']);
+      return gallery;
+    },
+    clock: { wait: async () => {} },
+  });
+
+  await target.prepareShowMedia();
+  const started = await target.playShowMedia({ frames: [1], finalFrame: 1 });
+  await started.completion;
+  await target.captureShowMediaState();
+
+  assert.deepEqual(calls, ['activate', ['goTo', 0]]);
+});
+
+test('IMS Show gallery prefers documented hotspotState, enforces finalFrame, and restores it', async () => {
+  const calls = [];
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 3 },
+    goTo(index) {
+      this.hotspotState.image = index;
+      calls.push(index);
+    },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    clock: { wait: async () => {} },
+  });
+  const initial = await target.captureShowMediaState();
+
+  const started = await target.playShowMedia({
+    frames: [1],
+    frameHoldMs: 0,
+    finalFrame: 5,
+  });
+  await started.completion;
+  assert.deepEqual(calls, [0, 4]);
+
+  await target.restoreShowMediaState(initial);
+  assert.deepEqual(calls, [0, 4, 3]);
+});
+
+test('IMS Show gallery never reads the private dollar-state fallback', async () => {
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: {},
+    get $() {
+      throw new Error('private state must not be read');
+    },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+  });
+
+  assert.deepEqual(await target.captureShowMediaState(), {
+    kind: 'ims-gallery',
+    frame: 1,
+  });
+
+  const source = await readFile(
+    new URL('../../src/static-pages/js/tour-player/imsShowMediaAdapter.js', import.meta.url),
+    'utf8',
+  );
+  assert.doesNotMatch(source, /player\.\$/);
+});
+
+test('IMS Show target rejects spinner playback even through an injected resolver', async () => {
+  const spinner = {
+    localName: 'ims-spinner',
+    currentFrame: 3,
+    play() { throw new Error('spinner playback must remain unreachable'); },
+    pause() { throw new Error('spinner pause must remain unreachable'); },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => spinner,
+  });
+
+  await assert.rejects(
+    target.captureShowMediaState(),
+    error => error.code === 'ims-player-unsupported',
+  );
+  await assert.rejects(
+    target.playShowMedia({ mode: 'short-inline-continuous' }),
+    error => error.code === 'ims-player-unsupported',
+  );
+});
+
+test('IMS public player resolution observes mounted children and honors abort', async () => {
+  let child = null;
+  let observerCallback;
+  let disconnectCount = 0;
+  class MutationObserverStub {
+    constructor(callback) {
+      observerCallback = callback;
+    }
+    observe() {}
+    disconnect() {
+      disconnectCount += 1;
+    }
+  }
+  const viewer = listenerRoot(() => child);
+  const pending = waitForImsPublicPlayer(viewer, {
+    MutationObserverImpl: MutationObserverStub,
+  });
+  let settled = false;
+  pending.then(() => { settled = true; });
+  child = { localName: 'ims-gallery' };
+  observerCallback();
+  await Promise.resolve();
+  assert.equal(settled, false, 'child insertion is not readiness');
+  viewer.dispatch('ims-ready', child);
+  assert.equal(await pending, child);
+  assert.equal(disconnectCount, 1);
+
+  const controller = new AbortController();
+  const aborted = waitForImsPublicPlayer(listenerRoot(() => null), {
+    signal: controller.signal,
+    MutationObserverImpl: MutationObserverStub,
+  });
+  controller.abort(Object.assign(new Error('replaced'), { name: 'AbortError' }));
+  await assert.rejects(aborted, error => error === controller.signal.reason);
+  assert.equal(disconnectCount, 2);
+});
+
+test('IMS public player resolution waits through delayed viewer mount and captures a raced ready event', async () => {
+  let viewer = null;
+  let player = null;
+  let observerCallback;
+  let listenerWasAttached = false;
+  class MutationObserverStub {
+    constructor(callback) { observerCallback = callback; }
+    observe() {}
+    disconnect() {}
+  }
+  const host = listenerRoot(selector => selector === 'ims-viewer' ? viewer : null);
+  const originalAddEventListener = host.addEventListener;
+  host.addEventListener = function addEventListener(type, listener) {
+    if (type === 'ims-ready') listenerWasAttached = true;
+    return originalAddEventListener.call(this, type, listener);
+  };
+  const pending = waitForImsPublicPlayer(host, {
+    MutationObserverImpl: MutationObserverStub,
+  });
+
+  viewer = { querySelector: () => player };
+  observerCallback();
+  player = { localName: 'ims-gallery' };
+  host.dispatch('ims-ready', player);
+  observerCallback();
+
+  assert.equal(await pending, player);
+  assert.equal(listenerWasAttached, true, 'ready listener is attached before inspecting mounts');
+});
+
+test('IMS public player resolution accepts documented state from an already-ready child', async () => {
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+  };
+  let observerConstructed = false;
+  class MutationObserverStub {
+    constructor() { observerConstructed = true; }
+  }
+  const viewer = listenerRoot(() => gallery);
+  viewer.localName = 'ims-viewer';
+
+  assert.equal(await waitForImsPublicPlayer(viewer, {
+    MutationObserverImpl: MutationObserverStub,
+  }), gallery);
+  assert.equal(observerConstructed, false);
+});
+
+test('IMS Show target forwards capture abort and retries a rejected public-player mount', async () => {
+  const controller = new AbortController();
+  const reason = Object.assign(new Error('replaced during mount'), { name: 'AbortError' });
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 2 },
+  };
+  let attempts = 0;
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async (_viewer, { signal }) => {
+      attempts += 1;
+      if (attempts === 1) {
+        assert.equal(signal, controller.signal);
+        throw reason;
+      }
+      return gallery;
+    },
+  });
+
+  await assert.rejects(
+    target.captureShowMediaState({ signal: controller.signal }),
+    error => error === reason,
+  );
+  assert.deepEqual(await target.captureShowMediaState(), {
+    kind: 'ims-gallery',
+    frame: 3,
+  });
+  assert.equal(attempts, 2);
 });

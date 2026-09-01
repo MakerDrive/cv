@@ -1,0 +1,291 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-zyf0Cs3j402P1cLYG3k13hlzk4x93I/DLttL/bgp/SI=",
+  "media": {
+    "durationMs": 32650,
+    "hash": "sha256:ea7c3b69528b03f5d1ca3b122c2c4a48f90460387226d37666498f1cdb61893d",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-yqByhNi22rzaxyLbO8E+hZri453hodwesr8pJWY8k64=",
+  "turns": [
+    {
+      "endMs": 32650,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "В этом демо-воркспейс получает предметную конфигурацию для обслуживания оборудования. Панели связывают заявки, активы, локации, бригады и безопасные действия. Агент читает тот же актуальный контекст, который видит человек и работает через объявленные действия интерфейса. Этот контур проверяет архитектуру воркспейса на корпоративном процессе. Реальные данные авторизация и API-системы Максима подключаются отдельным интеграционным слоем.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 180,
+          "startMs": 0,
+          "text": "В"
+        },
+        {
+          "endMs": 460,
+          "startMs": 180,
+          "text": "этом"
+        },
+        {
+          "endMs": 920,
+          "startMs": 460,
+          "text": "демо"
+        },
+        {
+          "endMs": 1520,
+          "startMs": 920,
+          "text": "-воркспейс"
+        },
+        {
+          "endMs": 2380,
+          "startMs": 1520,
+          "text": "получает"
+        },
+        {
+          "endMs": 3080,
+          "startMs": 2380,
+          "text": "предметную"
+        },
+        {
+          "endMs": 4040,
+          "startMs": 3080,
+          "text": "конфигурацию"
+        },
+        {
+          "endMs": 4580,
+          "startMs": 4040,
+          "text": "для"
+        },
+        {
+          "endMs": 5440,
+          "startMs": 4580,
+          "text": "обслуживания"
+        },
+        {
+          "endMs": 6400,
+          "startMs": 5440,
+          "text": "оборудования."
+        },
+        {
+          "endMs": 7320,
+          "startMs": 6680,
+          "text": "Панели"
+        },
+        {
+          "endMs": 7960,
+          "startMs": 7320,
+          "text": "связывают"
+        },
+        {
+          "endMs": 8780,
+          "startMs": 7960,
+          "text": "заявки,"
+        },
+        {
+          "endMs": 9760,
+          "startMs": 9020,
+          "text": "активы,"
+        },
+        {
+          "endMs": 10600,
+          "startMs": 9860,
+          "text": "локации,"
+        },
+        {
+          "endMs": 11380,
+          "startMs": 10780,
+          "text": "бригады"
+        },
+        {
+          "endMs": 11560,
+          "startMs": 11380,
+          "text": "и"
+        },
+        {
+          "endMs": 12240,
+          "startMs": 11560,
+          "text": "безопасные"
+        },
+        {
+          "endMs": 12800,
+          "startMs": 12240,
+          "text": "действия."
+        },
+        {
+          "endMs": 13700,
+          "startMs": 13080,
+          "text": "Агент"
+        },
+        {
+          "endMs": 14200,
+          "startMs": 13700,
+          "text": "читает"
+        },
+        {
+          "endMs": 14400,
+          "startMs": 14200,
+          "text": "тот"
+        },
+        {
+          "endMs": 14600,
+          "startMs": 14400,
+          "text": "же"
+        },
+        {
+          "endMs": 15360,
+          "startMs": 14600,
+          "text": "актуальный"
+        },
+        {
+          "endMs": 15880,
+          "startMs": 15360,
+          "text": "контекст,"
+        },
+        {
+          "endMs": 16460,
+          "startMs": 16180,
+          "text": "который"
+        },
+        {
+          "endMs": 16800,
+          "startMs": 16460,
+          "text": "видит"
+        },
+        {
+          "endMs": 17240,
+          "startMs": 16800,
+          "text": "человек"
+        },
+        {
+          "endMs": 17540,
+          "startMs": 17240,
+          "text": "и"
+        },
+        {
+          "endMs": 17960,
+          "startMs": 17540,
+          "text": "работает"
+        },
+        {
+          "endMs": 18360,
+          "startMs": 17960,
+          "text": "через"
+        },
+        {
+          "endMs": 19200,
+          "startMs": 18360,
+          "text": "объявленные"
+        },
+        {
+          "endMs": 19700,
+          "startMs": 19200,
+          "text": "действия"
+        },
+        {
+          "endMs": 20620,
+          "startMs": 19700,
+          "text": "интерфейса."
+        },
+        {
+          "endMs": 21460,
+          "startMs": 20980,
+          "text": "Этот"
+        },
+        {
+          "endMs": 21860,
+          "startMs": 21460,
+          "text": "контур"
+        },
+        {
+          "endMs": 22420,
+          "startMs": 21860,
+          "text": "проверяет"
+        },
+        {
+          "endMs": 23040,
+          "startMs": 22420,
+          "text": "архитектуру"
+        },
+        {
+          "endMs": 23700,
+          "startMs": 23040,
+          "text": "воркспейса"
+        },
+        {
+          "endMs": 24020,
+          "startMs": 23700,
+          "text": "на"
+        },
+        {
+          "endMs": 24900,
+          "startMs": 24020,
+          "text": "корпоративном"
+        },
+        {
+          "endMs": 25480,
+          "startMs": 24900,
+          "text": "процессе."
+        },
+        {
+          "endMs": 26020,
+          "startMs": 25480,
+          "text": "Реальные"
+        },
+        {
+          "endMs": 26500,
+          "startMs": 26020,
+          "text": "данные"
+        },
+        {
+          "endMs": 27300,
+          "startMs": 26500,
+          "text": "авторизация"
+        },
+        {
+          "endMs": 27580,
+          "startMs": 27300,
+          "text": "и"
+        },
+        {
+          "endMs": 28140,
+          "startMs": 27580,
+          "text": "API"
+        },
+        {
+          "endMs": 28920,
+          "startMs": 28140,
+          "text": "-системы"
+        },
+        {
+          "endMs": 29540,
+          "startMs": 28920,
+          "text": "Максима"
+        },
+        {
+          "endMs": 30460,
+          "startMs": 29540,
+          "text": "подключаются"
+        },
+        {
+          "endMs": 31220,
+          "startMs": 30460,
+          "text": "отдельным"
+        },
+        {
+          "endMs": 32040,
+          "startMs": 31220,
+          "text": "интеграционным"
+        },
+        {
+          "endMs": 32480,
+          "startMs": 32040,
+          "text": "слоем."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

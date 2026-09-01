@@ -464,7 +464,7 @@ function validateTranscript(value) {
     }
     previousEnd = endSec;
     let wordText = requireString(word.word, `transcription word ${index} text`);
-    if (!LEXICAL_TOKEN_PATTERN.test(wordText)) return [];
+    if (endSec === startSec || !LEXICAL_TOKEN_PATTERN.test(wordText)) return [];
     return [{
       word: wordText,
       startSec,

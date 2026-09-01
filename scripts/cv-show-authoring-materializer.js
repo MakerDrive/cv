@@ -12,10 +12,14 @@ import { pathToFileURL } from 'node:url';
 import {
   presentationAuthoringProjectCanonicalProjection,
 } from 'symbiote-workspace';
+import { computeIntegrity } from 'symbiote-workspace/schema/canonical-json.js';
 import {
   createCvShowMediaBindingRegistry,
   validateCvShowMasterProject,
 } from '../src/static-pages/js/tour-player/presentationProjectAdapter.js';
+import {
+  createCvShowAudioReleaseDescriptor,
+} from './cv-show-audio-pipeline.js';
 import {
   acquireCvShowAuthoringLock,
 } from './cv-show-authoring-storage.js';
@@ -26,6 +30,8 @@ export const CV_SHOW_PROJECT_END_SENTINEL = '/* CV_SHOW_AUTHORING_PROJECT_INPUT:
 export const CV_SHOW_RELEASE_START_SENTINEL = '/* CV_SHOW_AUDIO_RELEASE_INPUT:START */';
 export const CV_SHOW_RELEASE_END_SENTINEL = '/* CV_SHOW_AUDIO_RELEASE_INPUT:END */';
 const SHA256_PATTERN = /^sha256:[a-f0-9]{64}$/u;
+const LEGACY_PROJECT_SCHEMA = 'workspace-presentation-authoring-project-v1';
+const LEGACY_PROJECT_HASH_PATTERN = /^workspace-presentation-authoring-project-v1:sha256-[A-Za-z0-9+/]{43}=$/u;
 
 function fail(code, message, details = {}) {
   throw Object.assign(new Error(message), { code, details: Object.freeze({ ...details }) });
@@ -64,15 +70,7 @@ function validateRelease(release, project) {
   return release;
 }
 
-async function importProjectModule(sourcePath, phase) {
-  let url = `${pathToFileURL(sourcePath).href}?cv-source-${phase}=${randomUUID()}`;
-  let sourceModule = await import(url);
-  let project = validateCvShowMasterProject(sourceModule.CV_SHOW_PRESENTATION_PROJECT);
-  let release = validateRelease(sourceModule.CV_SHOW_AUDIO_RELEASE, project);
-  return { sourceModule, project, release };
-}
-
-function replaceSentinelLiteral(source, startSentinel, endSentinel, value, field) {
+function sentinelLiteralBounds(source, startSentinel, endSentinel, field) {
   let start = source.indexOf(startSentinel);
   let end = source.indexOf(endSentinel);
   if (
@@ -87,7 +85,147 @@ function replaceSentinelLiteral(source, startSentinel, endSentinel, value, field
       `CV Show ${field} source sentinels are invalid`,
     );
   }
-  let literalStart = start + startSentinel.length;
+  return { start, end, literalStart: start + startSentinel.length };
+}
+
+function parseSentinelJson(source, startSentinel, endSentinel, field) {
+  let { literalStart, end } = sentinelLiteralBounds(
+    source,
+    startSentinel,
+    endSentinel,
+    field,
+  );
+  try {
+    return JSON.parse(source.slice(literalStart, end).trim());
+  } catch {
+    fail(
+      'CV_SHOW_AUTHORING_SOURCE_INVALID',
+      `CV Show ${field} sentinel content must be one JSON value`,
+    );
+  }
+}
+
+function legacySourceSelection(source, projectInput) {
+  if (projectInput?.schemaVersion !== LEGACY_PROJECT_SCHEMA) return null;
+  let project = {
+    ...projectInput,
+    hash: `${LEGACY_PROJECT_SCHEMA}:${computeIntegrity(projectInput)}`,
+  };
+  let release = parseSentinelJson(
+    source,
+    CV_SHOW_RELEASE_START_SENTINEL,
+    CV_SHOW_RELEASE_END_SENTINEL,
+    'audio release',
+  );
+  if (
+    Object.hasOwn(projectInput, 'hash')
+    || project.id !== 'cv-show'
+    || !Number.isInteger(project.revision)
+    || project.revision < 0
+    || !LEGACY_PROJECT_HASH_PATTERN.test(String(project.hash || ''))
+    || release?.schemaVersion !== 'cv-show-audio-release-v1'
+    || release.project?.revision !== project.revision
+    || release.project?.authoringProjectHash !== project.hash
+  ) {
+    fail(
+      'CV_SHOW_AUTHORING_SOURCE_STALE',
+      'CV Show legacy Project/release source base is stale or invalid',
+    );
+  }
+  let releaseProjection = { ...release };
+  delete releaseProjection.releaseId;
+  let normalizedRelease;
+  try {
+    normalizedRelease = createCvShowAudioReleaseDescriptor(releaseProjection);
+  } catch (error) {
+    fail(
+      'CV_SHOW_AUTHORING_SOURCE_STALE',
+      'CV Show legacy audio release identity is stale or invalid',
+      { causeCode: error?.code || 'UNKNOWN' },
+    );
+  }
+  if (normalizedRelease.releaseId !== release.releaseId) {
+    fail(
+      'CV_SHOW_AUTHORING_SOURCE_STALE',
+      'CV Show legacy audio release identity is stale or invalid',
+    );
+  }
+  return { sourceModule: null, project, release: normalizedRelease };
+}
+
+async function importProjectModule(sourcePath, phase) {
+  let url = `${pathToFileURL(sourcePath).href}?cv-source-${phase}=${randomUUID()}`;
+  let sourceModule = await import(url);
+  let project = validateCvShowMasterProject(sourceModule.CV_SHOW_PRESENTATION_PROJECT);
+  let release = validateRelease(sourceModule.CV_SHOW_AUDIO_RELEASE, project);
+  return { sourceModule, project, release };
+}
+
+async function importExactProjectModule({ sourcePath, bytes, phase, mode }) {
+  let temporary = `${sourcePath}.${process.pid}.${randomUUID()}.${phase}.load.mjs`;
+  let handle;
+  try {
+    handle = await open(temporary, 'wx', mode);
+    await handle.writeFile(bytes);
+    await handle.sync();
+    await handle.close();
+    handle = null;
+    return await importProjectModule(temporary, phase);
+  } finally {
+    await handle?.close().catch(() => undefined);
+    await unlink(temporary).catch(() => undefined);
+  }
+}
+
+export async function loadCvShowSourceSelection({
+  sourcePath,
+  phase = 'current',
+  expectedSourceSha256,
+} = {}) {
+  if (
+    !path.isAbsolute(sourcePath)
+    || typeof phase !== 'string'
+    || !phase
+    || (expectedSourceSha256 !== undefined
+      && !SHA256_PATTERN.test(String(expectedSourceSha256)))
+  ) {
+    fail('CV_SHOW_AUTHORING_SOURCE_INVALID', 'CV Show source selection input is invalid');
+  }
+  let [bytes, sourceStat] = await Promise.all([readFile(sourcePath), stat(sourcePath)]);
+  if (expectedSourceSha256 !== undefined && sha256(bytes) !== expectedSourceSha256) {
+    fail('CV_SHOW_AUTHORING_SOURCE_STALE', 'CV Show Project/release source SHA-256 is stale');
+  }
+  let source = bytes.toString('utf8');
+  let projectInput = parseSentinelJson(
+    source,
+    CV_SHOW_PROJECT_START_SENTINEL,
+    CV_SHOW_PROJECT_END_SENTINEL,
+    'Project',
+  );
+  let selected = legacySourceSelection(source, projectInput);
+  if (!selected) {
+    selected = await importExactProjectModule({
+      sourcePath,
+      bytes,
+      phase,
+      mode: sourceStat.mode & 0o777,
+    });
+  }
+  return Object.freeze({
+    sourcePath,
+    bytes,
+    CV_SHOW_PRESENTATION_PROJECT: selected.project,
+    CV_SHOW_AUDIO_RELEASE: selected.release,
+  });
+}
+
+function replaceSentinelLiteral(source, startSentinel, endSentinel, value, field) {
+  let { literalStart, end } = sentinelLiteralBounds(
+    source,
+    startSentinel,
+    endSentinel,
+    field,
+  );
   return `${source.slice(0, literalStart)}\n${JSON.stringify(value, null, 2)}\n${source.slice(end)}`;
 }
 
@@ -178,20 +316,25 @@ export async function replaceCvShowSource({
     fail('CV_SHOW_AUTHORING_SOURCE_INVALID', 'CV Show source CAS input is invalid');
   }
   let target = path.join(repoRoot, CV_SHOW_SOURCE_RELATIVE_PATH);
-  let [beforeBytes, sourceStat] = await Promise.all([readFile(target), stat(target)]);
-  if (sha256(beforeBytes) !== expectedSourceSha256) {
-    fail('CV_SHOW_AUTHORING_SOURCE_STALE', 'CV Show Project/release source SHA-256 is stale');
-  }
-  let current = await importProjectModule(target, 'current');
+  let [currentSelection, sourceStat] = await Promise.all([
+    loadCvShowSourceSelection({
+      sourcePath: target,
+      phase: 'current',
+      expectedSourceSha256,
+    }),
+    stat(target),
+  ]);
+  let beforeBytes = currentSelection.bytes;
+  let source = beforeBytes.toString('utf8');
   if (
-    current.project.revision !== expectedProject.revision
-    || current.project.hash !== expectedProject.authoringProjectHash
-    || current.release.releaseId !== expectedReleaseId
+    currentSelection.CV_SHOW_PRESENTATION_PROJECT.revision !== expectedProject.revision
+    || currentSelection.CV_SHOW_PRESENTATION_PROJECT.hash !== expectedProject.authoringProjectHash
+    || currentSelection.CV_SHOW_AUDIO_RELEASE.releaseId !== expectedReleaseId
   ) {
     fail('CV_SHOW_AUTHORING_SOURCE_STALE', 'CV Show Project/release source base is stale');
   }
   let nextSource = renderCvShowSource({
-    source: beforeBytes.toString('utf8'),
+    source,
     project,
     release,
   });
@@ -214,16 +357,18 @@ export async function replaceCvShowSource({
   } finally {
     if (temporary) await unlink(temporary).catch(() => undefined);
   }
-  let finalBytes = await readFile(target);
-  let final = await importProjectModule(target, 'final');
-  if (final.project.hash !== project.hash || final.release.releaseId !== release.releaseId) {
+  let final = await loadCvShowSourceSelection({ sourcePath: target, phase: 'final' });
+  if (
+    final.CV_SHOW_PRESENTATION_PROJECT.hash !== project.hash
+    || final.CV_SHOW_AUDIO_RELEASE.releaseId !== release.releaseId
+  ) {
     fail('CV_SHOW_AUTHORING_MATERIALIZATION_INVALID', 'CV Show final source is divergent');
   }
   return Object.freeze({
     oldSourceSha256: expectedSourceSha256,
-    newSourceSha256: sha256(finalBytes),
-    project: final.project,
-    release: final.release,
+    newSourceSha256: sha256(final.bytes),
+    project: final.CV_SHOW_PRESENTATION_PROJECT,
+    release: final.CV_SHOW_AUDIO_RELEASE,
   });
 }
 
