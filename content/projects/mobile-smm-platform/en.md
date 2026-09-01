@@ -2,7 +2,7 @@
 title: Mobile SMM Operations Platform
 order: 20.5
 period: Date pending
-kicker: Selected R&D case
+kicker: Selected project
 summary: A controlled multi-profile SMM operations case combining media, publishing schedules, queues, Android execution, approvals, limits, deduplication, and an action log.
 image: https://rnd-pro.com/svg/logo/index.svg
 alt: Mobile SMM operations platform
