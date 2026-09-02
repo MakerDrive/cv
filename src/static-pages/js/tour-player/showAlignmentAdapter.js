@@ -357,7 +357,20 @@ export function createCvShowAlignmentController({
       let tuple = null;
       let mediaRuntime = null;
       const receiptObservers = new Set();
+      const terminalReasons = new Map();
+      const terminalReasonCode = (reason) => (
+        typeof reason === 'string' ? reason : String(reason?.code || '')
+      );
       const receiveAcceptedReceipt = (receipt) => {
+        if (
+          ['failed', 'rejected', 'cancelled', 'stale', 'skipped'].includes(receipt?.status)
+          && receipt?.cellId
+        ) {
+          terminalReasons.set(receipt.cellId, Object.freeze({
+            status: receipt.status,
+            code: terminalReasonCode(receipt.reason),
+          }));
+        }
         onReceipt?.(receipt);
         for (const observer of [...receiptObservers]) observer(receipt);
       };
@@ -428,18 +441,24 @@ export function createCvShowAlignmentController({
         execution: tuple.execution,
         playbackPlan: tuple.playbackPlan,
         media,
-        onFailure: (error) => onSeekFailure?.(Object.freeze({
-          status: 'failed',
-          reason: error?.code || 'presentation-playback-failed',
-          operationId: tuple.execution.snapshot.activeOperationId,
-          requestedMs: tuple.execution.snapshot.mediaTimeMs || 0,
-          observedMs: Math.max(0, Math.round(Number(media.currentTime || 0) * 1_000)),
-          phase: 'presentation-playback',
-          details: Object.freeze({
-            message: String(error?.message || error || ''),
-            ...describePresentationOperationCause(error),
-          }),
-        })),
+        onFailure: (error) => {
+          const failedCellId = String(error?.details?.cellId || '');
+          const terminalReason = terminalReasons.get(failedCellId);
+          onSeekFailure?.(Object.freeze({
+            status: 'failed',
+            reason: error?.code || 'presentation-playback-failed',
+            operationId: tuple.execution.snapshot.activeOperationId,
+            requestedMs: tuple.execution.snapshot.mediaTimeMs || 0,
+            observedMs: Math.max(0, Math.round(Number(media.currentTime || 0) * 1_000)),
+            phase: 'presentation-playback',
+            details: Object.freeze({
+              message: String(error?.message || error || ''),
+              ...(terminalReason?.status ? { terminalStatus: terminalReason.status } : {}),
+              ...(terminalReason?.code ? { cause: terminalReason.code } : {}),
+              ...describePresentationOperationCause(error),
+            }),
+          }));
+        },
       });
       const mediaListeners = {
         playing: () => {
@@ -474,9 +493,17 @@ export function createCvShowAlignmentController({
           snapshot = await tuple.execution.whenIdle();
           const terminal = snapshot.terminal.find(({ cellId }) => cellId === cell.cellId);
           if (terminal?.status !== 'completed') {
+            const reason = terminalReasons.get(cell.cellId);
             throw Object.assign(
               new Error(`CV Show presentation setup failed: ${entry.id}/${cell.cellId}`),
-              { code: 'CV_SHOW_SCENE_SETUP_FAILED', snapshot },
+              {
+                code: 'CV_SHOW_SCENE_SETUP_FAILED',
+                snapshot,
+                details: Object.freeze({
+                  terminalStatus: terminal?.status || 'missing',
+                  ...(reason?.code ? { cause: reason.code } : {}),
+                }),
+              },
             );
           }
         }

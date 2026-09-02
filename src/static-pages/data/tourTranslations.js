@@ -52,6 +52,7 @@ const rawMessages = {
     'tour.error.speech.clipPlaybackFailed': 'audio clip playback failed',
     'tour.error.speech.clipTransportInvalid': 'the audio transport returned an invalid state',
     'tour.error.speech.speechSynthesis': 'browser speech synthesis failed',
+    'tour.status.retry': 'Retrying this step…',
   },
   ru: {
     'panel.tour': 'CV Show',
@@ -106,6 +107,7 @@ const rawMessages = {
     'tour.error.speech.clipPlaybackFailed': 'воспроизведение аудиофрагмента прервалось ошибкой',
     'tour.error.speech.clipTransportInvalid': 'аудиотранспорт вернул некорректное состояние',
     'tour.error.speech.speechSynthesis': 'системный синтез речи в браузере завершился ошибкой',
+    'tour.status.retry': 'Повторяю шаг…',
   },
   es: {
     'panel.tour': 'CV Show',
@@ -160,6 +162,7 @@ const rawMessages = {
     'tour.error.speech.clipPlaybackFailed': 'la reproducción del fragmento de audio falló',
     'tour.error.speech.clipTransportInvalid': 'el transporte de audio devolvió un estado no válido',
     'tour.error.speech.speechSynthesis': 'la síntesis de voz del navegador falló',
+    'tour.status.retry': 'Reintentando el paso…',
   },
 };
 

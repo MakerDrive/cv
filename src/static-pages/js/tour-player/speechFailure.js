@@ -47,6 +47,15 @@ function boundedPart(value, limit = DETAIL_PART_LIMIT) {
   return text ? text.slice(0, limit) : '';
 }
 
+function firstStackFrame(stack) {
+  const frame = String(stack || '')
+    .split('\n')
+    .map((line) => line.trim())
+    .find((line) => line.startsWith('at '));
+  if (!frame) return '';
+  return boundedPart(frame.replace(/^at\s+/, ''), 100);
+}
+
 function firstText(...values) {
   for (const value of values) {
     const text = String(value ?? '').trim();
@@ -115,10 +124,10 @@ export function describeCvShowMissingTarget(receipt) {
  * and context fragment suitable for on-screen diagnostics.
  *
  * @param {{
- *   error?: null | string | { code?: unknown, name?: unknown, message?: unknown },
+ *   error?: null | string | { code?: unknown, name?: unknown, message?: unknown, stack?: unknown, details?: { cause?: unknown, targets?: unknown, terminalStatus?: unknown } },
  *   receipt?: null | { status?: unknown, reason?: unknown, terminalReason?: unknown,
  *     operationId?: unknown, phase?: unknown, requestedMs?: unknown, observedMs?: unknown,
- *     details?: { message?: unknown, cause?: unknown, targets?: unknown } },
+ *     details?: { message?: unknown, cause?: unknown, targets?: unknown, terminalStatus?: unknown } },
  *   entryId?: unknown,
  * }} [failure]
  * @returns {{ causeKey: string, code: string, detail: string }}
@@ -133,8 +142,8 @@ export function describeCvShowSpeechFailure({ error, receipt, entryId } = {}) {
     typeof source?.name === 'string' ? source.name : '',
   );
   const code = boundedPart(reason) || 'unknown-error';
-  const innerCause = boundedPart(receipt?.details?.cause, 80);
-  const targets = boundedPart(receipt?.details?.targets, 120);
+  const innerCause = boundedPart(receipt?.details?.cause ?? source?.details?.cause, 80);
+  const targets = boundedPart(receipt?.details?.targets ?? source?.details?.targets, 120);
   const detailParts = [];
   const entry = boundedPart(entryId, 80);
   if (entry) detailParts.push(`entry=${entry}`);
@@ -146,9 +155,11 @@ export function describeCvShowSpeechFailure({ error, receipt, entryId } = {}) {
   if (mediaKey) detailParts.push(`media=${code}`);
   const receiptStatus = boundedPart(receipt?.status, 40);
   if (receiptStatus && receiptStatus !== 'completed') detailParts.push(`status=${receiptStatus}`);
+  const terminalStatus = boundedPart(receipt?.details?.terminalStatus ?? source?.details?.terminalStatus, 40);
+  if (terminalStatus) detailParts.push(`terminal=${terminalStatus}`);
   if (targets) detailParts.push(`targets=${targets}`);
   const message = boundedPart(
-    receipt?.details?.message ?? source?.message ?? '',
+    receipt?.details?.message ?? source?.message ?? firstStackFrame(source?.stack) ?? '',
     DETAIL_MESSAGE_LIMIT,
   );
   if (message && message !== code) detailParts.push(message);

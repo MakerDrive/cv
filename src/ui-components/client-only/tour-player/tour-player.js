@@ -31,6 +31,8 @@ import {
 
 const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
+const CV_SHOW_SCENE_RETRY_LIMIT = 2;
+
 function formatProgress(message, current, total) {
   return message.replace('{current}', String(current)).replace('{total}', String(total));
 }
@@ -277,6 +279,8 @@ export class PortfolioShowChat extends HTMLElement {
   #audioArbiter = null;
   #speechToken = null;
   #activeSpeechEntry = null;
+  #speechRetryAttempts = new Map();
+  #sceneRetryScheduled = false;
   #messageStream = createCvShowMessageStreamController();
 
   constructor() {
@@ -1372,11 +1376,39 @@ export class PortfolioShowChat extends HTMLElement {
     } ${description.detail}`;
   }
 
+  /**
+   * User-driven rapid navigation commonly produces transient presentation
+   * races (slow media, late article mount, attention deadline). Re-present the
+   * failing scene a bounded number of times before showing a fatal error. The
+   * retry is deferred so it never unwinds through the failing runtime's own
+   * disposal stack, and it is dropped when the user navigates meanwhile.
+   */
+  #scheduleSceneRetry(entryId, requestId, positionMs = 0) {
+    if (this.#sceneRetryScheduled) return true;
+    const attempts = this.#speechRetryAttempts.get(entryId) || 0;
+    if (attempts >= CV_SHOW_SCENE_RETRY_LIMIT) return false;
+    this.#sceneRetryScheduled = true;
+    globalThis.setTimeout?.(() => {
+      this.#sceneRetryScheduled = false;
+      if (requestId !== this.#requestId || !this.isConnected) return;
+      const entry = this.#playbackEntries.find(({ id }) => id === entryId);
+      if (!entry) return;
+      this.#speechRetryAttempts.set(entryId, attempts + 1);
+      this.$.isError = false;
+      this.$.errorText = '';
+      this.#appendSystemMessage(this.#message('tour.status.retry'));
+      this.#sceneIndex = Math.max(0, this.#playbackEntries.indexOf(entry));
+      this.#presentEntry(entry, { positionMs, startPaused: !this.#playRequested });
+    }, 0);
+    return true;
+  }
+
   #recordAlignedSeekFailure(receipt, requestId, entryId) {
     if (requestId !== this.#requestId) return;
     if (this.#lastAlignedSeekFailure?.operationId === receipt?.operationId) return;
     this.#lastAlignedSeekFailure = receipt;
     this.#lastAlignedGenerationReceipt = receipt;
+    if (this.#scheduleSceneRetry(entryId, requestId)) return;
     this.$.isError = true;
     this.$.errorText = this.#speechFailureText({ receipt, entryId });
     this.pauseShow('alignment-seek-error');
@@ -1531,6 +1563,7 @@ export class PortfolioShowChat extends HTMLElement {
       }
     } catch (error) {
       if (requestId !== this.#requestId) return;
+      if (this.#scheduleSceneRetry(entry.id, requestId, positionMs)) return;
       this.$.isError = true;
       this.$.errorText = this.#speechFailureText({ error, entryId: entry.id });
       this.pauseShow('scene-setup-error');
@@ -1585,6 +1618,7 @@ export class PortfolioShowChat extends HTMLElement {
         if (typeof onPhysicalStart !== 'function') return;
         void onPhysicalStart().catch((error) => {
           if (requestId !== this.#requestId) return;
+          if (this.#scheduleSceneRetry(entry.id, requestId, positionMs)) return;
           this.$.isError = true;
           this.$.errorText = this.#speechFailureText({ error, entryId: entry.id });
           this.pauseShow('scene-setup-error');
@@ -1607,6 +1641,7 @@ export class PortfolioShowChat extends HTMLElement {
           releaseSpeech();
           return;
         }
+        this.#speechRetryAttempts.delete(entry.id);
         this.#transportPlaying = false;
         this.#syncPlayer();
         releaseSpeech();
@@ -1620,6 +1655,7 @@ export class PortfolioShowChat extends HTMLElement {
           this.#recordAlignedSeekFailure(receipt, requestId, entry.id);
           return;
         }
+        if (this.#scheduleSceneRetry(entry.id, requestId, positionMs)) return;
         this.$.isError = true;
         this.$.errorText = failureText;
         this.pauseShow('narration-error');
