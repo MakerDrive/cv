@@ -6002,3 +6002,119 @@ test('trusted document interaction pauses the Show without destructively clearin
     'Pause must retain the active marker/frame/selection and presenter cursor pair',
   );
 });
+
+test('terminal narration errors keep the player controllable: Play repeats the step', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+    'speechSynthesis',
+    'SpeechSynthesisUtterance',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  const spoken = [];
+  globalThis.speechSynthesis = {
+    paused: false,
+    cancel() {},
+    pause() { this.paused = true; },
+    resume() { this.paused = false; },
+    speak(utterance) {
+      spoken.push(utterance);
+      queueMicrotask(() => utterance.onerror?.({ error: 'speech-error' }));
+    },
+  };
+  globalThis.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+    constructor(text) { this.text = text; }
+  };
+
+  const dock = document.createElement('div');
+  const showPlayer = {
+    configs: [],
+    bind(config) { this.configs.push(config); },
+  };
+  t.after(() => {
+    dock.remove();
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+  dock.setAgentProvider = () => {};
+  dock.setMessages = () => {};
+  dock.getChat = () => null;
+  dock.setShow = (_key, config) => {
+    showPlayer.configs.push(config);
+    return showPlayer;
+  };
+  dock.removeShow = () => {};
+  const { PortfolioShowChat } = await import(
+    '../../src/ui-components/client-only/tour-player/tour-player.js?terminal-error-repeat-test'
+  );
+  const player = new PortfolioShowChat();
+  player.agentDock = dock;
+  player.addEventListener('portfolio-show-phase', (event) => {
+    if (typeof event.detail?.complete !== 'function') return;
+    event.detail.handled = true;
+    event.detail.complete(Object.freeze({
+      status: 'success',
+      receipts: Object.freeze([Object.freeze({
+        status: 'success',
+        result: Object.freeze({ status: 'completed' }),
+      })]),
+    }));
+  });
+  dock.append(player);
+  document.body.append(dock);
+
+  assert.equal(await player.applyShowRoute({
+    mode: 'short',
+    entryId: 'positioning',
+    timeMs: 0,
+    play: false,
+  }), true);
+
+  const messageCount = () => dock.textContent.length;
+  const baseline = messageCount();
+  showPlayer.configs.at(-1).controller.play();
+  const deadline = Date.now() + 15_000;
+  while (!player.$.isError && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  assert.equal(player.$.isError, true, 'the terminal narration error latches after bounded retries');
+  assert.equal(player.$.isPaused, true, 'the fatal error pauses the show');
+  assert.ok(messageCount() >= baseline, 'the fatal error message is published');
+
+  const retryMessages = dock.textContent;
+  const utterancesAfterLatch = spoken.length;
+  showPlayer.configs.at(-1).controller.play();
+  const repeatDeadline = Date.now() + 3_000;
+  while (spoken.length <= utterancesAfterLatch && Date.now() < repeatDeadline) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+
+  assert.equal(player.$.isError, false, 'Play clears the latched error by repeating the step');
+  assert.ok(spoken.length > utterancesAfterLatch, 'Play re-queues narration for the same step');
+  assert.ok(dock.textContent.length >= retryMessages.length, 'the repeated step appends its own message');
+  assert.equal(player.$.isRunning, true);
+  assert.equal(player.$.isPaused, false);
+  player.stopShow();
+});

@@ -34,6 +34,7 @@ import {
 const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
 const CV_SHOW_SCENE_RETRY_LIMIT = 2;
+const CV_SHOW_SCENE_RETRY_SETTLE_MS = 900;
 
 function formatProgress(message, current, total) {
   return message.replace('{current}', String(current)).replace('{total}', String(total));
@@ -229,6 +230,7 @@ export class PortfolioShowChat extends HTMLElement {
     lblDetails: '',
     lblReturn: '',
     lblResume: '',
+    lblRetry: '',
     lblSkipMedia: '',
   };
 
@@ -373,6 +375,7 @@ export class PortfolioShowChat extends HTMLElement {
     });
     else if (actionId === 'return') this.#returnFromDetails();
     else if (actionId === 'resume') void this.#resume();
+    else if (actionId === 'show-retry') this.#repeatCurrentEntry();
     else if (actionId === 'skip-media') this.#skipMedia();
     else if (['projects', 'resume', 'contact'].includes(actionId)) this.#emitProductAction(actionId);
   };
@@ -763,7 +766,10 @@ export class PortfolioShowChat extends HTMLElement {
         if (
           host.#pendingTransportIntent
           || (host.$.isRunning && host.$.resumeRequired && !host.#activeSpeechEntry)
-        ) host.#queuePendingTrustedPlay();
+        ) {
+          if (host.$.isRunning && host.$.isError && !host.#sceneRetryScheduled) host.#repeatCurrentEntry();
+          else host.#queuePendingTrustedPlay();
+        }
         else if (!host.$.isRunning && host.#mode) void host.#start(host.#mode);
         else if (host.$.isPaused) void host.#resume();
       },
@@ -878,6 +884,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.lblDetails = this.#message('tour.details');
     this.$.lblReturn = this.#message('tour.return');
     this.$.lblResume = this.#message('tour.resume');
+    this.$.lblRetry = this.#message('tour.retry');
     this.$.lblSkipMedia = this.#message('tour.skipMedia');
   }
 
@@ -1388,6 +1395,30 @@ export class PortfolioShowChat extends HTMLElement {
    * retry is deferred so it never unwinds through the failing runtime's own
    * disposal stack, and it is dropped when the user navigates meanwhile.
    */
+  /**
+   * Replays the current scene after a terminal presentation failure. A fresh
+   * #presentEntry run supersedes every stale callback and gives the step a
+   * clean scene setup, so Play/Retry always restores control.
+   */
+  #repeatCurrentEntry() {
+    if (!this.$.isRunning || this.$.inBranch) return;
+    const entry = this.#playbackEntries[this.#sceneIndex];
+    if (!entry) return;
+    this.#speechRetryAttempts.delete(entry.id);
+    this.$.isError = false;
+    this.$.errorText = '';
+    this.#clearSystemErrors();
+    this.#presentEntry(entry, { startPaused: false });
+  }
+
+  #fatalErrorDetail() {
+    return {
+      error: true,
+      actions: [{ id: 'retry', label: this.$.lblRetry, icon: 'replay' }],
+      actionId: 'show-retry',
+    };
+  }
+
   #scheduleSceneRetry(entryId, requestId, positionMs = 0) {
     if (this.#sceneRetryScheduled) return true;
     const attempts = this.#speechRetryAttempts.get(entryId) || 0;
@@ -1404,7 +1435,7 @@ export class PortfolioShowChat extends HTMLElement {
       this.#appendSystemMessage(this.#message('tour.status.retry'));
       this.#sceneIndex = Math.max(0, this.#playbackEntries.indexOf(entry));
       this.#presentEntry(entry, { positionMs, startPaused: !this.#playRequested });
-    }, 0);
+    }, CV_SHOW_SCENE_RETRY_SETTLE_MS);
     return true;
   }
 
@@ -1417,7 +1448,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.isError = true;
     this.$.errorText = this.#speechFailureText({ receipt, entryId });
     this.pauseShow('alignment-seek-error');
-    this.#appendSystemMessage(this.$.errorText, { error: true });
+    this.#appendSystemMessage(this.$.errorText, this.#fatalErrorDetail());
     this.dispatchEvent(new CustomEvent('portfolio-show-aligned-seek-failure', {
       bubbles: true,
       composed: true,
@@ -1572,7 +1603,7 @@ export class PortfolioShowChat extends HTMLElement {
       this.$.isError = true;
       this.$.errorText = this.#speechFailureText({ error, entryId: entry.id });
       this.pauseShow('scene-setup-error');
-      this.#appendSystemMessage(this.$.errorText, { error: true });
+      this.#appendSystemMessage(this.$.errorText, this.#fatalErrorDetail());
       return;
     }
     if (requestId !== this.#requestId) return;
@@ -1627,7 +1658,7 @@ export class PortfolioShowChat extends HTMLElement {
           this.$.isError = true;
           this.$.errorText = this.#speechFailureText({ error, entryId: entry.id });
           this.pauseShow('scene-setup-error');
-          this.#appendSystemMessage(this.$.errorText, { error: true });
+          this.#appendSystemMessage(this.$.errorText, this.#fatalErrorDetail());
         });
       },
       onMedia: (media, clip) => this.#attachAlignedEntry(entry, media, clip, requestId, {
@@ -1664,7 +1695,7 @@ export class PortfolioShowChat extends HTMLElement {
         this.$.isError = true;
         this.$.errorText = failureText;
         this.pauseShow('narration-error');
-        this.#appendSystemMessage(failureText, { error: true });
+        this.#appendSystemMessage(failureText, this.#fatalErrorDetail());
       },
       onBlocked: () => {
         if (requestId !== this.#requestId) return;
@@ -1885,6 +1916,10 @@ export class PortfolioShowChat extends HTMLElement {
   async #resume() {
     if (!this.$.resumeRequired || this.$.mediaBlocksResume) return;
     if (!this.#activeSpeechEntry) {
+      if (this.$.isError && !this.#sceneRetryScheduled) {
+        this.#repeatCurrentEntry();
+        return;
+      }
       this.#queuePendingTrustedPlay();
       return;
     }
