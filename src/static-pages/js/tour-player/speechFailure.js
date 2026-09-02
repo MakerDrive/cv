@@ -124,10 +124,10 @@ export function describeCvShowMissingTarget(receipt) {
  * and context fragment suitable for on-screen diagnostics.
  *
  * @param {{
- *   error?: null | string | { code?: unknown, name?: unknown, message?: unknown, stack?: unknown, details?: { cause?: unknown, targets?: unknown, terminalStatus?: unknown } },
+ *   error?: null | string | { code?: unknown, name?: unknown, message?: unknown, stack?: unknown, details?: { cause?: unknown, targets?: unknown, terminalStatus?: unknown, operationMessage?: unknown } },
  *   receipt?: null | { status?: unknown, reason?: unknown, terminalReason?: unknown,
  *     operationId?: unknown, phase?: unknown, requestedMs?: unknown, observedMs?: unknown,
- *     details?: { message?: unknown, cause?: unknown, targets?: unknown, terminalStatus?: unknown } },
+ *     details?: { message?: unknown, cause?: unknown, targets?: unknown, terminalStatus?: unknown, operationMessage?: unknown } },
  *   entryId?: unknown,
  * }} [failure]
  * @returns {{ causeKey: string, code: string, detail: string }}
