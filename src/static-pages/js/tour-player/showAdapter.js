@@ -629,6 +629,31 @@ export function createCvShowDirectiveRunner(options = {}) {
     let receipts = [];
     let optionalMissing = false;
 
+    // Lazy media targets (for example the IMS gallery host) mount during the
+    // narration lead-in, far outside the authored per-cell gesture budget.
+    // Prepare them when the phase starts so the cell activation window only
+    // pays for the authored choreography itself.
+    const mediaDirectiveTargets = directives
+      .filter((source) => String(source?.type) === 'media')
+      .map((source) => String(source.target || ''));
+    const prepareMediaTargets = () => {
+      for (const targetId of mediaDirectiveTargets) {
+        ensureMediaArticleProject(targetId, runtime);
+        try {
+          resolveMedia?.(targetId)?.prepareShowMedia?.({
+            signal: controller.signal,
+          })?.catch?.(() => {});
+        } catch {}
+      }
+    };
+    prepareMediaTargets();
+    const latePrepareTimer = setTimeout(prepareMediaTargets, 1_500);
+    controller.signal.addEventListener(
+      'abort',
+      () => clearTimeout(latePrepareTimer),
+      { once: true },
+    );
+
     try {
       for (let source of directives) {
         throwIfAborted(controller.signal);

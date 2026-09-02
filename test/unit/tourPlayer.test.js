@@ -1931,13 +1931,52 @@ test('CV adapter explicitly maps all nine product directives to the accepted sha
   assert.equal(mapped.idle.type, 'status');
 });
 
+test('CV runner prepares media targets when the phase starts', async () => {
+  const order = [];
+  const mediaTarget = {
+    id: 'media-target',
+    element: { matches: () => false },
+    prepareShowMedia: async ({ signal }) => {
+      order.push(['prepare', Boolean(signal)]);
+      return { kind: 'ims-gallery', ready: true };
+    },
+  };
+  const runtime = {
+    entries: new Map([['projects/boothbot', {}]]),
+    selectedId: 'projects/complexscan',
+    select(id, options) { order.push(['select', id, options]); this.selectedId = id; },
+  };
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime,
+    media: { play: async (target) => { order.push(['media', target]); return { played: true }; } },
+    resolveMedia: (targetId) => {
+      order.push(['resolveMedia', targetId]);
+      return mediaTarget;
+    },
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({ target }),
+  });
+
+  const result = await runner.run([
+    { id: 'd.gallery', type: 'media', target: 'media/boothbot/ims/gallery', mode: 'short-muted-montage' },
+  ]);
+  assert.equal(result.status, 'success');
+  assert.deepEqual(order.slice(0, 3), [
+    ['select', 'projects/boothbot', { focus: true, updateUrl: false }],
+    ['resolveMedia', 'media/boothbot/ims/gallery'],
+    ['prepare', true],
+  ]);
+  assert.ok(order.some(([name, value]) => name === 'media' && value === mediaTarget));
+});
+
 test('CV runner opens the owning article project for media targets before resolving them', async () => {
   const order = [];
   const mediaTarget = { id: 'media-target', element: { matches: () => false } };
   const runtime = {
     entries: new Map([['projects/boothbot', {}]]),
     selectedId: 'projects/complexscan',
-    select(id, options) { order.push(['select', id, options]); },
+    select(id, options) { order.push(['select', id, options]); this.selectedId = id; },
   };
   const runner = createCvShowDirectiveRunner({
     document: {},
@@ -1955,8 +1994,9 @@ test('CV runner opens the owning article project for media targets before resolv
     { id: 'd.gallery', type: 'media', target: 'media/boothbot/ims/gallery', mode: 'short-muted-montage' },
   ]);
   assert.equal(result.status, 'success');
-  assert.deepEqual(order, [
+  assert.deepEqual(order.slice(0, 4), [
     ['select', 'projects/boothbot', { focus: true, updateUrl: false }],
+    ['resolveMedia', 'media/boothbot/ims/gallery'],
     ['resolveMedia', 'media/boothbot/ims/gallery'],
     ['media', mediaTarget],
   ]);

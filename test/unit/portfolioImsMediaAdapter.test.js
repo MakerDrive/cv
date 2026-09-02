@@ -416,7 +416,7 @@ test('IMS Show gallery maps authored frames 1 through 5 to public zero-based goT
   assert.equal(result.finalFrame, 5);
 });
 
-test('IMS Show gallery enforces at least 500 ms between frame changes', async () => {
+test('IMS Show gallery honors the authored frame hold exactly', async () => {
   const waits = [];
   const gallery = {
     localName: 'ims-gallery',
@@ -438,8 +438,8 @@ test('IMS Show gallery enforces at least 500 ms between frame changes', async ()
   }, { signal: new AbortController().signal });
   await result.completion;
 
-  assert.deepEqual(waits, [500, 500]);
-  assert.equal(result.frameHoldMs, 500);
+  assert.deepEqual(waits, [250, 250]);
+  assert.equal(result.frameHoldMs, 250);
 });
 
 test('IMS Show target prewarms one public player and reuses it for capture and playback', async () => {
