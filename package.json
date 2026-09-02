@@ -26,6 +26,7 @@
     "authoring:serve": "node ./scripts/cv-show-authoring.js serve",
     "authoring:materialize": "node ./scripts/cv-show-authoring.js materialize",
     "cv-show:audio": "node ./scripts/cv-show-audio-workflow.js",
+    "cv-show:schedule-durations": "node ./scripts/cv-show-schedule-durations.js",
     "verify:cv-show-private-artifacts": "node ./scripts/verify-cv-show-private-artifacts.js",
     "publish:cv-show-web-audio": "node ./scripts/cv-show-web-audio-publisher.js",
     "verify:cv-show-web-audio": "node ./scripts/verify-cv-show-web-audio.js",

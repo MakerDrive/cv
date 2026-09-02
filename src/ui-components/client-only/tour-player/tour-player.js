@@ -21,6 +21,8 @@ import {
 } from '../../../static-pages/js/tour-player/presentationProjectAdapter.js';
 import { createBrowserSpeechController } from '../../../static-pages/js/tour-player/speech.js';
 import { describeCvShowMissingTarget, describeCvShowSpeechFailure } from '../../../static-pages/js/tour-player/speechFailure.js';
+import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../../static-pages/data/cvShowWebAudioRelease.js';
+import { CV_SHOW_SCHEDULE_DURATIONS } from '../../../static-pages/data/cvShowScheduleDurations.js';
 import {
   createCvShowMessageStreamController,
 } from '../../../static-pages/js/tour-player/messageStream.js';
@@ -190,10 +192,13 @@ export function resolveCvShowPlayerEntry({
 
 /** @param {any} story @param {'short' | 'full'} [mode] @param {Map<string, number>} [projectDurations] */
 function playerTimeline(story, mode = 'short', projectDurations = new Map()) {
+  const knownDurations = CV_SHOW_SCHEDULE_DURATIONS.releaseId === CV_SHOW_WEB_AUDIO_RELEASE.releaseId
+    ? CV_SHOW_SCHEDULE_DURATIONS.durations
+    : {};
   return Object.freeze({
     title: 'CV Show',
     turns: Object.freeze(createCvShowPlaybackEntries(story, mode).map((entry) => {
-      let durationMs = Number(projectDurations.get(entry.id));
+      const durationMs = Number(projectDurations.get(entry.id) ?? knownDurations[entry.id]);
       return Object.freeze({
         id: entry.id,
         persona: entry.sceneId ? 'Detail' : 'CV',

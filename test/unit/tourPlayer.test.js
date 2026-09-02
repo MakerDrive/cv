@@ -31,6 +31,7 @@ import {
   CV_SHOW_PRESENTATION_PROJECT,
 } from '../../src/static-pages/data/cvShowPresentationProject.js';
 import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../src/static-pages/data/cvShowWebAudioRelease.js';
+import { CV_SHOW_SCHEDULE_DURATIONS } from '../../src/static-pages/data/cvShowScheduleDurations.js';
 import {
   createCvShowAuthoringAuthority,
 } from '../../src/static-pages/js/tour-player/cvShowAuthoringAuthority.js';
@@ -1470,8 +1471,8 @@ test('detail admission rejects stale live media before branch or presentation mu
   const firstProgressTurn = progressConfig.timeline.turns[0];
   assert.equal(
     firstProgressTurn.durationMs,
-    null,
-    'the shared player cannot advertise raw source-audio duration as Project duration',
+    CV_SHOW_SCHEDULE_DURATIONS.durations[firstProgressTurn.id],
+    'the shared player advertises exact Project schedule durations, never raw source-audio duration',
   );
   assert.equal(
     showPlayer.states.at(-1).progress.positionMs,

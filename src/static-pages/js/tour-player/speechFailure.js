@@ -158,10 +158,13 @@ export function describeCvShowSpeechFailure({ error, receipt, entryId } = {}) {
   const terminalStatus = boundedPart(receipt?.details?.terminalStatus ?? source?.details?.terminalStatus, 40);
   if (terminalStatus) detailParts.push(`terminal=${terminalStatus}`);
   if (targets) detailParts.push(`targets=${targets}`);
+  if (innerCause && innerCause !== code) detailParts.push(`cause=${innerCause}`);
   const message = boundedPart(
     receipt?.details?.message ?? source?.message ?? firstStackFrame(source?.stack) ?? '',
     DETAIL_MESSAGE_LIMIT,
   );
+  const operationMessage = boundedPart(receipt?.details?.operationMessage ?? source?.details?.operationMessage, DETAIL_MESSAGE_LIMIT);
+  if (operationMessage && operationMessage !== message) detailParts.push(operationMessage);
   if (message && message !== code) detailParts.push(message);
   const assembledDetail = boundedPart(detailParts.join(' '));
   const causeKey = TARGET_REASON_KEYS.get(innerCause)

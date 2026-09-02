@@ -58,6 +58,11 @@ function invalidAlignment(reason) {
   );
 }
 
+function boundedOperationText(value, limit = 120) {
+  const text = String(value ?? '').replace(/\s+/gu, ' ').trim();
+  return text ? text.slice(0, limit) : '';
+}
+
 /**
  * Extracts the inner cause of a failed presentation operation: the missing
  * directive receipts and provider details carried by the operation error.
@@ -358,6 +363,7 @@ export function createCvShowAlignmentController({
       let mediaRuntime = null;
       const receiptObservers = new Set();
       const terminalReasons = new Map();
+      const operationCauses = new Map();
       const terminalReasonCode = (reason) => (
         typeof reason === 'string' ? reason : String(reason?.code || '')
       );
@@ -376,11 +382,29 @@ export function createCvShowAlignmentController({
       };
       const adapterMethod = async (operation, kind) => {
         const source = projectCvShowDirective(operation.projectCell, tuple.project);
-        return runPresentationOperation(Object.freeze({
-          ...operation,
-          kind,
-          source,
-        }));
+        try {
+          return await runPresentationOperation(Object.freeze({
+            ...operation,
+            kind,
+            source,
+          }));
+        } catch (error) {
+          const missing = (error?.result?.receipts || [])
+            .filter(({ status }) => status === 'missing')
+            .map(({ id, target, reason }) => `${target || id}:${reason}`);
+          if (missing.length) {
+            operationCauses.set(operation.projectCell.id, Object.freeze({
+              targets: missing.join(', '),
+              cause: missing[0].split(':').pop() || '',
+            }));
+          } else if (error?.message) {
+            operationCauses.set(operation.projectCell.id, Object.freeze({
+              cause: error.code || '',
+              message: boundedOperationText(error.message),
+            }));
+          }
+          throw error;
+        }
       };
       tuple = createCvShowEntryTuple(authoringView.project, entry.id, sequence, {
         checkpointMs,
@@ -444,6 +468,7 @@ export function createCvShowAlignmentController({
         onFailure: (error) => {
           const failedCellId = String(error?.details?.cellId || '');
           const terminalReason = terminalReasons.get(failedCellId);
+          const operationCause = operationCauses.get(failedCellId);
           onSeekFailure?.(Object.freeze({
             status: 'failed',
             reason: error?.code || 'presentation-playback-failed',
@@ -454,8 +479,17 @@ export function createCvShowAlignmentController({
             details: Object.freeze({
               message: String(error?.message || error || ''),
               ...(terminalReason?.status ? { terminalStatus: terminalReason.status } : {}),
-              ...(terminalReason?.code ? { cause: terminalReason.code } : {}),
-              ...describePresentationOperationCause(error),
+              ...(operationCause?.targets || operationCause?.cause || operationCause?.message
+                ? {
+                  targets: operationCause.targets || '',
+                  cause: operationCause.cause || '',
+                  operationMessage: operationCause.message || '',
+                }
+                : {}),
+              ...(terminalReason?.code && !operationCause?.cause
+                ? { cause: terminalReason.code }
+                : {}),
+              ...(!operationCause && describePresentationOperationCause(error)),
             }),
           }));
         },
