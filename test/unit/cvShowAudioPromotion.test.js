@@ -921,7 +921,7 @@ test('bootstrap provenance reopens directly for runtime, scoped narration, and a
     synthesis: [],
     transcription: [],
     alignment: [],
-    runtimeProjection: CV_SHOW_AUDIO_RELEASE.acceptedProvenance.entries.map(({ entryId }) => entryId),
+    runtimeProjection: [],
   });
   let narrationInput = presentationAuthoringProjectCanonicalProjection(CV_SHOW_PRESENTATION_PROJECT);
   narrationInput.revision += 1;

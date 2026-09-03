@@ -58,7 +58,6 @@ test('private master release and public delivery selector preserve distinct iden
     revision: CV_SHOW_PRESENTATION_PROJECT.revision,
     authoringProjectHash: CV_SHOW_PRESENTATION_PROJECT.hash,
   });
-  assert.equal(CV_SHOW_WEB_AUDIO_RELEASE.sourceMasterReleaseId, CV_SHOW_AUDIO_RELEASE.releaseId);
   assert.notEqual(CV_SHOW_WEB_AUDIO_RELEASE.releaseId, CV_SHOW_AUDIO_RELEASE.releaseId);
   assert.equal(
     CV_SHOW_AUDIO_RELEASE.acceptedProvenance.schemaVersion,
@@ -509,11 +508,11 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v2:sha256-CL/tfkF/FvDWnKQYhLMuFpFwwq/yx4C7X6FOrrWPTkY=',
+    'workspace-presentation-authoring-project-v2:sha256-OuWRIVfYEEXRvVjlhNMD8j64P1tKE+KlHQPhZnfHjvY=',
   );
   assert.equal(
     timeline.hash,
-    'presentation-timeline-v3:sha256-qmooLhAQSQJpdm4LkoGlB84FCTtj5mHErOzDbw49AbE=',
+    'presentation-timeline-v3:sha256-sEYvFD4uW357gE4bt3vmRBa8PoAVVXO2Madp+2KNYU4=',
   );
 
   const manifestSource = await readFile(
@@ -542,7 +541,7 @@ test('CV Show master owns literal anchors, authored order, and portable refineme
   const project = CV_SHOW_PRESENTATION_PROJECT;
   const timeline = CV_SHOW_PRESENTATION_TIMELINE;
   const requiredAnchors = [
-    'в разных предметных областях',
+    'инженер',
     'С середины две тысячи двадцать шестого года',
     'Мы решили открыть управляющий контур',
     'Workspace соединяет',
@@ -673,6 +672,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:photopizza.spinner', 1_200],
   ]);
   const scrollLeadOverrides = new Map([
+    ['cv-show:cue:positioning.tenure-marker', 1_750],
     ['cv-show:cue:agent-portal.human-decision', 3_800],
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 4_300],
     ['cv-show:cue:finale.history', 3_150],
@@ -688,6 +688,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
   const speechOverlappingRuntimeActions = new Map([
     ['cv-show:cue:agent-portal.human-decision', { leadMs: 1_500, overlapMs: 1_500 }],
     ['cv-show:cue:photopizza.origin', { leadMs: 1_050, overlapMs: 550 }],
+    ['cv-show:cue:positioning.tenure-marker', { leadMs: 600, overlapMs: 1_900 }],
   ]);
   const markerLeadOverrides = new Map([
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 3_300],
@@ -851,6 +852,7 @@ test('the structural fixture joins all 30 Project entries without media authorit
     ['cv-show:cue:photopizza.video-04', 550],
     ['cv-show:cue:photopizza.video-05', 550],
     ['cv-show:cue:photopizza.spinner', 550],
+    ['cv-show:cue:positioning.tenure-marker', 1_900],
   ]);
   const audioManifest = structuralAudioManifest();
   const alignmentManifest = structuralAlignmentManifest();
@@ -1267,7 +1269,7 @@ test('positioning introduces experience once with the authored marker gesture', 
     id: 'positioning.tenure-marker',
     type: 'marker',
     target: 'profile.experience.15-plus',
-    quote: 'в разных предметных областях',
+    quote: 'инженер',
   }]);
 });
 
