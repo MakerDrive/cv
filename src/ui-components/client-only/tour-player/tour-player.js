@@ -380,6 +380,18 @@ export class PortfolioShowChat extends HTMLElement {
     else if (['projects', 'resume', 'contact'].includes(actionId)) this.#emitProductAction(actionId);
   };
 
+  /**
+   * Hidden pages freeze rAF-driven effects while the shared engine's
+   * wall-clock operation deadline keeps running. Pausing on hide cancels the
+   * active cells honestly (cancelled, replayable) instead of letting them
+   * expire into PRESENTATION_EFFECT_DEADLINE_MISSED on return.
+   */
+  #onDocumentVisibility = () => {
+    if (globalThis.document?.visibilityState !== 'hidden') return;
+    if (!this.$.isRunning || this.$.isPaused) return;
+    this.pauseShow('page-hidden');
+  };
+
   #captureTrustedContactClick = (event) => {
     const button = event.target?.closest?.('[data-action-id]');
     if (!event.isTrusted || !button || !this.#dock?.contains(button)) return;
@@ -430,6 +442,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.#narrationReady = Promise.resolve(this.#speech.snapshot);
     this.#alignmentReady = Promise.resolve(this.#alignment.snapshot);
     this.addEventListener('portfolio-show-result', this.#onResult);
+    document.addEventListener('visibilitychange', this.#onDocumentVisibility);
     this.#dock.addEventListener('agent-show-action', this.#onAgentAction);
     this.#dock.addEventListener('agent-show-response', this.#onAgentResponse);
     this.#dock.addEventListener('agent-dock-ready', this.#onDockReady);
@@ -439,6 +452,7 @@ export class PortfolioShowChat extends HTMLElement {
 
   disconnectedCallback() {
     this.removeEventListener('portfolio-show-result', this.#onResult);
+    document.removeEventListener('visibilitychange', this.#onDocumentVisibility);
     this.#dock?.removeEventListener('agent-show-action', this.#onAgentAction);
     this.#dock?.removeEventListener('agent-show-response', this.#onAgentResponse);
     this.#dock?.removeEventListener('agent-dock-ready', this.#onDockReady);

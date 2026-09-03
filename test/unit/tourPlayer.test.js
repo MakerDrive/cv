@@ -6118,3 +6118,102 @@ test('terminal narration errors keep the player controllable: Play repeats the s
   assert.equal(player.$.isPaused, false);
   player.stopShow();
 });
+
+test('hiding the page pauses the show instead of burning cell deadlines', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+    'speechSynthesis',
+    'SpeechSynthesisUtterance',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  globalThis.speechSynthesis = {
+    paused: false,
+    cancel() {},
+    pause() { this.paused = true; },
+    resume() { this.paused = false; },
+    speak() {},
+  };
+  globalThis.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+    constructor(text) { this.text = text; }
+  };
+
+  const dock = document.createElement('div');
+  t.after(() => {
+    dock.remove();
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+  dock.setAgentProvider = () => {};
+  dock.setMessages = () => {};
+  dock.getChat = () => null;
+  dock.setShow = () => ({ bind() {}, setState() {} });
+  dock.removeShow = () => {};
+  const { PortfolioShowChat } = await import(
+    '../../src/ui-components/client-only/tour-player/tour-player.js?visibility-pause-test'
+  );
+  const player = new PortfolioShowChat();
+  player.agentDock = dock;
+  player.addEventListener('portfolio-show-phase', (event) => {
+    if (typeof event.detail?.complete !== 'function') return;
+    event.detail.handled = true;
+    event.detail.complete(Object.freeze({
+      status: 'success',
+      receipts: Object.freeze([Object.freeze({
+        status: 'success',
+        result: Object.freeze({ status: 'completed' }),
+      })]),
+    }));
+  });
+  dock.append(player);
+  document.body.append(dock);
+
+  assert.equal(await player.applyShowRoute({
+    mode: 'short',
+    entryId: 'positioning',
+    timeMs: 0,
+    play: true,
+  }), true);
+  assert.equal(player.$.isRunning, true);
+  assert.equal(player.$.isPaused, false);
+
+  Object.defineProperty(document, 'visibilityState', {
+    configurable: true,
+    get: () => 'hidden',
+  });
+  document.dispatchEvent(new Event('visibilitychange'));
+  assert.equal(player.$.isPaused, true, 'hiding the page pauses the show');
+  assert.equal(player.$.isRunning, true);
+  assert.equal(player.$.isError, false);
+  assert.equal(player.$.errorText, '');
+
+  Object.defineProperty(document, 'visibilityState', {
+    configurable: true,
+    get: () => 'visible',
+  });
+  document.dispatchEvent(new Event('visibilitychange'));
+  assert.equal(player.$.isPaused, true, 'becoming visible again keeps the paused state');
+  player.stopShow();
+});
