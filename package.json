@@ -52,7 +52,7 @@
     "immersive-media-spots": "^1.3.7",
     "jsda-kit": "1.6.0",
     "symbiote-ui": "https://codeload.github.com/rnd-pro/symbiote-ui/tar.gz/529b00c97f3712660e2a18f4ecf16aa6a1cab742",
-    "symbiote-workspace": "https://codeload.github.com/rnd-pro/symbiote-workspace/tar.gz/94b87a55f264b4f39bc6616ccc93fb00ae014199"
+    "symbiote-workspace": "https://codeload.github.com/rnd-pro/symbiote-workspace/tar.gz/f1a4b7dc20950fd17b164d34c5d52a5470bb9531"
   },
   "overrides": {
     "@symbiotejs/symbiote": "$@symbiotejs/symbiote",
