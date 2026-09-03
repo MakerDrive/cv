@@ -33,7 +33,7 @@ import {
 
 const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
-const CV_SHOW_SCENE_RETRY_LIMIT = 2;
+const CV_SHOW_SCENE_RETRY_LIMIT = 3;
 const CV_SHOW_SCENE_RETRY_SETTLE_MS = 900;
 
 function formatProgress(message, current, total) {
@@ -1390,10 +1390,13 @@ export class PortfolioShowChat extends HTMLElement {
 
   /**
    * User-driven rapid navigation commonly produces transient presentation
-   * races (slow media, late article mount, attention deadline). Re-present the
-   * failing scene a bounded number of times before showing a fatal error. The
-   * retry is deferred so it never unwinds through the failing runtime's own
-   * disposal stack, and it is dropped when the user navigates meanwhile.
+   * races (slow media, late article mount, attention deadline). The shared
+   * engine enforces a wall-clock authored budget with no jank grace, so a
+   * single main-thread stall can fail an otherwise healthy cell. Re-present
+   * the failing scene with growing settle backoff before showing a fatal
+   * error. The retry is deferred so it never unwinds through the failing
+   * runtime's own disposal stack, and it is dropped when the user navigates
+   * meanwhile.
    */
   /**
    * Replays the current scene after a terminal presentation failure. A fresh
@@ -1424,6 +1427,7 @@ export class PortfolioShowChat extends HTMLElement {
     const attempts = this.#speechRetryAttempts.get(entryId) || 0;
     if (attempts >= CV_SHOW_SCENE_RETRY_LIMIT) return false;
     this.#sceneRetryScheduled = true;
+    const settleMs = CV_SHOW_SCENE_RETRY_SETTLE_MS * (attempts + 1);
     globalThis.setTimeout?.(() => {
       this.#sceneRetryScheduled = false;
       if (requestId !== this.#requestId || !this.isConnected) return;
@@ -1435,7 +1439,7 @@ export class PortfolioShowChat extends HTMLElement {
       this.#appendSystemMessage(this.#message('tour.status.retry'));
       this.#sceneIndex = Math.max(0, this.#playbackEntries.indexOf(entry));
       this.#presentEntry(entry, { positionMs, startPaused: !this.#playRequested });
-    }, CV_SHOW_SCENE_RETRY_SETTLE_MS);
+    }, settleMs);
     return true;
   }
 
