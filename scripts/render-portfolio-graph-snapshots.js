@@ -166,6 +166,22 @@ async function resolveChromePath() {
   throw new Error(`Chrome is required to render graph snapshots: ${CHROME_CANDIDATES.join(', ')}`);
 }
 
+/**
+ * Chrome keeps flushing profile files for a moment after its process exits,
+ * so a single recursive rm can race the last writes (ENOTEMPTY). The profile
+ * directory is disposable temporary state: retry briefly, then continue —
+ * a failed cleanup must never fail rendered snapshots.
+ */
+async function removeProfileDirectory(userDataDir) {
+  try {
+    await rm(userDataDir, { force: true, recursive: true, maxRetries: 10, retryDelay: 200 });
+  } catch (error) {
+    globalThis.console?.warn?.(
+      `graph snapshot: profile cleanup left ${userDataDir} behind (${error?.code || error})`,
+    );
+  }
+}
+
 async function launchChrome() {
   const chromePath = await resolveChromePath();
   let userDataDir = await mkdtemp(path.join(tmpdir(), 'cv-graph-snapshot-chrome-'));
@@ -191,12 +207,12 @@ async function launchChrome() {
       async close() {
         chrome.kill('SIGTERM');
         if (chrome.exitCode === null) await new Promise((resolve) => chrome.once('exit', resolve));
-        await rm(userDataDir, { force: true, recursive: true });
+        await removeProfileDirectory(userDataDir);
       },
     };
   } catch (error) {
     chrome.kill('SIGTERM');
-    await rm(userDataDir, { force: true, recursive: true });
+    await removeProfileDirectory(userDataDir);
     throw error;
   }
 }
