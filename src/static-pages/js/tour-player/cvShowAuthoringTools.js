@@ -19,6 +19,49 @@ function clone(value) {
   return structuredClone(value);
 }
 
+const GENERIC_DESCRIPTOR_BY_NAME = new Map(
+  listPresentationAuthoringToolDescriptors().map((descriptor) => [descriptor.name, descriptor]),
+);
+const CELL_ADD_PAYLOAD_SCHEMA = clone(
+  GENERIC_DESCRIPTOR_BY_NAME.get('presentation_authoring_cell_add').inputSchema.properties.payload,
+);
+const CUE_CELL_SCHEMA = clone(
+  (CELL_ADD_PAYLOAD_SCHEMA.properties.cell.oneOf || [])
+    .find((variant) => variant.properties?.kind?.enum?.[0] === 'cue'),
+);
+if (!CUE_CELL_SCHEMA) {
+  throw new TypeError('CV Show cue batch requires the canonical provider cue cell schema');
+}
+const CELL_ADD_CUE_PAYLOAD_SCHEMA = {
+  type: 'object',
+  properties: {
+    cell: CUE_CELL_SCHEMA,
+    ...(CELL_ADD_PAYLOAD_SCHEMA.properties.index === undefined
+      ? {}
+      : { index: CELL_ADD_PAYLOAD_SCHEMA.properties.index }),
+  },
+  required: [...(CELL_ADD_PAYLOAD_SCHEMA.required || [])],
+  additionalProperties: false,
+};
+const CELL_REMOVE_PAYLOAD_SCHEMA = clone(
+  GENERIC_DESCRIPTOR_BY_NAME.get('presentation_authoring_cell_remove').inputSchema.properties.payload,
+);
+const CELL_DEPENDENCIES_PAYLOAD_SCHEMA = clone(
+  GENERIC_DESCRIPTOR_BY_NAME.get('presentation_authoring_cell_set_dependencies').inputSchema.properties.payload,
+);
+const DIRECTIVE_REFINEMENTS_PAYLOAD_SCHEMA = {
+  type: 'object',
+  properties: {
+    cellId: { type: 'string', minLength: 1 },
+    refinements: {
+      type: 'object',
+      description: 'CV Show directive refinement map. Any portable JSON record is accepted: nested objects, arrays, strings, finite numbers, booleans, and null. Known runtime-consumed fields include safePath (activation path), mode, action, actions (media or chat actions), frames, finalFrame, frameHoldMs (frame sequences), quote, occurrence (selection anchors), and persistent (chat actions). Unknown extra fields are preserved verbatim; do not invent validation restrictions.',
+    },
+  },
+  required: ['cellId', 'refinements'],
+  additionalProperties: false,
+};
+
 function freezeDeep(value) {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
   for (const child of Object.values(value)) freezeDeep(child);
@@ -110,7 +153,67 @@ const CUE_BATCH_DESCRIPTOR = freezeDeep({
           commands: {
             type: 'array',
             minItems: 1,
-            items: { type: 'object' },
+            items: {
+              type: 'object',
+              properties: {
+                schemaVersion: { type: 'string', minLength: 1 },
+                id: { type: 'string', minLength: 1 },
+                base: {
+                  type: 'object',
+                  properties: {
+                    revision: { type: 'integer', minimum: 0 },
+                    authoringProjectHash: { type: 'string', minLength: 1 },
+                  },
+                  required: ['revision', 'authoringProjectHash'],
+                  additionalProperties: false,
+                },
+                type: { enum: [...ALLOWED_COMMAND_TYPES] },
+                payload: {
+                  oneOf: [
+                    CELL_ADD_CUE_PAYLOAD_SCHEMA,
+                    CELL_REMOVE_PAYLOAD_SCHEMA,
+                    CELL_DEPENDENCIES_PAYLOAD_SCHEMA,
+                    DIRECTIVE_REFINEMENTS_PAYLOAD_SCHEMA,
+                  ],
+                },
+              },
+              required: ['schemaVersion', 'id', 'base', 'type', 'payload'],
+              additionalProperties: false,
+              allOf: [
+                {
+                  if: { properties: { type: { const: 'cell.add' } }, required: ['type'] },
+                  then: {
+                    properties: {
+                      payload: CELL_ADD_CUE_PAYLOAD_SCHEMA,
+                    },
+                  },
+                },
+                {
+                  if: { properties: { type: { const: 'cell.remove' } }, required: ['type'] },
+                  then: {
+                    properties: {
+                      payload: CELL_REMOVE_PAYLOAD_SCHEMA,
+                    },
+                  },
+                },
+                {
+                  if: { properties: { type: { const: 'cell.set-dependencies' } }, required: ['type'] },
+                  then: {
+                    properties: {
+                      payload: CELL_DEPENDENCIES_PAYLOAD_SCHEMA,
+                    },
+                  },
+                },
+                {
+                  if: { properties: { type: { const: 'cv-show.directive.set-refinements' } }, required: ['type'] },
+                  then: {
+                    properties: {
+                      payload: DIRECTIVE_REFINEMENTS_PAYLOAD_SCHEMA,
+                    },
+                  },
+                },
+              ],
+            },
           },
         },
         required: ['commands'],

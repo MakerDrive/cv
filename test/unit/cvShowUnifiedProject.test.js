@@ -305,7 +305,8 @@ test('hidden CV transport persists Project time instead of raw source-audio time
     /function playerTimeline\([\s\S]*?\n\}/u,
   )?.[0];
   assert.ok(playerTimelineSource, 'playerTimeline source');
-  assert.match(playerTimelineSource, /projectDurations\.get\(entry\.id\)/u);
+  assert.match(playerTimelineSource, /projectDurations\.get\(durationEntry\.id\)/u);
+  assert.match(playerTimelineSource, /detailReplacements\.get\(entry\.id\)/u);
   assert.doesNotMatch(playerTimelineSource, /durationMilliseconds/u);
   assert.match(
     source,

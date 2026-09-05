@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { DatabaseSync } from 'node:sqlite';
 import {
   mkdir,
   open,
@@ -12,6 +13,7 @@ import { canonicalize } from 'symbiote-workspace/schema/canonical-json.js';
 
 const DRAFT_SCHEMA_VERSION = 'cv-show-authoring-draft-v1';
 const HEAD_SCHEMA_VERSION = 'cv-show-authoring-head-v1';
+const LATEST_HEAD_SCHEMA_VERSION = 'cv-show-authoring-latest-head-v1';
 const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{16,128}$/u;
 const DRAFT_HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 
@@ -89,41 +91,39 @@ export async function acquireCvShowAuthoringLock({ storageRoot, owner }) {
     fail('CV_SHOW_AUTHORING_STORAGE_INVALID', 'CV Show authoring lock input is invalid');
   }
   await mkdir(storageRoot, { recursive: true, mode: 0o700 });
-  let lockPath = path.join(storageRoot, 'host.lock');
   let lockId = randomUUID();
-  let handle;
+  let metadataPath = path.join(storageRoot, 'host.lock');
+  let database = new DatabaseSync(path.join(storageRoot, 'host-lock.sqlite'));
   try {
-    handle = await open(lockPath, 'wx', 0o600);
-  } catch (error) {
-    if (error?.code === 'EEXIST') {
-      fail(
-        'CV_SHOW_AUTHORING_HOST_LOCKED',
-        'Another CV Show authoring process owns the local lock',
-      );
-    }
-    throw error;
-  }
-  try {
-    await handle.writeFile(`${canonicalize({
+    database.exec('PRAGMA busy_timeout = 0');
+    database.exec('CREATE TABLE IF NOT EXISTS owner (id INTEGER PRIMARY KEY CHECK (id = 1), lock_id TEXT NOT NULL, role TEXT NOT NULL, pid INTEGER NOT NULL)');
+    database.exec('BEGIN IMMEDIATE');
+    database.prepare('INSERT OR REPLACE INTO owner (id, lock_id, role, pid) VALUES (1, ?, ?, ?)')
+      .run(lockId, owner, process.pid);
+    await atomicWrite(metadataPath, `${canonicalize({
       schemaVersion: 'cv-show-authoring-host-lock-v1',
       lockId,
       owner,
       pid: process.pid,
-    })}\n`, 'utf8');
-    await handle.sync();
-    await handle.close();
+    })}\n`);
   } catch (error) {
-    await handle.close().catch(() => undefined);
-    await unlink(lockPath).catch(() => undefined);
+    try { database.exec('ROLLBACK'); } catch {}
+    database.close();
+    if (
+      String(error?.code || '').includes('SQLITE_BUSY')
+      || error?.code === 'ERR_SQLITE_ERROR' && /database is locked/iu.test(error.message)
+    ) {
+      fail('CV_SHOW_AUTHORING_HOST_LOCKED', 'Another CV Show authoring process owns the local lock');
+    }
     throw error;
   }
+  let released = false;
   let release = async () => {
-    try {
-      let current = JSON.parse(await readFile(lockPath, 'utf8'));
-      if (current.lockId === lockId) await unlink(lockPath);
-    } catch (error) {
-      if (error?.code !== 'ENOENT') throw error;
-    }
+    if (released) return;
+    released = true;
+    await unlink(metadataPath).catch(() => undefined);
+    database.exec('COMMIT');
+    database.close();
   };
   return Object.freeze({ release });
 }
@@ -210,6 +210,22 @@ export function createCvShowAuthoringStorage({ storageRoot }) {
     return readDraft(sessionId, value.draftHash);
   };
 
+  let readLatestHead = async () => {
+    let pointer;
+    try {
+      pointer = JSON.parse(await readFile(path.join(storageRoot, 'latest-head.json'), 'utf8'));
+    } catch (error) {
+      if (error?.code === 'ENOENT') return null;
+      fail('CV_SHOW_AUTHORING_HEAD_INVALID', 'CV Show authoring latest head could not be read');
+    }
+    if (
+      !pointer || typeof pointer !== 'object' || Array.isArray(pointer)
+      || pointer.schemaVersion !== LATEST_HEAD_SCHEMA_VERSION
+      || Object.keys(pointer).length !== 3
+    ) fail('CV_SHOW_AUTHORING_HEAD_INVALID', 'CV Show authoring latest head is invalid');
+    return readDraft(validateSessionId(pointer.sessionId), validateDraftHash(pointer.draftHash));
+  };
+
   let commit = async (sessionId, draft) => {
     validateSessionId(sessionId);
     validateDraft(draft);
@@ -231,8 +247,13 @@ export function createCvShowAuthoringStorage({ storageRoot }) {
       schemaVersion: HEAD_SCHEMA_VERSION,
       draftHash: draft.draftHash,
     })}\n`);
+    await atomicWrite(path.join(storageRoot, 'latest-head.json'), `${canonicalize({
+      schemaVersion: LATEST_HEAD_SCHEMA_VERSION,
+      sessionId,
+      draftHash: draft.draftHash,
+    })}\n`);
     return draft;
   };
 
-  return Object.freeze({ readDraft, readHead, commit });
+  return Object.freeze({ readDraft, readHead, readLatestHead, commit });
 }

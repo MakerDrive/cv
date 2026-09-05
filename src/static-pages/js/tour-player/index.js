@@ -452,6 +452,38 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let lastRouteSemanticKey = '';
   let reconcileRouteWhenIdle = false;
   let stripRouteWhenIdle = false;
+  let mobilePlayerHost = null;
+
+  const clearMobileShowPlacement = () => {
+    getDock()?.getChat?.()?.setPlayerHost?.(null);
+    mobilePlayerHost?.remove();
+    mobilePlayerHost = null;
+    workspace.classList.remove('portfolio-show-mobile-active');
+  };
+
+  const syncMobileShowPlacement = () => {
+    const dock = getDock();
+    const chat = dock?.getChat?.();
+    const mobile = Boolean(dock?.ref?.layout?.hasAttribute?.('drawer-mode-active'));
+    if (!chat || !chat.getShowPlayer?.()) {
+      if (!mobile) {
+        clearMobileShowPlacement();
+      }
+      return;
+    }
+    if (!mobile) {
+      clearMobileShowPlacement();
+      return;
+    }
+    mobilePlayerHost ||= Object.assign(document.createElement('section'), {
+      className: 'portfolio-show-mobile-footer',
+    });
+    if (!mobilePlayerHost.isConnected) workspace.append(mobilePlayerHost);
+    chat.setPlayerHost(mobilePlayerHost);
+    chat.getShowPlayer().setLayoutPlacement?.('inline');
+    workspace.classList.add('portfolio-show-mobile-active');
+    dock?.close?.('show-mobile-player');
+  };
 
   const cancelPendingRouteWrite = () => {
     if (routeWriteTimer) clearTimeout(routeWriteTimer);
@@ -536,6 +568,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   });
 
   const createPresenterSession = () => {
+    const gestureSeed = globalThis.crypto?.randomUUID?.()
+      || `${Date.now()}:${Math.random()}`;
     const cursor = createPresenterCursor();
     const attention = new ShowAttentionController({
       cursor,
@@ -561,6 +595,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         ),
       }),
       reportRuntimeError,
+      gestureSeed,
     });
     return { cursor, attention, runner };
   };
@@ -632,6 +667,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const restoreOrigin = (event) => {
+    clearMobileShowPlacement();
     cancelPendingRouteWrite();
     const wasRunning = running;
     const wasPresenting = Boolean(presenter);
@@ -665,6 +701,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     let chat = ensureChat();
     dock?.open?.('tour-button');
     chat?.openShow?.();
+    queueMicrotask(syncMobileShowPlacement);
     queueMicrotask(() => requestAnimationFrame(() => requestAnimationFrame(
       () => getChat()?.focusFirstControl?.(),
     )));
@@ -765,6 +802,14 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       return;
     }
     scheduleRouteStateWrite(event.detail?.state);
+  };
+
+  const onDockResponsiveChange = () => {
+    queueMicrotask(syncMobileShowPlacement);
+  };
+
+  const onShowPlayerMounted = () => {
+    queueMicrotask(syncMobileShowPlacement);
   };
 
   const onPopState = () => {
@@ -880,7 +925,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onDockChange = (event) => {
-    if (event.detail?.source === 'show-action') return;
+    if (['show-action', 'show-mobile-player'].includes(event.detail?.source)) return;
     if (event.detail?.open !== false) return;
     getChat()?.stopShow?.();
     disposePresenter();
@@ -923,6 +968,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   document.addEventListener('source-viewer-action', onSourceViewerAction);
   globalThis.addEventListener?.('popstate', onPopState);
   workspace.addEventListener('portfolio-show-start', onStart);
+  workspace.addEventListener('portfolio-show-player-mounted', onShowPlayerMounted);
   workspace.addEventListener('portfolio-show-seek', onSeek);
   workspace.addEventListener('portfolio-show-route-change', onRouteChange);
   document.addEventListener('portfolio-show-pause', pausePresenter, { capture: true });
@@ -936,6 +982,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   workspace.addEventListener('portfolio-show-action', onShowAction);
   workspace.addEventListener('portfolio-show-skip-media', onSkipMedia);
   getDock()?.addEventListener('agent-dock-change', onDockChange);
+  getDock()?.addEventListener('agent-dock-responsive-change', onDockResponsiveChange);
   queueMicrotask(() => { void applyLocationRoute({ source: 'load' }); });
 
   return () => {
@@ -943,6 +990,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     document.removeEventListener('source-viewer-action', onSourceViewerAction);
     globalThis.removeEventListener?.('popstate', onPopState);
     workspace.removeEventListener('portfolio-show-start', onStart);
+    workspace.removeEventListener('portfolio-show-player-mounted', onShowPlayerMounted);
     workspace.removeEventListener('portfolio-show-seek', onSeek);
     workspace.removeEventListener('portfolio-show-route-change', onRouteChange);
     document.removeEventListener('portfolio-show-pause', pausePresenter, { capture: true });
@@ -956,6 +1004,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     workspace.removeEventListener('portfolio-show-action', onShowAction);
     workspace.removeEventListener('portfolio-show-skip-media', onSkipMedia);
     getDock()?.removeEventListener('agent-dock-change', onDockChange);
+    getDock()?.removeEventListener('agent-dock-responsive-change', onDockResponsiveChange);
+    mobilePlayerHost?.remove();
     interactionMonitor.dispose();
     cancelPendingRouteWrite();
     routeRequests.cancel();

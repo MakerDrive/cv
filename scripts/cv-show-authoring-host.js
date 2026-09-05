@@ -325,7 +325,15 @@ export async function startCvShowAuthoringHost({
     let transactionQueue = Promise.resolve();
 
     let readCurrent = async () => {
-      let head = await storage.readHead(sessionId);
+      let head = await storage.readLatestHead();
+      if (
+        head
+        && (
+          head.sourceBase?.revision !== source.sourceBase.revision
+          || head.sourceBase?.authoringProjectHash !== source.sourceBase.authoringProjectHash
+          || head.sourceBase?.sourceSha256 !== source.sourceBase.sourceSha256
+        )
+      ) head = null;
       if (!head) {
         return {
           draftHash: null,
@@ -641,7 +649,7 @@ export async function startCvShowAuthoringHost({
     };
     return Object.freeze({ origin: expectedOrigin, sessionId, close });
   } catch (error) {
-    await new Promise((resolve) => server?.close?.(() => resolve()));
+    if (server) await new Promise((resolve) => server.close(() => resolve()));
     await lock.release();
     throw error;
   }

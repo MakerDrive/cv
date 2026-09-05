@@ -525,6 +525,7 @@ export function createCvShowDirectiveRunner(options = {}) {
     timeoutMs = 2_500,
     observePerformance = observePresentationPerformance,
     reportRuntimeError = null,
+    gestureSeed = '',
   } = options;
   let activeController = null;
   let markerSeries = '';
@@ -762,6 +763,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                         targetIdentity: attentionDirective.targetId,
                       } : {}),
                       gestureId: source.id,
+                      seed: `${gestureSeed}:${source.id}`,
                       cueTimeMs: source.cueTimeMs,
                       mediaTimeMs: source.mediaTimeMs,
                       ...(providerPlanned ? {

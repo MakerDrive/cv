@@ -6,6 +6,9 @@ import {
   createCvShowAuthoringAuthority,
   normalizeCvShowAuthoringSnapshot,
 } from '../../src/static-pages/js/tour-player/cvShowAuthoringAuthority.js';
+import {
+  listCvShowAuthoringToolDescriptors,
+} from '../../src/static-pages/js/tour-player/cvShowAuthoringTools.js';
 import { CV_SHOW_PRESENTATION_PROJECT } from '../../src/static-pages/data/cvShowPresentationProject.js';
 
 function base(project) {
@@ -1044,4 +1047,253 @@ test('a committed host result is not converted to failure when replica notificat
   assert.equal(transport.calls.transact, 1);
   assert.equal(authority.lifecycle.state, 'blocked');
   assert.equal(authority.view.base.revision, seedRevision + 1);
+});
+
+test('the CV cue batch descriptor binds cue-only cell.add and documents free-form refinements', () => {
+  const descriptors = listCvShowAuthoringToolDescriptors();
+  const batch = descriptors.find(({ name }) => name === 'presentation_authoring_cv_show_cue_batch');
+  assert.ok(batch, 'cue batch tool descriptor is advertised');
+  const commands = batch.inputSchema.properties.payload.properties.commands;
+  const item = commands.items;
+  const addThen = item.allOf.find(({ if: condition }) => (
+    condition.properties?.type?.const === 'cell.add'
+  ));
+  assert.ok(addThen, 'cell.add carries a payload schema branch');
+  const addPayload = addThen.then.properties.payload.properties;
+  const kinds = addPayload.cell.properties.kind.enum;
+  assert.deepEqual(kinds, ['cue'], 'cell.add payload is limited to the canonical cue cell schema');
+  assert.equal(addPayload.cell.required.includes('id'), true);
+  assert.equal(addPayload.cell.required.includes('cue'), true);
+  assert.equal(addPayload.cell.required.includes('narration'), false);
+  assert.deepEqual(addThen.then.properties.payload.required, ['cell'], 'index stays optional exactly like the provider command');
+  const removeThen = item.allOf.find(({ if: condition }) => (
+    condition.properties?.type?.const === 'cell.remove'
+  ));
+  assert.ok(removeThen?.then.properties.payload.required.includes('cellId'));
+  const dependenciesThen = item.allOf.find(({ if: condition }) => (
+    condition.properties?.type?.const === 'cell.set-dependencies'
+  ));
+  assert.ok(dependenciesThen?.then.properties.payload.required.includes('dependsOn'));
+  const refinementsThen = item.allOf.find(({ if: condition }) => (
+    condition.properties?.type?.const === 'cv-show.directive.set-refinements'
+  ));
+  const refinementsSchema = refinementsThen?.then.properties.payload.properties.refinements;
+  assert.ok(refinementsSchema, 'set-refinements exposes a refinements schema');
+  assert.equal(refinementsSchema.type, 'object');
+  assert.equal(refinementsSchema.additionalProperties, undefined, 'refinements stay an open portable JSON map');
+  assert.match(refinementsSchema.description, /safePath/u);
+  assert.match(refinementsSchema.description, /frames/u);
+  assert.match(refinementsSchema.description, /quote/u);
+  assert.match(refinementsSchema.description, /preserved verbatim/u);
+  const uniqueTypes = item.allOf.map(({ if: condition }) => condition.properties?.type?.const).filter(Boolean);
+  assert.deepEqual([...new Set(uniqueTypes)].sort(), [
+    'cell.add',
+    'cell.remove',
+    'cell.set-dependencies',
+    'cv-show.directive.set-refinements',
+  ]);
+});
+
+// Minimal JSON Schema (draft-07 subset) validator that covers every keyword
+// used by the cue batch descriptor, so real command documents can be checked
+// against the advertised schema instead of only inspecting its structure.
+
+function schemaTypeMatches(schemaType, value) {
+  if (Array.isArray(schemaType)) return schemaType.some((type) => schemaTypeMatches(type, value));
+  switch (schemaType) {
+    case 'object': return value !== null && typeof value === 'object' && !Array.isArray(value);
+    case 'array': return Array.isArray(value);
+    case 'string': return typeof value === 'string';
+    case 'boolean': return typeof value === 'boolean';
+    case 'integer': return Number.isInteger(value);
+    case 'number': return typeof value === 'number' && Number.isFinite(value);
+    case 'null': return value === null;
+    default: return true;
+  }
+}
+
+function collectSchemaErrors(schema, value, path = '#') {
+  if (schema === true || schema === undefined) return [];
+  if (schema === false) return value === undefined ? [] : [`${path}: false schema rejects a value`];
+  const errors = [];
+  if (schema.type !== undefined && !schemaTypeMatches(schema.type, value)) {
+    const expected = Array.isArray(schema.type) ? schema.type.join(' | ') : schema.type;
+    errors.push(`${path}: expected ${expected}, received ${value === null ? 'null' : typeof value}`);
+  }
+  if (schema.const !== undefined && !Object.is(schema.const, value)) {
+    errors.push(`${path}: expected const ${JSON.stringify(schema.const)}`);
+  }
+  if (schema.enum !== undefined && !schema.enum.some((candidate) => (
+    Object.is(candidate, value) || JSON.stringify(candidate) === JSON.stringify(value)
+  ))) {
+    errors.push(`${path}: value is not one of the enum members`);
+  }
+  if (schema.oneOf !== undefined) {
+    const matches = schema.oneOf.filter((branch) => collectSchemaErrors(branch, value, path).length === 0);
+    if (matches.length !== 1) errors.push(`${path}: expected exactly one oneOf branch to match (${matches.length})`);
+  }
+  if (schema.anyOf !== undefined) {
+    const matches = schema.anyOf.filter((branch) => collectSchemaErrors(branch, value, path).length === 0);
+    if (matches.length === 0) errors.push(`${path}: no anyOf branch matches`);
+  }
+  if (schema.allOf !== undefined) {
+    for (const branch of schema.allOf) errors.push(...collectSchemaErrors(branch, value, path));
+  }
+  if (schema.if !== undefined) {
+    const ifErrors = collectSchemaErrors(schema.if, value, path);
+    if (ifErrors.length === 0) {
+      if (schema.then !== undefined) errors.push(...collectSchemaErrors(schema.then, value, path));
+    } else if (schema.else !== undefined) {
+      errors.push(...collectSchemaErrors(schema.else, value, path));
+    }
+  }
+  if (schema.minLength !== undefined && typeof value === 'string' && value.length < schema.minLength) {
+    errors.push(`${path}: shorter than minLength ${schema.minLength}`);
+  }
+  if (schema.minimum !== undefined && typeof value === 'number' && value < schema.minimum) {
+    errors.push(`${path}: below minimum ${schema.minimum}`);
+  }
+  if (schema.maximum !== undefined && typeof value === 'number' && value > schema.maximum) {
+    errors.push(`${path}: above maximum ${schema.maximum}`);
+  }
+  if (value === null || typeof value !== 'object') return errors;
+  if (Array.isArray(value)) {
+    if (schema.items !== undefined) {
+      for (let i = 0; i < value.length; i += 1) {
+        errors.push(...collectSchemaErrors(schema.items, value[i], `${path}[${i}]`));
+      }
+    }
+    if (schema.minItems !== undefined && value.length < schema.minItems) {
+      errors.push(`${path}: fewer than minItems ${schema.minItems}`);
+    }
+    return errors;
+  }
+  if (schema.properties !== undefined) {
+    for (const [key, subschema] of Object.entries(schema.properties)) {
+      if (Object.prototype.hasOwnProperty.call(value, key)) {
+        errors.push(...collectSchemaErrors(subschema, value[key], `${path}.${key}`));
+      }
+    }
+  }
+  if (schema.required !== undefined) {
+    for (const key of schema.required) {
+      if (!Object.prototype.hasOwnProperty.call(value, key)) errors.push(`${path}: missing required ${key}`);
+    }
+  }
+  if (schema.additionalProperties !== undefined && schema.additionalProperties !== true) {
+    for (const key of Object.keys(value)) {
+      if (schema.properties && Object.prototype.hasOwnProperty.call(schema.properties, key)) continue;
+      if (schema.additionalProperties === false) {
+        errors.push(`${path}.${key}: additional property is forbidden`);
+      } else {
+        errors.push(...collectSchemaErrors(schema.additionalProperties, value[key], `${path}.${key}`));
+      }
+    }
+  }
+  return errors;
+}
+
+function validateAgainstSchema(schema, value) {
+  return collectSchemaErrors(schema, value);
+}
+
+function cueBatchInputSchema() {
+  const descriptors = listCvShowAuthoringToolDescriptors();
+  const batch = descriptors.find(({ name }) => name === 'presentation_authoring_cv_show_cue_batch');
+  assert.ok(batch, 'cue batch tool descriptor is advertised');
+  return batch.inputSchema;
+}
+
+function cueBatchCommand(project, type, payload, extra = {}) {
+  return Object.freeze({
+    schemaVersion: 'workspace-presentation-authoring-command-v1',
+    id: `test-command-${type}`,
+    base: base(project),
+    type,
+    payload,
+    ...extra,
+  });
+}
+
+test('the cue batch JSON Schema admits valid cue command documents and rejects invalid ones', () => {
+  const project = CV_SHOW_PRESENTATION_PROJECT;
+  const schema = cueBatchInputSchema();
+  const seedCell = structuredClone(project.cells.find(({ kind }) => kind === 'cue'));
+  const addedCell = { ...seedCell, id: 'test-command-cell:added-cue' };
+  const batchInput = (commands) => ({
+    id: 'test-cue-batch-input',
+    base: base(project),
+    payload: { commands },
+  });
+  const assertValid = (command) => assert.deepEqual(
+    validateAgainstSchema(schema, batchInput([command])),
+    [],
+    `valid command must pass: ${command.type}`,
+  );
+  const assertInvalid = (command, label) => assert.ok(
+    validateAgainstSchema(schema, batchInput([command])).length > 0,
+    `invalid command must fail: ${label}`,
+  );
+
+  assertValid(cueBatchCommand(project, 'cell.add', { cell: addedCell }));
+  assertValid(cueBatchCommand(project, 'cell.add', { cell: addedCell, index: 1 }));
+  assertValid(cueBatchCommand(project, 'cell.remove', { cellId: addedCell.id }));
+  assertValid(cueBatchCommand(project, 'cell.set-dependencies', {
+    cellId: addedCell.id,
+    dependsOn: [],
+  }));
+  assertValid(cueBatchCommand(project, 'cv-show.directive.set-refinements', {
+    cellId: addedCell.id,
+    refinements: {
+      action: 'watch-full-video',
+      mode: 'short-muted-montage',
+      frames: [{ at: 1, durationMs: 500 }],
+      quote: 'инженер',
+      occurrence: 1,
+      unknownNested: { deep: [true, null, 3] },
+    },
+  }));
+
+  assertInvalid(cueBatchCommand(project, 'cell.add', {
+    cell: {
+      id: addedCell.id,
+      kind: 'cue',
+      layerId: addedCell.layerId,
+      turnId: addedCell.turnId,
+      timing: addedCell.timing,
+      dependsOn: [],
+    },
+  }), 'cue cell missing the cue member');
+  assertInvalid(cueBatchCommand(project, 'cell.add', {
+    cell: { ...addedCell, cue: { ...addedCell.cue, kind: 'bogus' } },
+  }), 'unknown cue.kind');
+  assertInvalid(cueBatchCommand(project, 'cell.add', {
+    cell: { ...addedCell, cue: { ...addedCell.cue, kind: 'interaction', unknownCueField: true } },
+  }), 'unknown cue member');
+  assertInvalid(cueBatchCommand(project, 'cell.remove', {}), 'cell.remove without cellId');
+  assertInvalid(cueBatchCommand(project, 'cell.remove', { cellId: '' }), 'empty cellId');
+  assertInvalid(cueBatchCommand(project, 'cell.set-dependencies', {
+    cellId: addedCell.id,
+  }), 'set-dependencies without dependsOn');
+  assertInvalid(cueBatchCommand(project, 'cv-show.directive.set-refinements', {
+    cellId: addedCell.id,
+    refinements: 'watch',
+  }), 'refinements not an object');
+  assertInvalid(cueBatchCommand(project, 'cv-show.directive.set-refinements', {
+    cellId: addedCell.id,
+  }), 'set-refinements without refinements');
+  assertInvalid(cueBatchCommand(project, 'cell.edit', { cell: addedCell }), 'unsupported type');
+  assertInvalid(cueBatchCommand(project, 'cell.add', {
+    cellId: addedCell.id,
+    refinements: { action: 'watch' },
+  }), 'cross-type payload');
+  assertInvalid(cueBatchCommand(project, 'cell.remove', {
+    cellId: addedCell.id,
+  }, { extra: 'boom' }), 'extra command member');
+
+  const emptyCommands = { id: 'test', base: base(project), payload: { commands: [] } };
+  assert.ok(
+    validateAgainstSchema(schema, emptyCommands).length > 0,
+    'an empty command batch must fail',
+  );
 });

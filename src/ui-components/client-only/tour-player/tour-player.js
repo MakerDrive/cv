@@ -192,14 +192,17 @@ export function resolveCvShowPlayerEntry({
 }
 
 /** @param {any} story @param {'short' | 'full'} [mode] @param {Map<string, number>} [projectDurations] */
-function playerTimeline(story, mode = 'short', projectDurations = new Map()) {
+function playerTimeline(story, mode = 'short', projectDurations = new Map(), detailReplacements = new Map()) {
   const knownDurations = CV_SHOW_SCHEDULE_DURATIONS.releaseId === CV_SHOW_WEB_AUDIO_RELEASE.releaseId
     ? CV_SHOW_SCHEDULE_DURATIONS.durations
     : {};
   return Object.freeze({
     title: 'CV Show',
     turns: Object.freeze(createCvShowPlaybackEntries(story, mode).map((entry) => {
-      const durationMs = Number(projectDurations.get(entry.id) ?? knownDurations[entry.id]);
+      const replacementId = detailReplacements.get(entry.id) || '';
+      const replacement = entry.branchId === replacementId ? story?.branches?.[replacementId] : null;
+      const durationEntry = replacement || entry;
+      const durationMs = Number(projectDurations.get(durationEntry.id) ?? knownDurations[durationEntry.id]);
       return Object.freeze({
         id: entry.id,
         persona: entry.sceneId ? 'Detail' : 'CV',
@@ -269,6 +272,7 @@ export class PortfolioShowChat extends HTMLElement {
   #alignmentReady = Promise.resolve();
   #alignedEntry = null;
   #projectDurationMsByEntry = new Map();
+  #detailReplacementByEntry = new Map();
   #lastExecutionReceipt = null;
   #lastAlignedReset = null;
   #lastAlignedSeekFailure = null;
@@ -282,6 +286,11 @@ export class PortfolioShowChat extends HTMLElement {
   #playRequested = false;
   #resumePending = false;
   #pendingStartDetail = null;
+  /** Scene whose content is confirmed as physically presented in the
+   * workspace. It is set only after the entry scene setup / preroll actually
+   * completes and is cleared on stop, so an interrupted or failed setup never
+   * pretends that the owner scene is ready. */
+  #presentedSceneId = '';
   #session = new ShowSessionState();
   #audioArbiter = null;
   #speechToken = null;
@@ -650,6 +659,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.#completedDetailReview = false;
     this.#completedDetailReviewPreparing = false;
     this.#presentationAdmitted = false;
+    this.#presentedSceneId = '';
     this.#transportPlaying = false;
     this.#playRequested = false;
     this.#resumePending = false;
@@ -734,6 +744,7 @@ export class PortfolioShowChat extends HTMLElement {
         this.#story,
         this.#mode || 'short',
         this.#projectDurationMsByEntry,
+        this.#detailReplacementByEntry,
       ),
       state: {
         index: Math.max(0, this.#sceneIndex),
@@ -765,6 +776,7 @@ export class PortfolioShowChat extends HTMLElement {
     if (!this.#dock || !this.#story || !this.#controller || !this.#mode) return null;
     this.#agent = this.#dock.getChat?.() || this.#agent;
     this.#showPlayer = this.#dock.setShow('short', this.#showConfig()) || this.#showPlayer;
+    this.dispatchEvent(new CustomEvent('portfolio-show-player-mounted', { bubbles: true }));
     return this.#showPlayer;
   }
 
@@ -938,6 +950,7 @@ export class PortfolioShowChat extends HTMLElement {
     }
     this.#mode = mode;
     this.#showCompleted = false;
+    this.#detailReplacementByEntry.clear();
     this.#playbackEntries = playbackEntries;
     const requestedIndex = entryId
       ? playbackEntries.findIndex((entry) => entry.id === entryId)
@@ -1062,7 +1075,7 @@ export class PortfolioShowChat extends HTMLElement {
       this.#resumePending = false;
       this.#pendingStartDetail = Object.freeze({});
     }
-    this.#presentScene({ startPaused: true });
+    this.#enterSegment(index, { startPaused: true });
   }
 
   async #seek(index, positionMs = 0) {
@@ -1091,8 +1104,19 @@ export class PortfolioShowChat extends HTMLElement {
     const wasPlaying = wasRunning
       ? !this.$.isPaused
       : Boolean(pendingTransportIntent?.play);
-    if (this.$.inBranch) {
+    const targetEntry = this.#playbackEntries[index] || null;
+    const replacedBranchId = this.#replacementBranchIdFor(targetEntry);
+    const activeBranchId = this.$.inBranch
+      ? this.#session.snapshot.playback.episodeId
+      : '';
+    const seekStaysInReplacementDetail = Boolean(
+      this.$.inBranch
+      && replacedBranchId
+      && activeBranchId === replacedBranchId,
+    );
+    if (this.$.inBranch && !seekStaysInReplacementDetail) {
       this.#session.returnFromBranch();
+      this.$.inBranch = false;
       this.#branchReturnPlayback = null;
       this.#completedDetailReview = false;
       this.#showCompleted = false;
@@ -1109,18 +1133,53 @@ export class PortfolioShowChat extends HTMLElement {
       });
     }
     this.$.isRunning = true;
-    this.#presentScene({ startPaused: !wasPlaying, positionMs: targetMs });
+    // The seek event resets the live presentation runner. Emit it before the
+    // destination entry starts its own (possibly synchronous) scene setup
+    // phase; emitting it afterwards cancels that phase before it settles.
+    this.dispatchEvent(new CustomEvent('portfolio-show-seek', {
+      bubbles: true,
+      composed: true,
+      detail: { index, positionMs: targetMs },
+    }));
+    if (seekStaysInReplacementDetail && targetEntry) {
+      const branch = this.#story?.branches?.[replacedBranchId];
+      this.#session.setPlayback({
+        episodeId: replacedBranchId,
+        cueIndex: 0,
+        positionMs: targetMs,
+        playbackState: wasPlaying ? 'playing' : 'paused',
+        subjectId: branch?.sceneId || targetEntry.id,
+      });
+      if (branch) {
+        // The detail is already the active branch, but its owner scene may
+        // not be physically presented yet (an earlier entry into this detail
+        // was interrupted before its setup completed). Re-run the owner setup
+        // unless the presented scene already matches the detail owner.
+        const ownerEntry = branch.sceneId
+          ? this.#story?.scenes?.find(({ id }) => id === branch.sceneId) || null
+          : null;
+        const needsOwnerSetup = Boolean(
+          ownerEntry
+          && this.#presentedSceneId !== branch.sceneId,
+        );
+        this.#presentEntry(branch, {
+          startPaused: !wasPlaying,
+          positionMs: targetMs,
+          precedingSetupEntry: needsOwnerSetup ? ownerEntry : null,
+        });
+      }
+    } else {
+      this.#enterSegment(this.#sceneIndex, {
+        startPaused: !wasPlaying,
+        positionMs: targetMs,
+      });
+    }
     if (
       this.#pendingTransportIntent?.transportRequestId
       === pendingTransportIntent?.transportRequestId
     ) {
       this.#pendingTransportIntent = null;
     }
-    this.dispatchEvent(new CustomEvent('portfolio-show-seek', {
-      bubbles: true,
-      composed: true,
-      detail: { index, positionMs: targetMs },
-    }));
     return true;
   }
 
@@ -1133,6 +1192,47 @@ export class PortfolioShowChat extends HTMLElement {
 
   #currentEntry() {
     return this.#playbackEntries[this.#sceneIndex] || null;
+  }
+
+  /**
+   * A Short segment chosen as Details keeps that replacement for the whole
+   * tour. Reopening the segment (manual step, auto-advance, preview, seek)
+   * must play the selected recording again, not the original Short clip.
+   * @param {any} [entry]
+   * @returns {string} the replacement branch id, or '' when the segment is
+   *   still presented as its original Short recording.
+   */
+  #replacementBranchIdFor(entry) {
+    if (this.#mode !== 'short' || !entry?.branchId) return '';
+    const replacementBranchId = this.#detailReplacementByEntry.get(entry.id) || '';
+    return entry.branchId === replacementBranchId ? replacementBranchId : '';
+  }
+
+  /**
+   * Opens the segment at {@link index} in the recording selected for this
+   * tour: the detail branch for a replaced segment, the Short clip otherwise.
+   * The caller owns pause/play intent; the position belongs to the same
+   * recording the timeline advertises for the segment.
+   * @param {number} index
+   * @param {{ startPaused?: boolean, positionMs?: number }} [options]
+   */
+  #enterSegment(index, { startPaused = false, positionMs = 0 } = {}) {
+    const entry = this.#playbackEntries[index];
+    if (!entry) return false;
+    const replacedBranchId = this.#replacementBranchIdFor(entry);
+    this.#sceneIndex = index;
+    if (replacedBranchId) {
+      this.#enterDetails(replacedBranchId, {
+        contextualCardId: `${entry.id}.actions`,
+        contextualActionId: 'details',
+        historicalOwnerEntryId: entry.id,
+        startPaused,
+        positionMs,
+      });
+      return true;
+    }
+    this.#presentScene({ startPaused, positionMs });
+    return true;
   }
 
   #playerEntry() {
@@ -1148,17 +1248,18 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   #step(direction) {
-    if (!this.$.isReady || this.$.inBranch) return;
+    if (!this.$.isReady) return;
+    if (this.$.inBranch) {
+      if (direction > 0) this.#returnFromDetails();
+      return;
+    }
     const nextIndex = Math.min(
       this.#playbackEntries.length - 1,
       Math.max(0, Math.max(0, this.#sceneIndex) + direction),
     );
     if (nextIndex === this.#sceneIndex) return;
     if (!this.$.isRunning || this.$.isPaused) void this.#preview(nextIndex);
-    else {
-      this.#sceneIndex = nextIndex;
-      this.#presentScene();
-    }
+    else this.#enterSegment(nextIndex);
   }
 
   async #waitForAttentionBarrier(requestId) {
@@ -1200,7 +1301,7 @@ export class PortfolioShowChat extends HTMLElement {
       return;
     }
     this.#sceneIndex += 1;
-    this.#presentScene();
+    this.#enterSegment(this.#sceneIndex);
   }
 
   #publishPhysicalStart(entry, requestId) {
@@ -1314,6 +1415,8 @@ export class PortfolioShowChat extends HTMLElement {
         : await this.#runSceneSetup(entry, requestId);
       requireCvShowSceneSetupSuccess(receipt, entry.id);
       if (requestId !== this.#requestId) return;
+      // The scene setup completed, so its content is physically presented.
+      this.#presentedSceneId = entry.sceneId || entry.id;
       this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
         bubbles: true,
         composed: true,
@@ -1418,7 +1521,32 @@ export class PortfolioShowChat extends HTMLElement {
    * clean scene setup, so Play/Retry always restores control.
    */
   #repeatCurrentEntry() {
-    if (!this.$.isRunning || this.$.inBranch) return;
+    if (!this.$.isRunning) return;
+    if (this.$.inBranch) {
+      // Retry inside a Detail branch: leave the failed branch session and
+      // re-enter the same Detail with its owner scene setup forced, so the
+      // recovery path does not depend on a half-prepared presentation.
+      const branchId = this.#session.snapshot.playback.episodeId;
+      const branch = this.#story?.branches?.[branchId];
+      if (!branch || this.#mode !== 'short') return;
+      this.#stopSpeech('branch-retry');
+      this.#session.returnFromBranch();
+      this.$.inBranch = false;
+      this.#branchReturnPlayback = null;
+      this.#speechRetryAttempts.delete(branchId);
+      this.$.isError = false;
+      this.$.errorText = '';
+      this.#clearSystemErrors();
+      void this.#enterDetails(branchId, {
+        contextualCardId: `${branch.sceneId}.actions`,
+        contextualActionId: 'details',
+        historicalOwnerEntryId: branch.sceneId,
+        forcePrecedingSetup: true,
+        startPaused: false,
+        positionMs: 0,
+      });
+      return;
+    }
     const entry = this.#playbackEntries[this.#sceneIndex];
     if (!entry) return;
     this.#speechRetryAttempts.delete(entry.id);
@@ -1438,6 +1566,11 @@ export class PortfolioShowChat extends HTMLElement {
 
   #scheduleSceneRetry(entryId, requestId, positionMs = 0) {
     if (this.#sceneRetryScheduled) return true;
+    // Retry replays a timeline Short entry. A Detail branch is not a timeline
+    // entry: keep the failure visible and let the player recovery action
+    // re-enter the branch instead of silently scheduling a no-op retry.
+    const retryEntry = this.#playbackEntries.find(({ id }) => id === entryId);
+    if (!retryEntry) return false;
     const attempts = this.#speechRetryAttempts.get(entryId) || 0;
     if (attempts >= CV_SHOW_SCENE_RETRY_LIMIT) return false;
     this.#sceneRetryScheduled = true;
@@ -1445,14 +1578,12 @@ export class PortfolioShowChat extends HTMLElement {
     globalThis.setTimeout?.(() => {
       this.#sceneRetryScheduled = false;
       if (requestId !== this.#requestId || !this.isConnected) return;
-      const entry = this.#playbackEntries.find(({ id }) => id === entryId);
-      if (!entry) return;
       this.#speechRetryAttempts.set(entryId, attempts + 1);
       this.$.isError = false;
       this.$.errorText = '';
       this.#appendSystemMessage(this.#message('tour.status.retry'));
-      this.#sceneIndex = Math.max(0, this.#playbackEntries.indexOf(entry));
-      this.#presentEntry(entry, { positionMs, startPaused: !this.#playRequested });
+      this.#sceneIndex = Math.max(0, this.#playbackEntries.indexOf(retryEntry));
+      this.#presentEntry(retryEntry, { positionMs, startPaused: !this.#playRequested });
     }, settleMs);
     return true;
   }
@@ -1587,6 +1718,13 @@ export class PortfolioShowChat extends HTMLElement {
     }, { reason });
     if (requestId !== this.#requestId) return receipt;
     this.#lastAlignedGenerationReceipt = receipt;
+    // A completed generation means the entry preroll ran: the scene content
+    // is physically presented, so it becomes the confirmed presented scene.
+    // With deferred presentation the preroll waits for playback, so the scene
+    // is confirmed later (on physical start / next completed setup).
+    if (receipt?.status === 'completed' && !deferPresentationUntilPlayback) {
+      this.#presentedSceneId = entry.sceneId || entry.id;
+    }
     this.dispatchEvent(new CustomEvent('portfolio-show-aligned-generation', {
       bubbles: true,
       composed: true,
@@ -1699,7 +1837,8 @@ export class PortfolioShowChat extends HTMLElement {
         this.#transportPlaying = false;
         this.#syncPlayer();
         releaseSpeech();
-        if (!startedInBranch) void this.#advanceAfterAttention(requestId);
+        if (startedInBranch) this.#returnFromDetails();
+        else void this.#advanceAfterAttention(requestId);
       },
       onError: (error, receipt) => {
         if (requestId !== this.#requestId) return;
@@ -1798,6 +1937,9 @@ export class PortfolioShowChat extends HTMLElement {
       contextualCardId,
       contextualActionId,
     });
+    if (historicalOwnerEntry.id === returnParentEntry.id) {
+      this.#detailReplacementByEntry.set(returnParentEntry.id, branch.id);
+    }
     this.#session.enterBranch(branch.id, shortPlayback);
     this.#session.setPlayback({
       episodeId: branch.id,
@@ -1810,15 +1952,20 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.isPaused = startPaused;
     this.$.resumeRequired = startPaused;
     this.$.hasDetails = false;
+    // The owner scene becomes the presented scene only after its setup
+    // actually completes (confirmed in the entry preroll / scene phase), so
+    // an interrupted or failed setup keeps the previously confirmed scene and
+    // a later entry re-runs the owner setup instead of trusting an intent.
+    const precedingSetupEntry = forcePrecedingSetup
+      ? historicalOwnerEntry
+      : this.#completedDetailReview
+      || this.#presentedSceneId !== historicalOwnerEntry.id
+      ? historicalOwnerEntry
+      : null;
     this.#presentEntry(branch, {
       startPaused,
       positionMs,
-      precedingSetupEntry: forcePrecedingSetup
-        ? historicalOwnerEntry
-        : this.#completedDetailReview
-        || historicalOwnerEntry.id !== returnParentEntry.id
-        ? historicalOwnerEntry
-        : null,
+      precedingSetupEntry,
     });
   }
 
@@ -1900,25 +2047,27 @@ export class PortfolioShowChat extends HTMLElement {
       this.stopShow({ completed: true });
       return;
     }
-    this.#requestId += 1;
-    this.#stopSpeech('branch-return');
-    this.#session.returnFromBranch();
-    this.$.inBranch = false;
-    this.$.isPaused = true;
-    this.$.resumeRequired = true;
-    this.$.hasDetails = this.#mode === 'short' && Boolean(this.#currentScene()?.branchId);
-    this.$.statusText = this.#message('tour.status.branchReturned');
-    this.#appendSystemMessage(this.$.statusText, {
-      actions: [{ id: 'resume', label: this.$.lblResume, icon: 'play_arrow' }],
-      actionId: 'show-resume-after-branch',
+    // A details action from an earlier card is contextual, not a replacement
+    // for the scene currently playing. Restore that current Short checkpoint.
+    if (restore?.binding.historicalOwnerEntryId !== restore?.entry.id) {
+      this.#requestId += 1;
+      this.#stopSpeech('historical-branch-return');
+      this.#session.returnFromBranch();
+      this.$.inBranch = false;
+      this.$.isPaused = true;
+      this.$.resumeRequired = true;
+      this.#branchReturnPlayback = null;
+      this.#showPlayer?.bind?.(this.#showConfig());
+      void this.#restoreAfterHistoricalDetails(restore, this.#requestId);
+      return;
+    }
+    this.#continueShortAfterDetails(this.#requestId, {
+      interrupt: true,
+      startPaused: this.$.isPaused,
     });
-    this.#branchReturnPlayback = null;
-    this.#showPlayer?.bind?.(this.#showConfig());
-    this.#syncPlayer();
-    if (restore) void this.#restoreAfterBranch(restore, this.#requestId);
   }
 
-  async #restoreAfterBranch({ entry, playback }, requestId) {
+  async #restoreAfterHistoricalDetails({ entry, playback }, requestId) {
     await this.#alignmentReady;
     if (requestId !== this.#requestId) return;
     const sceneSetupReady = this.#alignment.available
@@ -1929,6 +2078,25 @@ export class PortfolioShowChat extends HTMLElement {
       positionMs: playback.positionMs,
       sceneSetupReady,
     });
+  }
+
+  #continueShortAfterDetails(requestId, { interrupt = false, startPaused = false } = {}) {
+    if (!this.$.inBranch || requestId !== this.#requestId) return;
+    if (interrupt) {
+      this.#requestId += 1;
+      requestId = this.#requestId;
+      this.#stopSpeech('branch-replaced');
+    }
+    this.#session.returnFromBranch();
+    this.$.inBranch = false;
+    this.#branchReturnPlayback = null;
+    if (this.#sceneIndex >= this.#playbackEntries.length - 1) {
+      this.stopShow({ completed: true });
+      return;
+    }
+    this.#sceneIndex += 1;
+    this.#showPlayer?.bind?.(this.#showConfig());
+    this.#enterSegment(this.#sceneIndex, { startPaused });
   }
 
   async #resume() {

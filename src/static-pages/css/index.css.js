@@ -192,6 +192,7 @@ main > article {
 }
 
 .pulse-workspace {
+  position: relative;
   display: block;
   min-width: 0;
   min-height: 0;
@@ -199,6 +200,27 @@ main > article {
   height: var(--pulse-workspace-block-size);
   background: var(--pulse-surface);
   color: var(--pulse-text);
+}
+
+.portfolio-show-mobile-footer {
+  position: absolute;
+  z-index: var(--sn-layer-overlay, 16000);
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: min(42dvh, 300px);
+  background: var(--pulse-surface-panel);
+  border-block-start: 1px solid var(--pulse-outline);
+}
+
+.portfolio-show-mobile-footer > chat-show-player {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.pulse-workspace.portfolio-show-mobile-active {
+  box-sizing: border-box;
+  padding-block-end: min(42dvh, 300px);
 }
 
 portfolio-workspace,

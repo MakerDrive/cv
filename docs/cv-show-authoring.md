@@ -27,6 +27,13 @@ Start the local authoring host on an unused loopback port:
 npm run authoring:serve -- --port 4183
 ```
 
+Before starting it, build the public assets (`npm run build`). Open the printed
+loopback origin in a browser with native WebMCP enabled. A listening host is not
+enough: the browser must register the `presentation_authoring_*` tools. Confirm
+that registration by calling `presentation_authoring_inspect`; if it is absent,
+the local client reports the missing runtime or native-registration error rather
+than permitting an unbound edit.
+
 The command prints its exact origin and session ID. Open the returned origin at
 `/cv/`. That host injects the local client, establishes one capability-bound
 session, loads the current Project, and registers the library's
@@ -45,6 +52,50 @@ The useful CV operations are:
 - `presentation_authoring_cell_set_dependencies` for explicit sequencing;
 - `presentation_authoring_inverse` to derive the exact inverse of an accepted
   command.
+- `presentation_authoring_cv_show_cue_batch` for one atomic batch of cue-only
+  `cell.add`, `cell.remove`, `cell.set-dependencies`, or
+  `cv-show.directive.set-refinements` commands; every nested command carries
+  the same exact `base` returned by inspect;
+- `presentation_authoring_cv_show_entry_set_subtitle` to update display text
+  without changing pronunciation-oriented narration.
+
+Use this loop for every edit: inspect and retain its `project` and `base`; make
+one command against that base; inspect again and verify revision, hashes,
+timeline and media disposition. Preserve the resulting inspected `project` as
+the private absolute JSON file passed to the audio workflow as `--project`.
+Never use a stale inspect result after a mutation or an unknown commit outcome.
+
+For example, after `presentation_authoring_inspect` returns
+`base = { revision, authoringProjectHash }`, set a subtitle with:
+
+```json
+{
+  "id": "subtitle-positioning",
+  "base": { "revision": 12, "authoringProjectHash": "…from inspect…" },
+  "payload": { "entryId": "positioning", "subtitle": "Новый подзаголовок" }
+}
+```
+
+Pass that object to `presentation_authoring_cv_show_entry_set_subtitle`, inspect
+again, and save the returned `project` object verbatim to a private absolute
+JSON file. That file is the exact `--project /absolute/path/project.json` input
+for the approved audio workflow.
+
+For a cue batch, each nested command repeats that same `base`; for example a
+removal uses `type: "cell.remove"` with
+`payload: { "cellId": "cv-show:cue:positioning.example" }`. Add uses
+`payload: { "cell": { "…complete cue cell with kind: "cue"…" }, "index": 4 }`;
+the batch tool only accepts `kind: "cue"` cells, never narration or audio-clip
+cells. Dependency changes use `payload: { "cellId": "…", "dependsOn": [{
+"cellId": "…", "barrier": "settled" }] }`. Directive refinements use
+`payload: { "cellId": "…", "refinements": { … } }`; `refinements` is an open
+portable JSON map (nested objects, arrays, strings, finite numbers, booleans,
+and null). Runtime-consumed fields include `safePath` (activation path),
+`mode`, `action`, `actions` (media or chat actions), `frames`, `finalFrame`,
+`frameHoldMs` (frame sequences), `quote`, `occurrence` (selection anchors), and
+`persistent` (chat actions). Unknown fields are preserved verbatim; do not
+guess validation restrictions — use the tool descriptor and
+`presentation_authoring_inspect` to confirm a command before sending it.
 
 The shared library also describes structural layer/cell add, remove, and move
 commands. CV deliberately rejects changes that break its fixed 30-entry shape,

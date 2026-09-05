@@ -860,20 +860,18 @@ test('narration accepts only a successfully settled subject setup', () => {
   );
 });
 
-test('branch return reruns subject setup before restoring paused narration', async () => {
+test('details replace one Short segment and continue with the next Short segment', async () => {
   const logic = await readFile(
     new URL('../../src/ui-components/client-only/tour-player/tour-player.js', import.meta.url),
     'utf8',
   );
-  const restoreMethod = logic.match(
-    /async #restoreAfterBranch\(\{ entry, playback \}, requestId\) \{(?<body>[\s\S]*?)\n  \}\n\n  async #resume/,
+  const continuationMethod = logic.match(
+    /#continueShortAfterDetails\(requestId, \{ interrupt = false, startPaused = false \} = \{\}\) \{(?<body>[\s\S]*?)\n  \}\n\n  async #resume/,
   );
-  assert.ok(restoreMethod?.groups?.body, 'branch-return method body');
-  assert.match(
-    restoreMethod.groups.body,
-    /this\.#alignment\.available\s*\? null\s*:\s*this\.#runSceneSetup\(entry, requestId\)/u,
-  );
-  assert.match(restoreMethod.groups.body, /sceneSetupReady,/);
+  assert.ok(continuationMethod?.groups?.body, 'detail replacement continuation method body');
+  assert.match(continuationMethod.groups.body, /this\.#session\.returnFromBranch\(\)/u);
+  assert.match(continuationMethod.groups.body, /this\.#sceneIndex \+= 1/u);
+  assert.match(continuationMethod.groups.body, /this\.#enterSegment\(this\.#sceneIndex, \{ startPaused \}\)/u);
   assert.match(logic, /const activeBranchId = this\.#session\.snapshot\.playback\.episodeId/u);
   assert.match(logic, /const branchEntry = this\.#story\?\.branches\?\.\[activeBranchId\]/u);
   assert.match(logic, /\(\{ id \}\) => id === branchEntry\?\.sceneId/u);
@@ -5749,7 +5747,7 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.match(logic, /createCvShowMessageStream/);
   assert.match(
     logic,
-    /const acknowledgement = await this\.#appendAgentMessage[\s\S]*?acknowledgement\?\.status !== 'completed'[\s\S]*?this\.#presentScene\(\)/u,
+    /const acknowledgement = await this\.#appendAgentMessage[\s\S]*?acknowledgement\?\.status !== 'completed'[\s\S]*?this\.#presentScene\(\{/u,
   );
   assert.match(logic, /wasRunning && !completed && this\.isConnected/u);
   assert.match(logic, /payload: \{ intent: 'show-mode' \},\s*\}, \{ stream: false \}\)/u);
@@ -5836,8 +5834,8 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.doesNotMatch(logic, /semantics: 'pointer-only'/);
   assert.match(
     logic,
-    /#returnFromDetails\(\) \{[\s\S]*?this\.\$\.inBranch = false;[\s\S]*?this\.#showPlayer\?\.bind\?\.\(this\.#showConfig\(\)\);[\s\S]*?this\.#syncPlayer\(\);/u,
-    'returning from details must rebind the Short controls before redrawing the player',
+    /#returnFromDetails\(\) \{[\s\S]*?this\.#continueShortAfterDetails\(this\.#requestId, \{\s*interrupt: true,\s*startPaused: this\.\$\.isPaused,\s*\}\);/u,
+    'returning from details must replace the Short segment and continue with the previous pause state',
   );
   assert.match(logic, /partitionCvShowAlignedDirectives\(entry\.directives\)/);
   assert.match(
@@ -6215,5 +6213,684 @@ test('hiding the page pauses the show instead of burning cell deadlines', async 
   });
   document.dispatchEvent(new Event('visibilitychange'));
   assert.equal(player.$.isPaused, true, 'becoming visible again keeps the paused state');
+  player.stopShow();
+});
+
+test('a replaced Short segment stays the selected detail on manual Next, natural end, and seek', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+    'speechSynthesis',
+    'SpeechSynthesisUtterance',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  const spoken = [];
+  globalThis.speechSynthesis = {
+    paused: false,
+    cancel() {},
+    pause() { this.paused = true; },
+    resume() { this.paused = false; },
+    speak(utterance) { spoken.push(utterance); },
+  };
+  globalThis.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+    constructor(text) { this.text = text; }
+  };
+
+  const dock = document.createElement('div');
+  const showPlayer = {
+    configs: [],
+    states: [],
+    bind(config) { this.configs.push(config); },
+    setState(state) { this.states.push(state); },
+  };
+  t.after(() => {
+    dock.remove();
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+  dock.setAgentProvider = () => {};
+  dock.setMessages = () => {};
+  dock.getChat = () => null;
+  dock.setShow = (_key, config) => {
+    showPlayer.configs.push(config);
+    return showPlayer;
+  };
+  dock.removeShow = () => {};
+  const { PortfolioShowChat } = await import(
+    '../../src/ui-components/client-only/tour-player/tour-player.js?replaced-segment-flow-test'
+  );
+  const player = new PortfolioShowChat();
+  player.agentDock = dock;
+  player.addEventListener('portfolio-show-phase', (event) => {
+    if (typeof event.detail?.complete !== 'function') return;
+    event.detail.handled = true;
+    event.detail.complete(Object.freeze({
+      status: 'success',
+      receipts: Object.freeze([Object.freeze({
+        status: 'success',
+        result: Object.freeze({ status: 'completed' }),
+      })]),
+    }));
+  });
+  dock.append(player);
+  document.body.append(dock);
+
+  const wait = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
+  const currentConfig = () => showPlayer.configs.at(-1);
+  const openDetails = (branchId, sceneId) => {
+    dock.dispatchEvent(new CustomEvent('agent-show-action', {
+      detail: {
+        id: `${sceneId}.actions`,
+        actionId: 'details',
+        payload: { branchId, sceneId },
+      },
+    }));
+  };
+
+  assert.equal(await player.applyShowRoute({
+    mode: 'short',
+    entryId: 'symbiote-workspace',
+    timeMs: 0,
+    play: true,
+  }), true);
+  await wait(10);
+  spoken.at(-1)?.onstart?.();
+  await wait(10);
+  assert.equal(player.$.inBranch, false);
+  assert.equal(currentConfig().state.index, 1, 'the Short tour starts on the workspace segment');
+
+  openDetails('workspace-details', 'symbiote-workspace');
+  await wait(30);
+  assert.equal(player.$.inBranch, true, 'current-segment details replace the Short recording');
+  assert.deepEqual(player.routeSnapshot, {
+    mode: 'short',
+    entryId: 'symbiote-workspace',
+    detailId: 'workspace-details',
+    timeMs: 0,
+    play: true,
+    running: true,
+    completed: false,
+  });
+  const detailSpeech = String(spoken.at(-1)?.text || '');
+  assert.equal(detailSpeech, CV_SHOW_STORY.branches['workspace-details'].speech);
+
+  spoken.at(-1)?.onend?.();
+  await wait(50);
+  assert.equal(player.$.inBranch, false, 'the natural end of the replacement detail continues Short');
+  assert.equal(currentConfig().state.index, 2, 'the next segment after the replacement is the following Short');
+  assert.deepEqual(player.routeSnapshot.entryId, 'symbiote-ui');
+
+  currentConfig().controller.seek(1, 2_000);
+  await wait(50);
+  assert.equal(player.$.inBranch, true, 'seek into the replaced segment reopens the selected detail');
+  assert.equal(player.routeSnapshot.detailId, 'workspace-details');
+  assert.equal(player.routeSnapshot.entryId, 'symbiote-workspace');
+  assert.equal(player.routeSnapshot.timeMs, 2_000, 'the seek position belongs to the detail recording');
+  assert.equal(String(spoken.at(-1)?.text || ''), detailSpeech, 'seek plays the detail, not the Short clip');
+
+  currentConfig().controller.pause();
+  await wait(10);
+  assert.equal(player.$.isPaused, true, 'the detail can be paused');
+  currentConfig().controller.next();
+  await wait(50);
+  assert.equal(player.$.inBranch, false);
+  assert.equal(player.$.isPaused, true, 'manual Next from a paused detail opens the next Short paused');
+  assert.equal(currentConfig().state.index, 2);
+  assert.equal(player.$.resumeRequired, true);
+
+  currentConfig().controller.play();
+  await wait(10);
+  spoken.at(-1)?.onstart?.();
+  await wait(10);
+  assert.equal(player.$.isPaused, false, 'resume continues the next Short');
+
+  // Manual Next while the replacement detail is playing continues into the
+  // next Short without a pause, matching the previous playback intent.
+  currentConfig().controller.seek(1, 500);
+  await wait(50);
+  assert.equal(player.$.inBranch, true);
+  const utterancesBeforePlayingNext = spoken.length;
+  currentConfig().controller.next();
+  await wait(50);
+  assert.equal(player.$.inBranch, false);
+  assert.equal(player.$.isPaused, false, 'Next from a playing detail continues playing the next Short');
+  assert.equal(currentConfig().state.index, 2);
+  assert.ok(spoken.length > utterancesBeforePlayingNext, 'the next Short starts speaking after playing Next');
+
+  // Seek back into the replaced segment, then rewind while the detail is
+  // already active: the player stays inside the branch and only repositions
+  // the detail recording; its natural end then advances to the next Short.
+  currentConfig().controller.seek(1, 2_000);
+  await wait(50);
+  assert.equal(player.$.inBranch, true);
+  assert.equal(player.routeSnapshot.detailId, 'workspace-details');
+  const rewoundDetailSpeechIndex = spoken.length;
+  currentConfig().controller.seek(1, 4_000);
+  await wait(50);
+  assert.equal(player.$.inBranch, true, 'seek inside the active replacement detail stays in the detail');
+  assert.equal(player.routeSnapshot.detailId, 'workspace-details');
+  assert.equal(player.routeSnapshot.entryId, 'symbiote-workspace');
+  assert.equal(player.routeSnapshot.timeMs, 4_000, 'the rewound position belongs to the detail recording');
+  assert.equal(player.$.isPaused, false, 'rewinding a playing detail keeps it playing');
+  assert.ok(spoken.length > rewoundDetailSpeechIndex, 'the rewind restarts the detail narration');
+  assert.equal(String(spoken.at(-1)?.text || ''), detailSpeech, 'the rewind plays the detail, not the Short clip');
+
+  spoken.at(-1)?.onstart?.();
+  await wait(10);
+  spoken.at(-1)?.onend?.();
+  await wait(50);
+  assert.equal(player.$.inBranch, false, 'the natural end after the in-detail rewind continues Short');
+  assert.equal(currentConfig().state.index, 2, 'the natural end after the rewind advances to the following Short');
+  assert.equal(player.routeSnapshot.entryId, 'symbiote-ui');
+  assert.equal(player.routeSnapshot.timeMs, 0);
+  assert.equal(player.$.isPaused, false, 'the following Short keeps playing after the natural end');
+
+  player.stopShow();
+});
+
+test('historical and terminal detail exits restore the interrupted Short checkpoint', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+    'speechSynthesis',
+    'SpeechSynthesisUtterance',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  const spoken = [];
+  globalThis.speechSynthesis = {
+    paused: false,
+    cancel() {},
+    pause() { this.paused = true; },
+    resume() { this.paused = false; },
+    speak(utterance) { spoken.push(utterance); },
+  };
+  globalThis.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+    constructor(text) { this.text = text; }
+  };
+
+  const dock = document.createElement('div');
+  const showPlayer = {
+    configs: [],
+    states: [],
+    bind(config) { this.configs.push(config); },
+    setState(state) { this.states.push(state); },
+  };
+  t.after(() => {
+    dock.remove();
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+  dock.setAgentProvider = () => {};
+  dock.setMessages = () => {};
+  dock.getChat = () => null;
+  dock.setShow = (_key, config) => {
+    showPlayer.configs.push(config);
+    return showPlayer;
+  };
+  dock.removeShow = () => {};
+  const { PortfolioShowChat } = await import(
+    '../../src/ui-components/client-only/tour-player/tour-player.js?historical-detail-flow-test'
+  );
+  const player = new PortfolioShowChat();
+  player.agentDock = dock;
+  player.addEventListener('portfolio-show-phase', (event) => {
+    if (typeof event.detail?.complete !== 'function') return;
+    event.detail.handled = true;
+    event.detail.complete(Object.freeze({
+      status: 'success',
+      receipts: Object.freeze([Object.freeze({
+        status: 'success',
+        result: Object.freeze({ status: 'completed' }),
+      })]),
+    }));
+  });
+  dock.append(player);
+  document.body.append(dock);
+
+  const wait = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
+  const currentConfig = () => showPlayer.configs.at(-1);
+  const openDetails = (branchId, sceneId) => {
+    dock.dispatchEvent(new CustomEvent('agent-show-action', {
+      detail: {
+        id: `${sceneId}.actions`,
+        actionId: 'details',
+        payload: { branchId, sceneId },
+      },
+    }));
+  };
+
+  assert.equal(await player.applyShowRoute({
+    mode: 'short',
+    entryId: 'symbiote-workspace',
+    timeMs: 3_000,
+    play: false,
+  }), true);
+  await wait(10);
+  assert.equal(player.$.isRunning, true);
+  assert.equal(player.$.isPaused, true);
+  assert.equal(currentConfig().state.index, 1);
+
+  // Historical details: the owning scene differs from the currently paused Short.
+  openDetails('symbiote-ui-details', 'symbiote-ui');
+  await wait(30);
+  assert.equal(player.$.inBranch, true, 'details of an earlier card open as a contextual branch');
+  assert.deepEqual(player.routeSnapshot, {
+    mode: 'short',
+    entryId: 'symbiote-ui',
+    detailId: 'symbiote-ui-details',
+    timeMs: 0,
+    play: true,
+    running: true,
+    completed: false,
+  });
+
+  spoken.at(-1)?.onend?.();
+  await wait(50);
+  assert.equal(player.$.inBranch, false, 'the natural end of historical details returns to Short');
+  assert.equal(currentConfig().state.index, 1, 'historical details do not skip the interrupted Short segment');
+  assert.equal(player.routeSnapshot.entryId, 'symbiote-workspace');
+  assert.equal(player.$.isPaused, true, 'historical return restores the interrupted Short paused');
+  assert.equal(player.$.resumeRequired, true);
+
+  // Reopen historical details and leave through Return/Next: same checkpoint contract.
+  openDetails('symbiote-ui-details', 'symbiote-ui');
+  await wait(30);
+  assert.equal(player.$.inBranch, true);
+  dock.dispatchEvent(new CustomEvent('agent-show-action', {
+    detail: { actionId: 'return' },
+  }));
+  await wait(50);
+  assert.equal(player.$.inBranch, false);
+  assert.equal(currentConfig().state.index, 1);
+  assert.equal(player.routeSnapshot.entryId, 'symbiote-workspace');
+  assert.equal(player.$.isPaused, true, 'Return from historical details restores the paused Short checkpoint');
+
+  openDetails('symbiote-ui-details', 'symbiote-ui');
+  await wait(30);
+  currentConfig().controller.next();
+  await wait(50);
+  assert.equal(player.$.inBranch, false, 'Next from historical details exits the contextual branch');
+  assert.equal(currentConfig().state.index, 1, 'Next from historical details does not advance past the interrupted Short');
+  assert.equal(player.$.isPaused, true);
+  assert.equal(player.$.resumeRequired, true);
+
+  // Completed-tour detail review must not resume the remaining sequence.
+  player.stopShow({ completed: true });
+  await wait(10);
+  assert.equal(player.$.isRunning, false);
+  openDetails('symbiote-ui-details', 'symbiote-ui');
+  await wait(30);
+  assert.equal(player.$.inBranch, true, 'a completed tour can reopen one emitted detail action');
+  const utterancesBeforeEnd = spoken.length;
+  spoken.at(-1)?.onend?.();
+  await wait(50);
+  assert.equal(player.$.isRunning, false, 'the terminal detail review completes without resuming the tour');
+  assert.equal(player.$.inBranch, false);
+  assert.equal(player.routeSnapshot.completed, true);
+  assert.equal(spoken.length, utterancesBeforeEnd, 'the terminal review does not start the following sequence');
+  player.stopShow();
+});
+
+test('a seek back into a replaced segment runs the owner scene setup before the detail plays again', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+    'speechSynthesis',
+    'SpeechSynthesisUtterance',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  const spoken = [];
+  globalThis.speechSynthesis = {
+    paused: false,
+    cancel() {},
+    pause() { this.paused = true; },
+    resume() { this.paused = false; },
+    speak(utterance) { spoken.push(utterance); },
+  };
+  globalThis.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+    constructor(text) { this.text = text; }
+  };
+
+  const dock = document.createElement('div');
+  const showPlayer = {
+    configs: [],
+    states: [],
+    bind(config) { this.configs.push(config); },
+    setState(state) { this.states.push(state); },
+  };
+  t.after(() => {
+    dock.remove();
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+  dock.setAgentProvider = () => {};
+  dock.setMessages = () => {};
+  dock.getChat = () => null;
+  dock.setShow = (_key, config) => {
+    showPlayer.configs.push(config);
+    return showPlayer;
+  };
+  dock.removeShow = () => {};
+  const { PortfolioShowChat } = await import(
+    '../../src/ui-components/client-only/tour-player/tour-player.js?replaced-reseek-scene-setup-test'
+  );
+  const player = new PortfolioShowChat();
+  player.agentDock = dock;
+  const sceneSetupPhases = [];
+  player.addEventListener('portfolio-show-phase', (event) => {
+    const directives = event.detail?.directives || [];
+    sceneSetupPhases.push({
+      aligned: Boolean(event.detail?.aligned),
+      directives: directives.map((directive) => ({
+        id: directive.id || '',
+        type: directive.type || '',
+      })),
+    });
+    if (typeof event.detail?.complete !== 'function') return;
+    event.detail.handled = true;
+    event.detail.complete(Object.freeze({
+      status: 'success',
+      receipts: Object.freeze([]),
+    }));
+  });
+  dock.append(player);
+  document.body.append(dock);
+
+  const wait = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
+  const currentConfig = () => showPlayer.configs.at(-1);
+  const openDetails = (branchId, sceneId) => {
+    dock.dispatchEvent(new CustomEvent('agent-show-action', {
+      detail: {
+        id: `${sceneId}.actions`,
+        actionId: 'details',
+        payload: { branchId, sceneId },
+      },
+    }));
+  };
+
+  assert.equal(await player.applyShowRoute({
+    mode: 'short',
+    entryId: 'symbiote-workspace',
+    timeMs: 0,
+    play: true,
+  }), true);
+  await wait(10);
+  spoken.at(-1)?.onstart?.();
+  await wait(10);
+
+  // symbiote-workspace details are the current segment replacement.
+  openDetails('workspace-details', 'symbiote-workspace');
+  await wait(30);
+  assert.equal(player.$.inBranch, true);
+  assert.equal(player.routeSnapshot.detailId, 'workspace-details');
+  spoken.at(-1)?.onend?.();
+  await wait(50);
+  assert.equal(player.$.inBranch, false);
+  assert.equal(currentConfig().state.index, 2, 'the natural end continues to the following Short');
+
+  // symbiote-ui details replace their own segment.
+  openDetails('symbiote-ui-details', 'symbiote-ui');
+  await wait(30);
+  assert.equal(player.$.inBranch, true);
+  assert.equal(player.routeSnapshot.detailId, 'symbiote-ui-details');
+  spoken.at(-1)?.onend?.();
+  await wait(50);
+  assert.equal(player.$.inBranch, false);
+  assert.equal(currentConfig().state.index, 3, 'the natural end advances to symbiote-engine');
+  assert.equal(player.routeSnapshot.entryId, 'symbiote-engine');
+
+  // Seek back into the replaced symbiote-ui segment with a nonzero position.
+  // The physical scene is symbiote-engine, so the owner scene (symbiote-ui)
+  // must run its setup phase again before the detail narration is replayed;
+  // otherwise the real page presentation of the detail fails silently.
+  sceneSetupPhases.length = 0;
+  currentConfig().controller.seek(2, 4_000);
+  await wait(30);
+  assert.equal(player.$.inBranch, true, 'the re-seek opens the selected detail');
+  assert.equal(player.routeSnapshot.detailId, 'symbiote-ui-details');
+  spoken.at(-1)?.onstart?.();
+  await wait(30);
+  assert.equal(String(spoken.at(-1)?.text || ''), CV_SHOW_STORY.branches['symbiote-ui-details'].speech);
+
+  const ownerSceneSetupRan = sceneSetupPhases.some((phase) => (
+    phase.directives.some((directive) => (
+      directive.type === 'navigate'
+      && directive.id === 'symbiote-ui.open'
+    ))
+  ));
+  assert.equal(
+    ownerSceneSetupRan,
+    true,
+    `the re-seek into the replaced segment must run the owner scene setup, got ${JSON.stringify(sceneSetupPhases)}`,
+  );
+
+  player.stopShow();
+});
+
+test('an interrupted owner scene setup is re-run when the same replaced segment is sought again', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+    'speechSynthesis',
+    'SpeechSynthesisUtterance',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  const spoken = [];
+  globalThis.speechSynthesis = {
+    paused: false,
+    cancel() {},
+    pause() { this.paused = true; },
+    resume() { this.paused = false; },
+    speak(utterance) { spoken.push(utterance); },
+  };
+  globalThis.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+    constructor(text) { this.text = text; }
+  };
+
+  const dock = document.createElement('div');
+  const showPlayer = {
+    configs: [],
+    states: [],
+    bind(config) { this.configs.push(config); },
+    setState(state) { this.states.push(state); },
+  };
+  t.after(() => {
+    dock.remove();
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+  dock.setAgentProvider = () => {};
+  dock.setMessages = () => {};
+  dock.getChat = () => null;
+  dock.setShow = (_key, config) => {
+    showPlayer.configs.push(config);
+    return showPlayer;
+  };
+  dock.removeShow = () => {};
+  const { PortfolioShowChat } = await import(
+    '../../src/ui-components/client-only/tour-player/tour-player.js?interrupted-owner-setup-test'
+  );
+  const player = new PortfolioShowChat();
+  player.agentDock = dock;
+  const sceneSetupPhases = [];
+  player.addEventListener('portfolio-show-phase', (event) => {
+    const directives = event.detail?.directives || [];
+    sceneSetupPhases.push({
+      directives: directives.map((directive) => ({
+        id: directive.id || '',
+        type: directive.type || '',
+      })),
+    });
+    if (typeof event.detail?.complete !== 'function') return;
+    event.detail.handled = true;
+    event.detail.complete(Object.freeze({
+      status: 'success',
+      receipts: Object.freeze([]),
+    }));
+  });
+  dock.append(player);
+  document.body.append(dock);
+
+  const wait = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
+  const currentConfig = () => showPlayer.configs.at(-1);
+  const openDetails = (branchId, sceneId) => {
+    dock.dispatchEvent(new CustomEvent('agent-show-action', {
+      detail: {
+        id: `${sceneId}.actions`,
+        actionId: 'details',
+        payload: { branchId, sceneId },
+      },
+    }));
+  };
+
+  assert.equal(await player.applyShowRoute({
+    mode: 'short',
+    entryId: 'symbiote-workspace',
+    timeMs: 0,
+    play: true,
+  }), true);
+  await wait(10);
+  spoken.at(-1)?.onstart?.();
+  await wait(10);
+
+  // Replace workspace and symbiote-ui segments with their details and reach
+  // the following Short (symbiote-engine), confirming each scene along the way.
+  openDetails('workspace-details', 'symbiote-workspace');
+  await wait(30);
+  spoken.at(-1)?.onstart?.();
+  await wait(10);
+  spoken.at(-1)?.onend?.();
+  await wait(50);
+  openDetails('symbiote-ui-details', 'symbiote-ui');
+  await wait(30);
+  spoken.at(-1)?.onstart?.();
+  await wait(10);
+  spoken.at(-1)?.onend?.();
+  await wait(50);
+  assert.equal(player.$.inBranch, false);
+  assert.equal(player.routeSnapshot.entryId, 'symbiote-engine');
+  spoken.at(-1)?.onstart?.();
+  await wait(20);
+
+  // First seek into the replaced segment starts an owner scene setup; the
+  // second seek interrupts it before the setup completed. The setup must be
+  // re-run for the second seek: the physical scene was never confirmed.
+  sceneSetupPhases.length = 0;
+  currentConfig().controller.seek(2, 4_000);
+  await wait(10);
+  currentConfig().controller.seek(2, 9_000);
+  await wait(10);
+  assert.equal(player.$.inBranch, true);
+  assert.equal(player.routeSnapshot.detailId, 'symbiote-ui-details');
+  spoken.at(-1)?.onstart?.();
+  await wait(40);
+
+  const ownerSceneSetupReRan = sceneSetupPhases.some((phase) => (
+    phase.directives.some((directive) => (
+      directive.type === 'navigate'
+      && directive.id === 'symbiote-ui.open'
+    ))
+  ));
+  assert.equal(
+    ownerSceneSetupReRan,
+    true,
+    `the interrupted owner scene setup must be re-run after the second seek, got ${JSON.stringify(sceneSetupPhases)}`,
+  );
+  assert.equal(
+    String(spoken.at(-1)?.text || ''),
+    CV_SHOW_STORY.branches['symbiote-ui-details'].speech,
+    'the detail narration starts after the re-run owner setup',
+  );
+  assert.equal(player.$.isError, false);
+  assert.equal(player.$.errorText, '');
+
   player.stopShow();
 });
