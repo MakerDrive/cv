@@ -2,6 +2,7 @@ import {
   createShowActionLifecycle,
   normalizeShowDirective,
   waitForShowDomReadiness,
+  waitForShowVisualSettlement,
 } from 'symbiote-ui/chat/show-runtime';
 
 export const CV_SHOW_DIRECTIVE_TYPES = Object.freeze([
@@ -738,6 +739,17 @@ export function createCvShowDirectiveRunner(options = {}) {
                     presentationTarget,
                     adapted.directive,
                   ) || presentationTarget;
+                  if (presentationTarget) {
+                    // Marker ink is painted in viewport coordinates: measure
+                    // it only after the target stops moving, otherwise motion
+                    // tails (smooth scroll, drawer transitions) leave static
+                    // strokes over shifted text. Never fails the cue.
+                    await waitForShowVisualSettlement(presentationTarget, {
+                      document,
+                      signal: controller.signal,
+                      inactivityMs: 800,
+                    }).catch(() => null);
+                  }
                 }
                 if (!presentationTarget && isDeferredMapAction(source)) {
                   // The map is hidden and the tour is not allowed to open it:
