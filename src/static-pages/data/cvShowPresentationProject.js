@@ -2886,7 +2886,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "intent": "emphasize",
           "marker": "underline",
           "series": "lifecycle-twin",
-          "quote": "applicable to the physical runtime",
+          "quote": "mirrored the GSM modem pool",
           "occurrence": 1
         },
         "kind": "annotation",

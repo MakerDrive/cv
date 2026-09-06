@@ -175,6 +175,13 @@ export function createImsShowMediaTarget(root, {
     hostActivationRequested = true;
     root.activate();
   };
+  const actuatedPlayer = (player) => {
+    if (playerKind(player) === 'ims-spinner') return player;
+    const scope = player?.matches?.('ims-viewer') ? player : player?.querySelector?.('ims-viewer');
+    const spinner = scope?.shadowRoot?.querySelector?.('ims-spinner')
+      || scope?.querySelector?.('ims-spinner');
+    return spinner || player;
+  };
   const getPlayer = (signal) => {
     if (!playerPromise) {
       const pending = Promise.resolve().then(() => {
@@ -244,13 +251,13 @@ export function createImsShowMediaTarget(root, {
       { signal } = /** @type {{ signal?: AbortSignal }} */ ({}),
     ) {
       const player = await awaitSharedWithAbort(prepare(), signal);
-      return Object.freeze({ kind: playerKind(player), ready: true });
+      return Object.freeze({ kind: playerKind(actuatedPlayer(player)), ready: true });
     },
 
     async captureShowMediaState(
       { signal } = /** @type {{ signal?: AbortSignal }} */ ({}),
     ) {
-      const player = await getPlayer(signal);
+      const player = actuatedPlayer(await getPlayer(signal));
       throwIfAborted(signal);
       const kind = playerKind(player);
       if (kind === 'ims-spinner') {
@@ -286,7 +293,7 @@ export function createImsShowMediaTarget(root, {
       { signal } = /** @type {{ signal?: AbortSignal }} */ ({}),
     ) {
       throwIfAborted(signal);
-      const player = await getPlayer(signal);
+      const player = actuatedPlayer(await getPlayer(signal));
       throwIfAborted(signal);
       const kind = playerKind(player);
       if (kind === 'ims-spinner') {
@@ -330,7 +337,7 @@ export function createImsShowMediaTarget(root, {
 
     async pauseShowMedia() {
       try {
-        const player = await getPlayer();
+        const player = actuatedPlayer(await getPlayer());
         if (playerKind(player) === 'ims-spinner') {
           lastSpinnerPlaying = false;
           player.pause?.();
@@ -339,7 +346,7 @@ export function createImsShowMediaTarget(root, {
     },
 
     async restoreShowMediaState(state = {}) {
-      const player = await getPlayer();
+      const player = actuatedPlayer(await getPlayer());
       const kind = playerKind(player);
       if (kind === 'ims-spinner') {
         if (state.playing === true) {
