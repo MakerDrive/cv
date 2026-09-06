@@ -1131,6 +1131,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   getDock()?.addEventListener('agent-dock-responsive-change', onDockResponsiveChange);
   const drawerLevelRailSelector = 'layout-node[drawer-rail][drawer-rail-collapsed][data-drawer-dock="end"]';
   const drawerLevelPrimarySelector = 'layout-node[mobile-dock="primary"]';
+  /** @type {ReturnType<typeof setTimeout> | number} */
   let drawerLevelTimer = 0;
   let innerDrawerObserver = null;
   let outerDrawerObserver = null;
