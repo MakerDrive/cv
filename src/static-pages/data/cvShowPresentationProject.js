@@ -13162,9 +13162,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-iKlnRRlbsiBaRtgKAwUiqVH23R7/qPsb1AKVKetB1Uw=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-sYUBcyel/c9rXEBNSaUTAOfljJKvwO+Fz8a7clVrltY=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-Og03ra0A8hmHTQ61GpHq8FKi+TEGMZo4PdiR7iOAplk=",
         "entryId": "agent-pool-mcp",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-NBDnyflw4FQMGGh65U41s4IiNcQvxTFqquC5JQWW7/E=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-05BMuKwPCTBbFfsSQnJeZyn49JF9vmKqNY3pIU+JYpg=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-yO9FZv9AI0u20GFC9q8tJmfNvNnxcef9AFQ/62n82/A=",
         "sourceCellIds": [
           "cv-show:narration:agent-pool-mcp",
@@ -13196,9 +13196,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-wm8tn+xgj8lI42tu25aL0Ho08nn2nHKc+mSKeS625n0=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-RLIDb5buBPz62Z6KHEETHUuSB1vcOucZHSSVJonkraM=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-0XJnRxCOFbWsu4Fslyrv7hzH4sAbhG0UBqFp3+YFvGo=",
         "entryId": "lifecycle-messaging-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-FzozN5XfIu9XF690fUbLCO5CrS1Lr519oxmpy8nFfFk=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-hKedETwW0PCN4jlVVI2uMDI5n69yKKlwsy9kxvyv2iQ=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-e9dVkJdL6qPnp3kFiK2h2SH69pVXKfHV6CrhyIKZE5I=",
         "sourceCellIds": [
           "cv-show:narration:lifecycle-messaging-platform",
@@ -13311,9 +13311,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-wXI9MSrLSgolD4qcskhVsLnfaUmSEY4YLf9mdw4ADpk=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-EtUy+MJeu01SPMeamOBTLtG9JxWjlIWQT3y5V5KJDxo=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-0cykmw3o9MHKTOa6VcGsMIOFUm6NJvJrLdMnQgerPP4=",
         "entryId": "photopizza",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-bMqu3HoJ0yt/ly8gSzH5CYWvBXqYX307OqclDL57SLE=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-8wXdPIB/qrYcZ26TzT6bBlm5HvJlz2kIZY7HYx8eln4=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-rvSrWiSaWyfQScaCabmt/6nUDzqler3xf80mnTiaPHo=",
         "sourceCellIds": [
           "cv-show:narration:photopizza",
@@ -13630,7 +13630,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-f4gSknuhftAdYHmtgP6dwr2V6fV6MakuY3iSoCC6Aac="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-FIuun7KRCxH7ZeLLcgcKMkcvd7KOdrz+kdUz6qcO/Ko=",
+    "hash": "cv-show-audio-provenance-v1:sha256-uIxKbErR9p4oqHBHpkt1+SYVqbBRVI4fEY95HxrNLlk=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
@@ -13699,10 +13699,10 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-OuWRIVfYEEXRvVjlhNMD8j64P1tKE+KlHQPhZnfHjvY=",
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-X+Wfo/EQHeCyDDhOp2FP/Ybn0BymFlU6us7712SNU/E=",
     "revision": 62
   },
-  "releaseId": "cv-show-audio-release-v1:3edd7031d7e7234bf4741399ade75cadefbe7ed41f70858b4a5fbd4e7e4f9883",
+  "releaseId": "cv-show-audio-release-v1:cf2f306cfe1c92195040ff9879d73335cb97ad382ff3e5f1a57d2e57f3b8e736",
   "schemaVersion": "cv-show-audio-release-v1",
   "verificationHash": "cv-show-audio-release-verification-v1:2f47d74022258dc5c74f2c67449891d49492e53938f9513a45601713b48239b7"
 }
