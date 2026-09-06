@@ -2367,7 +2367,9 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "annotation": {
           "intent": "emphasize",
           "marker": "underline",
-          "series": "agent-pool-flow"
+          "series": "agent-pool-flow",
+          "quote": "tracks process state",
+          "occurrence": 1
         },
         "kind": "annotation",
         "targetId": "article.agent-pool-mcp.execution-flow"

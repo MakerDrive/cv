@@ -835,7 +835,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                   reportInteractionSettled();
                   if (
                     adapted.directive.mode === 'frame'
-                    && source?.refinements?.playOnSettle === true
+                    && (source?.playOnSettle === true || source?.refinements?.playOnSettle === true)
                   ) {
                     try {
                       const spinTarget = resolveMedia?.(source.target);

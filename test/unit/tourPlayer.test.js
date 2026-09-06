@@ -6894,3 +6894,43 @@ test('an interrupted owner scene setup is re-run when the same replaced segment 
 
   player.stopShow();
 });
+
+test('CV runner starts spinner rotation when a settled focus carries playOnSettle', async () => {
+  const order = [];
+  const mediaTarget = { id: 'spinner-target' };
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime: {
+      entries: new Map([['projects/photopizza', {}]]),
+      selectedId: 'projects/other',
+      select(id, options) { order.push(['select', id, options]); this.selectedId = id; },
+    },
+    attention: {
+      present: () => ({ presented: true }),
+      whenSettled: async () => ({ status: 'settled' }),
+      cancel() {},
+      seek: async () => ({}),
+      clearTransient() {},
+    },
+    media: { play: async (target, directive) => { order.push(['media', target, directive.mode]); return { played: true }; } },
+    emit: () => {},
+    resolveTarget: () => ({ matches: () => false }),
+    resolveMedia: (targetId) => {
+      order.push(['resolveMedia', targetId]);
+      return targetId === 'media/photopizza/ims/spinner' ? mediaTarget : null;
+    },
+    resolveMarkerTarget: (target) => target,
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({ target: typeof target === 'function' ? target() : target }),
+  });
+  const result = await runner.run([
+    { id: 'd.spin-open', type: 'navigate', target: 'projects/photopizza' },
+    { id: 'd.spin-focus', type: 'frame', target: 'media/photopizza/ims/spinner', playOnSettle: true },
+  ], {
+    presentation: { budgetMs: 1200 },
+  });
+  assert.equal(result.status, 'success');
+  assert.deepEqual(order.filter(([name]) => name === 'media'), [
+    ['media', mediaTarget, 'spinner-rotation'],
+  ]);
+});
