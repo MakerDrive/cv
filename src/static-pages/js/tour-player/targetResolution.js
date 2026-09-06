@@ -387,6 +387,44 @@ function unionRangeRect(range) {
 }
 
 /**
+ * Finds the visible block holding the nth occurrence of a marker quote,
+ * searching outward from a resolved region target. Semantic region targets
+ * often resolve to the first paragraph while the quote lives deeper; without
+ * this search the stroke anchors to the wrong block. Returns null when the
+ * exact occurrence is absent so callers keep current behavior.
+ */
+export function findQuoteScopeElement(target, quote, occurrence = 1) {
+  const want = Math.max(1, Number.parseInt(String(occurrence ?? 1), 10) || 1);
+  const text = String(quote || '');
+  if (!target || !text) return null;
+  let scope = target.parentElement || null;
+  for (let depth = 0; depth < 4 && scope; depth += 1) {
+    if (scope.matches?.('article, [data-article], .portfolio-article, .article-body, main')) break;
+    scope = scope.parentElement;
+  }
+  scope = scope || target.parentElement || null;
+  if (!scope?.querySelectorAll) return null;
+  const candidates = [...scope.querySelectorAll('p, li, h1, h2, h3, blockquote')].filter((el) => {
+    if (el === target) return false;
+    const rect = el.getBoundingClientRect?.();
+    return rect && rect.width > 0 && rect.height > 0 && String(el.textContent || '').includes(text);
+  });
+  let seen = 0;
+  for (const el of candidates) {
+    const body = String(el.textContent || '');
+    let from = 0;
+    for (;;) {
+      const at = body.indexOf(text, from);
+      if (at < 0) break;
+      seen += 1;
+      if (seen === want) return el;
+      from = at + text.length;
+    }
+  }
+  return null;
+}
+
+/**
  * Narrows marker geometry to an authored quote using the browser's public Range
  * abstraction. The returned element-like proxy keeps clipping ancestry and
  * document timing attached to the rendered article block.
@@ -396,7 +434,8 @@ export function createCvShowTextMarkerTarget(target, directive = {}) {
   const occurrence = Math.max(1, Number.parseInt(directive.occurrence, 10) || 1);
   const document = target?.ownerDocument || globalThis.document;
   if (!target || !quote || !document?.createRange) return target;
-  const nodes = textNodesWithin(target, document);
+  const quoted = findQuoteScopeElement(target, quote, occurrence) || target;
+  const nodes = textNodesWithin(quoted, document);
   const text = nodes.map((node) => String(node.data ?? node.textContent ?? '')).join('');
   const startOffset = occurrenceOffset(text, quote, occurrence);
   if (startOffset < 0) return target;
@@ -408,13 +447,13 @@ export function createCvShowTextMarkerTarget(target, directive = {}) {
   range.setEnd(end.node, end.offset);
   if (!unionRangeRect(range)) return target;
   return Object.freeze({
-    id: target.id ? `${target.id}--show-marker-quote` : '',
+    id: quoted.id ? `${quoted.id}--show-marker-quote` : '',
     ownerDocument: document,
-    parentElement: target.parentElement || null,
-    parentNode: target,
-    isConnected: target.isConnected !== false,
-    getRootNode: target.getRootNode?.bind(target),
-    scrollIntoView: target.scrollIntoView?.bind(target),
+    parentElement: quoted.parentElement || null,
+    parentNode: quoted,
+    isConnected: quoted.isConnected !== false,
+    getRootNode: quoted.getRootNode?.bind(quoted),
+    scrollIntoView: quoted.scrollIntoView?.bind(quoted),
     getBoundingClientRect: () => unionRangeRect(range),
     getClientRects: () => Object.freeze([unionRangeRect(range)].filter(Boolean)),
   });

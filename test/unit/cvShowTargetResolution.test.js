@@ -122,3 +122,57 @@ test('exact marker quote occurrence exposes nonzero Range geometry through a tar
     height: 24,
   });
 });
+
+test('marker quote missing from the resolved block searches visible siblings', () => {
+  const quoteText = 'ключевая фраза находится здесь';
+  const range = {
+    setStart(node, offset) {
+      this.start = { node, offset };
+    },
+    setEnd(node, offset) {
+      this.end = { node, offset };
+    },
+    getClientRects: () => [{ left: 20, top: 300, right: 320, bottom: 324, width: 300, height: 24 }],
+  };
+  const document = {
+    defaultView: {},
+    createTreeWalker: (root) => {
+      const data = String(root?.textContent || '');
+      let available = data.length > 0;
+      const node = { data };
+      return { nextNode: () => { if (!available) return null; available = false; return node; } };
+    },
+    createRange: () => range,
+  };
+  const scope = {
+    matches: (selector) => String(selector).split(',').some((part) => part.trim() === 'article'),
+    querySelectorAll: () => [sibling],
+    parentElement: null,
+  };
+  const sibling = {
+    textContent: `вступительное слово, ${quoteText}, продолжение`,
+    parentElement: scope,
+    getBoundingClientRect: () => ({ left: 20, top: 300, width: 300, height: 24 }),
+  };
+  const target = {
+    id: 'region-first',
+    ownerDocument: document,
+    isConnected: true,
+    parentElement: scope,
+    textContent: 'вводный абзац без нужной фразы',
+    getBoundingClientRect: () => ({ left: 20, top: 100, width: 300, height: 24 }),
+  };
+
+  const proxy = createCvShowTextMarkerTarget(target, { quote: 'ключевая фраза', occurrence: 1 });
+
+  assert.notEqual(proxy, target);
+  assert.equal(proxy.parentElement, scope);
+  assert.deepEqual(proxy.getBoundingClientRect(), {
+    left: 20,
+    top: 300,
+    right: 320,
+    bottom: 324,
+    width: 300,
+    height: 24,
+  });
+});
