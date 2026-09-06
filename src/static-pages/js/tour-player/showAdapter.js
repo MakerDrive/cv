@@ -252,7 +252,9 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
       mode: 'marker',
       targetId: directive.target,
       marker: directive.shape,
-      ...(directive.text ? { label: directive.text } : {}),
+      ...(directive.label !== undefined
+        ? { label: directive.label }
+        : directive.text ? { label: directive.text } : {}),
       ...(directive.quote ? { quote: directive.quote } : {}),
       ...(directive.occurrence ? { occurrence: directive.occurrence } : {}),
     };

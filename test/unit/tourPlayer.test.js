@@ -6934,3 +6934,16 @@ test('CV runner starts spinner rotation when a settled focus carries playOnSettl
     ['media', mediaTarget, 'spinner-rotation'],
   ]);
 });
+
+test('CV adapter preserves an authored marker label instead of defaulting digits', () => {
+  const labeled = adaptCvShowDirective(
+    { id: 'd.number', type: 'marker', target: 'article.example.steps', shape: 'number', label: '2' },
+    { resolveText: (key) => key },
+  ).directive;
+  assert.equal(labeled.label, '2');
+  const legacy = adaptCvShowDirective(
+    { id: 'd.legacy', type: 'marker', target: 'article.example.map', shape: 'oval', text: 'A' },
+    { resolveText: (key) => key },
+  ).directive;
+  assert.equal(legacy.label, 'A');
+});
