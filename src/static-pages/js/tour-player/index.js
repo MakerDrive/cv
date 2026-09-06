@@ -42,6 +42,8 @@ import {
   shouldDeferCvShowNavigationTarget,
   waitForPortfolioMapTargetVisualSettlement,
 } from './targetResolution.js';
+import { CV_SHOW_SEEK_KEYS, resolveCvShowGestureClear } from './gestureClearPolicy.js';
+import { resolveCvShowPanelRevealState } from './panelRevealPolicy.js';
 import { createCvShowMediaTargetResolver } from './showMediaTargetResolution.js';
 import { createYouTubeNoCookieEmbedUrl } from './youtubeEmbedUrl.js';
 
@@ -238,18 +240,25 @@ function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
     });
   }
   const mobile = layout.hasAttribute('drawer-mode-active');
-  const dock = panel?.behavior?.mobileDock === 'start' ? 'start' : 'end';
-  const drawerOpen = layout.hasAttribute(`drawer-${dock}-open`);
-  const activeDrawerId = dock === 'start' ? layout.$.drawerStartPanelId : layout.$.drawerEndPanelId;
-  const desktopOpen = Boolean(visibleElement(panelComponent)) && panel?.collapsed !== true;
+  const revealState = resolveCvShowPanelRevealState({
+    mobile,
+    mobileDock: panel?.behavior?.mobileDock,
+    collapsed: panel?.collapsed,
+    drawerStartOpen: Boolean(layout.$.drawerStartOpen),
+    drawerEndOpen: Boolean(layout.$.drawerEndOpen),
+    activeStartPanelId: layout.$.drawerStartPanelId,
+    activeEndPanelId: layout.$.drawerEndPanelId,
+    panelId,
+    visible: Boolean(visibleElement(panelComponent)),
+  });
   return Object.freeze({
     targetId,
     surface,
     panelType,
     panelId,
     mobile,
-    dock,
-    open: mobile ? drawerOpen && (!activeDrawerId || activeDrawerId === panelId) : desktopOpen,
+    dock: revealState.dock,
+    open: revealState.open,
     outerMobile,
     outerOpen,
   });
@@ -260,6 +269,22 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
   const reveal = ({ action, inspected }) => {
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
     const agentDock = /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
+    const mapClosed = Boolean(
+      inspected?.panelType === 'portfolio-graph'
+      && inspected.panelId
+      && !inspected.open,
+    );
+    if (mapClosed) {
+      // The project map is autonomous: tour actions never force-open a hidden
+      // map (and never pre-bind it behind the scenes). The hidden map stays
+      // lazy; a map the user opens themselves is served by the normal visible
+      // focus path below (awaitTransition/awaitTarget) without reveal.
+      return {
+        changed: false,
+        mapDeferred: true,
+        ...inspectTargetPanel(workspace, runtime, action.target, action.id),
+      };
+    }
     const innerChanged = Boolean(inspected?.panelId && !inspected.open);
     const outerShouldOpen = inspected?.surface === 'outer-dock';
     const outerChanged = Boolean(
@@ -267,9 +292,6 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     );
     const outerOpened = outerChanged && outerShouldOpen;
     const outerClosed = outerChanged && !outerShouldOpen;
-    if (innerChanged && inspected.panelType === 'portfolio-graph') {
-      layout?.querySelector?.('portfolio-graph-panel')?.prepareShowTarget?.({ allowHidden: true });
-    }
     if (innerChanged && inspected.mobile) layout?.openDrawer?.(inspected.dock, inspected.panelId);
     else if (innerChanged) {
       setDesktopPanelCollapsed(layout, inspected.panelId, inspected.panelType, false);
@@ -287,6 +309,15 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
   };
   const awaitTransition = async ({ action, inspected, signal }) => {
     if (!inspected?.panelId && !inspected?.outerMobile) return { ready: true, panelId: '' };
+    if (
+      inspected?.panelType === 'portfolio-graph'
+      && inspected.panelId
+      && !inspected.open
+    ) {
+      // Hidden map: nothing was (or will be) revealed; do not poll for an
+      // opening that is intentionally deferred to the user.
+      return { ready: true, panelId: inspected.panelId };
+    }
     const ready = await waitForShowDomReadiness({
       document,
       target: () => {
@@ -301,6 +332,8 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
             : visibleElement(workspace);
         }
         if (state.open && state.panelType === 'portfolio-graph') {
+          // The user opened the map: escalate its lazy renderer (visible-only),
+          // never bind it behind a hidden drawer.
           layout?.querySelector?.('portfolio-graph-panel')?.prepareShowTarget?.();
         }
         const target = visibleElement(resolvePanelActionTarget(workspace, runtime, action));
@@ -316,6 +349,18 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     return { ready: true, panelId: inspected.panelId, target: ready.target };
   };
   const awaitTarget = async ({ action, context, signal }) => {
+    const current = inspectTargetPanel(workspace, runtime, action.target, action.id);
+    if (
+      current.panelType === 'portfolio-graph'
+      && current.panelId
+      && !current.open
+    ) {
+      // The map stayed hidden: report the target as ready-by-deferral. The
+      // lifecycle stores this bare null as the target (an object with a null
+      // `target` field would be coalesced into the object itself), the act
+      // phase satisfies map-deferred cues silently, and no drawer opens.
+      return null;
+    }
     ensureCvShowArticleProject(runtime, action?.target);
     // Graph culling hides offscreen nodes. Focus the exact semantic node after
     // panel reveal/settlement and before requiring visible target geometry.
@@ -407,7 +452,11 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     return Object.freeze({ ...ready, visualSettlement });
   };
   const restore = ({ action, context, inspected, reveal: revealReceipt }) => {
-    if (context?.retainRevealedPanel === true || String(action?.id).endsWith('.map')) {
+    // Map-open retention used to keep the drawer open after `.map` actions.
+    // The map is now autonomous: tour actions never reveal it (reveal returns
+    // changed:false for a closed graph), so opened panels restore normally
+    // and a user-opened map is never touched because nothing changed.
+    if (context?.retainRevealedPanel === true) {
       return { changed: false, retainedOpen: true };
     }
     if (revealReceipt?.changed !== true || inspected?.open || !inspected?.panelId) {
@@ -455,7 +504,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let mobilePlayerHost = null;
 
   const clearMobileShowPlacement = () => {
-    getDock()?.getChat?.()?.setPlayerHost?.(null);
+    const chat = getDock()?.getChat?.();
+    chat?.setPlayerHost?.(null);
+    chat?.getShowPlayer?.()?.removeAttribute?.('compact-caption');
     mobilePlayerHost?.remove();
     mobilePlayerHost = null;
     workspace.classList.remove('portfolio-show-mobile-active');
@@ -480,7 +531,11 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     });
     if (!mobilePlayerHost.isConnected) workspace.append(mobilePlayerHost);
     chat.setPlayerHost(mobilePlayerHost);
-    chat.getShowPlayer().setLayoutPlacement?.('inline');
+    const player = chat.getShowPlayer();
+    player.setLayoutPlacement?.('inline');
+    // The mobile footer is a compact transport host: hide the caption block
+    // there only; the desktop chat keeps its caption.
+    player.setAttribute('compact-caption', '');
     workspace.classList.add('portfolio-show-mobile-active');
     dock?.close?.('show-mobile-player');
   };
@@ -612,8 +667,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const ensurePresenterLifecycle = () => {
-    workspace.querySelector('portfolio-graph-panel')
-      ?.prepareShowTarget?.({ allowHidden: true });
     const session = ensurePresenter();
     originTargetId ||= runtime.selectedId;
     const chat = getChat();
@@ -738,10 +791,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const applyRouteState = async (state) => {
     try {
       return await routeRequests.run(async () => {
-        if (state?.entryId === 'finale') {
-          workspace.querySelector('portfolio-graph-panel')
-            ?.prepareShowTarget?.({ allowHidden: true });
-        }
         const chat = ensureTourOpen();
         if (!chat) return false;
         return await chat.applyShowRoute?.(state) || false;
@@ -964,6 +1013,103 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     },
   });
 
+  const gestureClearPresentations = (reason) => {
+    if (!presenter) return false;
+    const attention = presenter.attention;
+    if (!attention) return false;
+    // Cancel any in-flight gesture animation first so a scheduled frame can
+    // never repaint the dismissed stroke, then drop transient visuals and the
+    // accumulated marker/annotation set. The cursor stays (pause policy) and
+    // neither the narration nor the transport state is touched.
+    attention.clearTransient?.(reason, { preserveInk: false, preserveCursor: true });
+    attention.clearMarkers?.();
+    return true;
+  };
+
+  const runGestureClearDecision = (input) => {
+    const decision = resolveCvShowGestureClear(input);
+    if (decision.clear) gestureClearPresentations(decision.reason);
+    return decision;
+  };
+
+  const gestureEventPath = (event) => (
+    typeof event.composedPath === 'function' ? event.composedPath() : [event.target]
+  );
+  const gesturePathMatches = (path, selector) => path.some((node) => (
+    typeof node?.matches === 'function' && node.matches(selector)
+  ));
+  let gestureDragStart = null;
+  const onGesturePointerDown = (event) => {
+    if (!presenter) return;
+    const path = gestureEventPath(event);
+    const inPlayer = gesturePathMatches(path, 'chat-show-player');
+    runGestureClearDecision({
+      type: 'pointerdown',
+      button: event.button,
+      inPlayer,
+      isPlayPause: inPlayer && gesturePathMatches(
+        path,
+        '[data-control="play"], [data-control="toggle"], .chat-show-primary-control',
+      ),
+      isPlayerSettings: inPlayer && gesturePathMatches(
+        path,
+        '[data-header-action="settings"], [data-show-menu-action]',
+      ),
+      isDrawerToggle: gesturePathMatches(
+        path,
+        'layout-node[drawer-rail][drawer-rail-collapsed], layout-node[data-drawer-dock], '
+          + '[class*="layout-drawer-handle"], .layout-drawer-backdrop',
+      ),
+    });
+    if (event.button !== 0 || inPlayer || gesturePathMatches(path, 'chat-workspace')) {
+      gestureDragStart = null;
+      return;
+    }
+    gestureDragStart = { x: event.clientX, y: event.clientY, cleared: false };
+  };
+  const onGesturePointerMove = (event) => {
+    if (!gestureDragStart || gestureDragStart.cleared || !presenter) return;
+    const distance = Math.hypot(
+      event.clientX - gestureDragStart.x,
+      event.clientY - gestureDragStart.y,
+    );
+    if (distance < 24) return;
+    gestureDragStart.cleared = true;
+    runGestureClearDecision({ type: 'pointermove', button: 0, dragStarted: true });
+  };
+  const clearGestureDragStart = () => {
+    gestureDragStart = null;
+  };
+  const onGestureWheel = (event) => {
+    if (!presenter) return;
+    const delta = Math.abs(Number(event.deltaY) || 0) + Math.abs(Number(event.deltaX) || 0);
+    if (delta <= 0) return;
+    runGestureClearDecision({ type: 'wheel', wheelDelta: delta });
+  };
+  const onGestureTextInput = (event) => {
+    if (!presenter) return;
+    const target = /** @type {any} */ (event.target);
+    const isTextEntry = Boolean(
+      target?.matches?.('input, textarea') || target?.isContentEditable,
+    );
+    if (isTextEntry) runGestureClearDecision({ type: 'input', isTextEntry });
+  };
+  const onGestureSeekKey = (event) => {
+    if (!presenter) return;
+    if (!gesturePathMatches(gestureEventPath(event), 'chat-show-player')) return;
+    runGestureClearDecision({
+      type: 'keydown',
+      isSeekKey: CV_SHOW_SEEK_KEYS.includes(event.key),
+    });
+  };
+  document.addEventListener('pointerdown', onGesturePointerDown, { capture: true });
+  document.addEventListener('pointermove', onGesturePointerMove, { capture: true });
+  document.addEventListener('pointerup', clearGestureDragStart, { capture: true });
+  document.addEventListener('pointercancel', clearGestureDragStart, { capture: true });
+  document.addEventListener('wheel', onGestureWheel, { capture: true, passive: true });
+  document.addEventListener('input', onGestureTextInput, { capture: true });
+  document.addEventListener('keydown', onGestureSeekKey, { capture: true });
+
   document.addEventListener('portfolio-open-tour', onOpen);
   document.addEventListener('source-viewer-action', onSourceViewerAction);
   globalThis.addEventListener?.('popstate', onPopState);
@@ -983,7 +1129,89 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   workspace.addEventListener('portfolio-show-skip-media', onSkipMedia);
   getDock()?.addEventListener('agent-dock-change', onDockChange);
   getDock()?.addEventListener('agent-dock-responsive-change', onDockResponsiveChange);
-  queueMicrotask(() => { void applyLocationRoute({ source: 'load' }); });
+  const drawerLevelRailSelector = 'layout-node[drawer-rail][drawer-rail-collapsed][data-drawer-dock="end"]';
+  const drawerLevelPrimarySelector = 'layout-node[mobile-dock="primary"]';
+  let drawerLevelTimer = 0;
+  let innerDrawerObserver = null;
+  let outerDrawerObserver = null;
+  const clearDrawerLevelInline = () => {
+    const outerLayout = getDock()?.ref?.layout;
+    if (!outerLayout) return;
+    outerLayout.querySelectorAll('layout-node[drawer-rail][data-drawer-dock="end"]')
+      .forEach((node) => {
+        node.style.removeProperty('visibility');
+        node.style.removeProperty('pointer-events');
+      });
+    outerLayout.querySelector(drawerLevelPrimarySelector)
+      ?.style.removeProperty('inset-inline-end');
+  };
+  const applyDrawerLevelSuppression = () => {
+    const dock = getDock();
+    const outerLayout = dock?.ref?.layout;
+    const inner = workspace.querySelector('.portfolio-layout');
+    if (!dock || !outerLayout || !inner || !workspace.isConnected) {
+      clearDrawerLevelInline();
+      return;
+    }
+    const mobile = Boolean(outerLayout.hasAttribute('drawer-mode-active'));
+    const innerEndOpen = inner.hasAttribute('drawer-end-open');
+    const chatOpen = dock.hasAttribute('open');
+    const suppress = mobile && innerEndOpen && !chatOpen;
+    if (!suppress) {
+      clearDrawerLevelInline();
+      return;
+    }
+    const rail = outerLayout.querySelector(drawerLevelRailSelector);
+    const primary = outerLayout.querySelector(drawerLevelPrimarySelector);
+    // Hide the rail visually and make it inert. Do not toggle `display`:
+    // the provider projection writes its own inline display rules when a
+    // drawer closes, so display:none can stay stuck; visibility/pointer
+    // events are untouched by the projection and always restore.
+    if (rail) {
+      rail.style.setProperty('visibility', 'hidden', 'important');
+      rail.style.setProperty('pointer-events', 'none', 'important');
+    }
+    if (primary) primary.style.setProperty('inset-inline-end', '0px', 'important');
+  };
+  const syncDrawerLevel = () => {
+    applyDrawerLevelSuppression();
+    if (drawerLevelTimer) return;
+    // The drawer projection settles over a few frames after the attribute
+    // change; re-apply on a short schedule so the chat rail reliably returns.
+    const reapply = [0, 120, 320].map((delay) => setTimeout(() => {
+      if (!drawerLevelTimer) return;
+      applyDrawerLevelSuppression();
+    }, delay));
+    drawerLevelTimer = setTimeout(() => {
+      drawerLevelTimer = 0;
+      for (const t of reapply) clearTimeout(t);
+      applyDrawerLevelSuppression();
+    }, 420);
+  };
+  const onDrawerLevelChange = () => {
+    queueMicrotask(syncDrawerLevel);
+  };
+  if (typeof MutationObserver === 'function') {
+    const innerLayout = workspace.querySelector('.portfolio-layout');
+    if (innerLayout) {
+      innerDrawerObserver = new MutationObserver(onDrawerLevelChange);
+      innerDrawerObserver.observe(innerLayout, {
+        attributes: true,
+        attributeFilter: ['drawer-end-open', 'drawer-mode-active'],
+      });
+    }
+    const outerLayout = getDock()?.ref?.layout;
+    if (outerLayout) {
+      outerDrawerObserver = new MutationObserver(onDrawerLevelChange);
+      outerDrawerObserver.observe(outerLayout, {
+        attributes: true,
+        attributeFilter: ['drawer-end-open', 'drawer-end-rail', 'drawer-mode-active'],
+      });
+    }
+  }
+  getDock()?.addEventListener('agent-dock-change', onDrawerLevelChange);
+  getDock()?.addEventListener('agent-dock-responsive-change', onDrawerLevelChange);
+  queueMicrotask(syncDrawerLevel);  queueMicrotask(() => { void applyLocationRoute({ source: 'load' }); });
 
   return () => {
     document.removeEventListener('portfolio-open-tour', onOpen);
@@ -1005,8 +1233,26 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     workspace.removeEventListener('portfolio-show-skip-media', onSkipMedia);
     getDock()?.removeEventListener('agent-dock-change', onDockChange);
     getDock()?.removeEventListener('agent-dock-responsive-change', onDockResponsiveChange);
+    getDock()?.removeEventListener('agent-dock-change', onDrawerLevelChange);
+    getDock()?.removeEventListener('agent-dock-responsive-change', onDrawerLevelChange);
+    innerDrawerObserver?.disconnect();
+    innerDrawerObserver = null;
+    outerDrawerObserver?.disconnect();
+    outerDrawerObserver = null;
+    if (drawerLevelTimer) {
+      clearTimeout(drawerLevelTimer);
+      drawerLevelTimer = 0;
+    }
+    applyDrawerLevelSuppression();
     mobilePlayerHost?.remove();
     interactionMonitor.dispose();
+    document.removeEventListener('pointerdown', onGesturePointerDown, { capture: true });
+    document.removeEventListener('pointermove', onGesturePointerMove, { capture: true });
+    document.removeEventListener('pointerup', clearGestureDragStart, { capture: true });
+    document.removeEventListener('pointercancel', clearGestureDragStart, { capture: true });
+    document.removeEventListener('wheel', onGestureWheel, { capture: true });
+    document.removeEventListener('input', onGestureTextInput, { capture: true });
+    document.removeEventListener('keydown', onGestureSeekKey, { capture: true });
     cancelPendingRouteWrite();
     routeRequests.cancel();
     getChat()?.stopShow?.();

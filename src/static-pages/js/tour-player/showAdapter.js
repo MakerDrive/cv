@@ -28,6 +28,19 @@ function runtimeCleanupReport(operation, reason, error) {
 }
 
 /**
+ * Graph-targeted action class: cue ids carry a `.map` suffix or the semantic
+ * target is a `portfolio.map.*` node. These actions resolve to the project
+ * map panel; while the map stays hidden (autonomous user surface) they are
+ * satisfied silently instead of force-opening the drawer.
+ */
+export function isDeferredMapAction(source = {}) {
+  return Boolean(
+    String(source?.id || '').endsWith('.map')
+    || String(source?.target || '').startsWith('portfolio.map.'),
+  );
+}
+
+/**
  * Starts Show media cleanup synchronously while consuming every async failure.
  * Terminal cleanup remains failure-independent: a rejected media stop cannot
  * prevent the final shared-audio release from running.
@@ -725,6 +738,15 @@ export function createCvShowDirectiveRunner(options = {}) {
                     presentationTarget,
                     adapted.directive,
                   ) || presentationTarget;
+                }
+                if (!presentationTarget && isDeferredMapAction(source)) {
+                  // The map is hidden and the tour is not allowed to open it:
+                  // the action adapter already deferred the reveal and the
+                  // target, so satisfy the cue silently (success receipt,
+                  // narration unaffected) without stray visuals or errors.
+                  reportInteractionActed();
+                  reportInteractionSettled();
+                  return { status: 'success', skipped: 'hidden-map-deferred' };
                 }
                 const providerPlanned = presentation?.requiresProviderAdmission === true;
                 if (

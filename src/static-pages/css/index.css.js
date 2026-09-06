@@ -203,24 +203,48 @@ main > article {
 }
 
 .portfolio-show-mobile-footer {
-  position: absolute;
+  /* The mobile footer is a compact transport strip in normal flow below the
+     workspace. Its height is set by the visible player content; no fixed
+     tall area is reserved underneath the transport controls. */
+  position: relative;
   z-index: var(--sn-layer-overlay, 16000);
-  inset-inline: 0;
   inset-block-end: 0;
-  block-size: min(42dvh, 300px);
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  min-block-size: 0;
+  max-block-size: min(46dvh, 360px);
+  overflow-y: auto;
   background: var(--pulse-surface-panel);
   border-block-start: 1px solid var(--pulse-outline);
+  padding-block-end: env(safe-area-inset-bottom, 0px);
 }
 
 .portfolio-show-mobile-footer > chat-show-player {
   display: block;
+  box-sizing: border-box;
   inline-size: 100%;
-  block-size: 100%;
+  block-size: auto;
+  min-block-size: 0;
+  border-inline: 0;
+  border-block-end: 0;
+  border-radius: 0;
+}
+
+/* The footer participates in normal flow, so the workspace needs no reserved
+   bottom padding; the pulse workspace becomes the flex column that the dock
+   host and the optional mobile footer share. */
+.pulse-workspace {
+  display: flex;
+  flex-direction: column;
+}
+
+.pulse-workspace > agent-dock-shell {
+  flex: 1 1 0%;
+  min-block-size: 0;
 }
 
 .pulse-workspace.portfolio-show-mobile-active {
-  box-sizing: border-box;
-  padding-block-end: min(42dvh, 300px);
+  padding-block-end: 0;
 }
 
 portfolio-workspace,
