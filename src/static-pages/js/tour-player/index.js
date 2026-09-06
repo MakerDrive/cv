@@ -98,8 +98,51 @@ function findVisibleProfileExperience(viewer, valueOnly = false) {
   return valueOnly ? row?.querySelector?.('td:nth-child(2)') || row : row;
 }
 
+const SPINNER_PLAY_MEDIA_ID = 'media/photopizza/ims/spinner';
+
+function mediaSlotElement(targetId) {
+  try {
+    return document.querySelector(
+      `[data-media-id="${escapeAttributeSelectorValue(targetId)}"]`,
+    ) || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolves the PhotoPizza 360 spinner target to its real toolbar Play button
+ * inside shadow DOM so the focus frame and cursor land on the physical
+ * control. Falls back to the media host when the button is unreachable;
+ * never throws. Other targets are unaffected.
+ */
+function resolveSpinnerMediaTarget(targetId) {
+  if (targetId !== SPINNER_PLAY_MEDIA_ID) return null;
+  try {
+    const slot = mediaSlotElement(targetId);
+    if (!slot) return null;
+    const host = slot.matches?.('sn-media-host')
+      ? slot
+      : slot.querySelector?.('sn-media-host');
+    const scope = host || slot;
+    const viewer = scope.querySelector?.('ims-viewer')
+      || (scope.matches?.('ims-viewer') ? scope : null);
+    const spinner = viewer?.shadowRoot?.querySelector?.('ims-spinner')
+      || viewer?.querySelector?.('ims-spinner');
+    const toolbar = spinner?.shadowRoot?.querySelector?.('ims-spinner-toolbar')
+      || spinner?.querySelector?.('ims-spinner-toolbar');
+    const button = toolbar?.shadowRoot?.querySelector?.('ims-button')
+      || toolbar?.querySelector?.('ims-button');
+    return visibleElement(button) || visibleElement(host || slot) || null;
+  } catch {
+    return null;
+  }
+}
+
 function resolveTargetElement(workspace, runtime, targetId) {
   if (!targetId) return null;
+  const spinnerMedia = resolveSpinnerMediaTarget(targetId);
+  if (spinnerMedia) return spinnerMedia;
   const direct = document.querySelector(`[data-tour-target="${escapeAttributeSelectorValue(targetId)}"]`);
   const directTarget = direct ? firstVisibleSibling(direct) : null;
   if (directTarget?.matches?.('video, audio')) return directTarget;

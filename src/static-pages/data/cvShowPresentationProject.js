@@ -2366,7 +2366,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "cue": {
         "annotation": {
           "intent": "emphasize",
-          "marker": "route",
+          "marker": "underline",
           "series": "agent-pool-flow"
         },
         "kind": "annotation",
@@ -2816,7 +2816,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "intent": "emphasize",
           "label": "2",
           "marker": "number",
-          "series": "lifecycle-layers"
+          "series": "lifecycle-runtime"
         },
         "kind": "annotation",
         "targetId": "article.lifecycle-messaging-platform.backend-runtime"
@@ -2882,7 +2882,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "cue": {
         "annotation": {
           "intent": "emphasize",
-          "marker": "bidirectional-route",
+          "marker": "underline",
           "series": "lifecycle-twin"
         },
         "kind": "annotation",
@@ -12095,7 +12095,9 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           },
           "cv-show:cue:photopizza.spinner": {
             "policy": "required",
-            "refinements": {}
+            "refinements": {
+              "playOnSettle": true
+            }
           },
           "cv-show:cue:photopizza.video-01": {
             "policy": "required",

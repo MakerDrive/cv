@@ -3,15 +3,16 @@ import test from 'node:test';
 
 import { createCvShowMediaTargetResolver } from '../../src/static-pages/js/tour-player/showMediaTargetResolution.js';
 
-test('Show media resolution exposes only the approved BoothBot gallery target', () => {
+test('Show media resolution exposes only the approved BoothBot gallery and PhotoPizza spinner targets', () => {
   const iframe = { localName: 'iframe' };
   const viewer = { localName: 'ims-viewer' };
+  const spinnerViewer = { localName: 'ims-viewer' };
   const slots = new Map([
     ['media/photopizza/youtube/demo', {
       querySelector: selector => selector.includes('iframe') ? iframe : null,
     }],
     ['media/photopizza/ims/spinner', {
-      querySelector: selector => selector === 'ims-viewer' ? viewer : null,
+      querySelector: selector => selector === 'ims-viewer' ? spinnerViewer : null,
     }],
     ['media/boothbot/ims/gallery', {
       querySelector: selector => selector === 'ims-viewer' ? viewer : null,
@@ -35,11 +36,13 @@ test('Show media resolution exposes only the approved BoothBot gallery target', 
   });
 
   assert.equal(resolve('media/photopizza/youtube/demo'), null);
-  assert.equal(resolve('media/photopizza/ims/spinner'), null);
+  const spinner = resolve('media/photopizza/ims/spinner');
+  assert.equal(spinner.element, spinnerViewer);
+  assert.equal(resolve('media/photopizza/ims/spinner'), spinner);
   const ims = resolve('media/boothbot/ims/gallery');
   assert.equal(ims.element, viewer);
   assert.equal(resolve('media/boothbot/ims/gallery'), ims);
-  assert.equal(imsTargets.length, 1);
+  assert.equal(imsTargets.length, 2);
 });
 
 test('Show media resolution does not expose native HTML media playback', () => {

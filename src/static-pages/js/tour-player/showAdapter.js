@@ -821,6 +821,20 @@ export function createCvShowDirectiveRunner(options = {}) {
                     return { unavailable: true, reason: result?.reason || result?.status };
                   }
                   reportInteractionSettled();
+                  if (
+                    adapted.directive.mode === 'frame'
+                    && source?.refinements?.playOnSettle === true
+                  ) {
+                    try {
+                      const spinTarget = resolveMedia?.(source.target);
+                      if (spinTarget) {
+                        void Promise.resolve(media?.play?.(
+                          spinTarget,
+                          { mode: 'spinner-rotation', target: source.target },
+                        ))?.catch?.(() => undefined);
+                      }
+                    } catch {}
+                  }
                   return source.type === 'navigate'
                     ? { ...result, settlement, selectedId: runtime.selectedId }
                     : { ...result, settlement };

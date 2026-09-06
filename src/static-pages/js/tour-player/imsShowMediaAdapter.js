@@ -169,6 +169,7 @@ export function createImsShowMediaTarget(root, {
   let preparationPromise = null;
   let hostActivationRequested = false;
   let lastGalleryFrame = 1;
+  let lastSpinnerPlaying = false;
   const activateHost = () => {
     if (hostActivationRequested || typeof root.activate !== 'function') return;
     hostActivationRequested = true;
@@ -201,6 +202,41 @@ export function createImsShowMediaTarget(root, {
     return preparationPromise;
   };
 
+  const playSpinnerMedia = (player, options = {}, signal) => {
+    const completion = (async () => {
+      try {
+        player.play?.();
+        lastSpinnerPlaying = true;
+        await new Promise((resolve, reject) => {
+          if (signal?.aborted) {
+            reject(signal.reason || new DOMException('IMS spinner choreography aborted', 'AbortError'));
+            return;
+          }
+          signal?.addEventListener?.('abort', () => {
+            reject(signal?.reason || new DOMException('IMS spinner choreography aborted', 'AbortError'));
+          }, { once: true });
+        });
+      } catch (error) {
+        if (error?.name !== 'AbortError') dispatchImsRuntimeError(root, error);
+        throw error;
+      } finally {
+        lastSpinnerPlaying = false;
+        try { player.pause?.(); } catch {}
+      }
+    })();
+    void completion.catch((error) => {
+      if (error?.name !== 'AbortError') dispatchImsRuntimeError(root, error);
+    });
+    return Object.freeze({
+      mode: String(options?.mode || ''),
+      frames: Object.freeze([]),
+      frameHoldMs: 0,
+      finalFrame: null,
+      running: true,
+      completion,
+    });
+  };
+
   return Object.freeze({
     element: root,
 
@@ -217,6 +253,12 @@ export function createImsShowMediaTarget(root, {
       const player = await getPlayer(signal);
       throwIfAborted(signal);
       const kind = playerKind(player);
+      if (kind === 'ims-spinner') {
+        return Object.freeze({
+          kind,
+          playing: lastSpinnerPlaying,
+        });
+      }
       if (kind !== 'ims-gallery') {
         throw Object.assign(new TypeError(`unsupported IMS Show player "${kind}"`), {
           code: 'ims-player-unsupported',
@@ -247,6 +289,9 @@ export function createImsShowMediaTarget(root, {
       const player = await getPlayer(signal);
       throwIfAborted(signal);
       const kind = playerKind(player);
+      if (kind === 'ims-spinner') {
+        return playSpinnerMedia(player, options, signal);
+      }
       if (kind !== 'ims-gallery') {
         throw Object.assign(new TypeError(`unsupported IMS Show player "${kind}"`), {
           code: 'ims-player-unsupported',
@@ -283,11 +328,29 @@ export function createImsShowMediaTarget(root, {
       });
     },
 
-    async pauseShowMedia() {},
+    async pauseShowMedia() {
+      try {
+        const player = await getPlayer();
+        if (playerKind(player) === 'ims-spinner') {
+          lastSpinnerPlaying = false;
+          player.pause?.();
+        }
+      } catch {}
+    },
 
     async restoreShowMediaState(state = {}) {
       const player = await getPlayer();
       const kind = playerKind(player);
+      if (kind === 'ims-spinner') {
+        if (state.playing === true) {
+          lastSpinnerPlaying = true;
+          player.play?.();
+        } else {
+          lastSpinnerPlaying = false;
+          player.pause?.();
+        }
+        return;
+      }
       if (kind !== 'ims-gallery') {
         throw Object.assign(new TypeError(`unsupported IMS Show player "${kind}"`), {
           code: 'ims-player-unsupported',

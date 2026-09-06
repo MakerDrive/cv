@@ -552,15 +552,13 @@ test('IMS Show gallery never reads the private dollar-state fallback', async () 
   assert.doesNotMatch(source, /player\.\$/);
 });
 
-test('IMS Show target rejects spinner playback even through an injected resolver', async () => {
-  const spinner = {
-    localName: 'ims-spinner',
+test('IMS Show target still rejects unknown players while spinner is supported', async () => {
+  const unknown = {
+    localName: 'ims-unknown',
     currentFrame: 3,
-    play() { throw new Error('spinner playback must remain unreachable'); },
-    pause() { throw new Error('spinner pause must remain unreachable'); },
   };
   const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
-    resolvePlayer: async () => spinner,
+    resolvePlayer: async () => unknown,
   });
 
   await assert.rejects(
@@ -686,4 +684,54 @@ test('IMS Show target forwards capture abort and retries a rejected public-playe
     frame: 3,
   });
   assert.equal(attempts, 2);
+});
+
+test('IMS Show spinner starts rotation through the public play API and pauses on abort', async () => {
+  const events = [];
+  const spinner = {
+    localName: 'ims-spinner',
+    play() {
+      events.push('play');
+    },
+    pause() {
+      events.push('pause');
+    },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => spinner,
+  });
+
+  const controller = new AbortController();
+  const result = await target.playShowMedia({ mode: 'spinner-rotation' }, { signal: controller.signal });
+  assert.equal(result.running, true);
+  assert.deepEqual(result.frames, []);
+  assert.deepEqual(events, ['play']);
+  assert.deepEqual(await target.captureShowMediaState(), { kind: 'ims-spinner', playing: true });
+
+  controller.abort();
+  await assert.rejects(result.completion, (error) => error?.name === 'AbortError');
+  assert.deepEqual(events, ['play', 'pause']);
+  assert.deepEqual(await target.captureShowMediaState(), { kind: 'ims-spinner', playing: false });
+});
+
+test('IMS Show spinner pauses through the shared media pause hook without touching gallery semantics', async () => {
+  const events = [];
+  const spinner = {
+    localName: 'ims-spinner',
+    play() {
+      events.push('play');
+    },
+    pause() {
+      events.push('pause');
+    },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => spinner,
+  });
+
+  await target.restoreShowMediaState({ kind: 'ims-spinner', playing: true });
+  assert.deepEqual(events, ['play']);
+  await target.pauseShowMedia();
+  assert.deepEqual(events, ['play', 'pause']);
+  assert.deepEqual(await target.captureShowMediaState(), { kind: 'ims-spinner', playing: false });
 });
