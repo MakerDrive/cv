@@ -2883,7 +2883,9 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "annotation": {
           "intent": "emphasize",
           "marker": "underline",
-          "series": "lifecycle-twin"
+          "series": "lifecycle-twin",
+          "quote": "applicable to the physical runtime",
+          "occurrence": 1
         },
         "kind": "annotation",
         "targetId": "article.lifecycle-messaging-platform.digital-twin"
