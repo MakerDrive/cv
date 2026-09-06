@@ -1,6 +1,48 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveCvShowPanelRevealState } from '../../src/static-pages/js/tour-player/panelRevealPolicy.js';
+import {
+  resolveCvShowPanelRevealState,
+  shouldDeferMapAction,
+} from '../../src/static-pages/js/tour-player/panelRevealPolicy.js';
+
+test('hidden graph-targeted action defers (autonomous hidden map)', () => {
+  assert.equal(shouldDeferMapAction({
+    panelType: 'portfolio-graph',
+    open: false,
+    actionId: 'cv-show:cue:finale.map',
+    target: 'projects/index',
+  }), true);
+  assert.equal(shouldDeferMapAction({
+    panelType: 'portfolio-graph',
+    open: false,
+    actionId: 'cue-x',
+    target: 'portfolio.map.historical-branch',
+  }), true);
+});
+
+test('visible map with unresolved target must NOT falsely defer', () => {
+  assert.equal(shouldDeferMapAction({
+    panelType: 'portfolio-graph',
+    open: true,
+    actionId: 'cv-show:cue:finale.map',
+    target: 'projects/index',
+  }), false);
+});
+
+test('non-graph or non-map actions never defer as hidden map', () => {
+  assert.equal(shouldDeferMapAction({
+    panelType: 'portfolio-viewer',
+    open: false,
+    actionId: 'positioning.open',
+    target: 'profile/photo',
+  }), false);
+  assert.equal(shouldDeferMapAction({
+    panelType: 'portfolio-graph',
+    open: false,
+    actionId: 'positioning.open',
+    target: 'profile/photo',
+  }), false);
+});
 
 test('mobile primary panel is always open and never a drawer', () => {
   const state = resolveCvShowPanelRevealState({

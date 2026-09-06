@@ -59,3 +59,25 @@ export function resolveCvShowPanelRevealState(state = {}) {
     primary: false,
   });
 }
+
+/**
+ * Decides whether a graph-targeted show action should be satisfied silently
+ * because the map is proven hidden. The map is autonomous: a hidden map must
+ * never be force-opened by tour actions, so such cues defer (no drawer open,
+ * success receipt, narration unaffected). A visible map that fails to resolve
+ * its exact target must NOT defer: the action then reports an honest
+ * invalid-target instead of falsely succeeding.
+ *
+ * @param {{
+ *   panelType?: string,
+ *   open?: boolean,
+ *   actionId?: string,
+ *   target?: string,
+ * }} [state]
+ */
+export function shouldDeferMapAction(state = {}) {
+  const panelIsGraph = state.panelType === 'portfolio-graph';
+  const mapSemantic = String(state.actionId || '').endsWith('.map')
+    || String(state.target || '').startsWith('portfolio.map.');
+  return panelIsGraph && !state.open && mapSemantic;
+}

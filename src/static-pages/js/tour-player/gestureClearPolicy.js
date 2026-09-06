@@ -26,6 +26,36 @@ export const CV_SHOW_GESTURE_CLEAR_REASONS = Object.freeze({
 export const CV_SHOW_PLAYER_TOGGLE_ACTIONS = Object.freeze(['play', 'toggle']);
 export const CV_SHOW_SEEK_KEYS = Object.freeze(['ArrowLeft', 'ArrowRight', 'Home', 'End']);
 
+export const GESTURE_TOGGLE_SELECTOR = [
+  'layout-node[drawer-rail][drawer-rail-collapsed]',
+  '[class*="layout-drawer-handle"]',
+  '.layout-drawer-backdrop',
+].join(', ');
+
+export const GESTURE_NAV_SELECTOR = [
+  'a[href]',
+  'button',
+  '[role="button"]',
+  '[data-action-id]',
+  '[data-control]',
+  '.sn-tree-row',
+  '.sn-card',
+  '[contenteditable="true"]',
+].join(', ');
+
+export function pathMatchesSelector(path, selector) {
+  return Boolean(path?.some((node) => (
+    node && typeof node.matches === 'function' && node.matches(selector)
+  )));
+}
+
+export function pointerAffordanceFromPath(path) {
+  return {
+    isDrawerToggle: pathMatchesSelector(path, GESTURE_TOGGLE_SELECTOR),
+    isNavigationTarget: pathMatchesSelector(path, GESTURE_NAV_SELECTOR),
+  };
+}
+
 const KEEP = Object.freeze({ clear: false, reason: CV_SHOW_GESTURE_CLEAR_REASONS.none });
 
 /**
@@ -36,6 +66,7 @@ const KEEP = Object.freeze({ clear: false, reason: CV_SHOW_GESTURE_CLEAR_REASONS
  *   isPlayPause?: boolean,
  *   isPlayerSettings?: boolean,
  *   isDrawerToggle?: boolean,
+ *   isNavigationTarget?: boolean,
  *   isTextEntry?: boolean,
  *   isSeekKey?: boolean,
  *   dragStarted?: boolean,
@@ -68,10 +99,17 @@ export function resolveCvShowGestureClear(input = {}) {
         reason: CV_SHOW_GESTURE_CLEAR_REASONS.panelToggle,
       });
     }
-    return Object.freeze({
-      clear: true,
-      reason: CV_SHOW_GESTURE_CLEAR_REASONS.userPointer,
-    });
+    // A pointer press only clears stale gesture graphics when it actually
+    // targets a navigation/selection affordance. A neutral click on plain
+    // content (no link/button/tree row/action) does not move the marked
+    // content, so it must not dismiss a pause-held marker.
+    if (input.isNavigationTarget) {
+      return Object.freeze({
+        clear: true,
+        reason: CV_SHOW_GESTURE_CLEAR_REASONS.userPointer,
+      });
+    }
+    return KEEP;
   }
 
   if (type === 'pointermove' && input.dragStarted) {

@@ -42,8 +42,14 @@ import {
   shouldDeferCvShowNavigationTarget,
   waitForPortfolioMapTargetVisualSettlement,
 } from './targetResolution.js';
-import { CV_SHOW_SEEK_KEYS, resolveCvShowGestureClear } from './gestureClearPolicy.js';
-import { resolveCvShowPanelRevealState } from './panelRevealPolicy.js';
+import {
+  CV_SHOW_SEEK_KEYS,
+  pathMatchesSelector,
+  pointerAffordanceFromPath,
+  resolveCvShowGestureClear,
+} from './gestureClearPolicy.js';
+import { resolveCvShowPanelRevealState, shouldDeferMapAction } from './panelRevealPolicy.js';
+import { bindStaleNavDrawerCloser, createStaleNavDrawerCloser, shouldCloseStaleNavDrawer } from './drawerTransitionPolicy.js';
 import { createCvShowMediaTargetResolver } from './showMediaTargetResolution.js';
 import { createYouTubeNoCookieEmbedUrl } from './youtubeEmbedUrl.js';
 
@@ -292,9 +298,20 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     );
     const outerOpened = outerChanged && outerShouldOpen;
     const outerClosed = outerChanged && !outerShouldOpen;
-    if (innerChanged && inspected.mobile) layout?.openDrawer?.(inspected.dock, inspected.panelId);
-    else if (innerChanged) {
+    if (innerChanged && inspected.mobile) {
+      layout?.openDrawer?.(inspected.dock, inspected.panelId);
+    } else if (innerChanged) {
       setDesktopPanelCollapsed(layout, inspected.panelId, inspected.panelType, false);
+    }
+    // An authored navigation reveal opens (or keeps open) the start drawer:
+    // cancel any stale deferred close so the reveal intent is never lost,
+    // even when the panel was already open (innerChanged false).
+    if (inspected?.mobile && inspected.dock === 'start' && inspected.panelType === 'portfolio-tree') {
+      workspace.dispatchEvent(new CustomEvent('cv-show-start-drawer-opened', {
+        bubbles: true,
+        composed: true,
+        detail: { panelId: inspected.panelId, source: 'reveal', opened: innerChanged },
+      }));
     }
     if (outerOpened) agentDock?.open?.('show-action');
     else if (outerClosed) agentDock?.close?.('show-action');
@@ -350,11 +367,12 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
   };
   const awaitTarget = async ({ action, context, signal }) => {
     const current = inspectTargetPanel(workspace, runtime, action.target, action.id);
-    if (
-      current.panelType === 'portfolio-graph'
-      && current.panelId
-      && !current.open
-    ) {
+    if (shouldDeferMapAction({
+      panelType: current.panelType,
+      open: current.open,
+      actionId: action.id,
+      target: action.target,
+    })) {
       // The map stayed hidden: report the target as ready-by-deferral. The
       // lifecycle stores this bare null as the target (an object with a null
       // `target` field would be coalesced into the object itself), the act
@@ -498,6 +516,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const routeRequests = createCvShowRouteRequestCoordinator();
   let routeWriteTimer = null;
   let lastRouteWriteAt = 0;
+  let lastPlaybackEntryId = '';
   let lastRouteSemanticKey = '';
   let reconcileRouteWhenIdle = false;
   let stripRouteWhenIdle = false;
@@ -538,6 +557,31 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     player.setAttribute('compact-caption', '');
     workspace.classList.add('portfolio-show-mobile-active');
     dock?.close?.('show-mobile-player');
+  };
+
+  const closeStaleStartDrawer = () => {
+    // A tour-driven material transition (new playback entry) must not leave
+    // the navigation/start drawer over the viewer. The close is deferred to a
+    // microtask, so it only runs while the tour is still active: if the show
+    // is stopped/completed before the microtask executes, a manually opened
+    // panel is never closed later. Authored cues reopen the drawer themselves.
+    const layout = workspace.querySelector('.portfolio-layout');
+    if (!shouldCloseStaleNavDrawer({
+      layoutDrawerMode: Boolean(layout?.hasAttribute?.('drawer-mode-active')),
+      drawerStartOpen: Boolean(layout?.hasAttribute?.('drawer-start-open')),
+      dockOpen: Boolean(getDock()?.hasAttribute?.('open')),
+      tourActive: running,
+    })) return;
+    layout?.closeDrawer?.('start');
+  };
+
+  const onPlaybackEntryChange = (event) => {
+    if (event.target !== getChat()) return;
+    const state = event.detail?.state;
+    if (!state?.entryId) return;
+    if (state.entryId === lastPlaybackEntryId) return;
+    lastPlaybackEntryId = state.entryId;
+    staleNavDrawerCloser.schedule();
   };
 
   const cancelPendingRouteWrite = () => {
@@ -657,6 +701,11 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   let originTargetId = '';
   let running = false;
+  const staleNavDrawerCloser = createStaleNavDrawerCloser({
+    isActive: () => running,
+    onClose: closeStaleStartDrawer,
+  });
+  const staleNavDrawerBinder = bindStaleNavDrawerCloser(workspace, staleNavDrawerCloser);
   const activePresentationOperations = new Set();
   /** @type {ReturnType<typeof createPresenterSession> | null} */
   let presenter = null;
@@ -740,6 +789,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       runtime.select(originTargetId, { focus: true, updateUrl: false });
     }
     originTargetId = '';
+    lastPlaybackEntryId = '';
+    staleNavDrawerCloser?.cancel();
     scheduleDocumentSelectionClear();
     if (event?.type === 'portfolio-show-complete' && event.detail?.routeState?.mode) {
       writeRouteState(event.detail.routeState);
@@ -1035,33 +1086,28 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const gestureEventPath = (event) => (
     typeof event.composedPath === 'function' ? event.composedPath() : [event.target]
   );
-  const gesturePathMatches = (path, selector) => path.some((node) => (
-    typeof node?.matches === 'function' && node.matches(selector)
-  ));
   let gestureDragStart = null;
   const onGesturePointerDown = (event) => {
     if (!presenter) return;
     const path = gestureEventPath(event);
-    const inPlayer = gesturePathMatches(path, 'chat-show-player');
+    const inPlayer = pathMatchesSelector(path, 'chat-show-player');
+    // Single source of affordance selectors lives in gestureClearPolicy.js.
+    const affordance = pointerAffordanceFromPath(path);
     runGestureClearDecision({
       type: 'pointerdown',
       button: event.button,
       inPlayer,
-      isPlayPause: inPlayer && gesturePathMatches(
+      isPlayPause: inPlayer && pathMatchesSelector(
         path,
         '[data-control="play"], [data-control="toggle"], .chat-show-primary-control',
       ),
-      isPlayerSettings: inPlayer && gesturePathMatches(
+      isPlayerSettings: inPlayer && pathMatchesSelector(
         path,
         '[data-header-action="settings"], [data-show-menu-action]',
       ),
-      isDrawerToggle: gesturePathMatches(
-        path,
-        'layout-node[drawer-rail][drawer-rail-collapsed], layout-node[data-drawer-dock], '
-          + '[class*="layout-drawer-handle"], .layout-drawer-backdrop',
-      ),
+      ...affordance,
     });
-    if (event.button !== 0 || inPlayer || gesturePathMatches(path, 'chat-workspace')) {
+    if (event.button !== 0 || inPlayer || pathMatchesSelector(path, 'chat-workspace')) {
       gestureDragStart = null;
       return;
     }
@@ -1096,7 +1142,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
   const onGestureSeekKey = (event) => {
     if (!presenter) return;
-    if (!gesturePathMatches(gestureEventPath(event), 'chat-show-player')) return;
+    if (!pathMatchesSelector(gestureEventPath(event), 'chat-show-player')) return;
     runGestureClearDecision({
       type: 'keydown',
       isSeekKey: CV_SHOW_SEEK_KEYS.includes(event.key),
@@ -1117,6 +1163,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   workspace.addEventListener('portfolio-show-player-mounted', onShowPlayerMounted);
   workspace.addEventListener('portfolio-show-seek', onSeek);
   workspace.addEventListener('portfolio-show-route-change', onRouteChange);
+  workspace.addEventListener('portfolio-show-route-change', onPlaybackEntryChange);
   document.addEventListener('portfolio-show-pause', pausePresenter, { capture: true });
   document.addEventListener('portfolio-show-resume', resumePresenter, { capture: true });
   workspace.addEventListener('portfolio-show-phase', onPhase);
@@ -1222,6 +1269,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     workspace.removeEventListener('portfolio-show-player-mounted', onShowPlayerMounted);
     workspace.removeEventListener('portfolio-show-seek', onSeek);
     workspace.removeEventListener('portfolio-show-route-change', onRouteChange);
+    workspace.removeEventListener('portfolio-show-route-change', onPlaybackEntryChange);
     document.removeEventListener('portfolio-show-pause', pausePresenter, { capture: true });
     document.removeEventListener('portfolio-show-resume', resumePresenter, { capture: true });
     workspace.removeEventListener('portfolio-show-phase', onPhase);
@@ -1255,6 +1303,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     document.removeEventListener('input', onGestureTextInput, { capture: true });
     document.removeEventListener('keydown', onGestureSeekKey, { capture: true });
     cancelPendingRouteWrite();
+    staleNavDrawerBinder?.dispose?.();
+    staleNavDrawerCloser?.cancel();
     routeRequests.cancel();
     getChat()?.stopShow?.();
     disposePresenter();

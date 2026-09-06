@@ -48,10 +48,19 @@ test('clears on player transport advance (next, previous, stop, timeline, seek)'
   assert.equal(decision.reason, 'gesture-transport-advance');
 });
 
-test('clears on any other manual pointer action over content', () => {
-  const decision = resolveCvShowGestureClear({ type: 'pointerdown', button: 0 });
+test('clears on a navigation/selection pointer action over content', () => {
+  const decision = resolveCvShowGestureClear({
+    type: 'pointerdown',
+    button: 0,
+    isNavigationTarget: true,
+  });
   assert.equal(decision.clear, true);
   assert.equal(decision.reason, 'gesture-user-pointer');
+});
+
+test('neutral pointer click on plain content does not clear', () => {
+  const decision = resolveCvShowGestureClear({ type: 'pointerdown', button: 0 });
+  assert.equal(decision.clear, false);
 });
 
 test('clears once a manual drag actually moves the pointer', () => {
