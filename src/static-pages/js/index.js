@@ -3262,7 +3262,7 @@ class PortfolioGraphPanel extends HTMLElement {
 
   async captureGraphRenderSnapshot() {
     if (!this.canvas || !this._structuredBound) {
-      throw new Error('Portfolio graph capture requires the bound structured canvas.');
+      throw new Error('Graph capture requires a bound structured canvas.');
     }
     return capturePortfolioGraphRenderSnapshot(this, this.canvas);
   }
