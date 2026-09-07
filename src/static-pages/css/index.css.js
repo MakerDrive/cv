@@ -213,38 +213,6 @@ main > article {
   min-block-size: 0;
 }
 
-.pulse-workspace > .portfolio-mobile-show-layout,
-portfolio-mobile-dock-host,
-portfolio-mobile-show-host {
-  display: block;
-  inline-size: 100%;
-  block-size: 100%;
-  min-block-size: 0;
-}
-
-.pulse-workspace > .portfolio-mobile-show-layout {
-  flex: 1 1 0%;
-}
-
-portfolio-mobile-show-host {
-  overflow: auto;
-  background: var(--pulse-surface-panel);
-}
-
-portfolio-mobile-show-host > chat-show-player {
-  display: block;
-  box-sizing: border-box;
-  inline-size: 100%;
-  min-block-size: 0;
-  border-inline: 0;
-  border-block-end: 0;
-  border-radius: 0;
-}
-
-.pulse-workspace.portfolio-show-mobile-active {
-  padding-block-end: 0;
-}
-
 portfolio-workspace,
 agent-dock-shell,
 .portfolio-layout,

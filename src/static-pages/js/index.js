@@ -3686,15 +3686,6 @@ class PortfolioThemePanel extends HTMLElement {
   }
 }
 
-class PortfolioMobileDockHost extends HTMLElement {
-  connectedCallback() {
-    let dock = this.closest('portfolio-workspace')?._dock;
-    if (dock && dock.parentElement !== this) this.append(dock);
-  }
-}
-
-class PortfolioMobileShowHost extends HTMLElement {}
-
 class PortfolioWorkspace extends HTMLElement {
   resetPanelDefaults(source = 'api') {
     let current = this._layout?.getLayout?.();
@@ -3734,9 +3725,10 @@ class PortfolioWorkspace extends HTMLElement {
     this._ready = true;
     let template = document.createElement('template');
     template.innerHTML = /*html*/ `
-      <panel-layout class="portfolio-mobile-show-layout" panel-chrome="none" responsive-mode="preserve"></panel-layout>
       <agent-dock-shell
         closed
+        show-panel-mobile
+        show-panel-mobile-close-show
         label="Agent"
         reveal-label="Open Agent"
         responsive-breakpoint="${PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT}"
@@ -3755,31 +3747,15 @@ class PortfolioWorkspace extends HTMLElement {
     `;
     let dock = /** @type {any} */ (template.content.querySelector('agent-dock-shell'));
     let layout = /** @type {any} */ (dock?.querySelector('.portfolio-layout'));
-    let showLayout = /** @type {any} */ (template.content.querySelector('.portfolio-mobile-show-layout'));
-    if (!dock || !layout || !showLayout) return;
+    if (!dock || !layout) return;
     this._dock = dock;
     this._layout = layout;
-    this._showLayout = showLayout;
     dock.addEventListener('agent-dock-responsive-change', (event) => {
       layout.setLayoutBehavior({
         responsiveMode: event.detail?.mobile ? 'swipe' : 'preserve',
       });
     });
     this.replaceChildren(template.content);
-    showLayout.registerPanelType('portfolio-mobile-dock', {
-      component: 'portfolio-mobile-dock-host',
-      behavior: { collapse: 'never', minBlockSize: 120 },
-    });
-    showLayout.registerPanelType('portfolio-mobile-show', {
-      component: 'portfolio-mobile-show-host',
-      behavior: { collapse: 'never', minBlockSize: 120 },
-    });
-    showLayout.setLayout({
-      id: 'portfolio-mobile-dock',
-      type: 'panel',
-      panelType: 'portfolio-mobile-dock',
-      behavior: { collapse: 'never', minBlockSize: 120 },
-    });
     layout.registerPanelType('portfolio-tree', {
       title: tPortfolio('panel.materials'),
       icon: 'folder',
@@ -3868,6 +3844,4 @@ customElements.define('portfolio-media-canvas-graph', /** @type {any} */ (Portfo
 customElements.define('portfolio-graph-panel', PortfolioGraphPanel);
 customElements.define('portfolio-viewer-panel', PortfolioViewerPanel);
 customElements.define('portfolio-theme-panel', PortfolioThemePanel);
-customElements.define('portfolio-mobile-dock-host', PortfolioMobileDockHost);
-customElements.define('portfolio-mobile-show-host', PortfolioMobileShowHost);
 customElements.define('portfolio-workspace', PortfolioWorkspace);

@@ -563,46 +563,17 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let lastRouteSemanticKey = '';
   let reconcileRouteWhenIdle = false;
   let stripRouteWhenIdle = false;
-  let mobileShowCloseHandler = null;
-
-  const mobileShowLayoutTree = () => ({
-    id: 'portfolio-mobile-show-root',
-    type: 'split',
-    direction: 'vertical',
-    ratio: 0.72,
-    first: {
-      id: 'portfolio-mobile-dock',
-      type: 'panel',
-      panelType: 'portfolio-mobile-dock',
-      behavior: { collapse: 'never', minBlockSize: 120 },
-    },
-    second: {
-      id: 'portfolio-mobile-show',
-      type: 'panel',
-      panelType: 'portfolio-mobile-show',
-      behavior: { collapse: 'never', minBlockSize: 120 },
-    },
-  });
-
-  const mobileDockLayoutTree = () => ({
-    id: 'portfolio-mobile-dock',
-    type: 'panel',
-    panelType: 'portfolio-mobile-dock',
-    behavior: { collapse: 'never', minBlockSize: 120 },
-  });
 
   const clearMobileShowPlacement = () => {
     const chat = getDock()?.getChat?.();
     const player = chat?.getShowPlayer?.();
-    if (player && mobileShowCloseHandler) player.removeEventListener('chat-show-close-request', mobileShowCloseHandler);
-    mobileShowCloseHandler = null;
     player?.setShowSettings?.(true);
+    player?.setShowClose?.(true);
     player?.setShowLayoutAction?.(true);
     player?.setResizable?.(false);
-    chat?.setPlayerHost?.(null);
+    player?.requestLayoutPlacement?.('inline');
     player?.removeAttribute?.('compact-caption');
     workspace._mobileShowActive = false;
-    workspace._showLayout?.setLayout?.(mobileDockLayoutTree());
     workspace.classList.remove('portfolio-show-mobile-active');
   };
 
@@ -620,30 +591,17 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       clearMobileShowPlacement();
       return;
     }
-    let showLayout = workspace._showLayout;
-    if (!showLayout) return;
     workspace._mobileShowActive = true;
-    showLayout.setLayout?.(mobileShowLayoutTree());
     const player = chat.getShowPlayer();
-    player.setLayoutPlacement?.('inline');
     player.setResizable?.(false);
     player.setShowSettings?.(false);
+    player.setShowClose?.(false);
     player.setShowLayoutAction?.(false);
-    if (!mobileShowCloseHandler) {
-      mobileShowCloseHandler = (event) => {
-        event.preventDefault();
-        getChat()?.stopShow?.({ reason: 'show-mobile-player-close' });
-      };
-      player.addEventListener('chat-show-close-request', mobileShowCloseHandler);
-    }
     // The mobile footer is a compact transport host: hide the caption block
     // there only; the desktop chat keeps its caption.
     player.setAttribute('compact-caption', '');
     workspace.classList.add('portfolio-show-mobile-active');
-    requestAnimationFrame(() => {
-      let host = showLayout.querySelector?.('portfolio-mobile-show-host');
-      if (host) chat.setPlayerHost(host);
-    });
+    player.requestLayoutPlacement?.('panel');
     dock?.close?.('show-mobile-player');
   };
 
