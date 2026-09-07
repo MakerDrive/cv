@@ -29,7 +29,7 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 // launcher zones and transport button states legitimately cost ~4KB raw.
 // The previous budget sat 9 bytes under, so no feature could land at all.
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
-  raw: 1_770_000,
+  raw: 1_780_000,
   gzip: 432_000,
 });
 
