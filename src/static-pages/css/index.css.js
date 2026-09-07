@@ -213,7 +213,9 @@ main > article {
   box-sizing: border-box;
   flex: 0 0 auto;
   min-block-size: 0;
-  max-block-size: min(46dvh, 360px);
+  max-block-size: min(70dvh, 560px);
+  resize: vertical;
+  overflow: auto;
   overflow-y: auto;
   background: var(--pulse-surface-panel);
   border-block-start: 1px solid var(--pulse-outline);
@@ -678,7 +680,7 @@ body > footer a {
   }
 
   .pulse-locale-toggle {
-    --sn-segmented-padding: 4px 7px;
+    --sn-segmented-padding: 3px 6px;
     --sn-segmented-item-min-height: 32px;
   }
 
