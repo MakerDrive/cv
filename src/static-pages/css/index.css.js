@@ -650,12 +650,21 @@ body > footer a {
   }
 
   body:has(.pulse-screen) > header {
+    block-size: var(--sn-layout-collapsed-horizontal-size, 56px);
+    min-block-size: var(--sn-layout-collapsed-horizontal-size, 56px);
+    box-sizing: border-box;
     gap: var(--pulse-mobile-header-gap, 10px);
     padding: var(--sn-app-topbar-mobile-padding, 6px 10px);
   }
 
   .pulse-header-menu-button {
     display: inline-flex;
+  }
+
+  .portfolio-show-mobile-footer chat-show-player [data-header-action="settings"],
+  .portfolio-show-mobile-footer chat-show-player [data-show-menu-action="layout"],
+  .portfolio-show-mobile-footer chat-show-player .chat-show-menu {
+    display: none !important;
   }
 
   .pulse-header-menu-button,
