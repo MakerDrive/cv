@@ -2625,7 +2625,7 @@ function createPortfolioLayoutTree() {
     minBlockSize: 180,
     collapse: 'auto',
     mobileDock: 'start',
-    swipeControl: 'rail',
+    swipeControl: 'none',
   });
   let graphPanel = LayoutTree.createPanel('portfolio-graph', {}, {
     importance: PORTFOLIO_GRAPH_PANEL_IMPORTANCE,
