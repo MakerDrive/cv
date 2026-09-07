@@ -966,6 +966,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onStart = () => {
+    // A real mobile start can originate from the chat itself. Close that
+    // outer surface before presenter work begins so the first scene ink is
+    // never painted beneath an already-open chat overlay. Manual reopening
+    // remains available after the start.
+    const dock = getDock();
+    const outerLayout = dock?.ref?.layout;
+    if (dock?.hasAttribute('open') && outerLayout?.hasAttribute('drawer-mode-active')) {
+      dock.close?.('show-start');
+    }
     running = true;
     ensurePresenterLifecycle();
   };
