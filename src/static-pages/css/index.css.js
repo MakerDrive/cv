@@ -677,6 +677,8 @@ body > footer a {
     min-inline-size: var(--pulse-header-action-size, 44px);
     min-block-size: var(--pulse-header-action-size, 44px);
     padding: 0;
+    margin-block: 4px;
+    margin-inline: 2px;
   }
 
   .pulse-locale-toggle {
