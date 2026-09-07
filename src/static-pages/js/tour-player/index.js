@@ -580,7 +580,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const syncMobileShowPlacement = () => {
     const dock = getDock();
     const chat = dock?.getChat?.();
-    const mobile = Boolean(dock?.ref?.layout?.hasAttribute?.('drawer-mode-active'));
+    const mobile = Boolean(dock?.querySelector?.('panel-layout[drawer-mode-active]'));
     if (!chat || !chat.getShowPlayer?.()) {
       if (!mobile) {
         clearMobileShowPlacement();
