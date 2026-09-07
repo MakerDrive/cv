@@ -632,7 +632,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     if (!mobileShowCloseHandler) {
       mobileShowCloseHandler = (event) => {
         event.preventDefault();
-        chat.stopShow?.({ reason: 'show-mobile-player-close' });
+        getChat()?.stopShow?.({ reason: 'show-mobile-player-close' });
       };
       player.addEventListener('chat-show-close-request', mobileShowCloseHandler);
     }
