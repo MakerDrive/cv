@@ -203,39 +203,6 @@ main > article {
   color: var(--pulse-text);
 }
 
-.portfolio-show-mobile-footer {
-  /* The mobile footer is a compact transport strip in normal flow below the
-     workspace. Its height is set by the visible player content; no fixed
-     tall area is reserved underneath the transport controls. */
-  position: relative;
-  z-index: var(--sn-layer-overlay, 16000);
-  inset-block-end: 0;
-  box-sizing: border-box;
-  flex: 0 0 auto;
-  min-block-size: 0;
-  max-block-size: min(70dvh, 560px);
-  resize: vertical;
-  overflow: auto;
-  overflow-y: auto;
-  background: var(--pulse-surface-panel);
-  border-block-start: 1px solid var(--pulse-outline);
-  padding-block-end: env(safe-area-inset-bottom, 0px);
-}
-
-.portfolio-show-mobile-footer > chat-show-player {
-  display: block;
-  box-sizing: border-box;
-  inline-size: 100%;
-  block-size: auto;
-  min-block-size: 0;
-  border-inline: 0;
-  border-block-end: 0;
-  border-radius: 0;
-}
-
-/* The footer participates in normal flow, so the workspace needs no reserved
-   bottom padding; the pulse workspace becomes the flex column that the dock
-   host and the optional mobile footer share. */
 .pulse-workspace {
   display: flex;
   flex-direction: column;
@@ -244,6 +211,34 @@ main > article {
 .pulse-workspace > agent-dock-shell {
   flex: 1 1 0%;
   min-block-size: 0;
+}
+
+.pulse-workspace > .portfolio-mobile-show-layout,
+portfolio-mobile-dock-host,
+portfolio-mobile-show-host {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.pulse-workspace > .portfolio-mobile-show-layout {
+  flex: 1 1 0%;
+}
+
+portfolio-mobile-show-host {
+  overflow: auto;
+  background: var(--pulse-surface-panel);
+}
+
+portfolio-mobile-show-host > chat-show-player {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 0;
+  border-inline: 0;
+  border-block-end: 0;
+  border-radius: 0;
 }
 
 .pulse-workspace.portfolio-show-mobile-active {
@@ -648,7 +643,10 @@ body > footer a {
   }
 
   body:has(.pulse-screen) {
-    --calc-top-pan-height: var(--sn-app-topbar-mobile-height, 56px);
+    /* The workspace must subtract the actual rail-sized header, not the
+       former fixed 56px fallback. Otherwise the unallocated remainder shows
+       as a strip below the mobile layout. */
+    --calc-top-pan-height: var(--sn-layout-collapsed-horizontal-size, 56px);
   }
 
   body:has(.pulse-screen) > header {

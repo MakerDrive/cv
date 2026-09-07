@@ -563,8 +563,33 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let lastRouteSemanticKey = '';
   let reconcileRouteWhenIdle = false;
   let stripRouteWhenIdle = false;
-  let mobilePlayerHost = null;
   let mobileShowCloseHandler = null;
+
+  const mobileShowLayoutTree = () => ({
+    id: 'portfolio-mobile-show-root',
+    type: 'split',
+    direction: 'vertical',
+    ratio: 0.72,
+    first: {
+      id: 'portfolio-mobile-dock',
+      type: 'panel',
+      panelType: 'portfolio-mobile-dock',
+      behavior: { collapse: 'never', minBlockSize: 120 },
+    },
+    second: {
+      id: 'portfolio-mobile-show',
+      type: 'panel',
+      panelType: 'portfolio-mobile-show',
+      behavior: { collapse: 'never', minBlockSize: 120 },
+    },
+  });
+
+  const mobileDockLayoutTree = () => ({
+    id: 'portfolio-mobile-dock',
+    type: 'panel',
+    panelType: 'portfolio-mobile-dock',
+    behavior: { collapse: 'never', minBlockSize: 120 },
+  });
 
   const clearMobileShowPlacement = () => {
     const chat = getDock()?.getChat?.();
@@ -573,10 +598,11 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     mobileShowCloseHandler = null;
     player?.setShowSettings?.(true);
     player?.setShowLayoutAction?.(true);
+    player?.setResizable?.(false);
     chat?.setPlayerHost?.(null);
     player?.removeAttribute?.('compact-caption');
-    mobilePlayerHost?.remove();
-    mobilePlayerHost = null;
+    workspace._mobileShowActive = false;
+    workspace._showLayout?.setLayout?.(mobileDockLayoutTree());
     workspace.classList.remove('portfolio-show-mobile-active');
   };
 
@@ -594,25 +620,30 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       clearMobileShowPlacement();
       return;
     }
-    mobilePlayerHost ||= Object.assign(document.createElement('section'), {
-      className: 'portfolio-show-mobile-footer',
-    });
-    if (!mobilePlayerHost.isConnected) workspace.append(mobilePlayerHost);
-    chat.setPlayerHost(mobilePlayerHost);
+    let showLayout = workspace._showLayout;
+    if (!showLayout) return;
+    workspace._mobileShowActive = true;
+    showLayout.setLayout?.(mobileShowLayoutTree());
     const player = chat.getShowPlayer();
     player.setLayoutPlacement?.('inline');
-    player.setResizable?.(true);
+    player.setResizable?.(false);
     player.setShowSettings?.(false);
     player.setShowLayoutAction?.(false);
-    mobileShowCloseHandler = (event) => {
-      event.preventDefault();
-      chat.stopShow?.({ reason: 'show-mobile-player-close' });
-    };
-    player.addEventListener('chat-show-close-request', mobileShowCloseHandler);
+    if (!mobileShowCloseHandler) {
+      mobileShowCloseHandler = (event) => {
+        event.preventDefault();
+        chat.stopShow?.({ reason: 'show-mobile-player-close' });
+      };
+      player.addEventListener('chat-show-close-request', mobileShowCloseHandler);
+    }
     // The mobile footer is a compact transport host: hide the caption block
     // there only; the desktop chat keeps its caption.
     player.setAttribute('compact-caption', '');
     workspace.classList.add('portfolio-show-mobile-active');
+    requestAnimationFrame(() => {
+      let host = showLayout.querySelector?.('portfolio-mobile-show-host');
+      if (host) chat.setPlayerHost(host);
+    });
     dock?.close?.('show-mobile-player');
   };
 
