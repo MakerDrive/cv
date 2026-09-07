@@ -601,6 +601,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     chat.setPlayerHost(mobilePlayerHost);
     const player = chat.getShowPlayer();
     player.setLayoutPlacement?.('inline');
+    player.setResizable?.(true);
     player.setShowSettings?.(false);
     player.setShowLayoutAction?.(false);
     mobileShowCloseHandler = (event) => {
