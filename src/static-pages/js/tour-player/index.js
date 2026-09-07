@@ -564,11 +564,17 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let reconcileRouteWhenIdle = false;
   let stripRouteWhenIdle = false;
   let mobilePlayerHost = null;
+  let mobileShowCloseHandler = null;
 
   const clearMobileShowPlacement = () => {
     const chat = getDock()?.getChat?.();
+    const player = chat?.getShowPlayer?.();
+    if (player && mobileShowCloseHandler) player.removeEventListener('chat-show-close-request', mobileShowCloseHandler);
+    mobileShowCloseHandler = null;
+    player?.setShowSettings?.(true);
+    player?.setShowLayoutAction?.(true);
     chat?.setPlayerHost?.(null);
-    chat?.getShowPlayer?.()?.removeAttribute?.('compact-caption');
+    player?.removeAttribute?.('compact-caption');
     mobilePlayerHost?.remove();
     mobilePlayerHost = null;
     workspace.classList.remove('portfolio-show-mobile-active');
@@ -595,6 +601,13 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     chat.setPlayerHost(mobilePlayerHost);
     const player = chat.getShowPlayer();
     player.setLayoutPlacement?.('inline');
+    player.setShowSettings?.(false);
+    player.setShowLayoutAction?.(false);
+    mobileShowCloseHandler = (event) => {
+      event.preventDefault();
+      chat.stopShow?.({ reason: 'show-mobile-player-close' });
+    };
+    player.addEventListener('chat-show-close-request', mobileShowCloseHandler);
     // The mobile footer is a compact transport host: hide the caption block
     // there only; the desktop chat keeps its caption.
     player.setAttribute('compact-caption', '');

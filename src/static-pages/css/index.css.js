@@ -67,6 +67,7 @@ body:has(.pulse-screen) > header {
   font-size: var(--sn-app-title-size, 13px);
   line-height: 1;
   z-index: var(--pulse-header-z, 100);
+  min-block-size: var(--sn-layout-collapsed-horizontal-size, 44px);
 }
 
 .pulse-header-title {
