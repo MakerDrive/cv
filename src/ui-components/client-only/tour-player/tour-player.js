@@ -810,9 +810,16 @@ export class PortfolioShowChat extends HTMLElement {
       pause() { host.pauseShow('explicit-control'); },
       prev() { host.#step(-1); },
       next() { host.#step(1); },
-      // Stop freezes the current Show in its native panel. Closing the Show is
-      // a separate layout action; disposing it here leaves an empty split.
-      stop() { host.pauseShow('explicit-stop'); },
+      // Stop resets the native Show transport to its first Short entry and
+      // leaves it paused. Closing the Show is a separate layout action.
+      stop() {
+        if (host.$.isRunning && host.#mode && !host.$.inBranch) {
+          host.pauseShow('explicit-stop');
+          void host.#seek(0, 0);
+          return;
+        }
+        host.pauseShow('explicit-stop');
+      },
       preview(index) { void host.#preview(index); },
       seek(index, positionMs) { void host.#seek(index, positionMs); },
     };
