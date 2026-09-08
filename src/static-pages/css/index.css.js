@@ -629,12 +629,6 @@ body > footer a {
     display: inline-flex;
   }
 
-  .portfolio-show-mobile-footer chat-show-player [data-header-action="settings"],
-  .portfolio-show-mobile-footer chat-show-player [data-show-menu-action="layout"],
-  .portfolio-show-mobile-footer chat-show-player .chat-show-menu {
-    display: none !important;
-  }
-
   .pulse-header-menu-button,
   .pulse-tour-button,
   .pulse-theme-widget .ctw-trigger {

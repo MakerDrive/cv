@@ -564,6 +564,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let reconcileRouteWhenIdle = false;
   let stripRouteWhenIdle = false;
 
+  const isMobileDock = () => Boolean(getDock()?.querySelector?.('panel-layout[drawer-mode-active]'));
+
   const clearMobileShowPlacement = () => {
     const chat = getDock()?.getChat?.();
     const player = chat?.getShowPlayer?.();
@@ -580,7 +582,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const syncMobileShowPlacement = () => {
     const dock = getDock();
     const chat = dock?.getChat?.();
-    const mobile = Boolean(dock?.querySelector?.('panel-layout[drawer-mode-active]'));
+    const mobile = isMobileDock();
     if (!chat || !chat.getShowPlayer?.()) {
       if (!mobile) {
         clearMobileShowPlacement();
@@ -595,12 +597,18 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     const player = chat.getShowPlayer();
     player.setResizable?.(false);
     player.setShowSettings?.(false);
-    player.setShowClose?.(false);
+    // Close stays visible in the native mobile Show panel: the player close
+    // request flows through the library chat to the show controller, which
+    // stops the show and restores the placement via clearMobileShowPlacement.
+    player.setShowClose?.(true);
     player.setShowLayoutAction?.(false);
-    // The mobile footer is a compact transport host: hide the caption block
+    // The mobile panel is a compact transport host: hide the caption block
     // there only; the desktop chat keeps its caption.
     player.setAttribute('compact-caption', '');
     workspace.classList.add('portfolio-show-mobile-active');
+    // The dock honors show-panel-mobile by opening the native bottom Show
+    // panel in drawer mode; the chat drawer stays closed so the panel is
+    // visible immediately on launch.
     player.requestLayoutPlacement?.('panel');
     dock?.close?.('show-mobile-player');
   };
@@ -849,7 +857,11 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const ensureTourOpen = () => {
     let dock = getDock();
     let chat = ensureChat();
-    dock?.open?.('tour-button');
+    // In mobile the show opens in the native bottom panel, not in the chat
+    // drawer: keep the drawer closed so the panel is visible immediately
+    // instead of flashing the drawer open and shut.
+    if (isMobileDock()) dock?.close?.('tour-button');
+    else dock?.open?.('tour-button');
     chat?.openShow?.();
     queueMicrotask(syncMobileShowPlacement);
     queueMicrotask(() => requestAnimationFrame(() => requestAnimationFrame(
