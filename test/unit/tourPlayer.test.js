@@ -2512,6 +2512,8 @@ function workspaceOperationFixture({
   kind = 'attention',
   interaction = null,
   source = null,
+  cellId = `cv-show:cue:example-${kind}`,
+  targetId = 'target',
   controller = new AbortController(),
   events = [],
 } = {}) {
@@ -2534,12 +2536,12 @@ function workspaceOperationFixture({
     operationId: `presentation-effect-0-${kind}`,
     generation: 0,
     kind,
-    scheduleCell: { cellId: `cv-show:cue:example-${kind}` },
+    scheduleCell: { cellId },
     projectCell: {
-      id: `cv-show:cue:example-${kind}`,
+      id: cellId,
       cue: interaction
-        ? { kind: 'interaction', targetId: 'target', interaction }
-        : { kind: kind === 'state' ? 'state' : 'focus', targetId: 'target' },
+        ? { kind: 'interaction', targetId, interaction }
+        : { kind: kind === 'state' ? 'state' : 'focus', targetId },
       timing: { gestureDurationMs: 650 },
     },
     source: operationSource,
@@ -2693,6 +2695,47 @@ test('admitted attention relays exact v2 admission and first-frame evidence', as
     mode: 'frame',
     firstStatus: 'first-frame',
   });
+});
+
+test('visible finale map attention keeps the Workspace admission contract', async () => {
+  const admission = providerAdmissionFixture({
+    mode: 'frame',
+    gestureId: 'finale.history',
+    targetId: 'portfolio.map.historical-branch',
+  });
+  const firstFrame = providerMilestoneFixture(admission, 'first-frame', 110);
+  const settled = providerMilestoneFixture(admission, 'settled', 640);
+  const terminal = providerTerminalFixture(
+    admission,
+    'completed',
+    640,
+    settled.providerReceipt,
+    'settled',
+  );
+  const attention = scriptedAttentionProvider((request) => {
+    assert.equal(typeof request.onAdmission, 'function');
+    request.onAdmission(admission);
+    request.onMilestone(firstFrame);
+    request.onMilestone(settled);
+    return { presentation: { presented: true, admission }, terminal };
+  });
+  const fixture = workspaceOperationFixture({
+    cellId: 'cv-show:cue:finale.history',
+    targetId: 'portfolio.map.historical-branch',
+    source: {
+      id: 'finale.history',
+      type: 'frame',
+      target: 'portfolio.map.historical-branch',
+      policy: 'required',
+    },
+  });
+
+  assert.equal(
+    await runCvShowPresentationOperation(providerScenarioRunner(attention), fixture.operation),
+    undefined,
+  );
+  assert.equal(fixture.admissions.length, 1);
+  assert.deepEqual(fixture.receipts.map(({ status }) => status), ['first-frame', 'settled']);
 });
 
 test('admitted semantic select maps exact v2 first-frame evidence to acted', async () => {

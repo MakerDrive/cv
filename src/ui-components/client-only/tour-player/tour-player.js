@@ -267,10 +267,20 @@ export class PortfolioShowChat extends HTMLElement {
   });
   /** @type {Promise<any>} */
   #narrationReady = Promise.resolve();
+  #presentationDirectiveFilter = null;
   #alignment = createCvShowAlignmentController({
     url: globalThis.location?.href,
     baseUrl: globalThis.document?.baseURI,
     getAuthoringView: () => this.#authoringView,
+    getSpeechDirectiveIds: (entry) => {
+      if (typeof this.#presentationDirectiveFilter !== 'function') return null;
+      const scheduled = partitionCvShowAlignedDirectives(entry?.directives).scheduled;
+      const included = scheduled
+        .map(({ source }) => source)
+        .filter((directive) => this.#presentationDirectiveFilter(directive) !== false)
+        .map((directive) => directive.id);
+      return included.length === scheduled.length ? null : included;
+    },
   });
   /** @type {Promise<any>} */
   #alignmentReady = Promise.resolve();
@@ -485,6 +495,11 @@ export class PortfolioShowChat extends HTMLElement {
 
   openShow() {
     this.#configureVoiceInput();
+  }
+
+  setPresentationDirectiveFilter(filter = null) {
+    this.#presentationDirectiveFilter = typeof filter === 'function' ? filter : null;
+    return this;
   }
 
   get narrationSnapshot() {

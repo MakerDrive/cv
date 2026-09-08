@@ -14,6 +14,7 @@ import { getCvShowRuntimeAuthority } from './cvShowRuntimeAuthority.js';
 import {
   createCvShowDirectiveRunner,
   createCvShowRuntimeCleanup,
+  isDeferredMapAction,
   runCvShowPresentationOperation,
 } from './showAdapter.js';
 import { createCvShowPlaybackEntries } from './presentationContext.js';
@@ -811,8 +812,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const ensureChat = () => {
+    const configurePresentationProjection = (target) => {
+      target?.setPresentationDirectiveFilter?.((directive) => {
+        if (!isDeferredMapAction(directive)) return true;
+        return inspectTargetPanel(workspace, runtime, directive.target, directive.id).open;
+      });
+      return target;
+    };
     let chat = getChat();
-    if (chat) return chat;
+    if (chat) return configurePresentationProjection(chat);
     let dock = getDock();
     if (!dock) return null;
     chat = document.createElement('portfolio-show-chat');
@@ -821,7 +829,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     chat.audioArbiter = audioArbiter;
     chat.setAttribute('aria-label', title);
     workspace.append(chat);
-    return chat;
+    return configurePresentationProjection(chat);
   };
 
   const restoreOrigin = (event) => {

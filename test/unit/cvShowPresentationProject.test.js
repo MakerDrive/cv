@@ -2080,6 +2080,49 @@ test('checkpoint omits completed one-shot attention and preserves the remaining 
   }
 });
 
+test('speech directive projection removes a map group and keeps the remaining execution slice valid', async () => {
+  const manifest = structuralAlignmentManifest();
+  const clip = manifest.clips[0];
+  const sequence = structuralSequence(clip.id);
+  const full = createCvShowEntryTuple(STRUCTURAL_PROJECT, clip.id, sequence, {
+    adapter: immediateAdapter(),
+  });
+  assert.ok(full.includedSpeechDirectiveIds.length > 1);
+  const omittedId = full.includedSpeechDirectiveIds[0];
+  const retainedIds = full.includedSpeechDirectiveIds.slice(1);
+  const operations = [];
+  const filtered = createCvShowEntryTuple(STRUCTURAL_PROJECT, clip.id, sequence, {
+    speechDirectiveIds: retainedIds,
+    adapter: immediateAdapter(operations),
+  });
+
+  assert.deepEqual(filtered.includedSpeechDirectiveIds, retainedIds);
+  assert.equal(
+    filtered.project.cells.some(({ id }) => id === `cv-show:cue:${omittedId}`),
+    false,
+  );
+  assert.equal(
+    filtered.project.cells.some(({ id }) => id === `cv-show:cue:${omittedId}:scroll`),
+    false,
+  );
+  assert.equal(
+    filtered.project.cells.some(({ id }) => id === `cv-show:cue:${retainedIds[0]}`),
+    true,
+  );
+
+  filtered.execution.sample({ mediaTimeMs: 0, reason: 'speech-filter-test' });
+  await filtered.execution.whenIdle();
+  filtered.execution.sample({
+    mediaTimeMs: filtered.schedule.totalDurationMs,
+    reason: 'speech-filter-test-complete',
+  });
+  await filtered.execution.whenIdle();
+  assert.equal(
+    operations.some(({ projectCell }) => projectCell.id === `cv-show:cue:${omittedId}`),
+    false,
+  );
+});
+
 test('checkpoint held attention restores its state without replaying the completed scroll', () => {
   const entryId = 'symbiote-workspace';
   const attentionCellId = 'cv-show:cue:workspace.intro-frame';

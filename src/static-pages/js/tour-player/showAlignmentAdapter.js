@@ -221,6 +221,7 @@ export function requireCvShowSceneSetupSuccess(receipt, entryId = '') {
  *   appConfig?: any,
  *   userSettings?: any,
  *   getAuthoringView?: () => any,
+ *   getSpeechDirectiveIds?: (entry: any) => string[] | null,
  *   playbackClock?: { request?: Function, cancel?: Function, document?: Document },
  * }} [options]
  */
@@ -231,6 +232,7 @@ export function createCvShowAlignmentController({
   appConfig,
   userSettings,
   getAuthoringView = () => cvShowRuntimeAuthority.getView(),
+  getSpeechDirectiveIds = () => null,
   playbackClock,
 } = {}) {
   let manifest = null;
@@ -408,6 +410,7 @@ export function createCvShowAlignmentController({
       };
       tuple = createCvShowEntryTuple(authoringView.project, entry.id, sequence, {
         checkpointMs,
+        speechDirectiveIds: getSpeechDirectiveIds(entry),
         mediaAdmission: { audioClip, alignmentClip },
         mediaAncestry: authoringView.mediaRegistry,
         adapter: {

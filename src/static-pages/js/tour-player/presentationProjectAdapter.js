@@ -38,6 +38,7 @@ export {
 /**
  * @typedef {{
  *   checkpointMs?: number | null,
+ *   speechDirectiveIds?: string[] | null,
  *   adapter?: Record<string, any>,
  *   mediaAdmission?: CvShowRuntimeAdmissionOptions | null,
  *   mediaAncestry?: Record<string, any>,
@@ -1341,6 +1342,7 @@ export function createCvShowEntryTuple(
   sourceSequence,
   {
     checkpointMs = null,
+    speechDirectiveIds = null,
     adapter,
     mediaAdmission = null,
     mediaAncestry,
@@ -1359,11 +1361,13 @@ export function createCvShowEntryTuple(
     validateNarrationMediaBinding(master, entryId, binding, mediaAncestry);
     validateSourceSequence(master, entryId, sourceSequence);
   }
-  let project = createCvShowEntryProjectFromMaster(master, entryId);
+  let project = createCvShowEntryProjectFromMaster(master, entryId, {
+    speechDirectiveIds,
+  });
   let alignedSequence = createSliceAlignment(project, sourceSequence);
   let schedule = createPresentationScheduleV2(project, alignedSequence);
   const projectDurationMs = schedule.totalDurationMs;
-  let includedSpeechDirectiveIds = directiveMetadataForTurn(master, entryId)
+  let includedSpeechDirectiveIds = directiveMetadataForTurn(project, entryId)
     .filter(([, value]) => value.phase === 'speech')
     .map(([, value]) => value.id);
   let heldAttentionDirectiveIds = [];

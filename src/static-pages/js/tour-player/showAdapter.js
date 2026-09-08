@@ -410,19 +410,6 @@ function presentationProviderTerminalFailure(operation, terminal) {
 }
 
 function requiresProviderAdmission(operation) {
-  // Deferred map navigation is intentionally satisfied without painting a
-  // provider attention effect while the map remains hidden.  Treating it as
-  // an admitted attention operation leaves the shared execution cell without
-  // an admission receipt and makes the final scene retry forever.
-  if (
-    operation.kind === 'attention'
-    && isDeferredMapAction({
-      id: operation.projectCell?.id,
-      target: operation.projectCell?.cue?.targetId,
-    })
-  ) {
-    return false;
-  }
   return operation.kind === 'attention'
     || operation.projectCell.cue?.interaction?.type === 'select';
 }
