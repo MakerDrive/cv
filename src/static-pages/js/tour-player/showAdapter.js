@@ -808,7 +808,6 @@ export function createCvShowDirectiveRunner(options = {}) {
                   // settled canvas focus itself.
                   if (
                     isDeferredMapAction(source)
-                    && String(source.target || '').startsWith('portfolio.map.')
                   ) {
                     reportInteractionActed();
                     reportInteractionSettled();

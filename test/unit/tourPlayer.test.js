@@ -2244,7 +2244,7 @@ test('CV map navigation preserves the graph target supplied by the panel lifecyc
   }]);
 
   assert.equal(result.status, 'success');
-  assert.deepEqual(presented, ['projects-graph-node']);
+  assert.deepEqual(presented, [], 'semantic graph navigation is settled by the panel adapter');
 });
 
 test('CV semantic map attention settles from canvas focus without provider admission', async () => {
