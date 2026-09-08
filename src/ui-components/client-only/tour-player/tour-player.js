@@ -806,7 +806,9 @@ export class PortfolioShowChat extends HTMLElement {
       pause() { host.pauseShow('explicit-control'); },
       prev() { host.#step(-1); },
       next() { host.#step(1); },
-      stop() { host.stopShow({ focusStart: true }); },
+      // Stop freezes the current Show in its native panel. Closing the Show is
+      // a separate layout action; disposing it here leaves an empty split.
+      stop() { host.pauseShow('explicit-stop'); },
       preview(index) { void host.#preview(index); },
       seek(index, positionMs) { void host.#seek(index, positionMs); },
     };
