@@ -772,6 +772,14 @@ export function createCvShowDirectiveRunner(options = {}) {
                   reportInteractionSettled();
                   return { status: 'success', skipped: 'hidden-map-deferred' };
                 }
+                // The finale contact cue is an optional visual affordance. The
+                // persistent chat actions remain available even when the
+                // profile contact section is not mounted on the current page.
+                if (!presentationTarget && source.id === 'finale.contacts') {
+                  reportInteractionActed();
+                  reportInteractionSettled();
+                  return { status: 'success', skipped: 'contact-target-unavailable' };
+                }
                 const providerPlanned = presentation?.requiresProviderAdmission === true;
                 if (
                   providerPlanned
