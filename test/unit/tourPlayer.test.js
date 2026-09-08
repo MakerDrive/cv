@@ -44,6 +44,7 @@ import {
   createCvShowBranchReturnSnapshot,
   createCvShowDirectiveRunner,
   createCvShowRuntimeCleanup,
+  isDeferredMapAction,
   runCvShowPresentationOperation,
   shouldInstantlySettleCvShowAttention,
   validateCvShowBranchReturnSnapshot,
@@ -2736,6 +2737,17 @@ test('visible finale map attention keeps the Workspace admission contract', asyn
   );
   assert.equal(fixture.admissions.length, 1);
   assert.deepEqual(fixture.receipts.map(({ status }) => status), ['first-frame', 'settled']);
+});
+
+test('map deferral recognizes canonical attention targetId', () => {
+  assert.equal(isDeferredMapAction({
+    id: 'finale.history',
+    targetId: 'portfolio.map.historical-branch',
+  }), true);
+  assert.equal(isDeferredMapAction({
+    id: 'finale.workspace',
+    targetId: 'project-card.symbiote-workspace',
+  }), false);
 });
 
 test('admitted semantic select maps exact v2 first-frame evidence to acted', async () => {

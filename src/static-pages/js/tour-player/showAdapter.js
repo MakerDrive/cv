@@ -35,9 +35,10 @@ function runtimeCleanupReport(operation, reason, error) {
  * satisfied silently instead of force-opening the drawer.
  */
 export function isDeferredMapAction(source = {}) {
+  const target = source?.target ?? source?.targetId;
   return Boolean(
     String(source?.id || '').endsWith('.map')
-    || String(source?.target || '').startsWith('portfolio.map.'),
+    || String(target || '').startsWith('portfolio.map.'),
   );
 }
 
