@@ -606,11 +606,13 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     // there only; the desktop chat keeps its caption.
     player.setAttribute('compact-caption', '');
     workspace.classList.add('portfolio-show-mobile-active');
-    // The dock honors show-panel-mobile by opening the native bottom Show
-    // panel in drawer mode; the chat drawer stays closed so the panel is
-    // visible immediately on launch.
-    player.requestLayoutPlacement?.('panel');
+    // The dock honors show-panel-mobile by opening the native Show panel in
+    // drawer mode; the chat drawer stays closed so the panel is visible
+    // immediately on launch. Order matters: closing first lets the layout
+    // collapse-toggle settle on the chat drawer, so it never slams the
+    // just-opened Show drawer shut (both share the end dock).
     dock?.close?.('show-mobile-player');
+    player.requestLayoutPlacement?.('panel');
   };
 
   const closeStaleStartDrawer = () => {
