@@ -941,9 +941,11 @@ export class PortfolioShowChat extends HTMLElement {
     play = true,
     routeDriven = false,
     transportRequestId = 0,
+    allowCompletedReentry = false,
   } = {}) {
     if (!this.$.isReady || this.$.isRunning || this.#mode) return false;
     if (mode !== 'short' && mode !== 'full') return false;
+    if (this.#showCompleted && !allowCompletedReentry) return false;
     const activeTransportRequestId = transportRequestId || ++this.#transportRequestId;
     const requestId = this.#requestId;
     const playbackEntries = [...createCvShowPlaybackEntries(this.#story, mode)];
@@ -2039,7 +2041,7 @@ export class PortfolioShowChat extends HTMLElement {
         mode: this.#mode,
         inBranch: this.$.inBranch,
       }) === CV_SHOW_REENTRY_DECISION.RESTART_SHORT) {
-        void this.#start('short', { play: true });
+        void this.#start('short', { play: true, allowCompletedReentry: true });
       }
       return;
     }
@@ -2126,7 +2128,7 @@ export class PortfolioShowChat extends HTMLElement {
       mode: this.#mode,
       inBranch: this.$.inBranch,
     }) === CV_SHOW_REENTRY_DECISION.RESTART_SHORT) {
-      await this.#start('short', { play: true });
+      await this.#start('short', { play: true, allowCompletedReentry: true });
       return;
     }
     if (!this.$.resumeRequired || this.$.mediaBlocksResume) return;
