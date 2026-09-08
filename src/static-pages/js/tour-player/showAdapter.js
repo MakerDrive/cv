@@ -801,6 +801,19 @@ export function createCvShowDirectiveRunner(options = {}) {
                     : adapted.directive;
                   let result;
                   let presentFailure;
+                  // Graph semantic targets are already focused by the panel
+                  // adapter. Do not hand them to the generic attention
+                  // provider: graph providers require their own admission
+                  // contract, while these tour cues are satisfied by the
+                  // settled canvas focus itself.
+                  if (
+                    isDeferredMapAction(source)
+                    && String(source.target || '').startsWith('portfolio.map.')
+                  ) {
+                    reportInteractionActed();
+                    reportInteractionSettled();
+                    return { status: 'success', skipped: 'map-provider' };
+                  }
                   try {
                     result = attention?.present?.({
                       ...attentionDirective,

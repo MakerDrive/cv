@@ -2247,6 +2247,41 @@ test('CV map navigation preserves the graph target supplied by the panel lifecyc
   assert.deepEqual(presented, ['projects-graph-node']);
 });
 
+test('CV semantic map attention settles from canvas focus without provider admission', async () => {
+  let presented = 0;
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime: { entries: new Map() },
+    attention: {
+      present() {
+        presented += 1;
+        throw new Error('generic attention provider must not receive map cues');
+      },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    actionAdapter: {
+      inspect: () => ({ open: true, panelType: 'portfolio-graph', panelId: 'graph' }),
+      reveal: () => ({ changed: false }),
+      awaitTransition: () => ({ ready: true }),
+      awaitTarget: () => ({ target: { id: 'projects-agent-portal' } }),
+      restore: () => ({ changed: false }),
+    },
+    resolveTarget: () => null,
+    resolveText: (key) => key,
+  });
+
+  const result = await runner.run([{
+    id: 'finale.scale-route',
+    type: 'frame',
+    target: 'portfolio.map.engineering-scale-route',
+    policy: 'required',
+  }]);
+
+  assert.equal(result.status, 'success');
+  assert.equal(presented, 0);
+});
+
 test('CV runner distinguishes required and optional missing targets', async () => {
   const createRunner = () => createCvShowDirectiveRunner({
     document: {},
