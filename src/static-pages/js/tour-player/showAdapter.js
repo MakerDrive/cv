@@ -411,6 +411,15 @@ function presentationProviderTerminalFailure(operation, terminal) {
 }
 
 function requiresProviderAdmission(operation) {
+  if (
+    isDeferredMapAction({
+      id: operation.source?.id || operation.projectCell?.id,
+      target: operation.source?.target,
+      targetId: operation.source?.targetId || operation.projectCell?.cue?.targetId,
+    })
+  ) {
+    return false;
+  }
   return operation.kind === 'attention'
     || operation.projectCell.cue?.interaction?.type === 'select';
 }

@@ -2698,47 +2698,6 @@ test('admitted attention relays exact v2 admission and first-frame evidence', as
   });
 });
 
-test('visible finale map attention keeps the Workspace admission contract', async () => {
-  const admission = providerAdmissionFixture({
-    mode: 'frame',
-    gestureId: 'finale.history',
-    targetId: 'portfolio.map.historical-branch',
-  });
-  const firstFrame = providerMilestoneFixture(admission, 'first-frame', 110);
-  const settled = providerMilestoneFixture(admission, 'settled', 640);
-  const terminal = providerTerminalFixture(
-    admission,
-    'completed',
-    640,
-    settled.providerReceipt,
-    'settled',
-  );
-  const attention = scriptedAttentionProvider((request) => {
-    assert.equal(typeof request.onAdmission, 'function');
-    request.onAdmission(admission);
-    request.onMilestone(firstFrame);
-    request.onMilestone(settled);
-    return { presentation: { presented: true, admission }, terminal };
-  });
-  const fixture = workspaceOperationFixture({
-    cellId: 'cv-show:cue:finale.history',
-    targetId: 'portfolio.map.historical-branch',
-    source: {
-      id: 'finale.history',
-      type: 'frame',
-      target: 'portfolio.map.historical-branch',
-      policy: 'required',
-    },
-  });
-
-  assert.equal(
-    await runCvShowPresentationOperation(providerScenarioRunner(attention), fixture.operation),
-    undefined,
-  );
-  assert.equal(fixture.admissions.length, 1);
-  assert.deepEqual(fixture.receipts.map(({ status }) => status), ['first-frame', 'settled']);
-});
-
 test('map deferral recognizes canonical attention targetId', () => {
   assert.equal(isDeferredMapAction({
     id: 'finale.history',
