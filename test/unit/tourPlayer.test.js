@@ -2108,18 +2108,28 @@ test('CV finale contact cue remains optional when the profile target is not moun
     waitForReadiness: async ({ target }) => (typeof target === 'function' ? target() : target),
   });
 
-  const result = await runner.run([{
-    id: 'finale.contacts',
-    type: 'activate',
-    target: 'profile.contacts',
-    policy: 'required',
-  }]);
+  const result = await runner.run([
+    {
+      id: 'finale.contacts',
+      type: 'activate',
+      target: 'profile.contacts',
+      policy: 'required',
+    },
+    {
+      id: 'finale.workspace',
+      type: 'frame',
+      target: 'project-card.symbiote-workspace',
+      policy: 'required',
+    },
+  ]);
 
   assert.equal(result.status, 'success');
-  assert.equal(result.receipts[0].status, 'success');
-  assert.equal(
-    result.receipts[0].result.phases.find(({ phase }) => phase === 'act')?.result?.skipped,
-    'contact-target-unavailable',
+  assert.deepEqual(result.receipts.map(({ status }) => status), ['success', 'success']);
+  assert.deepEqual(
+    result.receipts.map(({ result: lifecycle }) => (
+      lifecycle.phases.find(({ phase }) => phase === 'act')?.result?.skipped
+    )),
+    ['finale-target-unavailable', 'finale-target-unavailable'],
   );
 });
 
