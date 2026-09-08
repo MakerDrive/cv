@@ -423,6 +423,10 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
       // phase satisfies map-deferred cues silently, and no drawer opens.
       return null;
     }
+    // The finale workspace focus is an optional visual affordance. It may be
+    // absent on a profile-only route, so do not spend the target-readiness
+    // timeout or turn a missing card into a playback retry.
+    if (action?.id === 'finale.workspace') return null;
     ensureCvShowArticleProject(runtime, action?.target);
     // Graph culling hides offscreen nodes. Focus the exact semantic node after
     // panel reveal/settlement and before requiring visible target geometry.

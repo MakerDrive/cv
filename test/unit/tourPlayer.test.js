@@ -2129,7 +2129,7 @@ test('CV finale contact cue remains optional when the profile target is not moun
     result.receipts.map(({ result: lifecycle }) => (
       lifecycle.phases.find(({ phase }) => phase === 'act')?.result?.skipped
     )),
-    ['finale-target-unavailable', 'finale-target-unavailable'],
+    ['finale-target-unavailable', 'finale-optional-visual'],
   );
 });
 

@@ -411,12 +411,14 @@ function presentationProviderTerminalFailure(operation, terminal) {
 }
 
 function requiresProviderAdmission(operation) {
+  const sourceId = String(operation.source?.id || operation.projectCell?.id || '');
   if (
     isDeferredMapAction({
-      id: operation.source?.id || operation.projectCell?.id,
+      id: sourceId,
       target: operation.source?.target,
       targetId: operation.source?.targetId || operation.projectCell?.cue?.targetId,
     })
+    || sourceId === 'finale.workspace'
   ) {
     return false;
   }
@@ -775,10 +777,14 @@ export function createCvShowDirectiveRunner(options = {}) {
                 // The finale contact cue is an optional visual affordance. The
                 // persistent chat actions remain available even when the
                 // profile contact section is not mounted on the current page.
-                if (
-                  !presentationTarget
-                  && (source.id === 'finale.contacts' || source.id === 'finale.workspace')
-                ) {
+                if (source.id === 'finale.workspace') {
+                  presentation?.reportStatus?.('first-frame', observePerformance());
+                  presentation?.reportStatus?.('settled', observePerformance());
+                  reportInteractionActed();
+                  reportInteractionSettled();
+                  return { status: 'success', skipped: 'finale-optional-visual' };
+                }
+                if (!presentationTarget && source.id === 'finale.contacts') {
                   reportInteractionActed();
                   reportInteractionSettled();
                   return { status: 'success', skipped: 'finale-target-unavailable' };
