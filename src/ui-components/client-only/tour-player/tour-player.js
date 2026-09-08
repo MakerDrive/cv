@@ -30,6 +30,10 @@ import {
   createCvShowBranchReturnSnapshot,
   validateCvShowBranchReturnSnapshot,
 } from '../../../static-pages/js/tour-player/showAdapter.js';
+import {
+  CV_SHOW_REENTRY_DECISION,
+  resolveCvShowChatReentry,
+} from '../../../static-pages/js/tour-player/showReentryPolicy.js';
 
 const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
@@ -2026,7 +2030,19 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   #returnFromDetails() {
-    if (!this.$.inBranch) return;
+    if (!this.$.inBranch) {
+      // Stale return after the player was closed: the stopped show owns no
+      // branch, so re-enter Short Show (remount + play) instead of no-op.
+      if (resolveCvShowChatReentry({
+        actionId: 'return',
+        running: this.$.isRunning,
+        mode: this.#mode,
+        inBranch: this.$.inBranch,
+      }) === CV_SHOW_REENTRY_DECISION.RESTART_SHORT) {
+        void this.#start('short', { play: true });
+      }
+      return;
+    }
     const restore = this.#branchReturnPlayback;
     if (restore) {
       const activeBranchId = this.#session.snapshot.playback.episodeId;
@@ -2102,6 +2118,17 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   async #resume() {
+    // Stale resume after the player was closed: the stopped show owns no
+    // transport, so re-enter Short Show (remount + play) instead of no-op.
+    if (resolveCvShowChatReentry({
+      actionId: 'resume',
+      running: this.$.isRunning,
+      mode: this.#mode,
+      inBranch: this.$.inBranch,
+    }) === CV_SHOW_REENTRY_DECISION.RESTART_SHORT) {
+      await this.#start('short', { play: true });
+      return;
+    }
     if (!this.$.resumeRequired || this.$.mediaBlocksResume) return;
     if (!this.#activeSpeechEntry) {
       if (this.$.isError && !this.#sceneRetryScheduled) {

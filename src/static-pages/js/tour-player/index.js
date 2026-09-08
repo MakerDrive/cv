@@ -849,7 +849,11 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     staleNavDrawerCloser?.cancel();
     scheduleDocumentSelectionClear();
     if (event?.type === 'portfolio-show-complete' && event.detail?.routeState?.mode) {
-      writeRouteState(event.detail.routeState);
+      // A completed route is terminal. Keeping mode/entry in the URL makes
+      // the location reconciler start the tour again after the final scene.
+      // Clear the route while leaving explicit resume/return actions alive in
+      // the chat history for a deliberate re-entry.
+      stripRouteState();
     } else if (!routeDriven) {
       if (routeRequests.applying) stripRouteWhenIdle = true;
       else stripRouteState();
@@ -1362,7 +1366,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       drawerLevelTimer = 0;
     }
     applyDrawerLevelSuppression();
-    mobilePlayerHost?.remove();
     interactionMonitor.dispose();
     document.removeEventListener('pointerdown', onGesturePointerDown, { capture: true });
     document.removeEventListener('pointermove', onGesturePointerMove, { capture: true });

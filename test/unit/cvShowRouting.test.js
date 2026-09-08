@@ -519,8 +519,8 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
     entryId: 'profile/photo',
     options: { focus: true, updateUrl: false },
   }], 'the external Show lifecycle restores its origin exactly once');
-  assert.equal(currentUrl.searchParams.get('showEntry'), 'symbiote-ui');
-  assert.equal(currentUrl.searchParams.get('showPlay'), '0');
+  assert.equal(currentUrl.searchParams.has('showEntry'), false, 'completed Show clears the replayable route');
+  assert.equal(currentUrl.searchParams.has('showPlay'), false, 'completed Show clears the replayable play flag');
   chat.dispatchEvent(new CustomEvent('portfolio-show-stop', {
     bubbles: true,
     detail: { reason: 'explicit' },
