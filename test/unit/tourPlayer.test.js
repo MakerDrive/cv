@@ -1285,7 +1285,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     reason: 'natural-end',
     routeState: {
       mode: 'short',
-      entryId: 'finale',
+      entryId: 'positioning',
       detailId: '',
       timeMs: 0,
       play: false,

@@ -1344,14 +1344,8 @@ export class PortfolioShowChat extends HTMLElement {
       this.#transportPlaying = false;
       this.#playRequested = false;
       this.#resumePending = false;
-      this.$.isPaused = true;
-      this.$.resumeRequired = true;
-      this.#session.setPlayback({
-        ...this.#session.snapshot.playback,
-        cueIndex: this.#sceneIndex,
-        positionMs: 0,
-        playbackState: 'paused',
-      });
+      this.#sceneIndex = 0;
+      this.#enterSegment(0, { startPaused: true, positionMs: 0 });
       this.#showPlayer?.bind?.(this.#showConfig());
       this.#syncPlayer();
       this.dispatchEvent(new CustomEvent('portfolio-show-complete', {
