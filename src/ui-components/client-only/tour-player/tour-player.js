@@ -828,6 +828,15 @@ export class PortfolioShowChat extends HTMLElement {
       // Stop resets the native Show transport to its first Short entry and
       // leaves it paused. Closing the Show is a separate layout action.
       stop() {
+        if (host.#pendingTransportIntent && !host.$.isRunning) {
+          // Invalidate an async route start before clearing its play intent;
+          // otherwise the superseded start can still finish successfully.
+          host.#requestId += 1;
+          host.#transportRequestId += 1;
+          host.#cancelPendingTrustedPlay();
+          host.#syncPlayer();
+          return;
+        }
         if (host.$.isRunning && host.#mode && !host.$.inBranch) {
           host.pauseShow('explicit-stop');
           void host.#seek(0, 0);

@@ -423,6 +423,15 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
       // phase satisfies map-deferred cues silently, and no drawer opens.
       return null;
     }
+    // The final contact affordance is optional: persistent chat actions remain
+    // available when the profile contact section is not mounted on this route.
+    // Return a ready null target so the shared lifecycle reaches the product
+    // skip branch instead of timing out during its target phase and retrying
+    // the whole scene.
+    if (action?.id === 'finale.contacts') {
+      const contactTarget = visibleElement(resolvePanelActionTarget(workspace, runtime, action));
+      if (!contactTarget) return { ready: true, panelId: current.panelId, target: null };
+    }
     // The finale workspace focus is optional, but its attention cell still
     // uses the native provider contract. When the project card is absent,
     // focus the visible article/workspace surface as a stable fallback so the

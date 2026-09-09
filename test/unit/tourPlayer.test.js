@@ -253,6 +253,17 @@ test('mobile panel actions preserve the surface that owns their target', async (
   assert.equal(ready.target.getBoundingClientRect().width > 0, true);
   closed.workspace.remove();
 
+  const finale = createFixture({ open: true });
+  const finaleAction = { id: 'finale.contacts', target: 'profile.contacts', type: 'scroll' };
+  const finaleInspected = finale.adapter.inspect({ action: finaleAction });
+  const finaleReady = await finale.adapter.awaitTarget({
+    action: finaleAction,
+    context: { scrollOperation: true },
+  });
+  assert.equal(finaleInspected.panelId, '');
+  assert.equal(finaleReady.target, null);
+  finale.workspace.remove();
+
   const main = createFixture({ open: true });
   reveal(main, 'article.symbiote-ui.intro');
   assert.deepEqual(main.calls, [['close', 'show-action']]);
