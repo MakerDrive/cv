@@ -1282,12 +1282,12 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   finalUtterance.onend();
   await new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual(completionEvents, [{
-    reason: 'explicit',
+    reason: 'natural-end',
     routeState: {
       mode: 'short',
       entryId: 'finale',
       detailId: '',
-      timeMs: finalTimeMs,
+      timeMs: 0,
       play: false,
       running: true,
       completed: true,

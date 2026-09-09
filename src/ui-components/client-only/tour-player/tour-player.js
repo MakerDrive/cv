@@ -1336,7 +1336,32 @@ export class PortfolioShowChat extends HTMLElement {
   #advanceShort(requestId) {
     if (requestId !== this.#requestId || !this.$.isRunning || this.$.isPaused || this.$.inBranch) return;
     if (this.#sceneIndex >= this.#playbackEntries.length - 1) {
-      this.stopShow({ completed: true });
+      // A natural tour end is a stable paused checkpoint. Do not tear down
+      // the player or clear the route: doing so lets reconciliation re-enter
+      // the terminal segment and creates the observed loop.
+      this.#requestId += 1;
+      this.#stopSpeech('show-complete');
+      this.#transportPlaying = false;
+      this.#playRequested = false;
+      this.#resumePending = false;
+      this.$.isPaused = true;
+      this.$.resumeRequired = true;
+      this.#session.setPlayback({
+        ...this.#session.snapshot.playback,
+        cueIndex: this.#sceneIndex,
+        positionMs: 0,
+        playbackState: 'paused',
+      });
+      this.#showPlayer?.bind?.(this.#showConfig());
+      this.#syncPlayer();
+      this.dispatchEvent(new CustomEvent('portfolio-show-complete', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          reason: 'natural-end',
+          routeState: Object.freeze({ ...this.routeSnapshot, completed: true }),
+        },
+      }));
       return;
     }
     this.#sceneIndex += 1;
