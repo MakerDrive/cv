@@ -998,6 +998,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onDockResponsiveChange = () => {
+    // A live Show owns its layout while transport is running. Re-syncing the
+    // dock here can remount the player, fire disconnectedCallback, and let
+    // route reconciliation restart the current segment.
+    if (running) return;
     queueMicrotask(syncMobileShowPlacement);
   };
 
@@ -1339,6 +1343,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     }, 420);
   };
   const onDrawerLevelChange = () => {
+    if (running) return;
     queueMicrotask(syncDrawerLevel);
   };
   if (typeof MutationObserver === 'function') {
