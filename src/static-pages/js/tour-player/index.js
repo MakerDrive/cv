@@ -154,6 +154,11 @@ function resolveTargetElement(workspace, runtime, targetId) {
       `[data-actions-id="${escapeAttributeSelectorValue(actionId)}"]`,
     );
     if (visibleElement(actionCard)) return actionCard;
+    // Some authored final actions are persistent controls on the native Show
+    // player rather than transcript cards. Use that stable host when the
+    // logical card has not been emitted, instead of the outer dock shell.
+    const showPlayer = workspace.querySelector('agent-dock-shell chat-show-player');
+    if (visibleElement(showPlayer)) return showPlayer;
   }
   const direct = document.querySelector(`[data-tour-target="${escapeAttributeSelectorValue(targetId)}"]`);
   const directTarget = direct ? firstVisibleSibling(direct) : null;
