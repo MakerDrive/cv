@@ -1150,26 +1150,7 @@ export class PortfolioShowChat extends HTMLElement {
       && Number.isFinite(targetDurationMs)
       && targetMs >= targetDurationMs
     ) {
-      this.#requestId += 1;
-      this.#stopSpeech('show-complete');
-      this.#transportPlaying = false;
-      this.#playRequested = false;
-      this.#resumePending = false;
-      this.$.isRunning = true;
-      this.$.isPaused = true;
-      this.$.resumeRequired = true;
-      this.#sceneIndex = 0;
-      this.#enterSegment(0, { startPaused: true, positionMs: 0 });
-      this.#showPlayer?.bind?.(this.#showConfig());
-      this.#syncPlayer();
-      this.dispatchEvent(new CustomEvent('portfolio-show-complete', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          reason: 'natural-end',
-          routeState: Object.freeze({ ...this.routeSnapshot, completed: true }),
-        },
-      }));
+      this.#completeNaturally();
       return true;
     }
     const replacedBranchId = this.#replacementBranchIdFor(targetEntry);
@@ -1364,30 +1345,41 @@ export class PortfolioShowChat extends HTMLElement {
   #advanceShort(requestId) {
     if (requestId !== this.#requestId || !this.$.isRunning || this.$.isPaused || this.$.inBranch) return;
     if (this.#sceneIndex >= this.#playbackEntries.length - 1) {
-      // A natural tour end is a stable paused checkpoint. Do not tear down
-      // the player or clear the route: doing so lets reconciliation re-enter
-      // the terminal segment and creates the observed loop.
-      this.#requestId += 1;
-      this.#stopSpeech('show-complete');
-      this.#transportPlaying = false;
-      this.#playRequested = false;
-      this.#resumePending = false;
-      this.#sceneIndex = 0;
-      this.#enterSegment(0, { startPaused: true, positionMs: 0 });
-      this.#showPlayer?.bind?.(this.#showConfig());
-      this.#syncPlayer();
-      this.dispatchEvent(new CustomEvent('portfolio-show-complete', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          reason: 'natural-end',
-          routeState: Object.freeze({ ...this.routeSnapshot, completed: true }),
-        },
-      }));
+      this.#completeNaturally();
       return;
     }
     this.#sceneIndex += 1;
     this.#enterSegment(this.#sceneIndex);
+  }
+
+  #completeNaturally() {
+    // Completion is a stable paused checkpoint. Clear any detail branch before
+    // entering the first Short segment so seek and narration-end share one
+    // state transition and route reconciliation cannot revive the old branch.
+    this.#requestId += 1;
+    this.#stopSpeech('show-complete');
+    this.#transportPlaying = false;
+    this.#playRequested = false;
+    this.#resumePending = false;
+    if (this.$.inBranch) this.#session.returnFromBranch();
+    this.$.inBranch = false;
+    this.#branchReturnPlayback = null;
+    this.#completedDetailReview = false;
+    this.$.isRunning = true;
+    this.$.isPaused = true;
+    this.$.resumeRequired = true;
+    this.#sceneIndex = 0;
+    this.#enterSegment(0, { startPaused: true, positionMs: 0 });
+    this.#showPlayer?.bind?.(this.#showConfig());
+    this.#syncPlayer();
+    this.dispatchEvent(new CustomEvent('portfolio-show-complete', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        reason: 'natural-end',
+        routeState: Object.freeze({ ...this.routeSnapshot, completed: true }),
+      },
+    }));
   }
 
   #publishPhysicalStart(entry, requestId) {
