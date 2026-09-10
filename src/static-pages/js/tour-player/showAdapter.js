@@ -790,7 +790,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                 // the player host and can otherwise hold the narration at the
                 // last segment forever.
                 if (
-                  String(source.target || '').startsWith('chat.actions.')
+                  String(source.target || source.targetId || '').startsWith('chat.actions.')
                   && presentationTarget?.matches?.('chat-show-player')
                 ) {
                   reportInteractionActed();
