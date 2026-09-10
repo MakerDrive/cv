@@ -144,6 +144,17 @@ function resolveTargetElement(workspace, runtime, targetId) {
   if (!targetId) return null;
   const spinnerMedia = resolveSpinnerMediaTarget(targetId);
   if (spinnerMedia) return spinnerMedia;
+  // Chat action cues name the logical action group (`chat.actions.finale`),
+  // while the shared chat renders the concrete card as `${entry}.actions`.
+  // Resolve that card before falling back to the dock shell: the shell has no
+  // stable attention geometry and therefore cannot satisfy provider admission.
+  if (targetId.startsWith('chat.actions.')) {
+    const actionId = `${targetId.slice('chat.actions.'.length)}.actions`;
+    const actionCard = document.querySelector(
+      `[data-actions-id="${escapeAttributeSelectorValue(actionId)}"]`,
+    );
+    if (visibleElement(actionCard)) return actionCard;
+  }
   const direct = document.querySelector(`[data-tour-target="${escapeAttributeSelectorValue(targetId)}"]`);
   const directTarget = direct ? firstVisibleSibling(direct) : null;
   if (directTarget?.matches?.('video, audio')) return directTarget;
