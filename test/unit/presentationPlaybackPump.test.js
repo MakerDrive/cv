@@ -153,3 +153,30 @@ test('pump resumes an interrupted audio clip from the shared source position', a
   assert.equal(execution.samples.at(-1).cellId, 'clip-1');
   assert.equal(execution.samples.at(-1).mediaTimeMs, 500);
 });
+
+test('pump samples the exact media boundary when the element emits ended', async () => {
+  const listeners = new Map();
+  const media = {
+    currentTime: 0,
+    pause() {},
+    addEventListener(type, listener) { listeners.set(type, listener); },
+    removeEventListener(type, listener) {
+      if (listeners.get(type) === listener) listeners.delete(type);
+    },
+  };
+  const execution = new FakeExecution();
+  const pump = createPresentationPlaybackPump({ execution, playbackPlan: plan, media });
+  Object.defineProperty(execution, 'nextCell', {
+    get: () => plan.cells.find(({ id }) => !execution.terminal.some((item) => item.cellId === id)
+      && id !== execution.active),
+  });
+
+  pump.resume('test-start');
+  await nextTurn();
+  media.currentTime = 1;
+  listeners.get('ended')?.();
+  assert.equal(execution.samples.at(-1).reason, 'project-playback:ended');
+  assert.equal(execution.samples.at(-1).mediaTimeMs, 1_100);
+  await pump.dispose('test-dispose');
+  assert.equal(listeners.has('ended'), false);
+});

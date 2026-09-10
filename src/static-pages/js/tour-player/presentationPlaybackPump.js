@@ -183,7 +183,15 @@ export function createPresentationPlaybackPump({
   const onMediaTimeUpdate = () => {
     sampleMediaClock('project-playback:media-timeupdate');
   };
+  // A media element may emit its last `timeupdate` below the exact source
+  // end. Sample once more on `ended` so trailing presentation cells whose
+  // barriers are anchored at the clip boundary can settle before narration
+  // completion waits on the shared execution.
+  const onMediaEnded = () => {
+    sampleMediaClock('project-playback:ended');
+  };
   media.addEventListener?.('timeupdate', onMediaTimeUpdate);
+  media.addEventListener?.('ended', onMediaEnded);
 
   const run = async (reason) => {
     while (requested && !disposed) {
@@ -282,6 +290,7 @@ export function createPresentationPlaybackPump({
       requested = false;
       queuedResume = false;
       media.removeEventListener?.('timeupdate', onMediaTimeUpdate);
+      media.removeEventListener?.('ended', onMediaEnded);
       media.pause?.();
       return execution.dispose(reason);
     },
