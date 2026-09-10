@@ -586,6 +586,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let lastRouteWriteAt = 0;
   let lastPlaybackEntryId = '';
   let lastRouteSemanticKey = '';
+  let mobileShowPlacementRequested = false;
   let reconcileRouteWhenIdle = false;
   let stripRouteWhenIdle = false;
 
@@ -601,6 +602,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     player?.requestLayoutPlacement?.('inline');
     player?.removeAttribute?.('compact-caption');
     workspace._mobileShowActive = false;
+    mobileShowPlacementRequested = false;
     workspace.classList.remove('portfolio-show-mobile-active');
   };
 
@@ -634,7 +636,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     // Let the native layout request establish the Show panel and its drawer
     // owner. Closing the shared dock here races that request and can detach
     // the live player, causing route reconciliation to restart the segment.
+    if (player.hasAttribute?.('panel-layout') || mobileShowPlacementRequested) return;
+    mobileShowPlacementRequested = true;
     player.requestLayoutPlacement?.('panel');
+  };
+
+  const onShowLayoutChange = (event) => {
+    if (event.detail?.placement === 'panel' || event.detail?.placement === 'inline') {
+      mobileShowPlacementRequested = false;
+    }
   };
 
   const closeStaleStartDrawer = () => {
@@ -1018,10 +1028,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onDockResponsiveChange = () => {
-    // A live Show owns its layout while transport is running. Re-syncing the
-    // dock here can remount the player, fire disconnectedCallback, and let
-    // route reconciliation restart the current segment.
-    if (running) return;
     queueMicrotask(syncMobileShowPlacement);
   };
 
@@ -1363,7 +1369,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     }, 420);
   };
   const onDrawerLevelChange = () => {
-    if (running) return;
     queueMicrotask(syncDrawerLevel);
   };
   if (typeof MutationObserver === 'function') {
@@ -1386,6 +1391,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   }
   getDock()?.addEventListener('agent-dock-change', onDrawerLevelChange);
   getDock()?.addEventListener('agent-dock-responsive-change', onDrawerLevelChange);
+  getDock()?.addEventListener('agent-show-layout-change', onShowLayoutChange);
   queueMicrotask(syncDrawerLevel);  queueMicrotask(() => { void applyLocationRoute({ source: 'load' }); });
 
   return () => {
@@ -1411,6 +1417,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     getDock()?.removeEventListener('agent-dock-responsive-change', onDockResponsiveChange);
     getDock()?.removeEventListener('agent-dock-change', onDrawerLevelChange);
     getDock()?.removeEventListener('agent-dock-responsive-change', onDrawerLevelChange);
+    getDock()?.removeEventListener('agent-show-layout-change', onShowLayoutChange);
     innerDrawerObserver?.disconnect();
     innerDrawerObserver = null;
     outerDrawerObserver?.disconnect();
