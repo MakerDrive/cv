@@ -896,10 +896,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       lastPlaybackEntryId = '';
       staleNavDrawerCloser?.cancel();
       scheduleDocumentSelectionClear();
-      // The completed player already owns the stable first-segment checkpoint.
-      // Remove the transient route instead of serializing the terminal event
-      // back into the URL; otherwise reconciliation can reopen the old end.
-      stripRouteState();
+      // The player has already moved to its first paused checkpoint. Persist
+      // that checkpoint rather than the old finale URL so a reconciliation or
+      // reload cannot re-enter the terminal segment.
+      scheduleRouteStateWrite(event.detail?.routeState);
       return;
     }
     clearMobileShowPlacement();

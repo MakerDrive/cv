@@ -496,9 +496,9 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
   assert.equal(currentUrl.searchParams.has('showTime'), false);
   assert.equal(currentUrl.searchParams.get('showPlay'), '0');
 
-  // Natural completion leaves the mounted player paused at its first segment,
-  // but removes the transient replay route so reconciliation cannot reopen
-  // the terminal segment.
+  // Natural completion publishes the same first paused checkpoint that remains
+  // mounted in the UI. Keeping it in the URL makes reload and reconciliation
+  // deterministic without retaining the terminal finale route.
   currentUrl = new URL(
     'https://portfolio.example/cv/?lang=ru&showMode=short&showEntry=finale&showTime=2345#profile',
   );
@@ -522,8 +522,8 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
     },
   }));
   await Promise.resolve();
-  assert.equal(currentUrl.searchParams.has('showEntry'), false);
-  assert.equal(currentUrl.searchParams.has('showPlay'), false);
+  assert.equal(currentUrl.searchParams.get('showEntry'), 'positioning');
+  assert.equal(currentUrl.searchParams.get('showPlay'), '0');
   assert.equal(currentUrl.searchParams.has('showTime'), false);
   assert.deepEqual(selections, [], 'natural completion keeps the current player surface');
 

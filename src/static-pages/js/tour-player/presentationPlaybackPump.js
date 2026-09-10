@@ -196,7 +196,12 @@ export function createPresentationPlaybackPump({
   const run = async (reason) => {
     while (requested && !disposed) {
       let snapshot = execution.snapshot;
-      const failed = (snapshot.terminal || []).find(({ status }) => status !== 'completed');
+      // `skipped` is the execution controller's normal terminal state for a
+      // visual cue whose authored expiry is already behind the sampled media
+      // clock. It is not an operation failure. In particular, an `ended`
+      // sample can legitimately expire optional trailing cues after the audio
+      // transport has acknowledged its final clip.
+      const failed = (snapshot.terminal || []).find(({ status }) => status === 'failed');
       if (failed) {
         throw Object.assign(new Error(`Presentation cell failed: ${failed.cellId}`), {
           code: 'PRESENTATION_PLAYBACK_CELL_FAILED',
