@@ -887,7 +887,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       // paused segment. Keep that native placement mounted; tearing it down
       // here makes the route reconciler recreate the old terminal segment.
       cancelPendingRouteWrite();
-      const state = event.detail?.routeState;
       running = false;
       disposePresenter();
       void runtimeCleanup.stopAndRelease('show-terminal', {
@@ -897,7 +896,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       lastPlaybackEntryId = '';
       staleNavDrawerCloser?.cancel();
       scheduleDocumentSelectionClear();
-      scheduleRouteStateWrite(state);
+      // The completed player already owns the stable first-segment checkpoint.
+      // Remove the transient route instead of serializing the terminal event
+      // back into the URL; otherwise reconciliation can reopen the old end.
+      stripRouteState();
       return;
     }
     clearMobileShowPlacement();
