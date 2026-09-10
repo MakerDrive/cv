@@ -1281,6 +1281,10 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   assert.equal(typeof finalUtterance?.onend, 'function');
   finalUtterance.onend();
   await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(restarted.player.$.isRunning, true);
+  assert.equal(restarted.player.$.isPaused, true);
+  assert.equal(restarted.player.routeSnapshot.entryId, 'positioning');
+  assert.equal(restarted.player.routeSnapshot.timeMs, 0);
   assert.deepEqual(completionEvents, [{
     reason: 'natural-end',
     routeState: {
