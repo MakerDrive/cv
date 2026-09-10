@@ -444,7 +444,7 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     // Return a ready null target so the shared lifecycle reaches the product
     // skip branch instead of timing out during its target phase and retrying
     // the whole scene.
-    if (action?.id === 'finale.contacts') {
+    if (String(action?.id || '').startsWith('finale.contacts')) {
       const contactTarget = visibleElement(resolvePanelActionTarget(workspace, runtime, action));
       if (!contactTarget) return { ready: true, panelId: current.panelId, target: null };
     }
