@@ -1011,6 +1011,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       routeRequests.cancel();
       return false;
     }
+    // A completed route is terminal — do not re-apply it to avoid restarting the show.
+    if (parsed.state?.completed === true) return false;
     if (parsed.changed) replaceRouteUrl(parsed.url);
     return applyRouteState(parsed.state);
   };

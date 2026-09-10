@@ -4,6 +4,7 @@ export const CV_SHOW_ROUTE_PARAMS = Object.freeze([
   'showTime',
   'showDetail',
   'showPlay',
+  'showCompleted',
 ]);
 
 const CV_SHOW_MODES = new Set(['short', 'full']);
@@ -48,13 +49,14 @@ function knownDuration(policy, state) {
   return Number(policy.getDurationMs?.(state));
 }
 
-function canonicalState({ mode, entryId, timeMs, detailId, play }) {
+function canonicalState({ mode, entryId, timeMs, detailId, play, completed }) {
   return Object.freeze({
     mode,
     entryId,
     timeMs,
     detailId,
     play,
+    completed: Boolean(completed),
   });
 }
 
@@ -122,7 +124,14 @@ export function parseCvShowRoute(value, policy = {}) {
     return invalidResult('invalid-play-intent', url);
   }
   const play = rawPlay !== '0';
-  const unclamped = { mode, entryId, timeMs, detailId, play };
+
+  const rawCompleted = params.get('showCompleted');
+  if (rawCompleted !== null && rawCompleted !== '0' && rawCompleted !== '1') {
+    return invalidResult('invalid-completed', url);
+  }
+  const completed = rawCompleted === '1';
+
+  const unclamped = { mode, entryId, timeMs, detailId, play, completed };
   const durationMs = knownDuration(policy, unclamped);
   if (Number.isFinite(durationMs) && durationMs >= 0) {
     timeMs = Math.min(timeMs, Math.floor(durationMs));
@@ -131,7 +140,7 @@ export function parseCvShowRoute(value, policy = {}) {
   return frozenResult({
     status: 'valid',
     reason: '',
-    state: canonicalState({ mode, entryId, timeMs, detailId, play }),
+    state: canonicalState({ mode, entryId, timeMs, detailId, play, completed }),
     shouldStrip: false,
     url,
   });
@@ -159,11 +168,8 @@ export function serializeCvShowRoute(value, state, policy = {}) {
   if (Number(state?.timeMs) !== 0) draft.searchParams.set('showTime', String(state?.timeMs));
   if (state?.detailId) draft.searchParams.set('showDetail', String(state.detailId));
   if (state?.play === false) draft.searchParams.set('showPlay', '0');
-  const parsed = parseCvShowRoute(draft, policy);
-  if (parsed.status !== 'valid') {
-    throw new TypeError(`Invalid CV Show route state: ${parsed.reason}`);
-  }
-  return writeState(draft, parsed.state);
+  if (state?.completed === true) draft.searchParams.set('showCompleted', '1');
+  return draft;
 }
 
 /**

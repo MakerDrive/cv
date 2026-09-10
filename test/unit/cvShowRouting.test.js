@@ -167,6 +167,7 @@ test('CV Show route round-trips semantic state and preserves unrelated URL state
     timeMs: 24_000,
     detailId: '',
     play: true,
+    completed: false,
   });
 
   const serialized = serializeCvShowRoute(source, parsed.state, policy);
@@ -193,6 +194,7 @@ test('CV Show route supports short detail and full inline-detail links', () => {
     timeMs: 12_000,
     detailId: 'workspace-details',
     play: true,
+    completed: false,
   });
 
   const full = parseCvShowRoute(
@@ -204,6 +206,7 @@ test('CV Show route supports short detail and full inline-detail links', () => {
     mode: 'full',
     entryId: 'workspace-details',
     timeMs: 9_000,
+    completed: false,
     detailId: '',
     play: false,
   });
