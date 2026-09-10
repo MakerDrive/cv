@@ -152,6 +152,20 @@ test('profile CV Show link starts in the current document while preserving nativ
   assert.deepEqual(selected, ['projects/agent-portal']);
 });
 
+test('header CV Show activation requests the positioning Short Show directly', async () => {
+  const source = await readFile(
+    new URL('../../src/static-pages/js/index.js', import.meta.url),
+    'utf8',
+  );
+  const branch = source.match(
+    /if \(target instanceof Element && target\.closest\('\.pulse-tour-button'\)\) \{[\s\S]*?\n  \}/u,
+  )?.[0];
+  assert.ok(branch, 'header CV Show click branch');
+  assert.match(branch, /new CustomEvent\('portfolio-open-tour'/u);
+  assert.match(branch, /entryId: 'positioning'/u);
+  assert.match(branch, /source: 'portfolio-header'/u);
+});
+
 test('CV Show route round-trips semantic state and preserves unrelated URL state', () => {
   const source = new URL(
     'https://portfolio.example/cv/projects/symbiote-workspace/'

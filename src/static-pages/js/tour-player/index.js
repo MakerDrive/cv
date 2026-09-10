@@ -1029,6 +1029,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       return;
     }
     const state = { mode: 'short', entryId, detailId: '', timeMs: 0, play: true };
+    // An explicit header activation supersedes any load-time route
+    // reconciliation that may still be writing the paused canonical URL.
+    cancelPendingRouteWrite();
+    routeRequests.cancel();
     writeRouteState(state, { push: true });
     void applyRouteState(state);
   };
