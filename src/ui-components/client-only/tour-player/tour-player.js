@@ -1144,6 +1144,34 @@ export class PortfolioShowChat extends HTMLElement {
       ? !this.$.isPaused
       : Boolean(pendingTransportIntent?.play);
     const targetEntry = this.#playbackEntries[index] || null;
+    const targetDurationMs = this.#projectDurationMsByEntry.get(targetEntry?.id);
+    if (
+      index === this.#playbackEntries.length - 1
+      && Number.isFinite(targetDurationMs)
+      && targetMs >= targetDurationMs
+    ) {
+      this.#requestId += 1;
+      this.#stopSpeech('show-complete');
+      this.#transportPlaying = false;
+      this.#playRequested = false;
+      this.#resumePending = false;
+      this.$.isRunning = true;
+      this.$.isPaused = true;
+      this.$.resumeRequired = true;
+      this.#sceneIndex = 0;
+      this.#enterSegment(0, { startPaused: true, positionMs: 0 });
+      this.#showPlayer?.bind?.(this.#showConfig());
+      this.#syncPlayer();
+      this.dispatchEvent(new CustomEvent('portfolio-show-complete', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          reason: 'natural-end',
+          routeState: Object.freeze({ ...this.routeSnapshot, completed: true }),
+        },
+      }));
+      return true;
+    }
     const replacedBranchId = this.#replacementBranchIdFor(targetEntry);
     const activeBranchId = this.$.inBranch
       ? this.#session.snapshot.playback.episodeId
