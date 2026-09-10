@@ -496,6 +496,36 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
   assert.equal(currentUrl.searchParams.has('showTime'), false);
   assert.equal(currentUrl.searchParams.get('showPlay'), '0');
 
+  // Natural completion is a paused first-segment checkpoint. The external
+  // integration must retain the mounted player and route instead of applying
+  // explicit-stop cleanup, which would reopen the terminal segment.
+  currentUrl = new URL(
+    'https://portfolio.example/cv/?lang=ru&showMode=short&showEntry=finale&showTime=2345#profile',
+  );
+  chat.routeSnapshot = {
+    mode: 'short',
+    entryId: 'positioning',
+    detailId: '',
+    timeMs: 0,
+    play: false,
+    running: true,
+    completed: false,
+  };
+  chat.dispatchEvent(new CustomEvent('portfolio-show-complete', {
+    bubbles: true,
+    detail: {
+      reason: 'natural-end',
+      routeState: {
+        ...chat.routeSnapshot,
+        completed: true,
+      },
+    },
+  }));
+  await Promise.resolve();
+  assert.equal(currentUrl.searchParams.get('showEntry'), 'positioning');
+  assert.equal(currentUrl.searchParams.get('showPlay'), '0');
+  assert.deepEqual(selections, [], 'natural completion keeps the current player surface');
+
   chat.dispatchEvent(new CustomEvent('portfolio-show-start', { bubbles: true }));
   runtime.selectedId = 'projects/other';
   const terminalRouteState = {

@@ -854,6 +854,26 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const restoreOrigin = (event) => {
+    const naturalEnd = event?.type === 'portfolio-show-complete'
+      && event.detail?.reason === 'natural-end';
+    if (naturalEnd) {
+      // Natural completion already moved the shared player to the first
+      // paused segment. Keep that native placement mounted; tearing it down
+      // here makes the route reconciler recreate the old terminal segment.
+      cancelPendingRouteWrite();
+      const state = event.detail?.routeState;
+      running = false;
+      disposePresenter();
+      void runtimeCleanup.stopAndRelease('show-terminal', {
+        operation: 'show-terminal-cleanup',
+      });
+      originTargetId = '';
+      lastPlaybackEntryId = '';
+      staleNavDrawerCloser?.cancel();
+      scheduleDocumentSelectionClear();
+      scheduleRouteStateWrite(state);
+      return;
+    }
     clearMobileShowPlacement();
     cancelPendingRouteWrite();
     const wasRunning = running;
