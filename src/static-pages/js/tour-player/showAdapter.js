@@ -783,6 +783,20 @@ export function createCvShowDirectiveRunner(options = {}) {
                 if (!presentation && source.id === 'finale.workspace') {
                   return { status: 'success', skipped: 'finale-target-unavailable' };
                 }
+                // Finale chat actions are persistent controls rendered by the
+                // native player itself. They are already present and must not
+                // be sent through the attention provider as a second visual
+                // effect: that provider has no authored gesture to settle on
+                // the player host and can otherwise hold the narration at the
+                // last segment forever.
+                if (
+                  String(source.target || '').startsWith('chat.actions.')
+                  && presentationTarget?.matches?.('chat-show-player')
+                ) {
+                  reportInteractionActed();
+                  reportInteractionSettled();
+                  return { status: 'success', skipped: 'persistent-chat-actions' };
+                }
                 const providerPlanned = presentation?.requiresProviderAdmission === true;
                 if (
                   providerPlanned
