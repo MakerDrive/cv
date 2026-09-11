@@ -1794,6 +1794,8 @@ export class PortfolioShowChat extends HTMLElement {
       this.#appendSystemMessage(this.#message('tour.unavailable'));
       return;
     }
+    // Clear any previous seek failure so a retry attempt doesn't see stale state.
+    this.#lastAlignedSeekFailure = null;
     await this.#alignmentReady;
     let sceneSetupReceipt = null;
     try {

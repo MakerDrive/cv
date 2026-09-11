@@ -790,6 +790,8 @@ export function createCvShowDirectiveRunner(options = {}) {
                   source.id === 'cv-show:cue:finale.workspace:scroll'
                   || source.id === 'cv-show:cue:finale.contacts:scroll'
                   || source.id === 'cv-show:cue:finale.actions:scroll'
+                  || source.id === 'cv-show:cue:finale.history:scroll'
+                  || source.id === 'cv-show:cue:finale.scale-route:scroll'
                 ) {
                   reportInteractionActed();
                   reportInteractionSettled();
