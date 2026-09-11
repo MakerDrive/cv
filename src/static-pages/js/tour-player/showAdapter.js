@@ -783,6 +783,18 @@ export function createCvShowDirectiveRunner(options = {}) {
                 if (!presentation && source.id === 'finale.workspace') {
                   return { status: 'success', skipped: 'finale-target-unavailable' };
                 }
+                // Finale scroll cues are optional visual affordances. The targeted
+                // elements (project cards, contacts section) may be absent on
+                // pulse/alias pages. Skip gracefully instead of failing the setup.
+                if (
+                  source.id === 'cv-show:cue:finale.workspace:scroll'
+                  || source.id === 'cv-show:cue:finale.contacts:scroll'
+                  || source.id === 'cv-show:cue:finale.actions:scroll'
+                ) {
+                  reportInteractionActed();
+                  reportInteractionSettled();
+                  return { status: 'success', skipped: 'finale-scroll-target-unavailable' };
+                }
                 // Finale chat actions are persistent controls rendered by the
                 // native player itself. They are already present and must not
                 // be sent through the attention provider as a second visual
