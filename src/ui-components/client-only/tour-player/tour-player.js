@@ -1368,6 +1368,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.$.isRunning = true;
     this.$.isPaused = true;
     this.$.resumeRequired = true;
+    this.#showCompleted = true;
     this.#sceneIndex = 0;
     this.#enterSegment(0, { startPaused: true, positionMs: 0 });
     this.#showPlayer?.bind?.(this.#showConfig());

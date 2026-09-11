@@ -1057,6 +1057,31 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   assert.equal(pausedRoute.config.controller.isPlaying, false);
   assert.equal(pausedRoute.player.routeSnapshot.play, false);
 
+  const pausedScrub = createFixture();
+  const pausedScrubRoute = pausedScrub.player.applyShowRoute({
+    mode: 'short',
+    entryId: 'positioning',
+    timeMs: 1_500,
+    play: false,
+  });
+  assert.equal(await pausedScrubRoute, true);
+  await new Promise((resolve) => setImmediate(resolve));
+  pausedScrub.config.controller.seek(1, 2_200);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(pausedScrub.player.routeSnapshot.entryId, 'symbiote-workspace');
+  assert.equal(pausedScrub.player.routeSnapshot.timeMs, 2_200);
+  assert.equal(pausedScrub.player.routeSnapshot.play, false);
+  pausedScrub.config.controller.play();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(pausedScrub.player.routeSnapshot.entryId, 'symbiote-workspace');
+  assert.equal(pausedScrub.player.routeSnapshot.timeMs, 2_200);
+  assert.equal(pausedScrub.player.routeSnapshot.play, true);
+  assert.equal(
+    pausedScrub.showPlayer.states.at(-1)?.progress?.positionMs,
+    2_200,
+    'the native player transport receives the new seek position after Play',
+  );
+
   const pendingTrustedPlay = createFixture();
   const pendingTrustedPlayStarts = [];
   pendingTrustedPlay.dock.addEventListener('portfolio-show-start', (event) => {
@@ -1283,6 +1308,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(restarted.player.$.isRunning, true);
   assert.equal(restarted.player.$.isPaused, true);
+  assert.equal(restarted.player.routeSnapshot.completed, true);
   assert.equal(restarted.player.routeSnapshot.entryId, 'positioning');
   assert.equal(restarted.player.routeSnapshot.timeMs, 0);
   assert.deepEqual(completionEvents, [{

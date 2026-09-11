@@ -12,6 +12,8 @@ import {
   stripCvShowRoute,
 } from '../../src/static-pages/js/tour-player/routing.js';
 import { shouldHandleInAppActivation } from '../../src/static-pages/js/portfolioPulseRuntime.js';
+import { coordinatePortfolioShowOverlays } from '../../src/static-pages/js/showOverlayCoordinator.js';
+import { resolveVisibleShowPlayer } from '../../src/static-pages/js/showPlayerResolver.js';
 
 const policy = Object.freeze({
   entryIdsByMode: Object.freeze({
@@ -164,6 +166,52 @@ test('header CV Show activation requests the positioning Short Show directly', a
   assert.match(branch, /new CustomEvent\('portfolio-open-tour'/u);
   assert.match(branch, /entryId: 'positioning'/u);
   assert.match(branch, /source: 'portfolio-header'/u);
+});
+
+test('header Show activation coordinates native overlays before opening the player', async () => {
+  const tourSource = await readFile(
+    new URL('../../src/static-pages/js/tour-player/index.js', import.meta.url),
+    'utf8',
+  );
+  const hostSource = await readFile(
+    new URL('../../src/static-pages/js/index.js', import.meta.url),
+    'utf8',
+  );
+  assert.match(tourSource, /portfolio-show-overlay-coordinate/u);
+  assert.match(tourSource, /action: 'prepare-show'/u);
+  assert.match(hostSource, /portfolio-show-overlay-coordinate/u);
+  const calls = [];
+  const layout = { closeDrawer: (dock) => calls.push(['inner-drawer', dock]) };
+  const outerLayout = { closeDrawer: (dock) => calls.push(['outer-drawer', dock]) };
+  const dock = { close: (source) => calls.push(['dock', source]) };
+  coordinatePortfolioShowOverlays({ layout, outerLayout, dock });
+  assert.deepEqual(calls, [
+    ['outer-drawer', 'all'],
+    ['inner-drawer', 'all'],
+    ['dock', 'show-overlay-coordinate'],
+  ], 'all overlays close before Show opens');
+});
+
+test('visible player resolver follows the stable player across host reparenting', () => {
+  const hiddenPlayer = {
+    isConnected: true,
+    getBoundingClientRect: () => ({ width: 0, height: 0 }),
+  };
+  const visiblePlayer = {
+    isConnected: true,
+    getBoundingClientRect: () => ({ width: 320, height: 120 }),
+  };
+  const chat = { getShowPlayer: () => hiddenPlayer };
+  const workspace = {
+    querySelector: (selector) => selector.includes('agent-show-chat') ? chat : null,
+    querySelectorAll: () => [hiddenPlayer, visiblePlayer],
+  };
+  const documentRef = { defaultView: { getComputedStyle: () => ({ display: 'grid', visibility: 'visible' }) } };
+  assert.equal(resolveVisibleShowPlayer(workspace, { document: documentRef }), visiblePlayer);
+  visiblePlayer.getBoundingClientRect = () => ({ width: 0, height: 0 });
+  assert.equal(resolveVisibleShowPlayer(workspace, { document: documentRef }), null);
+  hiddenPlayer.getBoundingClientRect = () => ({ width: 320, height: 120 });
+  assert.equal(resolveVisibleShowPlayer(workspace, { document: documentRef }), hiddenPlayer);
 });
 
 test('CV Show route round-trips semantic state and preserves unrelated URL state', () => {

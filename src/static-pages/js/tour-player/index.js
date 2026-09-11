@@ -53,6 +53,7 @@ import { resolveCvShowPanelRevealState, shouldDeferMapAction } from './panelReve
 import { bindStaleNavDrawerCloser, createStaleNavDrawerCloser, shouldCloseStaleNavDrawer } from './drawerTransitionPolicy.js';
 import { createCvShowMediaTargetResolver } from './showMediaTargetResolution.js';
 import { createYouTubeNoCookieEmbedUrl } from './youtubeEmbedUrl.js';
+import { resolveVisibleShowPlayer } from '../showPlayerResolver.js';
 
 export const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
@@ -157,7 +158,7 @@ function resolveTargetElement(workspace, runtime, targetId) {
     // Some authored final actions are persistent controls on the native Show
     // player rather than transcript cards. Use that stable host when the
     // logical card has not been emitted, instead of the outer dock shell.
-    const showPlayer = workspace.querySelector('agent-dock-shell chat-show-player');
+    const showPlayer = resolveVisibleShowPlayer(workspace);
     if (visibleElement(showPlayer)) return showPlayer;
   }
   const direct = document.querySelector(`[data-tour-target="${escapeAttributeSelectorValue(targetId)}"]`);
@@ -170,7 +171,7 @@ function resolveTargetElement(workspace, runtime, targetId) {
   if (targetId === 'portfolio/workspace') return workspace;
   if (targetId === 'portfolio/viewer') return runtime.viewer || workspace.querySelector('.portfolio-viewer');
   if (targetId === 'portfolio.show-stage' || targetId.startsWith('chat.')) {
-    return workspace.querySelector('agent-dock-shell chat-show-player')
+    return resolveVisibleShowPlayer(workspace)
       || workspace.querySelector('agent-dock-shell');
   }
   if (targetId.startsWith('portfolio.map.')) {
@@ -1018,6 +1019,14 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onOpen = (event) => {
+    // Ask the host shell to atomically clear every existing overlay before
+    // projecting the shared Show player. The shell owns the concrete layout;
+    // this semantic request keeps header activation independent of its shape.
+    (getDock() || workspace).dispatchEvent(new CustomEvent('portfolio-show-overlay-coordinate', {
+      bubbles: true,
+      composed: true,
+      detail: { action: 'prepare-show', source: event.detail?.source || 'show' },
+    }));
     const requestedEntryId = String(event.detail?.entryId || '').trim();
     if (!requestedEntryId) {
       ensureTourOpen();
@@ -1052,6 +1061,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onDockResponsiveChange = () => {
+    if (running) return;
     queueMicrotask(syncMobileShowPlacement);
   };
 
@@ -1332,91 +1342,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   workspace.addEventListener('portfolio-show-skip-media', onSkipMedia);
   getDock()?.addEventListener('agent-dock-change', onDockChange);
   getDock()?.addEventListener('agent-dock-responsive-change', onDockResponsiveChange);
-  const drawerLevelRailSelector = 'layout-node[drawer-rail][drawer-rail-collapsed][data-drawer-dock="end"]';
-  const drawerLevelPrimarySelector = 'layout-node[mobile-dock="primary"]';
-  /** @type {ReturnType<typeof setTimeout> | number} */
-  let drawerLevelTimer = 0;
-  let innerDrawerObserver = null;
-  let outerDrawerObserver = null;
-  const clearDrawerLevelInline = () => {
-    const outerLayout = getDock()?.ref?.layout;
-    if (!outerLayout) return;
-    outerLayout.querySelectorAll('layout-node[drawer-rail][data-drawer-dock="end"]')
-      .forEach((node) => {
-        node.style.removeProperty('visibility');
-        node.style.removeProperty('pointer-events');
-      });
-    outerLayout.querySelector(drawerLevelPrimarySelector)
-      ?.style.removeProperty('inset-inline-end');
-  };
-  const applyDrawerLevelSuppression = () => {
-    const dock = getDock();
-    const outerLayout = dock?.ref?.layout;
-    const inner = workspace.querySelector('.portfolio-layout');
-    if (!dock || !outerLayout || !inner || !workspace.isConnected) {
-      clearDrawerLevelInline();
-      return;
-    }
-    const mobile = Boolean(outerLayout.hasAttribute('drawer-mode-active'));
-    const innerEndOpen = inner.hasAttribute('drawer-end-open');
-    const chatOpen = dock.hasAttribute('open');
-    const suppress = mobile && innerEndOpen && !chatOpen;
-    if (!suppress) {
-      clearDrawerLevelInline();
-      return;
-    }
-    const rail = outerLayout.querySelector(drawerLevelRailSelector);
-    const primary = outerLayout.querySelector(drawerLevelPrimarySelector);
-    // Hide the rail visually and make it inert. Do not toggle `display`:
-    // the provider projection writes its own inline display rules when a
-    // drawer closes, so display:none can stay stuck; visibility/pointer
-    // events are untouched by the projection and always restore.
-    if (rail) {
-      rail.style.setProperty('visibility', 'hidden', 'important');
-      rail.style.setProperty('pointer-events', 'none', 'important');
-    }
-    if (primary) primary.style.setProperty('inset-inline-end', '0px', 'important');
-  };
-  const syncDrawerLevel = () => {
-    applyDrawerLevelSuppression();
-    if (drawerLevelTimer) return;
-    // The drawer projection settles over a few frames after the attribute
-    // change; re-apply on a short schedule so the chat rail reliably returns.
-    const reapply = [0, 120, 320].map((delay) => setTimeout(() => {
-      if (!drawerLevelTimer) return;
-      applyDrawerLevelSuppression();
-    }, delay));
-    drawerLevelTimer = setTimeout(() => {
-      drawerLevelTimer = 0;
-      for (const t of reapply) clearTimeout(t);
-      applyDrawerLevelSuppression();
-    }, 420);
-  };
-  const onDrawerLevelChange = () => {
-    queueMicrotask(syncDrawerLevel);
-  };
-  if (typeof MutationObserver === 'function') {
-    const innerLayout = workspace.querySelector('.portfolio-layout');
-    if (innerLayout) {
-      innerDrawerObserver = new MutationObserver(onDrawerLevelChange);
-      innerDrawerObserver.observe(innerLayout, {
-        attributes: true,
-        attributeFilter: ['drawer-end-open', 'drawer-mode-active'],
-      });
-    }
-    const outerLayout = getDock()?.ref?.layout;
-    if (outerLayout) {
-      outerDrawerObserver = new MutationObserver(onDrawerLevelChange);
-      outerDrawerObserver.observe(outerLayout, {
-        attributes: true,
-        attributeFilter: ['drawer-end-open', 'drawer-end-rail', 'drawer-mode-active'],
-      });
-    }
-  }
-  getDock()?.addEventListener('agent-dock-change', onDrawerLevelChange);
-  getDock()?.addEventListener('agent-dock-responsive-change', onDrawerLevelChange);
   getDock()?.addEventListener('agent-show-layout-change', onShowLayoutChange);
-  queueMicrotask(syncDrawerLevel);  queueMicrotask(() => { void applyLocationRoute({ source: 'load' }); });
+  queueMicrotask(() => { void applyLocationRoute({ source: 'load' }); });
 
   return () => {
     document.removeEventListener('portfolio-open-tour', onOpen);
@@ -1439,18 +1366,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     workspace.removeEventListener('portfolio-show-skip-media', onSkipMedia);
     getDock()?.removeEventListener('agent-dock-change', onDockChange);
     getDock()?.removeEventListener('agent-dock-responsive-change', onDockResponsiveChange);
-    getDock()?.removeEventListener('agent-dock-change', onDrawerLevelChange);
-    getDock()?.removeEventListener('agent-dock-responsive-change', onDrawerLevelChange);
     getDock()?.removeEventListener('agent-show-layout-change', onShowLayoutChange);
-    innerDrawerObserver?.disconnect();
-    innerDrawerObserver = null;
-    outerDrawerObserver?.disconnect();
-    outerDrawerObserver = null;
-    if (drawerLevelTimer) {
-      clearTimeout(drawerLevelTimer);
-      drawerLevelTimer = 0;
-    }
-    applyDrawerLevelSuppression();
     interactionMonitor.dispose();
     document.removeEventListener('pointerdown', onGesturePointerDown, { capture: true });
     document.removeEventListener('pointermove', onGesturePointerMove, { capture: true });

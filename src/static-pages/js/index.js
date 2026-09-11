@@ -4,6 +4,7 @@ import {
   createPortfolioGraphSnapshotRuntime,
 } from './portfolioGraphSnapshot.js';
 import { createPortfolioGraphConnectionId } from '../data/portfolioGraphSnapshot.js';
+import { coordinatePortfolioShowOverlays } from './showOverlayCoordinator.js';
 
 let tourModule;
 
@@ -3761,6 +3762,13 @@ class PortfolioWorkspace extends HTMLElement {
           || (typeof window !== 'undefined'
             && window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT),
       );
+    });
+    dock.addEventListener('portfolio-show-overlay-coordinate', () => {
+      coordinatePortfolioShowOverlays({
+        layout,
+        outerLayout: dock.ref?.layout,
+        dock,
+      });
     });
     this.replaceChildren(template.content);
     // The dock may have entered its responsive state before this listener is
