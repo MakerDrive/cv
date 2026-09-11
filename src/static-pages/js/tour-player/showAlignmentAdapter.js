@@ -529,7 +529,11 @@ export function createCvShowAlignmentController({
           });
           snapshot = await tuple.execution.whenIdle();
           const terminal = snapshot.terminal.find(({ cellId }) => cellId === cell.cellId);
-          if (terminal?.status !== 'completed') {
+          // An expired cue is reported `skipped` (not `failed`): the authored
+          // start is already behind the checkpoint clock. Restoring a paused
+          // mid-segment position must not treat that as a setup failure and
+          // re-trigger a scene retry loop.
+          if (terminal?.status === 'failed' || !terminal) {
             const reason = terminalReasons.get(cell.cellId);
             throw Object.assign(
               new Error(`CV Show presentation setup failed: ${entry.id}/${cell.cellId}`),
@@ -683,7 +687,10 @@ export function createCvShowAlignmentController({
           });
           const idle = await tuple.execution.whenIdle();
           const terminal = idle.terminal.find(({ cellId }) => cellId === cell.cellId);
-          if (terminal?.status !== 'completed') {
+          // Match runSetup: an expired held cell is `skipped`, not `failed`.
+          // Only a provider failure or a missing cell aborts the checkpoint
+          // restore; a skipped cue leaves playback in a settle-able state.
+          if (terminal?.status === 'failed' || !terminal) {
             throw attentionGateFailure(entry.id, cell.cellId, null, idle);
           }
         }
