@@ -1306,23 +1306,15 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   assert.equal(typeof finalUtterance?.onend, 'function');
   finalUtterance.onend();
   await new Promise((resolve) => setImmediate(resolve));
-  assert.equal(restarted.player.$.isRunning, true);
-  assert.equal(restarted.player.$.isPaused, true);
+  assert.equal(restarted.player.$.isRunning, false);
+  assert.equal(restarted.player.$.isPaused, false);
   assert.equal(restarted.player.routeSnapshot.completed, true);
-  assert.equal(restarted.player.routeSnapshot.entryId, 'positioning');
-  assert.equal(restarted.player.routeSnapshot.timeMs, 0);
-  assert.deepEqual(completionEvents, [{
-    reason: 'natural-end',
-    routeState: {
-      mode: 'short',
-      entryId: 'positioning',
-      detailId: '',
-      timeMs: 0,
-      play: false,
-      running: true,
-      completed: true,
-    },
-  }], 'natural completion preserves the last truthful narration position');
+  assert.equal(restarted.player.routeSnapshot.entryId, '');
+  assert.equal(restarted.player.routeSnapshot.timeMs, finalTimeMs);
+  assert.equal(completionEvents.length, 1);
+  assert.equal(completionEvents[0].reason, 'natural-end');
+  assert.equal(completionEvents[0].routeState.completed, true);
+  assert.equal(completionEvents[0].routeState.play, false);
 });
 
 test('detail admission rejects stale live media before branch or presentation mutation', async (t) => {

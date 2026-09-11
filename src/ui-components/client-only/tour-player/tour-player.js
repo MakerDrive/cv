@@ -1150,7 +1150,7 @@ export class PortfolioShowChat extends HTMLElement {
       && Number.isFinite(targetDurationMs)
       && targetMs >= targetDurationMs
     ) {
-      this.#completeNaturally();
+      this.stopShow({ completed: true, reason: 'natural-end' });
       return true;
     }
     const replacedBranchId = this.#replacementBranchIdFor(targetEntry);
@@ -1345,42 +1345,11 @@ export class PortfolioShowChat extends HTMLElement {
   #advanceShort(requestId) {
     if (requestId !== this.#requestId || !this.$.isRunning || this.$.isPaused || this.$.inBranch) return;
     if (this.#sceneIndex >= this.#playbackEntries.length - 1) {
-      this.#completeNaturally();
+      this.stopShow({ completed: true, reason: 'natural-end' });
       return;
     }
     this.#sceneIndex += 1;
     this.#enterSegment(this.#sceneIndex);
-  }
-
-  #completeNaturally() {
-    // Completion is a stable paused checkpoint. Clear any detail branch before
-    // entering the first Short segment so seek and narration-end share one
-    // state transition and route reconciliation cannot revive the old branch.
-    this.#requestId += 1;
-    this.#stopSpeech('show-complete');
-    this.#transportPlaying = false;
-    this.#playRequested = false;
-    this.#resumePending = false;
-    if (this.$.inBranch) this.#session.returnFromBranch();
-    this.$.inBranch = false;
-    this.#branchReturnPlayback = null;
-    this.#completedDetailReview = false;
-    this.$.isRunning = true;
-    this.$.isPaused = true;
-    this.$.resumeRequired = true;
-    this.#showCompleted = true;
-    this.#sceneIndex = 0;
-    this.#enterSegment(0, { startPaused: true, positionMs: 0 });
-    this.#showPlayer?.bind?.(this.#showConfig());
-    this.#syncPlayer();
-    this.dispatchEvent(new CustomEvent('portfolio-show-complete', {
-      bubbles: true,
-      composed: true,
-      detail: {
-        reason: 'natural-end',
-        routeState: Object.freeze({ ...this.routeSnapshot, completed: true }),
-      },
-    }));
   }
 
   #publishPhysicalStart(entry, requestId) {
