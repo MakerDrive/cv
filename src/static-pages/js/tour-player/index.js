@@ -189,7 +189,9 @@ function resolveTargetElement(workspace, runtime, targetId) {
       return findVisibleProfileExperience(viewer, true) || viewer;
     }
     if (targetId === 'profile.contacts') {
-      return viewer?.querySelector('a[href*="linkedin.com"], a[href*="t.me/"]') || viewer;
+      return viewer?.querySelector(
+        'a[href*="linkedin.com"], a[href*="github.com"], a[href*="youtube.com"], a[href*="facebook.com"], a[href*="t.me/"]'
+      ) || viewer;
     }
     return viewer;
   }
@@ -1202,16 +1204,33 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     const targetByAction = {
       projects: 'projects/index',
       resume: 'profile/photo',
-      contact: 'profile/photo',
+      'contact-github': 'profile/photo',
+      'contact-linkedin': 'profile/photo',
+      'contact-youtube': 'profile/photo',
+      'contact-facebook': 'profile/photo',
+      'contact-telegram': 'profile/photo',
+      'pdf-download': 'profile/photo',
     };
-    const targetId = targetByAction[event.detail?.action];
+    const action = event.detail?.action;
+    const targetId = targetByAction[action];
     if (!targetId || !runtime.entries.has(targetId)) return;
     runtime.select(targetId, { focus: true, updateUrl: false });
-    if (event.detail?.action === 'contact') {
+    if (action.startsWith('contact-')) {
       queueMicrotask(() => {
-        const contact = resolveTargetElement(workspace, runtime, 'profile.contacts');
+        const platform = action.replace('contact-', '');
+        const selector = platform === 'telegram'
+          ? 'a[href*="t.me/"]'
+          : `a[href*="${platform}.com"]`;
+        const contact = resolveTargetElement(workspace, runtime, 'profile.contacts')?.querySelector(selector);
         contact?.focus?.();
         activateCvShowUserAction('contact', contact);
+      });
+    }
+    if (action === 'pdf-download') {
+      queueMicrotask(() => {
+        const download = resolveTargetElement(workspace, runtime, 'profile.contacts')?.querySelector('a[href*="cv-"][href$=".pdf"]');
+        download?.focus?.();
+        activateCvShowUserAction('contact', download);
       });
     }
   };
