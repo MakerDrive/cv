@@ -775,7 +775,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                 // The finale contact cue is an optional visual affordance. The
                 // persistent chat actions remain available even when the
                 // profile contact section is not mounted on the current page.
-                if (!presentationTarget && String(source.id || '').startsWith('finale.contacts')) {
+                if (!presentationTarget && String(source.id || '').includes('finale.contacts')) {
                   reportInteractionActed();
                   reportInteractionSettled();
                   return { status: 'success', skipped: 'finale-target-unavailable' };
