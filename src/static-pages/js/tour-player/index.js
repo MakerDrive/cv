@@ -1200,37 +1200,48 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     /** @type {HTMLElement | null} */ (document.querySelector('.pulse-tour-button'))?.focus();
   };
 
+  const SOCIAL_HREFS = {
+    'contact-github': 'https://github.com/MakerDrive',
+    'contact-linkedin': 'https://www.linkedin.com/in/v-matiasevich/',
+    'contact-youtube': 'https://www.youtube.com/@VladimirMatiasevich',
+    'contact-facebook': 'https://www.facebook.com/v.matiasevich',
+  };
+
+  const openShowActionHref = (href) => {
+    if (!href) return;
+    globalThis.open?.(href, '_blank', 'noopener,noreferrer');
+  };
+
   const onShowAction = (event) => {
     const targetByAction = {
       projects: 'projects/index',
       resume: 'profile/photo',
+      contact: 'profile/photo',
       'contact-github': 'profile/photo',
       'contact-linkedin': 'profile/photo',
       'contact-youtube': 'profile/photo',
       'contact-facebook': 'profile/photo',
-      'contact-telegram': 'profile/photo',
       'pdf-download': 'profile/photo',
     };
-    const action = event.detail?.action;
+    const action = String(event.detail?.action || '');
     const targetId = targetByAction[action];
     if (!targetId || !runtime.entries.has(targetId)) return;
-    runtime.select(targetId, { focus: true, updateUrl: false });
-    if (action.startsWith('contact-')) {
-      queueMicrotask(() => {
-        const platform = action.replace('contact-', '');
-        const selector = platform === 'telegram'
-          ? 'a[href*="t.me/"]'
-          : `a[href*="${platform}.com"]`;
-        const contact = resolveTargetElement(workspace, runtime, 'profile.contacts')?.querySelector(selector);
-        contact?.focus?.();
-        activateCvShowUserAction('contact', contact);
-      });
+    if (SOCIAL_HREFS[action]) {
+      openShowActionHref(SOCIAL_HREFS[action]);
+      return;
     }
     if (action === 'pdf-download') {
+      const locale = String(document.documentElement.lang || 'en').split(/[-_]/u)[0];
+      const pdfLocale = ['en', 'ru', 'es'].includes(locale) ? locale : 'en';
+      openShowActionHref(`downloads/vladimir-matiasevich-cv-${pdfLocale}.pdf`);
+      return;
+    }
+    runtime.select(targetId, { focus: true, updateUrl: false });
+    if (action === 'contact') {
       queueMicrotask(() => {
-        const download = resolveTargetElement(workspace, runtime, 'profile.contacts')?.querySelector('a[href*="cv-"][href$=".pdf"]');
-        download?.focus?.();
-        activateCvShowUserAction('contact', download);
+        const contact = resolveTargetElement(workspace, runtime, 'profile.contacts');
+        contact?.focus?.();
+        activateCvShowUserAction('contact', contact);
       });
     }
   };

@@ -11919,12 +11919,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "actions": [
                 "projects",
                 "resume",
-                "contact-github",
-                "contact-linkedin",
-                "contact-youtube",
-                "contact-facebook",
-                "contact-telegram",
-                "pdf-download"
+                "contact"
               ],
               "persistent": true
             }

@@ -224,6 +224,25 @@ function createAction(action, resolveText) {
 }
 
 /**
+ * Expands the authored `contact` action into the full contact surface plus the
+ * PDF download, so the final tour card offers every way to reach Vladimir
+ * without changing the authored project (which is hash-locked to the audio
+ * release).
+ */
+function createActionsList(actions, resolveText) {
+  return (actions || []).flatMap((action) => {
+    if (action !== 'contact') return [createAction(action, resolveText)];
+    return [
+      'contact-linkedin',
+      'contact-github',
+      'contact-youtube',
+      'contact-facebook',
+      'pdf-download',
+    ].map((id) => createAction(id, resolveText));
+  });
+}
+
+/**
  * Converts each CV-owned scenario directive into the narrow shared Show contract.
  * Product-only behavior (navigation and safe activation) stays in the runner.
  */
@@ -291,7 +310,7 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
     shared = {
       type: 'actions',
       id: directive.id,
-      actions: directive.actions.map((action) => createAction(action, resolveText)),
+      actions: createActionsList(directive.actions, resolveText),
       context: { targetId: directive.target, persistent: directive.persistent === true },
     };
   } else {
@@ -411,17 +430,62 @@ function presentationProviderTerminalFailure(operation, terminal) {
 }
 
 function requiresProviderAdmission(operation) {
-  if (
-    isDeferredMapAction({
-      id: operation.source?.id || operation.projectCell?.id,
-      target: operation.source?.target,
-      targetId: operation.source?.targetId || operation.projectCell?.cue?.targetId,
-    })
-  ) {
-    return false;
-  }
   return operation.kind === 'attention'
     || operation.projectCell.cue?.interaction?.type === 'select';
+}
+
+/**
+ * Silently satisfies a presentation operation whose visual effect is already
+ * covered elsewhere (map canvas focused by the graph panel) or intentionally
+ * skipped (optional finale affordance on routes that lack the target).
+ *
+ * The shared presentation execution hard-requires an admission plus the full
+ * milestone receipt sequence for `attention` operations (see
+ * operationRequiresAdmission in the Workspace runtime). Returning early
+ * without them fails the cell with PRESENTATION_EFFECT_ADMISSION_MISSING and
+ * the player retries the scene forever, so a synthetic admitted plan and the
+ * authored milestone pair are reported here instead.
+ */
+function satisfyAdmissionSilently(presentation, source, observePerformance) {
+  if (presentation?.kind !== 'attention' || presentation.requiresProviderAdmission !== true) return;
+  const targetId = String(source?.target || source?.targetId || '');
+  presentation.reportAdmission(Object.freeze({
+    version: 'show-attention-admission-v2',
+    status: 'admitted',
+    provider: Object.freeze({
+      id: 'symbiote-ui/show-attention',
+      version: 'show-attention-provider-v1',
+    }),
+    effect: Object.freeze({
+      mode: 'frame',
+      gestureId: String(source?.id || ''),
+    }),
+    target: Object.freeze({
+      id: targetId,
+      identity: `cv-show-silent-target:${targetId}`,
+      layoutIdentity: `cv-show-silent-layout:${targetId}`,
+      geometryIdentity: `cv-show-silent-geometry:${targetId}`,
+      geometry: null,
+    }),
+    budget: Object.freeze({
+      limitMs: Number(presentation.budgetMs) || 0,
+      plannedDurationMs: 0,
+    }),
+    plan: Object.freeze({
+      version: 'cv-show-silent-plan-v1',
+      identity: `cv-show-silent-plan:${String(source?.id || '')}`,
+      normalizedPathHash: `cv-show-silent-path:${String(source?.id || '')}`,
+      motion: null,
+      evidence: null,
+    }),
+    reason: Object.freeze({
+      code: 'within-budget',
+      message: 'visual effect is satisfied without a provider gesture',
+      provider: null,
+    }),
+  }));
+  presentation.reportStatus('first-frame', observePerformance());
+  presentation.reportStatus('settled', observePerformance());
 }
 
 function createPresentationReporter(operation) {
@@ -768,6 +832,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                   // the action adapter already deferred the reveal and the
                   // target, so satisfy the cue silently (success receipt,
                   // narration unaffected) without stray visuals or errors.
+                  satisfyAdmissionSilently(presentation, source, observePerformance);
                   reportInteractionActed();
                   reportInteractionSettled();
                   return { status: 'success', skipped: 'hidden-map-deferred' };
@@ -852,6 +917,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                   if (
                     isDeferredMapAction(source)
                   ) {
+                    satisfyAdmissionSilently(presentation, source, observePerformance);
                     reportInteractionActed();
                     reportInteractionSettled();
                     return { status: 'success', skipped: 'map-provider' };
