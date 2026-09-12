@@ -786,10 +786,14 @@ export function createCvShowDirectiveRunner(options = {}) {
                 // Finale scroll cues are optional visual affordances. The targeted
                 // elements (project cards, contacts section) may be absent on
                 // pulse/alias pages. Skip gracefully instead of failing the setup.
+                // Also skip the click cue (cv-show:cue:finale.actions) since it
+                // targets the same chat.actions.finale element and would fail
+                // if the action card isn't rendered yet or has stale actions.
                 if (
                   source.id === 'cv-show:cue:finale.workspace:scroll'
                   || source.id === 'cv-show:cue:finale.contacts:scroll'
                   || source.id === 'cv-show:cue:finale.actions:scroll'
+                  || source.id === 'cv-show:cue:finale.actions'
                   || source.id === 'cv-show:cue:finale.history:scroll'
                   || source.id === 'cv-show:cue:finale.scale-route:scroll'
                 ) {
