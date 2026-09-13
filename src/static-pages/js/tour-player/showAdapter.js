@@ -234,6 +234,7 @@ function createActionsList(actions, resolveText) {
     if (action !== 'contact') return [createAction(action, resolveText)];
     return [
       'contact-linkedin',
+      'contact-telegram',
       'contact-github',
       'contact-youtube',
       'contact-facebook',

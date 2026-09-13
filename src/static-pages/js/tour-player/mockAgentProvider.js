@@ -3,7 +3,22 @@ import { createScriptedAgentProvider } from 'symbiote-ui/chat/show-chat';
 export const CV_SHOW_CONTACT_ACTIONS = Object.freeze({
   'contact-linkedin': 'https://www.linkedin.com/in/v-matiasevich/',
   'contact-telegram': 'https://t.me/text2code',
+  'contact-github': 'https://github.com/MakerDrive',
+  'contact-youtube': 'https://www.youtube.com/@VladimirMatiasevich',
+  'contact-facebook': 'https://www.facebook.com/v.matiasevich',
 });
+
+function resolveCvShowPdfDownloadUrl() {
+  const locale = String(globalThis.document?.documentElement?.lang || 'en')
+    .trim()
+    .toLowerCase()
+    .split(/[-_]/u)[0];
+  const pdfLocale = ['en', 'ru', 'es'].includes(locale) ? locale : 'en';
+  return new URL(
+    `downloads/vladimir-matiasevich-cv-${pdfLocale}.pdf`,
+    globalThis.document?.baseURI,
+  ).href;
+}
 
 const COPY = Object.freeze({
   en: Object.freeze({
@@ -113,5 +128,6 @@ export function createCvShowMockAgentProvider({ locale = 'en' } = {}) {
 
 export function resolveTrustedCvContactAction(actionId, trustedActionId) {
   if (actionId !== trustedActionId) return '';
+  if (actionId === 'pdf-download') return resolveCvShowPdfDownloadUrl();
   return CV_SHOW_CONTACT_ACTIONS[actionId] || '';
 }
