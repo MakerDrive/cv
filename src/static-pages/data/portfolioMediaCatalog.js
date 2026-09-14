@@ -90,6 +90,9 @@ function image(slug, name, { src, label, projectPage, targetIds }) {
 }
 
 export const PORTFOLIO_MEDIA_CATALOG = Object.freeze([
+  youtube('qsXmS4mFvYc', 'adaptive-maximo-workbench', 'Agentic EAM Demo 1'),
+  youtube('DUzUnbO2VVs', 'adaptive-maximo-workbench', 'XR EAM Example'),
+
   youtube('c3cCmDqO04c', 'megavisor', 'MEGAVISOR overview'),
   youtube('f1cB4X1wI50', 'megavisor', 'PhotoPizza turntable origin'),
   youtube('cFPJqtcWNSU', 'megavisor', 'DIY capture system origin'),

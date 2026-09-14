@@ -1,0 +1,486 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-uN/pKHVonyrkGaWxUv6OkdWSP27T9uq8+GNaVZnC8cU=",
+  "media": {
+    "durationMs": 43950,
+    "hash": "sha256:319ae71afc81c094bfab238685db64a823a4088dbef377f77391fd11ac30547e",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-UcLvWjpMbN9lEQbFqfX+gm6HKjMPUExk9uSqG9hbdxM=",
+  "turns": [
+    {
+      "endMs": 43950,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Symbiote Engine предоставляет компонуемые серверные примитивы. Это обработчики, команды, графы выполнения и хранение состояния. Идея здесь похожа на Symbiote UI. Я не хочу жестко зашивать всю серверную логику внутрь одного продукта. Продукт может собрать свой процесс из небольших функциональных блоков. Workspace затем связывает этот процесс с интерфейсом и переносимой конфигурацией. Получается отдельный визуальный слой, отдельный исполнительный слой и понятный контракт между ними. Я специально сохраняю это разделение. Engine должен оставаться пригодным не только для Workspace. Его можно использовать в разных сервисах и рабочих средах, где нужен граф исполнения, состояние и управляемая автоматизация.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 560,
+          "startMs": 0,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 900,
+          "startMs": 560,
+          "text": "Engine"
+        },
+        {
+          "endMs": 1800,
+          "startMs": 900,
+          "text": "предоставляет"
+        },
+        {
+          "endMs": 2640,
+          "startMs": 1800,
+          "text": "компонуемые"
+        },
+        {
+          "endMs": 3260,
+          "startMs": 2640,
+          "text": "серверные"
+        },
+        {
+          "endMs": 3920,
+          "startMs": 3260,
+          "text": "примитивы."
+        },
+        {
+          "endMs": 4540,
+          "startMs": 4060,
+          "text": "Это"
+        },
+        {
+          "endMs": 5280,
+          "startMs": 4540,
+          "text": "обработчики,"
+        },
+        {
+          "endMs": 5900,
+          "startMs": 5460,
+          "text": "команды,"
+        },
+        {
+          "endMs": 6340,
+          "startMs": 5980,
+          "text": "графы"
+        },
+        {
+          "endMs": 6900,
+          "startMs": 6340,
+          "text": "выполнения"
+        },
+        {
+          "endMs": 7160,
+          "startMs": 6900,
+          "text": "и"
+        },
+        {
+          "endMs": 7640,
+          "startMs": 7160,
+          "text": "хранение"
+        },
+        {
+          "endMs": 8320,
+          "startMs": 7640,
+          "text": "состояния."
+        },
+        {
+          "endMs": 8960,
+          "startMs": 8520,
+          "text": "Идея"
+        },
+        {
+          "endMs": 9220,
+          "startMs": 8960,
+          "text": "здесь"
+        },
+        {
+          "endMs": 9740,
+          "startMs": 9220,
+          "text": "похожа"
+        },
+        {
+          "endMs": 9840,
+          "startMs": 9740,
+          "text": "на"
+        },
+        {
+          "endMs": 10300,
+          "startMs": 9840,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 10640,
+          "startMs": 10300,
+          "text": "UI."
+        },
+        {
+          "endMs": 11520,
+          "startMs": 11260,
+          "text": "Я"
+        },
+        {
+          "endMs": 11660,
+          "startMs": 11520,
+          "text": "не"
+        },
+        {
+          "endMs": 11940,
+          "startMs": 11660,
+          "text": "хочу"
+        },
+        {
+          "endMs": 12560,
+          "startMs": 11940,
+          "text": "жестко"
+        },
+        {
+          "endMs": 12960,
+          "startMs": 12560,
+          "text": "зашивать"
+        },
+        {
+          "endMs": 13260,
+          "startMs": 12960,
+          "text": "всю"
+        },
+        {
+          "endMs": 13880,
+          "startMs": 13260,
+          "text": "серверную"
+        },
+        {
+          "endMs": 14400,
+          "startMs": 13880,
+          "text": "логику"
+        },
+        {
+          "endMs": 14920,
+          "startMs": 14400,
+          "text": "внутрь"
+        },
+        {
+          "endMs": 15200,
+          "startMs": 14920,
+          "text": "одного"
+        },
+        {
+          "endMs": 15880,
+          "startMs": 15200,
+          "text": "продукта."
+        },
+        {
+          "endMs": 16680,
+          "startMs": 16220,
+          "text": "Продукт"
+        },
+        {
+          "endMs": 16900,
+          "startMs": 16680,
+          "text": "может"
+        },
+        {
+          "endMs": 17260,
+          "startMs": 16900,
+          "text": "собрать"
+        },
+        {
+          "endMs": 17460,
+          "startMs": 17260,
+          "text": "свой"
+        },
+        {
+          "endMs": 17820,
+          "startMs": 17460,
+          "text": "процесс"
+        },
+        {
+          "endMs": 18240,
+          "startMs": 17820,
+          "text": "из"
+        },
+        {
+          "endMs": 18720,
+          "startMs": 18240,
+          "text": "небольших"
+        },
+        {
+          "endMs": 19480,
+          "startMs": 18720,
+          "text": "функциональных"
+        },
+        {
+          "endMs": 20020,
+          "startMs": 19480,
+          "text": "блоков."
+        },
+        {
+          "endMs": 20680,
+          "startMs": 20200,
+          "text": "Workspace"
+        },
+        {
+          "endMs": 21020,
+          "startMs": 20680,
+          "text": "затем"
+        },
+        {
+          "endMs": 21600,
+          "startMs": 21020,
+          "text": "связывает"
+        },
+        {
+          "endMs": 21800,
+          "startMs": 21600,
+          "text": "этот"
+        },
+        {
+          "endMs": 22200,
+          "startMs": 21800,
+          "text": "процесс"
+        },
+        {
+          "endMs": 22400,
+          "startMs": 22200,
+          "text": "с"
+        },
+        {
+          "endMs": 23060,
+          "startMs": 22400,
+          "text": "интерфейсом"
+        },
+        {
+          "endMs": 23320,
+          "startMs": 23060,
+          "text": "и"
+        },
+        {
+          "endMs": 24020,
+          "startMs": 23320,
+          "text": "переносимой"
+        },
+        {
+          "endMs": 24860,
+          "startMs": 24020,
+          "text": "конфигурацией."
+        },
+        {
+          "endMs": 25740,
+          "startMs": 25000,
+          "text": "Получается"
+        },
+        {
+          "endMs": 26440,
+          "startMs": 25740,
+          "text": "отдельный"
+        },
+        {
+          "endMs": 26860,
+          "startMs": 26440,
+          "text": "визуальный"
+        },
+        {
+          "endMs": 27220,
+          "startMs": 26860,
+          "text": "слой,"
+        },
+        {
+          "endMs": 28140,
+          "startMs": 27500,
+          "text": "отдельный"
+        },
+        {
+          "endMs": 28920,
+          "startMs": 28140,
+          "text": "исполнительный"
+        },
+        {
+          "endMs": 29260,
+          "startMs": 28920,
+          "text": "слой"
+        },
+        {
+          "endMs": 29660,
+          "startMs": 29260,
+          "text": "и"
+        },
+        {
+          "endMs": 30140,
+          "startMs": 29660,
+          "text": "понятный"
+        },
+        {
+          "endMs": 30700,
+          "startMs": 30140,
+          "text": "контракт"
+        },
+        {
+          "endMs": 30880,
+          "startMs": 30700,
+          "text": "между"
+        },
+        {
+          "endMs": 31200,
+          "startMs": 30880,
+          "text": "ними."
+        },
+        {
+          "endMs": 31600,
+          "startMs": 31380,
+          "text": "Я"
+        },
+        {
+          "endMs": 32060,
+          "startMs": 31600,
+          "text": "специально"
+        },
+        {
+          "endMs": 32500,
+          "startMs": 32060,
+          "text": "сохраняю"
+        },
+        {
+          "endMs": 32640,
+          "startMs": 32500,
+          "text": "это"
+        },
+        {
+          "endMs": 33160,
+          "startMs": 32640,
+          "text": "разделение."
+        },
+        {
+          "endMs": 33620,
+          "startMs": 33400,
+          "text": "Engine"
+        },
+        {
+          "endMs": 33940,
+          "startMs": 33620,
+          "text": "должен"
+        },
+        {
+          "endMs": 34440,
+          "startMs": 33940,
+          "text": "оставаться"
+        },
+        {
+          "endMs": 34940,
+          "startMs": 34440,
+          "text": "пригодным"
+        },
+        {
+          "endMs": 35100,
+          "startMs": 34940,
+          "text": "не"
+        },
+        {
+          "endMs": 35360,
+          "startMs": 35100,
+          "text": "только"
+        },
+        {
+          "endMs": 35540,
+          "startMs": 35360,
+          "text": "для"
+        },
+        {
+          "endMs": 36040,
+          "startMs": 35540,
+          "text": "Workspace."
+        },
+        {
+          "endMs": 36560,
+          "startMs": 36300,
+          "text": "Его"
+        },
+        {
+          "endMs": 36840,
+          "startMs": 36560,
+          "text": "можно"
+        },
+        {
+          "endMs": 37260,
+          "startMs": 36840,
+          "text": "использовать"
+        },
+        {
+          "endMs": 37460,
+          "startMs": 37260,
+          "text": "в"
+        },
+        {
+          "endMs": 37700,
+          "startMs": 37460,
+          "text": "разных"
+        },
+        {
+          "endMs": 38320,
+          "startMs": 37700,
+          "text": "сервисах"
+        },
+        {
+          "endMs": 38500,
+          "startMs": 38320,
+          "text": "и"
+        },
+        {
+          "endMs": 38980,
+          "startMs": 38500,
+          "text": "рабочих"
+        },
+        {
+          "endMs": 39480,
+          "startMs": 38980,
+          "text": "средах,"
+        },
+        {
+          "endMs": 39740,
+          "startMs": 39560,
+          "text": "где"
+        },
+        {
+          "endMs": 40100,
+          "startMs": 39740,
+          "text": "нужен"
+        },
+        {
+          "endMs": 40420,
+          "startMs": 40100,
+          "text": "граф"
+        },
+        {
+          "endMs": 41140,
+          "startMs": 40420,
+          "text": "исполнения,"
+        },
+        {
+          "endMs": 42040,
+          "startMs": 41440,
+          "text": "состояние"
+        },
+        {
+          "endMs": 42180,
+          "startMs": 42040,
+          "text": "и"
+        },
+        {
+          "endMs": 42800,
+          "startMs": 42180,
+          "text": "управляемая"
+        },
+        {
+          "endMs": 43760,
+          "startMs": 42800,
+          "text": "автоматизация."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

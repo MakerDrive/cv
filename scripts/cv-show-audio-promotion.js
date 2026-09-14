@@ -87,6 +87,9 @@ function validateAggregate(aggregate) {
   let approvalProjection = aggregate?.approval && {
     schemaVersion: aggregate.approval.schemaVersion,
     approved: aggregate.approval.approved,
+    ...(aggregate.approval.acceptanceMode
+      ? { acceptanceMode: aggregate.approval.acceptanceMode }
+      : {}),
     releaseId: aggregate.approval.releaseId,
     artifactTreeHash: aggregate.approval.artifactTreeHash,
     verificationHash: aggregate.approval.verificationHash,

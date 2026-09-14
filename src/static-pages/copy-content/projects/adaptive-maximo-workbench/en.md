@@ -22,6 +22,12 @@ The work-order surface keeps the queue, status, priority, and related operationa
 :::article-block asset-context
 Asset and location context stays linked to the selected work order, so a person and an agent can inspect the same current information.
 
+:::article-block agentic-eam-demo
+Agentic EAM Demo 1 shows the agent assembling a workspace for a specific task, then explaining the interface it created.
+
+:::article-block xr-eam-example
+XR EAM Example extends the same idea into spatial interaction, with a connected three-dimensional asset that can be picked up, rotated, and inspected.
+
 :::article-block safe-actions
 The interface declares the actions available in the current state. Any operation that could change an external system remains unavailable in this public demo.
 

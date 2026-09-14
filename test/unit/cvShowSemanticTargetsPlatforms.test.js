@@ -64,6 +64,8 @@ const EXPECTED_ORDER = Object.freeze({
     'work-order-demo',
     'work-orders',
     'asset-context',
+    'agentic-eam-demo',
+    'xr-eam-example',
     'safe-actions',
     'integration-boundary',
   ],

@@ -14,6 +14,9 @@ import {
 import {
   CV_SHOW_PRESENTATION_PROJECT,
 } from '../../src/static-pages/data/cvShowPresentationProject.js';
+import {
+  CV_SHOW_WEB_AUDIO_RELEASE,
+} from '../../src/static-pages/data/cvShowWebAudioRelease.js';
 
 class FakeExecution {
   constructor() {
@@ -219,10 +222,18 @@ async function settleTurns(count = 12) {
 test('real finale execution settles native audio end without a final timeupdate or a playback failure', async () => {
   const media = new ControlledMedia();
   const failures = [];
+  const webAudioBase = new URL('../../src/static-pages/copy-cv-show-audio/', import.meta.url);
+  const webAudioManifest = JSON.parse(await readFile(
+    new URL(`${CV_SHOW_WEB_AUDIO_RELEASE.manifest.path}`, webAudioBase),
+    'utf8',
+  ));
+  const finaleClipEntry = webAudioManifest.clips.find(({ id }) => id === 'finale');
   const sequence = JSON.parse(await readFile(new URL(
-    '../../src/static-pages/copy-cv-show-audio/barzana-2/d36ab3bd2685565d0e816a1e5602c3891eae3384be277bc2b3b7222c5688b8b5/aligned/16-short-finale.json',
-    import.meta.url,
+    `${CV_SHOW_WEB_AUDIO_RELEASE.manifest.path}/../${finaleClipEntry.alignedSequenceFile}`
+      .replace(/\/+/, '/'),
+    webAudioBase,
   ), 'utf8'));
+
   const tuple = createCvShowEntryTuple(
     CV_SHOW_PRESENTATION_PROJECT,
     'finale',

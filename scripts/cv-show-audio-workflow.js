@@ -37,6 +37,11 @@ import {
   createCvShowModelServiceClient,
 } from './cv-show-model-service-client.js';
 import {
+  MACHINE_REVIEW_THRESHOLDS,
+  computeSpeechMetrics,
+  evaluateMachineReview,
+} from './cv-show-audio-machine-review.js';
+import {
   publishCvShowWebAudio,
 } from './cv-show-web-audio-publisher.js';
 import {
@@ -1167,6 +1172,57 @@ export async function createCvShowAudioWorkflow({
     }
     return freezeDeep(states);
   };
+  let machineVerifyClip = async ({ disposition, wavHash, synthesisAttemptHash }) => {
+    let run = durableStorage.openRun(disposition.runnerPlan);
+    let wavPath = path.join(run.runDirectory, 'artifacts', `${wavHash}.bin`);
+    let wavBytes = await fs.readFile(wavPath);
+    let targetText = disposition.runnerPlan.timeline.turns[0].text;
+    let transcript = await modelClient.transcribe({
+      wavBytes,
+      language: profile.asr?.locale || 'ru',
+    });
+    let { metrics, counts, critical } = computeSpeechMetrics({
+      authoredText: targetText,
+      observedText: transcript.text,
+    });
+    let approved = evaluateMachineReview(metrics, critical);
+    let verifiedAt = new Date().toISOString();
+    let receipt = {
+      schemaVersion: 'cv-show-machine-review-receipt-v1',
+      entryId: disposition.entryId,
+      targetSpeechSha256: sha256(Buffer.from(targetText, 'utf8')),
+      wavHash,
+      synthesisAttemptHash,
+      transcriptSha256: sha256(Buffer.from(transcript.text, 'utf8')),
+      metrics,
+      counts,
+      critical,
+      thresholds: MACHINE_REVIEW_THRESHOLDS,
+      approved,
+      mode: 'machine-verified',
+      verifiedAt,
+      asr: { model: profile.asr?.model || 'unknown', locale: profile.asr?.locale || 'unknown' },
+    };
+    let receiptDir = path.join(base, '.workflow', 'machine-verification', disposition.entryId);
+    await fs.mkdir(receiptDir, { recursive: true });
+    let receiptPath = path.join(receiptDir, `${wavHash}.json`);
+    await fs.writeFile(receiptPath, `${JSON.stringify(receipt, null, 2)}\n`, { mode: 0o600 });
+    let verification = {
+      targetSpeechHash: receipt.targetSpeechSha256,
+      attemptHash: synthesisAttemptHash,
+      transcriptHash: receipt.transcriptSha256,
+      metrics: { wer: metrics.wer, cer: metrics.cer, coverage: metrics.coverage },
+      thresholds: MACHINE_REVIEW_THRESHOLDS,
+      critical: critical.length === 0,
+      verifiedAt,
+      receiptPath,
+    };
+    return {
+      approved,
+      verification,
+      result: freezeDeep(receipt),
+    };
+  };
   let reviewClip = async (input) => {
     if (!runner) {
       fail(
@@ -1178,12 +1234,86 @@ export async function createCvShowAudioWorkflow({
     if (!disposition || disposition.mode !== 'regenerate') {
       fail('CV_SHOW_AUDIO_WORKFLOW_ENTRY_UNKNOWN', `No regenerated entry ${input.entryId}.`);
     }
-    return runner.openEntry(disposition.runnerPlan).reviewClip({
+    let mode = input.mode || 'owner';
+    if (!['owner', 'machine'].includes(mode)) {
+      fail('CV_SHOW_AUDIO_WORKFLOW_REVIEW_MODE_INVALID', 'Review mode must be owner or machine.');
+    }
+    let review = {
       ownerToken: input.ownerToken,
       approved: input.approved,
       wavHash: input.wavHash,
       synthesisAttemptHash: input.synthesisAttemptHash,
-    });
+      mode: mode === 'machine' ? 'machine-verified' : 'owner',
+    };
+    if (mode === 'machine') {
+      let machine = await machineVerifyClip({
+        disposition,
+        wavHash: input.wavHash,
+        synthesisAttemptHash: input.synthesisAttemptHash,
+      });
+      review.approved = machine.approved;
+      review.machineVerification = machine.verification;
+      return {
+        review: await runner.openEntry(disposition.runnerPlan).reviewClip(review),
+        machineVerification: machine.result,
+      };
+    }
+    return runner.openEntry(disposition.runnerPlan).reviewClip(review);
+  };
+  let reviewAllMachine = async ({ ownerToken }) => {
+    let results = [];
+    for (let disposition of workflow.plan.entries) {
+      if (disposition.mode !== 'regenerate') continue;
+      let run = durableStorage.openRun(disposition.runnerPlan);
+      let head = await run.readHead();
+      let state = head?.state;
+      if (!state) {
+        fail('CV_SHOW_AUDIO_WORKFLOW_ENTRY_UNKNOWN', `Entry ${disposition.entryId} has no durable runner state.`);
+      }
+      if (state.phase === 'clip-reviewed' && state.review?.mode === 'machine-verified') {
+        results.push({ entryId: disposition.entryId, phase: state.phase, review: 'machine-verified (existing)' });
+        continue;
+      }
+      if (state.phase !== 'technical-verified') {
+        fail(
+          'CV_SHOW_AUDIO_WORKFLOW_REVIEW_STATE_INVALID',
+          `Entry ${disposition.entryId} is in phase ${state.phase}; machine review requires technical-verified.`,
+          { entryId: disposition.entryId, phase: state.phase },
+        );
+      }
+      let { review } = await reviewClip({
+        entryId: disposition.entryId,
+        ownerToken,
+        mode: 'machine',
+        wavHash: state.synthesis.wavHash,
+        synthesisAttemptHash: state.synthesis.attemptHash,
+      });
+      results.push({ entryId: disposition.entryId, phase: review?.phase, review: review?.review?.mode });
+    }
+    return freezeDeep(results);
+  };
+  let requireMachineVerifiedEntries = async () => {
+    let offenders = [];
+    for (let disposition of workflow.plan.entries) {
+      if (disposition.mode !== 'regenerate') continue;
+      let run = durableStorage.openRun(disposition.runnerPlan);
+      let head = await run.readHead();
+      let state = head?.state;
+      if (state?.phase !== 'entry-verified') {
+        offenders.push({ entryId: disposition.entryId, phase: state?.phase || 'not-initialized' });
+        continue;
+      }
+      if (state.review?.mode !== 'machine-verified') {
+        offenders.push({ entryId: disposition.entryId, reviewMode: state.review?.mode || 'none' });
+      }
+    }
+    if (offenders.length) {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_MACHINE_ACCEPTANCE_INVALID',
+        'Machine release acceptance requires every regenerated entry to be reviewed in machine mode.',
+        { offenders },
+      );
+    }
   };
   let retryEntryVerification = async (input) => {
     if (!runner) {
@@ -1307,6 +1437,8 @@ export async function createCvShowAudioWorkflow({
     workflow,
     advanceEntries,
     reviewClip,
+    reviewAllMachine,
+    requireMachineVerifiedEntries,
     retryEntryVerification,
     retryEntrySynthesis,
     inspectEntries,
@@ -1422,10 +1554,11 @@ async function cli(argv, environment = process.env) {
   let current = await loadCvShowAudioWorkflowCurrentSource(repoRoot);
   let targetProject = await loadTargetProject(options.project, current.CV_SHOW_PRESENTATION_PROJECT);
   let endpoint = options.endpoint || environment.CV_SHOW_MODEL_ENDPOINT;
+  let serviceToken = options['service-token'] || environment.CV_SHOW_MODEL_SERVICE_TOKEN || '';
   let modelClient = endpoint
     ? createCvShowModelServiceClient({
         endpoint,
-        headers: {},
+        headers: serviceToken ? { authorization: `Bearer ${serviceToken}` } : {},
         fetchImpl: globalThis.fetch,
         model: profile.voice.model || 'qwen3',
       })
@@ -1459,21 +1592,37 @@ async function cli(argv, environment = process.env) {
   };
   else if (command === 'advance') result = await handle.advanceEntries(owner);
   else if (command === 'review') {
+    let mode = options.mode || 'owner';
+    if (!['owner', 'machine'].includes(mode)) {
+      fail('CV_SHOW_AUDIO_WORKFLOW_REVIEW_ARGUMENT_INVALID', '--mode must be owner or machine.');
+    }
     if (typeof options.entry !== 'string' || typeof options['wav-hash'] !== 'string'
       || typeof options['attempt-hash'] !== 'string'
-      || !['yes', 'no'].includes(options.approve)) {
+      || (mode === 'owner' && !['yes', 'no'].includes(options.approve))) {
       fail(
         'CV_SHOW_AUDIO_WORKFLOW_REVIEW_ARGUMENT_INVALID',
-        'review requires --entry, --wav-hash, --attempt-hash, and explicit --approve yes|no.',
+        'review requires --entry, --wav-hash, --attempt-hash, and explicit --approve yes|no (owner mode) or --mode machine.',
       );
     }
     result = await handle.reviewClip({
       entryId: options.entry,
       ownerToken: owner,
+      mode,
       approved: options.approve === 'yes',
       wavHash: options['wav-hash'],
       synthesisAttemptHash: options['attempt-hash'],
     });
+  } else if (command === 'review-all-machine') {
+    if (options.confirm !== 'machine') {
+      fail(
+        'CV_SHOW_AUDIO_WORKFLOW_REVIEW_ARGUMENT_INVALID',
+        'review-all-machine requires --mode machine and --confirm machine; each regenerated entry is verified against its exact WAV through Whisper metrics.',
+      );
+    }
+    if (options.mode !== 'machine') {
+      fail('CV_SHOW_AUDIO_WORKFLOW_REVIEW_ARGUMENT_INVALID', 'review-all-machine requires --mode machine.');
+    }
+    result = await handle.reviewAllMachine({ ownerToken: owner });
   } else if (command === 'retry-verification') {
     if (typeof options.entry !== 'string' || !options.entry) {
       fail(
@@ -1544,7 +1693,18 @@ async function cli(argv, environment = process.env) {
         'Pass --approve yes and the exact --release-id printed by verify-release.',
       );
     }
-    result = await handle.aggregate.approve({ ownerToken: owner, approved: true });
+    let mode = options.mode || 'owner';
+    if (!['owner', 'machine'].includes(mode)) {
+      fail('CV_SHOW_AUDIO_WORKFLOW_RELEASE_APPROVAL_REQUIRED', '--mode must be owner or machine.');
+    }
+    if (mode === 'machine') {
+      await handle.requireMachineVerifiedEntries();
+    }
+    result = await handle.aggregate.approve({
+      ownerToken: owner,
+      approved: true,
+      acceptanceMode: mode === 'machine' ? 'machine-verified' : 'owner',
+    });
   } else if (command === 'stage') result = await handle.aggregate.stage(owner);
   else if (command === 'promote') result = await handle.aggregate.promote(owner);
   else if (command === 'publish') {

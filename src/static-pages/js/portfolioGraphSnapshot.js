@@ -5,8 +5,8 @@ import {
 } from '../data/portfolioGraphSnapshot.js';
 
 const MANIFEST_URL = 'portfolio-graph-snapshots/manifest.json';
-const PORTFOLIO_GRAPH_NODE_COUNT = 119;
-const PORTFOLIO_GRAPH_ROUTE_COUNT = 180;
+const PORTFOLIO_GRAPH_NODE_COUNT = 121;
+const PORTFOLIO_GRAPH_ROUTE_COUNT = 182;
 
 function roundMetric(value) {
   return Math.round(Number(value || 0) * 1000) / 1000;

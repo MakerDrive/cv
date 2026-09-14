@@ -125,6 +125,12 @@ target Project and its approved audio release. The standalone
 `authoring:materialize` command intentionally rejects unapproved drafts; do not
 bypass that gate or copy a draft literal into tracked source.
 
+Review and release acceptance support an explicit opt-in machine mode
+(`--mode machine`): the exact WAV is verified through Whisper metrics instead
+of human listening, the review records `machine-verified` evidence, and release
+acceptance becomes `machine-accepted`. The owner/human path remains the
+default. See the root README for the exact gates and thresholds.
+
 Master WAVs, recognition, alignment, receipts, voice references, and workflow
 state stay outside Git under the configured durable absolute base. The
 repository contains only the immutable Ogg/Opus web projection and its minimal

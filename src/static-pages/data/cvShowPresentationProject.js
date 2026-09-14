@@ -16,274 +16,274 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
 {
   "assets": [
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-+F/LbfxEcmB2hnTnvdQAdG+9+1QfDYRRPAeieHY6laU=",
-      "contentHash": "sha256:f2ad321ede2c25296cb5c89aecdf16ac7f0eb06a67f54261801dc9b4a0f0ee82",
-      "durationMs": 32160,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-Dz26eASMhL6iqbeuplRMrZOtWUrscNFFWlfH4PfHXQU=",
+      "contentHash": "sha256:f657646b15f95656ee3d31e37da18a7c0890a224e112f147562255e96dab1941",
+      "durationMs": 57310,
       "id": "cv-show:audio:positioning",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-2u3hU+KHdynv0+zLGxqPisQIIlylyFqeDioCz1l3GbM="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-HHuX7z1A6pUHI8I2SggtiWVVtaKk87RZ3qrSIrXuxEI="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-I6uoUqUBCRp76sfJ0e4oSg3OG96y5XuEQWi9RKrRYss=",
-      "contentHash": "sha256:04def085eccc94eec8b21327dab5e6e5c454cc3c498ebc9ff8e2064461358c5a",
-      "durationMs": 23910,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-nKLtBDYeEMDAh54q/iQd3II/YWblLqCbCyueSuVDXVo=",
+      "contentHash": "sha256:645d05c7ff3f117ebd6bad870678748306d00a88bc849e159c6caddf44ab9390",
+      "durationMs": 63200,
       "id": "cv-show:audio:symbiote-workspace",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-ZGwQrurNHOr9u7x+ZQ6A6rEVOAn4gjlJPOIV09xgSUo="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-mFUzwFRUVWUNGPIXqPiXLarUJzJEvRtURc/Fs2OgxYE="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-sjBAP3KVDuNGZFjDkffKUuwRLIMEU7bTSoa7W1JnnN0=",
-      "contentHash": "sha256:5ab8a4dddf5c59baee600e12b107d52bd632621cc0d5f2a1ae778fbfd46233ff",
-      "durationMs": 28370,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-kpkiDld/NHMoSw4BXQxLeb2wSVJjrKDlbdkVwuLsuPM=",
+      "contentHash": "sha256:af5d27a397daf8eb4b0525136f8b13dd05d4b82fadbb72b351fc3246a8023fdc",
+      "durationMs": 64510,
       "id": "cv-show:audio:symbiote-ui",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-U5sb1Db6R5BabMkraBMEASUguVduNKE+cph9WT4GXBs="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-cJqKpbsjkiEBqY0ffDLCb8aPpeLpE0uKQ8iva7EgcEI="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-GeID0VUpGpUtgSGxmpT+YAXZC9NcdkC4A/f3IqcKRW4=",
-      "contentHash": "sha256:103b25038b75b5de107d3d9c3d13165ade0cde21de4a694032fafe254d35af97",
-      "durationMs": 15200,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-afAm/8iXvIzg71bG57I/vDYrgT2+JZ44ZPBuMHJ1m70=",
+      "contentHash": "sha256:6d2976144f3039e683afe4e0e1388538e6a18005822be6c81130e4651400d98b",
+      "durationMs": 22880,
       "id": "cv-show:audio:symbiote-engine",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-PzOY4auoLHXP92JPnCcEw4RwAimCNQx+OgZpuC/74qo="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-koiVNRlRMzzO533W+SdMuur2GoKXXPB6DHBMH7FO0go="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-H5gAsEoW1cyHBBMCgv7OuJwm1VuqV0S88mWwQFoDBqI=",
-      "contentHash": "sha256:1a6799d9624a41f4f2658cbcfc38ecd4b4f87e30dca00d340f34165da87bc387",
-      "durationMs": 69920,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-oRjQ1FIw5xofTRhzcKO8RxwN6TVieihfpY+0CHBTlh4=",
+      "contentHash": "sha256:d79f643febd6589f8d136cc87bba5fdc6315fd6c48d626bc45995833f655b9c5",
+      "durationMs": 52060,
       "id": "cv-show:audio:agent-portal",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-dN41DuEBpzm6ETMpb+Bp4S1ydjjm+iAKTjk7W9Yjcic="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-n+cFJenC43hwh2vI/C6yGxDy2V0ymhJU6/5vrjYiRro="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-qBsMLEq/fuw61Fnzvl3dpLhnKitD7H9j+JNJnegqqMA=",
-      "contentHash": "sha256:48ce775c70f8233f99d1d9d1c42731d3784475d86ce6eb379f5e9d8878ab18a0",
-      "durationMs": 19510,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-qKH8JK0x4ryABdgrwIZn9+cKCssOCRhaoUZyBMEjE5w=",
+      "contentHash": "sha256:aee0c0a9b3b4f59a2be13fec14d8d7a0dec044216ca88ed287367b62cb0d48f5",
+      "durationMs": 25160,
       "id": "cv-show:audio:symbiote-video-studio",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-FEtfkkztWhQzjUtK3QoymF7H7MdVTsR8/j9z5jChqZ8="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-TxiaMyIZ8YRKyBYagEi8b+0PAqpjy7EkE0D8yvFQwFE="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-u0MHeXyYJgfALT5I2lz0hqmUXHSekfAZwVNg54qkTiY=",
-      "contentHash": "sha256:cf509267118d43e06c9c40e5d7eb91ed33cd9ecb689cda5522f6bf97644f79ba",
-      "durationMs": 25520,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-0+z4G7/IJ7nACxNkxMs3I19CHVUpQkuu2/OwVrb1YyU=",
+      "contentHash": "sha256:b602e0eae7fd39ea5e6ba12a241e5abc4e6a93b1350d3772c349d89d0619bde0",
+      "durationMs": 68020,
       "id": "cv-show:audio:adaptive-maximo-workbench",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-ALb50OuzZ9noME4rLOqneulQtnHXvSEIhadSuI+h29U="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-c5hW+84A+bhUtdeRyeHQtaOVxTFtiXBD8P+RRStKsAU="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-L9JlNmhNT+4IQzOLX8IRmJm7anBYZRiL3FnWuIr/iO8=",
-      "contentHash": "sha256:e1d09e85d25f5e57b1b37cabcc55ee8f5955d9b402d60e742f5824297f9ebdc2",
-      "durationMs": 22610,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-gGXEwGF9XtDylVdn1bN5VVrB+kbko3gCOzGb2R2bouc=",
+      "contentHash": "sha256:8942db1b6b7055d95bf218f88ba01ac12c9d9addfa2bc73cf7423e553daf1a49",
+      "durationMs": 23680,
       "id": "cv-show:audio:agent-pool-mcp",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-/ySKn4aXXs9JJge17sY2P6exQplUzQcALKKCrDjA2ao="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-1djkpO1R9wUn79rKrryp40hcRqF7XtrQ34sUDquj2/8="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-zUGqeZY57jwR2IOKDRgjRy4b26ZFte1RMJ8bnxr8EMs=",
-      "contentHash": "sha256:470f154c45eba3426bf95f4346f16d9971483ba4872919ac03bbfbaaf186dba9",
-      "durationMs": 38810,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-PrLWmmF75M+bXYsQ4nWCjYKgUGPBGWCpfh54OPPRogA=",
+      "contentHash": "sha256:386e701ad201aea96fde9d90f14bc6190f2f1313b098fb6fb3486b90e0deb72d",
+      "durationMs": 29820,
       "id": "cv-show:audio:project-graph-mcp",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-724/UnGUjLxE6dgIc82SmehIWVg4+M7RBD/R68YQwPs="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-NnhOqtDTjXByp4vfr1ChLQxuDODD8BnfeWOp9LJx8ro="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-KuizwC2b5SJfYB2mjp1q20EqoFONX5vIamFDV7Sem0w=",
-      "contentHash": "sha256:cfc14d92d0123a639ddaab07a0f79bc8e9469f0ed1327ec18c07173595787fb2",
-      "durationMs": 38320,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-2JDfCx9gxpTEumfYhO0RYxb/el4YXFvyhvUPhI5jFss=",
+      "contentHash": "sha256:0d32c02884d41943f9ec5869025a1bf9500f0d166c742f35727a6d3863a55363",
+      "durationMs": 36910,
       "id": "cv-show:audio:lifecycle-messaging-platform",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-ydUxOrl3L4i4Hkp9+aBOK4AMW+yqtD2rdBb8anDycUU="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-Ldz9rCTr2S3gtMCHaywAolFSrRRJz+/FLcmBQZYbwBM="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-5GAH2OASjLEWj2gOmz/LiPUXY3XhQajXIqcytx21E5I=",
-      "contentHash": "sha256:9923da285e8b6825791ca863a51408dd1059e8531e472ec90637031310882e5e",
-      "durationMs": 31420,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-GQlgt492NqNYLV6IwlMoXLV2LKAhstE2ib5dyj9yAvQ=",
+      "contentHash": "sha256:5550fa6ddf9e78b5737b9e12ecf9d1f412bbb27574841b5cf8844fc1bfb3f512",
+      "durationMs": 36990,
       "id": "cv-show:audio:mobile-smm-platform",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-sOSAb9XNvcUgZSAWaQ/dJGMLDUWkHw5V0dkC+/b6wwI="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-xEYC2VMzJnA2aEK3GewvNFnqF9iQDhG8KWC3McfZMVI="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-i680OAjFFqhGZ1mYgbeKo9RIrhDKZWTtGngdDQWHOY0=",
-      "contentHash": "sha256:884effdb0f335433f927752c7eeb26d31d1eb2ae2c15260558430bbc252b95eb",
-      "durationMs": 27900,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-McF61Jv+AbGnuIl/Hfu6KQVaDNok+AnnqQnR+Ve0yU0=",
+      "contentHash": "sha256:569ab98234333cf81c7c8f82dc6d97ee7bce8f02726f344f20ee39fd984a2a38",
+      "durationMs": 34500,
       "id": "cv-show:audio:f360-studio",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-PKdfdO9fGh1iQHgI4IR4DhM1F4p941A5Zf1/G7XNCU8="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-5e5h3kXZbfa6MX9eAtOhC/2fj7qN7In+nVpp9zc0EvE="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-oMXzLDwPbi/5clFiIoeuOgq0NNFMQuYoLFZ7fUbmJ6I=",
-      "contentHash": "sha256:4f5bce02c6bf8bb940aa4631a15cd9a481a0ab88df7d1c298b9967565a6c4456",
-      "durationMs": 121280,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-LsUOsAWonm1otX2hZhW2CAJ10GQwHXb4eV1ZKz8c+lw=",
+      "contentHash": "sha256:4d9723325b266607651dad591329b89133078fd3131e0edf3d8ac969560516ec",
+      "durationMs": 75980,
       "id": "cv-show:audio:autobox",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-zns4VQv8cvqVzQd7+n42yu2JXmZF2fpbXI5c97f1Dh4="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-zkomZmN06oAPrbuVxzQoPi988lc82oJ+QlQ7yEwH/fk="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-13h/xGq7VSqr24eDFml7kcdFdgwZwBpJHMco0UaeJmc=",
-      "contentHash": "sha256:d24b58728b952761ed49aba69db6d00683970191269115eac1d2bbdc94805933",
-      "durationMs": 95010,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-HELGUV9HbFAd3LPHMionEGjD/s7NFJqOY6VzAlBiT5w=",
+      "contentHash": "sha256:95116b03e7a20a2a2043aa01e373076c8172d19b48c0d353a66b822c1db952c7",
+      "durationMs": 122570,
       "id": "cv-show:audio:complexscan",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-MudOQgH57mmRLnpTfdG1a+t1xQlPxfgnPAthg/68nsU="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-CTzOI0MtBLi/icKNCUINqHxxBMLmlvolbkxaGni67w0="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-Njh22b6LvBJ5ZA8ltXtN7t16wuxQUe8nWPOzgkRO7vI=",
-      "contentHash": "sha256:c383da42502eea708e3367108c8a82365fb47311df15ecfc0c4ad17d32a25843",
-      "durationMs": 86080,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-gJzMnJ7gLBBqtCQgN7AA6BuLfitA8WJmVmf/V30gmfU=",
+      "contentHash": "sha256:c9fb961c8aded6139fce471ccc69b7bd0cd290d27c841369df8a60a7fc6b799c",
+      "durationMs": 175460,
       "id": "cv-show:audio:photopizza",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-PeMJB374K2Hc7MYZ+6bFGjR3iBsj+Kh3yYqpCrPbh0w="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-hCKbW9KIKXXMB/FhIJ8wSlPyy0+Bd9WmVwxbQEiWi6I="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-3/v7C4dnMpHww9y4a+TtyT+RaePlpg7SpC30BVlwJ8g=",
-      "contentHash": "sha256:55998a1fdce049efe8d88425076289eb53c1f64d6991d556a06729665fe06700",
-      "durationMs": 30550,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-jzT3Vm0Lg40ryaXkk+rjLpeXxhG58W/5ZA2kL+qfbiQ=",
+      "contentHash": "sha256:8a14be7f02c5024285c5970f6db4f53034777f00aeb2da29baa42fb138272bac",
+      "durationMs": 78210,
       "id": "cv-show:audio:finale",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-OB7OEHyj11TqEft0b+OZrVjmcJh/Fom+zzUEJWv8oAk="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-VkpqVSXFSFW3GXtWbn1tSI+sBy139JBIw9djwG02Ego="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-xyqkp62n/w+BX7TDwiBNJf++u0uTclLL+N/N6V6TFUQ=",
-      "contentHash": "sha256:0c404601661e4251401a4b6016a935d5edb189b7d99482115bf997b355e824a7",
-      "durationMs": 29070,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-uonzG/xZVYNnhiqdIwRwdSMEdAhybKxa3TolMhuA9wM=",
+      "contentHash": "sha256:dbe621a95460f8aa7adafe7cdae2d950c2793767e1791ae16ad68078d18698d6",
+      "durationMs": 81330,
       "id": "cv-show:audio:workspace-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-9yW5MROcgwVYAK0RnBmc7xc0I9OS21v45XUeMgUlrAA="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-HxAA6MYJAWzKjRg52R/e61uPiIwrmMaBTaHbo2I+pso="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-auZssrnGEC8BT0247CNGk2unHJcZMxiQlDls+qDS1zo=",
-      "contentHash": "sha256:0fb03d28883796d06835976923cf836e182edf5e8aaaddc2b164400a46c52822",
-      "durationMs": 24160,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-lz0jCGTFagpDE1YzLaDptDpuH5eQE5bZd7yrRFalzGA=",
+      "contentHash": "sha256:29dc9ab62436308acbc00fc00d6ba03765be217f6aae190ff4ec428e2f1540fc",
+      "durationMs": 70750,
       "id": "cv-show:audio:symbiote-ui-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-GwXYSlfLHSYdDcUvNJBcs8Zx9XI7q2i/tqbZ3PGoaJg="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-KrqkXQkkP/BPg4enb36qXZ6ONTr9+CzLLhACJQsoRoY="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-F7eGu9ToYcv46i/UcbP0cgBUW0U3QjYqE8cXgsj8Plg=",
-      "contentHash": "sha256:d3f86fc104133ecf1d77afb4e2a9d902eb2abd7d86ac6e083edfc8e01a39fe88",
-      "durationMs": 22970,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-uN/pKHVonyrkGaWxUv6OkdWSP27T9uq8+GNaVZnC8cU=",
+      "contentHash": "sha256:319ae71afc81c094bfab238685db64a823a4088dbef377f77391fd11ac30547e",
+      "durationMs": 43950,
       "id": "cv-show:audio:symbiote-engine-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-+RIZT38oMvGRSwCC2k1VkygSsTkisdeS4ZEb7UkLnKY="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-UcLvWjpMbN9lEQbFqfX+gm6HKjMPUExk9uSqG9hbdxM="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-EdBvgn7WgmP6d/KYyF6QA3v8V9n3DVAPht4tz+FiO+A=",
-      "contentHash": "sha256:5c10e4ce97aae523fd221fcb389b73682fc031fc99ebb20250721101cadcbc55",
-      "durationMs": 48960,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-uF/CYtvvQ0b+2OtL4Yr3Dxf93VG6bzjHjcuLOk86mTA=",
+      "contentHash": "sha256:5a03a51ef983db415dab96b96c3740b2cabef4b8c44630b65bed98ba43121b67",
+      "durationMs": 66800,
       "id": "cv-show:audio:agent-portal-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-tYXuX0I0RVZeHzVtXt5HabhW3zBodNl9U3dcgAYYfn0="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-6y9WU8Pi/hFcUSxiBCDt6qa3B04OWfyNdVwDjdprVbk="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-R7OvxsS9ivnHAFOKshj0fpBISNrqy0DAJFzmlTD/k9U=",
-      "contentHash": "sha256:823eb69844948acb90bcad1e6b7cfd94372699e3ece8db42ea9e72bc05c3d817",
-      "durationMs": 29640,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-rYwy5P/9DJyAs3zsoBRLpW8LFnAFEs2LDkUZSGU8u8o=",
+      "contentHash": "sha256:728b4de706f05550f5a968a3ea083d1d0f6fd470fa6bfb97ffe0207b3ef72205",
+      "durationMs": 47120,
       "id": "cv-show:audio:video-studio-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-x/zZnT9bQPi4eXVwDxJpZeJquDnTpiqoOKTg8NiOg64="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-Ua6mcvC0aVbmBpoR5AUw5+S934GRrrL4GXc8zXjD8tE="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-zyf0Cs3j402P1cLYG3k13hlzk4x93I/DLttL/bgp/SI=",
-      "contentHash": "sha256:ea7c3b69528b03f5d1ca3b122c2c4a48f90460387226d37666498f1cdb61893d",
-      "durationMs": 32650,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-UBZpAHj2aI8X71rtJh8nJCjKwdAsxwjtFkP/vBLa4Ic=",
+      "contentHash": "sha256:54710170e3e7f99c5c259efc207cb27232732dabb3a158ca9dcb0ca78b4fe513",
+      "durationMs": 76130,
       "id": "cv-show:audio:maximo-workbench-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-yqByhNi22rzaxyLbO8E+hZri453hodwesr8pJWY8k64="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-17hTHSAf2rlQ+YknBA1aw7LJWSt65S2x0F4Lp+ObGmA="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-MAysqc9Y7SwZuCDHHgAFlayKnUqynu2DRr6Lrmf3TXM=",
-      "contentHash": "sha256:f6b4b332ed56db47716f0bc579c49897ddcee2e13419f3b5f2b6dfc9c7e3d003",
-      "durationMs": 29280,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-lzch1FaG6oWnRND4LR1gYhbSuyqWDf1HksWYFMYte7c=",
+      "contentHash": "sha256:6488aa70024768dea858fe073fddac9d8449e3200215de53d61473a0681febea",
+      "durationMs": 54110,
       "id": "cv-show:audio:agent-pool-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-93nUeU+vEC5yVQ2KM+RwWnTCYQq4l/SP0Uo39liQtB8="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-A27lvUEMCAnu35D89uCm3iITFi2BVW8wAUxXFcgdFb4="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-doJGQbCkN59UhduTpqaVNRJsgq+xij6XDGURXsmks2A=",
-      "contentHash": "sha256:cc5a97dfc66b8fcb508def6c9d1ede2babf65fa712e8c4350b4884181aa1af7e",
-      "durationMs": 23360,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-sZBZPECXizDCaiicc5T8kbVbBxj9MDZ3g/lwwHEd8HA=",
+      "contentHash": "sha256:b5b2bf440ee098ff4c88b75db0701ac06b37e9b0be15ae13c7e0d0a7f59d2719",
+      "durationMs": 58160,
       "id": "cv-show:audio:project-graph-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-msxvkmt7a+94R3uRMdpfDhNYqQKcUMVLV54Rxc4bYds="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-bP9t/Wgec0WSTh85bTFXgvK0SKJjZb2E1FTGKiVUDGM="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-//tLsWxMidg7AcdQFjzJeCM1IrDhcbiq9mJNRPu5vg0=",
-      "contentHash": "sha256:2a54f77aada55de8a83723706a416d43c98b56fbb8d1f3ebe7ca5e17e0600458",
-      "durationMs": 40420,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-2eGxP6+B2MDcd5r8PVV9J3ehcLiealYY8NjPDkxOe0c=",
+      "contentHash": "sha256:6ca8d280dbd412737a2befed9f5c1510223670e93a7553f37843318597a0ea25",
+      "durationMs": 63800,
       "id": "cv-show:audio:lifecycle-platform-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-EkNC6CgEVdMTtu5BlnLR0QTdl/7LjBiyF2JNFEGjwK0="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-8wjzGqYecVMFRwpSA7NljHbug5ZQYQAipuK2NDy/yOE="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-zu/jiPi4Y8Z1k9hcLyPQvGqj/6MoG2rHtawiA2TWPDI=",
-      "contentHash": "sha256:25dbd5b963b9cc8c7c4197af98df3b95ac3b9c6bc8f9dd2710455f2201a20d5d",
-      "durationMs": 38000,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-pkH8hvtzixns1jPcNxjb2YCSxf27MNFfqk2TmXzeBw8=",
+      "contentHash": "sha256:170b66dfeaeb732c72aa32ae3b4b7e840b032b3367594155a7faba15600d9314",
+      "durationMs": 65450,
       "id": "cv-show:audio:mobile-smm-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-mPjlYYnwRUeq4nt5oZuntS0G1S0wEtehh8fLSc5u0Ho="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-HESgxGl/6WxDOC8STJCqFj79rSQGOQsXIA4/m4mngpc="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-m4Cd//n0sh1fVnRbIkKz/cF5j6PnarE5bf3yEw3gILE=",
-      "contentHash": "sha256:0f9415d586250df8c1ee6e94f226cb9abb2d0c0af4580b95cc3f2edaaae26863",
-      "durationMs": 32270,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-HZ8RzQLe/PCFCixRRM+7RitdOU/8gjHsy6Bk8XY94D8=",
+      "contentHash": "sha256:5e84ac9751f4243484d16533d2f20d64f998fc3f6f0b49705c9faddf9605fc97",
+      "durationMs": 57410,
       "id": "cv-show:audio:f360-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-pXFp+LVNNCB2UJynyllogkFdFcZ6fBpldgbtN8C6eZs="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-Q5XCIA7lhBilSjA57VrZUoeJaD8O7lPEnf7gN/2t8Ko="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-xFdlL3Su4IZzgVdPecW5nbxlM7Y4+XgboSEQ/+GEdIs=",
-      "contentHash": "sha256:e9ec12b980c9afb8159c67789dc031f85240a9680f692940a79b12217dc5a8d8",
-      "durationMs": 60400,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-i7GIqYI6KU9gNYLnZjrHdVnxIa53IPyofNED3JQe8dc=",
+      "contentHash": "sha256:47ce1a06ab3ad4ef55f3ed436241bdffe3efffb2b4fa745ca0e4fa15fedbd1d3",
+      "durationMs": 125640,
       "id": "cv-show:audio:autobox-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-P28gMNIVDoMZdM6kpxreQ4rR/dDXiNvvOHdsHP3bXWA="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-/a3Nt8xawm6G8HyRYRnTfoFTV9+UQbx7sv70aUkWRYA="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-GIJGRE3C0ISUoNh4V2V3zCMHnVJ9T5cQlBRSlvZbkvk=",
-      "contentHash": "sha256:24949f922f59f73033da998490726bba4659ddeb3d1bf623401d57d12d97d7f1",
-      "durationMs": 44510,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-FUadvDNgJ43EswEe9KG3S+WgO18ZrV6sV1PhAQ0JU78=",
+      "contentHash": "sha256:ceeeaeca0c0fcd6339bc535330531d931975eb49efd00509b06ca2a8d9fda988",
+      "durationMs": 158100,
       "id": "cv-show:audio:complexscan-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-pnvHjRrludIscnnDwPMziVFN079XLsaR6XgV92bKpms="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-ka04gtHDHGi2OwrtEv39vq2P+msOb2PcPqE9bavOhuc="
     },
     {
-      "alignmentHash": "workspace-aligned-sequence-v3:sha256-bO3Nz5AKfHONvv18moS6QpDtz7uNuKjrrhBtkVHQxIk=",
-      "contentHash": "sha256:77a4572d197b763f95d094223bc9aa67f67e9aba75b36d39cd12cb22a070f011",
-      "durationMs": 47980,
+      "alignmentHash": "workspace-aligned-sequence-v3:sha256-Wy57iYelFnVlcYnQeq1Xwbi4ZVyKRP6VrToNcTW0Su8=",
+      "contentHash": "sha256:d1ee1d1d730d94e3c672e595618d25dcbdd9a9247f23ebe6afccbc7946bf2c3e",
+      "durationMs": 191650,
       "id": "cv-show:audio:photopizza-details",
       "kind": "audio",
       "mediaType": "audio/wav",
-      "sourceTimelineHash": "presentation-timeline-v3:sha256-OdhPxgVkPh1ejXKF//iLpIEH7H+T3X75JWX30b60My8="
+      "sourceTimelineHash": "presentation-timeline-v3:sha256-/AN0LfqoltYR7Zi8Gh/GfcuSFW6YCqMg12e0AwmCsxc="
     }
   ],
   "cells": [
@@ -298,7 +298,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "positioning",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Привет, я Владимир. Я ар эн ди-инженер: нахожу проблемы и продуктовые возможности, формулирую задачи, придумываю решения и довожу их до работающего результата — самостоятельно или отвечая за свою часть работы в команде. Сейчас мой основной фокус — программные платформы и агентные продукты. В этой презентации я покажу, как этот ар эн ди-подход работает в разных предметных областях — от программных платформ до медиа и оборудования. В каждом проекте я отдельно обозначу свою роль."
+        "text": "Привет, я Владимир. Я ар эн ди инженер. Больше всего мне интересны задачи, где готового технического задания ещё нет. Есть цель или проблема, и сначала нужно понять, как это вообще должно работать. За свою карьеру я был сооснователем Megavisor, создавал собственные коммерческие и опенсорс проекты и работал с программными платформами, медиа, автоматизацией и оборудованием. Сейчас, в две тысячи двадцать шестом году, мой основной фокус это программные платформы и агентные продукты. Для этой презентации я отобрал несколько проектов, где хорошо виден мой подход. Я не только решаю уже сформулированные задачи. Я нахожу проблемы и новые возможности, формирую идеи проектов и продуктов, запускаю их с нуля или развиваю новые направления внутри существующих систем. В каждом проекте я отдельно покажу, какую задачу решал и за что именно отвечал."
       },
       "turnId": "positioning"
     },
@@ -313,7 +313,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "symbiote-workspace",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Начну с текущего центра моей работы. С середины две тысячи двадцать шестого года я развиваю Симбиот Воркспейс — универсальную среду, где агент собирает рабочее пространство под конкретную задачу. Результат сохраняется в виде исполняемой конфигурации, которую можно переносить. Некоторые мои текущие проекты появились раньше Воркспейса и теперь постепенно становятся его конфигурациями."
+        "text": "С середины две тысячи двадцать шестого года я развиваю Symbiote Workspace. Сейчас это центральный проект в моей работе. Чем сложнее система, тем тяжелее становится её универсальный интерфейс. Новому человеку часто нужно сначала изучить саму систему и только потом начинать решать в ней свои задачи. В Workspace я иду от конкретной задачи человека. Агент собирает рабочее пространство из готовых блоков под текущую ситуацию. Но на сборке интерфейса процесс не заканчивается. Интерфейс может объяснить, как он устроен, зачем появился конкретный элемент, почему сейчас важен определённый шаг, где есть риск и где требуется дополнительное подтверждение. Получается динамическая среда, где агент помогает справляться со сложностью, а человек сохраняет контроль и принимает решения. Такое рабочее пространство можно сохранить как исполняемую конфигурацию. Его можно перенести, открыть снова и продолжить работу. Некоторые мои проекты появились раньше Workspace и теперь постепенно становятся его конфигурациями."
       },
       "turnId": "symbiote-workspace"
     },
@@ -328,7 +328,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "symbiote-ui",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Визуальная часть Воркспейса построена на оупен сорс библиотеке Симбиот ю-ай. В ней собраны компоненты, компоновки, графовые инструменты и семантические контракты интерфейса. На её основе построен и весь интерфейс этого си-ви: навигация, рабочие панели, чат и плеер презентации. Исходный код и техническое описание доступны на Гитхаб, а прямо в этой презентации можно открыть подробный разбор проекта."
+        "text": "В две тысячи двадцать шестом году визуальной основой Workspace стала моя опенсорс библиотека Symbiote UI. В ней собраны компоненты, компоновки, графовые инструменты и семантические контракты интерфейса. Агент не просто берёт готовые блоки и размещает их на экране. Вместе с интерфейсом он формирует машиночитаемый контекст. Он описывает, что это за элементы, зачем они находятся на этом месте, какие у них состояния и какие действия доступны. В том числе такой контекст может публиковаться через Веб эм си пи. Благодаря этому агент после сборки понимает структуру собственного интерфейса и может использовать тот же контекст, чтобы объяснить её человеку. На Symbiote UI построен и интерфейс этого си ви. На нём работают панели, чат и сама интерактивная система презентации. То, что происходит прямо сейчас, это пример того же подхода. Рассказ синхронизирован со страницей. Интерфейс переводит внимание между элементами, выделяет их и буквально объясняет сам себя."
       },
       "turnId": "symbiote-ui"
     },
@@ -343,7 +343,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "symbiote-engine",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Функциональные блоки даёт Symbiote Engine. Это серверная библиотека для сервисов, графов выполнения и автоматизации. Workspace соединяет визуальные блоки UI с этим исполнительным слоем в одной конфигурации."
+        "text": "В две тысячи двадцать шестом году я также выделил серверный исполнительный слой в Symbiote Engine. Если Symbiote UI даёт визуальные блоки, то Engine даёт функциональные. Это библиотека для сервисов, графов выполнения, автоматизации и состояния. Workspace связывает визуальную и исполнительную части в одной конфигурации."
       },
       "turnId": "symbiote-engine"
     },
@@ -358,7 +358,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "agent-portal",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Эйджент Портал — один из проектов, которые я сейчас переношу в Симбиот Воркспейс как конфигурации. Я развиваю его с начала две тысячи двадцать шестого года. Проект появился как собственный управляющий слой над разными агентными средами — своего рода харнесс над харнессес. Он объединяет их в один видимый процесс и позволяет сохранять контроль над контекстом, задачами и ресурсами, при этом быстро меняя агентов, модели и способы доступа к ним. Когда я начинал эту линию, я не нашёл готового решения с таким сочетанием возможностей, поэтому стал развивать собственный вариант. Мы решили открыть управляющий контур эм-си-пи эйджент портал, хотя развиваем Эйджент Портал прежде всего для собственной практической работы. Исходный код этого контура доступен на Гитхаб, а интерфейс Эйджент Портал можно посмотреть в интерактивном демо. Чтобы показать его внутреннее устройство, дальше я разберу два отдельных инструмента. Эйджент Пул эм-си-пи отвечает за исполнение и распределение ресурсов, а Проджект Граф эм-си-пи — за структуру и контекст проекта."
+        "text": "С начала две тысячи двадцать шестого года я развиваю Agent Portal. Сейчас я постепенно переношу его в Symbiote Workspace как одну из конфигураций. Проект появился как мой собственный управляющий слой над разными агентными средами. По сути это единый процесс поверх разных агентов, моделей и способов доступа к ним. Он позволяет сохранять контроль над контекстом, задачами и ресурсами и при этом менять исполнителей под конкретный этап. Когда я начинал эту линию, я не нашёл готового решения с нужным мне сочетанием возможностей, поэтому стал развивать собственную архитектуру. Часть управляющего контура мы открыли как опенсорс проект. А внутри Agent Portal есть два важных инструмента. Agent Pool отвечает за исполнение и распределение ресурсов. Project Graph отвечает за структуру и контекст проекта."
       },
       "turnId": "agent-portal"
     },
@@ -373,7 +373,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "symbiote-video-studio",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Ещё один актуальный проект — Симбиот Видео Студио. Материалы, граф, таймлайн, предпросмотр и рендер собраны здесь в один видимый процесс. Агент работает с семантическими элементами интерфейса, а человек может проверить каждый этап. Сейчас Студио оформляется как конфигурация Симбиот Воркспейс."
+        "text": "В две тысячи двадцать пятом и две тысячи двадцать шестом годах я развивал Symbiote Video Studio. Сейчас этот проект постепенно оформляется как конфигурация Workspace. Материалы, граф, таймлайн, предпросмотр и рендер собраны здесь в один видимый процесс. Агент работает с семантическими элементами интерфейса. А человек может видеть и проверять каждый этап."
       },
       "turnId": "symbiote-video-studio"
     },
@@ -388,7 +388,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "adaptive-maximo-workbench",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Следующий пример — Адаптив Максимо Воркбенч. Он показывает, как заявки, оборудование, локации, бригады и доступные действия собираются в одном рабочем пространстве с общим актуальным контекстом. Сейчас это демонстрационный проект на стадии альфа-версии, показывающий возможности Воркспейса. Подключение к реальной системе Максимо выполняется как отдельная интеграция."
+        "text": "В две тысячи двадцать шестом году одним из демонстрационных направлений Workspace стал мой эксперимент с ай би эм Maximo. Это хороший пример проблемы, которую я пытаюсь решить. В больших системах управления активами в одном контуре находятся заявки, оборудование, локации, бригады и множество связанных действий. Человеку приходится постоянно собирать контекст своей задачи из разных частей большой системы. Workspace позволяет строить процесс вокруг самой задачи. Заявка, конкретное оборудование, его состояние и доступные действия оказываются в одном актуальном контексте. В этом демо я показываю следующий шаг. Агент собирает рабочее пространство под конкретную задачу, а затем проводит человека по созданному интерфейсу и объясняет, что здесь находится и зачем это нужно. А здесь я развиваю ту же идею в икс ар пространстве. Рабочий интерфейс размещается вокруг пользователя, и вместе с ним появляются интерактивные три дэ объекты. Редуктор можно буквально взять в руки, повернуть и рассмотреть нужную деталь. При этом объект остаётся связанным с контекстом рабочей задачи."
       },
       "turnId": "adaptive-maximo-workbench"
     },
@@ -403,7 +403,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "agent-pool-mcp",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "В начале две тысячи двадцать шестого года Эйджент Пул эм-си-пи оформился как самостоятельный эм-си-пи-сервер, который можно напрямую подключить к агенту. В Эйджент Портал он используется как исполнительный слой: распределяет задачи между агентами, отслеживает владение и состояние, передаёт сессии и маршрутизирует ресурсы."
+        "text": "В начале две тысячи двадцать шестого года Agent Pool MCP оформился как самостоятельный эм си пи сервер. Его можно подключить непосредственно к агенту. В Agent Portal он работает как исполнительный слой. Он распределяет задачи между агентами, отслеживает состояние и владение задачей, передаёт сессии и маршрутизирует ресурсы."
       },
       "turnId": "agent-pool-mcp"
     },
@@ -418,7 +418,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "project-graph-mcp",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Второй инструмент — Проджект Граф эм-си-пи, самостоятельный оупен сорс эм-си-пи-сервер для навигации по кодовой базе. Он строит компактный граф репозитория, который в Эйджент Портал отображается как визуальная карта проекта. Человек может выбрать интересующий узел, а агент — раскрыть для нужной части зависимости, скелеты кода, документацию и более подробный контекст. Так человек и агент работают с одной структурой проекта, а модель получает релевантные проверяемые факты, не перечитывая весь репозиторий. Исходный код доступен на Гитхаб, а интерактивное демо доступно по соседней ссылке."
+        "text": "В две тысячи двадцать шестом году я выделил второй самостоятельный инструмент. Project Graph MCP это опенсорс эм си пи сервер для навигации по кодовой базе. Он строит компактный граф репозитория. В Agent Portal этот граф отображается как визуальная карта проекта. Человек может выбрать интересующую часть проекта. А агент может раскрыть для неё зависимости, скелеты кода, документацию и дополнительный контекст. Так человек и агент работают с одной структурой проекта."
       },
       "turnId": "project-graph-mcp"
     },
@@ -433,7 +433,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "lifecycle-messaging-platform",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Теперь вернусь к Лайфсайкл Месседжинг Платформ, которую я развивал с две тысячи двадцать второго по две тысячи двадцать шестой год. Это маркетинговая платформа для автоматизации клиентских коммуникаций. Она включает сегментацию аудитории, управление маркетинговыми кампаниями, опт-ин эс-эм-эс сценарии и аналитику. Я проектировал эй-пи-ай, распределение заданий, связь с удалёнными инстансами, мониторинг и инструменты эксплуатации. Для проверки модемного контура я сделал локальный Диджитал Твин с виртуальными устройствами и воспроизводимыми сценариями."
+        "text": "С две тысячи двадцать второго по две тысячи двадцать шестой год я развивал Lifecycle Messaging Platform. Это маркетинговая платформа для автоматизации клиентских коммуникаций. Она объединяла сегментацию аудитории, управление кампаниями, сценарии согласованных эс эм эс коммуникаций и аналитику. Я проектировал эй пи ай, распределение заданий, связь с удалёнными инстансами, мониторинг и инструменты эксплуатации. А для проверки физического модемного контура я сделал локальный Digital Twin с виртуальными устройствами и воспроизводимыми сценариями."
       },
       "turnId": "lifecycle-messaging-platform"
     },
@@ -448,7 +448,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "mobile-smm-platform",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Отдельный прикладной кейс — мобильная эс-эм-эм платформа для управляемой работы с несколькими профилями. В одном контуре собраны медиаматериалы, публикации, расписание, входящие обращения и очередь. Андроид-устройства выполняют стабильные операции по готовым сценариям. При изменении интерфейса агент останавливает процесс, анализирует экран и готовит обновление сценария для проверки. Управляемость обеспечивают лимиты, дедупликация, согласование и журнал."
+        "text": "Отдельным прикладным проектом стала мобильная эс эм эм платформа для управляемой работы с несколькими профилями. В одном контуре были собраны медиаматериалы, публикации, расписание, входящие обращения и очередь. Андроид устройства выполняли стабильные операции по заранее подготовленным сценариям. Если интерфейс приложения изменялся, агент мог остановить процесс, проанализировать актуальный экран и подготовить обновлённый сценарий для проверки. Управляемость обеспечивали лимиты, дедупликация, подтверждения и журнал действий."
       },
       "turnId": "mobile-smm-platform"
     },
@@ -463,7 +463,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "f360-studio",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Теперь вернусь по истории программно-аппаратных проектов. В две тысячи двадцать первом — две тысячи двадцать втором годах я основал и вёл проект «Эф триста шестьдесят Студио». Он занимался высокоточным три дэ-сканированием. Я выстраивал процесс от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели. При переезде в Аргентину физическую производственную базу пришлось закрыть."
+        "text": "В две тысячи двадцать первом и две тысячи двадцать втором годах я основал и вёл F360 Studio. Это была коммерческая студия высокоточного три дэ сканирования. Здесь опыт музейной фотограмметрии превращался уже в законченный производственный процесс. Я выстраивал весь путь от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели. При переезде в Аргентину в две тысячи двадцать втором году физическую производственную базу пришлось закрыть."
       },
       "turnId": "f360-studio"
     },
@@ -478,7 +478,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "autobox",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Перед эф триста шестьдесят была музейная технология Авто Бокс, которую я развивал в две тысячи девятнадцатом — две тысячи двадцать первом годах. Здесь показана предварительная три дэ-визуализация оборудования Авто Бокс. Я подготовил её ещё до сборки установки, чтобы представить будущую конструкцию партнёрам, с которыми мы работали над три дэ-сканированием музейных объектов в Эрмитаже. Здесь я отлаживаю процесс фотограмметрии на поворотном столе PhotoPizza. Это один из предварительных экспериментов, проведённых до разработки установки для Эрмитажа. Здесь показан промежуточный результат той же отладки в Реалити Кэпчер. Слева видны исходные фотографии позолоченного Будды, а в три дэ-пространстве я вращаю уже обработанную модель и проверяю результат фотограмметрии перед разработкой оборудования для Эрмитажа. Здесь я собственноручно изготавливаю одну из деталей первой версии Авто Бокс — лазером вырезаю вентиляционную сетку для светового модуля. Здесь собранный прототип первой версии Авто Бокс сканирует нэцкэ в Эрмитаже. Это вводный ролик эрмитажной серии «Нэцкэ под увеличительным стеклом». Представленные в ней нэцкэ я собственноручно сканировал и визуализировал во время отладки технологии Авто Бокс. Для того же позолоченного Будды я сделал художественную три дэ-визуализацию. Она показывает качество сканирования сложного металлического объекта: сохранились мелкие детали, повреждения и царапины. Здесь — художественная визуализация могольского кинжала из собрания Эрмитажа. Сочетание полированного металла, позолоты и инкрустации драгоценными камнями делало его особенно сложным для фотограмметрии, но нам удалось сохранить и форму, и детали разных материалов. Здесь — художественная визуализация головы королевы-матери из Королевства Бенин. Сканирование точно передало сложный рельеф и патину бронзовой поверхности."
+        "text": "С две тысячи девятнадцатого по две тысячи двадцать первый год внутри исследовательского направления Complex Scan я развивал Auto Box. Это был более сложный ар эн ди проект для автоматизации три дэ сканирования музейных объектов. В серийной предметной съёмке процесс можно заранее настроить под класс похожих товаров. Здесь почти каждый новый предмет создавал новую задачу. Своя геометрия. Свой материал. Свои поверхности. И отдельные требования по безопасности. Поэтому целью было постепенно автоматизировать уже не только движение оборудования, но и построение процесса съёмки под конкретный объект. Ещё до изготовления установки я сделал её три дэ визуализацию. До разработки сложной механики я отдельно проверял технологию фотограмметрии на более простом оборудовании. Здесь уже виден промежуточный результат одного из таких экспериментов. После этого я перешёл к физическому прототипу. А здесь первая рабочая версия Auto Box уже сканирует настоящий музейный объект в Эрмитаже. На этих примерах можно увидеть результат на позолоте, полированном металле, драгоценных камнях и сложной бронзовой поверхности."
       },
       "turnId": "autobox"
     },
@@ -493,7 +493,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "complexscan",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "Теперь вернусь к Комплекс Скан — коммерческой линии оборудования, чьи разработки стали частью технической базы Авто Бокс. Я развивал Комплекс Скан в две тысячи семнадцатом — две тысячи двадцать втором годах. В линию входили прозрачные платформы для бестеневой съёмки предметов в формате фото триста шестьдесят и для три дэ-сканирования. Здесь я демонстрирую одну из таких платформ и веб-приложение, из которого управляю ею. Здесь я показываю обновлённые версии поворотной платформы Комплекс Скан и веб-приложения для управления ею. Я проектировал оборудование и метод съёмки как единый продукт и довёл линию до первых международных поставок. Отдельным прикладным проектом стал Бут Бот. Это система автоматизации каталожной съёмки винных бутылок непосредственно на складе заказчика. Система объединяла компактную съёмочную будку, управляемые световые панели, моторизированную камеру, пресеты съёмки и автоматическую обработку фотографий. Световая сцена была заранее настроена для бестеневой съёмки и контролируемых бликов, поэтому фотографии практически не требовали ручной коррекции. Система автоматически отделяла бутылку от фона, оптимизировала изображение и выдавала готовый материал для каталога. Благодаря этому сотрудники без студийного опыта могли получать повторяемый результат прямо на складе. Следующим этапом должна была стать прямая публикация готовых фотографий на сайте, но после моего переезда в Аргентину развитие проекта было приостановлено."
+        "text": "С две тысячи семнадцатого по две тысячи двадцать второй год я развивал профессиональное направление Complex Scan. Это была коммерческая линия оборудования для автоматизации предметной съёмки и три дэ сканирования. Внутри направления появлялись как универсальные системы, так и специализированное оборудование под конкретные процессы. Основой стали профессиональные поворотные платформы с прозрачной рабочей поверхностью из осветлённого стекла. Здесь требования к механике, ресурсу, точности и производительности были уже заметно выше, чем у открытой PhotoPizza. Система поддерживала несколько режимов автоматической съёмки. Можно было работать пошагово. А для большого потока использовать непрерывное вращение и серийную съёмку камеры. Управлять оборудованием можно было с физического пульта или через веб приложение. Я проектировал механику и метод съёмки как единый продукт. Я собирал прототипы и первые экземпляры, готовил конструкцию для подрядчиков, выполнял финальную сборку и тестирование. Затем добавились упаковка, экспортная документация и международная логистика. В результате Complex Scan прошёл путь от ар эн ди прототипов до оборудования, которое поставлялось клиентам в разные страны. Одним из специализированных проектов внутри этого профессионального направления стал Booth Bot. Он решал конкретную производственную задачу. Нужно было автоматизировать каталожную съёмку большого потока винных бутылок непосредственно на складе заказчика. Не перевозить товар в фотостудию. А перенести студийный процесс к товару. По сути мы построили компактную автоматизированную фотостудию. Световые панели создавали заданный рисунок бликов. Закрытая конструкция изолировала сцену от внешнего освещения. Система автоматически определяла высоту бутылки и позиционировала камеру. От оператора требовалось подготовить бутылку и поставить её внутрь. Остальной настроенный процесс система выполняла автоматически. После съёмки изображение отделялось от фона, обрабатывалось и превращалось в готовый материал для каталога."
       },
       "turnId": "complexscan"
     },
@@ -508,7 +508,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "photopizza",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "В начале этой линии была PhotoPizza, которую я развивал с две тысячи десятого года. Проект появился внутри Мегавизор как инструмент для повторяемой съёмки объектов на триста шестьдесят градусов. Здесь показан ускоренный демонстрационный ролик о сборке первой версии PhotoPizza — без подробной инструкции. Это промо Мегавизор, где показан весь спектр поддерживаемого контента, включая съёмку объектов на триста шестьдесят градусов. Я продумал механику, электронику, прошивку, документацию и упаковку. Таймлапс сборки прототипа PhotoPizza из конструкционного алюминиевого профиля и шагового двигателя. Позже PhotoPizza стала оупен сорс проектом. Здесь я показываю, как собрать простую поворотную платформу из подноса ИКЕА и вручную снять объект со всех сторон. Такие демонстрационные ролики я продюсировал для Мегавизор, чтобы популяризировать формат и снизить порог входа в технологию. Здесь я показываю новое веб-приложение PhotoPizza: с телефона запускаю съёмку и по вай-фай управляю поворотным столом и камерой через веб-приложение. Универсальный блок управления работал с поворотными платформами, слайдером камеры и моторизированной панорамной головкой. На грузовой поворотной платформе PhotoPizza мы снимали даже тяжёлые объекты, включая мотоциклы, на триста шестьдесят градусов. Проект продолжал развиваться до моего переезда в Аргентину в две тысячи двадцать втором году."
+        "text": "В начале две тысячи десятых годов одной из ключевых точек в моей истории стал Megavisor. Я был сооснователем проекта и техническим директором. Я отвечал за ар эн ди съёмочного направления и производство интерактивного контента. Megavisor был облачной платформой для фото на триста шестьдесят градусов, сферических три дэ панорам, видео и виртуальных туров. Я участвовал в проработке интерактивного плеера, который связывал эти форматы между собой. Например, из панорамы помещения можно было открыть находящийся внутри объект. Затем перейти к его вращению на триста шестьдесят градусов. А после этого открыть связанные фотографии и другие материалы. В этом ролике виден общий принцип платформы и то, как разные форматы могли работать внутри одного интерактивного пространства. В съёмочном направлении я руководил студией Gate Nine и выездным производством. Я организовывал съёмки, координировал фотографов и ретушёров, разрабатывал оборудование и выстраивал технологические процессы. Я также продюсировал промо и обучающие видеоматериалы, чтобы снизить порог входа в новый для рынка формат. Рост объёмов съёмки привёл к следующей инженерной задаче. Процесс нужно было автоматизировать. Так внутри Megavisor появилась PhotoPizza. PhotoPizza я начал развивать с две тысячи десятого года. Проект появился как решение конкретной производственной задачи. Съёмку объектов на триста шестьдесят градусов нужно было поставить на поток, чтобы она легко масштабировалась. Сначала я собрал прототип из доступных промышленных компонентов. Он позволил нам быстро проверить механику и саму технологию съёмки. На этом прототипе мы отработали основные принципы системы. После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение. Одной из ключевых задач было совместить небольшую массу с высокой грузоподъёмностью. Платформу можно было привезти на выездную съёмку и установить силами одного фотографа. При этом крупные версии выдерживали человека и позволяли снимать тяжёлые и габаритные предметы. В результате PhotoPizza выросла в целый модельный ряд. Появились и подвесные версии для люстр, украшений, велосипедов и других объектов. Система оставалась модульной. Один блок управления мог работать с платформами разных размеров, слайдером PhotoSnail и моторизированной панорамной головкой. Параллельно мы снижали порог входа в саму технологию. Например, я сделал простой вариант платформы из доступных деталей, чтобы фотограф мог сначала проверить сам формат почти без вложений. Позже PhotoPizza стала опенсорс проектом. Вместе с оборудованием развивалась и программная часть. В итоге с телефона по вай фай можно было управлять оборудованием и камерой через веб приложение. А это результат масштабирования технологии на крупные объекты. Интерактивную последовательность мотоцикла можно вращать и рассматривать со всех сторон. PhotoPizza продолжала развиваться до моего переезда в Аргентину в две тысячи двадцать втором году."
       },
       "turnId": "photopizza"
     },
@@ -523,7 +523,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "finale",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "А теперь вернусь в настоящее. От программно-аппаратных систем для съёмки я пришёл к распределённой инфраструктуре и текущим агентным рабочим средам. Во всех этих проектах я соединяю исследование, архитектуру и реализацию в работающий процесс с понятными границами и проверяемым результатом. Сейчас главным центром этой работы стал Symbiote Workspace. Здесь можно продолжить знакомство с проектами, открыть резюме или связаться со мной."
+        "text": "Все эти проекты находятся в разных предметных областях. Но для меня это один тип работы. Я нахожу проблемы и новые возможности. Придумываю и формирую проекты, продукты и технические решения. Запускаю их с нуля или развиваю новые направления внутри уже существующих систем. Проверяю идеи на практике и довожу их до работающего результата. Иногда работа начинается практически с чистого листа. Иногда новая идея появляется внутри уже существующего продукта и постепенно превращается в отдельное направление или отдельный проект. В зависимости от задачи это может быть программное обеспечение, искусственный интеллект, электроника, механика, компьютерное зрение или сочетание нескольких технологий. Сейчас мой основной фокус находится в области программных платформ и агентных систем. Один из текущих проектов в этом направлении это Symbiote Workspace. Но сама предметная область для меня не является ограничением. Мне интересны сложные проекты, где можно увидеть новую возможность, разобраться в проблеме и превратить идею в работающую систему. Здесь можно подробнее посмотреть мои проекты, открыть резюме, исходный код или связаться со мной."
       },
       "turnId": "finale"
     },
@@ -539,7 +539,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "symbiote-workspace",
         "sourceRefs": [],
-        "text": "Рабочая среда описывается конфигурацией: в ней задаются компоновка, панели, модули, действия и связи. Агент подбирает готовые блоки, валидирует конфигурацию и собирает интерфейс в браузере. Конфигурацию можно обновлять во время работы, сохранять и открывать в совместимом host-приложении. Секреты, авторизация и пользовательские данные остаются на стороне host. Я развиваю эту архитектуру как общий слой для специализированных рабочих процессов."
+        "text": "Если посмотреть глубже, основной объект Workspace это не заранее написанное приложение, а конфигурация рабочей среды. В ней задаются компоновка, панели, модули, действия и связи между ними. Агент выбирает подходящие готовые блоки, формирует конфигурацию, проверяет её и собирает интерфейс в браузере. Это важно, потому что агент не генерирует каждый раз произвольный интерфейс с нуля. Он работает с известными компонентами и с понятными контрактами. Конфигурацию можно изменять уже во время работы. Например, добавить новую панель, перестроить рабочий процесс или открыть другой инструмент, не пересобирая отдельное приложение целиком. После этого состояние можно сохранить и открыть в другом совместимом хост приложении. При этом секреты, авторизация и пользовательские данные не нужно переносить внутрь самой конфигурации. Они остаются на стороне хоста. Для меня это позволяет разделить две вещи. Есть переносимое описание рабочего процесса. И есть конкретная среда, которая предоставляет ему доступ к данным, авторизации и инфраструктуре. Я развиваю Workspace как общий слой для специализированных рабочих процессов, а не как одно приложение для одной предметной области."
       },
       "turnId": "workspace-details"
     },
@@ -555,7 +555,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "symbiote-ui",
         "sourceRefs": [],
-        "text": "Я развиваю Symbiote UI как библиотеку интерфейсных блоков, которые можно компоновать программно и описывать для агентов. Компоненты публикуют роли, состояния и безопасные действия через манифесты и WebMCP-контракты. Workspace использует этот каталог при сборке рабочей среды. Продуктовый смысл добавляет конкретная конфигурация, а библиотека сохраняет нейтральные переиспользуемые возможности."
+        "text": "Я развиваю Symbiote UI как библиотеку нейтральных интерфейсных блоков. Главная идея в том, что интерфейсы должны быть компонуемыми программно. Компонент при этом представляет собой не только визуальный элемент. Он может публиковать свою роль, состояние и безопасные действия. Для этого используются манифесты и семантические контракты. В том числе Веб эм си пи контракты. Так агент получает не набор пикселей, а понятную модель возможностей интерфейса. Например, он может знать, что перед ним список заявок, какая заявка выбрана, какие действия разрешены и какие данные связаны с текущим состоянием. Workspace использует этот каталог, когда собирает конкретную рабочую среду. Продуктовый смысл появляется уже на уровне конфигурации. Один и тот же нейтральный блок может использоваться в совершенно разных предметных областях. Для меня это принципиальное разделение. Библиотека предоставляет переиспользуемые возможности. А конкретный продукт или рабочий процесс придаёт им смысл. И за счёт того, что эти возможности описаны семантически, агент может работать с интерфейсом на том же уровне, на котором с ним работает человек."
       },
       "turnId": "symbiote-ui-details"
     },
@@ -571,7 +571,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "symbiote-engine",
         "sourceRefs": [],
-        "text": "Симбиот Энджин предоставляет компонуемые серверные примитивы: обработчики, команды, графы выполнения и хранение состояния. Продукт собирает из них свой бэкенд-процесс, а Воркспейс связывает исполнение с переносимой конфигурацией интерфейса. Я сохраняю разделение слоёв, чтобы Энджин можно было использовать в разных рабочих средах и сервисах."
+        "text": "Symbiote Engine предоставляет компонуемые серверные примитивы. Это обработчики, команды, графы выполнения и хранение состояния. Идея здесь похожа на Symbiote UI. Я не хочу жёстко зашивать всю серверную логику внутрь одного продукта. Продукт может собрать свой процесс из небольших функциональных блоков. Workspace затем связывает этот процесс с интерфейсом и переносимой конфигурацией. Получается отдельный визуальный слой, отдельный исполнительный слой и понятный контракт между ними. Я специально сохраняю это разделение. Engine должен оставаться пригодным не только для Workspace. Его можно использовать в разных сервисах и рабочих средах, где нужен граф исполнения, состояние и управляемая автоматизация."
       },
       "turnId": "symbiote-engine-details"
     },
@@ -587,7 +587,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "agent-portal",
         "sourceRefs": [],
-        "text": "Эйджент Портал — мой проект для управляемой агентной разработки. Я придумал и реализовал его архитектуру, а в работе мы использовали его как общую среду. Его управляющий контур эм-си-пи Эйджент Портал опубликован как оупен сорс проект. В центре находится исполняемая канбан-доска: каждая колонка запускает часть процесса и может получить свои действия, роли и пул специализированных агентов. Для задач с кодом система создаёт изолированную рабочую копию и ветку. Один агент выполняет работу, другой независимо проверяет результат. Успешный аудит открывает путь к публикации, а конфликт переводит карточку к решению человека. Модели и подписки объединяются в группы ресурсов, поэтому этап получает исполнителя с подходящими возможностями и доступным лимитом."
+        "text": "В центре Agent Portal находится исполняемая канбан доска. Карточка здесь не просто запись о задаче. Она является частью реального процесса. Каждая колонка может запускать свой этап. Для неё можно задать действия, роли и пул специализированных агентов. Поэтому доска фактически становится визуальным описанием процесса исполнения. Для задач с кодом система может создать отдельную рабочую копию и отдельную ветку. Один агент выполняет задачу. После этого другой агент независимо проверяет результат. Если аудит проходит успешно, задача может двигаться дальше к публикации. Если агенты не согласны или появляется конфликт, карточка переводится к решению человека. Ещё одна часть архитектуры это управление ресурсами. Модели, аккаунты и подписки можно объединять в группы. Тогда конкретный этап получает исполнителя, у которого есть нужные возможности и доступный лимит. Это позволяет отделить логику процесса от конкретного провайдера или конкретной модели. Для меня Agent Portal стал практической лабораторией управляемой агентной разработки."
       },
       "turnId": "agent-portal-details"
     },
@@ -603,7 +603,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "symbiote-video-studio",
         "sourceRefs": [],
-        "text": "В основе Студии лежит ядро Симбиот Видео. Агент описывает структуру ролика семантическим описанием в формате джейсон: сцены, слои, клипы и переходы. Движок превращает описание в граф, таймлайн и композицию. В рабочей среде можно проверить нод-граф, запустить лайв-превью, сохранить состояние и перейти к экспорту. Видео-ядро уже работает, а Студия как универсальная конфигурация Воркспейса продолжает развиваться в альфа-режиме."
+        "text": "В основе Studio лежит отдельное ядро Symbiote Video. Структура ролика описывается семантически. Например, через сцены, слои, клипы и переходы. Агент может сформировать такое описание в формате джейсон. После этого движок превращает его в реальные рабочие представления. Можно посмотреть граф. Можно проверить таймлайн. Можно запустить живой предпросмотр результата. Состояние проекта сохраняется, после чего процесс может перейти к экспорту. Для меня здесь снова важна одна и та же идея. Агент работает не с непрозрачным редактором через случайные клики. У него есть семантическая модель проекта и объявленные действия. Видео ядро уже работает. Сама Studio как универсальная конфигурация Workspace продолжает развиваться в альфа режиме."
       },
       "turnId": "video-studio-details"
     },
@@ -619,7 +619,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "adaptive-maximo-workbench",
         "sourceRefs": [],
-        "text": "В этом демо Воркспейс получает предметную конфигурацию для обслуживания оборудования. Панели связывают заявки, активы, локации, бригады и безопасные действия. Агент читает тот же актуальный контекст, который видит человек, и работает через объявленные действия интерфейса. Этот контур проверяет архитектуру Воркспейса на корпоративном процессе. Реальные данные, авторизация и эй-пи-ай системы Максимо подключаются отдельным интеграционным слоем."
+        "text": "Здесь Workspace получает предметную конфигурацию для обслуживания оборудования. Панели связывают заявки, активы, локации, бригады и доступные безопасные действия. Для меня здесь важен общий контекст. Агент работает не с абстрактным текстовым описанием задачи отдельно от интерфейса. Он читает тот же актуальный контекст, который находится перед человеком. Действия тоже не должны быть произвольными. Интерфейс объявляет, что можно сделать с конкретным объектом и какие ограничения действуют сейчас. За счёт этого рабочая среда может не только показать информацию, но и сопровождать сам процесс. Она может объяснить последовательность действий, подсветить риск или потребовать подтверждение перед критическим шагом. Поэтому это демо для меня не только пример интерфейса для Maximo. Оно проверяет архитектуру Workspace на сложном корпоративном процессе. Икс ар версия проверяет тот же принцип уже без ограничения плоским экраном. Контекст задачи, интерфейс и связанный с ним физический объект можно разместить в одном пространстве. Реальные данные Maximo, авторизация и эй пи ай при этом подключаются отдельным интеграционным слоем. Сам Workbench остаётся демонстрационным проектом и альфа версией архитектуры."
       },
       "turnId": "maximo-workbench-details"
     },
@@ -635,7 +635,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "agent-pool-mcp",
         "sourceRefs": [],
-        "text": "Я создавал Agent Pool MCP как независимый слой исполнения для разных CLI-агентов и моделей. Он поддерживает параллельные задачи, последовательные pipelines, handoff сессий, политики и группы ресурсов. Один процесс может поручить реализацию одному агенту, а независимую проверку — другому. В сценариях cross-model peer review агенты разных провайдеров сравнивают выводы и возвращают общий структурированный результат."
+        "text": "Я создавал Agent Pool как независимый слой исполнения для разных си эл ай агентов и разных моделей. Он не должен зависеть от одного конкретного провайдера. Система поддерживает параллельные задачи, последовательные пайплайны, передачу сессий, политики исполнения и группы ресурсов. Например, один процесс может поручить реализацию одному агенту. А независимую проверку результата другому. Так проверяющий агент не обязан наследовать рассуждения и предположения исполнителя. В сценариях кросс модельного ревью можно использовать модели разных провайдеров. Они независимо анализируют задачу, после чего результаты сравниваются и собираются в общий структурированный ответ. Для меня это способ строить процессы не вокруг одной умной модели, а вокруг системы исполнителей с разными ролями, возможностями и ограничениями."
       },
       "turnId": "agent-pool-details"
     },
@@ -651,7 +651,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "project-graph-mcp",
         "sourceRefs": [],
-        "text": "Project Graph MCP анализирует структуру репозитория и готовит несколько представлений: зависимости, скелеты кода, краткую карту проекта и факты браузерной проверки. Более быстрая модель может собрать эту карту, а сильная модель получает сфокусированный контекст для решения. Я использую этот слой как context engineering и структурированное извлечение с графовыми связями."
+        "text": "Project Graph анализирует структуру репозитория и готовит несколько представлений одного проекта. Это зависимости, скелеты кода, компактная карта и проверяемые факты. Цель здесь не в том, чтобы загрузить весь репозиторий в контекст модели. Наоборот. Сначала строится компактная структура. После этого сильная модель получает только тот участок, который действительно нужен для конкретной задачи. Отдельно система может хранить факты браузерной или другой внешней проверки. То есть модель получает не только пересказ кода, но и структурированный контекст с происхождением конкретной информации. Более быстрая и дешёвая модель может заниматься построением карты. А более сильная модель использовать уже сфокусированный контекст для решения сложной задачи. Я рассматриваю этот слой как практический context engineering. То есть как управление тем, какую структуру проекта модель видит, в каком объёме и с какими связями."
       },
       "turnId": "project-graph-details"
     },
@@ -667,7 +667,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "lifecycle-messaging-platform",
         "sourceRefs": [],
-        "text": "Платформа соединяла веб-продукт, серверную инфраструктуру и физическую доставку через модемы. Эй-пи-ай и Постгрес-кью-эл хранили продуктовые данные. Вебсокет связывал рантайм, а распределённые инстансы управляли пулами джи-эс-эм-модемов через сириал и эй-ти-команды. Связь и устройства могли менять состояние, поэтому очередь, повторяемое выполнение и мониторинг сохраняли управляемость процесса. Диджитал Твин воспроизводил физический контур для локальной проверки. В одном историческом эксперименте создание материалов и их проверка работали как независимые контуры с разными правилами оценки."
+        "text": "Этот проект соединял сразу несколько разных слоёв. Был веб продукт. Была серверная инфраструктура. И был физический контур доставки через модемы. Эй пи ай и база PostgreSQL хранили продуктовые данные и состояние системы. WebSocket связывал сервер с удалёнными исполнительными инстансами. Эти инстансы управляли пулами джи эс эм модемов через serial интерфейс и эй ти команды. В таком контуре нельзя исходить из того, что сеть и устройство всегда находятся в идеальном состоянии. Связь может пропасть. Модем может изменить состояние. Удалённый инстанс может перезапуститься. Поэтому очередь, повторяемое выполнение, состояние задач и мониторинг были частью самой архитектуры. Я старался сделать процесс восстанавливаемым и наблюдаемым на каждом этапе. При этом тестировать всё только на реальном пуле модемов неудобно и дорого. Поэтому я сделал локальный Digital Twin. Он воспроизводил физический контур виртуальными устройствами и позволял повторять нужные сценарии локально."
       },
       "turnId": "lifecycle-platform-details"
     },
@@ -683,7 +683,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "mobile-smm-platform",
         "sourceRefs": [],
-        "text": "В центре системы находится модель профилей, аккаунтов, медиаматериалов и публикаций. Сервер управляет расписанием, очередью и подключёнными Android-устройствами. Готовый JSON-сценарий выполняет стабильный путь и записывает результат в журнал. Если структура экрана изменилась, исполнитель останавливается в безопасной точке. Агент анализирует актуальный экран, готовит обновлённый сценарий и передаёт его на проверку. Исходящие действия проходят через лимиты, устойчивую дедупликацию и approval. Демонстрация заканчивается dry-run или подтверждением в журнале без внешней отправки."
+        "text": "В центре системы находится модель профилей, аккаунтов, медиаматериалов и публикаций. Сервер управляет расписанием, очередью и подключёнными Андроид устройствами. Для стабильных участков процесса используется заранее подготовленный джейсон сценарий. Он выполняет известный путь и записывает результат в журнал. Это дешевле и надёжнее, чем просить модель заново рассуждать на каждом обычном шаге. Но мобильный интерфейс может измениться. Если структура экрана больше не соответствует ожидаемому сценарию, исполнитель не должен продолжать нажимать вслепую. Он останавливается в безопасной точке. После этого агент анализирует новое состояние интерфейса и готовит обновлённый вариант сценария. Этот вариант сначала передаётся на проверку. Исходящие действия проходят через лимиты, устойчивую дедупликацию и подтверждение. Поэтому повторный запуск процесса не должен случайно дублировать уже выполненное действие. Здесь я соединяю детерминированную автоматизацию там, где она работает хорошо, и агентную адаптацию там, где действительно появляется неопределённость."
       },
       "turnId": "mobile-smm-details"
     },
@@ -699,7 +699,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "f360-studio",
         "sourceRefs": [],
-        "text": "F триста шестьдесят переносила дисциплину музейной съёмки в коммерческий студийный процесс. Для каждого объекта я планировал ракурсы и свет, контролировал исходные фотографии, проводил фотограмметрическую обработку и проверял геометрию с текстурами. Я собрал единый производственный путь от установки до финальной три D-модели и её публикации. Публичные примеры сохранились на YouTube и в портфолио Sketchfab. Студия завершила работу в две тысячи двадцать втором году во время моего переезда."
+        "text": "F триста шестьдесят переносила дисциплину музейной съёмки в коммерческую студийную работу. Для каждого объекта нужно было определить подходящие ракурсы и свет. Я контролировал исходный материал ещё на этапе съёмки. Плохой исходник гораздо дешевле переснять сразу, чем обнаружить проблему после долгой фотограмметрической обработки. После съёмки я проводил фотограмметрическую обработку и проверял геометрию модели. Отдельно контролировались текстуры. В результате получался не просто набор фотографий или сырой скан. Я выстроил единый путь от физического объекта до готовой три дэ модели и её презентации или публикации. Публичные примеры этой работы сохранились в видео и в портфолио моделей. Для меня F триста шестьдесят был ещё одним примером того, как исследовательская технология становится реальным производственным процессом. Работа студии завершилась в две тысячи двадцать втором году во время моего переезда."
       },
       "turnId": "f360-details"
     },
@@ -715,7 +715,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "autobox",
         "sourceRefs": [],
-        "text": "Рабочая система управляла камерой, светом и позиционированием. Она сначала снимала полную серию, после чего компьютерное зрение анализировало материал, оценивало резкость и отбирало исходники для построения три дэ-модели. Следующий прототип начинал с чернового три дэ-сканирования и упрощённой формы предмета. Затем он заранее рассчитывал весь план детальной макросъёмки: зоны, ракурсы, положения камеры, параметры оптики, глубину резкости и перекрытие. Расчёт учитывал сложную геометрию предмета, диапазон механики, габариты камеры, препятствия и безопасное расстояние. После проверки принципа я проектировал дополнительные контуры безопасности, включая лидарный контроль расстояния на случай смещения предмета. Этот слой остался следующим этапом разработки. Система Авто Бокс уже применялась в музеях. В Эрмитаже я сканировал японские нэцкэ, а технологическая линия применялась для бенинской бронзы в Кунсткамере."
+        "text": "Auto Box развивался итерациями. Важно, что это не был законченный автономный робот со всеми задуманными функциями одновременно. Часть контуров уже работала с реальными музейными объектами. Более автономные функции находились на разных стадиях прототипирования. Рабочая система управляла камерой, светом и механикой позиционирования. Сначала она могла снять полную серию. После этого компьютерное зрение анализировало материал, оценивало резкость и помогало отбирать фотографии для построения три дэ модели. Следующий уровень автоматизации был гораздо интереснее. Система должна была сначала получить черновую три дэ форму конкретного предмета. А затем сама построить план более детальной макросъёмки. Такой план включал зоны объекта, ракурсы, положения камеры, параметры оптики, глубину резкости и необходимое перекрытие кадров. Но геометрии предмета недостаточно. Нужно учитывать реальные размеры камеры, диапазон механики, возможные препятствия и безопасное расстояние до музейного объекта. После проверки основного принципа я проектировал и дополнительные контуры безопасности. Например, лидарный контроль расстояния на случай, если предмет случайно изменит положение. Этот слой оставался следующим этапом разработки. При этом первая рабочая технология уже применялась на настоящих музейных объектах. В Эрмитаже я собственноручно сканировал японские нэцкэ. Эти объекты использовались в музейной серии Нэцкэ под увеличительным стеклом. Позолоченный Будда показывает сохранение мелких повреждений и царапин на сложной металлической поверхности. У могольского кинжала одновременно присутствуют полированный металл, позолота и драгоценные камни. Для фотограмметрии это очень сложное сочетание материалов. А здесь можно увидеть сложный рельеф и характер поверхности бенинской бронзы. Для меня Auto Box был важен ещё и архитектурно. В ранних системах автоматизация в основном исполняла заранее описанный процесс. Здесь я уже двигался к системе, которая сначала изучает конкретный объект, затем формирует план и после этого управляет физическим исполнением."
       },
       "turnId": "autobox-details"
     },
@@ -731,7 +731,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "complexscan",
         "sourceRefs": [],
-        "text": "Я придумал Комплекс Скан как коммерческую линию профессионального оборудования после оупен сорс работы над PhotoPizza. Прозрачный вращающийся диск, стабильная механика и управляемый свет давали чистые исходники для съёмки объектов в формате триста шестьдесят градусов и фотограмметрии. Я собственноручно собирал прототипы и первые изделия, разбивал конструкцию на детали для профильных подрядчиков, затем выполнял финальную сборку и тестирование. Отдельно я проектировал защитную упаковку, оформлял экспортные документы и организовывал доставки клиентам в разные страны. Позже ар эн ди этой линии стало частью технической базы музейных систем вроде Авто Бокс."
+        "text": "Complex Scan я придумал как следующий коммерческий этап после открытой работы над PhotoPizza. Здесь уже нужно было не просто доказать идею, а сделать оборудование, которое будет постоянно работать у клиента. Прозрачный вращающийся диск, стабильная механика и управляемый свет давали чистые исходники для съёмки на триста шестьдесят градусов и для фотограмметрии. Прозрачная поверхность особенно важна для предметной съёмки. Она позволяет работать со светом вокруг объекта и не оставляет под ним обычное непрозрачное основание. Я собственноручно собирал прототипы и первые изделия. Когда конструкция стабилизировалась, я разбивал её на производимые детали и передавал отдельные операции профильным подрядчикам. После этого выполнял финальную сборку и тестирование. Но коммерческое оборудование не заканчивается в момент, когда устройство заработало. Его нужно безопасно упаковать, отправить через границу, оформить документы и получить у клиента в рабочем состоянии. Поэтому я отдельно проектировал транспортную упаковку, занимался экспортными документами и организовывал международные поставки. Ар эн ди этой линии позже стал технической базой для более специализированных систем. В том числе Booth Bot и музейного направления Auto Box. Здесь я уже проектировал не отдельный механизм, а почти весь производственный процесс целиком. Главная проблема была в масштабе. На большом складе постоянно появляются новые позиции. Возить каждую бутылку в отдельную профессиональную студию неудобно и дорого. При этом качество каталога должно оставаться одинаковым. Поэтому световая схема была частью самой машины. Для стеклянной бутылки особенно важен рисунок отражений. Управляемые панели позволяли заранее сформировать этот рисунок и повторять его для каждой следующей позиции. При необходимости свет можно было перенастроить под другой визуальный стиль. Корпус отсекал случайный свет помещения. Поэтому результат не зависел от окна, потолочного света или времени суток. Бутылки имеют разную высоту. Система автоматически измеряла объект и перемещала камеру так, чтобы сохранялась правильная геометрия и композиция. То есть оператору не нужно было заново выставлять штатив и строить кадр. Его задача была максимально простой. Подготовить товар. Удалить пыль и следы с поверхности. Поставить бутылку внутрь. После съёмки система отделяла объект от фона и готовила изображение для каталога. Следующим этапом должна была стать непосредственная публикация результата на сайте. Тогда весь процесс от физической бутылки на складе до карточки товара мог работать как единый автоматизированный конвейер."
       },
       "turnId": "complexscan-details"
     },
@@ -747,7 +747,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "photopizza",
         "sourceRefs": [],
-        "text": "Изначально PhotoPizza была внутренним инструментом Мегавизор — облачного сервиса для фото триста шестьдесят объектов, трёхмерных панорам, видео и виртуальных туров. В Мегавизор я разрабатывал технологию и оборудование и составил техническое задание на управляющее программное обеспечение. Первую версию для Ардуино по этому заданию реализовал привлечённый специалист. После Мегавизор я сам продолжил управляющее программное обеспечение на Джаваскрипте и Эспруино. Я подбирал доступные компоненты и подробно описывал сборку с калибровкой, чтобы люди могли собирать свои версии. Один контроллер управлял поворотной платформой, слайдером камеры и автоматической панорамной головкой. Этот открытый проект дал практическую основу для последующих экспериментов Комплекс Скан и Авто Бокс."
+        "text": "Для меня Megavisor был важен ещё и потому, что здесь я работал сразу на нескольких уровнях. Я занимался не только производством контента. Я участвовал в формировании самого продукта. Мы рассматривали интерактивный контент не как набор отдельных плееров. Пользователь мог двигаться между разными способами представления одного пространства или объекта. Например, находясь внутри сферической панорамы помещения, увидеть мотоцикл и открыть его как отдельный объект. После этого вращать уже сам мотоцикл. А затем перейти к обычной галерее или другому связанному материалу. Хот споты работали как связи между такими состояниями. Для веба того периода это был достаточно смелый подход. Параллельно я отвечал за реальное производство такого контента. Я руководил фотостудией, организовывал выездные съёмки на складах и в магазинах заказчиков и координировал фотографов и ретушёров. При росте объёмов быстро стало понятно, что одна хорошая фотостудия проблему не решает. Нужен технологический процесс, который можно масштабировать. Отдельным направлением были промо и обучающие материалы. Мы показывали фотографам и пользователям сервиса, как снимать контент на триста шестьдесят градусов, как его обрабатывать и как использовать в реальных проектах. То есть мы одновременно развивали сам продукт, технологию производства и рынок вокруг нового формата. Именно из этой производственной задачи выросла PhotoPizza. В самом начале мне было важно не сразу проектировать идеальное устройство, а быстро проверить принцип. Поэтому первый прототип был собран из доступных промышленных компонентов. Конструкционный алюминиевый профиль, шаговый двигатель и готовые элементы позволили быстро проверить механику и технологию съёмки. После этого я уже мог оптимизировать систему под реальную работу фотографа. Большая грузоподъёмность сама по себе не была новой задачей. Сложность была в том, чтобы получить её при небольшой массе и простой транспортировке. Я использовал конструкцию из листовых материалов и максимально простые механические узлы. Даже опорные элементы можно было собирать из доступных подшипников и стандартного крепежа. Так устройство было проще производить и ремонтировать. Постепенно появился модельный ряд под разные масштабы задачи. От макросъёмки небольших объектов до человека, бытовой техники и тяжёлых предметов. Подвесная конфигурация позволяла перевернуть сам принцип. Объект подвешивался и вращался сверху. Так можно было снимать люстру, украшение или велосипед, а ориентацию готовой последовательности изменить уже при обработке. При этом электронику не требовалось дублировать для каждой установки. Один универсальный контроллер подключался к разной механике. Он мог управлять поворотным столом, слайдером камеры и моторизированной панорамной головкой. Когда PhotoPizza стала открытым проектом, я подбирал доступные компоненты и описывал сборку и калибровку так, чтобы люди могли делать собственные версии. Это было продолжением идеи снижения порога входа. После Megavisor я продолжил развивать управляющее программное обеспечение на JavaScript и Espruino. Веб интерфейс позволял запускать процесс с обычного телефона без отдельной специализированной консоли. Этот открытый проект дал практическую основу для следующего этапа профессионального оборудования."
       },
       "turnId": "photopizza-details"
     },
@@ -775,7 +775,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "инженер"
+          "quote": "Сейчас, в две тысячи двадцать шестом году"
         },
         "gestureDurationMs": 800,
         "leadMs": 1750,
@@ -809,7 +809,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "инженер"
+          "quote": "Сейчас, в две тысячи двадцать шестом году"
         },
         "gestureDurationMs": 2500,
         "leadMs": 600,
@@ -842,7 +842,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В каждом проекте"
+          "quote": "и за что именно отвечал"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -874,7 +874,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В каждом проекте"
+          "quote": "и за что именно отвечал"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -957,7 +957,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "С середины две тысячи двадцать шестого года"
+          "quote": "Чем сложнее система"
         },
         "gestureDurationMs": 1800,
         "leadMs": 3450,
@@ -989,7 +989,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "С середины две тысячи двадцать шестого года"
+          "quote": "Чем сложнее система"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -1022,7 +1022,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Результат сохраняется"
+          "quote": "Такое рабочее пространство можно сохранить"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2150,
@@ -1055,7 +1055,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Результат сохраняется"
+          "quote": "Такое рабочее пространство можно сохранить"
         },
         "gestureDurationMs": 650,
         "leadMs": 950,
@@ -1088,7 +1088,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Некоторые мои текущие проекты"
+          "quote": "постепенно становятся его конфигурациями"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -1120,7 +1120,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Некоторые мои текущие проекты"
+          "quote": "постепенно становятся его конфигурациями"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -1178,7 +1178,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "графовые инструменты"
+          "quote": "графовые инструменты и семантические контракты"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3850,
@@ -1210,7 +1210,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "графовые инструменты"
+          "quote": "графовые инструменты и семантические контракты"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -1243,7 +1243,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "весь интерфейс этого си-ви"
+          "quote": "интерфейс этого си ви"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -1275,7 +1275,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "весь интерфейс этого си-ви"
+          "quote": "интерфейс этого си ви"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -1308,7 +1308,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "плеер презентации"
+          "quote": "То, что происходит прямо сейчас"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -1340,7 +1340,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "плеер презентации"
+          "quote": "То, что происходит прямо сейчас"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -1373,7 +1373,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Гитхаб"
+          "quote": "Интерфейс переводит внимание"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2700,
@@ -1405,7 +1405,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Гитхаб"
+          "quote": "Интерфейс переводит внимание"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -1438,7 +1438,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "подробный разбор проекта"
+          "quote": "объясняет сам себя"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -1471,7 +1471,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "подробный разбор проекта"
+          "quote": "объясняет сам себя"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -1529,7 +1529,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "серверная библиотека"
+          "quote": "библиотека для сервисов"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3850,
@@ -1561,7 +1561,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "серверная библиотека"
+          "quote": "библиотека для сервисов"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -1594,7 +1594,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Workspace соединяет"
+          "quote": "Workspace связывает визуальную и исполнительную части"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -1628,7 +1628,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Workspace соединяет"
+          "quote": "Workspace связывает визуальную и исполнительную части"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -1686,7 +1686,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "один видимый процесс"
+          "quote": "собственный управляющий слой"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -1720,7 +1720,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "один видимый процесс"
+          "quote": "собственный управляющий слой"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -1820,7 +1820,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Мы решили открыть управляющий контур"
+          "quote": "Часть управляющего контура мы открыли"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3850,
@@ -1852,7 +1852,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Мы решили открыть управляющий контур"
+          "quote": "Часть управляющего контура мы открыли"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -1885,7 +1885,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Гитхаб"
+          "quote": "А внутри Agent Portal есть два важных инструмента"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -1917,7 +1917,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Гитхаб"
+          "quote": "А внутри Agent Portal есть два важных инструмента"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -1950,7 +1950,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "интерактивном демо"
+          "quote": "Project Graph отвечает за структуру"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -1983,7 +1983,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "интерактивном демо"
+          "quote": "Project Graph отвечает за структуру"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -2041,7 +2041,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "предпросмотр и рендер"
+          "quote": "предпросмотр и рендер собраны"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3350,
@@ -2074,7 +2074,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "предпросмотр и рендер"
+          "quote": "предпросмотр и рендер собраны"
         },
         "gestureDurationMs": 650,
         "leadMs": 950,
@@ -2107,7 +2107,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Агент работает"
+          "quote": "Агент работает с семантическими элементами"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -2140,7 +2140,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Агент работает"
+          "quote": "Агент работает с семантическими элементами"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -2198,7 +2198,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "заявки, оборудование"
+          "quote": "постоянно собирать контекст своей задачи"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3850,
@@ -2230,7 +2230,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "заявки, оборудование"
+          "quote": "постоянно собирать контекст своей задачи"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -2263,7 +2263,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "общим актуальным контекстом"
+          "quote": "оказываются в одном актуальном контексте"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -2295,7 +2295,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "общим актуальным контекстом"
+          "quote": "оказываются в одном актуальном контексте"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -2353,7 +2353,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "распределяет задачи"
+          "quote": "распределяет задачи между агентами"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -2367,9 +2367,9 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "annotation": {
           "intent": "emphasize",
           "marker": "underline",
-          "series": "agent-pool-flow",
+          "occurrence": 1,
           "quote": "tracks process state",
-          "occurrence": 1
+          "series": "agent-pool-flow"
         },
         "kind": "annotation",
         "targetId": "article.agent-pool-mcp.execution-flow"
@@ -2389,7 +2389,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "распределяет задачи"
+          "quote": "распределяет задачи между агентами"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -2447,7 +2447,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "компактный граф"
+          "quote": "компактный граф репозитория"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3850,
@@ -2479,7 +2479,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "компактный граф"
+          "quote": "компактный граф репозитория"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -2512,7 +2512,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "раскрыть для нужной части"
+          "quote": "раскрыть для неё зависимости"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2150,
@@ -2545,7 +2545,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "раскрыть для нужной части"
+          "quote": "раскрыть для неё зависимости"
         },
         "gestureDurationMs": 650,
         "leadMs": 950,
@@ -2578,7 +2578,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "проверяемые факты"
+          "quote": "документацию и дополнительный контекст"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -2611,7 +2611,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "проверяемые факты"
+          "quote": "документацию и дополнительный контекст"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -2669,7 +2669,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "маркетинговая платформа"
+          "quote": "маркетинговая платформа для автоматизации"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3350,
@@ -2702,7 +2702,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "маркетинговая платформа"
+          "quote": "маркетинговая платформа для автоматизации"
         },
         "gestureDurationMs": 650,
         "leadMs": 950,
@@ -2735,7 +2735,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "сегментацию аудитории"
+          "quote": "сегментацию аудитории, управление кампаниями"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -2770,7 +2770,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "сегментацию аудитории"
+          "quote": "сегментацию аудитории, управление кампаниями"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -2803,7 +2803,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "распределение заданий"
+          "quote": "распределение заданий, связь с удалёнными инстансами"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -2838,7 +2838,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "распределение заданий"
+          "quote": "распределение заданий, связь с удалёнными инстансами"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -2871,7 +2871,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Диджитал Твин"
+          "quote": "локальный Digital Twin"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -2885,9 +2885,9 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "annotation": {
           "intent": "emphasize",
           "marker": "underline",
-          "series": "lifecycle-twin",
+          "occurrence": 1,
           "quote": "mirrored the GSM modem pool",
-          "occurrence": 1
+          "series": "lifecycle-twin"
         },
         "kind": "annotation",
         "targetId": "article.lifecycle-messaging-platform.digital-twin"
@@ -2907,7 +2907,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Диджитал Твин"
+          "quote": "локальный Digital Twin"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -2965,7 +2965,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В одном контуре"
+          "quote": "В одном контуре были собраны"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3850,
@@ -2997,7 +2997,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В одном контуре"
+          "quote": "В одном контуре были собраны"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3030,7 +3030,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Андроид-устройства"
+          "quote": "Андроид устройства выполняли"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3064,7 +3064,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Андроид-устройства"
+          "quote": "Андроид устройства выполняли"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -3097,7 +3097,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "При изменении интерфейса"
+          "quote": "агент мог остановить процесс"
         },
         "gestureDurationMs": 800,
         "leadMs": 3800,
@@ -3131,7 +3131,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "При изменении интерфейса"
+          "quote": "агент мог остановить процесс"
         },
         "gestureDurationMs": 2500,
         "leadMs": 2800,
@@ -3189,7 +3189,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "процесс от физической"
+          "quote": "весь путь от физической съёмочной установки"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3850,
@@ -3221,7 +3221,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "процесс от физической"
+          "quote": "весь путь от физической съёмочной установки"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3254,7 +3254,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "готовой презентации модели"
+          "quote": "до геометрии, текстур и готовой презентации модели"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -3287,7 +3287,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "готовой презентации модели"
+          "quote": "до геометрии, текстур и готовой презентации модели"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -3345,7 +3345,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь показана предварительная три дэ-визуализация оборудования Авто Бокс"
+          "quote": "Ещё до изготовления установки я сделал её три дэ визуализацию"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3377,7 +3377,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь показана предварительная три дэ-визуализация оборудования Авто Бокс"
+          "quote": "Ещё до изготовления установки я сделал её три дэ визуализацию"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3410,7 +3410,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь я отлаживаю процесс фотограмметрии"
+          "quote": "проверял технологию фотограмметрии"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3442,7 +3442,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь я отлаживаю процесс фотограмметрии"
+          "quote": "проверял технологию фотограмметрии"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3475,7 +3475,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь показан промежуточный результат той же отладки"
+          "quote": "промежуточный результат одного из таких экспериментов"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3507,7 +3507,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь показан промежуточный результат той же отладки"
+          "quote": "промежуточный результат одного из таких экспериментов"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3540,7 +3540,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь я собственноручно изготавливаю"
+          "quote": "перешёл к физическому прототипу"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3572,7 +3572,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь я собственноручно изготавливаю"
+          "quote": "перешёл к физическому прототипу"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3605,7 +3605,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь собранный прототип первой версии Авто Бокс"
+          "quote": "сканирует настоящий музейный объект в Эрмитаже"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3637,7 +3637,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь собранный прототип первой версии Авто Бокс"
+          "quote": "сканирует настоящий музейный объект в Эрмитаже"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3670,7 +3670,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Это вводный ролик эрмитажной серии"
+          "quote": "результат на позолоте"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3702,7 +3702,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Это вводный ролик эрмитажной серии"
+          "quote": "результат на позолоте"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3735,7 +3735,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Для того же позолоченного Будды"
+          "quote": "полированном металле"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3767,7 +3767,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Для того же позолоченного Будды"
+          "quote": "полированном металле"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3800,7 +3800,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь — художественная визуализация могольского кинжала"
+          "quote": "драгоценных камнях"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3832,7 +3832,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь — художественная визуализация могольского кинжала"
+          "quote": "драгоценных камнях"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3865,7 +3865,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь — художественная визуализация головы королевы-матери"
+          "quote": "сложной бронзовой поверхности"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3897,7 +3897,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь — художественная визуализация головы королевы-матери"
+          "quote": "сложной бронзовой поверхности"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -3955,7 +3955,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "коммерческой линии оборудования"
+          "quote": "коммерческая линия оборудования"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -3987,7 +3987,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "коммерческой линии оборудования"
+          "quote": "коммерческая линия оборудования"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -4020,7 +4020,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь я демонстрирую одну из таких платформ"
+          "quote": "Система поддерживала несколько режимов автоматической съёмки"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -4052,7 +4052,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь я демонстрирую одну из таких платформ"
+          "quote": "Система поддерживала несколько режимов автоматической съёмки"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -4085,7 +4085,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь я показываю обновлённые версии"
+          "quote": "физического пульта или через веб приложение"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -4117,7 +4117,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь я показываю обновлённые версии"
+          "quote": "физического пульта или через веб приложение"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -4150,7 +4150,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "международных поставок"
+          "quote": "экспортная документация и международная логистика"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -4183,7 +4183,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "международных поставок"
+          "quote": "экспортная документация и международная логистика"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -4216,7 +4216,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Отдельным прикладным проектом стал Бут Бот"
+          "quote": "Одним из специализированных проектов"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -4249,7 +4249,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Отдельным прикладным проектом стал Бут Бот"
+          "quote": "Одним из специализированных проектов"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -4282,7 +4282,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Система объединяла компактную съёмочную будку"
+          "quote": "компактную автоматизированную фотостудию"
         },
         "gestureDurationMs": 800,
         "leadMs": 3050,
@@ -4315,7 +4315,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Система объединяла компактную съёмочную будку"
+          "quote": "компактную автоматизированную фотостудию"
         },
         "gestureDurationMs": 1800,
         "leadMs": 2050,
@@ -4442,7 +4442,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Проект появился внутри Мегавизор"
+          "quote": "Я отвечал за ар эн ди съёмочного направления"
         },
         "gestureDurationMs": 1200,
         "leadMs": 2500,
@@ -4475,10 +4475,141 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Проект появился внутри Мегавизор"
+          "quote": "Я отвечал за ар эн ди съёмочного направления"
         },
         "gestureDurationMs": 1600,
         "leadMs": 1050,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/megavisor/youtube/c3cCmDqO04c"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:photopizza:02"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.megavisor-promo:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "В этом ролике виден общий принцип платформы"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 2500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/megavisor/youtube/c3cCmDqO04c"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.megavisor-promo:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.megavisor-promo",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "В этом ролике виден общий принцип платформы"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "projects/photopizza"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:photopizza:03"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.page-open:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Так внутри Megavisor появилась PhotoPizza"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 2500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "navigate"
+        },
+        "kind": "interaction",
+        "targetId": "projects/photopizza"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.page-open:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.page-open",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "PhotoPizza я начал развивать с две тысячи десятого года"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 1150,
         "settleBy": "none",
         "until": null
       },
@@ -4496,7 +4627,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "dependsOn": [
         {
           "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza:02"
+          "cellId": "cv-show:audio-clip:photopizza:04"
         }
       ],
       "id": "cv-show:cue:photopizza.video-01:scroll",
@@ -4508,7 +4639,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь показан ускоренный демонстрационный ролик"
+          "quote": "Сначала я собрал прототип из доступных промышленных компонентов"
         },
         "gestureDurationMs": 1200,
         "leadMs": 2850,
@@ -4540,7 +4671,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь показан ускоренный демонстрационный ролик"
+          "quote": "Сначала я собрал прототип из доступных промышленных компонентов"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -4561,7 +4692,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "dependsOn": [
         {
           "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza:03"
+          "cellId": "cv-show:audio-clip:photopizza:05"
         }
       ],
       "id": "cv-show:cue:photopizza.video-02:scroll",
@@ -4573,7 +4704,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Это промо Мегавизор"
+          "quote": "На этом прототипе мы отработали основные принципы системы"
         },
         "gestureDurationMs": 1200,
         "leadMs": 2850,
@@ -4605,7 +4736,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Это промо Мегавизор"
+          "quote": "На этом прототипе мы отработали основные принципы системы"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -4626,7 +4757,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "dependsOn": [
         {
           "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza:04"
+          "cellId": "cv-show:audio-clip:photopizza:06"
         }
       ],
       "id": "cv-show:cue:photopizza.mechanics:scroll",
@@ -4638,7 +4769,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Я продумал механику"
+          "quote": "совместить небольшую массу с высокой грузоподъёмностью"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -4670,202 +4801,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Я продумал механику"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 1450,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "photopizza"
-    },
-    {
-      "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "scroll"
-        },
-        "kind": "interaction",
-        "targetId": "media/photopizza/youtube/f1cB4X1wI50"
-      },
-      "dependsOn": [
-        {
-          "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza:05"
-        }
-      ],
-      "id": "cv-show:cue:photopizza.video-03:scroll",
-      "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Таймлапс сборки прототипа PhotoPizza"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 2850,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "photopizza"
-    },
-    {
-      "cue": {
-        "focus": {
-          "mode": "frame"
-        },
-        "kind": "focus",
-        "targetId": "media/photopizza/youtube/f1cB4X1wI50"
-      },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.video-03:scroll"
-        }
-      ],
-      "id": "cv-show:cue:photopizza.video-03",
-      "kind": "cue",
-      "layerId": "cv-show:layer:focus",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Таймлапс сборки прототипа PhotoPizza"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 1450,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "photopizza"
-    },
-    {
-      "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "scroll"
-        },
-        "kind": "interaction",
-        "targetId": "media/photopizza/youtube/cFPJqtcWNSU"
-      },
-      "dependsOn": [
-        {
-          "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza:06"
-        }
-      ],
-      "id": "cv-show:cue:photopizza.video-04:scroll",
-      "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Здесь я показываю, как собрать простую поворотную платформу"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 2850,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "photopizza"
-    },
-    {
-      "cue": {
-        "focus": {
-          "mode": "frame"
-        },
-        "kind": "focus",
-        "targetId": "media/photopizza/youtube/cFPJqtcWNSU"
-      },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.video-04:scroll"
-        }
-      ],
-      "id": "cv-show:cue:photopizza.video-04",
-      "kind": "cue",
-      "layerId": "cv-show:layer:focus",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Здесь я показываю, как собрать простую поворотную платформу"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 1450,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "photopizza"
-    },
-    {
-      "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "scroll"
-        },
-        "kind": "interaction",
-        "targetId": "media/photopizza/youtube/HeLMIjuMZac"
-      },
-      "dependsOn": [
-        {
-          "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza:07"
-        }
-      ],
-      "id": "cv-show:cue:photopizza.video-05:scroll",
-      "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Здесь я показываю новое веб-приложение PhotoPizza"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 2850,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "photopizza"
-    },
-    {
-      "cue": {
-        "focus": {
-          "mode": "frame"
-        },
-        "kind": "focus",
-        "targetId": "media/photopizza/youtube/HeLMIjuMZac"
-      },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.video-05:scroll"
-        }
-      ],
-      "id": "cv-show:cue:photopizza.video-05",
-      "kind": "cue",
-      "layerId": "cv-show:layer:focus",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Здесь я показываю новое веб-приложение PhotoPizza"
+          "quote": "совместить небольшую массу с высокой грузоподъёмностью"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -4886,7 +4822,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "dependsOn": [
         {
           "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza:08"
+          "cellId": "cv-show:audio-clip:photopizza:07"
         }
       ],
       "id": "cv-show:cue:photopizza.controller:scroll",
@@ -4898,7 +4834,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Универсальный блок управления"
+          "quote": "слайдером PhotoSnail и моторизированной панорамной головкой"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -4930,7 +4866,202 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Универсальный блок управления"
+          "quote": "слайдером PhotoSnail и моторизированной панорамной головкой"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/photopizza/youtube/f1cB4X1wI50"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:photopizza:08"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.video-03:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "простой вариант платформы из доступных деталей"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 2850,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/photopizza/youtube/f1cB4X1wI50"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.video-03:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.video-03",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "простой вариант платформы из доступных деталей"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/photopizza/youtube/cFPJqtcWNSU"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:photopizza:09"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.video-04:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Позже PhotoPizza стала опенсорс проектом"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 2850,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/photopizza/youtube/cFPJqtcWNSU"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.video-04:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.video-04",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Позже PhotoPizza стала опенсорс проектом"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/photopizza/youtube/HeLMIjuMZac"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:photopizza:10"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.video-05:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "с телефона по вай фай можно было управлять"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 2850,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/photopizza/youtube/HeLMIjuMZac"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.video-05:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.video-05",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "с телефона по вай фай можно было управлять"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -4951,7 +5082,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "dependsOn": [
         {
           "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza:09"
+          "cellId": "cv-show:audio-clip:photopizza:11"
         }
       ],
       "id": "cv-show:cue:photopizza.spinner:scroll",
@@ -4963,7 +5094,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "На грузовой поворотной платформе PhotoPizza"
+          "quote": "результат масштабирования технологии на крупные объекты"
         },
         "gestureDurationMs": 1200,
         "leadMs": 2850,
@@ -4995,7 +5126,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "На грузовой поворотной платформе PhotoPizza"
+          "quote": "результат масштабирования технологии на крупные объекты"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -5053,7 +5184,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "От программно-аппаратных систем"
+          "quote": "Но для меня это один тип работы"
         },
         "gestureDurationMs": 1500,
         "leadMs": 3150,
@@ -5085,7 +5216,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "От программно-аппаратных систем"
+          "quote": "Но для меня это один тип работы"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -5118,7 +5249,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Во всех этих проектах"
+          "quote": "Проверяю идеи на практике"
         },
         "gestureDurationMs": 1500,
         "leadMs": 3200,
@@ -5152,7 +5283,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Во всех этих проектах"
+          "quote": "Проверяю идеи на практике"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -5185,7 +5316,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Сейчас главным центром"
+          "quote": "это Symbiote Workspace"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -5217,7 +5348,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Сейчас главным центром"
+          "quote": "это Symbiote Workspace"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -5250,7 +5381,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь можно продолжить"
+          "quote": "Здесь можно подробнее посмотреть мои проекты"
         },
         "gestureDurationMs": 1200,
         "leadMs": 2450,
@@ -5283,7 +5414,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Здесь можно продолжить"
+          "quote": "Здесь можно подробнее посмотреть мои проекты"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -5409,7 +5540,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Агент подбирает"
+          "quote": "Агент выбирает подходящие готовые блоки"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -5443,7 +5574,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Агент подбирает"
+          "quote": "Агент выбирает подходящие готовые блоки"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -5476,7 +5607,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Конфигурацию можно обновлять"
+          "quote": "Конфигурацию можно изменять уже во время работы"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -5508,7 +5639,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Конфигурацию можно обновлять"
+          "quote": "Конфигурацию можно изменять уже во время работы"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -5541,7 +5672,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Секреты, авторизация"
+          "quote": "Они остаются на стороне хоста"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -5573,7 +5704,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Секреты, авторизация"
+          "quote": "Они остаются на стороне хоста"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -5631,7 +5762,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Компоненты публикуют"
+          "quote": "публиковать свою роль, состояние"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -5663,7 +5794,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Компоненты публикуют"
+          "quote": "публиковать свою роль, состояние"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -5696,7 +5827,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "манифесты"
+          "quote": "манифесты и семантические контракты"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -5729,7 +5860,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "манифесты"
+          "quote": "манифесты и семантические контракты"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -5762,7 +5893,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Workspace использует"
+          "quote": "Workspace использует этот каталог"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -5796,7 +5927,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Workspace использует"
+          "quote": "Workspace использует этот каталог"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -5856,7 +5987,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Продукт собирает"
+          "quote": "Продукт может собрать свой процесс"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2150,
@@ -5889,7 +6020,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Продукт собирает"
+          "quote": "Продукт может собрать свой процесс"
         },
         "gestureDurationMs": 650,
         "leadMs": 950,
@@ -5922,7 +6053,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Воркспейс связывает"
+          "quote": "Workspace затем связывает этот процесс"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -5955,7 +6086,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Воркспейс связывает"
+          "quote": "Workspace затем связывает этот процесс"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -6013,7 +6144,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В центре находится"
+          "quote": "Карточка здесь не просто запись о задаче"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -6045,7 +6176,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В центре находится"
+          "quote": "Карточка здесь не просто запись о задаче"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -6078,7 +6209,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "каждая колонка"
+          "quote": "Каждая колонка может запускать свой этап"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -6111,7 +6242,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "каждая колонка"
+          "quote": "Каждая колонка может запускать свой этап"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -6144,7 +6275,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Для задач с кодом"
+          "quote": "Для задач с кодом система"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -6176,7 +6307,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Для задач с кодом"
+          "quote": "Для задач с кодом система"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -6209,7 +6340,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Модели и подписки"
+          "quote": "Модели, аккаунты и подписки"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -6241,7 +6372,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Модели и подписки"
+          "quote": "Модели, аккаунты и подписки"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -6301,7 +6432,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Движок превращает"
+          "quote": "движок превращает его в реальные рабочие представления"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -6335,7 +6466,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Движок превращает"
+          "quote": "движок превращает его в реальные рабочие представления"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -6368,7 +6499,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В рабочей среде"
+          "quote": "запустить живой предпросмотр"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -6401,7 +6532,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В рабочей среде"
+          "quote": "запустить живой предпросмотр"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -6459,7 +6590,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Панели связывают"
+          "quote": "Панели связывают заявки, активы"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -6491,7 +6622,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Панели связывают"
+          "quote": "Панели связывают заявки, активы"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -6524,7 +6655,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "работает через объявленные действия"
+          "quote": "Интерфейс объявляет, что можно сделать"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -6556,7 +6687,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "работает через объявленные действия"
+          "quote": "Интерфейс объявляет, что можно сделать"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -6616,7 +6747,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "поручить реализацию"
+          "quote": "поручить реализацию одному агенту"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -6650,7 +6781,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "поручить реализацию"
+          "quote": "поручить реализацию одному агенту"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -6683,7 +6814,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "независимую проверку"
+          "quote": "независимую проверку результата другому"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -6717,7 +6848,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "независимую проверку"
+          "quote": "независимую проверку результата другому"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -6750,7 +6881,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "общий структурированный результат"
+          "quote": "общий структурированный ответ"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -6784,7 +6915,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "общий структурированный результат"
+          "quote": "общий структурированный ответ"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -6844,7 +6975,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "скелеты кода"
+          "quote": "скелеты кода, компактная карта"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -6876,7 +7007,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "скелеты кода"
+          "quote": "скелеты кода, компактная карта"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -6909,7 +7040,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "факты браузерной проверки"
+          "quote": "факты браузерной или другой внешней проверки"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2150,
@@ -6942,7 +7073,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "факты браузерной проверки"
+          "quote": "факты браузерной или другой внешней проверки"
         },
         "gestureDurationMs": 650,
         "leadMs": 950,
@@ -6975,7 +7106,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "сфокусированный контекст"
+          "quote": "уже сфокусированный контекст"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -7007,7 +7138,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "сфокусированный контекст"
+          "quote": "уже сфокусированный контекст"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -7067,7 +7198,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Эй-пи-ай"
+          "quote": "Эй пи ай и база PostgreSQL"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -7099,7 +7230,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Эй-пи-ай"
+          "quote": "Эй пи ай и база PostgreSQL"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -7132,7 +7263,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "управляли пулами"
+          "quote": "управляли пулами джи эс эм модемов"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -7164,7 +7295,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "управляли пулами"
+          "quote": "управляли пулами джи эс эм модемов"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -7264,7 +7395,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Диджитал Твин"
+          "quote": "локальный Digital Twin"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -7298,7 +7429,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Диджитал Твин"
+          "quote": "локальный Digital Twin"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -7358,7 +7489,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Сервер управляет расписанием"
+          "quote": "Сервер управляет расписанием, очередью"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -7390,7 +7521,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Сервер управляет расписанием"
+          "quote": "Сервер управляет расписанием, очередью"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -7423,7 +7554,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Готовый JSON-сценарий"
+          "quote": "подготовленный джейсон сценарий"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -7455,7 +7586,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Готовый JSON-сценарий"
+          "quote": "подготовленный джейсон сценарий"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -7488,7 +7619,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Если структура экрана изменилась"
+          "quote": "структура экрана больше не соответствует"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -7521,75 +7652,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Если структура экрана изменилась"
+          "quote": "структура экрана больше не соответствует"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "mobile-smm-details"
-    },
-    {
-      "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "scroll"
-        },
-        "kind": "interaction",
-        "targetId": "article.mobile-smm-platform.approval-log"
-      },
-      "dependsOn": [
-        {
-          "barrier": "ended",
-          "cellId": "cv-show:audio-clip:mobile-smm-details:04"
-        }
-      ],
-      "id": "cv-show:cue:mobile-smm-details.approval:scroll",
-      "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Исходящие действия"
-        },
-        "gestureDurationMs": 1000,
-        "leadMs": 2650,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "mobile-smm-details"
-    },
-    {
-      "cue": {
-        "focus": {
-          "mode": "frame"
-        },
-        "kind": "focus",
-        "targetId": "article.mobile-smm-platform.approval-log"
-      },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:mobile-smm-details.approval:scroll"
-        }
-      ],
-      "id": "cv-show:cue:mobile-smm-details.approval",
-      "kind": "cue",
-      "layerId": "cv-show:layer:focus",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Исходящие действия"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 1450,
         "settleBy": "none",
         "until": null
       },
@@ -7607,7 +7673,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "dependsOn": [
         {
           "barrier": "ended",
-          "cellId": "cv-show:audio-clip:mobile-smm-details:05"
+          "cellId": "cv-show:audio-clip:mobile-smm-details:04"
         }
       ],
       "id": "cv-show:cue:mobile-smm-details.draft:scroll",
@@ -7619,7 +7685,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Демонстрация заканчивается"
+          "quote": "Этот вариант сначала передаётся на проверку"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -7652,10 +7718,75 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Демонстрация заканчивается"
+          "quote": "Этот вариант сначала передаётся на проверку"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "mobile-smm-details"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "article.mobile-smm-platform.approval-log"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:mobile-smm-details:05"
+        }
+      ],
+      "id": "cv-show:cue:mobile-smm-details.approval:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "лимиты, устойчивую дедупликацию и подтверждение"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "mobile-smm-details"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "article.mobile-smm-platform.approval-log"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:mobile-smm-details.approval:scroll"
+        }
+      ],
+      "id": "cv-show:cue:mobile-smm-details.approval",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "лимиты, устойчивую дедупликацию и подтверждение"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
         "settleBy": "none",
         "until": null
       },
@@ -7712,7 +7843,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Публичные примеры"
+          "quote": "Публичные примеры этой работы"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -7745,7 +7876,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Публичные примеры"
+          "quote": "Публичные примеры этой работы"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -7778,7 +7909,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Студия завершила работу"
+          "quote": "завершилась в две тысячи двадцать втором году"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2150,
@@ -7811,7 +7942,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Студия завершила работу"
+          "quote": "завершилась в две тысячи двадцать втором году"
         },
         "gestureDurationMs": 650,
         "leadMs": 950,
@@ -7871,7 +8002,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "компьютерное зрение"
+          "quote": "Рабочая система управляла камерой"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -7905,7 +8036,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "компьютерное зрение"
+          "quote": "Рабочая система управляла камерой"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -7938,7 +8069,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В Эрмитаже я сканировал"
+          "quote": "собственноручно сканировал японские нэцкэ"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -7970,7 +8101,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В Эрмитаже я сканировал"
+          "quote": "собственноручно сканировал японские нэцкэ"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -8003,7 +8134,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "бенинской бронзы"
+          "quote": "характер поверхности бенинской бронзы"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -8036,7 +8167,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "бенинской бронзы"
+          "quote": "характер поверхности бенинской бронзы"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -8096,7 +8227,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "управляемый свет"
+          "quote": "стабильная механика и управляемый свет"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -8128,7 +8259,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "управляемый свет"
+          "quote": "стабильная механика и управляемый свет"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -8161,7 +8292,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "собирал прототипы"
+          "quote": "собирал прототипы и первые изделия"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -8194,7 +8325,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "собирал прототипы"
+          "quote": "собирал прототипы и первые изделия"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -8227,7 +8358,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "музейных систем"
+          "quote": "музейного направления Auto Box"
         },
         "gestureDurationMs": 800,
         "leadMs": 2500,
@@ -8261,7 +8392,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "музейных систем"
+          "quote": "музейного направления Auto Box"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -8319,7 +8450,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "версию для Ардуино"
+          "quote": "Один универсальный контроллер подключался"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -8351,7 +8482,72 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "версию для Ардуино"
+          "quote": "Один универсальный контроллер подключался"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza-details"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "article.photopizza.assembly-calibration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:photopizza-details:02"
+        }
+      ],
+      "id": "cv-show:cue:photopizza-details.documentation:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "описывал сборку и калибровку"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza-details"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "article.photopizza.assembly-calibration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza-details.documentation:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza-details.documentation",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "описывал сборку и калибровку"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -8372,7 +8568,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "dependsOn": [
         {
           "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza-details:02"
+          "cellId": "cv-show:audio-clip:photopizza-details:03"
         }
       ],
       "id": "cv-show:cue:photopizza-details.media:scroll",
@@ -8384,7 +8580,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "я сам продолжил"
+          "quote": "продолжил развивать управляющее программное обеспечение"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -8417,7 +8613,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "я сам продолжил"
+          "quote": "продолжил развивать управляющее программное обеспечение"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -8433,15 +8629,15 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "article.photopizza.assembly-calibration"
+        "targetId": "article.adaptive-maximo-workbench.agentic-eam-demo"
       },
       "dependsOn": [
         {
           "barrier": "ended",
-          "cellId": "cv-show:audio-clip:photopizza-details:03"
+          "cellId": "cv-show:audio-clip:adaptive-maximo-workbench:03"
         }
       ],
-      "id": "cv-show:cue:photopizza-details.documentation:scroll",
+      "id": "cv-show:cue:maximo.agentic-demo:scroll",
       "kind": "cue",
       "layerId": "cv-show:layer:interaction",
       "timing": {
@@ -8450,14 +8646,14 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "сборку с калибровкой"
+          "quote": "В этом демо я показываю следующий шаг"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
         "settleBy": "none",
         "until": null
       },
-      "turnId": "photopizza-details"
+      "turnId": "adaptive-maximo-workbench"
     },
     {
       "cue": {
@@ -8465,15 +8661,15 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "mode": "frame"
         },
         "kind": "focus",
-        "targetId": "article.photopizza.assembly-calibration"
+        "targetId": "article.adaptive-maximo-workbench.agentic-eam-demo"
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza-details.documentation:scroll"
+          "cellId": "cv-show:cue:maximo.agentic-demo:scroll"
         }
       ],
-      "id": "cv-show:cue:photopizza-details.documentation",
+      "id": "cv-show:cue:maximo.agentic-demo",
       "kind": "cue",
       "layerId": "cv-show:layer:focus",
       "timing": {
@@ -8482,20 +8678,215 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "сборку с калибровкой"
+          "quote": "В этом демо я показываю следующий шаг"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
         "settleBy": "none",
         "until": null
       },
-      "turnId": "photopizza-details"
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "article.adaptive-maximo-workbench.xr-eam-example"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:adaptive-maximo-workbench:04"
+        }
+      ],
+      "id": "cv-show:cue:maximo.xr-demo:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "А здесь я развиваю ту же идею в икс ар пространстве"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "article.adaptive-maximo-workbench.xr-eam-example"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo.xr-demo:scroll"
+        }
+      ],
+      "id": "cv-show:cue:maximo.xr-demo",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "А здесь я развиваю ту же идею в икс ар пространстве"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "article.adaptive-maximo-workbench.agentic-eam-demo"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:maximo-workbench-details:03"
+        }
+      ],
+      "id": "cv-show:cue:maximo-details.demo-1:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Поэтому это демо для меня не только пример интерфейса"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "maximo-workbench-details"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "article.adaptive-maximo-workbench.agentic-eam-demo"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo-details.demo-1:scroll"
+        }
+      ],
+      "id": "cv-show:cue:maximo-details.demo-1",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Поэтому это демо для меня не только пример интерфейса"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "maximo-workbench-details"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "article.adaptive-maximo-workbench.xr-eam-example"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:maximo-workbench-details:04"
+        }
+      ],
+      "id": "cv-show:cue:maximo-details.demo-xr:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Икс ар версия проверяет тот же принцип"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "maximo-workbench-details"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "article.adaptive-maximo-workbench.xr-eam-example"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo-details.demo-xr:scroll"
+        }
+      ],
+      "id": "cv-show:cue:maximo-details.demo-xr",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Икс ар версия проверяет тот же принцип"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "maximo-workbench-details"
     },
     {
       "audio": {
         "assetId": "cv-show:audio:positioning",
         "sourceInMs": 0,
-        "sourceOutMs": 23360
+        "sourceOutMs": 24860
       },
       "dependsOn": [
         {
@@ -8517,8 +8908,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:positioning",
-        "sourceInMs": 23360,
-        "sourceOutMs": 29080
+        "sourceInMs": 24860,
+        "sourceOutMs": 55600
       },
       "dependsOn": [
         {
@@ -8532,7 +8923,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 23360
+          "offsetMs": 24860
         }
       },
       "turnId": "positioning"
@@ -8540,8 +8931,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:positioning",
-        "sourceInMs": 29080,
-        "sourceOutMs": 32160
+        "sourceInMs": 55600,
+        "sourceOutMs": 57310
       },
       "dependsOn": [
         {
@@ -8555,7 +8946,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 29080
+          "offsetMs": 55600
         }
       },
       "turnId": "positioning"
@@ -8564,7 +8955,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:symbiote-workspace",
         "sourceInMs": 0,
-        "sourceOutMs": 2298
+        "sourceOutMs": 7500
       },
       "dependsOn": [
         {
@@ -8586,8 +8977,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-workspace",
-        "sourceInMs": 2298,
-        "sourceOutMs": 12220
+        "sourceInMs": 7500,
+        "sourceOutMs": 49520
       },
       "dependsOn": [
         {
@@ -8601,7 +8992,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 2298
+          "offsetMs": 7500
         }
       },
       "turnId": "symbiote-workspace"
@@ -8609,8 +9000,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-workspace",
-        "sourceInMs": 12220,
-        "sourceOutMs": 17060
+        "sourceInMs": 49520,
+        "sourceOutMs": 60800
       },
       "dependsOn": [
         {
@@ -8624,7 +9015,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 12220
+          "offsetMs": 49520
         }
       },
       "turnId": "symbiote-workspace"
@@ -8632,8 +9023,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-workspace",
-        "sourceInMs": 17060,
-        "sourceOutMs": 23910
+        "sourceInMs": 60800,
+        "sourceOutMs": 63200
       },
       "dependsOn": [
         {
@@ -8647,7 +9038,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 17060
+          "offsetMs": 60800
         }
       },
       "turnId": "symbiote-workspace"
@@ -8656,7 +9047,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui",
         "sourceInMs": 0,
-        "sourceOutMs": 9560
+        "sourceOutMs": 11160
       },
       "dependsOn": [
         {
@@ -8678,8 +9069,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui",
-        "sourceInMs": 9560,
-        "sourceOutMs": 14920
+        "sourceInMs": 11160,
+        "sourceOutMs": 45520
       },
       "dependsOn": [
         {
@@ -8693,7 +9084,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 9560
+          "offsetMs": 11160
         }
       },
       "turnId": "symbiote-ui"
@@ -8701,8 +9092,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui",
-        "sourceInMs": 14920,
-        "sourceOutMs": 19240
+        "sourceInMs": 45520,
+        "sourceOutMs": 52820
       },
       "dependsOn": [
         {
@@ -8716,7 +9107,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 14920
+          "offsetMs": 45520
         }
       },
       "turnId": "symbiote-ui"
@@ -8724,8 +9115,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui",
-        "sourceInMs": 19240,
-        "sourceOutMs": 23100
+        "sourceInMs": 52820,
+        "sourceOutMs": 58460
       },
       "dependsOn": [
         {
@@ -8739,7 +9130,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 19240
+          "offsetMs": 52820
         }
       },
       "turnId": "symbiote-ui"
@@ -8747,8 +9138,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui",
-        "sourceInMs": 23100,
-        "sourceOutMs": 26760
+        "sourceInMs": 58460,
+        "sourceOutMs": 63060
       },
       "dependsOn": [
         {
@@ -8762,7 +9153,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 23100
+          "offsetMs": 58460
         }
       },
       "turnId": "symbiote-ui"
@@ -8770,8 +9161,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui",
-        "sourceInMs": 26760,
-        "sourceOutMs": 28370
+        "sourceInMs": 63060,
+        "sourceOutMs": 64510
       },
       "dependsOn": [
         {
@@ -8785,7 +9176,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 26760
+          "offsetMs": 63060
         }
       },
       "turnId": "symbiote-ui"
@@ -8794,7 +9185,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:symbiote-engine",
         "sourceInMs": 0,
-        "sourceOutMs": 3740
+        "sourceOutMs": 12700
       },
       "dependsOn": [
         {
@@ -8816,8 +9207,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-engine",
-        "sourceInMs": 3740,
-        "sourceOutMs": 8940
+        "sourceInMs": 12700,
+        "sourceOutMs": 17940
       },
       "dependsOn": [
         {
@@ -8831,7 +9222,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 3740
+          "offsetMs": 12700
         }
       },
       "turnId": "symbiote-engine"
@@ -8839,8 +9230,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-engine",
-        "sourceInMs": 8940,
-        "sourceOutMs": 15200
+        "sourceInMs": 17940,
+        "sourceOutMs": 22880
       },
       "dependsOn": [
         {
@@ -8854,7 +9245,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 8940
+          "offsetMs": 17940
         }
       },
       "turnId": "symbiote-engine"
@@ -8863,7 +9254,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:agent-portal",
         "sourceInMs": 0,
-        "sourceOutMs": 19520
+        "sourceOutMs": 11640
       },
       "dependsOn": [
         {
@@ -8885,8 +9276,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-portal",
-        "sourceInMs": 19520,
-        "sourceOutMs": 21900
+        "sourceInMs": 11640,
+        "sourceOutMs": 22240
       },
       "dependsOn": [
         {
@@ -8900,7 +9291,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 19520
+          "offsetMs": 11640
         }
       },
       "turnId": "agent-portal"
@@ -8908,8 +9299,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-portal",
-        "sourceInMs": 21900,
-        "sourceOutMs": 37860
+        "sourceInMs": 22240,
+        "sourceOutMs": 37280
       },
       "dependsOn": [
         {
@@ -8923,7 +9314,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 21900
+          "offsetMs": 22240
         }
       },
       "turnId": "agent-portal"
@@ -8931,8 +9322,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-portal",
-        "sourceInMs": 37860,
-        "sourceOutMs": 50420
+        "sourceInMs": 37280,
+        "sourceOutMs": 41080
       },
       "dependsOn": [
         {
@@ -8946,7 +9337,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 37860
+          "offsetMs": 37280
         }
       },
       "turnId": "agent-portal"
@@ -8954,8 +9345,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-portal",
-        "sourceInMs": 50420,
-        "sourceOutMs": 53260
+        "sourceInMs": 41080,
+        "sourceOutMs": 48660
       },
       "dependsOn": [
         {
@@ -8969,7 +9360,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 50420
+          "offsetMs": 41080
         }
       },
       "turnId": "agent-portal"
@@ -8977,8 +9368,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-portal",
-        "sourceInMs": 53260,
-        "sourceOutMs": 69920
+        "sourceInMs": 48660,
+        "sourceOutMs": 52060
       },
       "dependsOn": [
         {
@@ -8992,7 +9383,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 53260
+          "offsetMs": 48660
         }
       },
       "turnId": "agent-portal"
@@ -9001,7 +9392,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:symbiote-video-studio",
         "sourceInMs": 0,
-        "sourceOutMs": 5880
+        "sourceOutMs": 14280
       },
       "dependsOn": [
         {
@@ -9023,8 +9414,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-video-studio",
-        "sourceInMs": 5880,
-        "sourceOutMs": 9660
+        "sourceInMs": 14280,
+        "sourceOutMs": 18400
       },
       "dependsOn": [
         {
@@ -9038,7 +9429,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 5880
+          "offsetMs": 14280
         }
       },
       "turnId": "symbiote-video-studio"
@@ -9046,8 +9437,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-video-studio",
-        "sourceInMs": 9660,
-        "sourceOutMs": 19510
+        "sourceInMs": 18400,
+        "sourceOutMs": 25160
       },
       "dependsOn": [
         {
@@ -9061,7 +9452,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 9660
+          "offsetMs": 18400
         }
       },
       "turnId": "symbiote-video-studio"
@@ -9070,7 +9461,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:adaptive-maximo-workbench",
         "sourceInMs": 0,
-        "sourceOutMs": 4620
+        "sourceOutMs": 22860
       },
       "dependsOn": [
         {
@@ -9092,8 +9483,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:adaptive-maximo-workbench",
-        "sourceInMs": 4620,
-        "sourceOutMs": 12120
+        "sourceInMs": 22860,
+        "sourceOutMs": 35360
       },
       "dependsOn": [
         {
@@ -9107,7 +9498,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 4620
+          "offsetMs": 22860
         }
       },
       "turnId": "adaptive-maximo-workbench"
@@ -9115,8 +9506,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:adaptive-maximo-workbench",
-        "sourceInMs": 12120,
-        "sourceOutMs": 25520
+        "sourceInMs": 35360,
+        "sourceOutMs": 37840
       },
       "dependsOn": [
         {
@@ -9130,7 +9521,53 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 12120
+          "offsetMs": 35360
+        }
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "audio": {
+        "assetId": "cv-show:audio:adaptive-maximo-workbench",
+        "sourceInMs": 37840,
+        "sourceOutMs": 49640
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo.agentic-demo"
+        }
+      ],
+      "id": "cv-show:audio-clip:adaptive-maximo-workbench:04",
+      "kind": "audio-clip",
+      "layerId": "cv-show:layer:audio",
+      "timing": {
+        "at": {
+          "anchor": "turn-start",
+          "offsetMs": 37840
+        }
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "audio": {
+        "assetId": "cv-show:audio:adaptive-maximo-workbench",
+        "sourceInMs": 49640,
+        "sourceOutMs": 68020
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo.xr-demo"
+        }
+      ],
+      "id": "cv-show:audio-clip:adaptive-maximo-workbench:05",
+      "kind": "audio-clip",
+      "layerId": "cv-show:layer:audio",
+      "timing": {
+        "at": {
+          "anchor": "turn-start",
+          "offsetMs": 49640
         }
       },
       "turnId": "adaptive-maximo-workbench"
@@ -9139,7 +9576,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:agent-pool-mcp",
         "sourceInMs": 0,
-        "sourceOutMs": 14740
+        "sourceOutMs": 15480
       },
       "dependsOn": [
         {
@@ -9161,8 +9598,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-pool-mcp",
-        "sourceInMs": 14740,
-        "sourceOutMs": 22610
+        "sourceInMs": 15480,
+        "sourceOutMs": 23680
       },
       "dependsOn": [
         {
@@ -9176,7 +9613,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 14740
+          "offsetMs": 15480
         }
       },
       "turnId": "agent-pool-mcp"
@@ -9185,7 +9622,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:project-graph-mcp",
         "sourceInMs": 0,
-        "sourceOutMs": 9820
+        "sourceOutMs": 12040
       },
       "dependsOn": [
         {
@@ -9207,8 +9644,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:project-graph-mcp",
-        "sourceInMs": 9820,
-        "sourceOutMs": 19380
+        "sourceInMs": 12040,
+        "sourceOutMs": 21720
       },
       "dependsOn": [
         {
@@ -9222,7 +9659,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 9820
+          "offsetMs": 12040
         }
       },
       "turnId": "project-graph-mcp"
@@ -9230,8 +9667,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:project-graph-mcp",
-        "sourceInMs": 19380,
-        "sourceOutMs": 30640
+        "sourceInMs": 21720,
+        "sourceOutMs": 24580
       },
       "dependsOn": [
         {
@@ -9245,7 +9682,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 19380
+          "offsetMs": 21720
         }
       },
       "turnId": "project-graph-mcp"
@@ -9253,8 +9690,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:project-graph-mcp",
-        "sourceInMs": 30640,
-        "sourceOutMs": 38810
+        "sourceInMs": 24580,
+        "sourceOutMs": 29820
       },
       "dependsOn": [
         {
@@ -9268,7 +9705,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 30640
+          "offsetMs": 24580
         }
       },
       "turnId": "project-graph-mcp"
@@ -9277,7 +9714,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:lifecycle-messaging-platform",
         "sourceInMs": 0,
-        "sourceOutMs": 9180
+        "sourceOutMs": 7160
       },
       "dependsOn": [
         {
@@ -9299,8 +9736,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:lifecycle-messaging-platform",
-        "sourceInMs": 9180,
-        "sourceOutMs": 13980
+        "sourceInMs": 7160,
+        "sourceOutMs": 12300
       },
       "dependsOn": [
         {
@@ -9314,7 +9751,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 9180
+          "offsetMs": 7160
         }
       },
       "turnId": "lifecycle-messaging-platform"
@@ -9322,8 +9759,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:lifecycle-messaging-platform",
-        "sourceInMs": 13980,
-        "sourceOutMs": 24180
+        "sourceInMs": 12300,
+        "sourceOutMs": 21460
       },
       "dependsOn": [
         {
@@ -9337,7 +9774,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 13980
+          "offsetMs": 12300
         }
       },
       "turnId": "lifecycle-messaging-platform"
@@ -9345,8 +9782,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:lifecycle-messaging-platform",
-        "sourceInMs": 24180,
-        "sourceOutMs": 32920
+        "sourceInMs": 21460,
+        "sourceOutMs": 31820
       },
       "dependsOn": [
         {
@@ -9360,7 +9797,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 24180
+          "offsetMs": 21460
         }
       },
       "turnId": "lifecycle-messaging-platform"
@@ -9368,8 +9805,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:lifecycle-messaging-platform",
-        "sourceInMs": 32920,
-        "sourceOutMs": 38320
+        "sourceInMs": 31820,
+        "sourceOutMs": 36910
       },
       "dependsOn": [
         {
@@ -9383,7 +9820,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 32920
+          "offsetMs": 31820
         }
       },
       "turnId": "lifecycle-messaging-platform"
@@ -9392,7 +9829,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-platform",
         "sourceInMs": 0,
-        "sourceOutMs": 6980
+        "sourceOutMs": 8360
       },
       "dependsOn": [
         {
@@ -9414,8 +9851,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-platform",
-        "sourceInMs": 6980,
-        "sourceOutMs": 13620
+        "sourceInMs": 8360,
+        "sourceOutMs": 16080
       },
       "dependsOn": [
         {
@@ -9429,7 +9866,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 6980
+          "offsetMs": 8360
         }
       },
       "turnId": "mobile-smm-platform"
@@ -9437,8 +9874,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-platform",
-        "sourceInMs": 13620,
-        "sourceOutMs": 18880
+        "sourceInMs": 16080,
+        "sourceOutMs": 23920
       },
       "dependsOn": [
         {
@@ -9452,7 +9889,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 13620
+          "offsetMs": 16080
         }
       },
       "turnId": "mobile-smm-platform"
@@ -9460,8 +9897,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-platform",
-        "sourceInMs": 18880,
-        "sourceOutMs": 31420
+        "sourceInMs": 23920,
+        "sourceOutMs": 36990
       },
       "dependsOn": [
         {
@@ -9475,7 +9912,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 18880
+          "offsetMs": 23920
         }
       },
       "turnId": "mobile-smm-platform"
@@ -9484,7 +9921,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:f360-studio",
         "sourceInMs": 0,
-        "sourceOutMs": 15380
+        "sourceOutMs": 19160
       },
       "dependsOn": [
         {
@@ -9506,8 +9943,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:f360-studio",
-        "sourceInMs": 15380,
-        "sourceOutMs": 21880
+        "sourceInMs": 19160,
+        "sourceOutMs": 23540
       },
       "dependsOn": [
         {
@@ -9521,7 +9958,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 15380
+          "offsetMs": 19160
         }
       },
       "turnId": "f360-studio"
@@ -9529,8 +9966,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:f360-studio",
-        "sourceInMs": 21880,
-        "sourceOutMs": 27900
+        "sourceInMs": 23540,
+        "sourceOutMs": 34500
       },
       "dependsOn": [
         {
@@ -9544,7 +9981,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 21880
+          "offsetMs": 23540
         }
       },
       "turnId": "f360-studio"
@@ -9553,7 +9990,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:autobox",
         "sourceInMs": 0,
-        "sourceOutMs": 8780
+        "sourceOutMs": 41020
       },
       "dependsOn": [
         {
@@ -9575,8 +10012,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox",
-        "sourceInMs": 8780,
-        "sourceOutMs": 25900
+        "sourceInMs": 41020,
+        "sourceOutMs": 49620
       },
       "dependsOn": [
         {
@@ -9590,7 +10027,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 8780
+          "offsetMs": 41020
         }
       },
       "turnId": "autobox"
@@ -9598,8 +10035,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox",
-        "sourceInMs": 25900,
-        "sourceOutMs": 36880
+        "sourceInMs": 49620,
+        "sourceOutMs": 54980
       },
       "dependsOn": [
         {
@@ -9613,7 +10050,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 25900
+          "offsetMs": 49620
         }
       },
       "turnId": "autobox"
@@ -9621,8 +10058,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox",
-        "sourceInMs": 36880,
-        "sourceOutMs": 53280
+        "sourceInMs": 54980,
+        "sourceOutMs": 59600
       },
       "dependsOn": [
         {
@@ -9636,7 +10073,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 36880
+          "offsetMs": 54980
         }
       },
       "turnId": "autobox"
@@ -9644,8 +10081,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox",
-        "sourceInMs": 53280,
-        "sourceOutMs": 63160
+        "sourceInMs": 59600,
+        "sourceOutMs": 64800
       },
       "dependsOn": [
         {
@@ -9659,7 +10096,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 53280
+          "offsetMs": 59600
         }
       },
       "turnId": "autobox"
@@ -9667,8 +10104,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox",
-        "sourceInMs": 63160,
-        "sourceOutMs": 68660
+        "sourceInMs": 64800,
+        "sourceOutMs": 69900
       },
       "dependsOn": [
         {
@@ -9682,7 +10119,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 63160
+          "offsetMs": 64800
         }
       },
       "turnId": "autobox"
@@ -9690,8 +10127,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox",
-        "sourceInMs": 68660,
-        "sourceOutMs": 79820
+        "sourceInMs": 69900,
+        "sourceOutMs": 71500
       },
       "dependsOn": [
         {
@@ -9705,7 +10142,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 68660
+          "offsetMs": 69900
         }
       },
       "turnId": "autobox"
@@ -9713,8 +10150,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox",
-        "sourceInMs": 79820,
-        "sourceOutMs": 92520
+        "sourceInMs": 71500,
+        "sourceOutMs": 73020
       },
       "dependsOn": [
         {
@@ -9728,7 +10165,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 79820
+          "offsetMs": 71500
         }
       },
       "turnId": "autobox"
@@ -9736,8 +10173,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox",
-        "sourceInMs": 92520,
-        "sourceOutMs": 110820
+        "sourceInMs": 73020,
+        "sourceOutMs": 74320
       },
       "dependsOn": [
         {
@@ -9751,7 +10188,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 92520
+          "offsetMs": 73020
         }
       },
       "turnId": "autobox"
@@ -9759,8 +10196,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox",
-        "sourceInMs": 110820,
-        "sourceOutMs": 121280
+        "sourceInMs": 74320,
+        "sourceOutMs": 75980
       },
       "dependsOn": [
         {
@@ -9774,7 +10211,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 110820
+          "offsetMs": 74320
         }
       },
       "turnId": "autobox"
@@ -9783,7 +10220,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:complexscan",
         "sourceInMs": 0,
-        "sourceOutMs": 1680
+        "sourceOutMs": 7240
       },
       "dependsOn": [
         {
@@ -9805,8 +10242,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan",
-        "sourceInMs": 1680,
-        "sourceOutMs": 21560
+        "sourceInMs": 7240,
+        "sourceOutMs": 31940
       },
       "dependsOn": [
         {
@@ -9820,7 +10257,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 1680
+          "offsetMs": 7240
         }
       },
       "turnId": "complexscan"
@@ -9828,8 +10265,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan",
-        "sourceInMs": 21560,
-        "sourceOutMs": 27220
+        "sourceInMs": 31940,
+        "sourceOutMs": 45020
       },
       "dependsOn": [
         {
@@ -9843,7 +10280,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 21560
+          "offsetMs": 31940
         }
       },
       "turnId": "complexscan"
@@ -9851,8 +10288,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan",
-        "sourceInMs": 27220,
-        "sourceOutMs": 40200
+        "sourceInMs": 45020,
+        "sourceOutMs": 62980
       },
       "dependsOn": [
         {
@@ -9866,7 +10303,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 27220
+          "offsetMs": 45020
         }
       },
       "turnId": "complexscan"
@@ -9874,8 +10311,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan",
-        "sourceInMs": 40200,
-        "sourceOutMs": 41780
+        "sourceInMs": 62980,
+        "sourceOutMs": 73820
       },
       "dependsOn": [
         {
@@ -9889,7 +10326,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 40200
+          "offsetMs": 62980
         }
       },
       "turnId": "complexscan"
@@ -9897,8 +10334,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan",
-        "sourceInMs": 41780,
-        "sourceOutMs": 52160
+        "sourceInMs": 73820,
+        "sourceOutMs": 94300
       },
       "dependsOn": [
         {
@@ -9912,7 +10349,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 41780
+          "offsetMs": 73820
         }
       },
       "turnId": "complexscan"
@@ -9920,8 +10357,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan",
-        "sourceInMs": 52160,
-        "sourceOutMs": 77380
+        "sourceInMs": 94300,
+        "sourceOutMs": 120920
       },
       "dependsOn": [
         {
@@ -9935,7 +10372,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 52160
+          "offsetMs": 94300
         }
       },
       "turnId": "complexscan"
@@ -9943,8 +10380,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan",
-        "sourceInMs": 77380,
-        "sourceOutMs": 95010
+        "sourceInMs": 120920,
+        "sourceOutMs": 122570
       },
       "dependsOn": [
         {
@@ -9958,7 +10395,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 77380
+          "offsetMs": 120920
         }
       },
       "turnId": "complexscan"
@@ -9967,7 +10404,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:photopizza",
         "sourceInMs": 0,
-        "sourceOutMs": 5240
+        "sourceOutMs": 8140
       },
       "dependsOn": [
         {
@@ -9989,8 +10426,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza",
-        "sourceInMs": 5240,
-        "sourceOutMs": 12200
+        "sourceInMs": 8140,
+        "sourceOutMs": 41880
       },
       "dependsOn": [
         {
@@ -10004,7 +10441,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 5240
+          "offsetMs": 8140
         }
       },
       "turnId": "photopizza"
@@ -10012,13 +10449,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza",
-        "sourceInMs": 12200,
-        "sourceOutMs": 19120
+        "sourceInMs": 41880,
+        "sourceOutMs": 74260
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.video-01"
+          "cellId": "cv-show:cue:photopizza.megavisor-promo"
         }
       ],
       "id": "cv-show:audio-clip:photopizza:03",
@@ -10027,7 +10464,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 12200
+          "offsetMs": 41880
         }
       },
       "turnId": "photopizza"
@@ -10035,13 +10472,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza",
-        "sourceInMs": 19120,
-        "sourceOutMs": 26280
+        "sourceInMs": 74260,
+        "sourceOutMs": 90240
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.video-02"
+          "cellId": "cv-show:cue:photopizza.page-open"
         }
       ],
       "id": "cv-show:audio-clip:photopizza:04",
@@ -10050,7 +10487,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 19120
+          "offsetMs": 74260
         }
       },
       "turnId": "photopizza"
@@ -10058,13 +10495,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza",
-        "sourceInMs": 26280,
-        "sourceOutMs": 31000
+        "sourceInMs": 90240,
+        "sourceOutMs": 98480
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.mechanics"
+          "cellId": "cv-show:cue:photopizza.video-01"
         }
       ],
       "id": "cv-show:audio-clip:photopizza:05",
@@ -10073,7 +10510,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 26280
+          "offsetMs": 90240
         }
       },
       "turnId": "photopizza"
@@ -10081,13 +10518,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza",
-        "sourceInMs": 31000,
-        "sourceOutMs": 40360
+        "sourceInMs": 98480,
+        "sourceOutMs": 109160
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.video-03"
+          "cellId": "cv-show:cue:photopizza.video-02"
         }
       ],
       "id": "cv-show:audio-clip:photopizza:06",
@@ -10096,7 +10533,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 31000
+          "offsetMs": 98480
         }
       },
       "turnId": "photopizza"
@@ -10104,13 +10541,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza",
-        "sourceInMs": 40360,
-        "sourceOutMs": 54980
+        "sourceInMs": 109160,
+        "sourceOutMs": 136220
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.video-04"
+          "cellId": "cv-show:cue:photopizza.mechanics"
         }
       ],
       "id": "cv-show:audio-clip:photopizza:07",
@@ -10119,7 +10556,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 40360
+          "offsetMs": 109160
         }
       },
       "turnId": "photopizza"
@@ -10127,13 +10564,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza",
-        "sourceInMs": 54980,
-        "sourceOutMs": 66200
+        "sourceInMs": 136220,
+        "sourceOutMs": 144200
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.video-05"
+          "cellId": "cv-show:cue:photopizza.controller"
         }
       ],
       "id": "cv-show:audio-clip:photopizza:08",
@@ -10142,7 +10579,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 54980
+          "offsetMs": 136220
         }
       },
       "turnId": "photopizza"
@@ -10150,13 +10587,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza",
-        "sourceInMs": 66200,
-        "sourceOutMs": 73020
+        "sourceInMs": 144200,
+        "sourceOutMs": 151120
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.controller"
+          "cellId": "cv-show:cue:photopizza.video-03"
         }
       ],
       "id": "cv-show:audio-clip:photopizza:09",
@@ -10165,7 +10602,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 66200
+          "offsetMs": 144200
         }
       },
       "turnId": "photopizza"
@@ -10173,13 +10610,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza",
-        "sourceInMs": 73020,
-        "sourceOutMs": 86080
+        "sourceInMs": 151120,
+        "sourceOutMs": 157140
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza.spinner"
+          "cellId": "cv-show:cue:photopizza.video-04"
         }
       ],
       "id": "cv-show:audio-clip:photopizza:10",
@@ -10188,7 +10625,53 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 73020
+          "offsetMs": 151120
+        }
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "audio": {
+        "assetId": "cv-show:audio:photopizza",
+        "sourceInMs": 157140,
+        "sourceOutMs": 162460
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.video-05"
+        }
+      ],
+      "id": "cv-show:audio-clip:photopizza:11",
+      "kind": "audio-clip",
+      "layerId": "cv-show:layer:audio",
+      "timing": {
+        "at": {
+          "anchor": "turn-start",
+          "offsetMs": 157140
+        }
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "audio": {
+        "assetId": "cv-show:audio:photopizza",
+        "sourceInMs": 162460,
+        "sourceOutMs": 175460
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.spinner"
+        }
+      ],
+      "id": "cv-show:audio-clip:photopizza:12",
+      "kind": "audio-clip",
+      "layerId": "cv-show:layer:audio",
+      "timing": {
+        "at": {
+          "anchor": "turn-start",
+          "offsetMs": 162460
         }
       },
       "turnId": "photopizza"
@@ -10197,7 +10680,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:finale",
         "sourceInMs": 0,
-        "sourceOutMs": 2200
+        "sourceOutMs": 4220
       },
       "dependsOn": [
         {
@@ -10219,8 +10702,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:finale",
-        "sourceInMs": 2200,
-        "sourceOutMs": 11460
+        "sourceInMs": 4220,
+        "sourceOutMs": 20040
       },
       "dependsOn": [
         {
@@ -10234,7 +10717,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 2200
+          "offsetMs": 4220
         }
       },
       "turnId": "finale"
@@ -10242,8 +10725,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:finale",
-        "sourceInMs": 11460,
-        "sourceOutMs": 20520
+        "sourceInMs": 20040,
+        "sourceOutMs": 56360
       },
       "dependsOn": [
         {
@@ -10257,7 +10740,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 11460
+          "offsetMs": 20040
         }
       },
       "turnId": "finale"
@@ -10265,8 +10748,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:finale",
-        "sourceInMs": 20520,
-        "sourceOutMs": 24680
+        "sourceInMs": 56360,
+        "sourceOutMs": 71900
       },
       "dependsOn": [
         {
@@ -10280,7 +10763,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 20520
+          "offsetMs": 56360
         }
       },
       "turnId": "finale"
@@ -10288,8 +10771,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:finale",
-        "sourceInMs": 24680,
-        "sourceOutMs": 29320
+        "sourceInMs": 71900,
+        "sourceOutMs": 77120
       },
       "dependsOn": [
         {
@@ -10303,7 +10786,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 24680
+          "offsetMs": 71900
         }
       },
       "turnId": "finale"
@@ -10311,8 +10794,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:finale",
-        "sourceInMs": 29320,
-        "sourceOutMs": 30550
+        "sourceInMs": 77120,
+        "sourceOutMs": 78210
       },
       "dependsOn": [
         {
@@ -10326,7 +10809,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 29320
+          "offsetMs": 77120
         }
       },
       "turnId": "finale"
@@ -10335,7 +10818,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:workspace-details",
         "sourceInMs": 0,
-        "sourceOutMs": 7480
+        "sourceOutMs": 14100
       },
       "dependsOn": [
         {
@@ -10357,8 +10840,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:workspace-details",
-        "sourceInMs": 7480,
-        "sourceOutMs": 13340
+        "sourceInMs": 14100,
+        "sourceOutMs": 30600
       },
       "dependsOn": [
         {
@@ -10372,7 +10855,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 7480
+          "offsetMs": 14100
         }
       },
       "turnId": "workspace-details"
@@ -10380,8 +10863,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:workspace-details",
-        "sourceInMs": 13340,
-        "sourceOutMs": 19100
+        "sourceInMs": 30600,
+        "sourceOutMs": 56480
       },
       "dependsOn": [
         {
@@ -10395,7 +10878,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 13340
+          "offsetMs": 30600
         }
       },
       "turnId": "workspace-details"
@@ -10403,8 +10886,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:workspace-details",
-        "sourceInMs": 19100,
-        "sourceOutMs": 29070
+        "sourceInMs": 56480,
+        "sourceOutMs": 81330
       },
       "dependsOn": [
         {
@@ -10418,7 +10901,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 19100
+          "offsetMs": 56480
         }
       },
       "turnId": "workspace-details"
@@ -10427,7 +10910,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui-details",
         "sourceInMs": 0,
-        "sourceOutMs": 7380
+        "sourceOutMs": 13820
       },
       "dependsOn": [
         {
@@ -10449,8 +10932,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui-details",
-        "sourceInMs": 7380,
-        "sourceOutMs": 11060
+        "sourceInMs": 13820,
+        "sourceOutMs": 18660
       },
       "dependsOn": [
         {
@@ -10464,7 +10947,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 7380
+          "offsetMs": 13820
         }
       },
       "turnId": "symbiote-ui-details"
@@ -10472,8 +10955,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui-details",
-        "sourceInMs": 11060,
-        "sourceOutMs": 13540
+        "sourceInMs": 18660,
+        "sourceOutMs": 36660
       },
       "dependsOn": [
         {
@@ -10487,7 +10970,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 11060
+          "offsetMs": 18660
         }
       },
       "turnId": "symbiote-ui-details"
@@ -10495,8 +10978,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-ui-details",
-        "sourceInMs": 13540,
-        "sourceOutMs": 24160
+        "sourceInMs": 36660,
+        "sourceOutMs": 70750
       },
       "dependsOn": [
         {
@@ -10510,7 +10993,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 13540
+          "offsetMs": 36660
         }
       },
       "turnId": "symbiote-ui-details"
@@ -10519,7 +11002,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:symbiote-engine-details",
         "sourceInMs": 0,
-        "sourceOutMs": 8360
+        "sourceOutMs": 16220
       },
       "dependsOn": [
         {
@@ -10541,8 +11024,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-engine-details",
-        "sourceInMs": 8360,
-        "sourceOutMs": 11418
+        "sourceInMs": 16220,
+        "sourceOutMs": 20200
       },
       "dependsOn": [
         {
@@ -10556,7 +11039,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 8360
+          "offsetMs": 16220
         }
       },
       "turnId": "symbiote-engine-details"
@@ -10564,8 +11047,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:symbiote-engine-details",
-        "sourceInMs": 11418,
-        "sourceOutMs": 22970
+        "sourceInMs": 20200,
+        "sourceOutMs": 43950
       },
       "dependsOn": [
         {
@@ -10579,7 +11062,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 11418
+          "offsetMs": 20200
         }
       },
       "turnId": "symbiote-engine-details"
@@ -10588,7 +11071,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:agent-portal-details",
         "sourceInMs": 0,
-        "sourceOutMs": 15980
+        "sourceOutMs": 4060
       },
       "dependsOn": [
         {
@@ -10610,8 +11093,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-portal-details",
-        "sourceInMs": 15980,
-        "sourceOutMs": 18780
+        "sourceInMs": 4060,
+        "sourceOutMs": 9120
       },
       "dependsOn": [
         {
@@ -10625,7 +11108,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 15980
+          "offsetMs": 4060
         }
       },
       "turnId": "agent-portal-details"
@@ -10633,8 +11116,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-portal-details",
-        "sourceInMs": 18780,
-        "sourceOutMs": 25700
+        "sourceInMs": 9120,
+        "sourceOutMs": 21840
       },
       "dependsOn": [
         {
@@ -10648,7 +11131,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 18780
+          "offsetMs": 9120
         }
       },
       "turnId": "agent-portal-details"
@@ -10656,8 +11139,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-portal-details",
-        "sourceInMs": 25700,
-        "sourceOutMs": 40480
+        "sourceInMs": 21840,
+        "sourceOutMs": 46120
       },
       "dependsOn": [
         {
@@ -10671,7 +11154,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 25700
+          "offsetMs": 21840
         }
       },
       "turnId": "agent-portal-details"
@@ -10679,8 +11162,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-portal-details",
-        "sourceInMs": 40480,
-        "sourceOutMs": 48960
+        "sourceInMs": 46120,
+        "sourceOutMs": 66800
       },
       "dependsOn": [
         {
@@ -10694,7 +11177,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 40480
+          "offsetMs": 46120
         }
       },
       "turnId": "agent-portal-details"
@@ -10703,7 +11186,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:video-studio-details",
         "sourceInMs": 0,
-        "sourceOutMs": 11160
+        "sourceOutMs": 14460
       },
       "dependsOn": [
         {
@@ -10725,8 +11208,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:video-studio-details",
-        "sourceInMs": 11160,
-        "sourceOutMs": 15180
+        "sourceInMs": 14460,
+        "sourceOutMs": 21400
       },
       "dependsOn": [
         {
@@ -10740,7 +11223,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 11160
+          "offsetMs": 14460
         }
       },
       "turnId": "video-studio-details"
@@ -10748,8 +11231,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:video-studio-details",
-        "sourceInMs": 15180,
-        "sourceOutMs": 29640
+        "sourceInMs": 21400,
+        "sourceOutMs": 47120
       },
       "dependsOn": [
         {
@@ -10763,7 +11246,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 15180
+          "offsetMs": 21400
         }
       },
       "turnId": "video-studio-details"
@@ -10772,7 +11255,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:maximo-workbench-details",
         "sourceInMs": 0,
-        "sourceOutMs": 6680
+        "sourceOutMs": 5540
       },
       "dependsOn": [
         {
@@ -10794,8 +11277,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:maximo-workbench-details",
-        "sourceInMs": 6680,
-        "sourceOutMs": 17540
+        "sourceInMs": 5540,
+        "sourceOutMs": 25020
       },
       "dependsOn": [
         {
@@ -10809,7 +11292,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 6680
+          "offsetMs": 5540
         }
       },
       "turnId": "maximo-workbench-details"
@@ -10817,8 +11300,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:maximo-workbench-details",
-        "sourceInMs": 17540,
-        "sourceOutMs": 32650
+        "sourceInMs": 25020,
+        "sourceOutMs": 44700
       },
       "dependsOn": [
         {
@@ -10832,7 +11315,53 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 17540
+          "offsetMs": 25020
+        }
+      },
+      "turnId": "maximo-workbench-details"
+    },
+    {
+      "audio": {
+        "assetId": "cv-show:audio:maximo-workbench-details",
+        "sourceInMs": 44700,
+        "sourceOutMs": 52160
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo-details.demo-1"
+        }
+      ],
+      "id": "cv-show:audio-clip:maximo-workbench-details:04",
+      "kind": "audio-clip",
+      "layerId": "cv-show:layer:audio",
+      "timing": {
+        "at": {
+          "anchor": "turn-start",
+          "offsetMs": 44700
+        }
+      },
+      "turnId": "maximo-workbench-details"
+    },
+    {
+      "audio": {
+        "assetId": "cv-show:audio:maximo-workbench-details",
+        "sourceInMs": 52160,
+        "sourceOutMs": 76130
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo-details.demo-xr"
+        }
+      ],
+      "id": "cv-show:audio-clip:maximo-workbench-details:05",
+      "kind": "audio-clip",
+      "layerId": "cv-show:layer:audio",
+      "timing": {
+        "at": {
+          "anchor": "turn-start",
+          "offsetMs": 52160
         }
       },
       "turnId": "maximo-workbench-details"
@@ -10841,7 +11370,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:agent-pool-details",
         "sourceInMs": 0,
-        "sourceOutMs": 16040
+        "sourceOutMs": 21520
       },
       "dependsOn": [
         {
@@ -10863,8 +11392,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-pool-details",
-        "sourceInMs": 16040,
-        "sourceOutMs": 18460
+        "sourceInMs": 21520,
+        "sourceOutMs": 24380
       },
       "dependsOn": [
         {
@@ -10878,7 +11407,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 16040
+          "offsetMs": 21520
         }
       },
       "turnId": "agent-pool-details"
@@ -10886,8 +11415,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-pool-details",
-        "sourceInMs": 18460,
-        "sourceOutMs": 27280
+        "sourceInMs": 24380,
+        "sourceOutMs": 43200
       },
       "dependsOn": [
         {
@@ -10901,7 +11430,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 18460
+          "offsetMs": 24380
         }
       },
       "turnId": "agent-pool-details"
@@ -10909,8 +11438,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:agent-pool-details",
-        "sourceInMs": 27280,
-        "sourceOutMs": 29280
+        "sourceInMs": 43200,
+        "sourceOutMs": 54110
       },
       "dependsOn": [
         {
@@ -10924,7 +11453,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 27280
+          "offsetMs": 43200
         }
       },
       "turnId": "agent-pool-details"
@@ -10933,7 +11462,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:project-graph-details",
         "sourceInMs": 0,
-        "sourceOutMs": 7160
+        "sourceOutMs": 7880
       },
       "dependsOn": [
         {
@@ -10955,8 +11484,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:project-graph-details",
-        "sourceInMs": 7160,
-        "sourceOutMs": 9480
+        "sourceInMs": 7880,
+        "sourceOutMs": 27240
       },
       "dependsOn": [
         {
@@ -10970,7 +11499,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 7160
+          "offsetMs": 7880
         }
       },
       "turnId": "project-graph-details"
@@ -10978,8 +11507,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:project-graph-details",
-        "sourceInMs": 9480,
-        "sourceOutMs": 14900
+        "sourceInMs": 27240,
+        "sourceOutMs": 44080
       },
       "dependsOn": [
         {
@@ -10993,7 +11522,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 9480
+          "offsetMs": 27240
         }
       },
       "turnId": "project-graph-details"
@@ -11001,8 +11530,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:project-graph-details",
-        "sourceInMs": 14900,
-        "sourceOutMs": 23360
+        "sourceInMs": 44080,
+        "sourceOutMs": 58160
       },
       "dependsOn": [
         {
@@ -11016,7 +11545,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 14900
+          "offsetMs": 44080
         }
       },
       "turnId": "project-graph-details"
@@ -11025,7 +11554,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:lifecycle-platform-details",
         "sourceInMs": 0,
-        "sourceOutMs": 6060
+        "sourceOutMs": 9460
       },
       "dependsOn": [
         {
@@ -11047,8 +11576,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:lifecycle-platform-details",
-        "sourceInMs": 6060,
-        "sourceOutMs": 15240
+        "sourceInMs": 9460,
+        "sourceOutMs": 19660
       },
       "dependsOn": [
         {
@@ -11062,7 +11591,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 6060
+          "offsetMs": 9460
         }
       },
       "turnId": "lifecycle-platform-details"
@@ -11070,8 +11599,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:lifecycle-platform-details",
-        "sourceInMs": 15240,
-        "sourceOutMs": 20860
+        "sourceInMs": 19660,
+        "sourceOutMs": 40240
       },
       "dependsOn": [
         {
@@ -11085,7 +11614,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 15240
+          "offsetMs": 19660
         }
       },
       "turnId": "lifecycle-platform-details"
@@ -11093,8 +11622,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:lifecycle-platform-details",
-        "sourceInMs": 20860,
-        "sourceOutMs": 26740
+        "sourceInMs": 40240,
+        "sourceOutMs": 56300
       },
       "dependsOn": [
         {
@@ -11108,7 +11637,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 20860
+          "offsetMs": 40240
         }
       },
       "turnId": "lifecycle-platform-details"
@@ -11116,8 +11645,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:lifecycle-platform-details",
-        "sourceInMs": 26740,
-        "sourceOutMs": 40420
+        "sourceInMs": 56300,
+        "sourceOutMs": 63800
       },
       "dependsOn": [
         {
@@ -11131,7 +11660,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 26740
+          "offsetMs": 56300
         }
       },
       "turnId": "lifecycle-platform-details"
@@ -11140,7 +11669,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-details",
         "sourceInMs": 0,
-        "sourceOutMs": 5300
+        "sourceOutMs": 5160
       },
       "dependsOn": [
         {
@@ -11162,8 +11691,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-details",
-        "sourceInMs": 5300,
-        "sourceOutMs": 10520
+        "sourceInMs": 5160,
+        "sourceOutMs": 13400
       },
       "dependsOn": [
         {
@@ -11177,7 +11706,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 5300
+          "offsetMs": 5160
         }
       },
       "turnId": "mobile-smm-details"
@@ -11185,8 +11714,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-details",
-        "sourceInMs": 10520,
-        "sourceOutMs": 16200
+        "sourceInMs": 13400,
+        "sourceOutMs": 27360
       },
       "dependsOn": [
         {
@@ -11200,7 +11729,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 10520
+          "offsetMs": 13400
         }
       },
       "turnId": "mobile-smm-details"
@@ -11208,8 +11737,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-details",
-        "sourceInMs": 16200,
-        "sourceOutMs": 27400
+        "sourceInMs": 27360,
+        "sourceOutMs": 42520
       },
       "dependsOn": [
         {
@@ -11223,7 +11752,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 16200
+          "offsetMs": 27360
         }
       },
       "turnId": "mobile-smm-details"
@@ -11231,13 +11760,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-details",
-        "sourceInMs": 27400,
-        "sourceOutMs": 32720
+        "sourceInMs": 42520,
+        "sourceOutMs": 47240
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:mobile-smm-details.approval"
+          "cellId": "cv-show:cue:mobile-smm-details.draft"
         }
       ],
       "id": "cv-show:audio-clip:mobile-smm-details:05",
@@ -11246,7 +11775,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 27400
+          "offsetMs": 42520
         }
       },
       "turnId": "mobile-smm-details"
@@ -11254,13 +11783,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:mobile-smm-details",
-        "sourceInMs": 32720,
-        "sourceOutMs": 38000
+        "sourceInMs": 47240,
+        "sourceOutMs": 65450
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:mobile-smm-details.draft"
+          "cellId": "cv-show:cue:mobile-smm-details.approval"
         }
       ],
       "id": "cv-show:audio-clip:mobile-smm-details:06",
@@ -11269,7 +11798,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 32720
+          "offsetMs": 47240
         }
       },
       "turnId": "mobile-smm-details"
@@ -11278,7 +11807,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:f360-details",
         "sourceInMs": 0,
-        "sourceOutMs": 23660
+        "sourceOutMs": 38980
       },
       "dependsOn": [
         {
@@ -11300,8 +11829,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:f360-details",
-        "sourceInMs": 23660,
-        "sourceOutMs": 27400
+        "sourceInMs": 38980,
+        "sourceOutMs": 52580
       },
       "dependsOn": [
         {
@@ -11315,7 +11844,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 23660
+          "offsetMs": 38980
         }
       },
       "turnId": "f360-details"
@@ -11323,8 +11852,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:f360-details",
-        "sourceInMs": 27400,
-        "sourceOutMs": 32270
+        "sourceInMs": 52580,
+        "sourceOutMs": 57410
       },
       "dependsOn": [
         {
@@ -11338,7 +11867,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 27400
+          "offsetMs": 52580
         }
       },
       "turnId": "f360-details"
@@ -11347,7 +11876,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:autobox-details",
         "sourceInMs": 0,
-        "sourceOutMs": 7020
+        "sourceOutMs": 17440
       },
       "dependsOn": [
         {
@@ -11369,8 +11898,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox-details",
-        "sourceInMs": 7020,
-        "sourceOutMs": 53880
+        "sourceInMs": 17440,
+        "sourceOutMs": 83320
       },
       "dependsOn": [
         {
@@ -11384,7 +11913,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 7020
+          "offsetMs": 17440
         }
       },
       "turnId": "autobox-details"
@@ -11392,8 +11921,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox-details",
-        "sourceInMs": 53880,
-        "sourceOutMs": 58680
+        "sourceInMs": 83320,
+        "sourceOutMs": 107160
       },
       "dependsOn": [
         {
@@ -11407,7 +11936,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 53880
+          "offsetMs": 83320
         }
       },
       "turnId": "autobox-details"
@@ -11415,8 +11944,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:autobox-details",
-        "sourceInMs": 58680,
-        "sourceOutMs": 60400
+        "sourceInMs": 107160,
+        "sourceOutMs": 125640
       },
       "dependsOn": [
         {
@@ -11430,7 +11959,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 58680
+          "offsetMs": 107160
         }
       },
       "turnId": "autobox-details"
@@ -11439,7 +11968,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:complexscan-details",
         "sourceInMs": 0,
-        "sourceOutMs": 11980
+        "sourceOutMs": 15420
       },
       "dependsOn": [
         {
@@ -11461,8 +11990,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan-details",
-        "sourceInMs": 11980,
-        "sourceOutMs": 21060
+        "sourceInMs": 15420,
+        "sourceOutMs": 35220
       },
       "dependsOn": [
         {
@@ -11476,7 +12005,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 11980
+          "offsetMs": 15420
         }
       },
       "turnId": "complexscan-details"
@@ -11484,8 +12013,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan-details",
-        "sourceInMs": 21060,
-        "sourceOutMs": 41980
+        "sourceInMs": 35220,
+        "sourceOutMs": 73670
       },
       "dependsOn": [
         {
@@ -11499,7 +12028,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 21060
+          "offsetMs": 35220
         }
       },
       "turnId": "complexscan-details"
@@ -11507,8 +12036,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:complexscan-details",
-        "sourceInMs": 41980,
-        "sourceOutMs": 44510
+        "sourceInMs": 73670,
+        "sourceOutMs": 158100
       },
       "dependsOn": [
         {
@@ -11522,7 +12051,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 41980
+          "offsetMs": 73670
         }
       },
       "turnId": "complexscan-details"
@@ -11531,7 +12060,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "audio": {
         "assetId": "cv-show:audio:photopizza-details",
         "sourceInMs": 0,
-        "sourceOutMs": 19920
+        "sourceOutMs": 153440
       },
       "dependsOn": [
         {
@@ -11553,8 +12082,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza-details",
-        "sourceInMs": 19920,
-        "sourceOutMs": 24660
+        "sourceInMs": 153440,
+        "sourceOutMs": 167480
       },
       "dependsOn": [
         {
@@ -11568,7 +12097,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 19920
+          "offsetMs": 153440
         }
       },
       "turnId": "photopizza-details"
@@ -11576,13 +12105,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza-details",
-        "sourceInMs": 24660,
-        "sourceOutMs": 32220
+        "sourceInMs": 167480,
+        "sourceOutMs": 176260
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza-details.media"
+          "cellId": "cv-show:cue:photopizza-details.documentation"
         }
       ],
       "id": "cv-show:audio-clip:photopizza-details:03",
@@ -11591,7 +12120,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 24660
+          "offsetMs": 167480
         }
       },
       "turnId": "photopizza-details"
@@ -11599,13 +12128,13 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     {
       "audio": {
         "assetId": "cv-show:audio:photopizza-details",
-        "sourceInMs": 32220,
-        "sourceOutMs": 47980
+        "sourceInMs": 176260,
+        "sourceOutMs": 191650
       },
       "dependsOn": [
         {
           "barrier": "settled",
-          "cellId": "cv-show:cue:photopizza-details.documentation"
+          "cellId": "cv-show:cue:photopizza-details.media"
         }
       ],
       "id": "cv-show:audio-clip:photopizza-details:04",
@@ -11614,7 +12143,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "timing": {
         "at": {
           "anchor": "turn-start",
-          "offsetMs": 32220
+          "offsetMs": 176260
         }
       },
       "turnId": "photopizza-details"
@@ -11675,7 +12204,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 62,
+  "revision": 97,
   "schemaVersion": "workspace-presentation-authoring-project-v2",
   "script": {
     "grounding": {
@@ -11995,11 +12524,23 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "policy": "required",
             "refinements": {}
           },
+          "cv-show:cue:maximo-details.demo-1": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:maximo-details.demo-xr": {
+            "policy": "required",
+            "refinements": {}
+          },
           "cv-show:cue:maximo-details.work-order": {
             "policy": "required",
             "refinements": {
               "safePath": "open-readonly-work-order"
             }
+          },
+          "cv-show:cue:maximo.agentic-demo": {
+            "policy": "required",
+            "refinements": {}
           },
           "cv-show:cue:maximo.asset-context": {
             "policy": "required",
@@ -12010,6 +12551,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "refinements": {}
           },
           "cv-show:cue:maximo.work-orders": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:maximo.xr-demo": {
             "policy": "required",
             "refinements": {}
           },
@@ -12086,6 +12631,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "policy": "required",
             "refinements": {}
           },
+          "cv-show:cue:photopizza.megavisor-promo": {
+            "policy": "required",
+            "refinements": {}
+          },
           "cv-show:cue:photopizza.open": {
             "policy": "required",
             "refinements": {}
@@ -12096,6 +12645,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "occurrence": 1,
               "quote": "внутри проекта MEGAVISOR"
             }
+          },
+          "cv-show:cue:photopizza.page-open": {
+            "policy": "required",
+            "refinements": {}
           },
           "cv-show:cue:photopizza.spinner": {
             "policy": "required",
@@ -12324,12 +12877,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю корпоративный Demo/Alpha-кейс Adaptive Maximo Workbench."
             },
             "media": {
-              "durationMilliseconds": 25520,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-u0MHeXyYJgfALT5I2lz0hqmUXHSekfAZwVNg54qkTiY=",
-              "sourceAlignmentFileHash": "sha256:296eb3e2a4536d700390a0973f506772d6874454fd9697bfce36bc309466b1b5",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-MOSOoyuP+7S0uSxhWhdTojYUdVYfHQaXQFjRqyMI/Rc=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-ALb50OuzZ9noME4rLOqneulQtnHXvSEIhadSuI+h29U=",
-              "wavHash": "sha256:cf509267118d43e06c9c40e5d7eb91ed33cd9ecb689cda5522f6bf97644f79ba"
+              "durationMilliseconds": 68020,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-0+z4G7/IJ7nACxNkxMs3I19CHVUpQkuu2/OwVrb1YyU=",
+              "sourceAlignmentFileHash": "sha256:0f5eb6bf1ef88028928db06708a4356165ec1b8aa89bf914af2f6eb5afd9ef37",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-SHm77bXYF8kqMIxUhQmczhiwbVUqeoruCJchEVo5Adw=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-c5hW+84A+bhUtdeRyeHQtaOVxTFtiXBD8P+RRStKsAU=",
+              "wavHash": "sha256:b602e0eae7fd39ea5e6ba12a241e5abc4e6a93b1350d3772c349d89d0619bde0"
             },
             "period": "Date pending",
             "projectId": "projects/adaptive-maximo-workbench",
@@ -12343,12 +12896,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Agent Pool MCP."
             },
             "media": {
-              "durationMilliseconds": 29280,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-MAysqc9Y7SwZuCDHHgAFlayKnUqynu2DRr6Lrmf3TXM=",
-              "sourceAlignmentFileHash": "sha256:7cfd46e60325f623f86780a542ab4452c77e1f906bd89f79879183667afa4293",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-9IpVRo8Fk1YEM0d8bvj8BqpWxjZfE8nFoMvF03pQAWo=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-93nUeU+vEC5yVQ2KM+RwWnTCYQq4l/SP0Uo39liQtB8=",
-              "wavHash": "sha256:f6b4b332ed56db47716f0bc579c49897ddcee2e13419f3b5f2b6dfc9c7e3d003"
+              "durationMilliseconds": 54110,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-lzch1FaG6oWnRND4LR1gYhbSuyqWDf1HksWYFMYte7c=",
+              "sourceAlignmentFileHash": "sha256:4425351b4e23d464f6a19127774528451cd3a25d25f06c79f19aafb3b5866d5e",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-0Z1tk1HGgpGaYVlvrYY1f4Y1PPR0I9TZ7/I3z6NPJR0=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-A27lvUEMCAnu35D89uCm3iITFi2BVW8wAUxXFcgdFb4=",
+              "wavHash": "sha256:6488aa70024768dea858fe073fddac9d8449e3200215de53d61473a0681febea"
             },
             "period": null,
             "projectId": null,
@@ -12367,12 +12920,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю исполнительный слой Agent Pool MCP."
             },
             "media": {
-              "durationMilliseconds": 22610,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-L9JlNmhNT+4IQzOLX8IRmJm7anBYZRiL3FnWuIr/iO8=",
-              "sourceAlignmentFileHash": "sha256:79739ed1f1664f2c95772a6808e20e0a5dffd3d86965556495ff3091fa2aa440",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-xPFCz6idueKTMojSGntWn0WgnQ1l6V2xGDoT+7Ru08Y=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-/ySKn4aXXs9JJge17sY2P6exQplUzQcALKKCrDjA2ao=",
-              "wavHash": "sha256:e1d09e85d25f5e57b1b37cabcc55ee8f5955d9b402d60e742f5824297f9ebdc2"
+              "durationMilliseconds": 23680,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-gGXEwGF9XtDylVdn1bN5VVrB+kbko3gCOzGb2R2bouc=",
+              "sourceAlignmentFileHash": "sha256:3521f4458df9806c4a41e5de3557d6b2cf29f6ee49acba536e42913b8d7bc63a",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-oR2K1haOhywFgP/JEyTYSDOXLgKxuxe+Bv890Z22EJE=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-1djkpO1R9wUn79rKrryp40hcRqF7XtrQ34sUDquj2/8=",
+              "wavHash": "sha256:8942db1b6b7055d95bf218f88ba01ac12c9d9addfa2bc73cf7423e553daf1a49"
             },
             "period": "2026",
             "projectId": "projects/agent-pool-mcp",
@@ -12387,12 +12940,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю Agent Portal и его исполняемый процесс."
             },
             "media": {
-              "durationMilliseconds": 69920,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-H5gAsEoW1cyHBBMCgv7OuJwm1VuqV0S88mWwQFoDBqI=",
-              "sourceAlignmentFileHash": "sha256:833299c23986e2d057ae2ee266eac1f82e49192f9b4a76b4ceff3b38b3f437b7",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-Kbbta5bGntb6sGAz8M2VxB9YPaeshtJOGYPx2qrVVrw=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-dN41DuEBpzm6ETMpb+Bp4S1ydjjm+iAKTjk7W9Yjcic=",
-              "wavHash": "sha256:1a6799d9624a41f4f2658cbcfc38ecd4b4f87e30dca00d340f34165da87bc387"
+              "durationMilliseconds": 52060,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-oRjQ1FIw5xofTRhzcKO8RxwN6TVieihfpY+0CHBTlh4=",
+              "sourceAlignmentFileHash": "sha256:5efda7cc62d92bc5282ce39d038bf71df4453ef6cd145d823a63f7008be607ec",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-F4bYdpyipQk9GLvAyClTBk19zAQxxGtEBj0fl8hNpok=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-n+cFJenC43hwh2vI/C6yGxDy2V0ymhJU6/5vrjYiRro=",
+              "wavHash": "sha256:d79f643febd6589f8d136cc87bba5fdc6315fd6c48d626bc45995833f655b9c5"
             },
             "period": "2025–2026",
             "projectId": "projects/agent-portal",
@@ -12406,12 +12959,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Agent Portal."
             },
             "media": {
-              "durationMilliseconds": 48960,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-EdBvgn7WgmP6d/KYyF6QA3v8V9n3DVAPht4tz+FiO+A=",
-              "sourceAlignmentFileHash": "sha256:4aa90d36f4bbceecb1563019c61ca5713ae2200fd7962e57f184d0b4ff0129c9",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-mjGcgiSsVWz0Y1VIjbNWGs4zVi+g10+DkevhvcrbX4g=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-tYXuX0I0RVZeHzVtXt5HabhW3zBodNl9U3dcgAYYfn0=",
-              "wavHash": "sha256:5c10e4ce97aae523fd221fcb389b73682fc031fc99ebb20250721101cadcbc55"
+              "durationMilliseconds": 66800,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-uF/CYtvvQ0b+2OtL4Yr3Dxf93VG6bzjHjcuLOk86mTA=",
+              "sourceAlignmentFileHash": "sha256:fc913e0a7082e6b00d170e5c75011ef17a4ba133a96837764ddf02f3acfc7b20",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-VtZlwIDdHq5cLZg4XnPWemCwqmoPIkVyu8U8v28raNw=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-6y9WU8Pi/hFcUSxiBCDt6qa3B04OWfyNdVwDjdprVbk=",
+              "wavHash": "sha256:5a03a51ef983db415dab96b96c3740b2cabef4b8c44630b65bed98ba43121b67"
             },
             "period": null,
             "projectId": null,
@@ -12430,12 +12983,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю музейную технологию AUTOBOX."
             },
             "media": {
-              "durationMilliseconds": 121280,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-oMXzLDwPbi/5clFiIoeuOgq0NNFMQuYoLFZ7fUbmJ6I=",
-              "sourceAlignmentFileHash": "sha256:eacd2e3c2ff2b14f8659e30e401f2dd75855d903a721f80cdea8d1a4902ce28a",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-CjomOjQJnhLB0SueH8wxrGCMWvoQcWeAqznNCsUyC4w=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-zns4VQv8cvqVzQd7+n42yu2JXmZF2fpbXI5c97f1Dh4=",
-              "wavHash": "sha256:4f5bce02c6bf8bb940aa4631a15cd9a481a0ab88df7d1c298b9967565a6c4456"
+              "durationMilliseconds": 75980,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-LsUOsAWonm1otX2hZhW2CAJ10GQwHXb4eV1ZKz8c+lw=",
+              "sourceAlignmentFileHash": "sha256:199a7951c59639332f5867378fd8f0df808f6d4dfdf5661bab777484730ccee0",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-gK8aGyDHQ3AXR9LRVyCrqEWKsXt3rHmQRmGbbsx8C9U=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-zkomZmN06oAPrbuVxzQoPi988lc82oJ+QlQ7yEwH/fk=",
+              "wavHash": "sha256:4d9723325b266607651dad591329b89133078fd3131e0edf3d8ac969560516ec"
             },
             "period": "2019–2021",
             "projectId": "projects/autobox-v1",
@@ -12449,12 +13002,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: AUTOBOX."
             },
             "media": {
-              "durationMilliseconds": 60400,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-xFdlL3Su4IZzgVdPecW5nbxlM7Y4+XgboSEQ/+GEdIs=",
-              "sourceAlignmentFileHash": "sha256:281227847925e3f90f25d80f4140e73e7041cebc9b52eb5208eaad6793452ff4",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-jKpKr5hf4GUZlnOBdsXWynO7TzWD1YpSGUvyY/Bk8wc=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-P28gMNIVDoMZdM6kpxreQ4rR/dDXiNvvOHdsHP3bXWA=",
-              "wavHash": "sha256:e9ec12b980c9afb8159c67789dc031f85240a9680f692940a79b12217dc5a8d8"
+              "durationMilliseconds": 125640,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-i7GIqYI6KU9gNYLnZjrHdVnxIa53IPyofNED3JQe8dc=",
+              "sourceAlignmentFileHash": "sha256:36a9dff35bc1c86fabd07b408c3f0e04d67b81c4c319c456ad39aeca0bc1fda5",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-Mn0vgjAtfh7R+MnnOsdODw+tR58Rf1HJWyFCzUCZlsE=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-/a3Nt8xawm6G8HyRYRnTfoFTV9+UQbx7sv70aUkWRYA=",
+              "wavHash": "sha256:47ce1a06ab3ad4ef55f3ed436241bdffe3efffb2b4fa745ca0e4fa15fedbd1d3"
             },
             "period": null,
             "projectId": null,
@@ -12473,12 +13026,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю коммерческую линейку оборудования ComplexScan."
             },
             "media": {
-              "durationMilliseconds": 95010,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-13h/xGq7VSqr24eDFml7kcdFdgwZwBpJHMco0UaeJmc=",
-              "sourceAlignmentFileHash": "sha256:d296ce1e039ef941fb9301651589800db53600f9866d4a25bb64719683da61f3",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-m6fzfczEG6SDTvlL4q5FWrf0rop7AceL/diuYKuaucc=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-MudOQgH57mmRLnpTfdG1a+t1xQlPxfgnPAthg/68nsU=",
-              "wavHash": "sha256:d24b58728b952761ed49aba69db6d00683970191269115eac1d2bbdc94805933"
+              "durationMilliseconds": 122570,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-HELGUV9HbFAd3LPHMionEGjD/s7NFJqOY6VzAlBiT5w=",
+              "sourceAlignmentFileHash": "sha256:b240f6aa65d4da8b6d41582ca4e8b22ae19dde743e50fbb7e6c22dfcd0064b2a",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-f7+8GEhwwdaazLV18BoeTISvcN0qx5aqcJrZEuTsMVs=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-CTzOI0MtBLi/icKNCUINqHxxBMLmlvolbkxaGni67w0=",
+              "wavHash": "sha256:95116b03e7a20a2a2043aa01e373076c8172d19b48c0d353a66b822c1db952c7"
             },
             "period": "2017–2022",
             "projectId": "projects/complexscan",
@@ -12492,12 +13045,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: ComplexScan."
             },
             "media": {
-              "durationMilliseconds": 44510,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-GIJGRE3C0ISUoNh4V2V3zCMHnVJ9T5cQlBRSlvZbkvk=",
-              "sourceAlignmentFileHash": "sha256:61d4a619033aeb4e8b776a7a8f5b56293676222c7f5264d26fa545a1a58cd3a5",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-bu5nq+3xNrNh5VjXiflfwYgNpL6HdVCvnr6cgnSnR2Y=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-pnvHjRrludIscnnDwPMziVFN079XLsaR6XgV92bKpms=",
-              "wavHash": "sha256:24949f922f59f73033da998490726bba4659ddeb3d1bf623401d57d12d97d7f1"
+              "durationMilliseconds": 158100,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-FUadvDNgJ43EswEe9KG3S+WgO18ZrV6sV1PhAQ0JU78=",
+              "sourceAlignmentFileHash": "sha256:88a721a2f60dc2f791162fb91877d6faddf4e8eefe113c0dc23017db15a2de52",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-LjlM/jRCgJ8TXLQMWhsYsuUXmXwcdUsupUs304O/DvU=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-ka04gtHDHGi2OwrtEv39vq2P+msOb2PcPqE9bavOhuc=",
+              "wavHash": "sha256:ceeeaeca0c0fcd6339bc535330531d931975eb49efd00509b06ca2a8d9fda988"
             },
             "period": null,
             "projectId": null,
@@ -12515,12 +13068,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: F360 Studio."
             },
             "media": {
-              "durationMilliseconds": 32270,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-m4Cd//n0sh1fVnRbIkKz/cF5j6PnarE5bf3yEw3gILE=",
-              "sourceAlignmentFileHash": "sha256:559e0f16da2aa2745259aa2426a29183a9e84531e62ed4966e314a470cd1948d",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-D40V9gkmElcV2stI9fQmd/Jbm2VatxX8GUr3cM8yFqI=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-pXFp+LVNNCB2UJynyllogkFdFcZ6fBpldgbtN8C6eZs=",
-              "wavHash": "sha256:0f9415d586250df8c1ee6e94f226cb9abb2d0c0af4580b95cc3f2edaaae26863"
+              "durationMilliseconds": 57410,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-HZ8RzQLe/PCFCixRRM+7RitdOU/8gjHsy6Bk8XY94D8=",
+              "sourceAlignmentFileHash": "sha256:01b05ae258124ff6c5b4c421cc88f8a26a31c8bd34a95829a30562d4ac1a3d99",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-F4OCEfbjt4WQISZBpbdy9wre38heI3Q3ZJPz15Jy548=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-Q5XCIA7lhBilSjA57VrZUoeJaD8O7lPEnf7gN/2t8Ko=",
+              "wavHash": "sha256:5e84ac9751f4243484d16533d2f20d64f998fc3f6f0b49705c9faddf9605fc97"
             },
             "period": null,
             "projectId": null,
@@ -12539,12 +13092,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Перехожу к исторической программно-аппаратной ветке и F360 Studio."
             },
             "media": {
-              "durationMilliseconds": 27900,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-i680OAjFFqhGZ1mYgbeKo9RIrhDKZWTtGngdDQWHOY0=",
-              "sourceAlignmentFileHash": "sha256:28a76ec6ce2112fc671ecb7542069b28e3bde02dd7c76a2c9d556040e60154f8",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-Gw7+5+65krzKIU0ZkwwYr3H8sbdCOg351Plf5UbDa4A=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-PKdfdO9fGh1iQHgI4IR4DhM1F4p941A5Zf1/G7XNCU8=",
-              "wavHash": "sha256:884effdb0f335433f927752c7eeb26d31d1eb2ae2c15260558430bbc252b95eb"
+              "durationMilliseconds": 34500,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-McF61Jv+AbGnuIl/Hfu6KQVaDNok+AnnqQnR+Ve0yU0=",
+              "sourceAlignmentFileHash": "sha256:c6f83ae0acf7994026af77a230d2c1b1b5f159d40a9810f583dd61f1624bf7b9",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-WYl3LaDbFi+uBcEb6ohuQoBlPyhxbj/nU1NfaPNt+Go=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-5e5h3kXZbfa6MX9eAtOhC/2fj7qN7In+nVpp9zc0EvE=",
+              "wavHash": "sha256:569ab98234333cf81c7c8f82dc6d97ee7bce8f02726f344f20ee39fd984a2a38"
             },
             "period": "2021–2022",
             "projectId": "projects/f360-studio",
@@ -12558,12 +13111,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Возвращаю рассказ в настоящее и оставляю итоговые действия."
             },
             "media": {
-              "durationMilliseconds": 30550,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-3/v7C4dnMpHww9y4a+TtyT+RaePlpg7SpC30BVlwJ8g=",
-              "sourceAlignmentFileHash": "sha256:8b4af568655ddfa0d9eff799e5601bdbdfbf250c07a142acf4e6354d89fcee53",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-zEKe86L75HPsyI/fsXucx39wiCmIUvhcIHUmesRnzKU=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-OB7OEHyj11TqEft0b+OZrVjmcJh/Fom+zzUEJWv8oAk=",
-              "wavHash": "sha256:55998a1fdce049efe8d88425076289eb53c1f64d6991d556a06729665fe06700"
+              "durationMilliseconds": 78210,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-jzT3Vm0Lg40ryaXkk+rjLpeXxhG58W/5ZA2kL+qfbiQ=",
+              "sourceAlignmentFileHash": "sha256:88c8f6cee81073927bfbea55c09823ab20222ef029d39262ce5741c6e3377f96",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-rgqMBmb+TXYATB3XqJgLXsxj51tzdyo9IBBxGts1K+c=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-VkpqVSXFSFW3GXtWbn1tSI+sBy139JBIw9djwG02Ego=",
+              "wavHash": "sha256:8a14be7f02c5024285c5970f6db4f53034777f00aeb2da29baa42fb138272bac"
             },
             "period": "настоящее",
             "projectId": null,
@@ -12578,12 +13131,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю распределённый контур Lifecycle Messaging Platform."
             },
             "media": {
-              "durationMilliseconds": 38320,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-KuizwC2b5SJfYB2mjp1q20EqoFONX5vIamFDV7Sem0w=",
-              "sourceAlignmentFileHash": "sha256:17f12a3bb0b7a41a6b03c647c8b3649d7eed68eb927f0403a706a606e2a9e779",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-AV/E0bSyyAbmuwesLBUXcSSCrL0V5m5+dsau4Kkn2Ts=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-ydUxOrl3L4i4Hkp9+aBOK4AMW+yqtD2rdBb8anDycUU=",
-              "wavHash": "sha256:cfc14d92d0123a639ddaab07a0f79bc8e9469f0ed1327ec18c07173595787fb2"
+              "durationMilliseconds": 36910,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-2JDfCx9gxpTEumfYhO0RYxb/el4YXFvyhvUPhI5jFss=",
+              "sourceAlignmentFileHash": "sha256:c8e9539436983d6615264db05c295d5de066eb1d7359046f1c6c04bbeb72915a",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-Rj0T+OMKlEUUs8lc7NxSGPtN4ndmmgj+Sd/a5fRdlgo=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-Ldz9rCTr2S3gtMCHaywAolFSrRRJz+/FLcmBQZYbwBM=",
+              "wavHash": "sha256:0d32c02884d41943f9ec5869025a1bf9500f0d166c742f35727a6d3863a55363"
             },
             "period": "2022–2026",
             "projectId": "projects/lifecycle-messaging-platform",
@@ -12597,12 +13150,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Lifecycle Messaging Platform."
             },
             "media": {
-              "durationMilliseconds": 40420,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-//tLsWxMidg7AcdQFjzJeCM1IrDhcbiq9mJNRPu5vg0=",
-              "sourceAlignmentFileHash": "sha256:6b5700c0cbd85497bd953b0c2820ebd2cf5adc3487539f8d183cd08d267960d4",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-uvwn8stlqbbjdnpw+bpXh+BLCn69rdmIQFPkZi60hgg=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-EkNC6CgEVdMTtu5BlnLR0QTdl/7LjBiyF2JNFEGjwK0=",
-              "wavHash": "sha256:2a54f77aada55de8a83723706a416d43c98b56fbb8d1f3ebe7ca5e17e0600458"
+              "durationMilliseconds": 63800,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-2eGxP6+B2MDcd5r8PVV9J3ehcLiealYY8NjPDkxOe0c=",
+              "sourceAlignmentFileHash": "sha256:ae55156dc3cbca1009a3b6483440c0066ab83be92d94fc528b46864ac7f1aa3e",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-TiCPiMT4BVdeAXfH41ii3E5HcfUwa/zBj6mMbE9Zxp0=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-8wjzGqYecVMFRwpSA7NljHbug5ZQYQAipuK2NDy/yOE=",
+              "wavHash": "sha256:6ca8d280dbd412737a2befed9f5c1510223670e93a7553f37843318597a0ea25"
             },
             "period": null,
             "projectId": null,
@@ -12620,12 +13173,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Adaptive Maximo Workbench."
             },
             "media": {
-              "durationMilliseconds": 32650,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-zyf0Cs3j402P1cLYG3k13hlzk4x93I/DLttL/bgp/SI=",
-              "sourceAlignmentFileHash": "sha256:c78e0815294ab8cb2c0fea6ef8bbfeccbf2e8737b8d4d40a46d20883d178db7e",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-sjY2PLIb5w6CRZ/sMaJQLGQNYrLjBtLdYmTK7wpL6Ro=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-yqByhNi22rzaxyLbO8E+hZri453hodwesr8pJWY8k64=",
-              "wavHash": "sha256:ea7c3b69528b03f5d1ca3b122c2c4a48f90460387226d37666498f1cdb61893d"
+              "durationMilliseconds": 76130,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-UBZpAHj2aI8X71rtJh8nJCjKwdAsxwjtFkP/vBLa4Ic=",
+              "sourceAlignmentFileHash": "sha256:eb211cd51dbbf761558951886d978bfa2dd63dd2ebe7461e607b7309cebb9310",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-W7IZrMG7nDu8gfM3Qzodgmrlenei8ZZZUq/9uj7/S7E=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-17hTHSAf2rlQ+YknBA1aw7LJWSt65S2x0F4Lp+ObGmA=",
+              "wavHash": "sha256:54710170e3e7f99c5c259efc207cb27232732dabb3a158ca9dcb0ca78b4fe513"
             },
             "period": null,
             "projectId": null,
@@ -12643,12 +13196,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Мобильная SMM-платформа."
             },
             "media": {
-              "durationMilliseconds": 38000,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-zu/jiPi4Y8Z1k9hcLyPQvGqj/6MoG2rHtawiA2TWPDI=",
-              "sourceAlignmentFileHash": "sha256:c2fd7d2aeb605a55a82fb4bed27d79c1d55caf753a6080e68469cb18f668a3f9",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-WHrxXDqRPQtDain/HwUeuxbbUv+Gv+LZw25C9EfP7co=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-mPjlYYnwRUeq4nt5oZuntS0G1S0wEtehh8fLSc5u0Ho=",
-              "wavHash": "sha256:25dbd5b963b9cc8c7c4197af98df3b95ac3b9c6bc8f9dd2710455f2201a20d5d"
+              "durationMilliseconds": 65450,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-pkH8hvtzixns1jPcNxjb2YCSxf27MNFfqk2TmXzeBw8=",
+              "sourceAlignmentFileHash": "sha256:28c6e8b651652cbeaffa38cf13adc146515de4a31dfdf72b00629835cf74a7bf",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-dlw6M651soVTVfDQzcSrmmY58YxP4mqWCSP7sWKyVhk=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-HESgxGl/6WxDOC8STJCqFj79rSQGOQsXIA4/m4mngpc=",
+              "wavHash": "sha256:170b66dfeaeb732c72aa32ae3b4b7e840b032b3367594155a7faba15600d9314"
             },
             "period": null,
             "projectId": null,
@@ -12667,12 +13220,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю отдельный прикладной кейс мобильной SMM-платформы."
             },
             "media": {
-              "durationMilliseconds": 31420,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-5GAH2OASjLEWj2gOmz/LiPUXY3XhQajXIqcytx21E5I=",
-              "sourceAlignmentFileHash": "sha256:b2e4092c9e45b1174b6b5ca6bc55636f9472fc1c75e249c22b448643862c7409",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-aMs6udHIy2fG13yKtBvwpaPgmeDkujfduMEVN41g/RU=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-sOSAb9XNvcUgZSAWaQ/dJGMLDUWkHw5V0dkC+/b6wwI=",
-              "wavHash": "sha256:9923da285e8b6825791ca863a51408dd1059e8531e472ec90637031310882e5e"
+              "durationMilliseconds": 36990,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-GQlgt492NqNYLV6IwlMoXLV2LKAhstE2ib5dyj9yAvQ=",
+              "sourceAlignmentFileHash": "sha256:f926c950736b29a636c5dc3d87e13d31157898c7eef8e7439705e8bf058c4408",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-2oLUCmKC/oDxygzkZ/ZgO7f1KlvGXOo3pqf4WyMQWjg=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-xEYC2VMzJnA2aEK3GewvNFnqF9iQDhG8KWC3McfZMVI=",
+              "wavHash": "sha256:5550fa6ddf9e78b5737b9e12ecf9d1f412bbb27574841b5cf8844fc1bfb3f512"
             },
             "period": "Date pending",
             "projectId": "projects/mobile-smm-platform",
@@ -12687,12 +13240,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю открытую основу этой линии — PhotoPizza."
             },
             "media": {
-              "durationMilliseconds": 86080,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-Njh22b6LvBJ5ZA8ltXtN7t16wuxQUe8nWPOzgkRO7vI=",
-              "sourceAlignmentFileHash": "sha256:0353944ab09614b330c1bd7b0e41f141666b262993fc28df6b1460f56442e4b2",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-fplAN/meLuhnvdaFhbzTmy9tUyrYx7wh9Qv0aN6dWl0=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-PeMJB374K2Hc7MYZ+6bFGjR3iBsj+Kh3yYqpCrPbh0w=",
-              "wavHash": "sha256:c383da42502eea708e3367108c8a82365fb47311df15ecfc0c4ad17d32a25843"
+              "durationMilliseconds": 175460,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-gJzMnJ7gLBBqtCQgN7AA6BuLfitA8WJmVmf/V30gmfU=",
+              "sourceAlignmentFileHash": "sha256:d02885b62d4a3475702155c218708e7efb8369fcc31ce29a6fceb8ac44d1598e",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-30QLhpIbU3+/65xY4kvwYl/LfWpQtkDq9E6PpGKP10o=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-hCKbW9KIKXXMB/FhIJ8wSlPyy0+Bd9WmVwxbQEiWi6I=",
+              "wavHash": "sha256:c9fb961c8aded6139fce471ccc69b7bd0cd290d27c841369df8a60a7fc6b799c"
             },
             "period": "2010–2022",
             "projectId": "projects/photopizza",
@@ -12706,12 +13259,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: PhotoPizza."
             },
             "media": {
-              "durationMilliseconds": 47980,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-bO3Nz5AKfHONvv18moS6QpDtz7uNuKjrrhBtkVHQxIk=",
-              "sourceAlignmentFileHash": "sha256:a34738465b670cca3683881c93a984b4609c772e7680d10b811ac2a9474dab5e",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-BSox/HYgsn3uUAk/qeqI+qSIyMqel4o3z+S1AZYvdBM=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-OdhPxgVkPh1ejXKF//iLpIEH7H+T3X75JWX30b60My8=",
-              "wavHash": "sha256:77a4572d197b763f95d094223bc9aa67f67e9aba75b36d39cd12cb22a070f011"
+              "durationMilliseconds": 191650,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-Wy57iYelFnVlcYnQeq1Xwbi4ZVyKRP6VrToNcTW0Su8=",
+              "sourceAlignmentFileHash": "sha256:1b50442cd4b3cbe204c12b9e7e24bba2ba16c0d22b5415b47da4b24226952984",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-hcb+uBJiikvTN8SBfbnNoQV5UxKfZKwSunJklulCAOY=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-/AN0LfqoltYR7Zi8Gh/GfcuSFW6YCqMg12e0AwmCsxc=",
+              "wavHash": "sha256:d1ee1d1d730d94e3c672e595618d25dcbdd9a9247f23ebe6afccbc7946bf2c3e"
             },
             "period": null,
             "projectId": null,
@@ -12729,12 +13282,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Начинаю краткий обзор опыта и проектов."
             },
             "media": {
-              "durationMilliseconds": 32160,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-+F/LbfxEcmB2hnTnvdQAdG+9+1QfDYRRPAeieHY6laU=",
-              "sourceAlignmentFileHash": "sha256:20501f979f46c93396c3b3a1d26eebbfd689b3bb92d03beb1085593d01363dce",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-/OVD3ceD8xV72eZtni3z0UvlMcff6v6DkWarl1OnNgI=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-2u3hU+KHdynv0+zLGxqPisQIIlylyFqeDioCz1l3GbM=",
-              "wavHash": "sha256:f2ad321ede2c25296cb5c89aecdf16ac7f0eb06a67f54261801dc9b4a0f0ee82"
+              "durationMilliseconds": 57310,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-Dz26eASMhL6iqbeuplRMrZOtWUrscNFFWlfH4PfHXQU=",
+              "sourceAlignmentFileHash": "sha256:af9ea91d8e7e8b035ad018f8402010a23eec9f068d8bb673464ce092456883ee",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-0Pk8hf9d9athRppl6gXqPMt10VhKRiSwrT6VhDsWc5o=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-HHuX7z1A6pUHI8I2SggtiWVVtaKk87RZ3qrSIrXuxEI=",
+              "wavHash": "sha256:f657646b15f95656ee3d31e37da18a7c0890a224e112f147562255e96dab1941"
             },
             "period": "present",
             "projectId": null,
@@ -12748,12 +13301,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Project Graph MCP."
             },
             "media": {
-              "durationMilliseconds": 23360,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-doJGQbCkN59UhduTpqaVNRJsgq+xij6XDGURXsmks2A=",
-              "sourceAlignmentFileHash": "sha256:f87ffed117b6b3892e3482cb6ed604f67fffbbb53a00ca6f1d8df4f7e428a04b",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-G/f27jo8Oj1UMot+MkMOu5Kh8xwL4JCSaXUh3b7OD+Y=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-msxvkmt7a+94R3uRMdpfDhNYqQKcUMVLV54Rxc4bYds=",
-              "wavHash": "sha256:cc5a97dfc66b8fcb508def6c9d1ede2babf65fa712e8c4350b4884181aa1af7e"
+              "durationMilliseconds": 58160,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-sZBZPECXizDCaiicc5T8kbVbBxj9MDZ3g/lwwHEd8HA=",
+              "sourceAlignmentFileHash": "sha256:e597a1fea919a4ecb2a6876c2bccb2a98f05b7e446775b349e4cd2f9e59edb04",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-puK3AF+IjrnlA7rPh36RwJvViZDvCpYKqwk63x4djiI=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-bP9t/Wgec0WSTh85bTFXgvK0SKJjZb2E1FTGKiVUDGM=",
+              "wavHash": "sha256:b5b2bf440ee098ff4c88b75db0701ac06b37e9b0be15ae13c7e0d0a7f59d2719"
             },
             "period": null,
             "projectId": null,
@@ -12772,12 +13325,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю слой структуры и контекста Project Graph MCP."
             },
             "media": {
-              "durationMilliseconds": 38810,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-zUGqeZY57jwR2IOKDRgjRy4b26ZFte1RMJ8bnxr8EMs=",
-              "sourceAlignmentFileHash": "sha256:6fbc8bde8d7455eeafd694768069be9a76b8ad16147bf206ae56d24e152eb432",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-96e9tHufOl01YTiwilsnamH3YmM9GTVcwGB0N7xBWPM=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-724/UnGUjLxE6dgIc82SmehIWVg4+M7RBD/R68YQwPs=",
-              "wavHash": "sha256:470f154c45eba3426bf95f4346f16d9971483ba4872919ac03bbfbaaf186dba9"
+              "durationMilliseconds": 29820,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-PrLWmmF75M+bXYsQ4nWCjYKgUGPBGWCpfh54OPPRogA=",
+              "sourceAlignmentFileHash": "sha256:fd40fbdcfc74ccfcdce718ed54b0e0ba1550b045be4ec2b937b57a029d9ab809",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-XmDF03uXyp9bGQ2AvkntJicuuW7hR6K36C48UMQL7JY=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-NnhOqtDTjXByp4vfr1ChLQxuDODD8BnfeWOp9LJx8ro=",
+              "wavHash": "sha256:386e701ad201aea96fde9d90f14bc6190f2f1313b098fb6fb3486b90e0deb72d"
             },
             "period": "2026",
             "projectId": "projects/project-graph-mcp",
@@ -12792,12 +13345,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю исполнительный слой — Symbiote Engine."
             },
             "media": {
-              "durationMilliseconds": 15200,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-GeID0VUpGpUtgSGxmpT+YAXZC9NcdkC4A/f3IqcKRW4=",
-              "sourceAlignmentFileHash": "sha256:3fdf19cb86e1c82e39cbac3fe92d0ced879f2032cb1827a3ce1d2d3df69e79b1",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-My2rzO2kXuLWAL09R7GtVCO1BhDGaRhSYnKBRzBEtyc=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-PzOY4auoLHXP92JPnCcEw4RwAimCNQx+OgZpuC/74qo=",
-              "wavHash": "sha256:103b25038b75b5de107d3d9c3d13165ade0cde21de4a694032fafe254d35af97"
+              "durationMilliseconds": 22880,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-afAm/8iXvIzg71bG57I/vDYrgT2+JZ44ZPBuMHJ1m70=",
+              "sourceAlignmentFileHash": "sha256:2435c3354aa423f24d94c40650346ebb72bc6afee2767d5aeca2d4bf2461f1a7",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-1py7nz2MsrqFi/dbqdPI9TeYq+ekRlmfxJjDbzu3t9o=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-koiVNRlRMzzO533W+SdMuur2GoKXXPB6DHBMH7FO0go=",
+              "wavHash": "sha256:6d2976144f3039e683afe4e0e1388538e6a18005822be6c81130e4651400d98b"
             },
             "period": "2026",
             "projectId": "projects/symbiote-engine",
@@ -12811,12 +13364,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Symbiote Engine."
             },
             "media": {
-              "durationMilliseconds": 22970,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-F7eGu9ToYcv46i/UcbP0cgBUW0U3QjYqE8cXgsj8Plg=",
-              "sourceAlignmentFileHash": "sha256:87e65765e3e0df265212fcb284f3ade6572752fcfb3fb8e0edb73f06c48c31c6",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-g/xW6pzwZaqKabGV18GLsTE4ILnNTnDgAr74JbBVq+Y=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-+RIZT38oMvGRSwCC2k1VkygSsTkisdeS4ZEb7UkLnKY=",
-              "wavHash": "sha256:d3f86fc104133ecf1d77afb4e2a9d902eb2abd7d86ac6e083edfc8e01a39fe88"
+              "durationMilliseconds": 43950,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-uN/pKHVonyrkGaWxUv6OkdWSP27T9uq8+GNaVZnC8cU=",
+              "sourceAlignmentFileHash": "sha256:49c6dfe1fa213ba0f1968ed6593b228215bc3d168e6caa1af2d6d8ca3dc15777",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-PkcEJW0tC+ocIktlZfijsiRI9aqhhWMS9IaapKG30vI=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-UcLvWjpMbN9lEQbFqfX+gm6HKjMPUExk9uSqG9hbdxM=",
+              "wavHash": "sha256:319ae71afc81c094bfab238685db64a823a4088dbef377f77391fd11ac30547e"
             },
             "period": null,
             "projectId": null,
@@ -12835,12 +13388,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю визуальную библиотечную основу — Symbiote UI."
             },
             "media": {
-              "durationMilliseconds": 28370,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-sjBAP3KVDuNGZFjDkffKUuwRLIMEU7bTSoa7W1JnnN0=",
-              "sourceAlignmentFileHash": "sha256:ad7d2515e76ca2aa63a1bf01c791c89da0c33a9993e8d549daec60ff597c6747",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-6Kb+7AlXwZMnS2PqiV5Ps2gYaaKrOci3a7pdKrSUnb0=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-U5sb1Db6R5BabMkraBMEASUguVduNKE+cph9WT4GXBs=",
-              "wavHash": "sha256:5ab8a4dddf5c59baee600e12b107d52bd632621cc0d5f2a1ae778fbfd46233ff"
+              "durationMilliseconds": 64510,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-kpkiDld/NHMoSw4BXQxLeb2wSVJjrKDlbdkVwuLsuPM=",
+              "sourceAlignmentFileHash": "sha256:84798a6fdffc3764659ff9f619473196e85a95bc248ea658f948b7ff4585cc85",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-7PQWknviaq80xUJsGAYp0Bid92Ml4rqLPogxekvOQ6M=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-cJqKpbsjkiEBqY0ffDLCb8aPpeLpE0uKQ8iva7EgcEI=",
+              "wavHash": "sha256:af5d27a397daf8eb4b0525136f8b13dd05d4b82fadbb72b351fc3246a8023fdc"
             },
             "period": "2026",
             "projectId": "projects/symbiote-ui",
@@ -12854,12 +13407,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Symbiote UI."
             },
             "media": {
-              "durationMilliseconds": 24160,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-auZssrnGEC8BT0247CNGk2unHJcZMxiQlDls+qDS1zo=",
-              "sourceAlignmentFileHash": "sha256:ae2fe1d60c96686996aa0bde122faa9c464dc7cbb27a1d88c374de1f8b174031",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-fLRJzFUs7LlBi+acGWjVV35OjLHQ/tEfbq0DxB5UaIc=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-GwXYSlfLHSYdDcUvNJBcs8Zx9XI7q2i/tqbZ3PGoaJg=",
-              "wavHash": "sha256:0fb03d28883796d06835976923cf836e182edf5e8aaaddc2b164400a46c52822"
+              "durationMilliseconds": 70750,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-lz0jCGTFagpDE1YzLaDptDpuH5eQE5bZd7yrRFalzGA=",
+              "sourceAlignmentFileHash": "sha256:880980d6c2e598777b4bcd059339a22f1d1857b3519d6277ec8c1f55bdb4516b",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-l+7X9zGR41BHm1pvVHiSqY50G2iRpPgqZT9+bGJysi0=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-KrqkXQkkP/BPg4enb36qXZ6ONTr9+CzLLhACJQsoRoY=",
+              "wavHash": "sha256:29dc9ab62436308acbc00fc00d6ba03765be217f6aae190ff4ec428e2f1540fc"
             },
             "period": null,
             "projectId": null,
@@ -12878,12 +13431,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю Symbiote Video Studio как актуальный workspace-кейс."
             },
             "media": {
-              "durationMilliseconds": 19510,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-qBsMLEq/fuw61Fnzvl3dpLhnKitD7H9j+JNJnegqqMA=",
-              "sourceAlignmentFileHash": "sha256:26518a3c926131ba21f5c27a86b7fe7e88d0f81e747503b9df95773097820549",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-p2f+yDjmVOui4kAnEnKiHMJRbb8axeJQ07nFQyZnj7Q=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-FEtfkkztWhQzjUtK3QoymF7H7MdVTsR8/j9z5jChqZ8=",
-              "wavHash": "sha256:48ce775c70f8233f99d1d9d1c42731d3784475d86ce6eb379f5e9d8878ab18a0"
+              "durationMilliseconds": 25160,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-qKH8JK0x4ryABdgrwIZn9+cKCssOCRhaoUZyBMEjE5w=",
+              "sourceAlignmentFileHash": "sha256:070638d77565d042a705f9d512e6fd70db6c231bc170fbf65b8f1de9c8984020",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-E6MbW6VLEjFGUDMl1QA/MZXCl5kGI/aX+MQ8Xwzz/Bo=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-TxiaMyIZ8YRKyBYagEi8b+0PAqpjy7EkE0D8yvFQwFE=",
+              "wavHash": "sha256:aee0c0a9b3b4f59a2be13fec14d8d7a0dec044216ca88ed287367b62cb0d48f5"
             },
             "period": "2025–2026",
             "projectId": "projects/symbiote-video-studio",
@@ -12898,12 +13451,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Показываю текущий центр работы — Symbiote Workspace."
             },
             "media": {
-              "durationMilliseconds": 23910,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-I6uoUqUBCRp76sfJ0e4oSg3OG96y5XuEQWi9RKrRYss=",
-              "sourceAlignmentFileHash": "sha256:d5ae2b0f7284765ea0660940f1d50c08bccacef4d45db867b5c47e2f8fcbe002",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-YoGLPjbpCZRLULd4yXZMFaPerf+ktt2DMc5anRhC8Mw=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-ZGwQrurNHOr9u7x+ZQ6A6rEVOAn4gjlJPOIV09xgSUo=",
-              "wavHash": "sha256:04def085eccc94eec8b21327dab5e6e5c454cc3c498ebc9ff8e2064461358c5a"
+              "durationMilliseconds": 63200,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-nKLtBDYeEMDAh54q/iQd3II/YWblLqCbCyueSuVDXVo=",
+              "sourceAlignmentFileHash": "sha256:166ebcf3a92b72732ec8808ac2d1839a6a719620f48dbe3745c12ad75dceb55f",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-umrWkev806IG5kTy14wKpY5ayH7UHmeKRE9YMlWaoic=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-mFUzwFRUVWUNGPIXqPiXLarUJzJEvRtURc/Fs2OgxYE=",
+              "wavHash": "sha256:645d05c7ff3f117ebd6bad870678748306d00a88bc849e159c6caddf44ab9390"
             },
             "period": "2026",
             "projectId": "projects/symbiote-workspace",
@@ -12917,12 +13470,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Symbiote Video Studio."
             },
             "media": {
-              "durationMilliseconds": 29640,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-R7OvxsS9ivnHAFOKshj0fpBISNrqy0DAJFzmlTD/k9U=",
-              "sourceAlignmentFileHash": "sha256:186afe0c7481f2793717596d1acab427d17671a6bda12932b16ef3dda99d2851",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-a9HC87onL69BhdD4bz1j+MGhu7cjpdpYxCMfLlUNMRU=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-x/zZnT9bQPi4eXVwDxJpZeJquDnTpiqoOKTg8NiOg64=",
-              "wavHash": "sha256:823eb69844948acb90bcad1e6b7cfd94372699e3ece8db42ea9e72bc05c3d817"
+              "durationMilliseconds": 47120,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-rYwy5P/9DJyAs3zsoBRLpW8LFnAFEs2LDkUZSGU8u8o=",
+              "sourceAlignmentFileHash": "sha256:e696ee3a53fce557e67bd639c6c556be3843897ea9a61a357fa82f83c2814498",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-IkH90q2udRPT6539kMQNtj7UjElC2DHQteydKMsNSXU=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-Ua6mcvC0aVbmBpoR5AUw5+S934GRrrL4GXc8zXjD8tE=",
+              "wavHash": "sha256:728b4de706f05550f5a968a3ea083d1d0f6fd470fa6bfb97ffe0207b3ef72205"
             },
             "period": null,
             "projectId": null,
@@ -12940,12 +13493,12 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "text": "Подробная ветка: Symbiote Workspace."
             },
             "media": {
-              "durationMilliseconds": 29070,
-              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-xyqkp62n/w+BX7TDwiBNJf++u0uTclLL+N/N6V6TFUQ=",
-              "sourceAlignmentFileHash": "sha256:8f3fad035b189fdf6d6ab8a3c3614df287fd200286c3c0999a84d7b54d165bfa",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-6lTA33BPjdmi7z8rOekzlA4klDp01epNYlwo3jGxeW4=",
-              "sourceTimelineHash": "presentation-timeline-v3:sha256-9yW5MROcgwVYAK0RnBmc7xc0I9OS21v45XUeMgUlrAA=",
-              "wavHash": "sha256:0c404601661e4251401a4b6016a935d5edb189b7d99482115bf997b355e824a7"
+              "durationMilliseconds": 81330,
+              "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-uonzG/xZVYNnhiqdIwRwdSMEdAhybKxa3TolMhuA9wM=",
+              "sourceAlignmentFileHash": "sha256:1a6213a8efc14c524c3213182f5b11fb1846baafa6ce1823d4def7bda28c82cc",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-+GrkCC0zBdwpBAw4w6qDO/bdNIYOSz7Zx4KHrUUIl78=",
+              "sourceTimelineHash": "presentation-timeline-v3:sha256-HxAA6MYJAWzKjRg52R/e61uPiIwrmMaBTaHbo2I+pso=",
+              "wavHash": "sha256:dbe621a95460f8aa7adafe7cdae2d950c2793767e1791ae16ad68078d18698d6"
             },
             "period": null,
             "projectId": null,
@@ -13028,11 +13581,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-xkDP1BOrbemy4iknmMC7Vj4rwXfu/OsnY5Q7ZPGcfIc=",
     "entries": [
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-aBCMDvsnK8NYRwkNrrB+rdzCEdMPZ15U8T1kAj3A+do=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-Z3RBM9ZJWfG1mkC3hhNZZyo8WBBsgtmkrEZbNIQjyZs=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-ctRBiieen1Vn2yNcnh07aNw4dgnsuzuXxMVGLkxXGlQ=",
         "entryId": "positioning",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-cE+Dr/t8t7sn0GL9Z5DPRFGpUKM7Ip3tKBj0yLExZrc=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-dxBEsduvjtmTNwLbU1uJQCnEBOiDUprEcSkGDfNCxYA=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-OKm9IHCERe1y+Y2DIcborkFzAi9NgOiNcUXzQgYDgKw=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-vnpNfkPIsLEK5xqsQxmLy2NNj2AgL8WLAkJ0nbiMw3g=",
         "sourceCellIds": [
           "cv-show:narration:positioning",
           "cv-show:cue:positioning.tenure-marker:scroll",
@@ -13042,14 +13595,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:positioning.open",
           "cv-show:audio-clip:positioning:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-yLaH9xpKKsSRO1hMdrWOSl28DtRLX1/BO62zaIbyWTA="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-waA8OYH6PJf0tvLE3qSJD+Xb7P5rO69uTNm2InvxbS4="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-qdrPVn9ggP4amwgYwKlwi3zq7btnRfQUc095J3/7KPM=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-r9OKtIAABu7lpI0bjSeR1vk8hqwxk3WGaHk3dPf9r/w=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-CSFYFEf1RRqJsQ6FnPDjgGrjYmxq12xslUw4JSK9oOE=",
         "entryId": "symbiote-workspace",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-6Cg+UKUWIJe+KrNoX1GaRMKXzLr/izR3dNVoofVCq98=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-UbbrcM4ikcMgRMzNoGBE6k1Vj83ePMgBIzPPZIHi7e0=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-16pTGhW4OVbc43ZnwQvqeI5XKTBP67EtBWwYYOFFRuc=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-yMDwqWitxBGefF+kLgklF+hJeywZI/SK+2AYT7P7Ue0=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-workspace",
           "cv-show:cue:workspace.open",
@@ -13061,14 +13614,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:workspace.agent-portal-card",
           "cv-show:audio-clip:symbiote-workspace:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-7gxTFEtPQ78FzB54az94oEY1EPdp8ID9IXD6V8xsNQY="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-RahVWYUNQc4qrkK4/Uh//nJXdZFwgqUdbfS0SUl3Mn4="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ZaTdoRWHM2mqIsS6pDl9QdD6ESC+dMqA60vWNFkuifA=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ZmNKnbBmixNRjiEe41jE2S4UAyj17jiZYUA2aJLUdZI=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-KL7gAQCEHCX6dZOWkmDjGvAwQ1Kp1u0CyF3D3TWqIyg=",
         "entryId": "symbiote-ui",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-syNQYZ0fiuAoOF1ba2L5l5N05vA9NDyWxFPnXEi6UyY=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-pVMG9ecEWuzUdnOer0iiygLnqLMMLP91PCHvMLQeNqg=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-OQRZV1BSoAbeBUpxLsWjaws5cpxPG4LGcel6hKh91jo=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-MkVA2BloN9R/VlYGROLp1wB4CSngv7vmUNF7YDCiCJ8=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-ui",
           "cv-show:cue:symbiote-ui.open",
@@ -13084,14 +13637,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:symbiote-ui.details-pointer",
           "cv-show:audio-clip:symbiote-ui:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-FP9gX62UdytRUUyG54tVrafTbbnQYlAtOI/lYtgTyh4="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-OMtx7ocghU6AsQntGkRK2qHzfWY0IfPfqLLghoyjlqA="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-prEOt9D6+zfU7YNYiNJuGgId538rkvOdjzNEeasL45w=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-UVWTzVKYkA/LSou8+P7AMlUpiDS2ILkdalRA1NcsrSs=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-PFN/UJD+Uzg6TKF1lswuVepH8mLJjeiSm2TNLcrRVbE=",
         "entryId": "symbiote-engine",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-gFFEphUl9yUebhygv77mu1Ch25PvKCXNHT5kWyddBNw=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-rPFrozOo8qk7JXLQWW5Red6QWTeq7aQg2Px44b28TV8=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-d6KQYEuEd0/9vyU8GQ3L0bm34S8SkPG3NrH1kxM/h/0=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-dRQLaIUeoXkmV0EEH0g0D8MXc8oDRoUlm4seBmFI/q4=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-engine",
           "cv-show:cue:symbiote-engine.open",
@@ -13101,14 +13654,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:symbiote-engine.workspace-join",
           "cv-show:audio-clip:symbiote-engine:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-flVqK6b0pA4uEgvhReKDQdNoOlvYcS3+QA/v6whdC/s="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-Z57mlla8cetxc+jwHS8kMltSrITJsCyT4xnHtPgHYLA="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ZHbA4WS1a7Pu5mRSMQ9VVnXe0RDVqY7qI+gpmKfWApg=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-v79dvY9GP+QP0A3ahJTuAyFhXhC+42LaneV4Lwd/aT8=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-p2ZZKDkXJF+634zkIevLx0ytbU1ndDaCZzyz0hqMma8=",
         "entryId": "agent-portal",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0U3M4BTb5TqgCBViqXipY9M6O5MUlwFAtufy2wE62cY=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-hHSrN01ig6BsXnERdAzeJUwGplCkdWOMuSpFEDraEKc=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-yXBZV6YE71ODpS5KklsH9E9k2aTIFmf0upiP7V4u+IU=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-0c8+syaJnLGyPe1JA0JTSRKkRAKB3RGZBQCrg1tSzyw=",
         "sourceCellIds": [
           "cv-show:narration:agent-portal",
           "cv-show:cue:agent-portal.open",
@@ -13124,14 +13677,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:agent-portal.demo-link",
           "cv-show:audio-clip:agent-portal:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-/7wLBaAaFVobkdHXEWpFT0PJsfFXpKmz7THXVDQkj8g="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-s+f16O2P6MZyzXybglzLgyZBQxIkSFdcs2qLXGWUIsw="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-7nMDkWQX3/9OelAIh5xuAEDQ9MCfw7spgmYC/F5Q2qo=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-a/r8z/RkRINLLL/yzgEsDFNRFxQDqbJh2cazfltAFDs=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-a5hz8CB1wd9BvSe2pJBYSs6FZBQJI7N47WVQ1bvkr44=",
         "entryId": "symbiote-video-studio",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-sgzWz2LM87dpEHfIy1ZA2ulDuimxHlBUIY44yo6Cvxc=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-ifz7EfSK7QYcW3S8lVr3/0U+fzK+NRoOLXeWUEDV2Nw=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0klUKDott7S9Mw/Z4/TTqQ8RGO6PkWVnAovxmW2Ty6E=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-A1CHbKPpHChO7RbFbgpGby+4A/grHEOoZc0TA24m3Rg=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-video-studio",
           "cv-show:cue:video-studio.open",
@@ -13141,14 +13694,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:video-studio.demo",
           "cv-show:audio-clip:symbiote-video-studio:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-qxSGZpPkOjcMOUHxcl/VVH5Qcf/WsEAkMENzNULa4+A="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-04W/ZvVF/s+ZaGFKgVYI12e2Vyc5GzNl9pUSZ5vxU3I="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-t2cviazPEEIKCOfjIIkjxYj6uLPK1uVSPEvGrTYFBi4=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-3+nx/XUnJi8Ek1ubqge0vxLbHtalfbFgX03H+NlGq0c=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-lqNgxzRXqz4ZVcb+BXruK5UMDBmQKfAK8vzi1ervStw=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-FpMuqq0VBJXa0/dW4ZPJ7LGniO8c+ec+VI62sIYcRpI=",
         "entryId": "adaptive-maximo-workbench",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-a6AxT3h3HdkBgUdxiyMwyrjh2Q+0jZYuD5g/aEFH0gQ=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-9w22SiO7Nm5B5/qUGMODYmHuH7gDiI54W9xLIbnO2ho=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-AeTOqf4JiQiQbMRK2naSvb8YZGVun1I61WzA+7HrtqA=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-O2lQ9XlyUKt1+MBWYzGkE2/VExEVPZBqGqE/JsWUU5Y=",
         "sourceCellIds": [
           "cv-show:narration:adaptive-maximo-workbench",
           "cv-show:cue:maximo.open",
@@ -13156,16 +13709,20 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:maximo.work-orders",
           "cv-show:cue:maximo.asset-context:scroll",
           "cv-show:cue:maximo.asset-context",
+          "cv-show:cue:maximo.agentic-demo:scroll",
+          "cv-show:cue:maximo.agentic-demo",
+          "cv-show:cue:maximo.xr-demo:scroll",
+          "cv-show:cue:maximo.xr-demo",
           "cv-show:audio-clip:adaptive-maximo-workbench:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-lczUOwbNRsVBNwXdKxK7/Watb/xQYkIpXcy9cePhuWo="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-kLMeEQJrZBg35ud2PpBwVjLHchXQ7FcVnfeshd2HLgA="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-iKlnRRlbsiBaRtgKAwUiqVH23R7/qPsb1AKVKetB1Uw=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-pwD5Km+AGO3sJVeyUbXcVTEBhTezMBAYz8xuxaxa/wg=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-Og03ra0A8hmHTQ61GpHq8FKi+TEGMZo4PdiR7iOAplk=",
         "entryId": "agent-pool-mcp",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-05BMuKwPCTBbFfsSQnJeZyn49JF9vmKqNY3pIU+JYpg=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-yO9FZv9AI0u20GFC9q8tJmfNvNnxcef9AFQ/62n82/A=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-agips5EvsgGk49xhHzMToQEZ3moQJDf3wzELMQc6pPE=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-C6G5YP4/VzBXQXs+xboagYm8ao3+0nuV3sm1poTWr74=",
         "sourceCellIds": [
           "cv-show:narration:agent-pool-mcp",
           "cv-show:cue:agent-pool.open",
@@ -13173,14 +13730,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:agent-pool.flow",
           "cv-show:audio-clip:agent-pool-mcp:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-oI3mv0/3TAV8KqHPS4wpZgDPJLyFGo+gYZdIgoIAwx4="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-KYuYEhLWUCcN5y//Qpr+vubCcPrjAqQIgxUdiwGJRjI="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-hfEvQNBhI4ehdNXbEWlM9lZ2G8cvAdZwJOhANj99Tbc=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-zYEtt4pCmFmtxm7QWDWTEUV+xW+vef/PSbLeH/gGFg0=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-3LA774V4jymZ1hLXZ8aljaI2pnYljZo+Gd3GgW3gZuc=",
         "entryId": "project-graph-mcp",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-IDy6svcxhlHuc3r64bJqYA7U2dZPJ1pSjQ2l3PX8fus=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-U58IW8+hFFKJ0WGIvcHjDwhN8KMZkqtvi5FSngtQSRM=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-M2qJHEmP4ZUZpfZjmqDI9zuBJbZxyLGls1yFjtX5Pq8=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-+EC8nBmFju1m+frEr0dnj5HiwOCvRdpQCaHdpylgeGs=",
         "sourceCellIds": [
           "cv-show:narration:project-graph-mcp",
           "cv-show:cue:project-graph.open",
@@ -13192,14 +13749,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:project-graph.node",
           "cv-show:audio-clip:project-graph-mcp:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-khvzxZ2eBFNLVOKkH5rM/CEC/PoFQiPbvixwX21eCkc="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-xrpfW7QJs4cEixTIMpwJYT4hfFUGAP1YOXjZb4IuP9A="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-wm8tn+xgj8lI42tu25aL0Ho08nn2nHKc+mSKeS625n0=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-kNg91O6Vlg8g7pFHv5spbaUABMLIOzuVN45S/Kc4aVk=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-0XJnRxCOFbWsu4Fslyrv7hzH4sAbhG0UBqFp3+YFvGo=",
         "entryId": "lifecycle-messaging-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-hKedETwW0PCN4jlVVI2uMDI5n69yKKlwsy9kxvyv2iQ=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-e9dVkJdL6qPnp3kFiK2h2SH69pVXKfHV6CrhyIKZE5I=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-gRoCEOE5PFPwwKKW9gA+8WwNDKTGaTe/XmxKFjS1b44=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-6+s2/0V2hwAvMTkkwp6MGItspS+LLF8gDf2Sjl9a19s=",
         "sourceCellIds": [
           "cv-show:narration:lifecycle-messaging-platform",
           "cv-show:cue:lifecycle.open",
@@ -13213,14 +13770,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:lifecycle.digital-twin",
           "cv-show:audio-clip:lifecycle-messaging-platform:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-jETwRxb75wNlXxMZ3tArJPLbm8DXuXRSN9FieQrcT9U="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-8HQo9BxGxQ+mX1pHxlF1/muZnaJrL1+5+CRvXz3oUt0="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-eHD0GTkJkPQKPCc5wbLpTQ5in//Uo5Ul2D+SANFoCp0=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-CLqSpctt2GZ4JXv4w2UuSPTpQTn2hU3nUwXlP5lQjRg=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-iKMGdnfgoHgQZ0RN09CM8IZcav9LKBNJNvDootrUzaE=",
         "entryId": "mobile-smm-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-wEpD2zfjP7WTnc0hWvE3UnyBOM4dMlMpt89FeylBUQk=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-Ac/jCGDy0hJcWz7bdx1KROioryrSykCibPGdQX+B/X0=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-LQIJ1Dq93QIJrfL2I9kDqE4K3XuTPAnyjrupH0aqTAY=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-P2WmeWKJfAQnXps50oD3UDAWv75HHICC0MSl5PMwnxw=",
         "sourceCellIds": [
           "cv-show:narration:mobile-smm-platform",
           "cv-show:cue:mobile-smm.open",
@@ -13232,14 +13789,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:mobile-smm.agent-update",
           "cv-show:audio-clip:mobile-smm-platform:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-44fqkjky36J8mhcxYJnzRxvEf59JcTz63dg1nm8ymbU="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-7g8pmsvPdNdLdCm9fmPZBPk+fq0l6IRqE3h7PbXKNe8="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-hkImF0HWBjJT3bN9XLyrD7IOYcTr6V190jiLihz8rv8=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-LrDv1gR268ZmyakdY+0AsgEn4PV3h0gGMfGllfa8gH0=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-VHll1CyMzQDJAyl/ZhAw6PP5nl19W2eo22usil4i7w8=",
         "entryId": "f360-studio",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-R1s2o4rKm5NFaXDxtVAVinpRP+RaS4Jqj82FXvFuqAc=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-5KaNWJqdPAJrPzLJ7I9leCuCbiP2zGe+z5ncvIS9sXM=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-cgPAlNiPz0Mfa6cu3XyV9sdIUi8IxihdxtvjHAJGJso=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-P6oHq80mAdO/fa3fXlJRZ6jXM8gv2zztv+CiHnreB/Y=",
         "sourceCellIds": [
           "cv-show:narration:f360-studio",
           "cv-show:cue:f360.open",
@@ -13249,14 +13806,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:f360.result",
           "cv-show:audio-clip:f360-studio:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-2cvgiQm/DRi8coM/sZaQCliXxQhKq8kfJqXdc8XOa/E="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-6Ebu0JeH8zmlNlsBjPLc4VmlRjlbeiSxQ/oqFMYaVkU="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ap2DLUKzfEMCqS/gjjbjt8AdXbNBnsk731glnhjUYZo=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-znuzWiTpOMuq2tdwRyjMRWMi9xWBVCP9bLzj6fRHgUA=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-DwzrR4+BRsQoAGgOTsXMyjePr01sErD2ZCajhsH41vk=",
         "entryId": "autobox",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-NxTa25ThrtEE55K3uI1piDOpdCBNwRdnkV+g6OQ2L4s=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-GZg3+Rt6JZp0LcquiEZgx6UxvmLZgMdQ8InFeW4jQas=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-VBi4gGp8+1y/Df81/PTrFnO7rb2TeC1OmMeqAP7dtmA=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-zKo9rXu/DgjzJEak34ri0gwsr7cki8v1hLqyHx49Cv0=",
         "sourceCellIds": [
           "cv-show:narration:autobox",
           "cv-show:cue:autobox.open",
@@ -13280,14 +13837,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:autobox.video-09",
           "cv-show:audio-clip:autobox:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-EJHKO8F9O1D3WFEiDK0J+h03t9jnRnlnbeCYtz5Y3O0="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-gjpm2BzQ3+DOBHHArUWQMG+brHfhP8gAJR3LYzlTe2E="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-npJojdqkfYW6cUe0i5szdd30TkCUgzVk5DtMyFdbXV8=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PSlxWKHMtOSPDeDSAUej7TX+OUhBp8ab3RobdUqR/w8=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-LS/wvx41nEzctYJlLbbIJezpa372Z/ePSmUVbDhSQZI=",
         "entryId": "complexscan",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-M+zF3suti3pSjN2zyGATcIea5T15fEDRikyP1FTyr8A=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-RhHLqu1IunZDXarbqVL+mh2ziBau2UsP7MDmysLF8bA=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-eq6FtPPwkaZpSOO6+sWw726J/9XCpXEB5SfWNSF7yW0=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-CIm1u3tH6Kp4jE015OG52H/OIw/GXPCB7StcOmllbNY=",
         "sourceCellIds": [
           "cv-show:narration:complexscan",
           "cv-show:cue:complexscan.open",
@@ -13307,45 +13864,49 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:complexscan.boothbot-catalog-ready",
           "cv-show:audio-clip:complexscan:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-yx1pOx9bOR85SueiPPjimBk9aNaf9p31g2VXx11vWh0="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-eS7KMgLnmMRIHLZa3ZCtvVYfUbta+gojrQ0HqmkE6hA="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-wXI9MSrLSgolD4qcskhVsLnfaUmSEY4YLf9mdw4ADpk=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-0cykmw3o9MHKTOa6VcGsMIOFUm6NJvJrLdMnQgerPP4=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PwhzgCCQi0AFF/znw6joZfpUI1GEzMirtJVE9dvHFeE=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-sOzLj/OUrrksQhxTqCFkg7Zj4OUwrK9xc7WrHd/TW7I=",
         "entryId": "photopizza",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-8wXdPIB/qrYcZ26TzT6bBlm5HvJlz2kIZY7HYx8eln4=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-rvSrWiSaWyfQScaCabmt/6nUDzqler3xf80mnTiaPHo=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-g3wmp0bPoNh+Km87gvQXWimcz4B62uq4QoJqEJ3T6ms=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-Mou2DdHLPse0rJpvnVn6y9fkxTKvjBLxEkVh4tonx74=",
         "sourceCellIds": [
           "cv-show:narration:photopizza",
           "cv-show:cue:photopizza.open",
           "cv-show:cue:photopizza.origin:scroll",
           "cv-show:cue:photopizza.origin",
+          "cv-show:cue:photopizza.megavisor-promo:scroll",
+          "cv-show:cue:photopizza.megavisor-promo",
+          "cv-show:cue:photopizza.page-open:scroll",
+          "cv-show:cue:photopizza.page-open",
           "cv-show:cue:photopizza.video-01:scroll",
           "cv-show:cue:photopizza.video-01",
           "cv-show:cue:photopizza.video-02:scroll",
           "cv-show:cue:photopizza.video-02",
           "cv-show:cue:photopizza.mechanics:scroll",
           "cv-show:cue:photopizza.mechanics",
+          "cv-show:cue:photopizza.controller:scroll",
+          "cv-show:cue:photopizza.controller",
           "cv-show:cue:photopizza.video-03:scroll",
           "cv-show:cue:photopizza.video-03",
           "cv-show:cue:photopizza.video-04:scroll",
           "cv-show:cue:photopizza.video-04",
           "cv-show:cue:photopizza.video-05:scroll",
           "cv-show:cue:photopizza.video-05",
-          "cv-show:cue:photopizza.controller:scroll",
-          "cv-show:cue:photopizza.controller",
           "cv-show:cue:photopizza.spinner:scroll",
           "cv-show:cue:photopizza.spinner",
           "cv-show:audio-clip:photopizza:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-OriP+doAo4+r0kpq9RIa65QPbs6C1FVaE4Hs+/7ARFs="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-rxmrXyNwEwkcjSsODgAJBwr1r1YuOf1u7JDZqvwHEWU="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-h7HVJr6espKfoOJCh6bKspJRdbUJx++9z/nooxWcUUc=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-hed0POh9/bQd0evkUsiV7b7Sjg0xoxx/D1MUqQBKRwk=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-NMK08ng0yJHm/sUqkZNGcXPKQ126y22LysMKz+wPURk=",
         "entryId": "finale",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-bQ6wIAMhArXR28UFmuM5p0xKLjtkcaaCpTwMiZRvUWY=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-BcabBttpbInDPu/kwUru5AmIeUyt5woUzwkETudnwtE=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-NhIIa/JtwaokJR7tTRXEojfCCKFBEM/GKeWfYysCqfg=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-2Q3zKvxa+VHQ5CGdCOG5QAhghQrurpEeHRV+45jGYTs=",
         "sourceCellIds": [
           "cv-show:narration:finale",
           "cv-show:cue:finale.map",
@@ -13361,14 +13922,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:finale.contacts",
           "cv-show:audio-clip:finale:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-rWU7mMsFV+ubyhx6XlAYWBmbzowyaZKOPA5aJK7GyYw="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-g7lVARDu3XnuA0q3j62o1xF0romblD7ijEiv+sRJAZ0="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-lcBhuobGzFKiOy7rZElWqe2rhGvLL4FBZkhJ4lud1KA=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-50zwX8cQtElV6OtHomeC4JWGj98Qh4QIaP1V1jN+Lp8=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-bIuRCKQ8ilDxqC3DRqYpYSITUy6birvAnbsIneSQhV4=",
         "entryId": "workspace-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-/a2QF9mqESzhP4UmEuxYnD6MQX7K0bNwwQ3P0RkawK0=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-tiB1+KZ73hSqxn50Gi6Q6AjZLo/hoJ4cvlbAMbIObrk=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-9slOMn9LDieJea8czw4QWUsjv2UD0JkhmzQPw9Ml8lA=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-0+GskdT+d9TrDSahaSvn5xtbQ2XJopUaTXWmkQ6Q3Ns=",
         "sourceCellIds": [
           "cv-show:narration:workspace-details",
           "cv-show:cue:workspace-details.flow-frame",
@@ -13380,14 +13941,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:workspace-details.hosts",
           "cv-show:audio-clip:workspace-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-REl1jXRSVmzu+Up/W2+Iy8Oql822P+uyKHnjx/04xYc="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-3zyUlNgabmlylr18384q6gWAKkcHodY3VKOqtXpDJYE="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-+ct0jcSPwCDyC9oBUNoljCjN1ixGDG/WnmHA3ALglyE=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-wynZRFWp9JWcnYLGgI1RlVNUag6DazM6CA2sFNkoyhI=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-whYfl80RajkiQbAdx1AjlQc3CSVvq/2aoIzdKn/a+Fs=",
         "entryId": "symbiote-ui-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-uJ6N0hYIX6Ih7PNKa4Nr4lwvm41Mh0N2s0ImLMhTDDE=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-ocL+PPhzotor+2wU6+91cX2FOOIQWXQ/Lg6CP47T45I=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-v/KQv08wMsy0LuLx37WHfZRZEoPtRCkxSNsU3vWxMk4=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-szFDkgKGCCAfIhojrbMFXU6owfyGREz7bPgrSFjF+uM=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-ui-details",
           "cv-show:cue:symbiote-ui-details.composition",
@@ -13399,14 +13960,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:symbiote-ui-details.workspace-route",
           "cv-show:audio-clip:symbiote-ui-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-+sXOW3TTlXWmYPiw1K/eutI7ZocP5T5bLI63lJzQ2wM="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-ZWZGd9LrmaR4dvHp71DUbJNSJ9NiSg/iXpfdSsQ8Epc="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-mNOldRErDtHl3Oqh3CAVK27y9ZWYtd35Oy6aIQ64Kzc=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-AqFnLkNA/gDkWdlbcdjp+O+9gqMzZLdCSjWiJk3jq4I=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-kyQ1czJy2MQgfutnh1VRL4G6e/cV86Y/Pg59QCsL4oA=",
         "entryId": "symbiote-engine-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-I0kzYYS5x0TquMJJz1R3fqSQc4rWZreWCpEPlCmByqo=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-vAPE5+ClcJDHV1isvi60+0b18U7XExEhSy4WLuUS2E4=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-WpRG0hgSbD7qWPki1HCbVOGbCIXT6HGGd20nv672eTI=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-bG1UB0qMT+LAB1I19GM9mku8xzhfpItO+axQ0AVN0X0=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-engine-details",
           "cv-show:cue:symbiote-engine-details.layers",
@@ -13416,14 +13977,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:symbiote-engine-details.demo",
           "cv-show:audio-clip:symbiote-engine-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-sea0ntzsn46lXmUbBvZ8F5e4bTBvW+Tvgptu/eqFzZ4="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-YijS0ylZgVJYmrHANZyM0I+zCNT+RkqbQZD22CDOSlg="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-GjcHlx9uIHfhkb/+t0yw5kmovTIDElSOZbyKNCwC/Fw=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-FS+VJDwJFfYszGhc43+G0DVJjIS7d2uxq8juO5/U0Sw=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-d4Wk6Fad/Y+1CaaDpub70YYX2pz/WnmYDdkDxM69giA=",
         "entryId": "agent-portal-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Vnu0xPC7GzbPdCDws7AItE5cA/SkL7x0J43M/93W/u0=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-LH2LnPFuGcnIkUo7nbqFqw5vqfObN9MX30u6rjn7yPU=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-aaDFGCfljfidqpGV4MEDuqnEr/usW5KDfOGj0xMgajE=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-cA0CivFNUC2/8RMMk0Q7iLhQcUJOMyBEehY0hP1bs3o=",
         "sourceCellIds": [
           "cv-show:narration:agent-portal-details",
           "cv-show:cue:agent-portal-details.gallery",
@@ -13437,14 +13998,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:agent-portal-details.resource-groups",
           "cv-show:audio-clip:agent-portal-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-nfVlm+0+58ESQj1YJJh78YWui3f03lHDOm5An2oX6OE="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-bE09TaQzhp+h4Bq4s/UanAzEzWYEpdBYv3EFqYtmIq4="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-tey/cJ3NPXXG3oCsawKpNR3a7fuj/GXd2cx3x9U16jM=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-HTqvv1jk/8ppdLSW21p4iDUvaVYwEhda+9B9DnJ3gWc=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-Hs4mVGom+3PoWKS9U+izdbxkz3gUaA8wRhD8/ft+PmU=",
         "entryId": "video-studio-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-cthxYDAw7/E72k8xCsczJ2rAVuvk2wqL+W8+qfRyWl0=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-u/7RRCgEpeXa3mqZUwYcT5sl7OSrRQQ3ZMp/0ifQcCs=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-jkNBbzuhSodveC9l7PL7oWKp9CVIgeVZ7ey/nlz9TCE=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-3BwwEdNVvjnSCpy++Z/apvxxoYPCZbWkUZ2tIrHNxXg=",
         "sourceCellIds": [
           "cv-show:narration:video-studio-details",
           "cv-show:cue:video-studio-details.flow",
@@ -13454,14 +14015,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:video-studio-details.demo",
           "cv-show:audio-clip:video-studio-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-At9Jx1Mc7+RBVwrqqj7HiVwBhPrF43KVxIv1l2XvYrk="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-J9Y+bWf8mW2xhwRdZf7FiTHhzfSSv9CUcKMLSngCsAs="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-eLPTzIhaedrS4ftmxF2TKAl4Aaqm3Nrh6i68lZWgASc=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-859u6zHlHzRqJ4OtmKwBc/emzM/UJunmnnW0W7beFkc=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-GGIR5NDLFEwyH4oP4SGXRxlvLm2IzKzcUI8HHVoD8ro=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-pTDO5rRsPEd7S6rnFmtJ87GbD/G6qYyiw3+4upP4a5Q=",
         "entryId": "maximo-workbench-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-atEVM+w0R8qXSbfb4BHn/LQU0BplMGdO4rfbl1/TlY4=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-JZW8lD5OQcpuYV8nYmOIRLYilQXO3etv53Ec7bLj0JA=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-TwVkfkfYlbymUT/gJu7dB7zUGEz3fr1muNxPkeh/UAk=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-I6KngwFvqUvNhMKsWmRhHRUIT0FPmZ4D4n9o7wywJqs=",
         "sourceCellIds": [
           "cv-show:narration:maximo-workbench-details",
           "cv-show:cue:maximo-details.work-order",
@@ -13469,16 +14030,20 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:maximo-details.asset",
           "cv-show:cue:maximo-details.actions:scroll",
           "cv-show:cue:maximo-details.actions",
+          "cv-show:cue:maximo-details.demo-1:scroll",
+          "cv-show:cue:maximo-details.demo-1",
+          "cv-show:cue:maximo-details.demo-xr:scroll",
+          "cv-show:cue:maximo-details.demo-xr",
           "cv-show:audio-clip:maximo-workbench-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-dX0FPhM4xlyJpkAezkCig+ND6GhmRvSTZj4hOOr7jaI="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-492HP5snybTVFt/blQnQMDBJMIGimQSDYeIr6TpL07Y="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-jX/4WcBD1qJQQ3JveUM/4uK7qXDe384a18TlvA6YZLo=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-vb7+jCe9xozucC5sy+XueN3RHFVf0I5HZ61bpVX8V98=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-But1VG2MD44GGzgBqWekxHvL6rjvCwjfVqtQMwLzaWY=",
         "entryId": "agent-pool-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-l8Ne3bK0cjU8etdiFh+WDWXmw+0NUe0Q9HHXeULUiT4=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-F+8mq4X6QpUzNMaj7beb+DPpeCjG7r3Id/74KuVgais=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Waq5UXv6mfj0GC5HCjifNJp2Ccc6nchz2hx+fMLyF4c=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-aRdam/AcgMIVFfn5F+7jAoZJrhkdX61Z6U9fY98W0wY=",
         "sourceCellIds": [
           "cv-show:narration:agent-pool-details",
           "cv-show:cue:agent-pool-details.runtime",
@@ -13490,14 +14055,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:agent-pool-details.result",
           "cv-show:audio-clip:agent-pool-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-5HORJujJQPWYr4ZST2necaaQvac5HaHtn9gviQtJToA="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-XG1ARgu5EcUuNyKOjH98vZ8dWVdWI5KLWqPI4YyJMsk="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-+jGVIzCJrAIrV4OX0rF4utaJz1xdHrqw+pb9RsfiPKw=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-04zHxYD7/Net9HZNWc0qTR+X9tYeYvYguUIVcFGbhL0=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-899Sdhy3mayybCxX4wR6HKMt0b4uNDPQl/AzrvpnP/U=",
         "entryId": "project-graph-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-DVWOz8Ldc2KgZgXMFSIArfXRD+r61MhyfTLuTlrTbdA=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-lDGzFtBnppSvyLGrSfyd84peKskC0N/12iG2x86yHEQ=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Fx4exz4ctNWGtxH01jPjx4v0afwLzHVgwySfzkHTUTE=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-kLikhFYOXjIN7lXfKEhiwZ/zvUuvGxPE647iP74m4KE=",
         "sourceCellIds": [
           "cv-show:narration:project-graph-details",
           "cv-show:cue:project-graph-details.root",
@@ -13509,14 +14074,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:project-graph-details.focus",
           "cv-show:audio-clip:project-graph-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-U5672TR7hX8fvDKzDRF2GIfuxd0VL8mrR0O9gab/ZU8="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-9PirKqiDy3ODgdwSNjbbxr/TE/LhDNA/zvzpm9leC3s="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-gpRCYqNVwzl5y9yODo1Q5OHemBsw82XEHxKb9UgHEQw=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ut/GU6jLroudiLGplaf7eNx7qEvXtDcwlscu3IpsQ+Q=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-CD9yb24P9Z4e0i7nlxRZ/G6qdMKlMnr3cko2ufU8aQk=",
         "entryId": "lifecycle-platform-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-3+Cj4M2d5gFv27SfKelw+ghPWZlYqqaMZKtXGP3clZk=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-VPD167zTRt4KHh8fu8YJE/7HqZUGlgmcs0ZdJjKKXJU=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-fj7ow9qrz7DPtuwxSe63gScSCUxNxZvzlVW3utxyA6A=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-vulvX1OjIRTJi9ONkjNKnPbqcWNhAFchetqPBpqpniU=",
         "sourceCellIds": [
           "cv-show:narration:lifecycle-platform-details",
           "cv-show:cue:lifecycle-details.product",
@@ -13530,14 +14095,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:lifecycle-details.twin",
           "cv-show:audio-clip:lifecycle-platform-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-HxP6GKgUOmx+y9DssebwGvOvTylnCIjAUnN4nns3oTo="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-sVgffeXvDFuWJI8emd757r1kTq6SoIMEhWAaonDv9oY="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-wtWH+9Tx9xv8z2Jb51GSz/P8pck/1OXyWMHLNOBhEAA=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-a2jy0ZGKfWaeNFM28IymePuvVF4/IjNL3C2XcMHlxj0=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-RjSNpeUpz8R53TnAzomnb6HwV1gyy6eqZK+qdkXF724=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-MuDzvffrqFa9JCuELzHmb3KhB3YKglj7RTfWSmF3xwI=",
         "entryId": "mobile-smm-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-DW8OhO4BWWFOofNANZN1e0jHU93n943qnuuH7Jpkyd4=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-uNbHfsKyRsyupm9Q7sWKgTC2krCOsrR0IC/VmL6Lzko=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0zho++swEjzwwe/seNAUFkAE97Ce1DBhvA5bkUvzuWU=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-U+S7J4EaiGhWa1LRCrk92WUmKxaeehXxpIRE5boIg10=",
         "sourceCellIds": [
           "cv-show:narration:mobile-smm-details",
           "cv-show:cue:mobile-smm-details.gallery",
@@ -13547,20 +14112,20 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:mobile-smm-details.queue",
           "cv-show:cue:mobile-smm-details.ui-change:scroll",
           "cv-show:cue:mobile-smm-details.ui-change",
-          "cv-show:cue:mobile-smm-details.approval:scroll",
-          "cv-show:cue:mobile-smm-details.approval",
           "cv-show:cue:mobile-smm-details.draft:scroll",
           "cv-show:cue:mobile-smm-details.draft",
+          "cv-show:cue:mobile-smm-details.approval:scroll",
+          "cv-show:cue:mobile-smm-details.approval",
           "cv-show:audio-clip:mobile-smm-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-oU24ypo+CjabJYt10vI3YJwIvpopDOV4mHYtEgG/Ptc="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-57Vi68wcjipvH1qeNgQ2u9hORLug1WbfOxROZUF8HJc="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-lUj7LLwMd/cwLYSQmpv48AehBOk11DKKj3r2r+1uYxk=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-uKWY3T5D8B92Nt7nQJdH7sniI6ImPdHvQvOc/ZdVZFw=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-n+00zZxJ3k2ftGh/oGtcr/9/J0cl1DV4Qk6aql8Uemo=",
         "entryId": "f360-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-4r5mWkYh4QHI0/WXDrCu+k/jWu9zZTqrxBkAA1S+Jm0=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-0ZEUAlsmhBEdOIPKTqo8Gj4UgZPb+GSKxeyzBtgSJUs=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-tRVCIG6IhWL/r/3YQOLrk0W9JO1Gk8yQbdj1XqdEawY=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-FQxh1Skna4v3LsDLTJ044NiUTMfRxCQqq5jc7K50Dj4=",
         "sourceCellIds": [
           "cv-show:narration:f360-details",
           "cv-show:cue:f360-details.path",
@@ -13570,14 +14135,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:f360-details.period",
           "cv-show:audio-clip:f360-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-Ssr/l/Xbdj0SWF+n4at2pap8gnDOuEJhlyDJfPZ91UU="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-zhrvxn74QtOT2rPdTgiJVaARUt4q9WiJxD4bFBG/ISY="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-AiNAPrPl54/afY16RzCZZUq8v3lwTr88LhXKyUH2Yno=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-SfethfxkdWJplTiNwQPQfXxyi/R635F2liXiK/ncfRQ=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-EFMF1cD/C2Vdk/2jqrl3EApmLc5BPkNCeOs9DKJU8Co=",
         "entryId": "autobox-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-IFHfWjvh5jH93zsEj/yUwz4VFppi/QPOPKG2X1V9S3I=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-6csEh0htMxmNJ/3fOuGNSNa5ORPv/V+217b3J1NzbVg=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-+B/hREMFDy+GX3N9Ll4GK6WiLiB55QG0bH86hrKFNek=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-4lr+LnH/rwSVkJZ7O3+QPYD2iNOO9RA6AOeSlvvnfAM=",
         "sourceCellIds": [
           "cv-show:narration:autobox-details",
           "cv-show:cue:autobox-details.working-system",
@@ -13589,14 +14154,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:autobox-details.bronze",
           "cv-show:audio-clip:autobox-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-WQY7qQ9vo0DJ5/50LwnrAIvLLC3Gc6aK7eFUqLRE0W4="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-SpRZkZqPBq0pP2V2V0URlZM3iWrfYD0qyNtdGzML36s="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ZRK5eCOI9KKaO1AuH7ohLqY6/L6IHQ0VqD/+zgHyN20=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-LNYDLP2BrYMWwRgWEkGvZ644NhAtwu98ctv9O360sug=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-D6jUWjPnVd/LsYJ+mdNzn7kBxWfo6sOYbNTT2YgwrvM=",
         "entryId": "complexscan-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-NNLL86BFMce9qc37LgRQFpLD1A6UARwkGLUS3ni/S/s=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-o9CKpFoEKrEZtW7rX+dpvbHp+ZyX64laSoQB0rV5xOg=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0kos5K0Ps8CJgJ6Rpv0MxjC2kfVWS3Gc/hVDUMG5qlU=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-X3QmfQyYZAGvXb6ryUPLHN65BJQxFDEFevQwzn+DDwA=",
         "sourceCellIds": [
           "cv-show:narration:complexscan-details",
           "cv-show:cue:complexscan-details.platform",
@@ -13608,90 +14173,90 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:complexscan-details.autobox",
           "cv-show:audio-clip:complexscan-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-OljR2W5LrzBmzyNNYe0nSwgC9mPS7BPMz5WHMXKD+bc="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-v3O6o6HPdlPo3MNQP28gXFeBK3LtgY9LmqbIPdQo0ew="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-RzJNDnztfOkeOuCTLW27WJnqqKgszvu3+ZoPWkUENNM=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-0Oerl7ZknY1RZUCj93G3f63Gc3J3EYo8U4vnmlI1exQ=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-3wsztHtvr3d0s1WyjWea8m0s39KLf/vCt+rvslrAl6M=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ZEc6vZeHt6obZ1ongAFs+Q9MqkR225knA68PJs/lMB8=",
         "entryId": "photopizza-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-/7URf6GICwfPPHBCpE5RF+rMOcC140D3tZSKke6siRA=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-t4vZbFG7+D0VUUgiASmco4OxFk7NO+feUWqUhquT+KI=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-tGXoT8ySCvrddZn2t2sMSYNkOMxoFctMuwcEqZmuKGk=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-3Bm6He/hBCtIYbEtaJ+t+QZa3OfkgCVfTjMHKTiJ1AY=",
         "sourceCellIds": [
           "cv-show:narration:photopizza-details",
           "cv-show:cue:photopizza-details.origin",
           "cv-show:cue:photopizza-details.attribution:scroll",
           "cv-show:cue:photopizza-details.attribution",
-          "cv-show:cue:photopizza-details.media:scroll",
-          "cv-show:cue:photopizza-details.media",
           "cv-show:cue:photopizza-details.documentation:scroll",
           "cv-show:cue:photopizza-details.documentation",
+          "cv-show:cue:photopizza-details.media:scroll",
+          "cv-show:cue:photopizza-details.media",
           "cv-show:audio-clip:photopizza-details:01"
         ],
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-f4gSknuhftAdYHmtgP6dwr2V6fV6MakuY3iSoCC6Aac="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-pl5FPD9FH9I3QS/DaGDZ0lLLQAIXmc9vmG669JXLmMQ="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-uIxKbErR9p4oqHBHpkt1+SYVqbBRVI4fEY95HxrNLlk=",
+    "hash": "cv-show-audio-provenance-v1:sha256-0lZpRmAdR99rCgHc441oRp3zhf9mWkdbb0zDnDwuHu4=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
   },
-  "artifactTreeHash": "cv-show-audio-artifact-tree-v1:0b7904bd023b999f4471c80e8ab14fbc2585b6c3b812d009e912dc315b804c5c",
+  "artifactTreeHash": "cv-show-audio-artifact-tree-v1:0332cdd05f461a3c1f7e9a9b14cf1820f054ad895752451893df74bc22569220",
   "entryReleaseIds": [
-    "cv-show-audio-entry-release-v1:5dd57ec27db64e42aecd5767d9b7705553a07d4cdf1849ced449ef05717c29aa",
-    "cv-show-audio-entry-release-v1:22a661f3298c7c53491ebc964b4f97b9cecfb8f2d8599fc841e3e525f4a1c99e",
-    "cv-show-audio-entry-release-v1:b2d91e8fd3be548a89ffd40d7f82354afa3424068e3ac3545639fd4354929729",
-    "cv-show-audio-entry-release-v1:f36504faf99d61fcce52b0a7690d631a2f751ea8fc9e44f8b38cdd001d1a3cf3",
-    "cv-show-audio-entry-release-v1:0601cc1d50a9279e493f53ac7e8605888100ef9f5015d81663595f91beb6ab93",
-    "cv-show-audio-entry-release-v1:7edeeab3b801c9ff2f488597385622e6f3cdc07709a86dc6ecaf1d00a732718e",
-    "cv-show-audio-entry-release-v1:aac40fffbe9903920192329a47cf042062a5890f9e81440fd0bc33162598f800",
-    "cv-show-audio-entry-release-v1:51242e5e65079fb75612bd7759c89c58762ec6f1eba8be5ded0eae6ec9a83fc5",
-    "cv-show-audio-entry-release-v1:23b500870b752a9f137942b4f28b3402f2c74df0682507b5334bf04ac9df117a",
-    "cv-show-audio-entry-release-v1:6cc05fd66cb0d5b15cc3cbe5f79b63779e8750c6dc797e66f77ee2c5d42b345c",
-    "cv-show-audio-entry-release-v1:d1d1f189a072013c3c3865422dfac65ed1ec019a6e6e7e19b1c5f09e1639f482",
-    "cv-show-audio-entry-release-v1:dde2669ef120bf63e13a3aae9f2f0d6c65a9aa324eb28f869e9f030c53db7a7b",
-    "cv-show-audio-entry-release-v1:892a723725f9f679181b51d34b86778fcba76bb46ec89d838350b593be1c7438",
-    "cv-show-audio-entry-release-v1:51362e55e93e6474765984e4fc0043b390b88e9ace6e4b4e88a6823d5425a742",
-    "cv-show-audio-entry-release-v1:b5b92a1863217e997b6ba788fb28bbc3a8d07ffd9335a6d470ab3272e44c2f28",
-    "cv-show-audio-entry-release-v1:351a48a983553f6a39e86fd9c62b7048f314b591212de4a520cbce1a1b9b3587",
-    "cv-show-audio-entry-release-v1:a05e373204f323aabb0e191ce8499e4fe51efcaab53039a5f8c2e6ba6bec283e",
-    "cv-show-audio-entry-release-v1:c09b870f70c574ee7291830caa52d045db6752dfd6623b0b0803047e0e5d0f01",
-    "cv-show-audio-entry-release-v1:9b31b13b2d47f36109dea909e68c6502ae799302761b04d40a1591ed6a68c93d",
-    "cv-show-audio-entry-release-v1:a1aabcb3eb17a0cf94e2e82557c43897603b6ca256f8804274a24d6a3260fe35",
-    "cv-show-audio-entry-release-v1:9b9b3618efbfa0efff0bb64fffe99a2eaa54f88ca690470c1f297b0ebee9ad86",
-    "cv-show-audio-entry-release-v1:db67f22f8d3fd1b4b0675410d8edd50506ea62ff08a8c2a2724c1873763a47d3",
-    "cv-show-audio-entry-release-v1:a7c9e7fe602f3b45cab2175839016bf604a9bf957d604424ceb310521638dd50",
-    "cv-show-audio-entry-release-v1:cd3dc002337fbadede16759ca927ba0e4a6d15fbca6d5db6163b949132f8dcf3",
-    "cv-show-audio-entry-release-v1:901179e30096e0f8cf8691ea5495a9e43ef6f4ddde063b0e92a362886e8dbc9c",
-    "cv-show-audio-entry-release-v1:d116520bc97def88577cd33e5e350e70cffdf43525e149c8942715d9a2951aec",
-    "cv-show-audio-entry-release-v1:82774b1c798791031febc7d3b0b506a17d9e1136600575f1d14838d2b6369bfc",
-    "cv-show-audio-entry-release-v1:f96352c0fe74ed18b1accc09b125838de1e05294ea949362fda15bc0d346395e",
-    "cv-show-audio-entry-release-v1:5873dacf8f0e15ecc77d0e75321a6987b7cd74788e751113c8d8d19dff78fb11",
-    "cv-show-audio-entry-release-v1:381bc685863211fcb66e3be5bf1e65e66c6b733dd432644cc9a06218f08b63e0"
+    "cv-show-audio-entry-release-v1:7dc09c5ebbc20ed676ae92bb46730e502ed384c75268e25e4fd79cf555c903d1",
+    "cv-show-audio-entry-release-v1:5641efd9f618d94aac255ba74501775f5b682a483e6eb36653889b509e38c9e5",
+    "cv-show-audio-entry-release-v1:e07ba084658cb1c3717550593fa84dd34fe31eed956a2a1b9a1854a1e3cecfba",
+    "cv-show-audio-entry-release-v1:95630bce45a60190e8f418f12f7a13cc1acb5d6ac562244e0b0ee0a3e0099e46",
+    "cv-show-audio-entry-release-v1:ecc8ec92b4129513335c5b38ecd5f508e795f1c9c9dfae1a9e9bf4ce5bb92e8d",
+    "cv-show-audio-entry-release-v1:63e6e716d0580e07ef59ba4eadd2b95565cf9f42d6f74c5e65bc5606cc94b807",
+    "cv-show-audio-entry-release-v1:42738210fa1f109346174b5e1e008209a2581f16cc12c59e3abd1b3b93f89e16",
+    "cv-show-audio-entry-release-v1:7ebaa81bc2db56efb2db5b2ff888b5a5799f037caaa48b7fb96d3c836d640102",
+    "cv-show-audio-entry-release-v1:56da26433e4ca51fd71d8db7471182de96bf18e7d9728bb6fe0e512afeaec1dc",
+    "cv-show-audio-entry-release-v1:bdf9802dbb323e8a495bb5f8110efd8ac0603cb9b7855e65feb1b9c03f3ede9f",
+    "cv-show-audio-entry-release-v1:3a97b0dc1ebb8d0d4550edda3c8aa71d5c33da85f8c2581c4c4df76751afd2a5",
+    "cv-show-audio-entry-release-v1:6be6fb708552681dbcf98c1f4c85daf1fc35261e0eba88f699519a729b7e61ff",
+    "cv-show-audio-entry-release-v1:94448ed3c8b97444c712553f5eb6b855c55e7a42e8b75c0036e11f1486467315",
+    "cv-show-audio-entry-release-v1:752ec7dde8bfce8873d8f146b76b211131362d7c830a6b474c75b7ef3157fa09",
+    "cv-show-audio-entry-release-v1:5cc39e0f06bf452579d4ba90f7224946d882194d345ebcacd071eb3879ae1317",
+    "cv-show-audio-entry-release-v1:9299e9ced9457090ae369a2166e5d447757b4d8d248b997be3e7be4fa02b1b6c",
+    "cv-show-audio-entry-release-v1:b2bd37bd1e1338bb8b4f9f5f7c48938a4450ffbf9b762c44258b685325c31bbe",
+    "cv-show-audio-entry-release-v1:89a710371cf8198410a512e98e9be4b33f73c1352060580c19068546b6b08552",
+    "cv-show-audio-entry-release-v1:fc61203f18f36609573631db350701183b37708165ae9bcf32f4b0a0dbaad3c7",
+    "cv-show-audio-entry-release-v1:b38ba9670f90c63ef13d76b8ab1b4a0ab308f657566ca1ed0e43a2af9a7f1e35",
+    "cv-show-audio-entry-release-v1:ec644bdf1211af9432bd60d4331c1e39e72abdb064e9690e61ec0cb64ce1ead9",
+    "cv-show-audio-entry-release-v1:31e891aefeb50ab3ccfd881444ab297b6c196a1502f1f4ff2edbe33b501ca075",
+    "cv-show-audio-entry-release-v1:7a4245ed4bf6eaebda6649448966a2fd51a51fbcbd6977cdc3c6cb6153aa5210",
+    "cv-show-audio-entry-release-v1:b28c376f11e967e741b069650816af24bc8b8d2178c3abf1163bc59bcabb0ed0",
+    "cv-show-audio-entry-release-v1:a4f8aff873f0a324220dc6f162d292ae2b943cfe2bd76f67c21e62601d1eb408",
+    "cv-show-audio-entry-release-v1:db476098995df9a9718b660a3d5e899ff331ed2b2f911917349dad4b17222728",
+    "cv-show-audio-entry-release-v1:09bf0ecb4890fe7939e44ef1a68642b96329418f4d2b69dcf2c65905769fa486",
+    "cv-show-audio-entry-release-v1:73406ac884a8fb3421124f4fe7409f0445eb052d0f39fa719759742613247c1e",
+    "cv-show-audio-entry-release-v1:5245e6d5ae01cec4cdb9a9008401b71d8a6866665db42f96b2990bbe91d00685",
+    "cv-show-audio-entry-release-v1:95e05c508146b506f9ee2b705f80ba7ac3099c16d87c7a595a2db35b1ccb6dc2"
   ],
   "manifests": {
     "alignment": {
       "model": "large-v3-turbo",
-      "path": "alignment/large-v3-turbo/66f9f319ba19bde1/manifest.json",
-      "sha256": "eed37ed5620cd0eee2f954b4c1b5d745c3e1f9df1dfe55a0b8f31e933e3f8dce",
-      "size": 1858999
+      "path": "alignment/large-v3-turbo/36d2d0b97e3f5c60/manifest.json",
+      "sha256": "03cbbb179518e3b88cd50da6a5d22ecdbbae149be98fa3a7d4e81e8657344e53",
+      "size": 3849790
     },
     "audio": {
       "path": "manifest.json",
-      "sha256": "e87a7052a37f07b5011217b62d06093f47e2b87e9bf794410ef8fd9b0c7bc0ae",
-      "size": 53744
+      "sha256": "d1ccadb06e91430639606aedd2b2b63540c3f1d2ea2f46ae2bf225eb2184ca0f",
+      "size": 81297
     },
-    "directory": "0b7904bd023b999f4471c80e8ab14fbc2585b6c3b812d009e912dc315b804c5c",
+    "directory": "0332cdd05f461a3c1f7e9a9b14cf1820f054ad895752451893df74bc22569220",
     "locale": "ru",
     "voice": "barzana-2"
   },
   "mediaCollectionIdentity": {
     "collectionId": "cv-show:34c3d40c1c53cd320362aff9888c1727c977b9b3c7dcfb0d3cc73683bcf29af9",
-    "identity": "cv-show-authoring-media-collection-v1:sha256-8QDUykVHCqXXyNQHlUHiSE4yPn2cwFhVio+N9hl3gmU=",
-    "manifestHash": "cv-show-media-manifest-v1:sha256-gu6Xs6rx6/TzBx9Rz+lzZxx/ASslezsrh7JgEk48JD8=",
+    "identity": "cv-show-authoring-media-collection-v1:sha256-iMFhk0ASRJSaQlYJMQZP8yljdOO3Xm6xRPOjkJwP3eA=",
+    "manifestHash": "cv-show-media-manifest-v1:sha256-n1Ewl/E2rJeQVvIWZfbNz+MaxL/pJuHS0m1Okjv9/jY=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:f787409717bd28fb313b8d53e8fc77584861f2c418b2999ef60d5e9c23f8c558",
-  "predecessorReleaseId": "cv-show-audio-release-v1:46157cd91b89614d756695ac57df90b0d55cdd25868ebb20b118f0a79e28b10a",
+  "planId": "cv-show-audio-release-plan-v1:78e9fb2ac553fa79c7d99cd8d513150a47b4b35113dcfb92c0acdfaf23d2f387",
+  "predecessorReleaseId": "cv-show-audio-release-v1:effc43f3f64aa1c56699ecb455770b063dad95bf148c7b8539598e1165255945",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WJXMA0f9i4DwyS1CYrZ3FSAznMtAbhDA/lcaYjQVtNY=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-xkDP1BOrbemy4iknmMC7Vj4rwXfu/OsnY5Q7ZPGcfIc=",
@@ -13699,12 +14264,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-X+Wfo/EQHeCyDDhOp2FP/Ybn0BymFlU6us7712SNU/E=",
-    "revision": 62
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-jl0di8c+j3Txao/pmwEUIIAP+t6vh38RWPrVqJ1A/G0=",
+    "revision": 97
   },
-  "releaseId": "cv-show-audio-release-v1:cf2f306cfe1c92195040ff9879d73335cb97ad382ff3e5f1a57d2e57f3b8e736",
+  "releaseId": "cv-show-audio-release-v1:1e7c05f1334becee2858e3c6651cae664c20868e1a7ebe905b88271fc2d96500",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:2f47d74022258dc5c74f2c67449891d49492e53938f9513a45601713b48239b7"
+  "verificationHash": "cv-show-audio-release-verification-v1:d0b09cff5ac9f2477059d2a4b0fdfbeedca4f5a93992b2ed86832e47531b70d9"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );

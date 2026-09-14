@@ -76,6 +76,24 @@ Opus publisher. It does not infer either human decision:
 1. every newly synthesized exact WAV must be reviewed before Whisper can run;
 2. the exact aggregate release ID must be approved before staging or promotion.
 
+Review and release acceptance come in two explicit modes. The default `owner`
+mode keeps human listening review and owner approval. The opt-in `machine`
+mode (`review --mode machine`, `review-all-machine --mode machine --confirm
+machine`, and `approve-release --mode machine`) replaces the human decision
+with a deterministic ASR proof: the exact synthesized WAV is transcribed by the
+same Whisper service, the transcript is compared to the exact target narration
+with documented normalization (case, punctuation, whitespace, ё/е, digits vs
+number words, and the known brand spellings), and the clip is accepted only
+when WER ≤ 0.05, CER ≤ 0.03, coverage ≥ 0.98 pass and no critical mismatch
+(lost negation, different number, missing long token) is found. The decision is
+recorded in the pipeline review state as `mode: "machine-verified"` with the
+metrics, hashes, thresholds, and a private receipt path; the release approval
+records `acceptanceMode: "machine-verified"` and its phase is
+`machine-accepted`. `approve-release --mode machine` additionally requires
+every regenerated entry to carry a machine-verified review. A failed machine
+review rejects the clip exactly like an owner rejection; regenerate with
+`retry-synthesis` and review the new attempt.
+
 Create a private profile JSON outside Git. Its provenance fields must describe
 the desired voice and policies exactly; `readinessProfile` must equal `/readyz`
 from the model service for the entire run:

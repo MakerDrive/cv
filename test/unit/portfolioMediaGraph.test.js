@@ -97,6 +97,10 @@ const WEIGHTS = Object.freeze({
 });
 
 const EXPECTED_CATALOG_IDS = Object.freeze({
+  'adaptive-maximo-workbench': Object.freeze([
+    'media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc',
+    'media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs',
+  ]),
   megavisor: Object.freeze([
     'media/megavisor/youtube/c3cCmDqO04c',
     'media/megavisor/youtube/f1cB4X1wI50',

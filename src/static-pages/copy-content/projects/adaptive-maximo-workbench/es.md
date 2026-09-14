@@ -10,6 +10,12 @@ La superficie de órdenes mantiene visibles la cola, el estado, la prioridad y e
 :::article-block asset-context
 El contexto del activo y de la ubicación permanece vinculado a la orden seleccionada, de modo que la persona y el agente consultan la misma información actual.
 
+:::article-block agentic-eam-demo
+Agentic EAM Demo 1 muestra cómo el agente construye un espacio de trabajo para una tarea concreta y después explica la interfaz creada.
+
+:::article-block xr-eam-example
+XR EAM Example lleva la misma idea a una interfaz espacial, donde un objeto tridimensional vinculado a la tarea se puede tomar, girar e inspeccionar.
+
 :::article-block safe-actions
 La interfaz declara las acciones disponibles en el estado actual. Las operaciones capaces de modificar un sistema externo no están disponibles en este demo público.
 

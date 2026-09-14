@@ -2,6 +2,10 @@ const MEDIA_FRAGMENT_PREFIX = 'media-';
 const ARTICLE_BLOCK_MARKER = /^:::article-block ([a-z0-9][a-z0-9-]*)$/;
 
 export const PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS = Object.freeze({
+  'adaptive-maximo-workbench': Object.freeze({
+    'media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc': 'agentic-eam-demo',
+    'media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs': 'xr-eam-example',
+  }),
   megavisor: Object.freeze({
     'media/megavisor/youtube/c3cCmDqO04c': 'lead',
     'media/megavisor/youtube/f1cB4X1wI50': 'photopizza-origin',

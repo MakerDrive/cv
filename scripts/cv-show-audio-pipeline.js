@@ -25,6 +25,7 @@ const PHASES = new Set([
   'entries-verified',
   'release-verified',
   'human-approved',
+  'machine-accepted',
   'staged',
   'promoted',
 ]);
@@ -973,12 +974,18 @@ export function createCvShowAudioReleasePipeline(input = {}) {
     };
 
     let approve = async (...args) => {
-      if (args.length !== 1 || !exactKeys(args[0], ['ownerToken', 'approved'])) {
+      let validShape = exactKeys(args[0], ['ownerToken', 'approved'])
+        || exactKeys(args[0], ['ownerToken', 'approved', 'acceptanceMode']);
+      if (args.length !== 1 || !validShape) {
         fail('CV_SHOW_AUDIO_RELEASE_INVALID', 'Approval needs an owner and exact decision');
       }
       let decision = args[0];
       if (typeof decision.approved !== 'boolean') {
         fail('CV_SHOW_AUDIO_RELEASE_INVALID', 'CV Show audio release approval decision is invalid');
+      }
+      let acceptanceMode = decision.acceptanceMode || 'owner';
+      if (!['owner', 'machine-verified'].includes(acceptanceMode)) {
+        fail('CV_SHOW_AUDIO_RELEASE_INVALID', 'CV Show audio release acceptance mode is invalid');
       }
       return withLock(run, decision.ownerToken, async () => {
         let context = await load(run, plan);
@@ -992,6 +999,7 @@ export function createCvShowAudioReleasePipeline(input = {}) {
         let approvalProjection = {
           schemaVersion: APPROVAL_SCHEMA,
           approved: decision.approved,
+          acceptanceMode,
           releaseId: release.releaseId,
           artifactTreeHash: release.artifactTreeHash,
           verificationHash: release.verificationHash,
@@ -1002,7 +1010,9 @@ export function createCvShowAudioReleasePipeline(input = {}) {
         };
         context = await replace(run, context, {
           ...context.state,
-          phase: decision.approved ? 'human-approved' : 'release-verified',
+          phase: decision.approved
+            ? (acceptanceMode === 'machine-verified' ? 'machine-accepted' : 'human-approved')
+            : 'release-verified',
           approval,
         });
         return publicState(context.state);
@@ -1016,12 +1026,15 @@ export function createCvShowAudioReleasePipeline(input = {}) {
         if (context.state.approval?.approved !== true) {
           fail('CV_SHOW_AUDIO_RELEASE_APPROVAL_REQUIRED', 'Approve the verified release before staging');
         }
+        let approvedFrom = context.state.approval.acceptanceMode === 'machine-verified'
+          ? 'machine-accepted'
+          : 'human-approved';
         return externalTransition({
           run,
           plan,
           context,
           name: 'stage',
-          fromPhase: 'human-approved',
+          fromPhase: approvedFrom,
           toPhase: 'staged',
           callback: stageRelease,
         });

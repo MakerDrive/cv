@@ -103,6 +103,7 @@ import {
 } from '../../src/static-pages/data/portfolioStructuredLayout.js';
 
 const EXPECTED_MEDIA_COUNTS = Object.freeze({
+  'projects/adaptive-maximo-workbench': 2,
   'projects/agent-portal': 1,
   'projects/autobox-v1': 9,
   'projects/boothbot': 1,
@@ -156,7 +157,7 @@ test('every curated media descriptor belongs to exactly one owning article group
   let groups = createPortfolioStructuredMediaGroups(PORTFOLIO_MEDIA_CATALOG);
   let memberships = new Map();
 
-  assert.equal(PORTFOLIO_MEDIA_CATALOG.length, 26);
+  assert.equal(PORTFOLIO_MEDIA_CATALOG.length, 28);
   assert.deepEqual(
     Object.fromEntries(
       Object.entries(groups).map(([ownerId, nodeIds]) => [ownerId, nodeIds.length - 1])
@@ -300,7 +301,7 @@ test('structured layout options retain article ownership for crystal and grouped
 
   assert.equal(auto.algorithm, 'auto');
   assert.deepEqual(auto.groups.biography, [PORTFOLIO_STRUCTURED_LAYOUT_ROOT_ID]);
-  assert.equal(auto.groups.projects.filter((id) => id.startsWith('media/')).length, 26);
+  assert.equal(auto.groups.projects.filter((id) => id.startsWith('media/')).length, 28);
   assert.equal(new Set(auto.groups.projects).size, auto.groups.projects.length);
   assert.ok(auto.groups.projects.includes('pulse/agent-portal'));
   assert.ok(auto.groups.projects.includes('pulse/two-project-update'));

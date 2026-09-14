@@ -123,6 +123,26 @@ function requireObject(value, expected, field) {
   return value;
 }
 
+function exactKeysWithOptional(value, required, optional) {
+  if (!isPlainObject(value)) return false;
+  let keys = new Set(Object.keys(value));
+  for (let key of required) if (!keys.has(key)) return false;
+  for (let key of keys) {
+    if (!required.includes(key) && !optional.includes(key)) return false;
+  }
+  return true;
+}
+
+function requireObjectOptional(value, required, optional, field) {
+  if (!exactKeysWithOptional(value, required, optional)) {
+    fail(
+      'CV_SHOW_AUDIO_PIPELINE_INVALID',
+      `CV Show audio pipeline ${field} has unexpected or missing fields`,
+    );
+  }
+  return value;
+}
+
 function requireString(value, field, { allowEmpty = false } = {}) {
   if (
     typeof value !== 'string'
@@ -496,13 +516,60 @@ function validateSynthesis(value) {
 
 function validateReview(value) {
   if (value === null) return;
-  let source = requireObject(
+  let source = requireObjectOptional(
     value,
     ['approved', 'wavHash', 'synthesisAttemptHash'],
+    ['mode', 'machineVerification'],
     'clip review',
   );
   if (typeof source.approved !== 'boolean') {
     fail('CV_SHOW_AUDIO_PIPELINE_INVALID', 'CV Show audio pipeline clip review decision is invalid');
+  }
+  if (source.mode !== undefined && !['owner', 'machine-verified'].includes(source.mode)) {
+    fail('CV_SHOW_AUDIO_PIPELINE_INVALID', 'CV Show audio pipeline clip review mode is invalid');
+  }
+  if (source.mode === 'machine-verified') {
+    let verification = requireObject(
+      source.machineVerification,
+      [
+        'targetSpeechHash',
+        'attemptHash',
+        'transcriptHash',
+        'metrics',
+        'thresholds',
+        'critical',
+        'verifiedAt',
+        'receiptPath',
+      ],
+      'clip machine verification',
+    );
+    requireHash(verification.targetSpeechHash, 'machine verification target speech hash');
+    requireHash(verification.attemptHash, 'machine verification attempt hash');
+    requireHash(verification.transcriptHash, 'machine verification transcript hash');
+    let metrics = requireObject(
+      verification.metrics,
+      ['wer', 'cer', 'coverage'],
+      'clip machine verification metrics',
+    );
+    for (let key of ['wer', 'cer', 'coverage']) {
+      if (typeof metrics[key] !== 'number' || !Number.isFinite(metrics[key])) {
+        fail('CV_SHOW_AUDIO_PIPELINE_INVALID', `CV Show audio pipeline machine metric ${key} is invalid`);
+      }
+    }
+    let thresholds = requireObject(
+      verification.thresholds,
+      ['werMax', 'cerMax', 'coverageMin'],
+      'clip machine verification thresholds',
+    );
+    for (let key of ['werMax', 'cerMax', 'coverageMin']) {
+      if (typeof thresholds[key] !== 'number' || !Number.isFinite(thresholds[key])) {
+        fail('CV_SHOW_AUDIO_PIPELINE_INVALID', `CV Show audio pipeline machine threshold ${key} is invalid`);
+      }
+    }
+    if (typeof verification.critical !== 'boolean' || typeof verification.verifiedAt !== 'string') {
+      fail('CV_SHOW_AUDIO_PIPELINE_INVALID', 'CV Show audio pipeline machine verification verdict is invalid');
+    }
+    requireString(verification.receiptPath, 'machine verification receipt path');
   }
   requireHash(source.wavHash, 'review WAV hash');
   requireHash(source.synthesisAttemptHash, 'review synthesis attempt hash');
@@ -1726,13 +1793,18 @@ export function createCvShowAudioPipelineRunner(input = {}) {
         fail('CV_SHOW_AUDIO_PIPELINE_INVALID', 'CV Show audio pipeline review needs one input');
       }
       let review = cloneJson(args[0], 'clip review input');
-      requireObject(
+      requireObjectOptional(
         review,
         ['ownerToken', 'approved', 'wavHash', 'synthesisAttemptHash'],
+        ['mode', 'machineVerification'],
         'clip review input',
       );
       if (typeof review.approved !== 'boolean') {
         fail('CV_SHOW_AUDIO_PIPELINE_INVALID', 'CV Show audio pipeline review decision is invalid');
+      }
+      let mode = review.mode || 'owner';
+      if (!['owner', 'machine-verified'].includes(mode)) {
+        fail('CV_SHOW_AUDIO_PIPELINE_INVALID', 'CV Show audio pipeline review mode is invalid');
       }
       requireHash(review.wavHash, 'review WAV hash');
       requireHash(review.synthesisAttemptHash, 'review synthesis attempt hash');
@@ -1757,7 +1829,10 @@ export function createCvShowAudioPipelineRunner(input = {}) {
           approved: review.approved,
           wavHash: review.wavHash,
           synthesisAttemptHash: review.synthesisAttemptHash,
+          mode,
+          ...(review.machineVerification ? { machineVerification: review.machineVerification } : {}),
         };
+        validateReview(decision);
         let nextState = review.approved
           ? {
               ...context.state,
@@ -1819,10 +1894,10 @@ export function createCvShowAudioPipelineRunner(input = {}) {
       let [ownerToken] = args;
       return withOwnerLock(run, ownerToken, async () => {
         let context = await loadContext(run, plan);
-        if (context.state.phase !== 'blocked') {
+        if (!['blocked', 'clip-rejected'].includes(context.state.phase)) {
           fail(
             'CV_SHOW_AUDIO_PIPELINE_RETRY_NOT_PERMITTED',
-            'CV Show audio pipeline synthesis retry requires a blocked entry',
+            'CV Show audio pipeline synthesis retry requires a blocked or rejected entry',
           );
         }
         let next = await replaceState(run, plan, context, createInitialState(plan));

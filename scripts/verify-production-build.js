@@ -418,7 +418,7 @@ export async function verifyPortfolioGraphSnapshots(distDir) {
           /<script\b|<foreignObject\b|\son[a-z]+\s*=|(?:href|src)\s*=\s*["']https?:/i.test(svg)
           || /<image\b|<text\b/i.test(svg)
           || !/<svg\b[^>]*aria-hidden="true"/i.test(svg)
-          || pathCount !== 180
+          || pathCount !== 182
         ) {
           throw new Error(`Portfolio graph connections-only SVG is invalid: ${svgName}.`);
         }
@@ -427,8 +427,8 @@ export async function verifyPortfolioGraphSnapshots(distDir) {
         if (!binding.valid) {
           throw new Error(`Portfolio graph route snapshot is invalid: ${snapshotName}: ${binding.reason}.`);
         }
-        if (binding.snapshot.nodeRects.length !== 119 || binding.snapshot.routes.length !== 180) {
-          throw new Error(`Portfolio graph route snapshot must contain 119 nodes and 180 routes: ${snapshotName}.`);
+        if (binding.snapshot.nodeRects.length !== 121 || binding.snapshot.routes.length !== 182) {
+          throw new Error(`Portfolio graph route snapshot must contain 121 nodes and 182 routes: ${snapshotName}.`);
         }
       }
     }

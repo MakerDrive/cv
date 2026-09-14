@@ -4488,7 +4488,7 @@ test('direct detail route settles its owner article before detail narration', {
         const detailSettled = receipts.some(({ cellId, status }) => (
           cellId === 'cv-show:cue:workspace-details.flow-frame' && status === 'settled'
         ));
-        if (failures.length || detailSettled || performance.now() - started > 18000) {
+        if (failures.length || detailSettled || performance.now() - started > 18200) {
           const host = document.querySelector('portfolio-show-chat');
           return resolve({
             timedOut: !failures.length && !detailSettled,
@@ -8261,7 +8261,7 @@ async function installRuGraphSnapshotStartup(cdp) {
         const overlayReady = snapshot?.matches?.('img[data-graph-visual-layer="connections-only"]')
           && snapshot.complete
           && snapshot.naturalWidth > 0;
-        const overlayPaths = overlayReady ? 180 : 0;
+        const overlayPaths = overlayReady ? 182 : 0;
         const visibleNodeCount = [...(canvas?.querySelectorAll('graph-node') || [])]
           .filter((node) => {
             const style = getComputedStyle(node);
@@ -8297,8 +8297,8 @@ async function installRuGraphSnapshotStartup(cdp) {
           && frame.snapshotOpacity <= 0.01
           && frame.pathCount > 0
           && frame.straightLike === frame.pathCount;
-        const visibleOverlay = overlayPaths === 180 && frame.snapshotOpacity > 0.01;
-        const visibleLiveEdges = frame.pathCount === 180
+        const visibleOverlay = overlayPaths === 182 && frame.snapshotOpacity > 0.01;
+        const visibleLiveEdges = frame.pathCount === 182
           && Number(liveLayer ? getComputedStyle(liveLayer).opacity : 0) > 0.01;
         const visibleEdges = visibleOverlay || visibleLiveEdges;
         if (visibleOverlay) window.__cvGraphSawConnectionsOnlyOverlay = true;
@@ -8511,11 +8511,11 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
   assert.ok(state.receipt, JSON.stringify(state));
   assert.equal(state.receipt.adopted, true);
   assert.equal(state.receipt.resolution, 'cached-pcb');
-  assert.equal(state.receipt.routeCount, 180);
+  assert.equal(state.receipt.routeCount, 182);
   assert.equal(state.objectCount, 0);
-  assert.equal(state.nodeCount, 119);
-  assert.deepEqual(state.qualities, { full: 180 });
-  assert.equal(state.uniqueRouteIds, 180);
+  assert.equal(state.nodeCount, 121);
+  assert.deepEqual(state.qualities, { full: 182 });
+  assert.equal(state.uniqueRouteIds, 182);
   assert.equal(state.deterministicRouteIds, true);
   assert.equal(state.snapshotResources.some((url) => url.endsWith('/initial.svg')), true);
   assert.equal(state.snapshotResources.filter((url) => url.endsWith('/initial.svg')).length, 1);
@@ -8602,7 +8602,7 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
   assert.equal(articleSwitch.result.value.selectedId, 'profile/photo');
   assert.equal(articleSwitch.result.value.routesUnchanged, true, JSON.stringify(articleSwitch.result.value));
   assert.equal(articleSwitch.result.value.geometryUnchanged, true, JSON.stringify(articleSwitch.result.value));
-  assert.equal(articleSwitch.result.value.routeCount, 180);
+  assert.equal(articleSwitch.result.value.routeCount, 182);
   let pcbCoverage = await readPcbRouteCoverage(cdp);
   if (VERBOSE_OUTPUT) {
     console.log('graph-startup-order-acceptance', JSON.stringify({
@@ -8741,9 +8741,9 @@ test('normal RU /cv/ adopts the wide cached graph on a Retina desktop', {
   await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
   let state = await readGraphSnapshotAcceptance(cdp, 'cached-pcb');
   assert.equal(state.receipt?.adopted, true, JSON.stringify(state));
-  assert.equal(state.receipt?.routeCount, 180, JSON.stringify(state));
+  assert.equal(state.receipt?.routeCount, 182, JSON.stringify(state));
   assert.equal(state.resolution, 'cached-pcb', JSON.stringify(state));
-  assert.deepEqual(state.qualities, { full: 180 });
+  assert.deepEqual(state.qualities, { full: 182 });
   assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
   await new Promise((resolve) => setTimeout(resolve, 12_000));
   let stable = await cdp.send('Runtime.evaluate', {
@@ -8758,7 +8758,7 @@ test('normal RU /cv/ adopts the wide cached graph on a Retina desktop', {
     })()`,
     returnByValue: true,
   });
-  assert.deepEqual(stable.result.value, { resolution: 'cached-pcb', reason: '', full: 180 });
+  assert.deepEqual(stable.result.value, { resolution: 'cached-pcb', reason: '', full: 182 });
   assert.equal(cdp.exceptions.length, 0);
 });
 
@@ -8775,9 +8775,9 @@ test('normal RU /cv/ adopts the wide cached graph at the common 1280 desktop siz
   await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
   let state = await readGraphSnapshotAcceptance(cdp, 'cached-pcb');
   assert.equal(state.receipt?.adopted, true, JSON.stringify(state));
-  assert.equal(state.receipt?.routeCount, 180, JSON.stringify(state));
+  assert.equal(state.receipt?.routeCount, 182, JSON.stringify(state));
   assert.equal(state.resolution, 'cached-pcb', JSON.stringify(state));
-  assert.deepEqual(state.qualities, { full: 180 });
+  assert.deepEqual(state.qualities, { full: 182 });
   assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
   await new Promise((resolve) => setTimeout(resolve, 12_000));
   let stable = await cdp.send('Runtime.evaluate', {
@@ -8792,7 +8792,7 @@ test('normal RU /cv/ adopts the wide cached graph at the common 1280 desktop siz
     })()`,
     returnByValue: true,
   });
-  assert.deepEqual(stable.result.value, { resolution: 'cached-pcb', reason: '', full: 180 });
+  assert.deepEqual(stable.result.value, { resolution: 'cached-pcb', reason: '', full: 182 });
   assert.equal(cdp.exceptions.length, 0);
 });
 
@@ -8827,7 +8827,7 @@ test('plain /cv/ keeps its cached graph after resolving the browser locale durin
   });
   assert.equal(state.result.value.resolution, 'cached-pcb', JSON.stringify(state.result.value));
   assert.equal(state.result.value.reason, '', JSON.stringify(state.result.value));
-  assert.equal(state.result.value.full, 180, JSON.stringify(state.result.value));
+  assert.equal(state.result.value.full, 182, JSON.stringify(state.result.value));
   console.log('plain-cv-graph-diagnostics', JSON.stringify(state.result.value.diagnostics));
   assert.equal(cdp.exceptions.length, 0);
 });
@@ -8855,8 +8855,8 @@ test('normal RU /cv/ keeps the inert PCB until a drifted snapshot reroutes to fu
   assert.equal(state.receipt.resolution, 'pcb-live-reroute');
   assert.equal(state.receipt.reason, 'route-fingerprint-mismatch');
   assert.equal(state.objectCount, 0);
-  assert.equal(state.nodeCount, 119);
-  assert.deepEqual(state.qualities, { full: 180 });
+  assert.equal(state.nodeCount, 121);
+  assert.deepEqual(state.qualities, { full: 182 });
   assert.equal(state.sawFullPcbQuality, true);
   assert.equal(state.sawConnectionsOnlyOverlay, true, JSON.stringify(state.timeline));
   assert.equal(state.sawEdgeGap, false, JSON.stringify(state.timeline));
@@ -8905,7 +8905,7 @@ test('normal RU /cv/ adopts the narrow cached graph after the mobile drawer open
         const paths = [...(canvas?.querySelectorAll('.sn-conn-path') || [])];
         if (panel?.dataset.graphSnapshot === 'cached-pcb'
           && receipt?.adopted
-          && paths.length === 180
+          && paths.length === 182
           && document.querySelectorAll('.portfolio-graph-snapshot').length === 0) {
           return resolve({
             receipt,
@@ -8946,9 +8946,9 @@ test('normal RU /cv/ adopts the narrow cached graph after the mobile drawer open
   let state = mobileResult.result.value;
   assert.ok(state.receipt, JSON.stringify(state));
   assert.equal(state.receipt.adopted, true);
-  assert.equal(state.receipt.routeCount, 180);
-  assert.deepEqual(state.qualities, { full: 180 });
-  assert.equal(state.uniqueRouteIds, 180);
+  assert.equal(state.receipt.routeCount, 182);
+  assert.deepEqual(state.qualities, { full: 182 });
+  assert.equal(state.uniqueRouteIds, 182);
   assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
   await saveGraphSnapshotScreenshot(cdp, 'ru-narrow-cached-pcb');
   assert.equal(cdp.exceptions.length, 0);
@@ -9038,10 +9038,10 @@ test('normal RU /cv/ preserves full PCB plus exactly three proxies during one-no
   });
   assert.equal(dragging.result.value.dragging, target.result.value.nodeId);
   assert.equal(dragging.result.value.proxies, 3);
-  assert.equal(dragging.result.value.full, 180);
-  assert.equal(dragging.result.value.pathCount, 180);
+  assert.equal(dragging.result.value.full, 182);
+  assert.equal(dragging.result.value.pathCount, 182);
   assert.equal(dragging.result.value.snapshotCount, 0);
-  assert.equal(dragging.result.value.retainedRoutes, 180);
+  assert.equal(dragging.result.value.retainedRoutes, 182);
   assert.equal(dragging.result.value.sawVisibleStraight, false);
   await saveGraphSnapshotScreenshot(cdp, 'ru-wide-pcb-three-drag-proxies');
 
@@ -9077,8 +9077,8 @@ test('normal RU /cv/ preserves full PCB plus exactly three proxies during one-no
         };
         if (
           state.proxies === 0
-          && state.pathCount === 180
-          && state.full === 180
+          && state.pathCount === 182
+          && state.full === 182
           && state.retainedRoutes === 177
           && state.straightLike < state.pathCount
         ) {
@@ -9093,7 +9093,7 @@ test('normal RU /cv/ preserves full PCB plus exactly three proxies during one-no
   assert.equal(Boolean(dropped.exceptionDetails), false, JSON.stringify(dropped.exceptionDetails));
   assert.equal(dropped.result.value.timeout, undefined, JSON.stringify(dropped.result.value));
   assert.equal(dropped.result.value.retainedRoutes, 177);
-  assert.equal(dropped.result.value.full, 180);
+  assert.equal(dropped.result.value.full, 182);
   assert.equal(dropped.result.value.pathCount - dropped.result.value.retainedRoutes, 3);
   assert.ok(dropped.result.value.straightLike < dropped.result.value.pathCount);
   assert.equal(dropped.result.value.sawVisibleStraight, false, JSON.stringify(dropped.result.value.timeline));

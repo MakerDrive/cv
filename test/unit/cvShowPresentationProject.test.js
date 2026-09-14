@@ -488,9 +488,9 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
     EXPECTED_DETAIL_PARENTS,
   );
   assert.equal(setupCells.length, 30);
-  assert.equal(groups.length, 106);
-  assert.equal(cueCells.length, 30 + (106 * 2));
-  assert.equal(audioClipCells.length, 136);
+  assert.equal(groups.length, 112);
+  assert.equal(cueCells.length, 30 + (112 * 2));
+  assert.equal(audioClipCells.length, 142);
   assert.equal(project.assets.length, 30);
   assert.deepEqual(
     new Set(audioClipCells.map(({ turnId }) => turnId)),
@@ -508,11 +508,11 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v2:sha256-X+Wfo/EQHeCyDDhOp2FP/Ybn0BymFlU6us7712SNU/E=',
+    'workspace-presentation-authoring-project-v2:sha256-jl0di8c+j3Txao/pmwEUIIAP+t6vh38RWPrVqJ1A/G0=',
   );
   assert.equal(
     timeline.hash,
-    'presentation-timeline-v3:sha256-0CYfy1qYoj2AKG0KzHDf7keEvOfyLj8vlrfl7dlO2uU=',
+    'presentation-timeline-v3:sha256-GvDhBFvOtXBBZM1sJpcjPjvoRSDG1Yg85NL6gpETZnY=',
   );
 
   const manifestSource = await readFile(
@@ -541,35 +541,34 @@ test('CV Show master owns literal anchors, authored order, and portable refineme
   const project = CV_SHOW_PRESENTATION_PROJECT;
   const timeline = CV_SHOW_PRESENTATION_TIMELINE;
   const requiredAnchors = [
-    'инженер',
-    'С середины две тысячи двадцать шестого года',
-    'Мы решили открыть управляющий контур',
-    'Workspace соединяет',
-    'Проект появился внутри Мегавизор',
-    'сегментацию аудитории',
-    'Диджитал Твин',
-    'Андроид-устройства',
-    'предпросмотр и рендер',
-    'Workspace использует',
-    'Воркспейс связывает',
-    'Эй-пи-ай',
-    'Готовый JSON-сценарий',
-    'В Эрмитаже я сканировал',
-    'бенинской бронзы',
-    'версию для Ардуино',
-    'я сам продолжил',
+    'Сейчас, в две тысячи двадцать шестом году',
+    'Чем сложнее система',
+    'Часть управляющего контура мы открыли',
+    'Workspace использует этот каталог',
+    'Так внутри Megavisor появилась PhotoPizza',
+    'сегментацию аудитории, управление кампаниями',
+    'локальный Digital Twin',
+    'Андроид устройства выполняли',
+    'предпросмотр и рендер собраны',
+    'Workspace связывает визуальную и исполнительную части',
+    'Эй пи ай и база PostgreSQL',
+    'подготовленный джейсон сценарий',
+    'сканирует настоящий музейный объект в Эрмитаже',
+    'характер поверхности бенинской бронзы',
+    'слайдером PhotoSnail и моторизированной панорамной головкой',
+    'продолжил развивать управляющее программное обеспечение',
   ];
   const anchors = timeline.turns.flatMap(({ cues }) => cues
     .map(({ at }) => at.anchor === 'speech' ? at.quote : null)
     .filter(Boolean));
   for (let value of requiredAnchors) assert.ok(anchors.includes(value), value);
-  assert.equal(anchors.filter((value) => value === 'Диджитал Твин').length, 4);
+  assert.equal(anchors.filter((value) => value === 'локальный Digital Twin').length, 4);
   assert.equal(
     Object.keys(project.script.metadata.cvShow.directives)
       .map((cellId) => project.cells.find((cell) => cell.id === cellId))
       .filter((cell) => cell?.timing.at.anchor === 'speech')
       .map((cell) => cell.timing.at.quote)
-      .filter((value) => value === 'Диджитал Твин').length,
+      .filter((value) => value === 'локальный Digital Twin').length,
     2,
   );
 
@@ -597,8 +596,8 @@ test('CV Show master owns literal anchors, authored order, and portable refineme
     'mobile-smm-details.schedule',
     'mobile-smm-details.queue',
     'mobile-smm-details.ui-change',
-    'mobile-smm-details.approval',
     'mobile-smm-details.draft',
+    'mobile-smm-details.approval',
   ]);
   assert.deepEqual(orderFor('f360-details'), [
     'f360-details.result-one', 'f360-details.period',
@@ -694,7 +693,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 3_300],
   ]);
 
-  assert.equal(attentionCells.length, 136);
+  assert.equal(attentionCells.length, 142);
   assert.equal(new Set(attentionCells.map(({ turnId }) => turnId)).size, 30);
   assert.deepEqual(
     Object.fromEntries(Object.entries(Object.groupBy(
@@ -1017,8 +1016,8 @@ test('the structural fixture joins all 30 Project entries without media authorit
 
   assert.equal(tupleCoverage.length, 30);
   assert.equal(new Set(tupleCoverage.map(({ projectHash }) => projectHash)).size, 30);
-  assert.equal(tupleCoverage.reduce((total, item) => total + item.speechGroupCount, 0), 106);
-  assert.deepEqual(anchorDispositions, { exact: 242 });
+  assert.equal(tupleCoverage.reduce((total, item) => total + item.speechGroupCount, 0), 112);
+  assert.deepEqual(anchorDispositions, { exact: 254 });
 });
 
 test('runtime admission joins Project master ancestry without treating delivery bytes as WAV', () => {
@@ -1269,7 +1268,7 @@ test('positioning introduces experience once with the authored marker gesture', 
     id: 'positioning.tenure-marker',
     type: 'marker',
     target: 'profile.experience.15-plus',
-    quote: 'инженер',
+    quote: 'Сейчас, в две тысячи двадцать шестом году',
   }]);
 });
 
@@ -1278,7 +1277,7 @@ test('Short media choreography frames video and 360 blocks while preserving the 
     sceneDirectives
   ));
   const youtube = directives.filter(({ target }) => /\/youtube\//u.test(String(target || '')));
-  assert.equal(youtube.length, 16);
+  assert.equal(youtube.length, 17);
   for (const directive of youtube) {
     assert.equal(directive.type, 'frame', directive.id);
     assert.equal(directive.mode, undefined, directive.id);
@@ -1419,31 +1418,31 @@ test('Short Symbiote UI and Agent Portal expose the required semantic link/actio
     type: 'frame',
     target: 'portfolio.show-stage',
     shape: undefined,
-    speechQuote: 'плеер презентации',
+      speechQuote: 'То, что происходит прямо сейчас',
   });
   assert.deepEqual(gesture('symbiote-ui.github-link'), {
     type: 'frame',
     target: 'project-link.symbiote-ui.github',
     shape: undefined,
-    speechQuote: 'Гитхаб',
+    speechQuote: 'Интерфейс переводит внимание',
   });
   assert.deepEqual(gesture('symbiote-ui.details-pointer'), {
     type: 'marker',
     target: 'chat.action.symbiote-ui.details',
     shape: 'arrow',
-    speechQuote: 'подробный разбор проекта',
+    speechQuote: 'объясняет сам себя',
   });
   assert.deepEqual(gesture('agent-portal.github-link'), {
     type: 'frame',
     target: 'project-link.agent-portal.github',
     shape: undefined,
-    speechQuote: 'Гитхаб',
+    speechQuote: 'А внутри Agent Portal есть два важных инструмента',
   });
   assert.deepEqual(gesture('agent-portal.demo-link'), {
     type: 'marker',
     target: 'project-link.agent-portal.demo',
     shape: 'arrow',
-    speechQuote: 'интерактивном демо',
+    speechQuote: 'Project Graph отвечает за структуру',
   });
 });
 
@@ -1460,7 +1459,7 @@ test('Show runtime policy keeps video blocks static in short and detail modes', 
   const passiveVideoDirectives = mediaDirectives.filter(({ target }) => (
     target.includes('/youtube/') || target.endsWith('/ims/spinner')
   ));
-  assert.equal(passiveVideoDirectives.length, 17);
+  assert.equal(passiveVideoDirectives.length, 18);
   assert.deepEqual(
     [...new Set(passiveVideoDirectives.map(({ type }) => type))],
     ['frame'],
