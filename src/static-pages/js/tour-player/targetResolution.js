@@ -36,6 +36,26 @@ export function isPortfolioMapTarget(targetId) {
   return String(targetId || '').startsWith(PORTFOLIO_MAP_TARGET_PREFIX);
 }
 
+/**
+ * Ensures a cross-project media cue renders the project page that mounts its
+ * media slot. Cross-project frame/scroll targets (for example the PhotoPizza
+ * cue at the Megavisor promo) cannot resolve against the current viewer; the
+ * owning project is selected here so the media host is mounted when the
+ * action lifecycle resolves the target.
+ */
+export function ensureCvShowMediaProject(runtime, targetId) {
+  const match = String(targetId || '').match(
+    /^media\/([a-z0-9][a-z0-9-]*)\//u,
+  );
+  if (!match) return null;
+  const projectId = `projects/${match[1]}`;
+  if (!runtime?.entries?.has?.(projectId)) return null;
+  if (runtime.selectedId === projectId) return Object.freeze({ projectId, changed: false });
+  const selected = runtime.select?.(projectId, { focus: true, updateUrl: false });
+  if (selected === false) return null;
+  return Object.freeze({ projectId, changed: true });
+}
+
 /** Ensures a direct Details entry renders the article that owns its semantic target. */
 export function ensureCvShowArticleProject(runtime, targetId) {
   const match = String(targetId || '').match(

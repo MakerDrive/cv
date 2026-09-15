@@ -1630,7 +1630,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "Workspace связывает визуальную и исполнительную части"
         },
-        "gestureDurationMs": 1200,
+        "gestureDurationMs": 2000,
         "leadMs": 1500,
         "settleBy": "none",
         "until": null
@@ -3100,7 +3100,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "quote": "агент мог остановить процесс"
         },
         "gestureDurationMs": 800,
-        "leadMs": 3800,
+        "leadMs": 4500,
         "settleBy": "none",
         "until": null
       },
@@ -3133,8 +3133,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "агент мог остановить процесс"
         },
-        "gestureDurationMs": 2500,
-        "leadMs": 2800,
+        "gestureDurationMs": 3200,
+        "leadMs": 3500,
         "settleBy": "none",
         "until": null
       },
@@ -12204,7 +12204,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 97,
+  "revision": 102,
   "schemaVersion": "workspace-presentation-authoring-project-v2",
   "script": {
     "grounding": {
@@ -13641,9 +13641,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-UVWTzVKYkA/LSou8+P7AMlUpiDS2ILkdalRA1NcsrSs=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-PFN/UJD+Uzg6TKF1lswuVepH8mLJjeiSm2TNLcrRVbE=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-zPCnOmVWtP/N/5+Nv4RZYcM8oRcXs78N1ZaC/VGd+g8=",
         "entryId": "symbiote-engine",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-d6KQYEuEd0/9vyU8GQ3L0bm34S8SkPG3NrH1kxM/h/0=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-H4+6IPgi14i1ZCD1sYlhvcD3Mwhz5cNDmmmmpjk+xIA=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-dRQLaIUeoXkmV0EEH0g0D8MXc8oDRoUlm4seBmFI/q4=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-engine",
@@ -13774,9 +13774,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-CLqSpctt2GZ4JXv4w2UuSPTpQTn2hU3nUwXlP5lQjRg=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-iKMGdnfgoHgQZ0RN09CM8IZcav9LKBNJNvDootrUzaE=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-8i/HpJrVig+XzP0sIcKRiMx3ahNurfjL8JMYH1riVJs=",
         "entryId": "mobile-smm-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-LQIJ1Dq93QIJrfL2I9kDqE4K3XuTPAnyjrupH0aqTAY=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-w24w2Zsr21UImM0i1yGIkFDUO3WK1hI7kufIH0xOLj8=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-P2WmeWKJfAQnXps50oD3UDAWv75HHICC0MSl5PMwnxw=",
         "sourceCellIds": [
           "cv-show:narration:mobile-smm-platform",
@@ -14195,7 +14195,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-pl5FPD9FH9I3QS/DaGDZ0lLLQAIXmc9vmG669JXLmMQ="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-0lZpRmAdR99rCgHc441oRp3zhf9mWkdbb0zDnDwuHu4=",
+    "hash": "cv-show-audio-provenance-v1:sha256-5bDySHZPtCu4vZWaOu/75S695cxjncb4s9HN50UGsZU=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
@@ -14255,8 +14255,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "manifestHash": "cv-show-media-manifest-v1:sha256-n1Ewl/E2rJeQVvIWZfbNz+MaxL/pJuHS0m1Okjv9/jY=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:78e9fb2ac553fa79c7d99cd8d513150a47b4b35113dcfb92c0acdfaf23d2f387",
-  "predecessorReleaseId": "cv-show-audio-release-v1:effc43f3f64aa1c56699ecb455770b063dad95bf148c7b8539598e1165255945",
+  "planId": "cv-show-audio-release-plan-v1:a964fefd9dcef32c959394b406f07b067702a4ae439a3af002a81ae25024116c",
+  "predecessorReleaseId": "cv-show-audio-release-v1:c4ec6a0936c3d85eaf472426e9354c15b034598f6d70dfd9d68c871d6fc93243",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WJXMA0f9i4DwyS1CYrZ3FSAznMtAbhDA/lcaYjQVtNY=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-xkDP1BOrbemy4iknmMC7Vj4rwXfu/OsnY5Q7ZPGcfIc=",
@@ -14264,12 +14264,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-jl0di8c+j3Txao/pmwEUIIAP+t6vh38RWPrVqJ1A/G0=",
-    "revision": 97
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-UgeWlJZqI+hudIsZB8VLdlVhIqoI/IhYuGCWpgcMGR8=",
+    "revision": 102
   },
-  "releaseId": "cv-show-audio-release-v1:1e7c05f1334becee2858e3c6651cae664c20868e1a7ebe905b88271fc2d96500",
+  "releaseId": "cv-show-audio-release-v1:8f7b72dad7f958601a57a3c5bb59d9c0d35a1a93876f3474cbbe37b588730dd1",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:d0b09cff5ac9f2477059d2a4b0fdfbeedca4f5a93992b2ed86832e47531b70d9"
+  "verificationHash": "cv-show-audio-release-verification-v1:5a90c8b51f3defdbaa81faacede9cc4224842f04bd80f493d06aaed836630d47"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );

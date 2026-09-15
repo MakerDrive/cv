@@ -29,6 +29,7 @@ import {
   animateCvShowScrollIntoView,
   createCvShowTextMarkerTarget,
   ensureCvShowArticleProject,
+  ensureCvShowMediaProject,
   focusPortfolioMapTarget,
   isPortfolioMapTarget,
   isShowTargetReadyForAction,
@@ -467,6 +468,7 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
       };
     }
     ensureCvShowArticleProject(runtime, action?.target);
+    ensureCvShowMediaProject(runtime, action?.target);
     // Graph culling hides offscreen nodes. Focus the exact semantic node after
     // panel reveal/settlement and before requiring visible target geometry.
     focusPortfolioMapTarget(workspace, action?.target, {

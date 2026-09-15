@@ -88,6 +88,7 @@ import {
 import {
   animateCvShowScrollIntoView,
   ensureCvShowArticleProject,
+  ensureCvShowMediaProject,
   focusPortfolioMapTarget,
   isPortfolioMapTarget,
   isShowTargetReadyForAction,
@@ -681,6 +682,35 @@ test('direct detail targets open their owning project article before readiness',
   );
   assert.equal(ensureCvShowArticleProject(runtime, 'profile.contacts'), null);
   assert.equal(ensureCvShowArticleProject(runtime, 'article.unknown.block'), null);
+  assert.equal(selections.length, 1);
+});
+
+test('cross-project media cues select the project that owns the media slot', () => {
+  const selections = [];
+  const runtime = {
+    selectedId: 'projects/photopizza',
+    entries: new Map([['projects/megavisor', Object.freeze({})]]),
+    select(projectId, options) {
+      selections.push([projectId, options]);
+      this.selectedId = projectId;
+      return true;
+    },
+  };
+
+  assert.deepEqual(
+    ensureCvShowMediaProject(runtime, 'media/megavisor/youtube/c3cCmDqO04c'),
+    { projectId: 'projects/megavisor', changed: true },
+  );
+  assert.deepEqual(selections, [[
+    'projects/megavisor',
+    { focus: true, updateUrl: false },
+  ]]);
+  assert.deepEqual(
+    ensureCvShowMediaProject(runtime, 'media/megavisor/youtube/c3cCmDqO04c'),
+    { projectId: 'projects/megavisor', changed: false },
+  );
+  assert.equal(ensureCvShowMediaProject(runtime, 'article.photopizza.megavisor-origin'), null);
+  assert.equal(ensureCvShowMediaProject(runtime, 'media/unknown-project/youtube/abc'), null);
   assert.equal(selections.length, 1);
 });
 

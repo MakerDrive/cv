@@ -508,7 +508,7 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v2:sha256-jl0di8c+j3Txao/pmwEUIIAP+t6vh38RWPrVqJ1A/G0=',
+    'workspace-presentation-authoring-project-v2:sha256-UgeWlJZqI+hudIsZB8VLdlVhIqoI/IhYuGCWpgcMGR8=',
   );
   assert.equal(
     timeline.hash,
@@ -637,6 +637,8 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
   ]);
   const measuredRuntimeDurationOverrides = new Map([
     ['cv-show:cue:agent-portal.human-decision', 3_000],
+    ['cv-show:cue:symbiote-engine.workspace-join', 2_000],
+    ['cv-show:cue:mobile-smm.agent-update', 3_200],
     ['cv-show:cue:complexscan.boothbot-gallery', 1_800],
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 3_000],
     ['cv-show:cue:photopizza.origin', 1_600],
@@ -688,9 +690,11 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:agent-portal.human-decision', { leadMs: 1_500, overlapMs: 1_500 }],
     ['cv-show:cue:photopizza.origin', { leadMs: 1_050, overlapMs: 550 }],
     ['cv-show:cue:positioning.tenure-marker', { leadMs: 600, overlapMs: 1_900 }],
+    ['cv-show:cue:symbiote-engine.workspace-join', { leadMs: 1_500, overlapMs: 500 }],
   ]);
   const markerLeadOverrides = new Map([
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 3_300],
+    ['cv-show:cue:mobile-smm.agent-update', 3_500],
   ]);
 
   assert.equal(attentionCells.length, 142);
@@ -735,7 +739,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     assert.equal(cell.timing.gestureDurationMs, durationMs, `${cell.id}: hard budget`);
     if (!setup && action === 'annotation') {
       assert.equal(
-        durationMs === 2_500,
+        [2_500, 3_200].includes(durationMs),
         expandedRuntimeOvalMarkers.has(cell.id),
         `${cell.id}: measured expanded-marker budget class`,
       );
@@ -743,7 +747,13 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
         assert.equal(runtimeMarker, 'oval', `${cell.id}: expanded oval marker`);
       }
       if (speechOverlappingRuntimeActions.has(cell.id)) {
-        assert.equal(runtimeMarker, 'oval', `${cell.id}: speech-overlapping oval marker`);
+        // The engine marker legitimately keeps its underline shape: its long
+        // arc over the whole "Workspace связывает" phrase needs a 2000ms
+        // gesture budget, so the cue overlaps trailing speech explicitly.
+        const shape = cell.id === 'cv-show:cue:symbiote-engine.workspace-join'
+          ? 'underline'
+          : 'oval';
+        assert.equal(runtimeMarker, shape, `${cell.id}: speech-overlapping marker`);
       } else {
         const expectedMarkerLeadMs = markerLeadOverrides.get(cell.id) ?? durationMs + 300;
         assert.equal(cell.timing.leadMs, expectedMarkerLeadMs, `${cell.id}: marker lead`);
@@ -844,6 +854,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
 test('the structural fixture joins all 30 Project entries without media authority', () => {
   const speechOverlappingRuntimeActions = new Map([
     ['cv-show:cue:agent-portal.human-decision', 1_500],
+    ['cv-show:cue:symbiote-engine.workspace-join', 500],
     ['cv-show:cue:photopizza.origin', 550],
     ['cv-show:cue:photopizza.video-01', 550],
     ['cv-show:cue:photopizza.video-02', 550],

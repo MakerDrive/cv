@@ -135,3 +135,26 @@ Master WAVs, recognition, alignment, receipts, voice references, and workflow
 state stay outside Git under the configured durable absolute base. The
 repository contains only the immutable Ogg/Opus web projection and its minimal
 aligned sequences.
+
+## Runtime budget rules learned from failure traces
+
+Two production loops (2026-09-15) traced a repeated `PRESENTATION_EFFECT_…`
+failure → entry retry pattern back to authoring data, not to runtime code:
+
+- Marker admission is strict: the kinematic plan duration is
+  `arcLengthPx / 0.471 px·ms⁻¹` for underline/oval markers and it must fit
+  `gestureDurationMs`. Wide multi-line text blocks (≈550px) draw for ~1.2–2.7s;
+  budgets like 1200/2500ms reject with `budget-exceeded` and the scene restarts
+  forever. Size marker gestures by the measured arc and keep `leadMs ≥
+  gestureDurationMs + 250ms`, with the paired `:scroll` cell giving at least
+  `marker.leadMs + scroll.gestureDurationMs + 200ms` of lead.
+- A `media/` cue whose owner project is not the currently open project page
+  (for example `photopizza.megavisor-promo` framing
+  `media/megavisor/youtube/c3cCmDqO04c` while the PhotoPizza page is open)
+  must rely on the runtime selecting the owning project page first; the
+  scroll-to-attention pair deadlocks otherwise and the entry loops.
+
+The audio-clip hard deadline is `clip duration + 1000ms` of wall-clock grace;
+the double `pause/play` preroll that normalizes deferred presentation consumes
+most of that grace, so a slow host main thread can miss the clock once and the
+player applies its bounded scene retry. Keep entry lead-ins lean.
