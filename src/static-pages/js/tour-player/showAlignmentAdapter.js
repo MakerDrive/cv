@@ -14,6 +14,12 @@ import {
 } from './webAudioRelease.js';
 import { playPresentationAudioClip } from './presentationAudioTransport.js';
 import { createPresentationPlaybackPump } from './presentationPlaybackPump.js';
+import { degradePresentationOperation } from './showAdapter.js';
+import {
+  cvShowCellLayerId,
+  isCvShowDecorativeCell,
+  resolveFailureRecovery,
+} from './failurePolicy.js';
 
 const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 const MAX_PRESENTATION_PREROLL_MEDIA_DRIFT_MS = 50;
@@ -366,9 +372,44 @@ export function createCvShowAlignmentController({
       const receiptObservers = new Set();
       const terminalReasons = new Map();
       const operationCauses = new Map();
+      // Cells whose engine failure is tolerated by the failure policy
+      // (decorative deadline misses etc.): the pump keeps driving the plan
+      // and their dependent chain expires gracefully instead of restarting
+      // the entry.
+      const toleratedFailedCells = new Set();
+      const degradedCellOutcomes = new Map();
       const terminalReasonCode = (reason) => (
         typeof reason === 'string' ? reason : String(reason?.code || '')
       );
+      const classifiableFailedReceipt = (receipt) => {
+        if (receipt?.status !== 'failed' || !receipt?.cellId || !tuple) return false;
+        const projectCell = (tuple.project?.cells || [])
+          .find((cell) => cell.id === receipt.cellId) || null;
+        const layerId = cvShowCellLayerId(projectCell || receipt) || '';
+        let policy = '';
+        if (projectCell) {
+          try {
+            policy = projectCvShowDirective(projectCell, tuple.project)?.policy || '';
+          } catch {
+            // Non-directive cells (audio, narration) have no policy; the
+            // layer/kind-based recovery classification already covers them.
+          }
+        }
+        const recovery = resolveFailureRecovery({
+          kind: String(receipt.kind || ''),
+          layerId,
+          policy,
+          code: terminalReasonCode(receipt.reason),
+          narrationStarted: physicalPlaybackStarted === true,
+        });
+        if (recovery !== 'degrade' && recovery !== 'skip') return false;
+        toleratedFailedCells.add(receipt.cellId);
+        degradedCellOutcomes.set(receipt.cellId, Object.freeze({
+          outcome: terminalReasonCode(receipt.reason) || 'failed',
+          fallback: 'none-skipped',
+        }));
+        return true;
+      };
       const receiveAcceptedReceipt = (receipt) => {
         if (
           ['failed', 'rejected', 'cancelled', 'stale', 'skipped'].includes(receipt?.status)
@@ -378,6 +419,7 @@ export function createCvShowAlignmentController({
             status: receipt.status,
             code: terminalReasonCode(receipt.reason),
           }));
+          classifiableFailedReceipt(receipt);
         }
         onReceipt?.(receipt);
         for (const observer of [...receiptObservers]) observer(receipt);
@@ -404,6 +446,28 @@ export function createCvShowAlignmentController({
               cause: error.code || '',
               message: boundedOperationText(error.message),
             }));
+          }
+          // Decorative cells (focus frames, markers, annotations) whose
+          // provider failed before any receipt was accepted are completed
+          // degraded instead of failing the engine terminal: narration and
+          // downstream soft dependents continue, the degraded outcome stays
+          // machine-readable on the receipt. Deadline/aborted failures are
+          // already engine-terminal; they rethrow and are tolerated by the
+          // playback pump policy instead.
+          if (
+            isCvShowDecorativeCell(operation.projectCell)
+            && !operation.signal?.aborted
+            && !operation.reportedReceipts?.length
+            && error?.code !== 'PRESENTATION_EFFECT_DEADLINE_MISSED'
+          ) {
+            degradedCellOutcomes.set(operation.projectCell.id, Object.freeze({
+              outcome: String(error?.code || 'operation-failed'),
+              fallback: 'none-skipped',
+            }));
+            return degradePresentationOperation(operation, {
+              outcome: String(error?.code || 'operation-failed'),
+              fallback: 'none-skipped',
+            });
           }
           throw error;
         }
@@ -468,8 +532,18 @@ export function createCvShowAlignmentController({
         execution: tuple.execution,
         playbackPlan: tuple.playbackPlan,
         media,
+        isFailureTolerated: (cellId) => toleratedFailedCells.has(String(cellId || '')),
         onFailure: (error) => {
           const failedCellId = String(error?.details?.cellId || '');
+          if (toleratedFailedCells.has(failedCellId)) {
+            // A tolerated decorative failure already terminalized in the
+            // execution engine; the pump relaunches to continue with the
+            // remaining cells. Narration is never touched.
+            queueMicrotask(() => {
+              playbackPump.resume?.('tolerated-cell-failure');
+            });
+            return;
+          }
           const terminalReason = terminalReasons.get(failedCellId);
           const operationCause = operationCauses.get(failedCellId);
           onSeekFailure?.(Object.freeze({
@@ -821,6 +895,15 @@ export function createCvShowAlignmentController({
         stop() {
           playbackRequested = false;
           return playbackPump.stop('runtime-stop');
+        },
+        get hasPlaybackStarted() {
+          return physicalPlaybackStarted === true;
+        },
+        degradedOutcomes() {
+          return Object.freeze({
+            cells: Object.freeze([...degradedCellOutcomes.keys()]),
+            details: Object.freeze(Object.fromEntries(degradedCellOutcomes)),
+          });
         },
         dispose() {
           if (disposed) return;

@@ -4,6 +4,7 @@ import {
   waitForShowDomReadiness,
   waitForShowVisualSettlement,
 } from 'symbiote-ui/chat/show-runtime';
+import { isCvShowDecorativeCell } from './failurePolicy.js';
 
 export const CV_SHOW_DIRECTIVE_TYPES = Object.freeze([
   'navigate',
@@ -489,6 +490,18 @@ function satisfyAdmissionSilently(presentation, source, observePerformance) {
   presentation.reportStatus('settled', observePerformance());
 }
 
+const CV_SHOW_DEGRADED_RECEIPT_VERSION = 'cv-show-degraded-receipt-v1';
+
+/**
+ * Whether a presentation operation carries purely decorative visual intent.
+ * Decorative failures (focus frames, markers, ovals, underlines) must never
+ * block, pause, or rewind narration: the lifecycle is completed degraded.
+ */
+export function isDecorativeCvShowOperation(operation) {
+  return isCvShowDecorativeCell(operation?.projectCell)
+    && operation?.kind === 'attention';
+}
+
 function createPresentationReporter(operation) {
   const admissionRequired = requiresProviderAdmission(operation);
   if (
@@ -546,6 +559,86 @@ function createPresentationReporter(operation) {
     }),
   }));
 
+  /**
+   * Completes a tolerated decorative failure without failing the engine
+   * terminal: lifecycle receipts are reported (so the dependency barriers
+   * open and downstream cells keep executing), but the provider receipt
+   * keeps the semantic outcome honest for the aggregate report and future
+   * preview/self-healing loops. EXECUTION COMPLETION != INTENT SUCCESS.
+   *
+   * Must only be used for decorative operations and before any milestone
+   * receipt has been reported.
+   */
+  const reportDegraded = ({ outcome, fallback = 'none-skipped', original = null }) => {
+    const providerReceipt = Object.freeze({
+      version: CV_SHOW_DEGRADED_RECEIPT_VERSION,
+      degraded: true,
+      outcome: String(outcome || 'degraded'),
+      fallback: String(fallback || 'none-skipped'),
+      ...(original ? { original: Object.freeze(original) } : {}),
+      effect: Object.freeze({
+        kind: operation.kind,
+        type: String(
+          operation.projectCell.cue?.interaction?.type
+          || operation.projectCell.cue?.kind
+          || operation.kind,
+        ),
+        status: 'settled',
+      }),
+      target: Object.freeze({
+        id: operation.projectCell.cue?.targetId ?? operation.source?.target ?? null,
+      }),
+    });
+    if (admissionRequired && !operation.admission) {
+      reportAdmission(Object.freeze({
+        version: 'show-attention-admission-v2',
+        status: 'admitted',
+        provider: Object.freeze({
+          id: 'symbiote-ui/show-attention',
+          version: 'show-attention-provider-v1',
+        }),
+        effect: Object.freeze({
+          mode: 'frame',
+          gestureId: String(operation.projectCell.id || ''),
+        }),
+        target: Object.freeze({
+          id: String(providerReceipt.target.id || ''),
+          identity: `cv-show-degraded-target:${operation.projectCell.id}`,
+          layoutIdentity: `cv-show-degraded-layout:${operation.projectCell.id}`,
+          geometryIdentity: `cv-show-degraded-geometry:${operation.projectCell.id}`,
+          geometry: null,
+        }),
+        budget: Object.freeze({
+          limitMs: Number(operation.projectCell.timing?.gestureDurationMs) || 0,
+          plannedDurationMs: 0,
+        }),
+        plan: Object.freeze({
+          version: 'cv-show-degraded-plan-v1',
+          identity: `cv-show-degraded-plan:${String(operation.projectCell.id || '')}`,
+          normalizedPathHash: `cv-show-degraded-path:${String(operation.projectCell.id || '')}`,
+          motion: null,
+          evidence: null,
+        }),
+        reason: Object.freeze({
+          code: 'within-budget',
+          message: `visual effect degraded: ${providerReceipt.outcome}`,
+          provider: null,
+        }),
+      }));
+    }
+    const firstMilestone = operation.kind === 'interaction' ? 'acted' : 'first-frame';
+    operation.reportReceipt(Object.freeze({
+      status: firstMilestone,
+      observedAt: observePresentationPerformance(),
+      providerReceipt,
+    }));
+    operation.reportReceipt(Object.freeze({
+      status: 'settled',
+      observedAt: observePresentationPerformance(),
+      providerReceipt,
+    }));
+  };
+
   const acceptTerminal = (providerReceipt) => {
     if (
       providerReceipt?.version !== SHOW_ATTENTION_TERMINAL_VERSION
@@ -568,16 +661,33 @@ function createPresentationReporter(operation) {
 
   return Object.freeze({
     kind: operation.kind,
-    budgetMs: operation.projectCell.timing?.gestureDurationMs,
+    budgetMs: Number(operation.projectCell.timing?.gestureDurationMs) || 0,
     requiresProviderAdmission: admissionRequired,
+    decorative: isDecorativeCvShowOperation(operation),
     reportAdmission,
     reportMilestone,
     reportStatus,
+    reportDegraded,
     acceptTerminal,
     providerFailure: (reason, details) => (
       presentationProviderFailure(operation, reason, details)
     ),
   });
+}
+
+/**
+ * Completes a failed decorative operation with a degraded lifecycle: the
+ * engine receives a valid admission (if required) and the full milestone
+ * receipt pair, so its terminal becomes `completed` and soft barriers open,
+ * while `providerReceipt.degraded` keeps the true outcome observable.
+ *
+ * Only safe before the operation has reported any receipt and before its
+ * signal was aborted by the engine deadline.
+ */
+export function degradePresentationOperation(operation, { outcome, fallback }) {
+  const presentation = createPresentationReporter(operation);
+  presentation.reportDegraded({ outcome, fallback });
+  return undefined;
 }
 
 export async function runCvShowPresentationOperation(runner, operation) {
@@ -910,6 +1020,28 @@ export function createCvShowDirectiveRunner(options = {}) {
                     : adapted.directive;
                   let result;
                   let presentFailure;
+                  // Decorative intents whose provider admission is rejected
+                  // (e.g. marker kinematics exceed the authored budget) are
+                  // completed degraded instead of failing the engine cell:
+                  // narration must never wait on or restart because of a
+                  // decorative visual effect.
+                  let degradedOutcome = '';
+                  const reportAdmissionWithDegrade = (providerAdmission) => {
+                    if (
+                      providerAdmission?.status === 'rejected'
+                      && presentation.decorative === true
+                    ) {
+                      degradedOutcome = String(
+                        providerAdmission?.reason?.code || 'admission-rejected',
+                      );
+                      presentation.reportDegraded({
+                        outcome: degradedOutcome,
+                        original: providerAdmission,
+                      });
+                      return undefined;
+                    }
+                    return presentation.reportAdmission(providerAdmission);
+                  };
                   // Graph semantic targets are already focused by the panel
                   // adapter. Do not hand them to the generic attention
                   // provider: graph providers require their own admission
@@ -936,7 +1068,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                       mediaTimeMs: source.mediaTimeMs,
                       ...(providerPlanned ? {
                         budgetMs: presentation.budgetMs,
-                        onAdmission: presentation.reportAdmission,
+                        onAdmission: reportAdmissionWithDegrade,
                         onMilestone: presentation.reportMilestone,
                       } : {}),
                       annotation: {
@@ -959,7 +1091,19 @@ export function createCvShowDirectiveRunner(options = {}) {
                   const settlement = await attention?.whenSettled?.();
                   if (presentFailure) throw presentFailure;
                   throwIfAborted(controller.signal);
-                  if (providerPlanned) presentation.acceptTerminal(settlement);
+                  if (providerPlanned && !degradedOutcome) {
+                    presentation.acceptTerminal(settlement);
+                  }
+                  if (degradedOutcome) {
+                    // Degraded decorative completion: lifecycle receipts were
+                    // already reported; do not report duplicate milestones.
+                    return Object.freeze({
+                      status: 'success',
+                      degraded: degradedOutcome,
+                      settlement,
+                      ...result,
+                    });
+                  }
                   if (
                     !providerPlanned
                     && (result?.presented === false || result?.status === 'unsupported')

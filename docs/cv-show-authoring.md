@@ -157,4 +157,27 @@ failure → entry retry pattern back to authoring data, not to runtime code:
 The audio-clip hard deadline is `clip duration + 1000ms` of wall-clock grace;
 the double `pause/play` preroll that normalizes deferred presentation consumes
 most of that grace, so a slow host main thread can miss the clock once and the
-player applies its bounded scene retry. Keep entry lead-ins lean.
+player applies its bounded scene setup retry. Keep entry lead-ins lean.
+
+## Failure semantics: AUTO REWIND IS FORBIDDEN
+
+Runtime never moves the narration playhead backwards inside a playback epoch
+as a failure recovery. Faults route through `resolveFailureRecovery`
+(`src/static-pages/js/tour-player/failurePolicy.js`) by cell kind, layer,
+authored policy and failure code:
+
+- decorative (focus/annotation) failures degrade in place: the adapter
+  completes the operation with a degraded lifecycle receipt
+  (`providerReceipt.degraded`), soft `settled` barriers open, and dependent
+  visual cells continue; narration is untouched;
+- decorative deadline races that already started degrade through pump
+  tolerance: the failed terminal is kept, never escalated, and the dependent
+  chain expires with the media clock instead of deadlocking the entry;
+- interaction/state failures pause and retry the scene setup locally while
+  narration has not started, or pause-and-report afterwards;
+- audio/narration critical failures pause-and-report; replay is only possible
+  through an explicit user action.
+
+Each show ends with `portfolio-show-complete` carrying a receipt summary
+(`success / degraded / skipped / failedCritical`, grouped by reason and
+fallback), which is the base for automated preview validation.

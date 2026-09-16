@@ -51,6 +51,7 @@
  *     removeEventListener?: (type: string, listener: () => void) => void,
  *   },
  *   onFailure?: ((error: any) => any) | null,
+ *   isFailureTolerated?: ((cellId: string) => boolean) | null,
  * }} PresentationPlaybackPumpOptions
  */
 
@@ -59,6 +60,8 @@ function invalidPump(reason) {
     code: 'PRESENTATION_PLAYBACK_PUMP_INVALID',
   });
 }
+
+const BLOCKED_POLL_INTERVAL_MS = 100;
 
 function terminalById(snapshot) {
   return new Map((snapshot?.terminal || []).map((item) => [item.cellId, item.status]));
@@ -117,6 +120,7 @@ export function createPresentationPlaybackPump({
   playbackPlan,
   media,
   onFailure = null,
+  isFailureTolerated = null,
 } = /** @type {PresentationPlaybackPumpOptions} */ ({})) {
   if (
     !execution?.snapshot
@@ -168,6 +172,40 @@ export function createPresentationPlaybackPump({
     return error;
   };
 
+  /**
+   * Cells whose failure the host policy tolerates (decorative visuals that
+   * degraded or were skipped). Tolerated failures neither stop the pump nor
+   * deadlock their dependent chain: the chain's remaining cells keep their
+   * authored expiry and are reported `skipped` by the execution controller
+   * as the media clock passes them.
+   */
+  const toleratedFailed = () => {
+    if (typeof isFailureTolerated !== 'function') return new Set();
+    const tolerated = new Set();
+    for (const { cellId, status } of (execution.snapshot.terminal || [])) {
+      if (status === 'failed' && isFailureTolerated(cellId)) tolerated.add(cellId);
+    }
+    return tolerated;
+  };
+
+  /**
+   * Whether every remaining pending cell is blocked only by a tolerated
+   * failed cell (directly or transitively). Such chains degrade with the
+   * media clock (the execution controller skips them at their authored
+   * expiry) instead of escalating into a playback failure.
+   */
+  const blockedByTolerated = (remaining, tolerated) => {
+    if (!tolerated.size || !remaining.length) return false;
+    const dependsOnTolerated = (cell, visited = new Set()) => {
+      if (!cell || visited.has(cell.id)) return false;
+      visited.add(cell.id);
+      return (cell.dependsOn || []).some(({ cellId }) => (
+        tolerated.has(cellId) || dependsOnTolerated(cellById.get(cellId), visited)
+      ));
+    };
+    return remaining.every((cell) => dependsOnTolerated(cell));
+  };
+
   const sampleMediaClock = (reason) => {
     if (!requested || disposed || media.seeking === true) return execution.snapshot;
     const mediaTimeMs = presentationPositionMs();
@@ -201,7 +239,10 @@ export function createPresentationPlaybackPump({
       // clock. It is not an operation failure. In particular, an `ended`
       // sample can legitimately expire optional trailing cues after the audio
       // transport has acknowledged its final clip.
-      const failed = (snapshot.terminal || []).find(({ status }) => status === 'failed');
+      const tolerated = toleratedFailed();
+      const failed = (snapshot.terminal || []).find(({ status, cellId }) => (
+        status === 'failed' && !tolerated.has(cellId)
+      ));
       if (failed) {
         throw Object.assign(new Error(`Presentation cell failed: ${failed.cellId}`), {
           code: 'PRESENTATION_PLAYBACK_CELL_FAILED',
@@ -219,6 +260,14 @@ export function createPresentationPlaybackPump({
           && !terminalById(snapshot).has(item.id)
         ));
         if (remaining.length) {
+          if (blockedByTolerated(remaining, tolerated)) {
+            // Degraded chain: keep sampling so the controller expires the
+            // blocked cells at their authored end instead of escalating.
+            await new Promise((resolve) => {
+              setTimeout(resolve, BLOCKED_POLL_INTERVAL_MS);
+            });
+            continue;
+          }
           throw Object.assign(new Error('Presentation playback dependencies are blocked'), {
             code: 'PRESENTATION_PLAYBACK_DEPENDENCY_BLOCKED',
             details: { cellIds: remaining.map(({ id }) => id) },

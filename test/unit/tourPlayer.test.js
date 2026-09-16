@@ -1063,6 +1063,14 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
       running: false,
       completed: false,
     },
+    receiptSummary: {
+      success: 0,
+      degraded: 0,
+      skipped: 0,
+      failedCritical: 0,
+      byReason: {},
+      byFallback: {},
+    },
   }]);
   assert.deepEqual(stoppedStartEvents, []);
   assert.equal(stopped.player.$.isRunning, false);
@@ -1708,6 +1716,14 @@ test('detail admission rejects stale live media before branch or presentation mu
         play: false,
         running: true,
         completed: true,
+      },
+      receiptSummary: {
+        success: 0,
+        degraded: 0,
+        skipped: 0,
+        failedCritical: 0,
+        byReason: {},
+        byFallback: {},
       },
     }],
     'terminal detail return closes the external Show lifecycle with completion semantics',
@@ -2915,7 +2931,7 @@ test('frame-only article media settles immediately without starting a media acti
   }), false);
 });
 
-test('target-unresolved rejection relays the exact nested v2 provider detail', async () => {
+test('target-unresolved rejection degrades the decorative lifecycle with honest evidence', async () => {
   let reason = freezeProviderValue({
     code: 'provider-rejected',
     message: 'the provider could not resolve the semantic target',
@@ -2941,21 +2957,27 @@ test('target-unresolved rejection relays the exact nested v2 provider detail', a
     return { presentation: { presented: false, admission }, terminal };
   });
 
-  await assert.rejects(
-    runCvShowPresentationOperation(providerScenarioRunner(attention), fixture.operation),
-    (error) => (
-      error.code === 'CV_SHOW_PRESENTATION_PROVIDER_REJECTED'
-      && error.details.providerReceipt === terminal
-    ),
+  // New failure-policy contract: a decorative (focus/annotation) rejection
+  // never fails the engine cell. The lifecycle completes so soft barriers
+  // open, while the degraded provider receipt keeps the true outcome.
+  const result = await runCvShowPresentationOperation(
+    providerScenarioRunner(attention),
+    fixture.operation,
   );
-  assert.equal(fixture.admissions[0].providerAdmission, admission);
-  assert.equal(fixture.admissions[0].providerAdmission.reason.provider.code, 'target-unresolved');
-  assert.equal(fixture.admissions[0].providerAdmission.target.identity, null);
-  assert.equal(fixture.admissions[0].providerAdmission.plan.identity, null);
-  assert.deepEqual(fixture.receipts, []);
+  assert.equal(result, undefined);
+  assert.equal(fixture.admissions.length, 1);
+  assert.equal(fixture.admissions[0].providerAdmission.status, 'admitted');
+  assert.equal(fixture.admissions[0].providerAdmission.reason.code, 'within-budget');
+  assert.deepEqual(
+    fixture.receipts.map(({ status }) => status),
+    ['first-frame', 'settled'],
+  );
+  assert.equal(fixture.receipts[0].providerReceipt.degraded, true);
+  assert.equal(fixture.receipts[0].providerReceipt.outcome, 'provider-rejected');
+  assert.equal(fixture.receipts[0].providerReceipt.target.id, 'target');
 });
 
-test('overbudget rejection relays the exact v2 plan and budget evidence', async () => {
+test('overbudget rejection degrades the decorative lifecycle with honest evidence', async () => {
   let reason = freezeProviderValue({
     code: 'budget-exceeded',
     message: 'the provider plan exceeds the explicit hard budget',
@@ -2974,20 +2996,19 @@ test('overbudget rejection relays the exact v2 plan and budget evidence', async 
     return { presentation: { presented: false, admission }, terminal };
   });
 
-  await assert.rejects(
-    runCvShowPresentationOperation(providerScenarioRunner(attention), fixture.operation),
-    (error) => (
-      error.code === 'CV_SHOW_PRESENTATION_PROVIDER_REJECTED'
-      && error.details.providerReceipt === terminal
-    ),
+  const result = await runCvShowPresentationOperation(
+    providerScenarioRunner(attention),
+    fixture.operation,
   );
-  assert.equal(fixture.admissions[0].providerAdmission, admission);
-  assert.deepEqual(fixture.admissions[0].providerAdmission.budget, {
-    limitMs: 650,
-    plannedDurationMs: 651,
-  });
-  assert.equal(fixture.admissions[0].providerAdmission.reason, reason);
-  assert.deepEqual(fixture.receipts, []);
+  assert.equal(result, undefined);
+  assert.equal(fixture.admissions.length, 1);
+  assert.equal(fixture.admissions[0].providerAdmission.status, 'admitted');
+  assert.deepEqual(
+    fixture.receipts.map(({ status }) => status),
+    ['first-frame', 'settled'],
+  );
+  assert.equal(fixture.receipts[0].providerReceipt.degraded, true);
+  assert.equal(fixture.receipts[0].providerReceipt.outcome, 'budget-exceeded');
 });
 
 test('immediate and reduced UI milestones follow synchronous Workspace admission', async () => {
@@ -3771,7 +3792,7 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
       assert.equal(harness.execution.snapshot.pendingCount, 0);
     },
   }, {
-    name: 'rejected admissions preserve exact over-budget and unresolved-target evidence',
+    name: 'rejected admissions degrade decorative cells with preserved evidence',
     run: async () => {
       let rejections = [{
         options: { focusDurationMs: 2_501 },
@@ -3809,26 +3830,30 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
         harness.events.length = 0;
 
         harness.sampleTarget();
-        let providerAdmission = await harness.admissionGate.promise;
+        let admittedAdmission = await harness.admissionGate.promise;
         await harness.execution.whenIdle();
         let record = harness.recordFor(harness.targetCellId);
         let targetReceipts = harness.receiptsFor(harness.targetCellId);
 
-        assert.equal(providerAdmission.status, 'rejected');
-        rejection.assertEvidence(providerAdmission);
-        assert.equal(record.admissionResults.length, 0);
-        assert.deepEqual(targetReceipts.map(({ status }) => status), ['failed']);
+        // The cell completes degraded instead of failing - narration never
+        // restarts because of a decorative visual - and the original provider
+        // rejection evidence stays machine-readable on the degraded receipt.
+        assert.equal(record.admissionResults.length, 1);
+        assert.equal(admittedAdmission.status, 'admitted');
+        assert.deepEqual(targetReceipts.map(({ status }) => status), ['first-frame', 'settled']);
+        assert.equal(targetReceipts[0].providerReceipt.degraded, true);
+        let original = targetReceipts[0].providerReceipt.original;
+        assert.equal(original.status, 'rejected');
+        rejection.assertEvidence(original);
         assert.equal(
-          targetReceipts[0].reason.code,
-          'PRESENTATION_EFFECT_ADMISSION_REJECTED',
-        );
-        assert.deepEqual(
-          targetReceipts[0].reason.details.providerAdmission,
-          providerAdmission,
+          targetReceipts[0].providerReceipt.outcome,
+          original.reason.code,
         );
         assert.equal(harness.events.some((event) => event.startsWith('ui:pixel:')), false);
         assert.equal(harness.rafHost.pendingCount, 0);
-        assertInstalledRecursivelyFrozen(targetReceipts[0].reason.details.providerAdmission);
+        let barriers = harness.execution.snapshot.barriers
+          .find(({ cellId }) => cellId === harness.targetCellId)?.barriers;
+        assert.deepEqual(barriers, ['first-frame', 'settled']);
       }
     },
   }, {
@@ -7094,3 +7119,5 @@ test('CV adapter preserves an authored marker label instead of defaulting digits
   ).directive;
   assert.equal(legacy.label, 'A');
 });
+
+

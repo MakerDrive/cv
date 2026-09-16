@@ -20,6 +20,13 @@ import {
   projectCvShowScheduleDuration,
 } from '../../../static-pages/js/tour-player/presentationProjectAdapter.js';
 import { createBrowserSpeechController } from '../../../static-pages/js/tour-player/speech.js';
+import {
+  CV_SHOW_RECOVERY,
+  createPresentationReceiptSummary,
+  cvShowCellLayerId,
+  normalizePresentationFailure,
+  resolveFailureRecovery,
+} from '../../../static-pages/js/tour-player/failurePolicy.js';
 import { describeCvShowMissingTarget, describeCvShowSpeechFailure } from '../../../static-pages/js/tour-player/speechFailure.js';
 import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../../static-pages/data/cvShowWebAudioRelease.js';
 import { CV_SHOW_SCHEDULE_DURATIONS } from '../../../static-pages/data/cvShowScheduleDurations.js';
@@ -291,6 +298,12 @@ export class PortfolioShowChat extends HTMLElement {
   #lastAlignedReset = null;
   #lastAlignedSeekFailure = null;
   #lastAlignedGenerationReceipt = null;
+  /**
+   * Per-show presentation receipt aggregate (success/degraded/skipped/
+   * failedCritical). Auto replay is forbidden; degraded visual outcomes are
+   * reported here instead of restarting narration.
+   */
+  #showReceiptSummary = createPresentationReceiptSummary();
   #branchReturnPlayback = null;
   #showCompleted = false;
   #completedDetailReview = false;
@@ -660,6 +673,8 @@ export class PortfolioShowChat extends HTMLElement {
     const wasRunning = this.$.isRunning;
     const hadShow = Boolean(wasRunning || this.#mode || this.#pendingTransportIntent);
     const terminalRouteState = this.routeSnapshot;
+    const receiptSummary = this.#showReceiptSummary.snapshot();
+    this.#showReceiptSummary = createPresentationReceiptSummary();
     this.#requestId += 1;
     this.#transportRequestId += 1;
     this.#stopSpeech('show-stopped');
@@ -702,6 +717,7 @@ export class PortfolioShowChat extends HTMLElement {
           detail: {
             reason,
             routeState: Object.freeze({ ...terminalRouteState, play: false, completed }),
+            receiptSummary,
           },
         },
       ));
@@ -1554,14 +1570,12 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   /**
-   * User-driven rapid navigation commonly produces transient presentation
-   * races (slow media, late article mount, attention deadline). The shared
-   * engine enforces a wall-clock authored budget with no jank grace, so a
-   * single main-thread stall can fail an otherwise healthy cell. Re-present
-   * the failing scene with growing settle backoff before showing a fatal
-   * error. The retry is deferred so it never unwinds through the failing
-   * runtime's own disposal stack, and it is dropped when the user navigates
-   * meanwhile.
+   * Scene setup may still race user-driven navigation (slow media, late
+   * article mount). While narration has not physically started, re-presenting
+   * the failing scene with growing settle backoff is a local pause-retry:
+   * nothing audible is replayed. Once narration started, this path is never
+   * used — failures become pause-and-report, and replay requires an explicit
+   * user action (see #recordAlignedSeekFailure).
    */
   /**
    * Replays the current scene after a terminal presentation failure. A fresh
@@ -1636,12 +1650,83 @@ export class PortfolioShowChat extends HTMLElement {
     return true;
   }
 
+  /**
+   * Failure classification context for the recovery policy: the aligned
+   * entry carries the projected schedule so the failing cell's kind, layer,
+   * and authored policy can be resolved from either receipt shape (engine
+   * receipts carry `cellId/kind` on top level; pump-path failures carry them
+   * inside `details`).
+   */
+  #failurePolicyInput(receipt, entryId) {
+    const failure = normalizePresentationFailure(receipt) || /** @type {any} */ ({});
+    let kind = String(failure.kind || '');
+    let layerId = String(failure.layerId || '');
+    let policy = '';
+    const cellId = String(failure.cellId || '');
+    if (cellId && this.#alignedEntry?.project) {
+      const projectCell = (this.#alignedEntry.project.cells || [])
+        .find(({ id }) => id === cellId);
+      if (projectCell) {
+        if (!layerId) layerId = cvShowCellLayerId(projectCell);
+        if (!kind) {
+          kind = projectCell.kind || '';
+          if (!kind && projectCell.cue?.kind === 'focus') kind = 'attention';
+          if (!kind && projectCell.cue?.kind === 'annotation') kind = 'attention';
+          if (!kind && projectCell.cue?.kind === 'interaction') kind = 'interaction';
+        }
+        policy = String(projectCell.policy || '');
+      }
+    }
+    return {
+      cellId,
+      kind,
+      layerId,
+      policy,
+      code: String(failure.code || ''),
+      // AUTO REWIND IS FORBIDDEN: once this entry's narration has physically
+      // started, no recovery may re-present it from position zero.
+      narrationStarted: this.#alignedEntry?.entryId === entryId
+        && this.#alignedEntry?.runtime?.hasPlaybackStarted === true,
+    };
+  }
+
   #recordAlignedSeekFailure(receipt, requestId, entryId) {
     if (requestId !== this.#requestId) return;
     if (this.#lastAlignedSeekFailure?.operationId === receipt?.operationId) return;
     this.#lastAlignedSeekFailure = receipt;
     this.#lastAlignedGenerationReceipt = receipt;
-    if (this.#scheduleSceneRetry(entryId, requestId)) return;
+    const input = this.#failurePolicyInput(receipt, entryId);
+    const recovery = resolveFailureRecovery(input);
+    if (
+      recovery === CV_SHOW_RECOVERY.DEGRADE
+      || recovery === CV_SHOW_RECOVERY.SKIP
+    ) {
+      // Decorative/tolerated failure: narration must continue untouched.
+      // The degraded outcome stays observable via this receipt's dispatch.
+      this.dispatchEvent(new CustomEvent('portfolio-show-aligned-seek-failure', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          requestId,
+          entryId,
+          receipt,
+          recovery,
+          tolerated: true,
+        },
+      }));
+      return;
+    }
+    if (
+      recovery === CV_SHOW_RECOVERY.PAUSE_RETRY
+      && !input.narrationStarted
+      && this.#scheduleSceneRetry(entryId, requestId)
+    ) {
+      // Bounded pause-retry before narration started: nothing audible has
+      // been replayed, this is a scene setup retry, not a rewind.
+      return;
+    }
+    // pause-report / fatal: stop advancing and report; restarting from zero
+    // is only possible through an explicit user action now.
     this.$.isError = true;
     this.$.errorText = this.#speechFailureText({ receipt, entryId });
     this.pauseShow('alignment-seek-error');
@@ -1649,7 +1734,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.dispatchEvent(new CustomEvent('portfolio-show-aligned-seek-failure', {
       bubbles: true,
       composed: true,
-      detail: { requestId, entryId, receipt },
+      detail: { requestId, entryId, receipt, recovery, tolerated: false },
     }));
   }
 
@@ -1710,6 +1795,7 @@ export class PortfolioShowChat extends HTMLElement {
       onReceipt: (receipt) => {
         if (requestId !== this.#requestId) return;
         this.#lastExecutionReceipt = receipt;
+        this.#showReceiptSummary.record(receipt);
         this.#session.setPlayback({
           ...this.#session.snapshot.playback,
           positionMs: Math.round(this.#presentationPositionMs()),
