@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   CV_SHOW_RECOVERY,
+  createCascadeTracker,
   createPresentationReceiptSummary,
   normalizePresentationFailure,
   resolveFailureRecovery,
@@ -153,12 +154,14 @@ test('degraded provider receipt stays machine-readable in the summary', () => {
     success: 1,
     degraded: 1,
     skipped: 1,
+    cascadeSkipped: 0,
     failedCritical: 1,
     byReason: {
       'budget-exceeded': 1,
       UNEXPECTED: 1,
     },
     byFallback: { 'none-skipped': 1 },
+    cascadeByRoot: {},
   });
 });
 
@@ -167,7 +170,7 @@ test('summary counts one class per cell irrespective of duplicate receipts', () 
   summary.record({ cellId: 'c', status: 'settled' });
   summary.record({ cellId: 'c', status: 'settled' });
   summary.record({ cellId: 'c', status: 'ended' });
-  assert.equal(summary.snapshot().success, 2);
+  assert.equal(summary.snapshot().success, 1, 'one cell counts exactly once');
 });
 
 
@@ -348,4 +351,64 @@ test('pump keeps hard dependency blocking for non-tolerated chains', async () =>
   assert.equal(failures.length, 1);
   assert.equal(failures[0].code, 'PRESENTATION_PLAYBACK_DEPENDENCY_BLOCKED');
   await pump.dispose('done');
+});
+
+test('cascade tracker maps multi-level skipped chains to the original failure', () => {
+  const tracker = createCascadeTracker([
+    { id: 'a', dependsOn: [] },
+    { id: 'b', dependsOn: [{ cellId: 'a', barrier: 'settled' }] },
+    { id: 'c', dependsOn: [{ cellId: 'b', barrier: 'settled' }] },
+    { id: 'd', dependsOn: [{ cellId: 'c', barrier: 'settled' }] },
+    { id: 'unrelated', dependsOn: [] },
+  ]);
+  tracker.markFailure('a');
+  assert.deepEqual(tracker.classifySkip('b'), { cascadeFrom: 'a', rootCauseCellId: 'a' });
+  assert.deepEqual(tracker.classifySkip('c'), { cascadeFrom: 'b', rootCauseCellId: 'a' });
+  assert.deepEqual(tracker.classifySkip('d'), { cascadeFrom: 'c', rootCauseCellId: 'a' });
+  assert.equal(tracker.classifySkip('unrelated'), null);
+  assert.equal(tracker.cascadeSkippedCount, 3);
+  assert.deepEqual(tracker.cascadeByRoot, { a: 3 });
+});
+
+test('summary precedence keeps the final outcome per cell', () => {
+  const summary = createPresentationReceiptSummary();
+  // degraded completion first (adapter-side degrade), terminal failed later
+  // should NEVER upgrade to success; precedence failed > degraded.
+  summary.record({
+    cellId: 'x',
+    status: 'first-frame',
+    providerReceipt: { degraded: true, outcome: 'budget-exceeded' },
+  });
+  summary.record({
+    cellId: 'x',
+    status: 'settled',
+    providerReceipt: { degraded: true, outcome: 'budget-exceeded' },
+  });
+  assert.equal(summary.snapshot().degraded, 1);
+  assert.equal(summary.snapshot().success, 0);
+  // A failed terminal of the same cell upgrades the class.
+  summary.record({ cellId: 'x', status: 'failed', reason: { code: 'POST' } });
+  assert.equal(summary.snapshot().degraded, 0);
+  assert.equal(summary.snapshot().failedCritical, 1);
+});
+
+test('cascade-skipped cells group under their root failure', () => {
+  const summary = createPresentationReceiptSummary();
+  summary.record({ cellId: 'a', status: 'failed', reason: { code: 'PRESENTATION_EFFECT_DEADLINE_MISSED' } });
+  summary.record({
+    cellId: 'b',
+    status: 'skipped',
+    providerReceipt: { outcome: 'dependency-failed', cascadeFrom: 'a', rootCauseCellId: 'a' },
+  });
+  summary.record({
+    cellId: 'c',
+    status: 'skipped',
+    providerReceipt: { outcome: 'dependency-failed', cascadeFrom: 'b', rootCauseCellId: 'a' },
+  });
+  summary.record({ cellId: 'plain', status: 'skipped' });
+  const snap = summary.snapshot();
+  assert.equal(snap.failedCritical, 1);
+  assert.equal(snap.cascadeSkipped, 2);
+  assert.equal(snap.skipped, 1);
+  assert.deepEqual(snap.cascadeByRoot, { a: 2 });
 });

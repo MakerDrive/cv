@@ -16,6 +16,7 @@ import { playPresentationAudioClip } from './presentationAudioTransport.js';
 import { createPresentationPlaybackPump } from './presentationPlaybackPump.js';
 import { degradePresentationOperation } from './showAdapter.js';
 import {
+  createCascadeTracker,
   cvShowCellLayerId,
   isCvShowDecorativeCell,
   resolveFailureRecovery,
@@ -378,6 +379,7 @@ export function createCvShowAlignmentController({
       // the entry.
       const toleratedFailedCells = new Set();
       const degradedCellOutcomes = new Map();
+      let cascadeTracker = null;
       const terminalReasonCode = (reason) => (
         typeof reason === 'string' ? reason : String(reason?.code || '')
       );
@@ -404,11 +406,42 @@ export function createCvShowAlignmentController({
         });
         if (recovery !== 'degrade' && recovery !== 'skip') return false;
         toleratedFailedCells.add(receipt.cellId);
+        cascadeTracker?.markFailure(receipt.cellId);
         degradedCellOutcomes.set(receipt.cellId, Object.freeze({
           outcome: terminalReasonCode(receipt.reason) || 'failed',
           fallback: 'none-skipped',
         }));
         return true;
+      };
+      /**
+       * Annotates an expiry skip that follows from a tolerated failed cell:
+       * the dependent keeps the engine `skipped` terminal but gains a
+       * machine-readable cascade marker so the aggregate report attributes
+       * the whole dropped visual branch to its single root failure.
+       */
+      const annotateCascadeSkip = (receipt) => {
+        if (
+          receipt?.status !== 'skipped'
+          || !receipt?.cellId
+          || !cascadeTracker
+          || terminalReasonCode(receipt.reason) !== 'PRESENTATION_EFFECT_EXPIRED'
+        ) {
+          return receipt;
+        }
+        const cascade = cascadeTracker.classifySkip(receipt.cellId);
+        if (!cascade) return receipt;
+        return Object.freeze({
+          ...receipt,
+          providerReceipt: Object.freeze({
+            ...(typeof receipt.providerReceipt === 'object' && receipt.providerReceipt
+              ? receipt.providerReceipt
+              : {}),
+            outcome: 'dependency-failed',
+            cascade: true,
+            cascadeFrom: cascade.cascadeFrom,
+            rootCauseCellId: cascade.rootCauseCellId,
+          }),
+        });
       };
       const receiveAcceptedReceipt = (receipt) => {
         if (
@@ -421,8 +454,9 @@ export function createCvShowAlignmentController({
           }));
           classifiableFailedReceipt(receipt);
         }
-        onReceipt?.(receipt);
-        for (const observer of [...receiptObservers]) observer(receipt);
+        const outgoing = annotateCascadeSkip(receipt);
+        onReceipt?.(outgoing);
+        for (const observer of [...receiptObservers]) observer(outgoing);
       };
       const adapterMethod = async (operation, kind) => {
         const source = projectCvShowDirective(operation.projectCell, tuple.project);
@@ -489,6 +523,7 @@ export function createCvShowAlignmentController({
         },
         onReceipt: receiveAcceptedReceipt,
       });
+      cascadeTracker = createCascadeTracker(tuple.playbackPlan?.cells || []);
       if (
         tuple.masterProjectHash !== authoringView.base.authoringProjectHash
         || tuple.masterRevision !== authoringView.base.revision

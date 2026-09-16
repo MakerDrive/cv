@@ -159,25 +159,70 @@ the double `pause/play` preroll that normalizes deferred presentation consumes
 most of that grace, so a slow host main thread can miss the clock once and the
 player applies its bounded scene setup retry. Keep entry lead-ins lean.
 
-## Failure semantics: AUTO REWIND IS FORBIDDEN
+## Failure semantics: AUTO REWIND after narration start is forbidden
 
-Runtime never moves the narration playhead backwards inside a playback epoch
-as a failure recovery. Faults route through `resolveFailureRecovery`
+Precise monotonicity contract (do not overstate it):
+
+- **Once the narration of an entry has physically started** (the media
+  element emitted `playing`), no runtime failure may re-present that entry
+  from position zero. Rewind is only possible via an explicit user action
+  (retry / replay / navigation).
+- **Before the first `playing`** of an entry, a bounded scene-setup retry is
+  allowed: nothing audible was heard, so this is a pause-retry of scene
+  preparation, not a replay.
+
+Faults route through `resolveFailureRecovery`
 (`src/static-pages/js/tour-player/failurePolicy.js`) by cell kind, layer,
-authored policy and failure code:
+authored policy, failure code and whether narration has started:
 
-- decorative (focus/annotation) failures degrade in place: the adapter
+- decorative (focus/annotation) failures **degrade in place**: the adapter
   completes the operation with a degraded lifecycle receipt
-  (`providerReceipt.degraded`), soft `settled` barriers open, and dependent
+  (`providerReceipt.degraded`, `outcome`, `fallback`, `original` — the
+  original provider rejection), soft `settled` barriers open, and dependent
   visual cells continue; narration is untouched;
-- decorative deadline races that already started degrade through pump
-  tolerance: the failed terminal is kept, never escalated, and the dependent
-  chain expires with the media clock instead of deadlocking the entry;
+- decorative failures that terminalize engine-side (deadline race after
+  activation) use the explicit **skip-branch** strategy: the failed terminal
+  is kept and tolerated, the pump never escalates it, and dependent visual
+  cells whose barriers can no longer open expire with the media clock. Each
+  such expiry is annotated `outcome: 'dependency-failed'` with
+  `cascadeFrom` / `rootCauseCellId`, so the aggregate report attributes the
+  entire dropped visual branch to one root failure instead of N independent
+  skips;
 - interaction/state failures pause and retry the scene setup locally while
   narration has not started, or pause-and-report afterwards;
 - audio/narration critical failures pause-and-report; replay is only possible
   through an explicit user action.
 
 Each show ends with `portfolio-show-complete` carrying a receipt summary
-(`success / degraded / skipped / failedCritical`, grouped by reason and
-fallback), which is the base for automated preview validation.
+(`success / degraded / skipped / cascadeSkipped / failedCritical`,
+`byReason`, `byFallback`, `cascadeByRoot`), counted per unique cell with
+precedence `failed > degraded > skipped > success`. This is the base for
+automated preview validation.
+
+### Startup contract
+
+Distinguish two startup failure domains; they are not interchangeable:
+
+- **Resource / load latency** (clip fetch, slow decode, first entry preroll):
+  wall-clock grace applies; a critical deadline hit pauses with a retry
+  affordance. Patch D may tune this.
+- **Browser autoplay / user-activation gating**: not a timing problem at
+  all — extending grace cannot fix a rejected `play()`. The show start must
+  be treated as a user-activation-scoped contract and handled by explicit
+  readiness logic, not by deadlines.
+
+### Known shims and strategic debt (A–C scope)
+
+- **Synthetic `within-budget` admission.** When a decorative provider
+  admission is rejected, the adapter reports a synthetic admitted plan so
+  the engine can finish the lifecycle. The synthetic
+  `reason.code === 'within-budget'` is **not** semantic truth: machine
+  observability must read `providerReceipt.degraded / outcome / original`
+  from the receipts, never infer success from the synthetic admission.
+- **skip-branch is a host-side strategy, not the ideal end state.** The
+  engine's barriers are private; a host cannot open a `settled` barrier for
+  a cell whose upgrade path degraded mid-flight. The long-term model belongs
+  in the engine: first-class terminal outcomes (`completed / degraded /
+  skipped / failed`) and barriers that declare which outcomes satisfy them.
+  Until that lands upstream, skip-branch with cascade receipts is the
+  sanctioned mechanism.

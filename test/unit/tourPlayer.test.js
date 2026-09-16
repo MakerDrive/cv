@@ -1070,6 +1070,8 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
       failedCritical: 0,
       byReason: {},
       byFallback: {},
+      cascadeSkipped: 0,
+      cascadeByRoot: {},
     },
   }]);
   assert.deepEqual(stoppedStartEvents, []);
@@ -1724,6 +1726,8 @@ test('detail admission rejects stale live media before branch or presentation mu
         failedCritical: 0,
         byReason: {},
         byFallback: {},
+        cascadeSkipped: 0,
+        cascadeByRoot: {},
       },
     }],
     'terminal detail return closes the external Show lifecycle with completion semantics',

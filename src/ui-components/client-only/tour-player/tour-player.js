@@ -1683,8 +1683,10 @@ export class PortfolioShowChat extends HTMLElement {
       layerId,
       policy,
       code: String(failure.code || ''),
-      // AUTO REWIND IS FORBIDDEN: once this entry's narration has physically
-      // started, no recovery may re-present it from position zero.
+      // Monotonicity contract: once this entry's narration has physically
+      // started (first media `playing`), automatic rewind is forbidden.
+      // Before narration starts, a bounded scene-setup retry is allowed
+      // because nothing audible has been played yet.
       narrationStarted: this.#alignedEntry?.entryId === entryId
         && this.#alignedEntry?.runtime?.hasPlaybackStarted === true,
     };

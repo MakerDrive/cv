@@ -152,27 +152,139 @@ export function resolveFailureRecovery({
   return CV_SHOW_RECOVERY.PAUSE_REPORT;
 }
 
+export const CV_SHOW_RECOVERY_SKIP_BRANCH = 'skip-branch';
+
 /**
- * Per-show aggregate of presentation receipts. Distinguishes lifecycle
- * completion from semantic success: a cell whose visual intent degraded is
- * counted separately and keeps its machine-readable reason/fallback so the
- * preview/self-healing loop can target it.
+ * Whether a presentation receipt records a terminal failure of a cell.
+ * Present in both shapes: engine receipts (top-level cellId/status) and the
+ * pump-path envelope (details.cellId / details.terminalStatus).
  */
+export function isTerminalFailureReceipt(receipt) {
+  if (!receipt || typeof receipt !== 'object') return false;
+  return String(receipt.status || receipt.details?.terminalStatus || '') === 'failed';
+}
+
+/**
+ * Builds the dependency graph of a playback plan so an engine-side tolerated
+ * failure can be traced into an explicit cascade: every cell downstream of a
+ * tolerated failed cell is skipped as part of a `skip-branch` recovery, and
+ * each cascade receipt carries:
+ *
+ *   outcome:         'dependency-failed'
+ *   cascadeFrom:     the direct failed/ancestor cell this skip follows from
+ *   rootCauseCellId: the original tolerated failure that started the cascade
+ *
+ * The outcome map is cellId -> rootCause tracking so multi-level cascades
+ * report the same root.
+ */
+export function createCascadeTracker(cells) {
+  const deps = new Map();
+  for (const cell of cells || []) {
+    const id = String(cell?.id || cell?.cellId || '');
+    if (!id) continue;
+    deps.set(id, (cell.dependsOn || []).map((dep) => String(dep.cellId || '')));
+  }
+  const roots = new Map(); // failedCellId -> rootCause
+  const cascaded = new Map(); // skippedCellId -> { cascadeFrom, rootCauseCellId }
+  /** @param {string} cellId */
+  const markFailure = (cellId) => {
+    roots.set(String(cellId), String(cellId));
+  };
+  /**
+   * @param {string} cellId terminal-skipped cell
+   * @returns {{ cascadeFrom: string, rootCauseCellId: string } | null}
+   */
+  const classifySkip = (cellId) => {
+    const id = String(cellId || '');
+    const parents = deps.get(id) || [];
+    for (const parent of parents) {
+      if (roots.has(parent)) {
+        const rootCauseCellId = roots.get(parent);
+        cascaded.set(id, Object.freeze({ cascadeFrom: parent, rootCauseCellId }));
+        return cascaded.get(id);
+      }
+      if (cascaded.has(parent)) {
+        const ancestor = cascaded.get(parent);
+        cascaded.set(id, Object.freeze({
+          cascadeFrom: parent,
+          rootCauseCellId: ancestor.rootCauseCellId,
+        }));
+        return cascaded.get(id);
+      }
+    }
+    return null;
+  };
+  return Object.freeze({
+    markFailure,
+    classifySkip,
+    get cascadeByRoot() {
+      const groups = {};
+      for (const [, value] of cascaded) {
+        const root = value.rootCauseCellId;
+        groups[root] = (groups[root] || 0) + 1;
+      }
+      return Object.freeze({ ...groups });
+    },
+    get cascadeSkippedCount() {
+      return cascaded.size;
+    },
+  });
+}
 export function createPresentationReceiptSummary() {
   const degradedCells = new Map();
-  const seenTerminal = new Set();
+  const outcomes = new Map(); // cellId -> { klass, rootCauseCellId? }
   const summary = {
     success: 0,
     degraded: 0,
     skipped: 0,
+    cascadeSkipped: 0,
     failedCritical: 0,
     byReason: {},
     byFallback: {},
+    cascadeByRoot: {},
+  };
+  const PRIORITY = {
+    failed: 4,
+    degraded: 3,
+    'cascade-skipped': 2,
+    skipped: 2,
+    success: 1,
   };
   const bump = (bucket, key) => {
     const name = String(key || '');
     if (!name) return;
     bucket[name] = (bucket[name] || 0) + 1;
+  };
+  const decrement = (klass, rootCauseCellId) => {
+    if (klass === 'success') summary.success -= 1;
+    else if (klass === 'degraded') summary.degraded -= 1;
+    else if (klass === 'skipped') summary.skipped -= 1;
+    else if (klass === 'cascade-skipped') {
+      summary.cascadeSkipped -= 1;
+      if (rootCauseCellId) {
+        summary.cascadeByRoot[rootCauseCellId] = Math.max(
+          0,
+          (summary.cascadeByRoot[rootCauseCellId] || 0) - 1,
+        );
+      }
+    } else if (klass === 'failed') summary.failedCritical -= 1;
+  };
+  const setOutcome = (cellId, klass, meta = {}) => {
+    if (!cellId) return;
+    const previous = outcomes.get(cellId);
+    if (previous) {
+      if (PRIORITY[previous.klass] >= PRIORITY[klass]) return;
+      decrement(previous.klass, previous.rootCauseCellId);
+    }
+    outcomes.set(cellId, { klass, ...meta });
+    if (klass === 'success') summary.success += 1;
+    else if (klass === 'degraded') summary.degraded += 1;
+    else if (klass === 'skipped') summary.skipped += 1;
+    else if (klass === 'cascade-skipped') {
+      summary.cascadeSkipped += 1;
+      const root = String(meta.rootCauseCellId || '');
+      if (root) summary.cascadeByRoot[root] = (summary.cascadeByRoot[root] || 0) + 1;
+    } else if (klass === 'failed') summary.failedCritical += 1;
   };
   return Object.freeze({
     /** @param {object} receipt */
@@ -200,33 +312,35 @@ export function createPresentationReceiptSummary() {
         }));
       }
       const status = String(receipt.status || '');
-      // The engine emits per-cell *terminal* receipts for skipped/failed and
-      // milestone receipts for healthy completion; a cell's final milestone
-      // ('ended' for audio, 'settled' for attention/interaction, 'ready' for
-      // state) is its success signal. Count exactly one class per cell.
-      const isSuccessMilestone = ['ended', 'settled', 'ready'].includes(status);
-      if (!isSuccessMilestone && !['skipped', 'failed'].includes(status)) {
-        return summary;
-      }
-      const terminalKey = `${cellId}:${status}`;
-      if (seenTerminal.has(terminalKey)) return summary;
-      seenTerminal.add(terminalKey);
-      if (isSuccessMilestone) {
+      if (['ended', 'settled', 'ready'].includes(status)) {
         const degradation = degradedCells.get(cellId);
         if (degradation) {
-          summary.degraded += 1;
+          setOutcome(cellId, 'degraded', {
+            reason: degradation.reason,
+            fallback: degradation.fallback,
+          });
           bump(summary.byReason, degradation.reason || 'degraded');
           bump(summary.byFallback, degradation.fallback || 'none');
         } else {
-          summary.success += 1;
+          setOutcome(cellId, 'success');
         }
       } else if (status === 'skipped') {
-        summary.skipped += 1;
+        const cascade = providerReceipt && providerReceipt.outcome === 'dependency-failed'
+          ? providerReceipt
+          : null;
+        if (cascade) {
+          setOutcome(cellId, 'cascade-skipped', {
+            reason: 'dependency-failed',
+            rootCauseCellId: String(cascade.rootCauseCellId || ''),
+          });
+        } else {
+          setOutcome(cellId, 'skipped');
+        }
       } else if (status === 'failed') {
-        summary.failedCritical += 1;
         const code = typeof receipt.reason === 'string'
           ? receipt.reason
           : String(receipt.reason?.code || '');
+        setOutcome(cellId, 'failed', { reason: code });
         bump(summary.byReason, code || 'failed');
       }
       return summary;
@@ -236,9 +350,11 @@ export function createPresentationReceiptSummary() {
         success: summary.success,
         degraded: summary.degraded,
         skipped: summary.skipped,
+        cascadeSkipped: summary.cascadeSkipped,
         failedCritical: summary.failedCritical,
         byReason: Object.freeze({ ...summary.byReason }),
         byFallback: Object.freeze({ ...summary.byFallback }),
+        cascadeByRoot: Object.freeze({ ...summary.cascadeByRoot }),
       });
     },
   });
