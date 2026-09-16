@@ -22,6 +22,7 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
   'js/index.js',
   'js/markdown-viewer/index.js',
   'js/tour-player/index.js',
+  'js/live-observation/index.js',
   'js/ForceWorker.js'
 ]);
 

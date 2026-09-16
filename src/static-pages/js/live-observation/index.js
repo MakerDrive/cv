@@ -1,0 +1,205 @@
+/**
+ * CV live semantic observation (Slice A — read-only).
+ *
+ * Publishes a WebMCP `live_inspect` tool backed by the generic
+ * symbiote-ui live-observation contract. It answers questions about the
+ * LIVE APPLICATION state — which panels and which portfolio tree nodes
+ * exist, what state they are in, and which semantic transitions they
+ * support in that state. It never mutates the UI, and it never exposes
+ * CSS selectors, DOM paths, or coordinates to the caller; target ids are
+ * semantic (`panel.<id>`, `tree.<id>`) and survive remounts because they
+ * derive from the application model (panel ids, tree ids), not from any
+ * concrete element instance.
+ */
+import {
+  createLiveInspectToolDescriptor,
+  createLiveObservationRegistry,
+} from 'symbiote-ui/webmcp/live-observation';
+import { registerWebMcpTool } from 'symbiote-ui/webmcp';
+
+export const CV_LIVE_INSPECT_TOOL_NAME = 'live_inspect';
+
+function normalizedText(value) {
+  return String(value ?? '').trim();
+}
+
+function isVisible(element, doc) {
+  if (!element?.isConnected) return false;
+  const rect = element.getBoundingClientRect?.();
+  if (rect && rect.width <= 0 && rect.height <= 0) {
+    const style = doc?.defaultView?.getComputedStyle?.(element);
+    if (!style || style.display === 'none' || style.visibility === 'hidden') return false;
+  }
+  return true;
+}
+
+function panelIdOf(element) {
+  // Panel identity is semantic: the hosted panel component (e.g.
+  // <portfolio-tree-panel>) names the logical panel; the layout node is
+  // just its current shell and may be re-created by the layout engine.
+  const hosted = Array.from(element?.querySelectorAll?.('*') || [])
+    .find((child) => normalizedText(child.localName).endsWith('-panel'))
+    || Array.from(element?.children || [])
+      .find((child) => normalizedText(child.localName).endsWith('-panel'))
+    || null;
+  const tag = normalizedText(hosted?.localName);
+  if (tag) return tag.replace(/-panel$/, '');
+  return normalizedText(element?.dataset?.panelId)
+    || normalizedText(element?.getAttribute?.('panel-id'))
+    || normalizedText(element?.id);
+}
+
+/**
+ * Observation of layout panels: `panel.<panel-id>` targets. Presence:
+ * - present   — the layout node exists and renders visibly;
+ * - hidden    — the node exists but is not visible (collapsed rail or
+ *               zero-size drawer still reports its semantic state);
+ * - unmounted — the application has no such panel right now
+ *               (reported only for ids from the observed universe).
+ * State follows the layout contract: `collapsed` mirrors the host
+ * attribute. Capabilities are advertised by semantic role: a panel can
+ * always support open/close; availability flips with the state.
+ * @param {Document} doc
+ */
+function createPanelProvider(doc) {
+  const collect = () => {
+    const nodes = Array.from(doc?.querySelectorAll?.('layout-node[node-type="panel"]') || []);
+    const observations = [];
+    const seen = new Set();
+    for (const node of nodes) {
+      const id = panelIdOf(node);
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      const collapsed = node.hasAttribute?.('collapsed') || node.hasAttribute?.('auto-collapsed') || false;
+      const visible = isVisible(node, doc);
+      observations.push({
+        targetId: `panel.${id}`,
+        role: 'panel',
+        component: node.localName || 'layout-node',
+        presence: visible ? 'present' : 'hidden',
+        visibility: visible ? 'visible' : 'hidden',
+        state: { collapsed },
+        capabilities: {
+          supported: ['open', 'close'],
+          available: collapsed ? ['open'] : ['close'],
+          unavailable: collapsed
+            ? [{ id: 'close', reason: 'already-closed' }]
+            : [{ id: 'open', reason: 'already-open' }],
+        },
+      });
+    }
+    return observations;
+  };
+  return {
+    id: 'cv-panels',
+    targetIdPrefix: 'panel.',
+    /** @param {{ targetId?: string }} [request] */
+    observe({ targetId } = {}) {
+      const all = collect();
+      if (!targetId) return all;
+      const id = normalizedText(targetId).slice('panel.'.length);
+      const found = all.find((entry) => entry.targetId === targetId);
+      if (found) return [found];
+      // Known-vs-unknown distinction: a layout exists, but no panel with
+      // this id — the target is unknown to the application.
+      if (!id || !doc?.querySelector?.('panel-layout')) return [];
+      return [{
+        targetId,
+        role: 'panel',
+        presence: 'unmounted',
+        state: {},
+        capabilities: {
+          supported: ['open', 'close'],
+          available: [],
+          unavailable: [
+            { id: 'open', reason: 'not-mounted' },
+            { id: 'close', reason: 'not-mounted' },
+          ],
+        },
+      }];
+    },
+  };
+}
+
+/**
+ * Observation of portfolio tree rows: `tree.<tree-id>` targets.
+ * `tree-id` comes from the tree model (e.g. `projects/symbiote-engine`),
+ * so identity is stable across re-renders and virtualization-style
+ * remounts. Selection is read from the tree's ARIA state.
+ * @param {Document} doc
+ */
+function createTreeProvider(doc) {
+  const rows = () => Array.from(doc?.querySelectorAll?.('.sn-tree-row[data-tree-id]') || []);
+  const collect = () => rows().map((row) => {
+    const treeId = normalizedText(/** @type {any} */ (row).dataset.treeId);
+    const selected = row.getAttribute?.('aria-selected') === 'true';
+    const visible = isVisible(row, doc);
+    return {
+      targetId: `tree.${treeId}`,
+      role: 'tree-item',
+      component: 'sn-tree-row',
+      presence: visible ? 'present' : 'hidden',
+      visibility: visible ? 'visible' : 'hidden',
+      state: { selected },
+      capabilities: {
+        supported: ['select', 'deselect'],
+        available: selected ? ['deselect'] : ['select'],
+        unavailable: selected
+          ? [{ id: 'select', reason: 'already-selected' }]
+          : [{ id: 'deselect', reason: 'not-selected' }],
+      },
+    };
+  });
+  return {
+    id: 'cv-tree',
+    targetIdPrefix: 'tree.',
+    /** @param {{ targetId?: string }} [request] */
+    observe({ targetId } = {}) {
+      const all = collect();
+      if (!targetId) return all;
+      const found = all.find((entry) => entry.targetId === targetId);
+      return found ? [found] : [];
+    },
+  };
+}
+
+/**
+ * Creates the CV live observation surface.
+ * @param {{ document?: Document }} [options]
+ */
+export function createCvLiveObservation(options = {}) {
+  const doc = options.document || (typeof document !== 'undefined' ? document : null);
+  const registry = createLiveObservationRegistry({
+    document: doc,
+    providers: [createPanelProvider(doc), createTreeProvider(doc)],
+  });
+  const descriptor = createLiveInspectToolDescriptor(registry, {
+    name: CV_LIVE_INSPECT_TOOL_NAME,
+    description: [
+      'Read-only semantic observation of the live CV application UI.',
+      'Query a semantic target id (panel.<id>, tree.<id>) or omit it to',
+      'list all observable targets with their current state, supported',
+      'capabilities, and available transitions. Never mutates the UI.',
+    ].join(' '),
+  });
+  return Object.freeze({ registry, descriptor, dispose: () => registry.dispose() });
+}
+
+/**
+ * Registers the live-inspect tool with the page WebMCP surface. A no-op
+ * when WebMCP is unavailable (plain browsers, tests): the observation
+ * engine itself stays callable through the returned handle.
+ * @param {{ document?: Document }} [options]
+ */
+export async function setupCvLiveObservation(options = {}) {
+  const surface = createCvLiveObservation(options);
+  const registration = await registerWebMcpTool(surface.descriptor, options.document || globalThis.document);
+  return Object.freeze({
+    ...surface,
+    registration,
+    dispose() {
+      surface.dispose();
+      registration?.unregister?.();
+    },
+  });
+}

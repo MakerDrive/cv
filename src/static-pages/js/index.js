@@ -3850,6 +3850,17 @@ class PortfolioWorkspace extends HTMLElement {
     document.addEventListener('cascade-theme-open-full', this._onThemeOpenFull);
     document.addEventListener('portfolio-open-materials', this._onOpenMaterials);
     layout.setLayout(createPortfolioLayoutTree());
+    // Read-only live semantic observation (Slice A). Registration is a
+    // no-op when the browser has no native WebMCP model context; the
+    // handle stays reachable for tests via the workspace element.
+    // Loaded as a runtime asset (not bundled into the main chunk), like
+    // the tour player and markdown viewer entrypoints.
+    import(createRuntimeAssetUrl('js/live-observation/index.js').href)
+      .then((module) => module.setupCvLiveObservation({ document }))
+      .then((surface) => {
+        this._disposeLiveObservation = () => surface.dispose();
+      })
+      .catch(() => {});
   }
 
   disconnectedCallback() {
@@ -3859,6 +3870,8 @@ class PortfolioWorkspace extends HTMLElement {
     if (this._onOpenMaterials) {
       document.removeEventListener('portfolio-open-materials', this._onOpenMaterials);
     }
+    this._disposeLiveObservation?.();
+    this._disposeLiveObservation = null;
     this._disposeTour?.();
   }
 }
