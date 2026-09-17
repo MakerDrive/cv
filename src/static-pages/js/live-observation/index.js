@@ -12,12 +12,15 @@
  * concrete element instance.
  */
 import {
+  createLiveEnsureToolDescriptor,
   createLiveInspectToolDescriptor,
   createLiveObservationRegistry,
 } from 'symbiote-ui/webmcp/live-observation';
 import { registerWebMcpTool } from 'symbiote-ui/webmcp';
+import { createEnsureController } from 'symbiote-workspace/browser';
 
 export const CV_LIVE_INSPECT_TOOL_NAME = 'live_inspect';
+export const CV_LIVE_ENSURE_TOOL_NAME = 'live_ensure';
 
 function normalizedText(value) {
   return String(value ?? '').trim();
@@ -85,6 +88,10 @@ function createPanelProvider(doc) {
           unavailable: collapsed
             ? [{ id: 'close', reason: 'already-closed' }]
             : [{ id: 'open', reason: 'already-open' }],
+          effects: {
+            open: { collapsed: false },
+            close: { collapsed: true },
+          },
         },
       });
     }
@@ -186,20 +193,110 @@ export function createCvLiveObservation(options = {}) {
 }
 
 /**
- * Registers the live-inspect tool with the page WebMCP surface. A no-op
- * when WebMCP is unavailable (plain browsers, tests): the observation
- * engine itself stays callable through the returned handle.
+ * Locates the layout-node for a semantic panel id and its hosting layout.
+ * Returns null when either side is missing — never falls back to guesses.
+ * @param {Document} doc
+ * @param {string} panelId
+ */
+function findPanelHost(doc, panelId) {
+  const nodes = Array.from(doc?.querySelectorAll?.('layout-node[node-type="panel"]') || []);
+  const node = nodes.find((entry) => panelIdOf(entry) === panelId);
+  if (!node) return null;
+  const layout = typeof node.closest === 'function' ? node.closest('panel-layout') : null;
+  if (!layout) return null;
+  return { node, layout };
+}
+
+/**
+ * Semantic transition invoker for the CV live surface. Panel transitions go
+ * through the public `panel-layout` API (`openPanel` / `closeUiPanel`) —
+ * never through direct attribute or class mutation. Unknown targets or
+ * unsupported transitions return null so the caller reports "no-transition"
+ * instead of pretending to have reconciled.
+ * @param {Document} doc
+ */
+function createCvTransitionInvoker(doc) {
+  return async ({ targetId, transitionId }) => {
+    const target = normalizedText(targetId);
+    if (!target.startsWith('panel.')) return null;
+    const host = findPanelHost(doc, target.slice('panel.'.length));
+    if (!host) return null;
+    const layout = /** @type {any} */ (host.layout);
+    if (transitionId === 'open' && typeof layout.openPanel === 'function') {
+      layout.openPanel(target.slice('panel.'.length), { uiInvoked: true });
+      return { transitionId, applied: 'openPanel' };
+    }
+    if (transitionId === 'close' && typeof layout.closeUiPanel === 'function') {
+      layout.closeUiPanel(target.slice('panel.'.length));
+      return { transitionId, applied: 'closeUiPanel' };
+    }
+    return null;
+  };
+}
+
+/**
+ * Creates the CV live ensure surface (Slice B): ensure(target, state)
+ * delegated to the generic workspace controller over the Slice A registry,
+ * with semantic invokers provided by this host.
+ * @param {{ document?: Document, registry?: any }} [options]
+ */
+export function createCvLiveEnsure(options = {}) {
+  const doc = options.document || (typeof document !== 'undefined' ? document : null);
+  const ownedRegistry = options.registry || createLiveObservationRegistry({
+    document: doc,
+    providers: [createPanelProvider(doc), createTreeProvider(doc)],
+  });
+  const registry = ownedRegistry;
+  const controller = createEnsureController({
+    observe: (request) => registry.observe(request),
+    invokeTransition: createCvTransitionInvoker(doc),
+  });
+  const descriptor = createLiveEnsureToolDescriptor(
+    ({ targetId, state, sync }) => controller.ensure(targetId, state, { sync }),
+    {
+      name: CV_LIVE_ENSURE_TOOL_NAME,
+      description: [
+        'Semantic reconciliation of the live CV application UI:',
+        'ensure(panel.<id>, { collapsed: false }) observes the panel,',
+        'invokes the available open/close transition through the layout',
+        'public API, and verifies the result by re-observation.',
+      ].join(' '),
+    },
+  );
+  return Object.freeze({
+    registry,
+    controller,
+    descriptor,
+    dispose: () => { if (!options.registry) registry.dispose(); },
+  });
+}
+
+/**
+ * Registers the live-inspect and live-ensure tools with the page WebMCP
+ * surface. A no-op when WebMCP is unavailable (plain browsers, tests): the
+ * observation engine itself stays callable through the returned handle.
  * @param {{ document?: Document }} [options]
  */
 export async function setupCvLiveObservation(options = {}) {
-  const surface = createCvLiveObservation(options);
-  const registration = await registerWebMcpTool(surface.descriptor, options.document || globalThis.document);
+  const inspectSurface = createCvLiveObservation(options);
+  const ensureSurface = createCvLiveEnsure({ ...options, registry: inspectSurface.registry });
+  const inspectRegistration = await registerWebMcpTool(
+    inspectSurface.descriptor, options.document || globalThis.document,
+  );
+  const ensureRegistration = await registerWebMcpTool(
+    ensureSurface.descriptor, options.document || globalThis.document,
+  );
   return Object.freeze({
-    ...surface,
-    registration,
+    registry: inspectSurface.registry,
+    descriptor: inspectSurface.descriptor,
+    ensureController: ensureSurface.controller,
+    ensureDescriptor: ensureSurface.descriptor,
+    registration: inspectRegistration,
+    ensureRegistration,
     dispose() {
-      surface.dispose();
-      registration?.unregister?.();
+      inspectSurface.dispose();
+      inspectRegistration?.unregister?.();
+      ensureRegistration?.unregister?.();
     },
   });
 }
