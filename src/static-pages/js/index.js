@@ -1045,8 +1045,9 @@ function getCvShowStartHref() {
   for (let name of ['showMode', 'showEntry', 'showTime', 'showDetail', 'showPlay']) {
     url.searchParams.delete(name);
   }
+  // Canonical show start: composition identity only (global time 0 is the
+  // default). No showEntry in the canonical URL.
   url.searchParams.set('showMode', 'short');
-  url.searchParams.set('showEntry', 'positioning');
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
@@ -1073,7 +1074,7 @@ function shouldHandleCvShowStartActivation(event, anchor, options = {}) {
   return targetUrl.origin === currentUrl.origin
     && targetUrl.pathname === baseUrl.pathname
     && targetUrl.searchParams.get('showMode') === 'short'
-    && targetUrl.searchParams.get('showEntry') === 'positioning'
+    && !targetUrl.searchParams.has('showEntry')
     && !targetUrl.searchParams.has('showTime')
     && !targetUrl.searchParams.has('showDetail')
     && (playIntent == null || playIntent === '1');

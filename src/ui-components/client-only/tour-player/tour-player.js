@@ -31,6 +31,11 @@ import { describeCvShowMissingTarget, describeCvShowSpeechFailure } from '../../
 import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../../static-pages/data/cvShowWebAudioRelease.js';
 import { CV_SHOW_SCHEDULE_DURATIONS } from '../../../static-pages/data/cvShowScheduleDurations.js';
 import {
+  createCvShowCompositionTimeline,
+  cvShowGlobalTimeOf,
+  resolveCvShowCompositionAt,
+} from '../../../static-pages/js/tour-player/compositionTime.js';
+import {
   createCvShowMessageStreamController,
 } from '../../../static-pages/js/tour-player/messageStream.js';
 import {
@@ -293,6 +298,7 @@ export class PortfolioShowChat extends HTMLElement {
   #alignmentReady = Promise.resolve();
   #alignedEntry = null;
   #projectDurationMsByEntry = new Map();
+  #compositionTimelines = new Map();
   #detailReplacementByEntry = new Map();
   #lastExecutionReceipt = null;
   #lastAlignedReset = null;
@@ -545,19 +551,37 @@ export class PortfolioShowChat extends HTMLElement {
     });
   }
 
+  #compositionTimeline(mode) {
+    if (!this.#story) return null;
+    if (!this.#compositionTimelines.has(mode)) {
+      this.#compositionTimelines.set(mode, createCvShowCompositionTimeline(this.#story, mode));
+    }
+    return this.#compositionTimelines.get(mode);
+  }
+
   get routeSnapshot() {
     const currentEntry = this.#currentEntry();
     const activeBranchId = this.$.inBranch ? this.#session.snapshot.playback.episodeId : '';
     const branch = activeBranchId ? this.#story?.branches?.[activeBranchId] : null;
     const fallbackPosition = this.#pendingTransportIntent?.positionMs
       ?? this.#session.snapshot.playback.positionMs;
+    const localMs = this.$.isRunning
+      ? Math.round(this.#presentationPositionMs())
+      : Math.max(0, Math.round(Number(fallbackPosition) || 0));
+    const routeEntryId = branch?.sceneId || currentEntry?.id || '';
+    const timeSegmentId = branch?.id || currentEntry?.id || '';
+    const timeline = this.#compositionTimeline(this.#mode || 'short');
+    // The URL carries ONLY the global composition coordinate. The current
+    // entry/branch/local position are derived playback state — computed from
+    // the global coordinate by resolveCvShowCompositionAt, never vice versa.
+    const globalTimeMs = timeline && timeSegmentId
+      ? cvShowGlobalTimeOf(timeline, timeSegmentId, localMs)
+      : localMs;
     return Object.freeze({
       mode: this.#mode,
-      entryId: branch?.sceneId || currentEntry?.id || '',
+      entryId: routeEntryId,
       detailId: branch?.id || this.#pendingTransportIntent?.detailId || '',
-      timeMs: this.$.isRunning
-        ? Math.round(this.#presentationPositionMs())
-        : Math.max(0, Math.round(Number(fallbackPosition) || 0)),
+      timeMs: globalTimeMs,
       play: this.$.isRunning
         ? this.#playRequested
         : Boolean(this.#pendingTransportIntent?.play),
@@ -567,16 +591,29 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   /**
+   * Restores the show from a URL state. `timeMs` is the GLOBAL composition
+   * coordinate; entry, detail branch and the local media position are derived
+   * here through the single resolver — the route never names them.
    * @param {{ mode?: 'short' | 'full', entryId?: string, detailId?: string, timeMs?: number, play?: boolean }} [route]
    */
-  async applyShowRoute({ mode, entryId = '', detailId = '', timeMs = 0, play = true } = {}) {
+  async applyShowRoute({ mode, timeMs = 0, play = true } = {}) {
     if (!this.$.isReady || (mode !== 'short' && mode !== 'full')) return false;
     if (this.$.isRunning || this.#mode) this.stopShow({ reason: 'route-replace' });
+    const timeline = this.#compositionTimeline(mode);
+    if (!timeline) return false;
+    const resolved = resolveCvShowCompositionAt(timeline, timeMs);
+    if (!resolved) return false;
+    // Branch restore (short mode): the runtime starts the owning scene paused
+    // and then enters the branch at its local position. Full mode plays
+    // branches inline as ordinary playback entries.
+    const branchParentSceneId = resolved.branch && mode === 'short'
+      ? String(this.#story?.branches?.[resolved.detailId]?.sceneId || '')
+      : '';
     const transportRequestId = ++this.#transportRequestId;
     return this.#start(mode, {
-      entryId: String(entryId || ''),
-      detailId: String(detailId || ''),
-      positionMs: Math.max(0, Math.round(Number(timeMs) || 0)),
+      entryId: branchParentSceneId || resolved.entryId,
+      detailId: branchParentSceneId ? resolved.detailId : '',
+      positionMs: resolved.localMs,
       play: play !== false,
       routeDriven: true,
       transportRequestId,

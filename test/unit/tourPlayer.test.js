@@ -26,6 +26,10 @@ import {
   TOUR_SHORT_SEQUENCE,
 } from '../../src/static-pages/data/tourManifest.js';
 import { CV_SHOW_STORY } from '../../src/static-pages/data/tourScripts.js';
+import { createCvShowCompositionTimeline, cvShowGlobalTimeOf } from '../../src/static-pages/js/tour-player/compositionTime.js';
+const ROUTE_SHORT_TIMELINE = createCvShowCompositionTimeline(CV_SHOW_STORY, 'short');
+const globalRoute = (entryId, localMs = 0, play = false) => ({ mode: 'short', timeMs: cvShowGlobalTimeOf(ROUTE_SHORT_TIMELINE, entryId, localMs), play });
+const globalTimeOf = (entryId, localMs = 0) => cvShowGlobalTimeOf(ROUTE_SHORT_TIMELINE, entryId, localMs);
 import {
   CV_SHOW_AUDIO_RELEASE,
   CV_SHOW_PRESENTATION_PROJECT,
@@ -1041,12 +1045,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   const stoppedStartEvents = [];
   stopped.dock.addEventListener('portfolio-show-stop', (event) => stopEvents.push(event.detail));
   stopped.dock.addEventListener('portfolio-show-start', (event) => stoppedStartEvents.push(event.detail));
-  const supersededStopStart = stopped.player.applyShowRoute({
-    mode: 'short',
-    entryId: 'positioning',
-    timeMs: 2_345,
-    play: true,
-  });
+  const supersededStopStart = stopped.player.applyShowRoute(globalRoute("positioning", 2345, true));
   assert.equal(stopped.mounts, 1, 'the shared player mounts before narration preparation settles');
   stopped.config.controller.stop();
   assert.equal(await supersededStopStart, false);
@@ -1056,9 +1055,9 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     reason: 'explicit',
     routeState: {
       mode: 'short',
-      entryId: 'positioning',
-      detailId: '',
-      timeMs: 2_345,
+      entryId: "positioning",
+      detailId: "",
+      timeMs: globalTimeOf("positioning", 2345),
       play: false,
       running: false,
       completed: false,
@@ -1083,12 +1082,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     pausedRouteStartEvents.push(event.detail);
   });
   const pausedRouteSpeechCount = spoken.length;
-  assert.equal(await pausedRoute.player.applyShowRoute({
-    mode: 'short',
-    entryId: 'positioning',
-    timeMs: 0,
-    play: false,
-  }), true);
+  assert.equal(await pausedRoute.player.applyShowRoute(globalRoute("positioning", 0, false)), true);
   await Promise.resolve();
   assert.equal(spoken.length, pausedRouteSpeechCount, 'showPlay=0 does not queue browser speech');
   assert.deepEqual(pausedRouteStartEvents, []);
@@ -1098,23 +1092,18 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   assert.equal(pausedRoute.player.routeSnapshot.play, false);
 
   const pausedScrub = createFixture();
-  const pausedScrubRoute = pausedScrub.player.applyShowRoute({
-    mode: 'short',
-    entryId: 'positioning',
-    timeMs: 1_500,
-    play: false,
-  });
+  const pausedScrubRoute = pausedScrub.player.applyShowRoute(globalRoute("positioning", 1500, false));
   assert.equal(await pausedScrubRoute, true);
   await new Promise((resolve) => setImmediate(resolve));
   pausedScrub.config.controller.seek(1, 2_200);
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(pausedScrub.player.routeSnapshot.entryId, 'symbiote-workspace');
-  assert.equal(pausedScrub.player.routeSnapshot.timeMs, 2_200);
+  assert.equal(pausedScrub.player.routeSnapshot.timeMs, globalTimeOf(pausedScrub.player.routeSnapshot.entryId, 2_200));
   assert.equal(pausedScrub.player.routeSnapshot.play, false);
   pausedScrub.config.controller.play();
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(pausedScrub.player.routeSnapshot.entryId, 'symbiote-workspace');
-  assert.equal(pausedScrub.player.routeSnapshot.timeMs, 2_200);
+  assert.equal(pausedScrub.player.routeSnapshot.timeMs, globalTimeOf(pausedScrub.player.routeSnapshot.entryId, 2_200));
   assert.equal(pausedScrub.player.routeSnapshot.play, true);
   assert.equal(
     pausedScrub.showPlayer.states.at(-1)?.progress?.positionMs,
@@ -1128,12 +1117,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     pendingTrustedPlayStarts.push(event.detail);
   });
   const pendingTrustedPlaySpeechCount = spoken.length;
-  const pendingTrustedPlayRoute = pendingTrustedPlay.player.applyShowRoute({
-    mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 0,
-    play: false,
-  });
+  const pendingTrustedPlayRoute = pendingTrustedPlay.player.applyShowRoute(globalRoute("symbiote-workspace", 0, false));
   assert.equal(
     pendingTrustedPlay.mounts,
     1,
@@ -1164,12 +1148,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     cancelledPendingPlayStarts.push(event.detail);
   });
   const cancelledPendingPlaySpeechCount = spoken.length;
-  const cancelledPendingPlayRoute = cancelledPendingPlay.player.applyShowRoute({
-    mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 0,
-    play: false,
-  });
+  const cancelledPendingPlayRoute = cancelledPendingPlay.player.applyShowRoute(globalRoute("symbiote-workspace", 0, false));
   cancelledPendingPlay.config.controller.play();
   cancelledPendingPlay.config.controller.pause();
   assert.equal(await cancelledPendingPlayRoute, true);
@@ -1196,12 +1175,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     release(token) { releasedLeases.push(token); },
   };
   const pausedDuringLeaseSpeechCount = spoken.length;
-  const pausedDuringLeaseRoute = pausedDuringLease.player.applyShowRoute({
-    mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 0,
-    play: false,
-  });
+  const pausedDuringLeaseRoute = pausedDuringLease.player.applyShowRoute(globalRoute("symbiote-workspace", 0, false));
   pausedDuringLease.config.controller.play();
   assert.equal(await pausedDuringLeaseRoute, true);
   await leaseRequested;
@@ -1217,12 +1191,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
 
   const pendingSeekPlay = createFixture();
   const pendingSeekPlaySpeechCount = spoken.length;
-  const supersededPendingSeekRoute = pendingSeekPlay.player.applyShowRoute({
-    mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 0,
-    play: false,
-  });
+  const supersededPendingSeekRoute = pendingSeekPlay.player.applyShowRoute(globalRoute("symbiote-workspace", 0, false));
   pendingSeekPlay.config.controller.seek(1, 1_000);
   pendingSeekPlay.config.controller.play();
   assert.equal(await supersededPendingSeekRoute, false);
@@ -1243,12 +1212,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   const blockedResumeEvents = [];
   blocked.dock.addEventListener('portfolio-show-start', (event) => blockedStartEvents.push(event.detail));
   blocked.dock.addEventListener('portfolio-show-resume', (event) => blockedResumeEvents.push(event.detail));
-  assert.equal(await blocked.player.applyShowRoute({
-    mode: 'short',
-    entryId: 'positioning',
-    timeMs: 0,
-    play: true,
-  }), true);
+  assert.equal(await blocked.player.applyShowRoute(globalRoute("positioning", 0, true)), true);
   await new Promise((resolve) => setImmediate(resolve));
   const deniedUtterance = spoken.at(-1);
   deniedUtterance.onerror?.({ error: 'not-allowed' });
@@ -1296,12 +1260,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   restarted.dock.addEventListener('portfolio-show-start', (event) => restartedStartEvents.push(event.detail));
   restarted.dock.addEventListener('portfolio-show-stop', (event) => restartedStopEvents.push(event.detail));
   const restartedSpeechCount = spoken.length;
-  const supersededRestartStart = restarted.player.applyShowRoute({
-    mode: 'short',
-    entryId: 'symbiote-ui',
-    timeMs: 3_456,
-    play: true,
-  });
+  const supersededRestartStart = restarted.player.applyShowRoute(globalRoute("symbiote-ui", 3456, true));
   assert.equal(restarted.mounts, 1);
   restarted.config.controller.seek(0, 0);
   assert.equal(await supersededRestartStart, false);
@@ -1316,9 +1275,9 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   assert.equal(restarted.config.controller.isPlaying, false, 'requested play is pending physical narration');
   assert.deepEqual(restarted.player.routeSnapshot, {
     mode: 'short',
-    entryId: 'positioning',
-    detailId: '',
-    timeMs: 0,
+    entryId: "positioning",
+    detailId: "",
+    timeMs: globalTimeOf("positioning", 0),
     play: true,
     running: true,
     completed: false,
@@ -1632,9 +1591,9 @@ test('detail admission rejects stale live media before branch or presentation mu
   );
   assert.deepEqual(player.routeSnapshot, {
     mode: 'short',
-    entryId: 'positioning',
-    detailId: '',
-    timeMs: 0,
+    entryId: "positioning",
+    detailId: "",
+    timeMs: globalTimeOf("positioning", 0),
     play: restartWasPlaying,
     running: true,
     completed: false,
@@ -1712,9 +1671,9 @@ test('detail admission rejects stale live media before branch or presentation mu
       reason: 'explicit',
       routeState: {
         mode: 'short',
-        entryId: 'symbiote-ui',
-        detailId: '',
-        timeMs: 0,
+        entryId: "symbiote-ui",
+        detailId: "",
+        timeMs: globalTimeOf("symbiote-ui", 0),
         play: false,
         running: true,
         completed: true,
@@ -6259,12 +6218,7 @@ test('terminal narration errors keep the player controllable: Play repeats the s
   dock.append(player);
   document.body.append(dock);
 
-  assert.equal(await player.applyShowRoute({
-    mode: 'short',
-    entryId: 'positioning',
-    timeMs: 0,
-    play: false,
-  }), true);
+  assert.equal(await player.applyShowRoute(globalRoute("positioning", 0, false)), true);
 
   const messageCount = () => dock.textContent.length;
   const baseline = messageCount();
@@ -6364,12 +6318,7 @@ test('hiding the page pauses the show instead of burning cell deadlines', async 
   dock.append(player);
   document.body.append(dock);
 
-  assert.equal(await player.applyShowRoute({
-    mode: 'short',
-    entryId: 'positioning',
-    timeMs: 0,
-    play: true,
-  }), true);
+  assert.equal(await player.applyShowRoute(globalRoute("positioning", 0, true)), true);
   assert.equal(player.$.isRunning, true);
   assert.equal(player.$.isPaused, false);
 
@@ -6485,12 +6434,7 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
     }));
   };
 
-  assert.equal(await player.applyShowRoute({
-    mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 0,
-    play: true,
-  }), true);
+  assert.equal(await player.applyShowRoute(globalRoute("symbiote-workspace", 0, true)), true);
   await wait(10);
   spoken.at(-1)?.onstart?.();
   await wait(10);
@@ -6502,9 +6446,9 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
   assert.equal(player.$.inBranch, true, 'current-segment details replace the Short recording');
   assert.deepEqual(player.routeSnapshot, {
     mode: 'short',
-    entryId: 'symbiote-workspace',
-    detailId: 'workspace-details',
-    timeMs: 0,
+    entryId: "symbiote-workspace",
+    detailId: "workspace-details",
+    timeMs: globalTimeOf("workspace-details", 0),
     play: true,
     running: true,
     completed: false,
@@ -6523,7 +6467,7 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
   assert.equal(player.$.inBranch, true, 'seek into the replaced segment reopens the selected detail');
   assert.equal(player.routeSnapshot.detailId, 'workspace-details');
   assert.equal(player.routeSnapshot.entryId, 'symbiote-workspace');
-  assert.equal(player.routeSnapshot.timeMs, 2_000, 'the seek position belongs to the detail recording');
+  assert.equal(player.routeSnapshot.timeMs, globalTimeOf('workspace-details', 2_000), 'the seek position belongs to the detail recording');
   assert.equal(String(spoken.at(-1)?.text || ''), detailSpeech, 'seek plays the detail, not the Short clip');
 
   currentConfig().controller.pause();
@@ -6568,7 +6512,7 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
   assert.equal(player.$.inBranch, true, 'seek inside the active replacement detail stays in the detail');
   assert.equal(player.routeSnapshot.detailId, 'workspace-details');
   assert.equal(player.routeSnapshot.entryId, 'symbiote-workspace');
-  assert.equal(player.routeSnapshot.timeMs, 4_000, 'the rewound position belongs to the detail recording');
+  assert.equal(player.routeSnapshot.timeMs, globalTimeOf('workspace-details', 4_000), 'the rewound position belongs to the detail recording');
   assert.equal(player.$.isPaused, false, 'rewinding a playing detail keeps it playing');
   assert.ok(spoken.length > rewoundDetailSpeechIndex, 'the rewind restarts the detail narration');
   assert.equal(String(spoken.at(-1)?.text || ''), detailSpeech, 'the rewind plays the detail, not the Short clip');
@@ -6580,7 +6524,7 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
   assert.equal(player.$.inBranch, false, 'the natural end after the in-detail rewind continues Short');
   assert.equal(currentConfig().state.index, 2, 'the natural end after the rewind advances to the following Short');
   assert.equal(player.routeSnapshot.entryId, 'symbiote-ui');
-  assert.equal(player.routeSnapshot.timeMs, 0);
+  assert.equal(player.routeSnapshot.timeMs, globalTimeOf('symbiote-ui', 0));
   assert.equal(player.$.isPaused, false, 'the following Short keeps playing after the natural end');
 
   player.stopShow();
@@ -6679,12 +6623,7 @@ test('historical and terminal detail exits restore the interrupted Short checkpo
     }));
   };
 
-  assert.equal(await player.applyShowRoute({
-    mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 3_000,
-    play: false,
-  }), true);
+  assert.equal(await player.applyShowRoute(globalRoute("symbiote-workspace", 3000, false)), true);
   await wait(10);
   assert.equal(player.$.isRunning, true);
   assert.equal(player.$.isPaused, true);
@@ -6696,9 +6635,9 @@ test('historical and terminal detail exits restore the interrupted Short checkpo
   assert.equal(player.$.inBranch, true, 'details of an earlier card open as a contextual branch');
   assert.deepEqual(player.routeSnapshot, {
     mode: 'short',
-    entryId: 'symbiote-ui',
-    detailId: 'symbiote-ui-details',
-    timeMs: 0,
+    entryId: "symbiote-ui",
+    detailId: "symbiote-ui-details",
+    timeMs: globalTimeOf("symbiote-ui-details", 0),
     play: true,
     running: true,
     completed: false,
@@ -6850,12 +6789,7 @@ test('a seek back into a replaced segment runs the owner scene setup before the 
     }));
   };
 
-  assert.equal(await player.applyShowRoute({
-    mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 0,
-    play: true,
-  }), true);
+  assert.equal(await player.applyShowRoute(globalRoute("symbiote-workspace", 0, true)), true);
   await wait(10);
   spoken.at(-1)?.onstart?.();
   await wait(10);
@@ -7007,12 +6941,7 @@ test('an interrupted owner scene setup is re-run when the same replaced segment 
     }));
   };
 
-  assert.equal(await player.applyShowRoute({
-    mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 0,
-    play: true,
-  }), true);
+  assert.equal(await player.applyShowRoute(globalRoute("symbiote-workspace", 0, true)), true);
   await wait(10);
   spoken.at(-1)?.onstart?.();
   await wait(10);

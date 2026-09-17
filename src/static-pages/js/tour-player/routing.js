@@ -1,3 +1,20 @@
+/**
+ * CV Show routing around GLOBAL COMPOSITION TIME.
+ *
+ * Canonical URL contract (show playback):
+ *   ?showMode=short|full&showTime=<global composition ms>[&showPlay=0][&showCompleted=1]
+ *
+ * The URL never names an entry, branch, clip or local position: those are
+ * DERIVED through resolveCvShowCompositionAt(). Legacy links that still
+ * carry showEntry/showDetail are converted once and replaced with the
+ * canonical global coordinate (history.replaceState, no extra navigation).
+ */
+import {
+  createCvShowCompositionTimeline,
+  cvShowGlobalTimeOf,
+  resolveCvShowCompositionAt,
+} from './compositionTime.js';
+
 export const CV_SHOW_ROUTE_PARAMS = Object.freeze([
   'showMode',
   'showEntry',
@@ -32,53 +49,26 @@ function hasDuplicateShowParam(searchParams) {
   return CV_SHOW_ROUTE_PARAMS.some((name) => searchParams.getAll(name).length > 1);
 }
 
-function knownEntry(policy, mode, entryId) {
-  const entries = policy.entryIdsByMode?.[mode];
-  return entries?.has?.(entryId) ?? true;
-}
-
-function knownDetailParent(policy, detailId) {
-  return policy.detailParents?.[detailId];
-}
-
-function validDetail(policy, detailId, entryId) {
-  return knownDetailParent(policy, detailId) === entryId;
-}
-
-function knownDuration(policy, state) {
-  return Number(policy.getDurationMs?.(state));
-}
-
-function canonicalState({ mode, entryId, timeMs, detailId, play, completed }) {
-  return Object.freeze({
-    mode,
-    entryId,
-    timeMs,
-    detailId,
-    play,
-    completed: Boolean(completed),
-  });
-}
-
-function writeState(url, state) {
-  const nextUrl = stripCvShowRoute(url);
-  nextUrl.searchParams.set('showMode', state.mode);
-  nextUrl.searchParams.set('showEntry', state.entryId);
-  if (state.timeMs > 0) nextUrl.searchParams.set('showTime', String(state.timeMs));
-  if (state.detailId) nextUrl.searchParams.set('showDetail', state.detailId);
-  if (!state.play) nextUrl.searchParams.set('showPlay', '0');
-  return nextUrl;
+function resolveTimeline(policy, mode) {
+  const timeline = policy.timelineByMode?.[mode];
+  if (timeline?.segments?.length) return timeline;
+  return null;
 }
 
 /**
- * Parse and validate a CV Show URL without reading browser state.
+ * Parse and validate a CV Show URL against the global composition timeline.
+ *
+ * `showTime` is the single playback coordinate: global composition time in
+ * milliseconds. `showEntry`/`showDetail` are accepted ONLY as a legacy
+ * bridge and are converted to the canonical global coordinate; the returned
+ * state always exposes derived entry/detail/local fields so callers never
+ * re-parse the URL.
  *
  * @param {string | URL} value
  * @param {{
  *   baseUrl?: string | URL,
- *   entryIdsByMode?: { short?: any, full?: any },
- *   detailParents?: Record<string, string>,
- *   getDurationMs?: (state: any) => number,
+ *   timelineByMode?: { short?: object, full?: object },
+ *   story?: object,
  * }} [policy]
  */
 export function parseCvShowRoute(value, policy = {}) {
@@ -99,10 +89,11 @@ export function parseCvShowRoute(value, policy = {}) {
   const mode = params.get('showMode') || '';
   if (!CV_SHOW_MODES.has(mode)) return invalidResult('invalid-mode', url);
 
-  const entryId = String(params.get('showEntry') || '').trim();
-  if (!entryId || !knownEntry(policy, mode, entryId)) {
-    return invalidResult('invalid-entry', url);
-  }
+  const timeline = resolveTimeline(policy, mode)
+    || (policy.story
+      ? createCvShowCompositionTimeline(policy.story, /** @type {'short' | 'full'} */ (mode))
+      : null);
+  if (!timeline) return invalidResult('timeline-unavailable', url);
 
   const rawTime = params.get('showTime');
   if (rawTime !== null && !NON_NEGATIVE_INTEGER.test(rawTime)) {
@@ -110,12 +101,18 @@ export function parseCvShowRoute(value, policy = {}) {
   }
   let timeMs = rawTime === null ? 0 : Number(rawTime);
   if (!Number.isSafeInteger(timeMs)) return invalidResult('invalid-time', url);
+  timeMs = Math.min(timeMs, timeline.totalMs);
 
-  const detailId = String(params.get('showDetail') || '').trim();
-  if (detailId) {
-    if (mode !== 'short') return invalidResult('detail-requires-short-mode', url);
-    if (!validDetail(policy, detailId, entryId)) {
-      return invalidResult('invalid-detail', url);
+  const legacyEntryId = String(params.get('showEntry') || '').trim();
+  const legacyDetailId = String(params.get('showDetail') || '').trim();
+  let legacyTimeMs = 0;
+  if (legacyEntryId || legacyDetailId) {
+    // Legacy bridge: the URL carries a local position inside a named entry.
+    legacyTimeMs = timeMs;
+    timeMs = cvShowGlobalTimeOf(timeline, legacyDetailId || legacyEntryId, legacyTimeMs);
+    if (legacyDetailId) {
+      // Legacy detail links only exist for short mode.
+      if (mode !== 'short') return invalidResult('detail-requires-short-mode', url);
     }
   }
 
@@ -131,18 +128,24 @@ export function parseCvShowRoute(value, policy = {}) {
   }
   const completed = rawCompleted === '1';
 
-  const unclamped = { mode, entryId, timeMs, detailId, play, completed };
-  const durationMs = knownDuration(policy, unclamped);
-  if (Number.isFinite(durationMs) && durationMs >= 0) {
-    timeMs = Math.min(timeMs, Math.floor(durationMs));
-  }
+  const resolution = resolveCvShowCompositionAt(timeline, timeMs);
+  if (!resolution) return invalidResult('timeline-unavailable', url);
 
   return frozenResult({
     status: 'valid',
     reason: '',
-    state: canonicalState({ mode, entryId, timeMs, detailId, play, completed }),
+    state: Object.freeze({
+      mode,
+      timeMs,
+      localMs: resolution.localMs,
+      entryId: resolution.sceneId || resolution.detailId,
+      detailId: resolution.detailId,
+      play,
+      completed,
+    }),
     shouldStrip: false,
     url,
+    legacy: Boolean(legacyEntryId || legacyDetailId),
   });
 }
 
@@ -158,29 +161,30 @@ export function stripCvShowRoute(value, { baseUrl } = {}) {
 }
 
 /**
- * Serialize a validated semantic Show state into an existing URL.
- * Default time and play intent are omitted from the canonical form.
+ * Serialize a global composition position into the canonical show URL.
+ * The URL names ONLY the composition identity (mode) and the global time;
+ * entry/detail are never written — they are derived at parse time. Zero
+ * time is omitted (show start is the default). play defaults to true.
  */
 export function serializeCvShowRoute(value, state, policy = {}) {
   const draft = stripCvShowRoute(value, { baseUrl: policy.baseUrl });
   draft.searchParams.set('showMode', String(state?.mode || ''));
-  draft.searchParams.set('showEntry', String(state?.entryId || ''));
-  if (Number(state?.timeMs) !== 0) draft.searchParams.set('showTime', String(state?.timeMs));
-  if (state?.detailId) draft.searchParams.set('showDetail', String(state.detailId));
+  if (Number(state?.timeMs) > 0) draft.searchParams.set('showTime', String(Math.round(state.timeMs)));
   if (state?.play === false) draft.searchParams.set('showPlay', '0');
   if (state?.completed === true) draft.searchParams.set('showCompleted', '1');
   return draft;
 }
 
 /**
- * Return a canonical URL. Invalid Show state is removed without touching other
- * query parameters or the hash.
+ * Return a canonical URL. Invalid Show state is removed without touching
+ * other query parameters or the hash; legacy entry/detail parameters are
+ * rewritten to the canonical global coordinate.
  */
 export function canonicalizeCvShowRoute(value, policy = {}) {
   const original = toUrl(value, policy.baseUrl);
   const parsed = parseCvShowRoute(original, policy);
   const url = parsed.status === 'valid'
-    ? writeState(original, parsed.state)
+    ? serializeCvShowRoute(original, parsed.state, policy)
     : parsed.status === 'invalid' ? stripCvShowRoute(original) : original;
   return frozenResult({
     ...parsed,

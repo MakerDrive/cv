@@ -299,7 +299,8 @@ test('hidden CV transport persists Project time instead of raw source-audio time
   );
   assert.match(
     source,
-    /timeMs: this\.\$\.isRunning\s*\? Math\.round\(this\.#presentationPositionMs\(\)\)/u,
+    /routeSnapshot[\s\S]*?cvShowGlobalTimeOf\(timeline, timeSegmentId, localMs\)/u,
+    'route snapshot exposes only the global composition coordinate',
   );
   const playerTimelineSource = source.match(
     /function playerTimeline\([\s\S]*?\n\}/u,

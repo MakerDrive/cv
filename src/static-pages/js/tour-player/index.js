@@ -26,6 +26,10 @@ import {
   stripCvShowRoute,
 } from './routing.js';
 import {
+  cvShowGlobalTimeOf,
+  createCvShowCompositionTimeline,
+} from './compositionTime.js';
+import {
   animateCvShowScrollIntoView,
   createCvShowTextMarkerTarget,
   ensureCvShowArticleProject,
@@ -704,15 +708,12 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const routePolicy = () => {
     const view = cvShowRuntimeAuthority.getView();
     const story = view.story;
-    const detailParents = Object.fromEntries(
-      Object.values(story?.branches || {}).map((branch) => [branch.id, branch.sceneId]),
-    );
     return {
-      entryIdsByMode: {
-        short: new Set(createCvShowPlaybackEntries(story, 'short').map(({ id }) => id)),
-        full: new Set(createCvShowPlaybackEntries(story, 'full').map(({ id }) => id)),
+      story,
+      timelineByMode: {
+        short: createCvShowCompositionTimeline(story, 'short'),
+        full: createCvShowCompositionTimeline(story, 'full'),
       },
-      detailParents,
     };
   };
 
@@ -959,8 +960,17 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const scheduleRouteStateWrite = (state) => {
-    if (!state?.mode || !state.entryId) return;
-    const semanticKey = [state.mode, state.entryId, state.detailId, state.play ? '1' : '0'].join('|');
+    if (!state?.mode) return;
+    // Global composition time is the only written coordinate; entry/detail
+    // ids never enter the URL. Throttling keeps refresh-light replaceState
+    // writes at entry-boundary granularity instead of per-frame churn.
+    const semanticKey = [
+      state.mode,
+      state.entryId || '',
+      state.detailId || '',
+      state.play ? '1' : '0',
+      state.completed ? '1' : '0',
+    ].join('|');
     const immediate = semanticKey !== lastRouteSemanticKey;
     lastRouteSemanticKey = semanticKey;
     if (routeWriteTimer) clearTimeout(routeWriteTimer);
@@ -1041,7 +1051,18 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       ensureTourOpen();
       return;
     }
-    const state = { mode: 'short', entryId, detailId: '', timeMs: 0, play: true };
+    // The header intends "start the scene for this project" — convert the
+    // semantic entry intent into the canonical global coordinate once; the
+    // URL keeps only showMode + showTime.
+    const timeline = routePolicy().timelineByMode.short;
+    const state = {
+      mode: 'short',
+      timeMs: cvShowGlobalTimeOf(timeline, entryId, 0),
+      play: true,
+      // entryId stays in the in-memory state for the player; it never
+      // reaches the URL (serializer ignores it).
+      entryId,
+    };
     // An explicit header activation supersedes any load-time route
     // reconciliation that may still be writing the paused canonical URL.
     cancelPendingRouteWrite();

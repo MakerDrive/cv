@@ -15,20 +15,35 @@ import { shouldHandleInAppActivation } from '../../src/static-pages/js/portfolio
 import { coordinatePortfolioShowOverlays } from '../../src/static-pages/js/showOverlayCoordinator.js';
 import { resolveVisibleShowPlayer } from '../../src/static-pages/js/showPlayerResolver.js';
 
-const policy = Object.freeze({
-  entryIdsByMode: Object.freeze({
-    short: new Set(['positioning', 'symbiote-workspace']),
-    full: new Set(['positioning', 'symbiote-workspace', 'workspace-details']),
+import {
+  createCvShowCompositionTimeline,
+  cvShowGlobalTimeOf,
+  resolveCvShowCompositionAt,
+} from '../../src/static-pages/js/tour-player/compositionTime.js';
+import { CV_SHOW_SCHEDULE_DURATIONS } from '../../src/static-pages/data/cvShowScheduleDurations.js';
+import { CV_SHOW_PRESENTATION_PROJECT } from '../../src/static-pages/data/cvShowPresentationProject.js';
+import { projectCvShowStory } from '../../src/static-pages/js/tour-player/presentationProjectAdapter.js';
+
+// Two-scene fixture story with a detail branch. Durations come from the
+// generated release table — these ids are real authored entries.
+const fixtureStory = Object.freeze({
+  short: ['positioning', 'symbiote-workspace'],
+  scenes: Object.freeze([
+    { id: 'positioning' },
+    { id: 'symbiote-workspace', branchId: 'workspace-details' },
+  ]),
+  branches: Object.freeze({
+    'workspace-details': { id: 'workspace-details', sceneId: 'symbiote-workspace' },
   }),
-  detailParents: Object.freeze({
-    'workspace-details': 'symbiote-workspace',
-  }),
-  getDurationMs: ({ entryId, detailId }) => ({
-    positioning: 48_000,
-    'symbiote-workspace': 61_000,
-    'workspace-details': 37_930,
-  })[detailId || entryId],
 });
+const SHORT = createCvShowCompositionTimeline(fixtureStory, 'short');
+const FULL = createCvShowCompositionTimeline(fixtureStory, 'full');
+const policy = Object.freeze({
+  timelineByMode: Object.freeze({ short: SHORT, full: FULL }),
+});
+
+const POSITIONING_MS = CV_SHOW_SCHEDULE_DURATIONS.durations.positioning;
+const WORKSPACE_MS = CV_SHOW_SCHEDULE_DURATIONS.durations['symbiote-workspace'];
 
 async function loadCvShowStartHrefFactory(locationHref, basePath) {
   const source = await readFile(
@@ -81,7 +96,8 @@ test('profile CV Show link starts in the current document while preserving nativ
   const href = getCvShowStartHref();
   const showUrl = new URL(href, 'https://portfolio.example');
   assert.equal(showUrl.searchParams.get('showMode'), 'short');
-  assert.equal(showUrl.searchParams.get('showEntry'), 'positioning');
+  assert.equal(showUrl.searchParams.has('showEntry'), false, 'canonical start URL names no entry');
+  assert.equal(showUrl.searchParams.has('showTime'), false, 'start at global 0 is implicit');
   assert.equal(showUrl.searchParams.get('lang'), 'ru');
   assert.equal(showUrl.searchParams.get('mode'), 'structured');
   assert.equal(showUrl.hash, '#profile');
@@ -215,19 +231,21 @@ test('visible player resolver follows the stable player across host reparenting'
 });
 
 test('CV Show route round-trips semantic state and preserves unrelated URL state', () => {
+  const globalT = POSITIONING_MS + 24_000; // 24s into symbiote-workspace
   const source = new URL(
     'https://portfolio.example/cv/projects/symbiote-workspace/'
       + '?lang=ru&mode=structured&sn-theme=cascade'
-      + '&showMode=short&showEntry=symbiote-workspace&showTime=24000&showPlay=1'
+      + `&showMode=short&showTime=${globalT}&showPlay=1`
       + '#media-workspace',
   );
   const parsed = parseCvShowRoute(source, policy);
   assert.equal(parsed.status, 'valid');
   assert.deepEqual(parsed.state, {
     mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 24_000,
+    entryId: 'symbiote-workspace',   // DERIVED from the global time
     detailId: '',
+    localMs: 24_000,                  // DERIVED local media time
+    timeMs: globalT,
     play: true,
     completed: false,
   });
@@ -238,52 +256,100 @@ test('CV Show route round-trips semantic state and preserves unrelated URL state
   assert.equal(serialized.searchParams.get('sn-theme'), 'cascade');
   assert.equal(serialized.hash, '#media-workspace');
   assert.equal(serialized.searchParams.get('showMode'), 'short');
-  assert.equal(serialized.searchParams.get('showEntry'), 'symbiote-workspace');
-  assert.equal(serialized.searchParams.get('showTime'), '24000');
+  assert.equal(serialized.searchParams.has('showEntry'), false, 'entry must never be written');
+  assert.equal(serialized.searchParams.has('showDetail'), false, 'detail must never be written');
+  assert.equal(serialized.searchParams.get('showTime'), String(globalT), 'global time only');
   assert.equal(serialized.searchParams.has('showPlay'), false, 'default play intent is canonicalized away');
 });
 
-test('CV Show route supports short detail and full inline-detail links', () => {
-  const short = parseCvShowRoute(
-    'https://portfolio.example/cv/projects/symbiote-workspace/'
-      + '?lang=ru&showMode=short&showEntry=symbiote-workspace'
-      + '&showDetail=workspace-details&showTime=12000&showPlay=1',
-    policy,
-  );
-  assert.deepEqual(short.state, {
-    mode: 'short',
-    entryId: 'symbiote-workspace',
-    timeMs: 12_000,
-    detailId: 'workspace-details',
-    play: true,
-    completed: false,
-  });
+test('CV Show resolver derives entry and local time from the global coordinate', () => {
+  // T inside entry 1, entry 2 and the branch appended after the finale.
+  const first = resolveCvShowCompositionAt(SHORT, 5_000);
+  assert.equal(first.entryId, 'positioning');
+  assert.equal(first.localMs, 5_000);
+  assert.equal(first.branch, false);
 
-  const full = parseCvShowRoute(
-    'https://portfolio.example/cv/?lang=ru&showMode=full'
-      + '&showEntry=workspace-details&showTime=9000&showPlay=0',
+  const second = resolveCvShowCompositionAt(SHORT, POSITIONING_MS + 2_000);
+  assert.equal(second.entryId, 'symbiote-workspace');
+  assert.equal(second.localMs, 2_000);
+  assert.equal(second.branch, false);
+
+  const branch = resolveCvShowCompositionAt(SHORT, POSITIONING_MS + WORKSPACE_MS + 3_000);
+  assert.equal(branch.entryId, 'workspace-details');
+  assert.equal(branch.detailId, 'workspace-details');
+  assert.equal(branch.localMs, 3_000);
+  assert.equal(branch.branch, true, 'detail is a composition segment appended after the finale');
+
+  // Global time past the end clamps to the last segment.
+  const end = resolveCvShowCompositionAt(SHORT, SHORT.totalMs + 10_000);
+  assert.equal(end.completed, true);
+  assert.equal(end.entryId, 'workspace-details');
+});
+
+test('seek and route restore resolve identical composition state from the same T', () => {
+  const t = POSITIONING_MS + WORKSPACE_MS + 12_345;
+  // The parse path (route restore) uses resolveCvShowCompositionAt; any seek
+  // implementation consuming the same resolver yields identical state.
+  const fromRoute = parseCvShowRoute(
+    `https://portfolio.example/cv/?showMode=short&showTime=${t}`,
+    policy,
+  ).state;
+  const fromSeek = resolveCvShowCompositionAt(SHORT, t);
+  assert.equal(fromRoute.entryId, fromSeek.entryId);
+  assert.equal(fromRoute.localMs, fromSeek.localMs);
+  assert.equal(fromRoute.detailId, fromSeek.detailId);
+  assert.equal(fromRoute.timeMs, t);
+});
+
+test('legacy entry+local-time URLs convert to the canonical global coordinate', () => {
+  const legacy = parseCvShowRoute(
+    'https://portfolio.example/cv/?showMode=short&showEntry=symbiote-workspace&showTime=12000',
     policy,
   );
-  assert.deepEqual(full.state, {
-    mode: 'full',
-    entryId: 'workspace-details',
-    timeMs: 9_000,
-    completed: false,
-    detailId: '',
-    play: false,
-  });
+  assert.equal(legacy.status, 'valid');
+  assert.equal(legacy.legacy, true);
+  assert.equal(legacy.state.timeMs, POSITIONING_MS + 12_000, 'global = entry start + local');
+  assert.equal(legacy.state.entryId, 'symbiote-workspace');
+  assert.equal(legacy.state.localMs, 12_000);
+
+  const rewritten = canonicalizeCvShowRoute(
+    'https://portfolio.example/cv/?showMode=short&showEntry=symbiote-workspace&showTime=12000',
+    policy,
+  );
+  assert.equal(rewritten.changed, true, 'legacy link is rewritten to the canonical URL');
+  assert.equal(rewritten.url.searchParams.get('showTime'), String(POSITIONING_MS + 12_000));
+  assert.equal(rewritten.url.searchParams.has('showEntry'), false);
+});
+
+test('legacy detail deep links resolve onto the appended branch segment', () => {
+  const legacy = parseCvShowRoute(
+    'https://portfolio.example/cv/?showMode=short&showEntry=symbiote-workspace'
+      + '&showDetail=workspace-details&showTime=9000',
+    policy,
+  );
+  assert.equal(legacy.status, 'valid');
+  assert.equal(legacy.state.detailId, 'workspace-details');
+  assert.equal(
+    legacy.state.timeMs,
+    POSITIONING_MS + WORKSPACE_MS + 9_000,
+    'branch global position = end of main composition + local detail time',
+  );
+});
+
+test('source media time is derived from the global composition position', () => {
+  const resolved = resolveCvShowCompositionAt(SHORT, POSITIONING_MS + 41_000);
+  assert.equal(resolved.entryId, 'symbiote-workspace');
+  assert.equal(resolved.localMs, 41_000, 'local media position is pure arithmetic, not a route field');
 });
 
 test('CV Show route rejects invalid semantic state and strips only Show parameters', () => {
   const cases = [
-    ['invalid-mode', 'showMode=preview&showEntry=positioning'],
-    ['invalid-entry', 'showMode=short&showEntry=unknown'],
-    ['invalid-time', 'showMode=short&showEntry=positioning&showTime=-1'],
-    ['invalid-time', 'showMode=short&showEntry=positioning&showTime=1.5'],
-    ['invalid-detail', 'showMode=short&showEntry=positioning&showDetail=workspace-details'],
-    ['detail-requires-short-mode', 'showMode=full&showEntry=workspace-details&showDetail=workspace-details'],
-    ['invalid-play-intent', 'showMode=short&showEntry=positioning&showPlay=yes'],
-    ['duplicate-parameter', 'showMode=short&showMode=full&showEntry=positioning'],
+    ['invalid-mode', 'showMode=preview&showTime=100'],
+    ['invalid-time', 'showMode=short&showTime=-1'],
+    ['invalid-time', 'showMode=short&showTime=1.5'],
+    ['detail-requires-short-mode', 'showMode=full&showEntry=symbiote-workspace&showDetail=workspace-details&showTime=100'],
+    ['invalid-play-intent', 'showMode=short&showPlay=yes'],
+    ['duplicate-parameter', 'showMode=short&showMode=full&showTime=100'],
     ['invalid-mode', 'showEntry=positioning'],
   ];
 
@@ -306,22 +372,15 @@ test('CV Show route rejects invalid semantic state and strips only Show paramete
   }
 });
 
-test('CV Show route clamps time to caller-provided authoritative duration', () => {
-  const scene = canonicalizeCvShowRoute(
-    'https://portfolio.example/cv/?showMode=short&showEntry=positioning&showTime=999999',
+test('CV Show route clamps global time to the composition total', () => {
+  const oversized = canonicalizeCvShowRoute(
+    `https://portfolio.example/cv/?showMode=short&showTime=${SHORT.totalMs + 999_999}`,
     policy,
   );
-  assert.equal(scene.status, 'valid');
-  assert.equal(scene.state.timeMs, 48_000);
-  assert.equal(scene.url.searchParams.get('showTime'), '48000');
-
-  const detail = canonicalizeCvShowRoute(
-    'https://portfolio.example/cv/?showMode=short&showEntry=symbiote-workspace'
-      + '&showDetail=workspace-details&showTime=999999',
-    policy,
-  );
-  assert.equal(detail.state.timeMs, 37_930);
-  assert.equal(detail.url.searchParams.get('showTime'), '37930');
+  assert.equal(oversized.status, 'valid');
+  assert.equal(oversized.state.timeMs, SHORT.totalMs, 'global time clamps to totalMs');
+  assert.equal(oversized.url.searchParams.get('showTime'), String(SHORT.totalMs));
+  assert.equal(oversized.state.completed, false);
 });
 
 test('stripCvShowRoute keeps locale, layout, theme and hash byte-semantically intact', () => {
@@ -511,9 +570,15 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
   routeStopReasons.length = 0;
   settleRouteApply = undefined;
 
+  // Canonical URL after popstate: the legacy finale link is converted to its
+  // global composition coordinate (finale scene start + local 5000ms).
+  const realStory = projectCvShowStory(CV_SHOW_PRESENTATION_PROJECT);
+  const realShort = createCvShowCompositionTimeline(realStory, 'short');
+  const finaleGlobal = cvShowGlobalTimeOf(realShort, 'finale', 5_000);
+  const positioningGlobal = cvShowGlobalTimeOf(realShort, 'positioning', 0);
+
   currentUrl = new URL(
-    'https://portfolio.example/cv/?lang=ru&showMode=short&showEntry=finale'
-      + '&showTime=5000&showPlay=0#profile',
+    `https://portfolio.example/cv/?lang=ru&showMode=short&showTime=${finaleGlobal}&showPlay=0#profile`,
   );
   chat.routeSnapshot = {
     mode: 'short',
@@ -539,7 +604,7 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
     mode: 'short',
     entryId: 'positioning',
     detailId: '',
-    timeMs: 0,
+    timeMs: positioningGlobal,
     play: false,
     running: true,
     completed: false,
@@ -549,16 +614,17 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
     detail: { state: chat.routeSnapshot },
   }));
   assert.equal(
-    currentUrl.searchParams.get('showEntry'),
-    'finale',
-    'user route waits until the older deeplink operation is fully idle',
+    currentUrl.searchParams.get('showTime'),
+    String(finaleGlobal),
+    'user route waits until the older deeplink operation is fully idle (URL keeps the older global time)',
   );
   settleRouteApply(true);
   await Promise.resolve();
   await Promise.resolve();
   await Promise.resolve();
-  assert.equal(currentUrl.searchParams.get('showEntry'), 'positioning');
-  assert.equal(currentUrl.searchParams.has('showTime'), false);
+  assert.equal(currentUrl.searchParams.has('showEntry'), false, 'canonical URL never names an entry');
+  assert.equal(currentUrl.searchParams.has('showDetail'), false, 'canonical URL never names a branch');
+  assert.equal(currentUrl.searchParams.has('showTime'), false, 'global time 0 is implicit in the canonical form');
   assert.equal(currentUrl.searchParams.get('showPlay'), '0');
 
   // Natural completion publishes the same first paused checkpoint that remains
@@ -571,7 +637,7 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
     mode: 'short',
     entryId: 'positioning',
     detailId: '',
-    timeMs: 0,
+    timeMs: positioningGlobal,
     play: false,
     running: true,
     completed: false,
@@ -587,9 +653,10 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
     },
   }));
   await Promise.resolve();
-  assert.equal(currentUrl.searchParams.get('showEntry'), 'positioning');
+  assert.equal(currentUrl.searchParams.has('showEntry'), false, 'canonical completion URL names no entry');
   assert.equal(currentUrl.searchParams.get('showPlay'), '0');
-  assert.equal(currentUrl.searchParams.has('showTime'), false);
+  assert.equal(currentUrl.searchParams.has('showTime'), false,
+    'natural completion at the composition origin keeps t implicit');
   assert.deepEqual(selections, [], 'natural completion keeps the current player surface');
 
   chat.dispatchEvent(new CustomEvent('portfolio-show-start', { bubbles: true }));
