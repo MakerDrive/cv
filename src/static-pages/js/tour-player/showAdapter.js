@@ -690,6 +690,45 @@ export function degradePresentationOperation(operation, { outcome, fallback }) {
   return undefined;
 }
 
+/**
+ * Completes a failed soft interaction whose `acted` milestone was already
+ * accepted by the engine but whose `settled` milestone never arrived (for
+ * example a scroll-for-attention whose provider timed out). Reports exactly
+ * the one missing terminal receipt with explicit degraded evidence; never
+ * fabricates duplicate milestones and never touches an aborted operation.
+ * Returns false when the operation state does not allow a safe completion.
+ */
+export function completeDegradedInteractionSettlement(
+  operation,
+  /** @type {{ outcome?: string, fallback?: string }} */ { outcome, fallback } = {},
+) {
+  if (operation.signal?.aborted) return false;
+  const reported = (operation.reportedReceipts || []).map(({ status }) => status);
+  if (reported.includes('settled')) return false;
+  if (!reported.includes('acted')) return false;
+  const presentation = createPresentationReporter(operation);
+  const providerReceipt = Object.freeze({
+    version: CV_SHOW_DEGRADED_RECEIPT_VERSION,
+    degraded: true,
+    outcome: String(outcome || 'degraded'),
+    fallback: String(fallback || 'none-skipped'),
+    effect: Object.freeze({
+      kind: operation.kind,
+      type: String(operation.projectCell.cue?.interaction?.type || operation.kind),
+      status: 'settled',
+    }),
+    target: Object.freeze({
+      id: operation.projectCell.cue?.targetId ?? operation.source?.target ?? null,
+    }),
+  });
+  operation.reportReceipt(Object.freeze({
+    status: 'settled',
+    observedAt: observePresentationPerformance(),
+    providerReceipt,
+  }));
+  return true;
+}
+
 export async function runCvShowPresentationOperation(runner, operation) {
   throwIfAborted(operation.signal);
   const presentation = createPresentationReporter(operation);

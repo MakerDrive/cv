@@ -194,8 +194,20 @@ export function createPresentationPlaybackPump({
    * media clock (the execution controller skips them at their authored
    * expiry) instead of escalating into a playback failure.
    */
+  /**
+   * Whether every remaining pending cell is blocked only by a tolerated
+   * failed cell (directly or transitively). Such chains degrade with the
+   * media clock (the execution controller skips them at their authored
+   * expiry) instead of escalating into a playback failure. Protected cells
+   * (audio/narration) never belong in a soft cascade: if a tolerated soft
+   * failure could reach audio, the pump must report the inconsistent plan
+   * instead of silently expiring narration.
+   */
   const blockedByTolerated = (remaining, tolerated) => {
     if (!tolerated.size || !remaining.length) return false;
+    if (remaining.some(({ kind }) => kind === 'audio-clip' || kind === 'narration')) {
+      return false;
+    }
     const dependsOnTolerated = (cell, visited = new Set()) => {
       if (!cell || visited.has(cell.id)) return false;
       visited.add(cell.id);

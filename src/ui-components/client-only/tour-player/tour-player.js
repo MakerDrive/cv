@@ -1662,14 +1662,18 @@ export class PortfolioShowChat extends HTMLElement {
     let kind = String(failure.kind || '');
     let layerId = String(failure.layerId || '');
     let policy = '';
+    let operationRole = '';
     const cellId = String(failure.cellId || '');
     if (cellId && this.#alignedEntry?.project) {
       const projectCell = (this.#alignedEntry.project.cells || [])
         .find(({ id }) => id === cellId);
       if (projectCell) {
         if (!layerId) layerId = cvShowCellLayerId(projectCell);
+        operationRole = String(
+          projectCell.cue?.interaction?.type || projectCell.cue?.kind || '',
+        );
         if (!kind) {
-          kind = projectCell.kind || '';
+          kind = projectCell.kind === 'audio-clip' ? 'audio' : projectCell.kind || '';
           if (!kind && projectCell.cue?.kind === 'focus') kind = 'attention';
           if (!kind && projectCell.cue?.kind === 'annotation') kind = 'attention';
           if (!kind && projectCell.cue?.kind === 'interaction') kind = 'interaction';
@@ -1682,6 +1686,7 @@ export class PortfolioShowChat extends HTMLElement {
       kind,
       layerId,
       policy,
+      operationRole,
       code: String(failure.code || ''),
       // Monotonicity contract: once this entry's narration has physically
       // started (first media `playing`), automatic rewind is forbidden.

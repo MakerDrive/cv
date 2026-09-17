@@ -161,37 +161,49 @@ player applies its bounded scene setup retry. Keep entry lead-ins lean.
 
 ## Failure semantics: AUTO REWIND after narration start is forbidden
 
-Precise monotonicity contract (do not overstate it):
+Two invariants govern presentation failures:
 
-- **Once the narration of an entry has physically started** (the media
-  element emitted `playing`), no runtime failure may re-present that entry
-  from position zero. Rewind is only possible via an explicit user action
-  (retry / replay / navigation).
+- **MONOTONICITY: once the narration of an entry has physically started**
+  (the media element emitted `playing`), no runtime failure may re-present
+  that entry from position zero. Rewind is only possible via an explicit
+  user action (retry / replay / navigation).
+- **CONTINUITY: once narration has started, a SOFT presentation effect
+  failure can never pause, terminate, or restart narration.** A soft effect
+  may only degrade in place or skip its own visual branch, always with a
+  machine-readable receipt. A missed soft deadline means "latest useful
+  execution time passed", not a fatal error.
 - **Before the first `playing`** of an entry, a bounded scene-setup retry is
   allowed: nothing audible was heard, so this is a pause-retry of scene
   preparation, not a replay.
 
 Faults route through `resolveFailureRecovery`
-(`src/static-pages/js/tour-player/failurePolicy.js`) by cell kind, layer,
-authored policy, failure code and whether narration has started:
+(`src/static-pages/js/tour-player/failurePolicy.js`). Each authored cell gets
+a semantic failure class — not a kind/layer guess:
 
-- decorative (focus/annotation) failures **degrade in place**: the adapter
-  completes the operation with a degraded lifecycle receipt
-  (`providerReceipt.degraded`, `outcome`, `fallback`, `original` — the
-  original provider rejection), soft `settled` barriers open, and dependent
-  visual cells continue; narration is untouched;
-- decorative failures that terminalize engine-side (deadline race after
+- **soft**: focus frames, markers, annotations, scroll-for-attention, and
+  native text selection. Post-narration failures **degrade in place**: the
+  adapter completes the operation with a degraded lifecycle receipt
+  (`providerReceipt.degraded`, `outcome`, `fallback`, `original`), soft
+  `settled` barriers open, dependent visual cells continue, and narration is
+  untouched;
+- soft failures that terminalize engine-side (deadline race after
   activation) use the explicit **skip-branch** strategy: the failed terminal
   is kept and tolerated, the pump never escalates it, and dependent visual
   cells whose barriers can no longer open expire with the media clock. Each
   such expiry is annotated `outcome: 'dependency-failed'` with
-  `cascadeFrom` / `rootCauseCellId`, so the aggregate report attributes the
-  entire dropped visual branch to one root failure instead of N independent
-  skips;
-- interaction/state failures pause and retry the scene setup locally while
-  narration has not started, or pause-and-report afterwards;
-- audio/narration critical failures pause-and-report; replay is only possible
-  through an explicit user action.
+  `cascadeFrom` / `rootCauseCellId`; protected cells (audio, narration) are
+  excluded from a soft cascade — the pump reports an inconsistent plan
+  instead of silently expiring them;
+- **gate**: required navigation and scene/state setup
+  (`interaction.type === 'navigate'` and other operations whose failure
+  would leave the presentation on the wrong scene). They pause and retry the
+  scene setup locally while narration has not started, or pause-and-report
+  afterwards;
+- **critical**: audio/narration pause-and-report; replay is only possible
+  through an explicit user action;
+- **unknown**: any cell without a resolvable class stays conservative —
+  `pause-report`, never a silent degrade. `test/unit/cvShowContinuityPolicy.test.js`
+  fails the build if any authored cell resolves to `unknown`.
 
 Each show ends with `portfolio-show-complete` carrying a receipt summary
 (`success / degraded / skipped / cascadeSkipped / failedCritical`,

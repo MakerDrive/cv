@@ -14,11 +14,15 @@ import {
 } from './webAudioRelease.js';
 import { playPresentationAudioClip } from './presentationAudioTransport.js';
 import { createPresentationPlaybackPump } from './presentationPlaybackPump.js';
-import { degradePresentationOperation } from './showAdapter.js';
+import {
+  completeDegradedInteractionSettlement,
+  degradePresentationOperation,
+} from './showAdapter.js';
 import {
   createCascadeTracker,
   cvShowCellLayerId,
-  isCvShowDecorativeCell,
+  CV_SHOW_FAILURE_SEMANTICS,
+  resolveCvShowFailureSemantics,
   resolveFailureRecovery,
 } from './failurePolicy.js';
 
@@ -398,11 +402,16 @@ export function createCvShowAlignmentController({
           }
         }
         const recovery = resolveFailureRecovery({
-          kind: String(receipt.kind || ''),
+          kind: projectCell?.kind === 'audio-clip'
+            ? 'audio'
+            : String(projectCell?.cue?.kind || receipt.kind || ''),
           layerId,
           policy,
           code: terminalReasonCode(receipt.reason),
           narrationStarted: physicalPlaybackStarted === true,
+          operationRole: String(
+            projectCell?.cue?.interaction?.type || projectCell?.cue?.kind || '',
+          ),
         });
         if (recovery !== 'degrade' && recovery !== 'skip') return false;
         toleratedFailedCells.add(receipt.cellId);
@@ -481,27 +490,45 @@ export function createCvShowAlignmentController({
               message: boundedOperationText(error.message),
             }));
           }
-          // Decorative cells (focus frames, markers, annotations) whose
-          // provider failed before any receipt was accepted are completed
-          // degraded instead of failing the engine terminal: narration and
-          // downstream soft dependents continue, the degraded outcome stays
-          // machine-readable on the receipt. Deadline/aborted failures are
-          // already engine-terminal; they rethrow and are tolerated by the
-          // playback pump policy instead.
-          if (
-            isCvShowDecorativeCell(operation.projectCell)
-            && !operation.signal?.aborted
-            && !operation.reportedReceipts?.length
-            && error?.code !== 'PRESENTATION_EFFECT_DEADLINE_MISSED'
-          ) {
-            degradedCellOutcomes.set(operation.projectCell.id, Object.freeze({
-              outcome: String(error?.code || 'operation-failed'),
-              fallback: 'none-skipped',
-            }));
-            return degradePresentationOperation(operation, {
-              outcome: String(error?.code || 'operation-failed'),
-              fallback: 'none-skipped',
+          // Soft cells (focus frames, markers, annotations, scrolls, native
+          // selections) whose provider failed before any receipt was accepted
+          // are completed degraded instead of failing the engine terminal:
+          // narration and downstream soft dependents continue, the degraded
+          // outcome stays machine-readable on the receipt. Deadline/aborted
+          // failures are already engine-terminal; they rethrow and are
+          // tolerated by the playback pump policy instead.
+          if (!operation.signal?.aborted && error?.code !== 'PRESENTATION_EFFECT_DEADLINE_MISSED') {
+            const softSemantics = resolveCvShowFailureSemantics({
+              kind: String(operation.projectCell?.cue?.kind || operation.kind || ''),
+              layerId: cvShowCellLayerId(operation.projectCell),
+              operationRole: String(
+                operation.projectCell?.cue?.interaction?.type
+                || operation.projectCell?.cue?.kind
+                || '',
+              ),
             });
+            if (softSemantics === CV_SHOW_FAILURE_SEMANTICS.SOFT) {
+              degradedCellOutcomes.set(operation.projectCell.id, Object.freeze({
+                outcome: String(error?.code || 'operation-failed'),
+                fallback: 'none-skipped',
+              }));
+              const reported = Array.isArray(operation.reportedReceipts)
+                ? operation.reportedReceipts.length
+                : 0;
+              if (operation.kind === 'interaction' && reported > 0) {
+                if (completeDegradedInteractionSettlement(operation, {
+                  outcome: String(error?.code || 'operation-failed'),
+                  fallback: 'none-skipped',
+                })) {
+                  return undefined;
+                }
+              } else if (reported === 0) {
+                return degradePresentationOperation(operation, {
+                  outcome: String(error?.code || 'operation-failed'),
+                  fallback: 'none-skipped',
+                });
+              }
+            }
           }
           throw error;
         }

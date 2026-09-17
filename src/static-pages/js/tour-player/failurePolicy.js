@@ -47,6 +47,88 @@ export const CV_SHOW_INTERACTION_LAYER_IDS = Object.freeze([
 ]);
 
 /**
+ * Semantic failure classes for authored CV Show cells, resolved from the
+ * portable directive refinements map (Option A: the Authoring Project stays
+ * the single source of truth; no new canonical schema).
+ *
+ *   'soft'   visual attention/scroll/selection/decoration: a missed effect
+ *            degrades or skips in place and NEVER pauses/rewinds/terminates
+ *            narration once it started (CONTINUITY invariant)
+ *   'gate'   required scene/state/navigation transitions: a failure pauses
+ *            and retries before narration starts, pauses-and-reports after
+ *   'critical' audio/narration: always pause-and-report, never auto-restart
+ *
+ * Any cell without an explicit resolvable class stays conservative
+ * ('unknown' -> treated as gate/critical), so unclassified authored cells
+ * can never silently degrade.
+ */
+export const CV_SHOW_FAILURE_SEMANTICS = Object.freeze({
+  SOFT: 'soft',
+  GATE: 'gate',
+  CRITICAL: 'critical',
+  UNKNOWN: 'unknown',
+});
+
+const SOFT_CONTINUITY_VALUES = new Set(['soft']);
+
+/**
+ * Resolves the semantic failure class of an authored CV Show cell.
+ *
+ * Preference order:
+ *   1. explicit `continuity` refinement ('soft' — portable authored intent);
+ *   2. focus/annotation layers and attention kind (always decorative);
+ *   3. interaction/state kind or layer: soft only when the operation role is
+ *      a visual scroll-for-attention or native text selection gesture
+ *      (never when it navigates, activates media, or is unknown);
+ *   4. audio/narration -> critical; anything else -> unknown (conservative).
+ *
+ * @param {object} input
+ * @param {string} [input.kind]
+ * @param {string} [input.layerId]
+ * @param {object|string} [input.refinements] authored directive refinements
+ *   (portable map) or the serialized directive carrying them
+ * @param {string} [input.operationRole] concrete gesture role of the cell,
+ *   e.g. 'scroll' | 'select' | 'navigate' | 'select-native' — resolved from
+ *   the authored cue, never inherited from an owner directive
+ */
+export function resolveCvShowFailureSemantics({
+  kind = '',
+  layerId = '',
+  refinements = null,
+  operationRole = '',
+} = {}) {
+  const continuity = typeof refinements === 'object' && refinements
+    ? String(refinements.continuity || '')
+    : '';
+  if (SOFT_CONTINUITY_VALUES.has(continuity)) {
+    return CV_SHOW_FAILURE_SEMANTICS.SOFT;
+  }
+  if (
+    CV_SHOW_DECORATIVE_LAYER_IDS.includes(layerId)
+    || kind === 'attention'
+  ) {
+    return CV_SHOW_FAILURE_SEMANTICS.SOFT;
+  }
+  if (kind === 'audio' || layerId === 'cv-show:layer:audio' || kind === 'narration') {
+    return CV_SHOW_FAILURE_SEMANTICS.CRITICAL;
+  }
+  if (
+    CV_SHOW_INTERACTION_LAYER_IDS.includes(layerId)
+    || kind === 'interaction'
+    || kind === 'state'
+  ) {
+    const role = String(operationRole || '');
+    // Only pure visual preparation/decoration gestures are soft. Real state
+    // transitions (navigate) and unknown operation roles stay hard.
+    if (role === 'scroll' || role === 'select-native' || role === 'select') {
+      return CV_SHOW_FAILURE_SEMANTICS.SOFT;
+    }
+    return CV_SHOW_FAILURE_SEMANTICS.GATE;
+  }
+  return CV_SHOW_FAILURE_SEMANTICS.UNKNOWN;
+}
+
+/**
  * Derives the semantic layer of a cell without depending on the authoring
  * projection internals: prefers the explicit layerId, falls back to the cue
  * kind classification used by the master project validator.
@@ -115,6 +197,14 @@ export function normalizePresentationFailure(receipt) {
 /**
  * Decides the recovery class for a normalized failure.
  *
+ * Semantics-first resolution (see `resolveCvShowFailureSemantics`):
+ *   soft     -> degrade in place once narration started (CONTINUITY);
+ *               bounded scene-setup retry before narration started
+ *   gate     -> pause-retry before narration, pause-and-report after
+ *   optional -> explicit skip (authored non-critical intent)
+ *   critical/unknown -> pause-and-report; never auto-restart an entry once
+ *               narration could have been heard; explicit user replay only
+ *
  * @param {object} input
  * @param {string} [input.kind] presentation cell kind (attention, interaction, ...)
  * @param {string} [input.layerId] authoring layer id
@@ -123,6 +213,8 @@ export function normalizePresentationFailure(receipt) {
  * @param {boolean} [input.narrationStarted] whether narration of the owning
  *   entry has already physically started; with narration started no recovery
  *   may re-present the entry from zero
+ * @param {object|string} [input.refinements] authored portable refinements map
+ * @param {string} [input.operationRole] concrete gesture role of the cell
  */
 export function resolveFailureRecovery({
   kind = '',
@@ -130,25 +222,34 @@ export function resolveFailureRecovery({
   policy = '',
   code = '',
   narrationStarted = false,
+  refinements = null,
+  operationRole = '',
 } = {}) {
-  if (policy === 'optional') return CV_SHOW_RECOVERY.SKIP;
-  if (
-    CV_SHOW_DECORATIVE_LAYER_IDS.includes(layerId)
-    || kind === 'attention'
-  ) {
-    return CV_SHOW_RECOVERY.DEGRADE;
-  }
-  if (
-    CV_SHOW_INTERACTION_LAYER_IDS.includes(layerId)
-    || kind === 'interaction'
-    || kind === 'state'
-  ) {
+  const semantics = resolveCvShowFailureSemantics({
+    kind,
+    layerId,
+    refinements,
+    operationRole,
+  });
+  if (semantics === CV_SHOW_FAILURE_SEMANTICS.SOFT) {
+    // CONTINUITY invariant: once narration started, a soft effect failure
+    // can only degrade in place. It can never pause, terminate, or rewind
+    // the narration. Before narration starts the established bounded
+    // scene-setup retry stays available (nothing audible has been played).
+    // Decorative attention effects always degraded in place historically;
+    // soft interaction gestures keep the bounded pre-narration setup retry.
     return narrationStarted
-      ? CV_SHOW_RECOVERY.PAUSE_REPORT
+      || kind === 'attention'
+      || CV_SHOW_DECORATIVE_LAYER_IDS.includes(layerId)
+      ? CV_SHOW_RECOVERY.DEGRADE
       : CV_SHOW_RECOVERY.PAUSE_RETRY;
   }
-  // Audio / narration / unknown critical cells: never auto-restart an entry
-  // once narration could have been heard; the user may explicitly replay.
+  if (policy === 'optional') return CV_SHOW_RECOVERY.SKIP;
+  if (semantics === CV_SHOW_FAILURE_SEMANTICS.GATE) {
+    return narrationStarted ? CV_SHOW_RECOVERY.PAUSE_REPORT : CV_SHOW_RECOVERY.PAUSE_RETRY;
+  }
+  // Audio / narration / unknown semantics: never auto-restart an entry once
+  // narration could have been heard; the user may explicitly replay.
   return CV_SHOW_RECOVERY.PAUSE_REPORT;
 }
 

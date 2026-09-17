@@ -2,12 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   CV_SHOW_RECOVERY,
+  cvShowCellLayerId,
   createCascadeTracker,
   createPresentationReceiptSummary,
   normalizePresentationFailure,
   resolveFailureRecovery,
 } from '../../src/static-pages/js/tour-player/failurePolicy.js';
 import { createPresentationPlaybackPump } from '../../src/static-pages/js/tour-player/presentationPlaybackPump.js';
+import {
+  CV_SHOW_PRESENTATION_PROJECT,
+  projectCvShowDirective,
+} from '../../src/static-pages/data/cvShowPresentationProject.js';
 
 test('engine-shape failure receipts normalize with top-level identity', () => {
   const normalized = normalizePresentationFailure({
@@ -411,4 +416,116 @@ test('cascade-skipped cells group under their root failure', () => {
   assert.equal(snap.cascadeSkipped, 2);
   assert.equal(snap.skipped, 1);
   assert.deepEqual(snap.cascadeByRoot, { a: 2 });
+});
+
+/**
+ * Rebuilds the exact classification input the production host derives in
+ * `showAlignmentAdapter.classifiableFailedReceipt` and
+ * `tour-player.#failurePolicyInput`: the authored project cell is the
+ * metadata authority, not the receipt fields.
+ */
+function authoredFailureInput(cellId, { narrationStarted = true, code = 'PRESENTATION_EFFECT_DEADLINE_MISSED' } = {}) {
+  const projectCell = CV_SHOW_PRESENTATION_PROJECT.cells.find(({ id }) => id === cellId);
+  assert.ok(projectCell, `authored cell must exist: ${cellId}`);
+  let policy = '';
+  try {
+    policy = projectCvShowDirective(projectCell, CV_SHOW_PRESENTATION_PROJECT)?.policy || '';
+  } catch {
+    // Non-directive cells (audio, narration) have no policy.
+  }
+  const kind = projectCell.kind === 'audio-clip'
+    ? 'audio'
+    : projectCell.cue?.kind || projectCell.kind;
+  return {
+    kind,
+    layerId: cvShowCellLayerId(projectCell),
+    policy,
+    code,
+    narrationStarted,
+    operationRole: projectCell.cue?.interaction?.type || projectCell.cue?.kind || '',
+  };
+}
+
+test('continuity: required soft interaction deadline miss degrades after narration started', () => {
+  for (const cellId of [
+    'cv-show:cue:workspace.portable-config:scroll',
+    'cv-show:cue:workspace.portable-config',
+  ]) {
+    assert.equal(
+      resolveFailureRecovery(authoredFailureInput(cellId)),
+      CV_SHOW_RECOVERY.DEGRADE,
+      `soft interaction cell must degrade in place: ${cellId}`,
+    );
+  }
+});
+
+test('continuity: soft visual cells never pause narration once it started', () => {
+  for (const cellId of [
+    'cv-show:cue:workspace.intro-frame',
+    'cv-show:cue:workspace.agent-portal-card',
+  ]) {
+    assert.equal(
+      resolveFailureRecovery(authoredFailureInput(cellId)),
+      CV_SHOW_RECOVERY.DEGRADE,
+    );
+  }
+});
+
+test('continuity: scroll inheritance is explicit per-cell, not owner-aliased', () => {
+  const scroll = CV_SHOW_PRESENTATION_PROJECT.cells.find(
+    ({ id }) => id === 'cv-show:cue:workspace.portable-config:scroll',
+  );
+  const owner = CV_SHOW_PRESENTATION_PROJECT.cells.find(
+    ({ id }) => id === 'cv-show:cue:workspace.portable-config',
+  );
+  // The scroll cell is a visual preparation gesture: its own layer/kind must
+  // classify it soft even when its owner directive is required.
+  assert.equal(
+    resolveFailureRecovery(authoredFailureInput(scroll.id)),
+    CV_SHOW_RECOVERY.DEGRADE,
+  );
+  assert.equal(
+    resolveFailureRecovery(authoredFailureInput(owner.id)),
+    CV_SHOW_RECOVERY.DEGRADE,
+  );
+});
+
+test('continuity: hard navigation and audio keep their recovery classes', () => {
+  // workspace.open is a required navigation setup cell: gate before
+  // narration (bounded retry), pause-report if it fails after narration.
+  assert.equal(
+    resolveFailureRecovery(authoredFailureInput('cv-show:cue:workspace.open', {
+      narrationStarted: false,
+    })),
+    CV_SHOW_RECOVERY.PAUSE_RETRY,
+  );
+  assert.equal(
+    resolveFailureRecovery(authoredFailureInput('cv-show:cue:workspace.open')),
+    CV_SHOW_RECOVERY.PAUSE_REPORT,
+  );
+  assert.equal(
+    resolveFailureRecovery({
+      kind: 'audio',
+      layerId: 'cv-show:layer:audio',
+      code: 'PRESENTATION_EFFECT_DEADLINE_MISSED',
+      narrationStarted: true,
+    }),
+    CV_SHOW_RECOVERY.PAUSE_REPORT,
+  );
+  // Unknown cells stay conservative: they can never silently degrade.
+  assert.equal(
+    resolveFailureRecovery({ kind: '', layerId: '', policy: '', code: 'X', narrationStarted: true }),
+    CV_SHOW_RECOVERY.PAUSE_REPORT,
+  );
+});
+
+test('continuity: pre-narration soft interaction retry stays available', () => {
+  const input = authoredFailureInput('cv-show:cue:workspace.portable-config:scroll', {
+    narrationStarted: false,
+  });
+  const recovery = resolveFailureRecovery(input);
+  assert.ok(
+    [CV_SHOW_RECOVERY.DEGRADE, CV_SHOW_RECOVERY.PAUSE_RETRY].includes(recovery),
+    `pre-narration soft failure must stay recoverable, got ${recovery}`,
+  );
 });
