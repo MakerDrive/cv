@@ -18,6 +18,7 @@ import {
   completeDegradedInteractionSettlement,
   degradePresentationOperation,
 } from './showAdapter.js';
+import { CV_SHOW_GATE_QUEUE } from './gateQueue.js';
 import {
   createCascadeTracker,
   cvShowCellLayerId,
@@ -595,6 +596,10 @@ export function createCvShowAlignmentController({
         playbackPlan: tuple.playbackPlan,
         media,
         isFailureTolerated: (cellId) => toleratedFailedCells.has(String(cellId || '')),
+        gate: {
+          hasPending: () => CV_SHOW_GATE_QUEUE.hasPending,
+          run: () => CV_SHOW_GATE_QUEUE.run(),
+        },
         onFailure: (error) => {
           const failedCellId = String(error?.details?.cellId || '');
           if (toleratedFailedCells.has(failedCellId)) {

@@ -205,6 +205,17 @@ and its tests.
 
 ## Failure semantics: AUTO REWIND after narration start is forbidden
 
+**Gate (Slice C):** `live_ensure(target, state, sync: 'gate')` on the live
+surface defers reconciliation to the next safe composition boundary: the
+pump pauses (media + execution, never rewind), the gate runs through the
+SAME ensure controller as non-gated calls, results are verified by live
+observation, then playback resumes. A gate that cannot reach its desired
+state resolves its own promise with the failed result and produces
+`PRESENTATION_GATE_FAILED` on the pipeline, recovering as pause-report
+(gate-class failure, not a soft degrade and never a silent continue).
+
+## Failure semantics (invariants)
+
 Two invariants govern presentation failures:
 
 - **MONOTONICITY: once the narration of an entry has physically started**

@@ -47,11 +47,16 @@
  *     currentTime: number,
  *     seeking?: boolean,
  *     pause?: () => void,
+ *     play?: () => void,
  *     addEventListener?: (type: string, listener: () => void) => void,
  *     removeEventListener?: (type: string, listener: () => void) => void,
  *   },
  *   onFailure?: ((error: any) => any) | null,
  *   isFailureTolerated?: ((cellId: string) => boolean) | null,
+ *   gate?: {
+ *     hasPending: () => boolean,
+ *     run: () => Promise<{ status: 'resolved' } | { status: 'failed', reason?: string }>,
+ *   },
  * }} PresentationPlaybackPumpOptions
  */
 
@@ -121,6 +126,7 @@ export function createPresentationPlaybackPump({
   media,
   onFailure = null,
   isFailureTolerated = null,
+  gate = null,
 } = /** @type {PresentationPlaybackPumpOptions} */ ({})) {
   if (
     !execution?.snapshot
@@ -266,6 +272,24 @@ export function createPresentationPlaybackPump({
         continue;
       }
       const cell = nextExecutableCell(playbackPlan, snapshot);
+      if (cell && gate && typeof gate.hasPending === 'function' && gate.hasPending()) {
+        // SAFE COMPOSITION BOUNDARY: no active gesture and the next cell is
+        // about to start. Pause playback, let the registered gate reconcile
+        // the desired UI state semantically, then resume — never rewind,
+        // never cancel in-flight effects (there are none here).
+        media.pause?.();
+        const gateOutcome = await gate.run();
+        if (!requested || disposed) return snapshot;
+        if (gateOutcome?.status === 'failed') {
+          throw Object.assign(new Error('Presentation gate could not reach the desired state'), {
+            code: 'PRESENTATION_GATE_FAILED',
+            details: gateOutcome,
+          });
+        }
+        media.play?.();
+        if (execution.snapshot.state === 'paused') execution.resume();
+        snapshot = execution.snapshot;
+      }
       if (!cell) {
         const remaining = playbackPlan.cells.filter((item) => (
           item.kind !== 'narration'

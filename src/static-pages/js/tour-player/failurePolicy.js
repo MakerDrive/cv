@@ -231,6 +231,11 @@ export function resolveFailureRecovery({
     refinements,
     operationRole,
   });
+  // Slice C gate failures are required-transition misses: pause and report,
+  // never degrade, never rewind or restart playback.
+  if (code === 'PRESENTATION_GATE_FAILED') {
+    return CV_SHOW_RECOVERY.PAUSE_REPORT;
+  }
   if (semantics === CV_SHOW_FAILURE_SEMANTICS.SOFT) {
     // CONTINUITY invariant: once narration started, a soft effect failure
     // can only degrade in place. It can never pause, terminate, or rewind

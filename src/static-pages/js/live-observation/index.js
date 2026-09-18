@@ -18,6 +18,7 @@ import {
 } from 'symbiote-ui/webmcp/live-observation';
 import { registerWebMcpTool } from 'symbiote-ui/webmcp';
 import { createEnsureController } from 'symbiote-workspace/browser';
+import { CV_SHOW_GATE_QUEUE } from '../tour-player/gateQueue.js';
 
 export const CV_LIVE_INSPECT_TOOL_NAME = 'live_inspect';
 export const CV_LIVE_ENSURE_TOOL_NAME = 'live_ensure';
@@ -251,8 +252,11 @@ export function createCvLiveEnsure(options = {}) {
     observe: (request) => registry.observe(request),
     invokeTransition: createCvTransitionInvoker(doc),
   });
+  const boundEnsure = (targetId, state, gateOptions) => controller.ensure(targetId, state, gateOptions);
   const descriptor = createLiveEnsureToolDescriptor(
-    ({ targetId, state, sync }) => controller.ensure(targetId, state, { sync }),
+    ({ targetId, state, sync }) => (sync === 'gate'
+      ? CV_SHOW_GATE_QUEUE.register({ targetId, state }, boundEnsure)
+      : controller.ensure(targetId, state, { sync })),
     {
       name: CV_LIVE_ENSURE_TOOL_NAME,
       description: [
@@ -260,6 +264,9 @@ export function createCvLiveEnsure(options = {}) {
         'ensure(panel.<id>, { collapsed: false }) observes the panel,',
         'invokes the available open/close transition through the layout',
         'public API, and verifies the result by re-observation.',
+        'sync=gate defers the reconciliation to the next safe composition',
+        'boundary of the active CV Show: playback pauses, the gate runs,',
+        'then the composition resumes.',
       ].join(' '),
     },
   );
