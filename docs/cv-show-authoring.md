@@ -171,7 +171,25 @@ position:
   coordinate. Entry, detail branch and local media position are derived via
   `resolveCvShowCompositionAt` (src/static-pages/js/tour-player/compositionTime.js).
 - `showPlay=0` — transient launch intent (open paused).
-- `showCompleted=1` — terminal session marker, not a coordinate.
+- `showCompleted=1` — terminal session marker, accepted on read for legacy
+  links, but NEVER written to a canonical URL (session state does not
+  belong in a shareable link).
+
+Numeric canonicalization: negative values clamp to 0; `NaN` / malformed /
+fractional query values are invalid and stripped; T equal to
+`totalMs` means `completed` semantics, not the final segment (intervals are
+`[start, end)`); the writer emits integer milliseconds. `showTime` is a
+composition coordinate — NEVER a wall-clock elapsed time. A short-policy
+playback that skips a branch segment advances `showTime` past that segment
+without playing it; policy-specific elapsed/remaining values must use
+separate functions, never subtract from `showTime`.
+
+**Deep-link policy for detail branches:** `showTime` always addresses the
+master composition directly. An explicit link whose T lies inside a branch
+segment opens exactly that branch even under `showMode=short`; after it
+ends, traversal continues by the mode policy (short resumes at the scene
+after that branch). Automatic short playback skips segments, explicit links
+play them.
 
 There is one master segment geometry (`scene → its detail branch`,
 interleaved). `short` never relocates branches in time. Durations come from

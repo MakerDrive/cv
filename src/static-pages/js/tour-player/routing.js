@@ -163,7 +163,8 @@ export function serializeCvShowRoute(value, state, policy = {}) {
   draft.searchParams.set('showMode', String(state?.mode || ''));
   if (Number(state?.timeMs) > 0) draft.searchParams.set('showTime', String(Math.round(state.timeMs)));
   if (state?.play === false) draft.searchParams.set('showPlay', '0');
-  if (state?.completed === true) draft.searchParams.set('showCompleted', '1');
+  // showCompleted is terminal SESSION state — it never enters a shareable
+  // URL. The parser still accepts it for legacy links.
   return draft;
 }
 

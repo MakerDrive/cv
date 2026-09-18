@@ -779,6 +779,72 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
   assert.equal(currentUrl.hash, '#profile');
 });
 
+const REAL_STORY = projectCvShowStory(CV_SHOW_PRESENTATION_PROJECT);
+
+test('generated durations match the master story exactly (stale schedule cannot slip silently)', () => {
+  const timeline = createCvShowCompositionTimeline(REAL_STORY);
+  const durationIds = Object.keys(CV_SHOW_SCHEDULE_DURATIONS.durations).sort();
+  const segmentIds = timeline.segments.map(({ id }) => id).sort();
+  assert.deepEqual(segmentIds, durationIds, 'every segment has a duration and vice versa');
+  assert.equal(new Set(segmentIds).size, segmentIds.length, 'segment ids are unique');
+  for (const [index, segment] of timeline.segments.entries()) {
+    assert.ok(Number.isSafeInteger(segment.durationMs) && segment.durationMs > 0, segment.id);
+    if (index > 0) {
+      assert.equal(segment.startMs, timeline.segments[index - 1].endMs, `contiguous at ${segment.id}`);
+    }
+  }
+  const branches = Object.keys(REAL_STORY.branches);
+  const branchIds = timeline.segments.filter(({ branch }) => branch).map(({ id }) => id);
+  assert.deepEqual(branchIds.sort(), branches.slice().sort());
+  assert.equal(timeline.segments.length, durationIds.length);
+});
+
+test('short policy deep link into EVERY detail branch opens exactly that branch', () => {
+  const timeline = createCvShowCompositionTimeline(REAL_STORY);
+  for (const branchId of Object.keys(REAL_STORY.branches)) {
+    const t = cvShowGlobalTimeOf(timeline, branchId, 1_000);
+    const parsed = parseCvShowRoute(
+      `https://portfolio.example/cv/?showMode=short&showTime=${t}`,
+      { timeline },
+    );
+    assert.equal(parsed.status, 'valid', branchId);
+    assert.equal(parsed.state.detailId, branchId, `${branchId}: T inside the branch resolves the branch`);
+    assert.equal(parsed.state.localMs, 1_000, branchId);
+    assert.equal(parsed.state.timeMs, t, branchId);
+    // canonical round-trip never reintroduces legacy parameters
+    const url = serializeCvShowRoute('https://portfolio.example/cv/', parsed.state, {});
+    assert.equal(url.searchParams.has('showEntry'), false, branchId);
+    assert.equal(url.searchParams.has('showDetail'), false, branchId);
+  }
+});
+
+test('showCompleted never enters the canonical URL writer', () => {
+  const url = serializeCvShowRoute('https://portfolio.example/cv/', {
+    mode: 'short',
+    timeMs: cvShowGlobalTimeOf(TIMELINE, 'symbiote-workspace', 100),
+    play: false,
+    completed: true,
+  });
+  assert.equal(url.searchParams.has('showCompleted'), false,
+    'terminal session state must not become a shareable URL coordinate');
+});
+
+test('canonical numeric semantics: negative clamps to 0, fractions/or junk are rejected', () => {
+  // Negative timeMs is rejected by the non-negative integer grammar and
+  // normalised by the resolver as extra safety.
+  assert.equal(resolveCvShowCompositionAt(TIMELINE, -1).globalTimeMs, 0);
+  assert.equal(resolveCvShowCompositionAt(TIMELINE, Number.NaN).globalTimeMs, 0);
+  assert.equal(resolveCvShowCompositionAt(TIMELINE, Number.POSITIVE_INFINITY).branch, true,
+    'non-finite input resolves deterministically (clamped to the final segment)');
+  // The writer canonicalizes fractional ms to an integer coordinate.
+  const url = serializeCvShowRoute('https://portfolio.example/cv/', {
+    mode: 'short',
+    timeMs: 12_345.7,
+    play: true,
+  });
+  assert.equal(url.searchParams.get('showTime'), '12346');
+});
+
 test('scene route mapping uses durable navigate targets and explicit project ownership only', () => {
   const story = {
     scenes: [

@@ -1375,6 +1375,24 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   document.addEventListener('portfolio-open-tour', onOpen);
   document.addEventListener('source-viewer-action', onSourceViewerAction);
   globalThis.addEventListener?.('popstate', onPopState);
+
+  // Force-flush the shareable global coordinate at semantic boundaries.
+  // Normal progress goes through the 1s-throttled writer; without this
+  // flush a tab close between throttled writes restores a stale position,
+  // which is worst exactly next to a branch/entry boundary.
+  const flushRouteNow = () => {
+    const snapshot = getChat()?.routeSnapshot;
+    if (!snapshot?.mode || snapshot.running !== true) return;
+    if (routeRequests.applying) return;
+    cancelPendingRouteWrite();
+    writeRouteState(snapshot);
+  };
+  const onVisibilityFlush = () => {
+    if (document.visibilityState === 'hidden') flushRouteNow();
+  };
+  document.addEventListener('visibilitychange', onVisibilityFlush);
+  globalThis.addEventListener?.('pagehide', flushRouteNow);
+
   workspace.addEventListener('portfolio-show-start', onStart);
   workspace.addEventListener('portfolio-show-player-mounted', onShowPlayerMounted);
   workspace.addEventListener('portfolio-show-seek', onSeek);
@@ -1399,6 +1417,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     document.removeEventListener('portfolio-open-tour', onOpen);
     document.removeEventListener('source-viewer-action', onSourceViewerAction);
     globalThis.removeEventListener?.('popstate', onPopState);
+    document.removeEventListener('visibilitychange', onVisibilityFlush);
+    globalThis.removeEventListener?.('pagehide', flushRouteNow);
     workspace.removeEventListener('portfolio-show-start', onStart);
     workspace.removeEventListener('portfolio-show-player-mounted', onShowPlayerMounted);
     workspace.removeEventListener('portfolio-show-seek', onSeek);
