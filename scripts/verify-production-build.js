@@ -29,9 +29,12 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 // Budget raised 2026-09-06 (+0.3% raw, +0.5% gzip): the approved drawer rail
 // launcher zones and transport button states legitimately cost ~4KB raw.
 // The previous budget sat 9 bytes under, so no feature could land at all.
+// Budget raised 2026-09-18 (+4% raw, +4% gzip): Slice A/B/C landed —
+// read-only live observation, ensure/reconciliation, gated composition
+// boundary handling are explicit new runtime surfaces.
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
-  raw: 1_780_000,
-  gzip: 432_000,
+  raw: 1_850_000,
+  gzip: 450_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);

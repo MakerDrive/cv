@@ -291,8 +291,8 @@ test('verifier verifyJsMetafile rejects any import record across all outputs', (
 
 test('verifier enforces the main bundle budget and runtime Markdown asset boundary', () => {
   assert.deepStrictEqual(MAIN_JS_SIZE_LIMITS, {
-    raw: 1780000,
-    gzip: 432000,
+    raw: 1850000,
+    gzip: 450000,
   });
 
   let measured = verifyMainBundleSize('small bundle', { raw: 100, gzip: 100 });
@@ -349,6 +349,11 @@ test('full verifier success and failure scenarios', async () => {
       await fs.writeFile(
         path.join(tmpDir, 'js/tour-player/index.js'),
         'const events = ["portfolio-show-start", "portfolio-show-phase"];',
+      );
+      await fs.mkdir(path.join(tmpDir, 'js/live-observation'), { recursive: true });
+      await fs.writeFile(
+        path.join(tmpDir, 'js/live-observation/index.js'),
+        'const live = "js/live-observation/index.js";',
       );
       await fs.writeFile(path.join(tmpDir, 'js/ForceWorker.js'), 'console.log("hello worker");');
       await fs.writeFile(path.join(tmpDir, 'js/material-symbols.css'), 'url("material-symbols-outlined-400.ttf")');
