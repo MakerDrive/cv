@@ -159,6 +159,32 @@ the double `pause/play` preroll that normalizes deferred presentation consumes
 most of that grace, so a slow host main thread can miss the clock once and the
 player applies its bounded scene setup retry. Keep entry lead-ins lean.
 
+## Playback routing: ONE composition, ONE global playhead
+
+The CV Show URL contract names only the composition identity and ONE global
+composition coordinate; it never names an entry, branch, clip, or local
+position:
+
+- `showMode` — playback policy (`short` skips detail segments, `full` plays
+  them). It changes traversal, never segment positions.
+- `showTime` — global composition time in milliseconds; the single playback
+  coordinate. Entry, detail branch and local media position are derived via
+  `resolveCvShowCompositionAt` (src/static-pages/js/tour-player/compositionTime.js).
+- `showPlay=0` — transient launch intent (open paused).
+- `showCompleted=1` — terminal session marker, not a coordinate.
+
+There is one master segment geometry (`scene → its detail branch`,
+interleaved). `short` never relocates branches in time. Durations come from
+`src/static-pages/data/cvShowScheduleDurations.js`, a generated projection of
+the canonical Project and the accepted audio release — regenerating audio
+reflows downstream offsets automatically.
+
+Legacy links carrying `showEntry` / `showDetail` + entry-local `showTime`
+are accepted ONCE as a compat bridge and rewritten to the canonical global
+coordinate via `history.replaceState`. Production runtime never writes
+entry/branch names to the URL; those params exist only in the legacy parser
+and its tests.
+
 ## Failure semantics: AUTO REWIND after narration start is forbidden
 
 Two invariants govern presentation failures:

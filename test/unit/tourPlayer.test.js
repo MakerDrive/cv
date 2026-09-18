@@ -27,7 +27,7 @@ import {
 } from '../../src/static-pages/data/tourManifest.js';
 import { CV_SHOW_STORY } from '../../src/static-pages/data/tourScripts.js';
 import { createCvShowCompositionTimeline, cvShowGlobalTimeOf } from '../../src/static-pages/js/tour-player/compositionTime.js';
-const ROUTE_SHORT_TIMELINE = createCvShowCompositionTimeline(CV_SHOW_STORY, 'short');
+const ROUTE_SHORT_TIMELINE = createCvShowCompositionTimeline(CV_SHOW_STORY);
 const globalRoute = (entryId, localMs = 0, play = false) => ({ mode: 'short', timeMs: cvShowGlobalTimeOf(ROUTE_SHORT_TIMELINE, entryId, localMs), play });
 const globalTimeOf = (entryId, localMs = 0) => cvShowGlobalTimeOf(ROUTE_SHORT_TIMELINE, entryId, localMs);
 import {

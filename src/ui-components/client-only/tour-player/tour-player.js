@@ -551,12 +551,12 @@ export class PortfolioShowChat extends HTMLElement {
     });
   }
 
-  #compositionTimeline(mode) {
+  #compositionTimeline() {
     if (!this.#story) return null;
-    if (!this.#compositionTimelines.has(mode)) {
-      this.#compositionTimelines.set(mode, createCvShowCompositionTimeline(this.#story, mode));
+    if (!this.#compositionTimelines.has('master')) {
+      this.#compositionTimelines.set('master', createCvShowCompositionTimeline(this.#story));
     }
-    return this.#compositionTimelines.get(mode);
+    return this.#compositionTimelines.get('master');
   }
 
   get routeSnapshot() {
@@ -570,7 +570,7 @@ export class PortfolioShowChat extends HTMLElement {
       : Math.max(0, Math.round(Number(fallbackPosition) || 0));
     const routeEntryId = branch?.sceneId || currentEntry?.id || '';
     const timeSegmentId = branch?.id || currentEntry?.id || '';
-    const timeline = this.#compositionTimeline(this.#mode || 'short');
+    const timeline = this.#compositionTimeline();
     // The URL carries ONLY the global composition coordinate. The current
     // entry/branch/local position are derived playback state — computed from
     // the global coordinate by resolveCvShowCompositionAt, never vice versa.
@@ -599,7 +599,7 @@ export class PortfolioShowChat extends HTMLElement {
   async applyShowRoute({ mode, timeMs = 0, play = true } = {}) {
     if (!this.$.isReady || (mode !== 'short' && mode !== 'full')) return false;
     if (this.$.isRunning || this.#mode) this.stopShow({ reason: 'route-replace' });
-    const timeline = this.#compositionTimeline(mode);
+    const timeline = this.#compositionTimeline();
     if (!timeline) return false;
     const resolved = resolveCvShowCompositionAt(timeline, timeMs);
     if (!resolved) return false;

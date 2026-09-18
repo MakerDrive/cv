@@ -710,10 +710,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     const story = view.story;
     return {
       story,
-      timelineByMode: {
-        short: createCvShowCompositionTimeline(story, 'short'),
-        full: createCvShowCompositionTimeline(story, 'full'),
-      },
+      timeline: createCvShowCompositionTimeline(story),
     };
   };
 
@@ -1054,7 +1051,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     // The header intends "start the scene for this project" — convert the
     // semantic entry intent into the canonical global coordinate once; the
     // URL keeps only showMode + showTime.
-    const timeline = routePolicy().timelineByMode.short;
+    const timeline = routePolicy().timeline;
     const state = {
       mode: 'short',
       timeMs: cvShowGlobalTimeOf(timeline, entryId, 0),

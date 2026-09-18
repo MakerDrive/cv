@@ -49,12 +49,6 @@ function hasDuplicateShowParam(searchParams) {
   return CV_SHOW_ROUTE_PARAMS.some((name) => searchParams.getAll(name).length > 1);
 }
 
-function resolveTimeline(policy, mode) {
-  const timeline = policy.timelineByMode?.[mode];
-  if (timeline?.segments?.length) return timeline;
-  return null;
-}
-
 /**
  * Parse and validate a CV Show URL against the global composition timeline.
  *
@@ -67,7 +61,7 @@ function resolveTimeline(policy, mode) {
  * @param {string | URL} value
  * @param {{
  *   baseUrl?: string | URL,
- *   timelineByMode?: { short?: object, full?: object },
+ *   timeline?: object,
  *   story?: object,
  * }} [policy]
  */
@@ -89,10 +83,8 @@ export function parseCvShowRoute(value, policy = {}) {
   const mode = params.get('showMode') || '';
   if (!CV_SHOW_MODES.has(mode)) return invalidResult('invalid-mode', url);
 
-  const timeline = resolveTimeline(policy, mode)
-    || (policy.story
-      ? createCvShowCompositionTimeline(policy.story, /** @type {'short' | 'full'} */ (mode))
-      : null);
+  const timeline = policy.timeline
+    || (policy.story ? createCvShowCompositionTimeline(policy.story) : null);
   if (!timeline) return invalidResult('timeline-unavailable', url);
 
   const rawTime = params.get('showTime');

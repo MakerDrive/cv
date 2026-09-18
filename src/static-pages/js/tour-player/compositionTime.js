@@ -2,15 +2,14 @@
  * CV Show global composition time.
  *
  * ONE COMPOSITION, ONE GLOBAL PLAYHEAD: a CV Show route carries only the
- * composition identity (short/full) plus ONE global composition coordinate
- * in milliseconds. Entry, branch, narration clip and local media position
- * are always DERIVED from that coordinate — never URL parameters.
+ * composition identity plus ONE global composition coordinate in
+ * milliseconds. Entry, branch, narration clip and local media position are
+ * always DERIVED from that coordinate — never URL parameters.
  *
- * Timeline layout:
- * - short: 16 main scenes in playback order, then detail branches appended
- *   after the finale (branches are interactive session entries, but they
- *   are still part of the deterministic composition for deep links);
- * - full: each scene followed immediately by its branch.
+ * Master layout (mode-independent): each scene followed immediately by its
+ * detail branch. There is only ONE segment geometry. `showMode=short` is a
+ * traversal policy that skips branch segments during automatic playback;
+ * `full` plays them. Neither mode relocates segments.
  *
  * Durations come from the generated schedule-durations projection of the
  * canonical Authoring Project.
@@ -24,13 +23,14 @@ function buildSegments(ids, branchIds, durations, sceneCount) {
     if (!Number.isSafeInteger(durationMs) || durationMs <= 0) {
       throw new TypeError(`CV Show composition timeline is missing a valid duration for "${id}"`);
     }
+    const branch = branchIds.has(id);
     const entry = Object.freeze({
       id,
       startMs: cursor,
       endMs: cursor + durationMs,
       durationMs,
-      branch: branchIds.has(id),
-      sceneIndex: index < sceneCount && !branchIds.has(id) ? index : -1,
+      branch,
+      sceneIndex: !branch ? index : -1,
     });
     cursor += durationMs;
     return entry;
@@ -38,25 +38,23 @@ function buildSegments(ids, branchIds, durations, sceneCount) {
 }
 
 /**
- * Builds the global composition timeline for a story in one mode.
+ * Builds THE master global composition timeline. There is intentionally no
+ * mode argument: changing from short to full playback changes which
+ * segments play, never where they sit in composition time.
  * @param {object} story CV Show story projection
- * @param {'short' | 'full'} mode
  */
-export function createCvShowCompositionTimeline(story, mode = 'short') {
+export function createCvShowCompositionTimeline(story) {
   const durations = CV_SHOW_SCHEDULE_DURATIONS.durations;
   const branchIds = new Set(Object.keys(story?.branches || {}));
   const scenes = (story?.short || []).map(String).filter(Boolean);
   if (!scenes.length) throw new TypeError('CV Show composition timeline requires story.short');
-  const ordered = mode === 'full'
-    ? scenes.flatMap((sceneId) => {
-        const branchId = String(story?.scenes?.find?.(({ id }) => id === sceneId)?.branchId || '');
-        return branchId && branchIds.has(branchId) ? [sceneId, branchId] : [sceneId];
-      })
-    : [...scenes, ...branchIds];
+  const ordered = scenes.flatMap((sceneId) => {
+    const branchId = String(story?.scenes?.find?.(({ id }) => id === sceneId)?.branchId || '');
+    return branchId && branchIds.has(branchId) ? [sceneId, branchId] : [sceneId];
+  });
   const segments = buildSegments(ordered, branchIds, durations, scenes.length);
-  const mainEndMs = segments.find(({ branch }) => branch)?.startMs ?? segments.at(-1).endMs;
+  const mainEndMs = segments.filter(({ branch }) => !branch).at(-1)?.endMs ?? 0;
   return Object.freeze({
-    mode,
     segments,
     mainEndMs,
     totalMs: segments.at(-1).endMs,
@@ -87,7 +85,6 @@ export function resolveCvShowCompositionAt(timeline, globalTimeMs) {
     durationMs: segment.durationMs,
     branch: segment.branch,
     completed: index < 0,
-    mode: timeline.mode,
   });
 }
 

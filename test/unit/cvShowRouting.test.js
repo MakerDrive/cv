@@ -36,10 +36,9 @@ const fixtureStory = Object.freeze({
     'workspace-details': { id: 'workspace-details', sceneId: 'symbiote-workspace' },
   }),
 });
-const SHORT = createCvShowCompositionTimeline(fixtureStory, 'short');
-const FULL = createCvShowCompositionTimeline(fixtureStory, 'full');
+const TIMELINE = createCvShowCompositionTimeline(fixtureStory);
 const policy = Object.freeze({
-  timelineByMode: Object.freeze({ short: SHORT, full: FULL }),
+  timeline: TIMELINE,
 });
 
 const POSITIONING_MS = CV_SHOW_SCHEDULE_DURATIONS.durations.positioning;
@@ -262,26 +261,68 @@ test('CV Show route round-trips semantic state and preserves unrelated URL state
   assert.equal(serialized.searchParams.has('showPlay'), false, 'default play intent is canonicalized away');
 });
 
+test('ONE master composition geometry: T resolves identically regardless of playback policy', () => {
+  // showMode is traversal policy, not timeline identity: the same global T
+  // must resolve to the same entry/segment for every playback policy. The
+  // master layout interleaves each scene with its detail branch at fixed
+  // coordinates; short/full playback never relocates them.
+  const tBranch = cvShowGlobalTimeOf(TIMELINE, 'workspace-details', 12_000);
+  const first = resolveCvShowCompositionAt(TIMELINE, tBranch);
+  const second = resolveCvShowCompositionAt(TIMELINE, tBranch);
+  assert.deepEqual(
+    { entryId: first.entryId, localMs: first.localMs, branch: first.branch },
+    { entryId: second.entryId, localMs: second.localMs, branch: second.branch },
+  );
+  assert.equal(first.branch, true, 'detail segment keeps its global position');
+
+  const tScene = cvShowGlobalTimeOf(TIMELINE, 'symbiote-workspace', 5_000);
+  const scene = resolveCvShowCompositionAt(TIMELINE, tScene);
+  assert.equal(scene.entryId, 'symbiote-workspace');
+  assert.equal(scene.localMs, 5_000);
+});
+
+test('global composition time boundary semantics use [start, end) consistently', () => {
+  const atStart = resolveCvShowCompositionAt(TIMELINE, TIMELINE.segments[1].startMs);
+  assert.equal(atStart.entryId, TIMELINE.segments[1].id);
+  assert.equal(atStart.localMs, 0);
+
+  const before = resolveCvShowCompositionAt(TIMELINE, TIMELINE.segments[1].startMs - 1);
+  assert.equal(before.entryId, TIMELINE.segments[0].id);
+  assert.equal(before.localMs, TIMELINE.segments[0].durationMs - 1);
+
+  const atEnd = resolveCvShowCompositionAt(TIMELINE, TIMELINE.totalMs);
+  assert.equal(atEnd.completed, true);
+
+  assert.equal(resolveCvShowCompositionAt(TIMELINE, -5).globalTimeMs, 0);
+  for (const bad of ['abc', '1.5', '-4']) {
+    assert.equal(
+      parseCvShowRoute(`https://portfolio.example/cv/?showMode=short&showTime=${bad}`, policy).reason,
+      'invalid-time',
+      bad,
+    );
+  }
+});
+
 test('CV Show resolver derives entry and local time from the global coordinate', () => {
   // T inside entry 1, entry 2 and the branch appended after the finale.
-  const first = resolveCvShowCompositionAt(SHORT, 5_000);
+  const first = resolveCvShowCompositionAt(TIMELINE, 5_000);
   assert.equal(first.entryId, 'positioning');
   assert.equal(first.localMs, 5_000);
   assert.equal(first.branch, false);
 
-  const second = resolveCvShowCompositionAt(SHORT, POSITIONING_MS + 2_000);
+  const second = resolveCvShowCompositionAt(TIMELINE, POSITIONING_MS + 2_000);
   assert.equal(second.entryId, 'symbiote-workspace');
   assert.equal(second.localMs, 2_000);
   assert.equal(second.branch, false);
 
-  const branch = resolveCvShowCompositionAt(SHORT, POSITIONING_MS + WORKSPACE_MS + 3_000);
+  const branch = resolveCvShowCompositionAt(TIMELINE, POSITIONING_MS + WORKSPACE_MS + 3_000);
   assert.equal(branch.entryId, 'workspace-details');
   assert.equal(branch.detailId, 'workspace-details');
   assert.equal(branch.localMs, 3_000);
   assert.equal(branch.branch, true, 'detail is a composition segment appended after the finale');
 
   // Global time past the end clamps to the last segment.
-  const end = resolveCvShowCompositionAt(SHORT, SHORT.totalMs + 10_000);
+  const end = resolveCvShowCompositionAt(TIMELINE, TIMELINE.totalMs + 10_000);
   assert.equal(end.completed, true);
   assert.equal(end.entryId, 'workspace-details');
 });
@@ -294,7 +335,7 @@ test('seek and route restore resolve identical composition state from the same T
     `https://portfolio.example/cv/?showMode=short&showTime=${t}`,
     policy,
   ).state;
-  const fromSeek = resolveCvShowCompositionAt(SHORT, t);
+  const fromSeek = resolveCvShowCompositionAt(TIMELINE, t);
   assert.equal(fromRoute.entryId, fromSeek.entryId);
   assert.equal(fromRoute.localMs, fromSeek.localMs);
   assert.equal(fromRoute.detailId, fromSeek.detailId);
@@ -337,7 +378,7 @@ test('legacy detail deep links resolve onto the appended branch segment', () => 
 });
 
 test('source media time is derived from the global composition position', () => {
-  const resolved = resolveCvShowCompositionAt(SHORT, POSITIONING_MS + 41_000);
+  const resolved = resolveCvShowCompositionAt(TIMELINE, POSITIONING_MS + 41_000);
   assert.equal(resolved.entryId, 'symbiote-workspace');
   assert.equal(resolved.localMs, 41_000, 'local media position is pure arithmetic, not a route field');
 });
@@ -374,12 +415,12 @@ test('CV Show route rejects invalid semantic state and strips only Show paramete
 
 test('CV Show route clamps global time to the composition total', () => {
   const oversized = canonicalizeCvShowRoute(
-    `https://portfolio.example/cv/?showMode=short&showTime=${SHORT.totalMs + 999_999}`,
+    `https://portfolio.example/cv/?showMode=short&showTime=${TIMELINE.totalMs + 999_999}`,
     policy,
   );
   assert.equal(oversized.status, 'valid');
-  assert.equal(oversized.state.timeMs, SHORT.totalMs, 'global time clamps to totalMs');
-  assert.equal(oversized.url.searchParams.get('showTime'), String(SHORT.totalMs));
+  assert.equal(oversized.state.timeMs, TIMELINE.totalMs, 'global time clamps to totalMs');
+  assert.equal(oversized.url.searchParams.get('showTime'), String(TIMELINE.totalMs));
   assert.equal(oversized.state.completed, false);
 });
 
@@ -573,7 +614,7 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
   // Canonical URL after popstate: the legacy finale link is converted to its
   // global composition coordinate (finale scene start + local 5000ms).
   const realStory = projectCvShowStory(CV_SHOW_PRESENTATION_PROJECT);
-  const realShort = createCvShowCompositionTimeline(realStory, 'short');
+  const realShort = createCvShowCompositionTimeline(realStory);
   const finaleGlobal = cvShowGlobalTimeOf(realShort, 'finale', 5_000);
   const positioningGlobal = cvShowGlobalTimeOf(realShort, 'positioning', 0);
 
