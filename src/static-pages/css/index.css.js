@@ -171,6 +171,13 @@ main > article {
   padding: 0;
 }
 
+/* agent-dock-shell uses isolation: isolate, so its inner fullscreen layers cannot
+   out-stack the page header; lift the whole shell above the header while any
+   inner layout is fullscreen. */
+agent-dock-shell:has(panel-layout[fullscreen-active]) {
+  z-index: 200;
+}
+
 .pulse-screen {
   position: relative;
   display: block;
