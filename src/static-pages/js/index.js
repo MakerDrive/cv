@@ -1,4 +1,5 @@
 import { createRuntimeAssetUrl } from './runtimeAssetUrl.js';
+import { createCvShowMockAgentProvider } from './tour-player/mockAgentProvider.js';
 import {
   capturePortfolioGraphRenderSnapshot,
   createPortfolioGraphSnapshotRuntime,
@@ -3772,6 +3773,17 @@ class PortfolioWorkspace extends HTMLElement {
       });
     });
     this.replaceChildren(template.content);
+    // The mock agent runtime is part of the site bootstrap, not a hidden side
+    // effect of starting CV Show: wire the scripted provider on every page load
+    // so the agent chat answers before any Show starts. The dock may upgrade
+    // after this connectedCallback when its definition loads lazily, so the
+    // call waits for the definition and pends inside the dock until the chat
+    // panel mounts.
+    customElements.whenDefined('agent-dock-shell').then(() => {
+      this._dock?.setAgentProvider?.(
+        createCvShowMockAgentProvider({ locale: document.documentElement.lang || 'en' }),
+      );
+    });
     // The dock may have entered its responsive state before this listener is
     // attached.  Configure the embedded workspace from the actual viewport
     // immediately; later dock events keep it in sync across breakpoints.

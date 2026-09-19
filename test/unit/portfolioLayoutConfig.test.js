@@ -498,3 +498,26 @@ test('portfolio structured graph applies layout only on binding, explicit select
   assert.match(selectionSource, /setPortfolioStructuredLayoutInUrl\(location\.href, this\.graphLayout\)/);
   assert.doesNotMatch(source, /\/\/ setNodePositions|icon: 'snowflake'/);
 });
+
+test('mock agent provider is wired during site bootstrap regardless of CV Show', async () => {
+  let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
+  let connectionIndex = source.indexOf('this.replaceChildren(template.content)');
+  let providerIndex = source.indexOf('this._dock?.setAgentProvider?.(');
+
+  assert.match(
+    source,
+    /import \{ createCvShowMockAgentProvider \} from '\.\/tour-player\/mockAgentProvider\.js'/,
+    'portfolio workspace must import the mock agent provider factory itself',
+  );
+  assert.ok(connectionIndex >= 0, 'dock template connection must exist');
+  assert.ok(providerIndex >= 0, 'workspace bootstrap must wire the mock agent provider');
+  assert.ok(
+    providerIndex > connectionIndex,
+    'provider wiring must run after the dock template is connected, not before upgrade',
+  );
+  assert.match(
+    source,
+    /customElements\.whenDefined\('agent-dock-shell'\)\.then\(/,
+    'provider wiring must wait for the dock definition so the public method exists',
+  );
+});
