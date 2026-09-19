@@ -3755,15 +3755,10 @@ class PortfolioWorkspace extends HTMLElement {
     if (!dock || !layout) return;
     this._dock = dock;
     this._layout = layout;
-    const syncWorkspaceResponsiveMode = (mobile) => {
-      layout.setAttribute('responsive-mode', mobile ? 'swipe' : 'preserve');
-    };
     dock.addEventListener('agent-dock-responsive-change', (event) => {
-      syncWorkspaceResponsiveMode(
-        Boolean(event.detail?.mobile)
-          || (typeof window !== 'undefined'
-            && window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT),
-      );
+      layout.setLayoutBehavior({
+        responsiveMode: event.detail?.mobile ? 'swipe' : 'preserve',
+      });
     });
     dock.addEventListener('portfolio-show-overlay-coordinate', () => {
       coordinatePortfolioShowOverlays({
@@ -3785,13 +3780,14 @@ class PortfolioWorkspace extends HTMLElement {
       );
     });
     // The dock may have entered its responsive state before this listener is
-    // attached.  Configure the embedded workspace from the actual viewport
+    // attached. Configure the embedded workspace from the actual viewport
     // immediately; later dock events keep it in sync across breakpoints.
     queueMicrotask(() => {
-      syncWorkspaceResponsiveMode(
-        typeof window !== 'undefined'
-          && window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT,
-      );
+      layout.setLayoutBehavior({
+        responsiveMode: typeof window !== 'undefined'
+          && window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT
+          ? 'swipe' : 'preserve',
+      });
     });
     layout.registerPanelType('portfolio-tree', {
       title: tPortfolio('panel.materials'),

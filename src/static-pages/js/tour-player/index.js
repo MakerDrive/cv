@@ -9,6 +9,7 @@ import {
   waitForShowVisualSettlement,
 } from 'symbiote-ui/chat/show-runtime';
 import { TOUR_LOCALE_MESSAGES } from '../../data/tourTranslations.js';
+import { PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT } from '../../data/portfolioLayoutConfig.js';
 import { activateCvShowTarget, activateCvShowUserAction } from './activation.js';
 import { getCvShowRuntimeAuthority } from './cvShowRuntimeAuthority.js';
 import {
@@ -615,7 +616,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let reconcileRouteWhenIdle = false;
   let stripRouteWhenIdle = false;
 
-  const isMobileDock = () => Boolean(getDock()?.querySelector?.('panel-layout[drawer-mode-active]'));
+  const isMobileDock = () => (
+    typeof window !== 'undefined' && window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT
+  ) || Boolean(getDock()?.querySelector?.('panel-layout[drawer-mode-active]'));
 
   const clearMobileShowPlacement = () => {
     const chat = getDock()?.getChat?.();

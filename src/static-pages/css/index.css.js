@@ -618,15 +618,12 @@ body > footer a {
   }
 
   body:has(.pulse-screen) {
-    /* The workspace must subtract the actual rail-sized header, not the
-       former fixed 56px fallback. Otherwise the unallocated remainder shows
-       as a strip below the mobile layout. */
-    --calc-top-pan-height: var(--sn-layout-collapsed-horizontal-size, 56px);
+    --calc-top-pan-height: var(--sn-app-topbar-mobile-height, 56px);
   }
 
   body:has(.pulse-screen) > header {
-    block-size: var(--sn-layout-collapsed-horizontal-size, 56px);
-    min-block-size: var(--sn-layout-collapsed-horizontal-size, 56px);
+    block-size: var(--sn-app-topbar-mobile-height, 56px);
+    min-block-size: var(--sn-app-topbar-mobile-height, 56px);
     box-sizing: border-box;
     gap: var(--pulse-mobile-header-gap, 10px);
     padding: var(--sn-app-topbar-mobile-padding, 6px 10px);
@@ -644,8 +641,12 @@ body > footer a {
     min-inline-size: var(--pulse-header-action-size, 44px);
     min-block-size: var(--pulse-header-action-size, 44px);
     padding: 0;
-    margin-block: 4px;
+    margin-block: 0;
     margin-inline: 2px;
+  }
+
+  .pulse-header-title {
+    display: none;
   }
 
   .pulse-locale-toggle {
