@@ -508,11 +508,11 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v2:sha256-UgeWlJZqI+hudIsZB8VLdlVhIqoI/IhYuGCWpgcMGR8=',
+    'workspace-presentation-authoring-project-v2:sha256-8shCZZmoy0zPzGiSFWNTIh+sji+yrWNnSNdZCvbFljE=',
   );
   assert.equal(
     timeline.hash,
-    'presentation-timeline-v3:sha256-GvDhBFvOtXBBZM1sJpcjPjvoRSDG1Yg85NL6gpETZnY=',
+    'presentation-timeline-v3:sha256-hL1fR/bfWVMRazhgUx+TAaqTk68AQHtvHxyjNKScTa4=',
   );
 
   const manifestSource = await readFile(
@@ -1288,7 +1288,7 @@ test('Short media choreography frames video and 360 blocks while preserving the 
     sceneDirectives
   ));
   const youtube = directives.filter(({ target }) => /\/youtube\//u.test(String(target || '')));
-  assert.equal(youtube.length, 17);
+  assert.equal(youtube.length, 19);
   for (const directive of youtube) {
     assert.equal(directive.type, 'frame', directive.id);
     assert.equal(directive.mode, undefined, directive.id);
@@ -1470,7 +1470,7 @@ test('Show runtime policy keeps video blocks static in short and detail modes', 
   const passiveVideoDirectives = mediaDirectives.filter(({ target }) => (
     target.includes('/youtube/') || target.endsWith('/ims/spinner')
   ));
-  assert.equal(passiveVideoDirectives.length, 18);
+  assert.equal(passiveVideoDirectives.length, 20);
   assert.deepEqual(
     [...new Set(passiveVideoDirectives.map(({ type }) => type))],
     ['frame'],

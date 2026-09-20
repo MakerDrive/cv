@@ -85,6 +85,7 @@ import {
   pickPortfolioActiveMediaId,
   resolvePortfolioMediaVisibilityChange,
 } from '../data/portfolioMediaVisibility.js';
+
 import { showClickRipple } from 'symbiote-ui/ui/click-ripple.js';
 import { createPortfolioImsMediaAdapter } from './portfolioImsMediaAdapter.js';
 
