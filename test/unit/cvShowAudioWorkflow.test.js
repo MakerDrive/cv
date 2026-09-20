@@ -32,6 +32,9 @@ import {
   createCvShowAudioReleasePipeline,
 } from '../../scripts/cv-show-audio-pipeline.js';
 import {
+  createCvShowAudioProvenance,
+} from '../../scripts/cv-show-audio-provenance.js';
+import {
   createCvShowAudioPipelineRunner,
 } from '../../scripts/cv-show-audio-pipeline-runner.js';
 import {
@@ -299,8 +302,7 @@ test('changed private media identity invokes the existing publisher exactly once
   assert.equal(result.status, 'published');
 });
 
-function fakeEntryReleases() {
-  let accepted = CV_SHOW_AUDIO_RELEASE.acceptedProvenance;
+function fakeEntryReleases(accepted) {
   return accepted.entries.map((entry, index) => {
     let prefix = String(index + 1).padStart(2, '0');
     let projection = {
@@ -340,9 +342,17 @@ function fakeEntryReleases() {
 }
 
 function predecessorFixture() {
-  let releases = fakeEntryReleases();
+  let acceptedProvenance = createCvShowAudioProvenance({
+    project: CV_SHOW_PRESENTATION_PROJECT,
+    voice: PROFILE.voice,
+    synthesisPolicy: PROFILE.synthesisPolicy,
+    asr: PROFILE.asr,
+    aligner: PROFILE.aligner,
+  });
+  let releases = fakeEntryReleases(acceptedProvenance);
   let projection = structuredClone(CV_SHOW_AUDIO_RELEASE);
   delete projection.releaseId;
+  projection.acceptedProvenance = acceptedProvenance;
   projection.entryReleaseIds = releases.map(({ entryReleaseId }) => entryReleaseId);
   projection.manifests = {
     ...projection.manifests,
