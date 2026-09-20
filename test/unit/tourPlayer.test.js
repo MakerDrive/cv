@@ -375,11 +375,67 @@ test('CV Show scroll settles an already-centered target without artificial anima
   assert.equal(frameRequests, 0, 'a no-op scroll must not invent visual motion');
 });
 
+test('CV Show calm-scene scroll ramps over a human-like duration with eased intermediates', async () => {
+  let sequence = 0;
+  const callbacks = new Map();
+  const view = {
+    requestAnimationFrame(callback) {
+      const id = ++sequence;
+      callbacks.set(id, callback);
+      return id;
+    },
+    cancelAnimationFrame(id) {
+      callbacks.delete(id);
+    },
+    matchMedia() {
+      return { matches: false };
+    },
+  };
+  const container = {
+    parentElement: null,
+    scrollHeight: 5_000,
+    clientHeight: 400,
+    scrollWidth: 300,
+    clientWidth: 300,
+    scrollLeft: 0,
+    scrollTop: 0,
+    getRootNode() { return null; },
+  };
+  const target = {
+    parentElement: container,
+    scrollIntoView() {
+      container.scrollTop = 1_200;
+    },
+  };
+  const document = { defaultView: view, scrollingElement: container };
+
+  const pending = animateCvShowScrollIntoView(target, {
+    document,
+    durationMs: resolveCvShowScrollDuration(3_000),
+  });
+  assert.equal(container.scrollTop, 0, 'destination probe is invisible');
+
+  const step = (timestamp) => {
+    const [id, callback] = callbacks.entries().next().value;
+    callbacks.delete(id);
+    callback(timestamp);
+  };
+  step(0);
+  step(175); // quarter of the motion
+  assert.ok(container.scrollTop > 0, 'motion has started');
+  assert.ok(container.scrollTop < 300, 'eased ramp stays behind a linear midpoint ahead of tempo');
+  step(350);
+  assert.ok(container.scrollTop > 0 && container.scrollTop < 1_200, 'mid-motion is an intermediate value');
+  step(700);
+  await pending;
+  assert.equal(container.scrollTop, 1_200);
+});
+
 test('CV Show scroll motion reserves settlement time inside the authored hard deadline', () => {
   assert.equal(resolveCvShowScrollDuration(800), 0);
   assert.equal(resolveCvShowScrollDuration(1_000), 200);
-  assert.equal(resolveCvShowScrollDuration(2_200), 300);
-  assert.equal(resolveCvShowScrollDuration(null), 300);
+  assert.equal(resolveCvShowScrollDuration(2_200), 700);
+  assert.equal(resolveCvShowScrollDuration(null), 700);
   assert.equal(shouldBypassCvShowScrollSettlement(800), true);
   assert.equal(shouldBypassCvShowScrollSettlement(1_000), false);
   assert.equal(shouldBypassCvShowScrollSettlement(1_200, {
