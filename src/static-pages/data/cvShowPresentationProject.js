@@ -463,7 +463,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "f360-studio",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "В две тысячи двадцать первом и две тысячи двадцать втором годах я основал и вёл F360 Studio. Это была коммерческая студия высокоточного три дэ сканирования. Здесь опыт музейной фотограмметрии превращался уже в законченный производственный процесс. Я выстраивал весь путь от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели. При переезде в Аргентину в две тысячи двадцать втором году физическую производственную базу пришлось закрыть."
+        "text": "В две тысячи двадцать первом и две тысячи двадцать втором годах я основал и вёл F360 Studio. Это была коммерческая студия высокоточного три дэ сканирования. Здесь опыт музейной фотограмметрии превращался уже в законченный производственный процесс. Я выстраивал весь путь от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели. В две тысячи двадцать втором году физическую производственную базу пришлось закрыть."
       },
       "turnId": "f360-studio"
     },
@@ -8629,7 +8629,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "article.adaptive-maximo-workbench.agentic-eam-demo"
+        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
       },
       "dependsOn": [
         {
@@ -8661,7 +8661,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "mode": "frame"
         },
         "kind": "focus",
-        "targetId": "article.adaptive-maximo-workbench.agentic-eam-demo"
+        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
       },
       "dependsOn": [
         {
@@ -8694,7 +8694,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "article.adaptive-maximo-workbench.xr-eam-example"
+        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
       },
       "dependsOn": [
         {
@@ -8726,7 +8726,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "mode": "frame"
         },
         "kind": "focus",
-        "targetId": "article.adaptive-maximo-workbench.xr-eam-example"
+        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
       },
       "dependsOn": [
         {
@@ -8759,7 +8759,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "article.adaptive-maximo-workbench.agentic-eam-demo"
+        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
       },
       "dependsOn": [
         {
@@ -8791,7 +8791,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "mode": "frame"
         },
         "kind": "focus",
-        "targetId": "article.adaptive-maximo-workbench.agentic-eam-demo"
+        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
       },
       "dependsOn": [
         {
@@ -8824,7 +8824,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "article.adaptive-maximo-workbench.xr-eam-example"
+        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
       },
       "dependsOn": [
         {
@@ -8856,7 +8856,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "mode": "frame"
         },
         "kind": "focus",
-        "targetId": "article.adaptive-maximo-workbench.xr-eam-example"
+        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
       },
       "dependsOn": [
         {
@@ -13036,7 +13036,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "period": "2017–2022",
             "projectId": "projects/complexscan",
             "return": null,
-            "subtitle": "Теперь вернусь к ComplexScan — коммерческой линии оборудования, чьи разработки стали частью технической базы AUTOBOX. Я развивал ComplexScan в 2017–2022 годах. В линию входили прозрачные платформы для бестеневой съёмки предметов в формате фото 360 и для 3D-сканирования. Здесь я демонстрирую одну из таких платформ и веб-приложение, из которого управляю ею. Здесь я показываю обновлённые версии поворотной платформы ComplexScan и веб-приложения для управления ею. Я проектировал оборудование и метод съёмки как единый продукт и довёл линию до первых международных поставок. Отдельным прикладным проектом стал BoothBot. Это система автоматизации каталожной съёмки винных бутылок непосредственно на складе заказчика. Система объединяла компактную съёмочную будку, управляемые световые панели, моторизированную камеру, пресеты съёмки и автоматическую обработку фотографий. Световая сцена была заранее настроена для бестеневой съёмки и контролируемых бликов, поэтому фотографии практически не требовали ручной коррекции. Система автоматически отделяла бутылку от фона, оптимизировала изображение и выдавала готовый материал для каталога. Благодаря этому сотрудники без студийного опыта могли получать повторяемый результат прямо на складе. Следующим этапом должна была стать прямая публикация готовых фотографий на сайте, но после моего переезда в Аргентину развитие проекта было приостановлено.",
+            "subtitle": "Теперь вернусь к ComplexScan — коммерческой линии оборудования, чьи разработки стали частью технической базы AUTOBOX. Я развивал ComplexScan в 2017–2022 годах. В линию входили прозрачные платформы для бестеневой съёмки предметов в формате фото 360 и для 3D-сканирования. Здесь я демонстрирую одну из таких платформ и веб-приложение, из которого управляю ею. Здесь я показываю обновлённые версии поворотной платформы ComplexScan и веб-приложения для управления ею. Я проектировал оборудование и метод съёмки как единый продукт и довёл линию до первых международных поставок. Отдельным прикладным проектом стал BoothBot. Это система автоматизации каталожной съёмки винных бутылок непосредственно на складе заказчика. Система объединяла компактную съёмочную будку, управляемые световые панели, моторизированную камеру, пресеты съёмки и автоматическую обработку фотографий. Световая сцена была заранее настроена для бестеневой съёмки и контролируемых бликов, поэтому фотографии практически не требовали ручной коррекции. Система автоматически отделяла бутылку от фона, оптимизировала изображение и выдавала готовый материал для каталога. Благодаря этому сотрудники без студийного опыта могли получать повторяемый результат прямо на складе. Следующим этапом должна была стать прямая публикация готовых фотографий на сайте, но развитие проекта было приостановлено.",
             "title": "ComplexScan"
           },
           "complexscan-details": {
@@ -13102,7 +13102,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "period": "2021–2022",
             "projectId": "projects/f360-studio",
             "return": null,
-            "subtitle": "Теперь вернусь по истории программно-аппаратных проектов. В 2021–2022 годах я основал и вёл F360 Studio. Это проект высокоточного 3D-сканирования. Я выстраивал процесс от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели. При переезде в Аргентину физическую производственную базу пришлось закрыть.",
+            "subtitle": "Теперь вернусь по истории программно-аппаратных проектов. В 2021–2022 годах я основал и вёл F360 Studio. Это проект высокоточного 3D-сканирования. Я выстраивал процесс от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели. Физическую производственную базу пришлось закрыть.",
             "title": "F360 Studio"
           },
           "finale": {
@@ -13250,7 +13250,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "period": "2010–2022",
             "projectId": "projects/photopizza",
             "return": null,
-            "subtitle": "В начале этой линии была PhotoPizza, которую я развивал с 2010 года. Проект появился внутри MEGAVISOR как инструмент для повторяемой съёмки объектов на 360 градусов. Здесь показан ускоренный демонстрационный ролик о сборке первой версии PhotoPizza — без подробной инструкции. Это промо MEGAVISOR, где показан весь спектр поддерживаемого контента, включая съёмку объектов на 360 градусов. Я продумал механику, электронику, прошивку, документацию и упаковку. Таймлапс сборки прототипа PhotoPizza из конструкционного алюминиевого профиля и шагового двигателя. Позже PhotoPizza стала open-source проектом. Здесь я показываю, как собрать простую поворотную платформу из подноса IKEA и вручную снять объект со всех сторон. Такие демонстрационные ролики я продюсировал для MEGAVISOR, чтобы популяризировать формат и снизить порог входа в технологию. Здесь я показываю новое веб-приложение PhotoPizza: с телефона запускаю съёмку и по Wi‑Fi управляю поворотным столом и камерой через веб-приложение. Универсальный блок управления работал с поворотными платформами, слайдером камеры и моторизированной панорамной головкой. На грузовой поворотной платформе PhotoPizza мы снимали даже тяжёлые объекты, включая мотоциклы, на 360 градусов. Проект продолжал развиваться до моего переезда в Аргентину в 2022 году.",
+            "subtitle": "В начале этой линии была PhotoPizza, которую я развивал с 2010 года. Проект появился внутри MEGAVISOR как инструмент для повторяемой съёмки объектов на 360 градусов. Здесь показан ускоренный демонстрационный ролик о сборке первой версии PhotoPizza — без подробной инструкции. Это промо MEGAVISOR, где показан весь спектр поддерживаемого контента, включая съёмку объектов на 360 градусов. Я продумал механику, электронику, прошивку, документацию и упаковку. Таймлапс сборки прототипа PhotoPizza из конструкционного алюминиевого профиля и шагового двигателя. Позже PhotoPizza стала open-source проектом. Здесь я показываю, как собрать простую поворотную платформу из подноса IKEA и вручную снять объект со всех сторон. Такие демонстрационные ролики я продюсировал для MEGAVISOR, чтобы популяризировать формат и снизить порог входа в технологию. Здесь я показываю новое веб-приложение PhotoPizza: с телефона запускаю съёмку и по Wi‑Fi управляю поворотным столом и камерой через веб-приложение. Универсальный блок управления работал с поворотными платформами, слайдером камеры и моторизированной панорамной головкой. На грузовой поворотной платформе PhotoPizza мы снимали даже тяжёлые объекты, включая мотоциклы, на 360 градусов. Проект продолжал развиваться до две тысячи двадцать второго года.",
             "title": "PhotoPizza"
           },
           "photopizza-details": {
@@ -13577,15 +13577,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
 /* CV_SHOW_AUDIO_RELEASE_INPUT:START */
 {
   "acceptedProvenance": {
-    "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WJXMA0f9i4DwyS1CYrZ3FSAznMtAbhDA/lcaYjQVtNY=",
+    "schemaVersion": "cv-show-audio-provenance-v1",
+    "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q=",
+    "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-xkDP1BOrbemy4iknmMC7Vj4rwXfu/OsnY5Q7ZPGcfIc=",
+    "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WJXMA0f9i4DwyS1CYrZ3FSAznMtAbhDA/lcaYjQVtNY=",
     "entries": [
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-Z3RBM9ZJWfG1mkC3hhNZZyo8WBBsgtmkrEZbNIQjyZs=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ctRBiieen1Vn2yNcnh07aNw4dgnsuzuXxMVGLkxXGlQ=",
         "entryId": "positioning",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-OKm9IHCERe1y+Y2DIcborkFzAi9NgOiNcUXzQgYDgKw=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-vnpNfkPIsLEK5xqsQxmLy2NNj2AgL8WLAkJ0nbiMw3g=",
         "sourceCellIds": [
           "cv-show:narration:positioning",
           "cv-show:cue:positioning.tenure-marker:scroll",
@@ -13595,14 +13594,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:positioning.open",
           "cv-show:audio-clip:positioning:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-OKm9IHCERe1y+Y2DIcborkFzAi9NgOiNcUXzQgYDgKw=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-vnpNfkPIsLEK5xqsQxmLy2NNj2AgL8WLAkJ0nbiMw3g=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-Z3RBM9ZJWfG1mkC3hhNZZyo8WBBsgtmkrEZbNIQjyZs=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ctRBiieen1Vn2yNcnh07aNw4dgnsuzuXxMVGLkxXGlQ=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-waA8OYH6PJf0tvLE3qSJD+Xb7P5rO69uTNm2InvxbS4="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-r9OKtIAABu7lpI0bjSeR1vk8hqwxk3WGaHk3dPf9r/w=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-CSFYFEf1RRqJsQ6FnPDjgGrjYmxq12xslUw4JSK9oOE=",
         "entryId": "symbiote-workspace",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-16pTGhW4OVbc43ZnwQvqeI5XKTBP67EtBWwYYOFFRuc=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-yMDwqWitxBGefF+kLgklF+hJeywZI/SK+2AYT7P7Ue0=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-workspace",
           "cv-show:cue:workspace.open",
@@ -13614,14 +13613,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:workspace.agent-portal-card",
           "cv-show:audio-clip:symbiote-workspace:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-16pTGhW4OVbc43ZnwQvqeI5XKTBP67EtBWwYYOFFRuc=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-yMDwqWitxBGefF+kLgklF+hJeywZI/SK+2AYT7P7Ue0=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-r9OKtIAABu7lpI0bjSeR1vk8hqwxk3WGaHk3dPf9r/w=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-CSFYFEf1RRqJsQ6FnPDjgGrjYmxq12xslUw4JSK9oOE=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-RahVWYUNQc4qrkK4/Uh//nJXdZFwgqUdbfS0SUl3Mn4="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ZmNKnbBmixNRjiEe41jE2S4UAyj17jiZYUA2aJLUdZI=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-KL7gAQCEHCX6dZOWkmDjGvAwQ1Kp1u0CyF3D3TWqIyg=",
         "entryId": "symbiote-ui",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-OQRZV1BSoAbeBUpxLsWjaws5cpxPG4LGcel6hKh91jo=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-MkVA2BloN9R/VlYGROLp1wB4CSngv7vmUNF7YDCiCJ8=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-ui",
           "cv-show:cue:symbiote-ui.open",
@@ -13637,14 +13636,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:symbiote-ui.details-pointer",
           "cv-show:audio-clip:symbiote-ui:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-OQRZV1BSoAbeBUpxLsWjaws5cpxPG4LGcel6hKh91jo=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-MkVA2BloN9R/VlYGROLp1wB4CSngv7vmUNF7YDCiCJ8=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ZmNKnbBmixNRjiEe41jE2S4UAyj17jiZYUA2aJLUdZI=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-KL7gAQCEHCX6dZOWkmDjGvAwQ1Kp1u0CyF3D3TWqIyg=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-OMtx7ocghU6AsQntGkRK2qHzfWY0IfPfqLLghoyjlqA="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-UVWTzVKYkA/LSou8+P7AMlUpiDS2ILkdalRA1NcsrSs=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-zPCnOmVWtP/N/5+Nv4RZYcM8oRcXs78N1ZaC/VGd+g8=",
         "entryId": "symbiote-engine",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-H4+6IPgi14i1ZCD1sYlhvcD3Mwhz5cNDmmmmpjk+xIA=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-dRQLaIUeoXkmV0EEH0g0D8MXc8oDRoUlm4seBmFI/q4=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-engine",
           "cv-show:cue:symbiote-engine.open",
@@ -13654,14 +13653,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:symbiote-engine.workspace-join",
           "cv-show:audio-clip:symbiote-engine:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-H4+6IPgi14i1ZCD1sYlhvcD3Mwhz5cNDmmmmpjk+xIA=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-dRQLaIUeoXkmV0EEH0g0D8MXc8oDRoUlm4seBmFI/q4=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-UVWTzVKYkA/LSou8+P7AMlUpiDS2ILkdalRA1NcsrSs=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-zPCnOmVWtP/N/5+Nv4RZYcM8oRcXs78N1ZaC/VGd+g8=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-Z57mlla8cetxc+jwHS8kMltSrITJsCyT4xnHtPgHYLA="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-v79dvY9GP+QP0A3ahJTuAyFhXhC+42LaneV4Lwd/aT8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-p2ZZKDkXJF+634zkIevLx0ytbU1ndDaCZzyz0hqMma8=",
         "entryId": "agent-portal",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-yXBZV6YE71ODpS5KklsH9E9k2aTIFmf0upiP7V4u+IU=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-0c8+syaJnLGyPe1JA0JTSRKkRAKB3RGZBQCrg1tSzyw=",
         "sourceCellIds": [
           "cv-show:narration:agent-portal",
           "cv-show:cue:agent-portal.open",
@@ -13677,14 +13676,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:agent-portal.demo-link",
           "cv-show:audio-clip:agent-portal:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-yXBZV6YE71ODpS5KklsH9E9k2aTIFmf0upiP7V4u+IU=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-0c8+syaJnLGyPe1JA0JTSRKkRAKB3RGZBQCrg1tSzyw=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-v79dvY9GP+QP0A3ahJTuAyFhXhC+42LaneV4Lwd/aT8=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-p2ZZKDkXJF+634zkIevLx0ytbU1ndDaCZzyz0hqMma8=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-s+f16O2P6MZyzXybglzLgyZBQxIkSFdcs2qLXGWUIsw="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-a/r8z/RkRINLLL/yzgEsDFNRFxQDqbJh2cazfltAFDs=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-a5hz8CB1wd9BvSe2pJBYSs6FZBQJI7N47WVQ1bvkr44=",
         "entryId": "symbiote-video-studio",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0klUKDott7S9Mw/Z4/TTqQ8RGO6PkWVnAovxmW2Ty6E=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-A1CHbKPpHChO7RbFbgpGby+4A/grHEOoZc0TA24m3Rg=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-video-studio",
           "cv-show:cue:video-studio.open",
@@ -13694,14 +13693,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:video-studio.demo",
           "cv-show:audio-clip:symbiote-video-studio:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0klUKDott7S9Mw/Z4/TTqQ8RGO6PkWVnAovxmW2Ty6E=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-A1CHbKPpHChO7RbFbgpGby+4A/grHEOoZc0TA24m3Rg=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-a/r8z/RkRINLLL/yzgEsDFNRFxQDqbJh2cazfltAFDs=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-a5hz8CB1wd9BvSe2pJBYSs6FZBQJI7N47WVQ1bvkr44=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-04W/ZvVF/s+ZaGFKgVYI12e2Vyc5GzNl9pUSZ5vxU3I="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-lqNgxzRXqz4ZVcb+BXruK5UMDBmQKfAK8vzi1ervStw=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-FpMuqq0VBJXa0/dW4ZPJ7LGniO8c+ec+VI62sIYcRpI=",
         "entryId": "adaptive-maximo-workbench",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-AeTOqf4JiQiQbMRK2naSvb8YZGVun1I61WzA+7HrtqA=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-O2lQ9XlyUKt1+MBWYzGkE2/VExEVPZBqGqE/JsWUU5Y=",
         "sourceCellIds": [
           "cv-show:narration:adaptive-maximo-workbench",
           "cv-show:cue:maximo.open",
@@ -13715,14 +13714,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:maximo.xr-demo",
           "cv-show:audio-clip:adaptive-maximo-workbench:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-H9TFWjqPnqrZSP0TZQR6Ja+8b4V4/e27ROb3JJkmlXU=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-O2lQ9XlyUKt1+MBWYzGkE2/VExEVPZBqGqE/JsWUU5Y=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-lqNgxzRXqz4ZVcb+BXruK5UMDBmQKfAK8vzi1ervStw=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-dz3x4A46f0XwbXw67NnVa9w15mvYpvniceVnK4P7/cU=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-kLMeEQJrZBg35ud2PpBwVjLHchXQ7FcVnfeshd2HLgA="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-pwD5Km+AGO3sJVeyUbXcVTEBhTezMBAYz8xuxaxa/wg=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-Og03ra0A8hmHTQ61GpHq8FKi+TEGMZo4PdiR7iOAplk=",
         "entryId": "agent-pool-mcp",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-agips5EvsgGk49xhHzMToQEZ3moQJDf3wzELMQc6pPE=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-C6G5YP4/VzBXQXs+xboagYm8ao3+0nuV3sm1poTWr74=",
         "sourceCellIds": [
           "cv-show:narration:agent-pool-mcp",
           "cv-show:cue:agent-pool.open",
@@ -13730,14 +13729,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:agent-pool.flow",
           "cv-show:audio-clip:agent-pool-mcp:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-agips5EvsgGk49xhHzMToQEZ3moQJDf3wzELMQc6pPE=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-C6G5YP4/VzBXQXs+xboagYm8ao3+0nuV3sm1poTWr74=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-pwD5Km+AGO3sJVeyUbXcVTEBhTezMBAYz8xuxaxa/wg=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-Og03ra0A8hmHTQ61GpHq8FKi+TEGMZo4PdiR7iOAplk=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-KYuYEhLWUCcN5y//Qpr+vubCcPrjAqQIgxUdiwGJRjI="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-zYEtt4pCmFmtxm7QWDWTEUV+xW+vef/PSbLeH/gGFg0=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-3LA774V4jymZ1hLXZ8aljaI2pnYljZo+Gd3GgW3gZuc=",
         "entryId": "project-graph-mcp",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-M2qJHEmP4ZUZpfZjmqDI9zuBJbZxyLGls1yFjtX5Pq8=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-+EC8nBmFju1m+frEr0dnj5HiwOCvRdpQCaHdpylgeGs=",
         "sourceCellIds": [
           "cv-show:narration:project-graph-mcp",
           "cv-show:cue:project-graph.open",
@@ -13749,14 +13748,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:project-graph.node",
           "cv-show:audio-clip:project-graph-mcp:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-M2qJHEmP4ZUZpfZjmqDI9zuBJbZxyLGls1yFjtX5Pq8=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-+EC8nBmFju1m+frEr0dnj5HiwOCvRdpQCaHdpylgeGs=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-zYEtt4pCmFmtxm7QWDWTEUV+xW+vef/PSbLeH/gGFg0=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-3LA774V4jymZ1hLXZ8aljaI2pnYljZo+Gd3GgW3gZuc=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-xrpfW7QJs4cEixTIMpwJYT4hfFUGAP1YOXjZb4IuP9A="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-kNg91O6Vlg8g7pFHv5spbaUABMLIOzuVN45S/Kc4aVk=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-0XJnRxCOFbWsu4Fslyrv7hzH4sAbhG0UBqFp3+YFvGo=",
         "entryId": "lifecycle-messaging-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-gRoCEOE5PFPwwKKW9gA+8WwNDKTGaTe/XmxKFjS1b44=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-6+s2/0V2hwAvMTkkwp6MGItspS+LLF8gDf2Sjl9a19s=",
         "sourceCellIds": [
           "cv-show:narration:lifecycle-messaging-platform",
           "cv-show:cue:lifecycle.open",
@@ -13770,14 +13769,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:lifecycle.digital-twin",
           "cv-show:audio-clip:lifecycle-messaging-platform:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-gRoCEOE5PFPwwKKW9gA+8WwNDKTGaTe/XmxKFjS1b44=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-6+s2/0V2hwAvMTkkwp6MGItspS+LLF8gDf2Sjl9a19s=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-kNg91O6Vlg8g7pFHv5spbaUABMLIOzuVN45S/Kc4aVk=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-0XJnRxCOFbWsu4Fslyrv7hzH4sAbhG0UBqFp3+YFvGo=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-8HQo9BxGxQ+mX1pHxlF1/muZnaJrL1+5+CRvXz3oUt0="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-CLqSpctt2GZ4JXv4w2UuSPTpQTn2hU3nUwXlP5lQjRg=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-8i/HpJrVig+XzP0sIcKRiMx3ahNurfjL8JMYH1riVJs=",
         "entryId": "mobile-smm-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-w24w2Zsr21UImM0i1yGIkFDUO3WK1hI7kufIH0xOLj8=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-P2WmeWKJfAQnXps50oD3UDAWv75HHICC0MSl5PMwnxw=",
         "sourceCellIds": [
           "cv-show:narration:mobile-smm-platform",
           "cv-show:cue:mobile-smm.open",
@@ -13789,14 +13788,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:mobile-smm.agent-update",
           "cv-show:audio-clip:mobile-smm-platform:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-w24w2Zsr21UImM0i1yGIkFDUO3WK1hI7kufIH0xOLj8=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-P2WmeWKJfAQnXps50oD3UDAWv75HHICC0MSl5PMwnxw=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-CLqSpctt2GZ4JXv4w2UuSPTpQTn2hU3nUwXlP5lQjRg=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-8i/HpJrVig+XzP0sIcKRiMx3ahNurfjL8JMYH1riVJs=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-7g8pmsvPdNdLdCm9fmPZBPk+fq0l6IRqE3h7PbXKNe8="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-LrDv1gR268ZmyakdY+0AsgEn4PV3h0gGMfGllfa8gH0=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-VHll1CyMzQDJAyl/ZhAw6PP5nl19W2eo22usil4i7w8=",
         "entryId": "f360-studio",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-cgPAlNiPz0Mfa6cu3XyV9sdIUi8IxihdxtvjHAJGJso=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-P6oHq80mAdO/fa3fXlJRZ6jXM8gv2zztv+CiHnreB/Y=",
         "sourceCellIds": [
           "cv-show:narration:f360-studio",
           "cv-show:cue:f360.open",
@@ -13806,14 +13805,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:f360.result",
           "cv-show:audio-clip:f360-studio:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-cgPAlNiPz0Mfa6cu3XyV9sdIUi8IxihdxtvjHAJGJso=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-P6oHq80mAdO/fa3fXlJRZ6jXM8gv2zztv+CiHnreB/Y=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-LrDv1gR268ZmyakdY+0AsgEn4PV3h0gGMfGllfa8gH0=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-VHll1CyMzQDJAyl/ZhAw6PP5nl19W2eo22usil4i7w8=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-6Ebu0JeH8zmlNlsBjPLc4VmlRjlbeiSxQ/oqFMYaVkU="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-znuzWiTpOMuq2tdwRyjMRWMi9xWBVCP9bLzj6fRHgUA=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-DwzrR4+BRsQoAGgOTsXMyjePr01sErD2ZCajhsH41vk=",
         "entryId": "autobox",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-VBi4gGp8+1y/Df81/PTrFnO7rb2TeC1OmMeqAP7dtmA=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-zKo9rXu/DgjzJEak34ri0gwsr7cki8v1hLqyHx49Cv0=",
         "sourceCellIds": [
           "cv-show:narration:autobox",
           "cv-show:cue:autobox.open",
@@ -13837,14 +13836,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:autobox.video-09",
           "cv-show:audio-clip:autobox:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-VBi4gGp8+1y/Df81/PTrFnO7rb2TeC1OmMeqAP7dtmA=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-zKo9rXu/DgjzJEak34ri0gwsr7cki8v1hLqyHx49Cv0=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-znuzWiTpOMuq2tdwRyjMRWMi9xWBVCP9bLzj6fRHgUA=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-DwzrR4+BRsQoAGgOTsXMyjePr01sErD2ZCajhsH41vk=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-gjpm2BzQ3+DOBHHArUWQMG+brHfhP8gAJR3LYzlTe2E="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PSlxWKHMtOSPDeDSAUej7TX+OUhBp8ab3RobdUqR/w8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-LS/wvx41nEzctYJlLbbIJezpa372Z/ePSmUVbDhSQZI=",
         "entryId": "complexscan",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-eq6FtPPwkaZpSOO6+sWw726J/9XCpXEB5SfWNSF7yW0=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-CIm1u3tH6Kp4jE015OG52H/OIw/GXPCB7StcOmllbNY=",
         "sourceCellIds": [
           "cv-show:narration:complexscan",
           "cv-show:cue:complexscan.open",
@@ -13864,14 +13863,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:complexscan.boothbot-catalog-ready",
           "cv-show:audio-clip:complexscan:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-eq6FtPPwkaZpSOO6+sWw726J/9XCpXEB5SfWNSF7yW0=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-CIm1u3tH6Kp4jE015OG52H/OIw/GXPCB7StcOmllbNY=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PSlxWKHMtOSPDeDSAUej7TX+OUhBp8ab3RobdUqR/w8=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-LS/wvx41nEzctYJlLbbIJezpa372Z/ePSmUVbDhSQZI=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-eS7KMgLnmMRIHLZa3ZCtvVYfUbta+gojrQ0HqmkE6hA="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PwhzgCCQi0AFF/znw6joZfpUI1GEzMirtJVE9dvHFeE=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-sOzLj/OUrrksQhxTqCFkg7Zj4OUwrK9xc7WrHd/TW7I=",
         "entryId": "photopizza",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-g3wmp0bPoNh+Km87gvQXWimcz4B62uq4QoJqEJ3T6ms=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-Mou2DdHLPse0rJpvnVn6y9fkxTKvjBLxEkVh4tonx74=",
         "sourceCellIds": [
           "cv-show:narration:photopizza",
           "cv-show:cue:photopizza.open",
@@ -13899,14 +13898,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:photopizza.spinner",
           "cv-show:audio-clip:photopizza:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-g3wmp0bPoNh+Km87gvQXWimcz4B62uq4QoJqEJ3T6ms=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-Mou2DdHLPse0rJpvnVn6y9fkxTKvjBLxEkVh4tonx74=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PwhzgCCQi0AFF/znw6joZfpUI1GEzMirtJVE9dvHFeE=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-sOzLj/OUrrksQhxTqCFkg7Zj4OUwrK9xc7WrHd/TW7I=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-rxmrXyNwEwkcjSsODgAJBwr1r1YuOf1u7JDZqvwHEWU="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-hed0POh9/bQd0evkUsiV7b7Sjg0xoxx/D1MUqQBKRwk=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-NMK08ng0yJHm/sUqkZNGcXPKQ126y22LysMKz+wPURk=",
         "entryId": "finale",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-NhIIa/JtwaokJR7tTRXEojfCCKFBEM/GKeWfYysCqfg=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-2Q3zKvxa+VHQ5CGdCOG5QAhghQrurpEeHRV+45jGYTs=",
         "sourceCellIds": [
           "cv-show:narration:finale",
           "cv-show:cue:finale.map",
@@ -13922,14 +13921,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:finale.contacts",
           "cv-show:audio-clip:finale:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-NhIIa/JtwaokJR7tTRXEojfCCKFBEM/GKeWfYysCqfg=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-2Q3zKvxa+VHQ5CGdCOG5QAhghQrurpEeHRV+45jGYTs=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-hed0POh9/bQd0evkUsiV7b7Sjg0xoxx/D1MUqQBKRwk=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-NMK08ng0yJHm/sUqkZNGcXPKQ126y22LysMKz+wPURk=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-g7lVARDu3XnuA0q3j62o1xF0romblD7ijEiv+sRJAZ0="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-50zwX8cQtElV6OtHomeC4JWGj98Qh4QIaP1V1jN+Lp8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-bIuRCKQ8ilDxqC3DRqYpYSITUy6birvAnbsIneSQhV4=",
         "entryId": "workspace-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-9slOMn9LDieJea8czw4QWUsjv2UD0JkhmzQPw9Ml8lA=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-0+GskdT+d9TrDSahaSvn5xtbQ2XJopUaTXWmkQ6Q3Ns=",
         "sourceCellIds": [
           "cv-show:narration:workspace-details",
           "cv-show:cue:workspace-details.flow-frame",
@@ -13941,14 +13940,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:workspace-details.hosts",
           "cv-show:audio-clip:workspace-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-9slOMn9LDieJea8czw4QWUsjv2UD0JkhmzQPw9Ml8lA=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-0+GskdT+d9TrDSahaSvn5xtbQ2XJopUaTXWmkQ6Q3Ns=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-50zwX8cQtElV6OtHomeC4JWGj98Qh4QIaP1V1jN+Lp8=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-bIuRCKQ8ilDxqC3DRqYpYSITUy6birvAnbsIneSQhV4=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-3zyUlNgabmlylr18384q6gWAKkcHodY3VKOqtXpDJYE="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-wynZRFWp9JWcnYLGgI1RlVNUag6DazM6CA2sFNkoyhI=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-whYfl80RajkiQbAdx1AjlQc3CSVvq/2aoIzdKn/a+Fs=",
         "entryId": "symbiote-ui-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-v/KQv08wMsy0LuLx37WHfZRZEoPtRCkxSNsU3vWxMk4=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-szFDkgKGCCAfIhojrbMFXU6owfyGREz7bPgrSFjF+uM=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-ui-details",
           "cv-show:cue:symbiote-ui-details.composition",
@@ -13960,14 +13959,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:symbiote-ui-details.workspace-route",
           "cv-show:audio-clip:symbiote-ui-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-v/KQv08wMsy0LuLx37WHfZRZEoPtRCkxSNsU3vWxMk4=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-szFDkgKGCCAfIhojrbMFXU6owfyGREz7bPgrSFjF+uM=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-wynZRFWp9JWcnYLGgI1RlVNUag6DazM6CA2sFNkoyhI=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-whYfl80RajkiQbAdx1AjlQc3CSVvq/2aoIzdKn/a+Fs=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-ZWZGd9LrmaR4dvHp71DUbJNSJ9NiSg/iXpfdSsQ8Epc="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-AqFnLkNA/gDkWdlbcdjp+O+9gqMzZLdCSjWiJk3jq4I=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-kyQ1czJy2MQgfutnh1VRL4G6e/cV86Y/Pg59QCsL4oA=",
         "entryId": "symbiote-engine-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-WpRG0hgSbD7qWPki1HCbVOGbCIXT6HGGd20nv672eTI=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-bG1UB0qMT+LAB1I19GM9mku8xzhfpItO+axQ0AVN0X0=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-engine-details",
           "cv-show:cue:symbiote-engine-details.layers",
@@ -13977,14 +13976,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:symbiote-engine-details.demo",
           "cv-show:audio-clip:symbiote-engine-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-WpRG0hgSbD7qWPki1HCbVOGbCIXT6HGGd20nv672eTI=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-bG1UB0qMT+LAB1I19GM9mku8xzhfpItO+axQ0AVN0X0=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-AqFnLkNA/gDkWdlbcdjp+O+9gqMzZLdCSjWiJk3jq4I=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-kyQ1czJy2MQgfutnh1VRL4G6e/cV86Y/Pg59QCsL4oA=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-YijS0ylZgVJYmrHANZyM0I+zCNT+RkqbQZD22CDOSlg="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-FS+VJDwJFfYszGhc43+G0DVJjIS7d2uxq8juO5/U0Sw=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-d4Wk6Fad/Y+1CaaDpub70YYX2pz/WnmYDdkDxM69giA=",
         "entryId": "agent-portal-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-aaDFGCfljfidqpGV4MEDuqnEr/usW5KDfOGj0xMgajE=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-cA0CivFNUC2/8RMMk0Q7iLhQcUJOMyBEehY0hP1bs3o=",
         "sourceCellIds": [
           "cv-show:narration:agent-portal-details",
           "cv-show:cue:agent-portal-details.gallery",
@@ -13998,14 +13997,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:agent-portal-details.resource-groups",
           "cv-show:audio-clip:agent-portal-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-aaDFGCfljfidqpGV4MEDuqnEr/usW5KDfOGj0xMgajE=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-cA0CivFNUC2/8RMMk0Q7iLhQcUJOMyBEehY0hP1bs3o=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-FS+VJDwJFfYszGhc43+G0DVJjIS7d2uxq8juO5/U0Sw=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-d4Wk6Fad/Y+1CaaDpub70YYX2pz/WnmYDdkDxM69giA=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-bE09TaQzhp+h4Bq4s/UanAzEzWYEpdBYv3EFqYtmIq4="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-HTqvv1jk/8ppdLSW21p4iDUvaVYwEhda+9B9DnJ3gWc=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-Hs4mVGom+3PoWKS9U+izdbxkz3gUaA8wRhD8/ft+PmU=",
         "entryId": "video-studio-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-jkNBbzuhSodveC9l7PL7oWKp9CVIgeVZ7ey/nlz9TCE=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-3BwwEdNVvjnSCpy++Z/apvxxoYPCZbWkUZ2tIrHNxXg=",
         "sourceCellIds": [
           "cv-show:narration:video-studio-details",
           "cv-show:cue:video-studio-details.flow",
@@ -14015,14 +14014,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:video-studio-details.demo",
           "cv-show:audio-clip:video-studio-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-jkNBbzuhSodveC9l7PL7oWKp9CVIgeVZ7ey/nlz9TCE=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-3BwwEdNVvjnSCpy++Z/apvxxoYPCZbWkUZ2tIrHNxXg=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-HTqvv1jk/8ppdLSW21p4iDUvaVYwEhda+9B9DnJ3gWc=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-Hs4mVGom+3PoWKS9U+izdbxkz3gUaA8wRhD8/ft+PmU=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-J9Y+bWf8mW2xhwRdZf7FiTHhzfSSv9CUcKMLSngCsAs="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-GGIR5NDLFEwyH4oP4SGXRxlvLm2IzKzcUI8HHVoD8ro=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-pTDO5rRsPEd7S6rnFmtJ87GbD/G6qYyiw3+4upP4a5Q=",
         "entryId": "maximo-workbench-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-TwVkfkfYlbymUT/gJu7dB7zUGEz3fr1muNxPkeh/UAk=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-I6KngwFvqUvNhMKsWmRhHRUIT0FPmZ4D4n9o7wywJqs=",
         "sourceCellIds": [
           "cv-show:narration:maximo-workbench-details",
           "cv-show:cue:maximo-details.work-order",
@@ -14036,14 +14035,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:maximo-details.demo-xr",
           "cv-show:audio-clip:maximo-workbench-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-9zq+O6SeMqdt61m8xSKf15fZeGJXecMNW16jCgBVDgg=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-I6KngwFvqUvNhMKsWmRhHRUIT0FPmZ4D4n9o7wywJqs=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-GGIR5NDLFEwyH4oP4SGXRxlvLm2IzKzcUI8HHVoD8ro=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ovIXSDsC0c8sQqYCyGoBRfh9socR47mYsIi80MlZQWg=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-492HP5snybTVFt/blQnQMDBJMIGimQSDYeIr6TpL07Y="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-vb7+jCe9xozucC5sy+XueN3RHFVf0I5HZ61bpVX8V98=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-But1VG2MD44GGzgBqWekxHvL6rjvCwjfVqtQMwLzaWY=",
         "entryId": "agent-pool-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Waq5UXv6mfj0GC5HCjifNJp2Ccc6nchz2hx+fMLyF4c=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-aRdam/AcgMIVFfn5F+7jAoZJrhkdX61Z6U9fY98W0wY=",
         "sourceCellIds": [
           "cv-show:narration:agent-pool-details",
           "cv-show:cue:agent-pool-details.runtime",
@@ -14055,14 +14054,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:agent-pool-details.result",
           "cv-show:audio-clip:agent-pool-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Waq5UXv6mfj0GC5HCjifNJp2Ccc6nchz2hx+fMLyF4c=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-aRdam/AcgMIVFfn5F+7jAoZJrhkdX61Z6U9fY98W0wY=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-vb7+jCe9xozucC5sy+XueN3RHFVf0I5HZ61bpVX8V98=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-But1VG2MD44GGzgBqWekxHvL6rjvCwjfVqtQMwLzaWY=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-XG1ARgu5EcUuNyKOjH98vZ8dWVdWI5KLWqPI4YyJMsk="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-04zHxYD7/Net9HZNWc0qTR+X9tYeYvYguUIVcFGbhL0=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-899Sdhy3mayybCxX4wR6HKMt0b4uNDPQl/AzrvpnP/U=",
         "entryId": "project-graph-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Fx4exz4ctNWGtxH01jPjx4v0afwLzHVgwySfzkHTUTE=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-kLikhFYOXjIN7lXfKEhiwZ/zvUuvGxPE647iP74m4KE=",
         "sourceCellIds": [
           "cv-show:narration:project-graph-details",
           "cv-show:cue:project-graph-details.root",
@@ -14074,14 +14073,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:project-graph-details.focus",
           "cv-show:audio-clip:project-graph-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Fx4exz4ctNWGtxH01jPjx4v0afwLzHVgwySfzkHTUTE=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-kLikhFYOXjIN7lXfKEhiwZ/zvUuvGxPE647iP74m4KE=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-04zHxYD7/Net9HZNWc0qTR+X9tYeYvYguUIVcFGbhL0=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-899Sdhy3mayybCxX4wR6HKMt0b4uNDPQl/AzrvpnP/U=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-9PirKqiDy3ODgdwSNjbbxr/TE/LhDNA/zvzpm9leC3s="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ut/GU6jLroudiLGplaf7eNx7qEvXtDcwlscu3IpsQ+Q=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-CD9yb24P9Z4e0i7nlxRZ/G6qdMKlMnr3cko2ufU8aQk=",
         "entryId": "lifecycle-platform-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-fj7ow9qrz7DPtuwxSe63gScSCUxNxZvzlVW3utxyA6A=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-vulvX1OjIRTJi9ONkjNKnPbqcWNhAFchetqPBpqpniU=",
         "sourceCellIds": [
           "cv-show:narration:lifecycle-platform-details",
           "cv-show:cue:lifecycle-details.product",
@@ -14095,14 +14094,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:lifecycle-details.twin",
           "cv-show:audio-clip:lifecycle-platform-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-fj7ow9qrz7DPtuwxSe63gScSCUxNxZvzlVW3utxyA6A=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-vulvX1OjIRTJi9ONkjNKnPbqcWNhAFchetqPBpqpniU=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ut/GU6jLroudiLGplaf7eNx7qEvXtDcwlscu3IpsQ+Q=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-CD9yb24P9Z4e0i7nlxRZ/G6qdMKlMnr3cko2ufU8aQk=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-sVgffeXvDFuWJI8emd757r1kTq6SoIMEhWAaonDv9oY="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-RjSNpeUpz8R53TnAzomnb6HwV1gyy6eqZK+qdkXF724=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-MuDzvffrqFa9JCuELzHmb3KhB3YKglj7RTfWSmF3xwI=",
         "entryId": "mobile-smm-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0zho++swEjzwwe/seNAUFkAE97Ce1DBhvA5bkUvzuWU=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-U+S7J4EaiGhWa1LRCrk92WUmKxaeehXxpIRE5boIg10=",
         "sourceCellIds": [
           "cv-show:narration:mobile-smm-details",
           "cv-show:cue:mobile-smm-details.gallery",
@@ -14118,14 +14117,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:mobile-smm-details.approval",
           "cv-show:audio-clip:mobile-smm-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0zho++swEjzwwe/seNAUFkAE97Ce1DBhvA5bkUvzuWU=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-U+S7J4EaiGhWa1LRCrk92WUmKxaeehXxpIRE5boIg10=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-RjSNpeUpz8R53TnAzomnb6HwV1gyy6eqZK+qdkXF724=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-MuDzvffrqFa9JCuELzHmb3KhB3YKglj7RTfWSmF3xwI=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-57Vi68wcjipvH1qeNgQ2u9hORLug1WbfOxROZUF8HJc="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-uKWY3T5D8B92Nt7nQJdH7sniI6ImPdHvQvOc/ZdVZFw=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-n+00zZxJ3k2ftGh/oGtcr/9/J0cl1DV4Qk6aql8Uemo=",
         "entryId": "f360-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-tRVCIG6IhWL/r/3YQOLrk0W9JO1Gk8yQbdj1XqdEawY=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-FQxh1Skna4v3LsDLTJ044NiUTMfRxCQqq5jc7K50Dj4=",
         "sourceCellIds": [
           "cv-show:narration:f360-details",
           "cv-show:cue:f360-details.path",
@@ -14135,14 +14134,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:f360-details.period",
           "cv-show:audio-clip:f360-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-tRVCIG6IhWL/r/3YQOLrk0W9JO1Gk8yQbdj1XqdEawY=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-FQxh1Skna4v3LsDLTJ044NiUTMfRxCQqq5jc7K50Dj4=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-uKWY3T5D8B92Nt7nQJdH7sniI6ImPdHvQvOc/ZdVZFw=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-n+00zZxJ3k2ftGh/oGtcr/9/J0cl1DV4Qk6aql8Uemo=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-zhrvxn74QtOT2rPdTgiJVaARUt4q9WiJxD4bFBG/ISY="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-SfethfxkdWJplTiNwQPQfXxyi/R635F2liXiK/ncfRQ=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-EFMF1cD/C2Vdk/2jqrl3EApmLc5BPkNCeOs9DKJU8Co=",
         "entryId": "autobox-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-+B/hREMFDy+GX3N9Ll4GK6WiLiB55QG0bH86hrKFNek=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-4lr+LnH/rwSVkJZ7O3+QPYD2iNOO9RA6AOeSlvvnfAM=",
         "sourceCellIds": [
           "cv-show:narration:autobox-details",
           "cv-show:cue:autobox-details.working-system",
@@ -14154,14 +14153,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:autobox-details.bronze",
           "cv-show:audio-clip:autobox-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-+B/hREMFDy+GX3N9Ll4GK6WiLiB55QG0bH86hrKFNek=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-4lr+LnH/rwSVkJZ7O3+QPYD2iNOO9RA6AOeSlvvnfAM=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-SfethfxkdWJplTiNwQPQfXxyi/R635F2liXiK/ncfRQ=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-EFMF1cD/C2Vdk/2jqrl3EApmLc5BPkNCeOs9DKJU8Co=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-SpRZkZqPBq0pP2V2V0URlZM3iWrfYD0qyNtdGzML36s="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-LNYDLP2BrYMWwRgWEkGvZ644NhAtwu98ctv9O360sug=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-D6jUWjPnVd/LsYJ+mdNzn7kBxWfo6sOYbNTT2YgwrvM=",
         "entryId": "complexscan-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0kos5K0Ps8CJgJ6Rpv0MxjC2kfVWS3Gc/hVDUMG5qlU=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-X3QmfQyYZAGvXb6ryUPLHN65BJQxFDEFevQwzn+DDwA=",
         "sourceCellIds": [
           "cv-show:narration:complexscan-details",
           "cv-show:cue:complexscan-details.platform",
@@ -14173,14 +14172,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:complexscan-details.autobox",
           "cv-show:audio-clip:complexscan-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0kos5K0Ps8CJgJ6Rpv0MxjC2kfVWS3Gc/hVDUMG5qlU=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-X3QmfQyYZAGvXb6ryUPLHN65BJQxFDEFevQwzn+DDwA=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-LNYDLP2BrYMWwRgWEkGvZ644NhAtwu98ctv9O360sug=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-D6jUWjPnVd/LsYJ+mdNzn7kBxWfo6sOYbNTT2YgwrvM=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-v3O6o6HPdlPo3MNQP28gXFeBK3LtgY9LmqbIPdQo0ew="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-3wsztHtvr3d0s1WyjWea8m0s39KLf/vCt+rvslrAl6M=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ZEc6vZeHt6obZ1ongAFs+Q9MqkR225knA68PJs/lMB8=",
         "entryId": "photopizza-details",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-tGXoT8ySCvrddZn2t2sMSYNkOMxoFctMuwcEqZmuKGk=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-3Bm6He/hBCtIYbEtaJ+t+QZa3OfkgCVfTjMHKTiJ1AY=",
         "sourceCellIds": [
           "cv-show:narration:photopizza-details",
           "cv-show:cue:photopizza-details.origin",
@@ -14192,13 +14191,14 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:photopizza-details.media",
           "cv-show:audio-clip:photopizza-details:01"
         ],
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-tGXoT8ySCvrddZn2t2sMSYNkOMxoFctMuwcEqZmuKGk=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-3Bm6He/hBCtIYbEtaJ+t+QZa3OfkgCVfTjMHKTiJ1AY=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-3wsztHtvr3d0s1WyjWea8m0s39KLf/vCt+rvslrAl6M=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ZEc6vZeHt6obZ1ongAFs+Q9MqkR225knA68PJs/lMB8=",
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-pl5FPD9FH9I3QS/DaGDZ0lLLQAIXmc9vmG669JXLmMQ="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-5bDySHZPtCu4vZWaOu/75S695cxjncb4s9HN50UGsZU=",
-    "schemaVersion": "cv-show-audio-provenance-v1",
-    "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
-    "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
+    "hash": "cv-show-audio-provenance-v1:sha256-h7XhMTt/LLgp9fpFFZ1elQrmeZ/a+5HbpAhZvDl/l4w="
   },
   "artifactTreeHash": "cv-show-audio-artifact-tree-v1:0332cdd05f461a3c1f7e9a9b14cf1820f054ad895752451893df74bc22569220",
   "entryReleaseIds": [
@@ -14264,12 +14264,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-fr9DLXnwdaC3f50U49dDoU05D2Vrmau5l5gLhxCIF4Q="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-UgeWlJZqI+hudIsZB8VLdlVhIqoI/IhYuGCWpgcMGR8=",
-    "revision": 102
+    "revision": 102,
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-1DZrRlEuQnLvrRrBwH7mitDNM/Xp1C7WWJiF63E5y38="
   },
-  "releaseId": "cv-show-audio-release-v1:8f7b72dad7f958601a57a3c5bb59d9c0d35a1a93876f3474cbbe37b588730dd1",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:5a90c8b51f3defdbaa81faacede9cc4224842f04bd80f493d06aaed836630d47"
+  "verificationHash": "cv-show-audio-release-verification-v1:5a90c8b51f3defdbaa81faacede9cc4224842f04bd80f493d06aaed836630d47",
+  "releaseId": "cv-show-audio-release-v1:6481131bf85a522bb41489375244f440e1481dcc08a9602ad5dc815530cf4562"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );
