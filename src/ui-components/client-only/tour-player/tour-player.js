@@ -263,6 +263,12 @@ export class PortfolioShowChat extends HTMLElement {
   #requestId = 0;
   #transportRequestId = 0;
   #pendingTransportIntent = null;
+  // After a seek click the player must KEEP the clicked position until the
+  // narration runtime restores it. Without this the playhead snaps back as
+  // soon as `#presentationPositionMs()` reads the pre-seek runtime position
+  // (and then snaps forward again on the next `timeupdate`). This is the
+  // double-jump the user flagged.
+  #pendingSeekPositionMs = null;
   #pendingTrustedPlay = false;
   #messages = [];
   #currentMessageId = '';
@@ -533,6 +539,16 @@ export class PortfolioShowChat extends HTMLElement {
     );
     if (Number.isFinite(legacyMediaPosition)) return Math.max(0, legacyMediaPosition * 1_000);
     return Math.max(0, Number(fallbackMs) || 0);
+  }
+
+  // UI-facing position: prefer the runtime, but while a seek is pending (between
+  // the user's click and `loadAndRestorePlayback` completing) report the click
+  // target — the playhead must not snap back to the previous entry's position
+  // before narration restores the real one (item №11 double-jump). Not used by
+  // route/session codepaths, which always want the canonical runtime position.
+  #presentationPositionMsForUI() {
+    if (this.#pendingSeekPositionMs !== null) return this.#pendingSeekPositionMs;
+    return this.#presentationPositionMs();
   }
 
   get alignmentSnapshot() {
@@ -822,7 +838,7 @@ export class PortfolioShowChat extends HTMLElement {
         index: Math.max(0, this.#sceneIndex),
         playing: this.#transportPlaying,
         progress: {
-          positionMs: this.#presentationPositionMs(),
+          positionMs: this.#presentationPositionMsForUI(),
         },
         caption: {
           speaker: entry?.sceneId ? this.#message('tour.details') : 'CV',
@@ -1186,6 +1202,11 @@ export class PortfolioShowChat extends HTMLElement {
       this.#pendingTransportIntent = pendingTransportIntent;
     }
     const transportRequestId = ++this.#transportRequestId;
+    // Keep the just-clicked position as the runtime preview so the player does
+    // not snap back to the previous entry's stale position while the narration
+    // runtime restores playback. Cleared as soon as the runtime starts speaking
+    // from the restored position (see `#presentationPositionMs`).
+    this.#pendingSeekPositionMs = targetMs;
     await Promise.all([this.#narrationReady, this.#alignmentReady]);
     if (
       !this.isConnected
@@ -1869,6 +1890,10 @@ export class PortfolioShowChat extends HTMLElement {
     }
     this.#disposeAlignedEntry();
     const onCaptionTimeUpdate = () => {
+      // The runtime has reported the restored position — drop the pending
+      // seek marker so subsequent `#presentationPositionMs` reads come from
+      // the runtime, not the stale snapshot.
+      this.#pendingSeekPositionMs = null;
       if (requestId === this.#requestId) this.#syncPlayer();
     };
     if (aligned) media.addEventListener?.('timeupdate', onCaptionTimeUpdate);
@@ -1894,6 +1919,9 @@ export class PortfolioShowChat extends HTMLElement {
       paused: true,
       preload: 'auto',
     }, { reason });
+    // The runtime now reports the restored position — drop the pending seek
+    // marker so future `#presentationPositionMs` reads come from the runtime.
+    this.#pendingSeekPositionMs = null;
     if (requestId !== this.#requestId) return receipt;
     this.#lastAlignedGenerationReceipt = receipt;
     // A completed generation means the entry preroll ran: the scene content
@@ -2484,7 +2512,7 @@ export class PortfolioShowChat extends HTMLElement {
   #syncPlayer(terminalState = null) {
     const scene = this.#currentScene();
     const activeEntry = this.#playerEntry();
-    const captionPositionMs = this.#presentationPositionMs();
+    const captionPositionMs = this.#presentationPositionMsForUI();
     const caption = createCvShowCanonicalCaption(
       activeEntry?.subtitle || scene?.subtitle || '',
       this.#alignedEntry?.captionTrack,
