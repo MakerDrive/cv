@@ -1,5 +1,12 @@
-const IMS_PUBLIC_PLAYER_SELECTOR = 'ims-gallery';
+const IMS_PUBLIC_PLAYER_SELECTOR = 'ims-gallery, ims-spinner';
+const IMS_PUBLIC_PLAYER_KINDS = Object.freeze(['ims-gallery', 'ims-spinner']);
 const IMS_READY_EVENT = 'ims-ready';
+/**
+ * Narration-paced gallery invariant: viewers must be able to read at most one
+ * image per second. Authored frame choreography is clamped to this floor so a
+ * montage can never outrun the narration that describes it.
+ */
+const MIN_GALLERY_FRAME_HOLD_MS = 1000;
 const IMS_READY_PLAYERS = new WeakSet();
 
 function abortError(signal) {
@@ -81,7 +88,7 @@ function playerKind(player) {
 
 function findImsPublicPlayer(root) {
   const rootKind = playerKind(root);
-  if (rootKind === 'ims-gallery') return root;
+  if (IMS_PUBLIC_PLAYER_KINDS.includes(rootKind)) return root;
   const direct = root?.querySelector?.(IMS_PUBLIC_PLAYER_SELECTOR);
   if (direct) return direct;
   const viewer = rootKind === 'ims-viewer'
@@ -94,8 +101,15 @@ function hasImsPublicReadyEvidence(player) {
   if (IMS_READY_PLAYERS.has(player)) return true;
   try {
     const image = player.hotspotState?.image;
-    return Number.isInteger(image) && image >= 0;
+    if (Number.isInteger(image) && image >= 0) return true;
   } catch {}
+  if (playerKind(player) === 'ims-spinner') {
+    // ims-spinner marks itself `active` after srcData load and init, which is
+    // the same moment the `ims-ready` event represents for an ims-gallery.
+    try {
+      if (player.hasAttribute?.('active')) return true;
+    } catch {}
+  }
   return false;
 }
 
@@ -131,7 +145,7 @@ export function waitForImsPublicPlayer(root, {
     const onReady = (event) => {
       const player = event?.target;
       const kind = playerKind(player);
-      if (kind !== 'ims-gallery') return;
+      if (!IMS_PUBLIC_PLAYER_KINDS.includes(kind)) return;
       IMS_READY_PLAYERS.add(player);
       inspect();
     };
@@ -156,6 +170,12 @@ export function waitForImsPublicPlayer(root, {
 function normalizeFrames(value) {
   if (!Array.isArray(value)) return [];
   return value.map(Number).filter((frame) => Number.isInteger(frame) && frame >= 1);
+}
+
+/** Public ims-gallery image count; the private `#images` list stays unread. */
+function galleryImageCount(player) {
+  let count = Number(player?.srcData?.srcList?.length);
+  return Number.isSafeInteger(count) && count > 0 ? count : 0;
 }
 
 /** Adapts the approved BoothBot IMS gallery to Show frame-advance hooks. */
@@ -304,8 +324,17 @@ export function createImsShowMediaTarget(root, {
           code: 'ims-player-unsupported',
         });
       }
-      const frames = normalizeFrames(options.frames);
-      const frameHoldMs = Math.max(0, Number(options.frameHoldMs) || 0);
+      let frames = normalizeFrames(options.frames);
+      if (!frames.length) {
+        // No authored frames: pace the whole gallery. The image count comes
+        // from the player itself, never from a hardcoded scenario constant.
+        const total = galleryImageCount(player);
+        frames = Array.from({ length: total }, (_, index) => index + 1);
+      }
+      const frameHoldMs = Math.max(
+        MIN_GALLERY_FRAME_HOLD_MS,
+        Number(options.frameHoldMs) || 0,
+      );
       const finalFrame = Number.isInteger(Number(options.finalFrame))
         && Number(options.finalFrame) >= 1
         ? Number(options.finalFrame)

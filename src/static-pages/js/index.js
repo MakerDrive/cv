@@ -85,7 +85,23 @@ import {
   pickPortfolioActiveMediaId,
   resolvePortfolioMediaVisibilityChange,
 } from '../data/portfolioMediaVisibility.js';
+import { showClickRipple } from 'symbiote-ui/ui/click-ripple.js';
 import { createPortfolioImsMediaAdapter } from './portfolioImsMediaAdapter.js';
+
+const PORTFOLIO_POINTER_RIPPLE_WINDOW_MS = 600;
+let lastPortfolioPointerPoint = null; // { x, y, at } | null
+document.querySelector('portfolio-workspace')?.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0) return;
+  lastPortfolioPointerPoint = { x: event.clientX, y: event.clientY, at: Date.now() };
+}, { capture: true });
+function showPortfolioPointerRipple() {
+  let point = lastPortfolioPointerPoint;
+  if (!point) return false;
+  if (Date.now() - point.at > PORTFOLIO_POINTER_RIPPLE_WINDOW_MS) return false;
+  lastPortfolioPointerPoint = null;
+  showClickRipple({ x: point.x, y: point.y });
+  return true;
+}
 import {
   PORTFOLIO_THEME_LIGHT_STATE,
   PORTFOLIO_THEME_DARK_STATE,
@@ -2108,6 +2124,9 @@ const portfolioRuntime = {
       treeSelectionId = '',
     } = {},
   ) {
+    if (id && id !== this.selectedId) {
+      showPortfolioPointerRipple();
+    }
     return portfolioNavigationController.select(id, {
       focus,
       updateUrl,

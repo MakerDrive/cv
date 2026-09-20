@@ -7054,3 +7054,24 @@ test('CV adapter preserves an authored marker label instead of defaulting digits
 });
 
 
+
+test('TTS normalization resolves brand names to pronounceable Russian', async () => {
+  const { normalizeCvShowNarrationText } = await import('../../src/static-pages/js/tour-player/ttsNormalize.js');
+  assert.equal(normalizeCvShowNarrationText('PhotoPizza появилась внутри MEGAVISOR'), 'Фото Пицца появилась внутри Мегавизор');
+  assert.equal(normalizeCvShowNarrationText('Symbiote UI — библиотека компонентов'), 'Симбиот UI — библиотека компонентов');
+  assert.equal(normalizeCvShowNarrationText('Смотрим Wi‑Fi'), 'Смотрим Вай-Фай');
+  assert.equal(normalizeCvShowNarrationText('Привет мир'), 'Привет мир');
+  assert.equal(normalizeCvShowNarrationText(''), '');
+});
+
+test('show narration contains no Argentina-relocation wording', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const src = fs.readFileSync(
+    fileURLToPath(new URL('../../src/static-pages/data/cvShowPresentationProject.js', import.meta.url)),
+    'utf8',
+  );
+  assert.equal(src.includes('аргентин'), false, 'show narration must not name Argentina');
+  assert.equal(src.includes('Argentina'), false, 'show narration must not mention Argentina in Latin');
+});

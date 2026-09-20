@@ -390,7 +390,7 @@ test('IMS Show gallery maps authored frames 1 through 5 to public zero-based goT
   const result = await Promise.race([
     target.playShowMedia({
       frames: [1, 2, 3, 4, 5],
-      frameHoldMs: 600,
+      frameHoldMs: 1200,
       finalFrame: 5,
     }, { signal: new AbortController().signal }),
     new Promise((_, reject) => setTimeout(() => reject(
@@ -400,23 +400,23 @@ test('IMS Show gallery maps authored frames 1 through 5 to public zero-based goT
 
   assert.equal(result.running, true);
   assert.equal(typeof result.completion?.then, 'function');
-  assert.deepEqual(events, [['goTo', 0], ['wait', 600]]);
+  assert.deepEqual(events, [['goTo', 0], ['wait', 1200]]);
 
   releaseHold();
   await result.completion;
 
   assert.deepEqual(events, [
-    ['goTo', 0], ['wait', 600],
-    ['goTo', 1], ['wait', 600],
-    ['goTo', 2], ['wait', 600],
-    ['goTo', 3], ['wait', 600],
-    ['goTo', 4], ['wait', 600],
+    ['goTo', 0], ['wait', 1200],
+    ['goTo', 1], ['wait', 1200],
+    ['goTo', 2], ['wait', 1200],
+    ['goTo', 3], ['wait', 1200],
+    ['goTo', 4], ['wait', 1200],
   ]);
   assert.deepEqual(result.frames, [1, 2, 3, 4, 5]);
   assert.equal(result.finalFrame, 5);
 });
 
-test('IMS Show gallery honors the authored frame hold exactly', async () => {
+test('IMS Show gallery clamps frame holds so narration sees at most one image per second', async () => {
   const waits = [];
   const gallery = {
     localName: 'ims-gallery',
@@ -438,8 +438,54 @@ test('IMS Show gallery honors the authored frame hold exactly', async () => {
   }, { signal: new AbortController().signal });
   await result.completion;
 
-  assert.deepEqual(waits, [250, 250]);
-  assert.equal(result.frameHoldMs, 250);
+  assert.deepEqual(waits, [1000, 1000]);
+  assert.equal(result.frameHoldMs, 1000);
+  assert.ok(
+    waits.every((durationMs) => durationMs >= 1000),
+    'gallery frames advance at most once per second',
+  );
+});
+
+test('IMS Show gallery derives the paced image count from the player, not from authored frames', async () => {
+  const events = [];
+  const imageCount = 7;
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    srcData: {
+      srcList: Array.from({ length: imageCount }, (_, index) => `img-${index}.jpg`),
+    },
+    goTo(index) {
+      events.push(['goTo', index]);
+    },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    clock: {
+      wait: async (durationMs) => {
+        events.push(['wait', durationMs]);
+      },
+    },
+  });
+
+  const result = await target.playShowMedia(
+    { mode: 'short-muted-montage' },
+    { signal: new AbortController().signal },
+  );
+  await result.completion;
+
+  const playedFrames = events.filter(([kind]) => kind === 'goTo');
+  const heldWaits = events.filter(([kind]) => kind === 'wait').map(([, durationMs]) => durationMs);
+
+  assert.equal(playedFrames.length, imageCount, 'every gallery image is shown exactly once');
+  assert.deepEqual(playedFrames.map(([, index]) => index), [0, 1, 2, 3, 4, 5, 6]);
+  assert.equal(heldWaits.length, imageCount);
+  assert.ok(
+    heldWaits.every((durationMs) => durationMs >= 1000),
+    'narration sees at most one image per second',
+  );
+  assert.deepEqual(result.frames, [1, 2, 3, 4, 5, 6, 7]);
+  assert.equal(result.finalFrame, imageCount);
 });
 
 test('IMS Show target prewarms one public player and reuses it for capture and playback', async () => {
@@ -654,6 +700,93 @@ test('IMS public player resolution accepts documented state from an already-read
     MutationObserverImpl: MutationObserverStub,
   }), gallery);
   assert.equal(observerConstructed, false);
+});
+
+test('IMS public player resolution accepts an ims-spinner as the public 360 player', async () => {
+  let spinner = null;
+  let observerCallback;
+  let disconnectCount = 0;
+  class MutationObserverStub {
+    constructor(callback) {
+      observerCallback = callback;
+    }
+    observe() {}
+    disconnect() {
+      disconnectCount += 1;
+    }
+  }
+  const viewer = listenerRoot(() => spinner);
+  viewer.localName = 'ims-viewer';
+  const pending = waitForImsPublicPlayer(viewer, {
+    MutationObserverImpl: MutationObserverStub,
+  });
+  let settled = false;
+  pending.then(() => { settled = true; });
+
+  // A mounted ims-spinner without any readiness evidence must keep waiting:
+  // child insertion alone is never a ready player.
+  spinner = { localName: 'ims-spinner' };
+  observerCallback();
+  await Promise.resolve();
+  assert.equal(settled, false);
+
+  viewer.dispatch('ims-ready', spinner);
+  assert.equal(await pending, spinner, 'the ims-ready event completes spinner readiness');
+  assert.equal(disconnectCount, 1);
+});
+
+test('IMS public player resolution accepts an already-active ims-spinner without observing', async () => {
+  const spinner = {
+    localName: 'ims-spinner',
+    hasAttribute(name) {
+      return name === 'active';
+    },
+  };
+  let observerConstructed = false;
+  class MutationObserverStub {
+    constructor() { observerConstructed = true; }
+  }
+  const viewer = listenerRoot(() => spinner);
+  viewer.localName = 'ims-viewer';
+
+  assert.equal(await waitForImsPublicPlayer(viewer, {
+    MutationObserverImpl: MutationObserverStub,
+  }), spinner);
+  assert.equal(observerConstructed, false);
+});
+
+test('IMS Show spinner play keeps rotating until the show aborts it', async () => {
+  const events = [];
+  const spinner = {
+    localName: 'ims-spinner',
+    play() { events.push('play'); },
+    pause() { events.push('pause'); },
+  };
+  const controller = new AbortController();
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => spinner,
+  });
+
+  const started = await target.playShowMedia(
+    { mode: 'spinner-rotation' },
+    { signal: controller.signal },
+  );
+  assert.equal(started.running, true);
+  assert.deepEqual(events, ['play']);
+
+  let completed = false;
+  started.completion.then(
+    () => { completed = true; },
+    () => { completed = true; },
+  );
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(completed, false, 'rotation completion stays open instead of auto-stopping');
+  assert.deepEqual(events, ['play'], 'no early pause precedes the abort');
+
+  controller.abort(Object.assign(new Error('show-moved-on'), { name: 'AbortError' }));
+  await assert.rejects(started.completion, error => error?.name === 'AbortError');
+  assert.deepEqual(events, ['play', 'pause']);
 });
 
 test('IMS Show target forwards capture abort and retries a rejected public-player mount', async () => {

@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { canonicalize } from 'symbiote-workspace/schema/canonical-json.js';
+import { normalizeCvShowNarrationText } from '../src/static-pages/js/tour-player/ttsNormalize.js';
 
 const RECEIPT_VERSION = 'symbiote-audio-synthesis-receipt-v3';
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
@@ -509,6 +510,10 @@ export function createCvShowModelServiceClient({
 
   let synthesize = async (value) => {
     let item = normalizeSynthesisItem(value);
+    // Apply TTS pronunciation dictionary at the very edge of the call: the
+    // normalized text flows to the engine without touching UV source text or
+    // provenance hashes, so dirty-set accounting is untouched.
+    item = { ...item, text: normalizeCvShowNarrationText(item.text) };
     let response = await request('/synthesize', {
       method: 'POST',
       redirect: 'error',
