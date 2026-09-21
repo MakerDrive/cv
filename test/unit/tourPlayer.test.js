@@ -7113,7 +7113,7 @@ test('CV adapter preserves an authored marker label instead of defaulting digits
 
 test('TTS normalization resolves brand names to pronounceable Russian', async () => {
   const { normalizeCvShowNarrationText } = await import('../../src/static-pages/js/tour-player/ttsNormalize.js');
-  assert.equal(normalizeCvShowNarrationText('PhotoPizza появилась внутри MEGAVISOR'), 'Фото Пицца появилась внутри Мегавизор');
+  assert.equal(normalizeCvShowNarrationText('PhotoPizza появилась внутри MEGAVISOR'), 'Фото Пицца появилась внутри Mega visor');
   assert.equal(normalizeCvShowNarrationText('Symbiote UI — библиотека компонентов'), 'Симбиот UI — библиотека компонентов');
   assert.equal(normalizeCvShowNarrationText('Смотрим Wi‑Fi'), 'Смотрим Вай-Фай');
   assert.equal(normalizeCvShowNarrationText('Привет мир'), 'Привет мир');

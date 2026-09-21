@@ -30,6 +30,7 @@
     "verify:cv-show-private-artifacts": "node ./scripts/verify-cv-show-private-artifacts.js",
     "publish:cv-show-web-audio": "node ./scripts/cv-show-web-audio-publisher.js",
     "verify:cv-show-web-audio": "node ./scripts/verify-cv-show-web-audio.js",
+    "preview:cv-show-tts": "node ./scripts/cv-show-tts-preview.js --docs docs/cv-show-tts-preview.md",
     "clean": "rm -rf ./dist",
     "copy-robots": "cp ./src/static-pages/robots.txt ./dist/robots.txt",
     "copy-404": "sed 's|<base href=[^>]*>|<base href=/cv/>|' ./dist/index.html > ./dist/404.html",

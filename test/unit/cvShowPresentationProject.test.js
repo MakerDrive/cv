@@ -508,11 +508,11 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v2:sha256-nYAX5n3YF6cwKVmvpfIxEZmXIZ7Lh8dadXVmMYv8E00=',
+    'workspace-presentation-authoring-project-v2:sha256-jKsueCWDNW7lXE7dueufHVhX/U7noybiDYAAcprSLi0=',
   );
   assert.equal(
     timeline.hash,
-    'presentation-timeline-v3:sha256-/lyiqW5dr+vCSF5WcoRYFYX6fPnd9vL+l2LI9+nys8I=',
+    'presentation-timeline-v3:sha256-JWPokvEfWbUZ5HAubQFiterAQXc7F3NDsvfG5hAQyuQ=',
   );
 
   const manifestSource = await readFile(
@@ -543,7 +543,7 @@ test('CV Show master owns literal anchors, authored order, and portable refineme
   const requiredAnchors = [
     'Сейчас, в две тысячи двадцать шестом году',
     'Чем сложнее система',
-    'Часть управляющего контура мы открыли',
+    'Часть слоя управления мы открыли',
     'Workspace использует этот каталог',
     'Так внутри Megavisor появилась PhotoPizza',
     'сегментацию аудитории, управление кампаниями',
@@ -552,7 +552,7 @@ test('CV Show master owns literal anchors, authored order, and portable refineme
     'предпросмотр и рендер собраны',
     'Workspace связывает визуальную и исполнительную части',
     'Эй пи ай и база PostgreSQL',
-    'подготовленный джейсон сценарий',
+    'подготовленный сценарий в формате джейсон',
     'сканирует настоящий музейный объект в Эрмитаже',
     'характер поверхности бенинской бронзы',
     'слайдером PhotoSnail и моторизированной панорамной головкой',

@@ -7,17 +7,29 @@
 
 const PRONUNCIATION_DICTIONARY = new Map(Object.entries({
   // Brands and project names
-  'MEGAVISOR': 'Мегавизор',
+  'MEGAVISOR': 'Mega visor',
+  'Megavisor': 'Mega visor',
   'Symbiote': 'Симбиот',
   'Watsonx': 'Уотсон Икс',
   'AUTOBOX': 'Автобокс',
   'Agile Controller': 'Эджайл Контроллер',
   'F360': 'Эфф триста шестьдесят',
   'PhotoPizza': 'Фото Пицца',
-  'PhotoSnail': 'ФотоСнэил',
+  'PhotoSnail': 'Фото Снэил',
   'ComplexScan': 'Комплекс скан',
   'BoothBot': 'Бут Бот',
-  'R&D': 'эр энд дэ',
+  'R&D': 'арэнди',
+
+  // Pre-transliterated fragments the engine must not split apart.
+  'опенсорс': 'open source',
+  'ар эн ди': 'арэнди',
+  'инстансами': 'instances',
+  'эс эм эм': 'эсэмэм',
+  'эс эм эс': 'эсэмэс',
+  'рендер': 'рэндэр',
+  'плеера': 'плэйера',
+  'плееров': 'плэйеров',
+  'плеер': 'плэйер',
 
   // Latin shorthands written in Cyrillic transliteration are already
   // faithful to Russian speech; the ones below are only automated
@@ -28,15 +40,21 @@ const PRONUNCIATION_DICTIONARY = new Map(Object.entries({
 }));
 
 function buildWordBoundaryRegex() {
+  // \b in JavaScript is ASCII-only, so Cyrillic keys like «опенсорс» would
+  // never match; use Unicode letter boundaries instead.
   return new RegExp(
-    `\\b(${Array.from(PRONUNCIATION_DICTIONARY.keys())
+    `(?<![\\p{L}\\p{N}_])(${Array.from(PRONUNCIATION_DICTIONARY.keys())
       .map((key) => key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-      .join('|')})\\b`,
+      .join('|')})(?![\\p{L}\\p{N}_])`,
     'gu',
   );
 }
 
 const WORD_BOUNDARY_REGEX = buildWordBoundaryRegex();
+
+export function listCvShowPronunciationTargets() {
+  return Object.freeze(Array.from(PRONUNCIATION_DICTIONARY.keys()));
+}
 
 export function normalizeCvShowNarrationText(text) {
   const value = String(text ?? '');

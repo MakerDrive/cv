@@ -358,7 +358,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "agent-portal",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "С начала две тысячи двадцать шестого года я развиваю Agent Portal. Сейчас я постепенно переношу его в Symbiote Workspace как одну из конфигураций. Проект появился как мой собственный управляющий слой над разными агентными средами. По сути это единый процесс поверх разных агентов, моделей и способов доступа к ним. Он позволяет сохранять контроль над контекстом, задачами и ресурсами и при этом менять исполнителей под конкретный этап. Когда я начинал эту линию, я не нашёл готового решения с нужным мне сочетанием возможностей, поэтому стал развивать собственную архитектуру. Часть управляющего контура мы открыли как опенсорс проект. А внутри Agent Portal есть два важных инструмента. Agent Pool отвечает за исполнение и распределение ресурсов. Project Graph отвечает за структуру и контекст проекта."
+        "text": "С начала две тысячи двадцать шестого года я развиваю Agent Portal. Сейчас я постепенно переношу его в Symbiote Workspace как одну из конфигураций. Проект появился как мой собственный управляющий слой над разными агентными средами. По сути это единый процесс поверх разных агентов, моделей и способов доступа к ним. Он позволяет сохранять контроль над контекстом, задачами и ресурсами и при этом менять исполнителей под конкретный этап. Когда я начинал эту линию, я не нашёл готового решения с нужным мне сочетанием возможностей, поэтому стал развивать собственную архитектуру. Часть слоя управления мы открыли как опенсорс проект. А внутри Agent Portal есть два важных инструмента. Agent Pool отвечает за исполнение и распределение ресурсов. Project Graph отвечает за структуру и контекст проекта."
       },
       "turnId": "agent-portal"
     },
@@ -388,7 +388,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "adaptive-maximo-workbench",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "В две тысячи двадцать шестом году одним из демонстрационных направлений Workspace стал мой эксперимент с ай би эм Maximo. Это хороший пример проблемы, которую я пытаюсь решить. В больших системах управления активами в одном контуре находятся заявки, оборудование, локации, бригады и множество связанных действий. Человеку приходится постоянно собирать контекст своей задачи из разных частей большой системы. Workspace позволяет строить процесс вокруг самой задачи. Заявка, конкретное оборудование, его состояние и доступные действия оказываются в одном актуальном контексте. В этом демо я показываю следующий шаг. Агент собирает рабочее пространство под конкретную задачу, а затем проводит человека по созданному интерфейсу и объясняет, что здесь находится и зачем это нужно. А здесь я развиваю ту же идею в икс ар пространстве. Рабочий интерфейс размещается вокруг пользователя, и вместе с ним появляются интерактивные три дэ объекты. Редуктор можно буквально взять в руки, повернуть и рассмотреть нужную деталь. При этом объект остаётся связанным с контекстом рабочей задачи."
+        "text": "В две тысячи двадцать шестом году одним из демонстрационных направлений Workspace стал мой эксперимент с ай би эм Maximo. Это хороший пример проблемы, которую я пытаюсь решить. В больших системах управления активами в одном контуре находятся заявки, оборудование, локации, бригады и множество связанных действий. Человеку приходится постоянно собирать контекст своей задачи из разных частей большой системы. Workspace позволяет строить процесс вокруг самой задачи. Заявка, конкретное оборудование, его состояние и доступные действия оказываются в одном актуальном контексте. В этом демонстраторе я показываю следующий шаг. Агент собирает рабочее пространство под конкретную задачу, а затем проводит человека по созданному интерфейсу и объясняет, что здесь находится и зачем это нужно. А здесь я развиваю ту же идею в икс ар пространстве. Рабочий интерфейс размещается вокруг пользователя, и вместе с ним появляются интерактивные три дэ объекты. Редуктор можно буквально взять в руки, повернуть и рассмотреть нужную деталь. При этом объект остаётся связанным с контекстом рабочей задачи."
       },
       "turnId": "adaptive-maximo-workbench"
     },
@@ -433,7 +433,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "lifecycle-messaging-platform",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "С две тысячи двадцать второго по две тысячи двадцать шестой год я развивал Lifecycle Messaging Platform. Это маркетинговая платформа для автоматизации клиентских коммуникаций. Она объединяла сегментацию аудитории, управление кампаниями, сценарии согласованных эс эм эс коммуникаций и аналитику. Я проектировал эй пи ай, распределение заданий, связь с удалёнными инстансами, мониторинг и инструменты эксплуатации. А для проверки физического модемного контура я сделал локальный Digital Twin с виртуальными устройствами и воспроизводимыми сценариями."
+        "text": "С две тысячи двадцать второго по две тысячи двадцать шестой год я развивал Lifecycle Messaging Platform. Это маркетинговая платформа для автоматизации клиентских коммуникаций. Она объединяла сегментацию аудитории, управление кампаниями, сценарии согласованных эс эм эс коммуникаций и аналитику. Я проектировал эй пи ай, распределение заданий, связь с удалёнными инстансами, мониторинг и инструменты эксплуатации. А для проверки физического модемного звена я сделал локальный Digital Twin с виртуальными устройствами и воспроизводимыми сценариями."
       },
       "turnId": "lifecycle-messaging-platform"
     },
@@ -463,7 +463,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "f360-studio",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "В две тысячи двадцать первом и две тысячи двадцать втором годах я основал и вёл F360 Studio. Это была коммерческая студия высокоточного три дэ сканирования. Здесь опыт музейной фотограмметрии превращался уже в законченный производственный процесс. Я выстраивал весь путь от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели. В две тысячи двадцать втором году физическую производственную базу пришлось закрыть."
+        "text": "В две тысячи двадцать первом и две тысячи двадцать втором годах я основал и вёл F360 Studio. Это была коммерческая студия высокоточного три дэ сканирования. Здесь опыт музейной фотограмметрии превращался уже в законченный производственный процесс. Я выстраивал весь путь от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели."
       },
       "turnId": "f360-studio"
     },
@@ -493,7 +493,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "complexscan",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "С две тысячи семнадцатого по две тысячи двадцать второй год я развивал профессиональное направление Complex Scan. Это была коммерческая линия оборудования для автоматизации предметной съёмки и три дэ сканирования. Внутри направления появлялись как универсальные системы, так и специализированное оборудование под конкретные процессы. Основой стали профессиональные поворотные платформы с прозрачной рабочей поверхностью из осветлённого стекла. Здесь требования к механике, ресурсу, точности и производительности были уже заметно выше, чем у открытой PhotoPizza. Система поддерживала несколько режимов автоматической съёмки. Можно было работать пошагово. А для большого потока использовать непрерывное вращение и серийную съёмку камеры. Управлять оборудованием можно было с физического пульта или через веб приложение. Я проектировал механику и метод съёмки как единый продукт. Я собирал прототипы и первые экземпляры, готовил конструкцию для подрядчиков, выполнял финальную сборку и тестирование. Затем добавились упаковка, экспортная документация и международная логистика. В результате Complex Scan прошёл путь от ар эн ди прототипов до оборудования, которое поставлялось клиентам в разные страны. Одним из специализированных проектов внутри этого профессионального направления стал Booth Bot. Он решал конкретную производственную задачу. Нужно было автоматизировать каталожную съёмку большого потока винных бутылок непосредственно на складе заказчика. Не перевозить товар в фотостудию. А перенести студийный процесс к товару. По сути мы построили компактную автоматизированную фотостудию. Световые панели создавали заданный рисунок бликов. Закрытая конструкция изолировала сцену от внешнего освещения. Система автоматически определяла высоту бутылки и позиционировала камеру. От оператора требовалось подготовить бутылку и поставить её внутрь. Остальной настроенный процесс система выполняла автоматически. После съёмки изображение отделялось от фона, обрабатывалось и превращалось в готовый материал для каталога."
+        "text": "С две тысячи семнадцатого по две тысячи двадцать второй год я развивал профессиональное направление Complex Scan. Это была коммерческая линия оборудования для автоматизации предметной съёмки и три дэ сканирования. Внутри направления появлялись как универсальные системы, так и специализированное оборудование под конкретные процессы. Основой стали профессиональные поворотные платформы с прозрачной рабочей поверхностью из осветлённого стекла. Здесь требования к механике, ресурсу, точности и производительности были уже заметно выше, чем у открытого проекта PhotoPizza. Система поддерживала несколько режимов автоматической съёмки. Можно было работать пошагово. А для большого потока использовать непрерывное вращение и серийную съёмку камеры. Управлять оборудованием можно было с физического пульта или через веб приложение. Я проектировал механику и метод съёмки как единый продукт. Я собирал прототипы и первые экземпляры, готовил конструкцию для подрядчиков, выполнял финальную сборку и тестирование. Затем добавились упаковка, экспортная документация и международная логистика. В результате Complex Scan прошёл путь от ар эн ди прототипов до оборудования, которое поставлялось клиентам в разные страны. Одним из специализированных проектов внутри этого профессионального направления стал Booth Bot. Он решал конкретную производственную задачу. Нужно было автоматизировать каталожную съёмку большого потока винных бутылок непосредственно на складе заказчика. Не перевозить товар в фотостудию. А перенести студийный процесс к товару. По сути мы построили компактную автоматизированную фотостудию. Световые панели создавали заданный рисунок бликов. Закрытая конструкция изолировала сцену от внешнего освещения. Система автоматически определяла высоту бутылки и позиционировала камеру. От оператора требовалось подготовить бутылку и поставить её внутрь. Остальной настроенный процесс система выполняла автоматически. После съёмки изображение отделялось от фона, обрабатывалось и превращалось в готовый материал для каталога."
       },
       "turnId": "complexscan"
     },
@@ -508,7 +508,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "id": "photopizza",
         "persona": "vladimir",
         "sourceRefs": [],
-        "text": "В начале две тысячи десятых годов одной из ключевых точек в моей истории стал Megavisor. Я был сооснователем проекта и техническим директором. Я отвечал за ар эн ди съёмочного направления и производство интерактивного контента. Megavisor был облачной платформой для фото на триста шестьдесят градусов, сферических три дэ панорам, видео и виртуальных туров. Я участвовал в проработке интерактивного плеера, который связывал эти форматы между собой. Например, из панорамы помещения можно было открыть находящийся внутри объект. Затем перейти к его вращению на триста шестьдесят градусов. А после этого открыть связанные фотографии и другие материалы. В этом ролике виден общий принцип платформы и то, как разные форматы могли работать внутри одного интерактивного пространства. В съёмочном направлении я руководил студией Gate Nine и выездным производством. Я организовывал съёмки, координировал фотографов и ретушёров, разрабатывал оборудование и выстраивал технологические процессы. Я также продюсировал промо и обучающие видеоматериалы, чтобы снизить порог входа в новый для рынка формат. Рост объёмов съёмки привёл к следующей инженерной задаче. Процесс нужно было автоматизировать. Так внутри Megavisor появилась PhotoPizza. PhotoPizza я начал развивать с две тысячи десятого года. Проект появился как решение конкретной производственной задачи. Съёмку объектов на триста шестьдесят градусов нужно было поставить на поток, чтобы она легко масштабировалась. Сначала я собрал прототип из доступных промышленных компонентов. Он позволил нам быстро проверить механику и саму технологию съёмки. На этом прототипе мы отработали основные принципы системы. После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение. Одной из ключевых задач было совместить небольшую массу с высокой грузоподъёмностью. Платформу можно было привезти на выездную съёмку и установить силами одного фотографа. При этом крупные версии выдерживали человека и позволяли снимать тяжёлые и габаритные предметы. В результате PhotoPizza выросла в целый модельный ряд. Появились и подвесные версии для люстр, украшений, велосипедов и других объектов. Система оставалась модульной. Один блок управления мог работать с платформами разных размеров, слайдером PhotoSnail и моторизированной панорамной головкой. Параллельно мы снижали порог входа в саму технологию. Например, я сделал простой вариант платформы из доступных деталей, чтобы фотограф мог сначала проверить сам формат почти без вложений. Позже PhotoPizza стала опенсорс проектом. Вместе с оборудованием развивалась и программная часть. В итоге с телефона по вай фай можно было управлять оборудованием и камерой через веб приложение. А это результат масштабирования технологии на крупные объекты. Интерактивную последовательность мотоцикла можно вращать и рассматривать со всех сторон. PhotoPizza продолжала развиваться до моего переезда в Аргентину в две тысячи двадцать втором году."
+        "text": "В начале две тысячи десятых годов одной из ключевых точек в моей истории стал Megavisor. Я был сооснователем проекта и техническим директором. Я отвечал за ар эн ди съёмочного направления и производство интерактивного контента. Megavisor был облачной платформой для фото на триста шестьдесят градусов, сферических три дэ панорам, видео и виртуальных туров. Я участвовал в проработке интерактивного плеера, который связывал эти форматы между собой. Например, из панорамы помещения можно было открыть находящийся внутри объект. Затем перейти к его вращению на триста шестьдесят градусов. А после этого открыть связанные фотографии и другие материалы. В этом ролике виден общий принцип платформы и то, как разные форматы могли работать внутри одного интерактивного пространства. В съёмочном направлении я руководил студией Gate Nine и выездным производством. Я организовывал съёмки, координировал фотографов и ретушёров, разрабатывал оборудование и выстраивал технологические процессы. Я также продюсировал промо и обучающие видеоматериалы, чтобы снизить порог входа в новый для рынка формат. Рост объёмов съёмки привёл к следующей инженерной задаче. Процесс нужно было автоматизировать. Так внутри Megavisor появилась PhotoPizza. PhotoPizza я начал развивать с две тысячи десятого года. Проект появился как решение конкретной производственной задачи. Съёмку объектов на триста шестьдесят градусов нужно было поставить на поток, чтобы она легко масштабировалась. Сначала я собрал прототип из доступных промышленных компонентов. Он позволил нам быстро проверить механику и саму технологию съёмки. На этом прототипе мы отработали основные принципы системы. После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение. Одной из ключевых задач было совместить небольшую массу с высокой грузоподъёмностью. Платформу можно было привезти на выездную съёмку и установить силами одного фотографа. При этом крупные версии выдерживали человека и позволяли снимать тяжёлые и габаритные предметы. В результате PhotoPizza выросла в целый модельный ряд. Появились и подвесные версии для люстр, украшений, велосипедов и других объектов. Система оставалась модульной. Один блок управления мог работать с платформами разных размеров, слайдером PhotoSnail и моторизированной панорамной головкой. Параллельно мы снижали порог входа в саму технологию. Например, я сделал простой вариант платформы из доступных деталей, чтобы фотограф мог сначала проверить сам формат почти без вложений. Позже PhotoPizza стала опенсорс проектом. Вместе с оборудованием развивалась и программная часть. В итоге с телефона по вай фай можно было управлять оборудованием и камерой через веб приложение. А это результат масштабирования технологии на крупные объекты. Интерактивную последовательность мотоцикла можно вращать и рассматривать со всех сторон."
       },
       "turnId": "photopizza"
     },
@@ -683,7 +683,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "mobile-smm-platform",
         "sourceRefs": [],
-        "text": "В центре системы находится модель профилей, аккаунтов, медиаматериалов и публикаций. Сервер управляет расписанием, очередью и подключёнными Андроид устройствами. Для стабильных участков процесса используется заранее подготовленный джейсон сценарий. Он выполняет известный путь и записывает результат в журнал. Это дешевле и надёжнее, чем просить модель заново рассуждать на каждом обычном шаге. Но мобильный интерфейс может измениться. Если структура экрана больше не соответствует ожидаемому сценарию, исполнитель не должен продолжать нажимать вслепую. Он останавливается в безопасной точке. После этого агент анализирует новое состояние интерфейса и готовит обновлённый вариант сценария. Этот вариант сначала передаётся на проверку. Исходящие действия проходят через лимиты, устойчивую дедупликацию и подтверждение. Поэтому повторный запуск процесса не должен случайно дублировать уже выполненное действие. Здесь я соединяю детерминированную автоматизацию там, где она работает хорошо, и агентную адаптацию там, где действительно появляется неопределённость."
+        "text": "В центре системы находится модель профилей, аккаунтов, медиаматериалов и публикаций. Сервер управляет расписанием, очередью и подключёнными Андроид устройствами. Для стабильных участков процесса используется заранее подготовленный сценарий в формате джейсон. Он выполняет известный путь и записывает результат в журнал. Это дешевле и надёжнее, чем просить модель заново рассуждать на каждом обычном шаге. Но мобильный интерфейс может измениться. Если структура экрана больше не соответствует ожидаемому сценарию, исполнитель не должен продолжать нажимать вслепую. Он останавливается в безопасной точке. После этого агент анализирует новое состояние интерфейса и готовит обновлённый вариант сценария. Этот вариант сначала передаётся на проверку. Исходящие действия проходят через лимиты, устойчивую дедупликацию и подтверждение. Поэтому повторный запуск процесса не должен случайно дублировать уже выполненное действие. Здесь я соединяю детерминированную автоматизацию там, где она работает хорошо, и агентную адаптацию там, где действительно появляется неопределённость."
       },
       "turnId": "mobile-smm-details"
     },
@@ -699,7 +699,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "persona": "vladimir",
         "replyTo": "f360-studio",
         "sourceRefs": [],
-        "text": "F триста шестьдесят переносила дисциплину музейной съёмки в коммерческую студийную работу. Для каждого объекта нужно было определить подходящие ракурсы и свет. Я контролировал исходный материал ещё на этапе съёмки. Плохой исходник гораздо дешевле переснять сразу, чем обнаружить проблему после долгой фотограмметрической обработки. После съёмки я проводил фотограмметрическую обработку и проверял геометрию модели. Отдельно контролировались текстуры. В результате получался не просто набор фотографий или сырой скан. Я выстроил единый путь от физического объекта до готовой три дэ модели и её презентации или публикации. Публичные примеры этой работы сохранились в видео и в портфолио моделей. Для меня F триста шестьдесят был ещё одним примером того, как исследовательская технология становится реальным производственным процессом. Работа студии завершилась в две тысячи двадцать втором году во время моего переезда."
+        "text": "F триста шестьдесят переносила дисциплину музейной съёмки в коммерческую студийную работу. Для каждого объекта нужно было определить подходящие ракурсы и свет. Я контролировал исходный материал ещё на этапе съёмки. Плохой исходник гораздо дешевле переснять сразу, чем обнаружить проблему после долгой фотограмметрической обработки. После съёмки я проводил фотограмметрическую обработку и проверял геометрию модели. Отдельно контролировались текстуры. В результате получался не просто набор фотографий или сырой скан. Я выстроил единый путь от физического объекта до готовой три дэ модели и её презентации или публикации. Публичные примеры этой работы сохранились в видео и в портфолио моделей. Для меня F триста шестьдесят был ещё одним примером того, как исследовательская технология становится реальным производственным процессом."
       },
       "turnId": "f360-details"
     },
@@ -1820,7 +1820,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Часть управляющего контура мы открыли"
+          "quote": "Часть слоя управления мы открыли"
         },
         "gestureDurationMs": 2200,
         "leadMs": 3850,
@@ -1852,7 +1852,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Часть управляющего контура мы открыли"
+          "quote": "Часть слоя управления мы открыли"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -7554,7 +7554,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "подготовленный джейсон сценарий"
+          "quote": "подготовленный сценарий в формате джейсон"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -7586,7 +7586,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "подготовленный джейсон сценарий"
+          "quote": "подготовленный сценарий в формате джейсон"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -7843,7 +7843,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Публичные примеры этой работы"
+          "quote": "Публичные примеры этой работы сохранились"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2250,
@@ -7876,7 +7876,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "Публичные примеры этой работы"
+          "quote": "Публичные примеры этой работы сохранились"
         },
         "gestureDurationMs": 800,
         "leadMs": 1050,
@@ -7909,7 +7909,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "завершилась в две тысячи двадцать втором году"
+          "quote": "Для меня F триста шестьдесят был ещё одним примером"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2150,
@@ -7942,7 +7942,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "завершилась в две тысячи двадцать втором году"
+          "quote": "Для меня F триста шестьдесят был ещё одним примером"
         },
         "gestureDurationMs": 650,
         "leadMs": 950,
@@ -8646,7 +8646,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В этом демо я показываю следующий шаг"
+          "quote": "В этом демонстраторе я показываю следующий шаг"
         },
         "gestureDurationMs": 1000,
         "leadMs": 2650,
@@ -8678,7 +8678,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "edge": "start",
           "occurrence": 1,
           "offsetMs": 0,
-          "quote": "В этом демо я показываю следующий шаг"
+          "quote": "В этом демонстраторе я показываю следующий шаг"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -12880,7 +12880,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "durationMilliseconds": 68020,
               "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-0+z4G7/IJ7nACxNkxMs3I19CHVUpQkuu2/OwVrb1YyU=",
               "sourceAlignmentFileHash": "sha256:0f5eb6bf1ef88028928db06708a4356165ec1b8aa89bf914af2f6eb5afd9ef37",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-SHm77bXYF8kqMIxUhQmczhiwbVUqeoruCJchEVo5Adw=",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-pVZnELyJQ3BqvEep/9khhRZd9Q6cGEZz/eKAQVuP6Tk=",
               "sourceTimelineHash": "presentation-timeline-v3:sha256-c5hW+84A+bhUtdeRyeHQtaOVxTFtiXBD8P+RRStKsAU=",
               "wavHash": "sha256:b602e0eae7fd39ea5e6ba12a241e5abc4e6a93b1350d3772c349d89d0619bde0"
             },
@@ -12943,7 +12943,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "durationMilliseconds": 52060,
               "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-oRjQ1FIw5xofTRhzcKO8RxwN6TVieihfpY+0CHBTlh4=",
               "sourceAlignmentFileHash": "sha256:5efda7cc62d92bc5282ce39d038bf71df4453ef6cd145d823a63f7008be607ec",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-F4bYdpyipQk9GLvAyClTBk19zAQxxGtEBj0fl8hNpok=",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-6xzuLz52dXPYhXt19fzuW1tXZEgxDuhA994tO23SH7Q=",
               "sourceTimelineHash": "presentation-timeline-v3:sha256-n+cFJenC43hwh2vI/C6yGxDy2V0ymhJU6/5vrjYiRro=",
               "wavHash": "sha256:d79f643febd6589f8d136cc87bba5fdc6315fd6c48d626bc45995833f655b9c5"
             },
@@ -13029,7 +13029,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "durationMilliseconds": 122570,
               "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-HELGUV9HbFAd3LPHMionEGjD/s7NFJqOY6VzAlBiT5w=",
               "sourceAlignmentFileHash": "sha256:b240f6aa65d4da8b6d41582ca4e8b22ae19dde743e50fbb7e6c22dfcd0064b2a",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-f7+8GEhwwdaazLV18BoeTISvcN0qx5aqcJrZEuTsMVs=",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-pHsue9S3U63B+dnqVEFGMsbtTIB9OjQjuRa/QE/hAf0=",
               "sourceTimelineHash": "presentation-timeline-v3:sha256-CTzOI0MtBLi/icKNCUINqHxxBMLmlvolbkxaGni67w0=",
               "wavHash": "sha256:95116b03e7a20a2a2043aa01e373076c8172d19b48c0d353a66b822c1db952c7"
             },
@@ -13071,7 +13071,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "durationMilliseconds": 57410,
               "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-HZ8RzQLe/PCFCixRRM+7RitdOU/8gjHsy6Bk8XY94D8=",
               "sourceAlignmentFileHash": "sha256:01b05ae258124ff6c5b4c421cc88f8a26a31c8bd34a95829a30562d4ac1a3d99",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-F4OCEfbjt4WQISZBpbdy9wre38heI3Q3ZJPz15Jy548=",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-D2lgOl8LwbKPxraY2zulllBMb5seuOruCPSjB/svGHo=",
               "sourceTimelineHash": "presentation-timeline-v3:sha256-Q5XCIA7lhBilSjA57VrZUoeJaD8O7lPEnf7gN/2t8Ko=",
               "wavHash": "sha256:5e84ac9751f4243484d16533d2f20d64f998fc3f6f0b49705c9faddf9605fc97"
             },
@@ -13082,7 +13082,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "replayCompletedSpeech": false,
               "resume": "paused"
             },
-            "subtitle": "F360 переносила дисциплину музейной съёмки в коммерческий студийный процесс. Для каждого объекта я планировал ракурсы и свет, контролировал исходные фотографии, проводил фотограмметрическую обработку и проверял геометрию с текстурами. Я собрал единый производственный путь от установки до финальной 3D-модели и её публикации. Публичные примеры сохранились на YouTube и в портфолио Sketchfab. Студия завершила работу в две тысячи двадцать втором году во время моего переезда.",
+            "subtitle": "F360 переносила дисциплину музейной съёмки в коммерческий студийный процесс. Для каждого объекта я планировал ракурсы и свет, контролировал исходные фотографии, проводил фотограмметрическую обработку и проверял геометрию с текстурами. Я собрал единый производственный путь от установки до финальной 3D-модели и её публикации. Публичные примеры сохранились на YouTube и в портфолио Sketchfab.",
             "title": null
           },
           "f360-studio": {
@@ -13095,14 +13095,14 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "durationMilliseconds": 34500,
               "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-McF61Jv+AbGnuIl/Hfu6KQVaDNok+AnnqQnR+Ve0yU0=",
               "sourceAlignmentFileHash": "sha256:c6f83ae0acf7994026af77a230d2c1b1b5f159d40a9810f583dd61f1624bf7b9",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-OVGYG1dJmUByzy11YmxFqHmLvxI2Bm+m+Ds4+47atQM=",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-JMlrh2J0HobzGA9c0Ed3zvI9qvCOkEagOVE3OMzg3RQ=",
               "sourceTimelineHash": "presentation-timeline-v3:sha256-5e5h3kXZbfa6MX9eAtOhC/2fj7qN7In+nVpp9zc0EvE=",
               "wavHash": "sha256:569ab98234333cf81c7c8f82dc6d97ee7bce8f02726f344f20ee39fd984a2a38"
             },
             "period": "2021–2022",
             "projectId": "projects/f360-studio",
             "return": null,
-            "subtitle": "Теперь вернусь по истории программно-аппаратных проектов. В 2021–2022 годах я основал и вёл F360 Studio. Это проект высокоточного 3D-сканирования. Я выстраивал процесс от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели. Физическую производственную базу пришлось закрыть.",
+            "subtitle": "Теперь вернусь по истории программно-аппаратных проектов. В 2021–2022 годах я основал и вёл F360 Studio. Это проект высокоточного 3D-сканирования. Я выстраивал процесс от физической съёмочной установки и управляемого света до геометрии, текстур и готовой презентации модели.",
             "title": "F360 Studio"
           },
           "finale": {
@@ -13134,7 +13134,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "durationMilliseconds": 36910,
               "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-2JDfCx9gxpTEumfYhO0RYxb/el4YXFvyhvUPhI5jFss=",
               "sourceAlignmentFileHash": "sha256:c8e9539436983d6615264db05c295d5de066eb1d7359046f1c6c04bbeb72915a",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-Rj0T+OMKlEUUs8lc7NxSGPtN4ndmmgj+Sd/a5fRdlgo=",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-NdA/SMrLfqpY/D3BamBRdt4WFT7Oec/7fPEFXNiRM8s=",
               "sourceTimelineHash": "presentation-timeline-v3:sha256-Ldz9rCTr2S3gtMCHaywAolFSrRRJz+/FLcmBQZYbwBM=",
               "wavHash": "sha256:0d32c02884d41943f9ec5869025a1bf9500f0d166c742f35727a6d3863a55363"
             },
@@ -13199,7 +13199,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "durationMilliseconds": 65450,
               "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-pkH8hvtzixns1jPcNxjb2YCSxf27MNFfqk2TmXzeBw8=",
               "sourceAlignmentFileHash": "sha256:28c6e8b651652cbeaffa38cf13adc146515de4a31dfdf72b00629835cf74a7bf",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-dlw6M651soVTVfDQzcSrmmY58YxP4mqWCSP7sWKyVhk=",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-3+QSY8V/49CMs8GiWWw+3S7Zu78QmzuPVSsO6nSbDbY=",
               "sourceTimelineHash": "presentation-timeline-v3:sha256-HESgxGl/6WxDOC8STJCqFj79rSQGOQsXIA4/m4mngpc=",
               "wavHash": "sha256:170b66dfeaeb732c72aa32ae3b4b7e840b032b3367594155a7faba15600d9314"
             },
@@ -13243,7 +13243,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "durationMilliseconds": 175460,
               "sourceAlignedSequenceHash": "workspace-aligned-sequence-v3:sha256-gJzMnJ7gLBBqtCQgN7AA6BuLfitA8WJmVmf/V30gmfU=",
               "sourceAlignmentFileHash": "sha256:d02885b62d4a3475702155c218708e7efb8369fcc31ce29a6fceb8ac44d1598e",
-              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-30QLhpIbU3+/65xY4kvwYl/LfWpQtkDq9E6PpGKP10o=",
+              "sourceNarrationCellHash": "workspace-presentation-authoring-project-v2:cell:sha256-dOvGskhqL6xmaMvZ/7Ppm10AIqEpQuy0w4yCpitOpUU=",
               "sourceTimelineHash": "presentation-timeline-v3:sha256-hCKbW9KIKXXMB/FhIJ8wSlPyy0+Bd9WmVwxbQEiWi6I=",
               "wavHash": "sha256:c9fb961c8aded6139fce471ccc69b7bd0cd290d27c841369df8a60a7fc6b799c"
             },
@@ -13676,11 +13676,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:agent-portal.demo-link",
           "cv-show:audio-clip:agent-portal:01"
         ],
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-yXBZV6YE71ODpS5KklsH9E9k2aTIFmf0upiP7V4u+IU=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-0c8+syaJnLGyPe1JA0JTSRKkRAKB3RGZBQCrg1tSzyw=",
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-v79dvY9GP+QP0A3ahJTuAyFhXhC+42LaneV4Lwd/aT8=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-X1uzKd8aEF9KEk31PHYNjHNjXLv2/G/dn669+ocWcTw=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-U5xYPd6+RKhH3kn0pN0sJzHMJTi32vKUQ0WTnAvZ6GU=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-6m/OHVdKGNag494XUIeUWyZ8ztC9KjRWUkvvt6dTvyE=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-p2ZZKDkXJF+634zkIevLx0ytbU1ndDaCZzyz0hqMma8=",
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-s+f16O2P6MZyzXybglzLgyZBQxIkSFdcs2qLXGWUIsw="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-2DvwT7/NGVFcmP58haMekWYQQT8BVdZZBhUz8m0AlSU="
       },
       {
         "entryId": "symbiote-video-studio",
@@ -13714,11 +13714,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:maximo.xr-demo",
           "cv-show:audio-clip:adaptive-maximo-workbench:01"
         ],
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-H9TFWjqPnqrZSP0TZQR6Ja+8b4V4/e27ROb3JJkmlXU=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-O2lQ9XlyUKt1+MBWYzGkE2/VExEVPZBqGqE/JsWUU5Y=",
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-lqNgxzRXqz4ZVcb+BXruK5UMDBmQKfAK8vzi1ervStw=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-VH840sM78sagARcimCvz6gEdFZ7zKQJe7b+5vAfpat4=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-7yUdHVBVXifkCLq2r/3qWsCvNQuphlTVQM1SVntZ/1g=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-H0+MlZFyt+4d89JzJJ0+241hldLgt/8ybMaHzfHTjbM=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-dz3x4A46f0XwbXw67NnVa9w15mvYpvniceVnK4P7/cU=",
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-kLMeEQJrZBg35ud2PpBwVjLHchXQ7FcVnfeshd2HLgA="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-C65Lxlgijn195MltCqPkhwESlLtHNqU73iZbbqWWD7g="
       },
       {
         "entryId": "agent-pool-mcp",
@@ -13769,11 +13769,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:lifecycle.digital-twin",
           "cv-show:audio-clip:lifecycle-messaging-platform:01"
         ],
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-gRoCEOE5PFPwwKKW9gA+8WwNDKTGaTe/XmxKFjS1b44=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-6+s2/0V2hwAvMTkkwp6MGItspS+LLF8gDf2Sjl9a19s=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-axVNlatnuDfvYCABostWTNqqbXLkgqTWmi7v3hU6ekI=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-rd5XWahbXiMfsBFby0WhdeIdDSlev4fN7pto/tAG5jc=",
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-kNg91O6Vlg8g7pFHv5spbaUABMLIOzuVN45S/Kc4aVk=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-0XJnRxCOFbWsu4Fslyrv7hzH4sAbhG0UBqFp3+YFvGo=",
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-8HQo9BxGxQ+mX1pHxlF1/muZnaJrL1+5+CRvXz3oUt0="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-h8mAwhGZrtoFrFNhzAYXvqtwrGzzp9IR5tvDOScjjYQ="
       },
       {
         "entryId": "mobile-smm-platform",
@@ -13805,11 +13805,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:f360.result",
           "cv-show:audio-clip:f360-studio:01"
         ],
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-zPbkHWKx5Ayo5PosDqnvMGdLAbLQiyOHtdzdgFhzElI=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-CttcsBBR7eTIrrBp2ugw9w78HSiGhFb99F2xOac+Wrg=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-FFRQmKVHDfhoumcxtL0c5KUWKOSE1PHmCygi6C4O8Gc=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-U8EiRM/sIoPO05j/lKdnVrop5MrQKLh5VcqW/kyYaW8=",
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-LrDv1gR268ZmyakdY+0AsgEn4PV3h0gGMfGllfa8gH0=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-VHll1CyMzQDJAyl/ZhAw6PP5nl19W2eo22usil4i7w8=",
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-6Ebu0JeH8zmlNlsBjPLc4VmlRjlbeiSxQ/oqFMYaVkU="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-MklNPGknMeJg0hgbajX9XsIwm7hCh318HAduElx+6FE="
       },
       {
         "entryId": "autobox",
@@ -13863,11 +13863,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:complexscan.boothbot-catalog-ready",
           "cv-show:audio-clip:complexscan:01"
         ],
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-RtTEvg3Gh8LNm6sbv3Vpy9G29aREd+ndSfahgmyQYR8=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-CIm1u3tH6Kp4jE015OG52H/OIw/GXPCB7StcOmllbNY=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Sk8stByyb0Dapkpl/X3/l1q6eLpy4Rd1x5ZT5D1LFkc=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-rhyJ4LVfNnvCNFNEKii6VVj7xw8suzlkPUb0BygA5Rc=",
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PSlxWKHMtOSPDeDSAUej7TX+OUhBp8ab3RobdUqR/w8=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-LS/wvx41nEzctYJlLbbIJezpa372Z/ePSmUVbDhSQZI=",
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-eS7KMgLnmMRIHLZa3ZCtvVYfUbta+gojrQ0HqmkE6hA="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-nHBohJCoSkrn2+LxLCn3i1IA1oClkd1jMhi4ekLmH5s="
       },
       {
         "entryId": "photopizza",
@@ -13898,11 +13898,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:photopizza.spinner",
           "cv-show:audio-clip:photopizza:01"
         ],
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Q8APCR2fwdtAmK9d+cE4N405ub35OW2XVF6AEo0sGkI=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-Mou2DdHLPse0rJpvnVn6y9fkxTKvjBLxEkVh4tonx74=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-d9S11MgIEYSQj5m6QicJ4NP9CDk6IBK6EAiwRRV1iJ0=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-q9rQV2coScSj990b6Lp1L4A7yuDd/OmXm0FH9b+zYE4=",
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PwhzgCCQi0AFF/znw6joZfpUI1GEzMirtJVE9dvHFeE=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-sOzLj/OUrrksQhxTqCFkg7Zj4OUwrK9xc7WrHd/TW7I=",
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-rxmrXyNwEwkcjSsODgAJBwr1r1YuOf1u7JDZqvwHEWU="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-wsbo718CCAmZ5vkbrkc/OfMM9ATSUJmrB2Tw1anpgUo="
       },
       {
         "entryId": "finale",
@@ -14117,11 +14117,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:mobile-smm-details.approval",
           "cv-show:audio-clip:mobile-smm-details:01"
         ],
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-0zho++swEjzwwe/seNAUFkAE97Ce1DBhvA5bkUvzuWU=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-U+S7J4EaiGhWa1LRCrk92WUmKxaeehXxpIRE5boIg10=",
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-RjSNpeUpz8R53TnAzomnb6HwV1gyy6eqZK+qdkXF724=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-TLhVBmkkcgsZG96x7LaTbY1Mj1P2WTEDUXyi89oa2Tw=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-f1hIr4M0XBVG7XNOKeHrJAQn4VFp2EUi9zJsarjL4dA=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-EUzPV+vL6zAjbUgqQ/2n39BGaI8XCSb3ZHZenz/Aoko=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-MuDzvffrqFa9JCuELzHmb3KhB3YKglj7RTfWSmF3xwI=",
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-57Vi68wcjipvH1qeNgQ2u9hORLug1WbfOxROZUF8HJc="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-1LdGiho5SoFpvSlowIEY7ynZeW1/cZAGci6scAW9uVU="
       },
       {
         "entryId": "f360-details",
@@ -14134,11 +14134,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:f360-details.period",
           "cv-show:audio-clip:f360-details:01"
         ],
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-tRVCIG6IhWL/r/3YQOLrk0W9JO1Gk8yQbdj1XqdEawY=",
-        "narrationInputHash": "cv-show-narration-input-v1:sha256-FQxh1Skna4v3LsDLTJ044NiUTMfRxCQqq5jc7K50Dj4=",
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-uKWY3T5D8B92Nt7nQJdH7sniI6ImPdHvQvOc/ZdVZFw=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Xdmv8YUut1+E0hAdHlBqe15NHBQW8KYvNMZifrQqNnU=",
+        "narrationInputHash": "cv-show-narration-input-v1:sha256-Kd3mjaquAnS49it6mYsel9nNhuSvJ2VwERqzART4NLs=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-FLswUr3jroK2TlcaU8RETHgavPETrOFyXz/0zxo/5f8=",
         "attentionContractHash": "cv-show-attention-contract-v1:sha256-n+00zZxJ3k2ftGh/oGtcr/9/J0cl1DV4Qk6aql8Uemo=",
-        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-zhrvxn74QtOT2rPdTgiJVaARUt4q9WiJxD4bFBG/ISY="
+        "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-eh+WyNePmz+/FFHa5cDjuZZ9Oh9xqIFmUcU5ov9BJM4="
       },
       {
         "entryId": "autobox-details",
@@ -14198,7 +14198,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-pl5FPD9FH9I3QS/DaGDZ0lLLQAIXmc9vmG669JXLmMQ="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-ACGCozEylNJJwze/U6gab1ehdwLmp/A+JUCkGsGquOg="
+    "hash": "cv-show-audio-provenance-v1:sha256-ncRrnKC5eoKP/PwamH4GFU48L6/RhQ0w4Vr6IASXgcQ="
   },
   "artifactTreeHash": "cv-show-audio-artifact-tree-v1:0332cdd05f461a3c1f7e9a9b14cf1820f054ad895752451893df74bc22569220",
   "entryReleaseIds": [
@@ -14265,11 +14265,11 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
   },
   "project": {
     "revision": 102,
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-nYAX5n3YF6cwKVmvpfIxEZmXIZ7Lh8dadXVmMYv8E00="
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-jKsueCWDNW7lXE7dueufHVhX/U7noybiDYAAcprSLi0="
   },
   "schemaVersion": "cv-show-audio-release-v1",
   "verificationHash": "cv-show-audio-release-verification-v1:5a90c8b51f3defdbaa81faacede9cc4224842f04bd80f493d06aaed836630d47",
-  "releaseId": "cv-show-audio-release-v1:b39be695432cd63b228cc8fa20a31209b46a597a850183c6854c26c8a4ded8d7"
+  "releaseId": "cv-show-audio-release-v1:314e6e2f378e079553d2b738513a1d658b79983a902d2edfa147277eaab931c1"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );
