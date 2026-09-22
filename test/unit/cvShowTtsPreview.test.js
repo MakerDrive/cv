@@ -8,7 +8,7 @@ import {
   CV_SHOW_TTS_PREVIEW_FLAG_TARGET_NOT_APPLIED,
   renderCvShowTtsPreviewListing,
   splitCvShowNarrationSentences,
-} from '../../src/static-pages/js/tour-player/cv-show-preview/index.js';
+} from '../../scripts/cv-show-tts-preview-lib.js';
 import { listCvShowPronunciationTargets } from '../../src/static-pages/js/tour-player/ttsNormalize.js';
 
 test('splitCvShowNarrationSentences keeps sentence order and indices', () => {

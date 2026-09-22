@@ -1,0 +1,321 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-JFKHWXtQbdIkp1o25RgiL2Zb5jLarlBx2lBiW28Y3+I=",
+  "media": {
+    "durationMs": 40100,
+    "hash": "sha256:d3c5cf10545bbb445d872f5c0203b2c1cd6f5be34bb19836af190791dedf27a7",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-oJNaubNs4ntZ7fTRyOGbU3lQIcYUafM4EQdJxAI+tIg=",
+  "turns": [
+    {
+      "endMs": 40100,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "С 2022 по 2026 год я развивал Lifecycle Messaging Platform. Это маркетинговая платформа для автоматизации клиентских коммуникаций. Она объединяла сегментацию аудитории, управление компаниями, сценарии согласованных SMS-коммуникаций и аналитику. Я проектировал API, распределение заданий, связь с удаленными instances, мониторинг и инструменты эксплуатации. А для проверки физического модемного звена я сделал локальный Digital Twin с виртуальными устройствами и воспроизводимыми сценариями.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 380,
+          "startMs": 0,
+          "text": "С"
+        },
+        {
+          "endMs": 1300,
+          "startMs": 380,
+          "text": "2022"
+        },
+        {
+          "endMs": 2120,
+          "startMs": 1300,
+          "text": "по"
+        },
+        {
+          "endMs": 3360,
+          "startMs": 2120,
+          "text": "2026"
+        },
+        {
+          "endMs": 3900,
+          "startMs": 3360,
+          "text": "год"
+        },
+        {
+          "endMs": 4520,
+          "startMs": 3900,
+          "text": "я"
+        },
+        {
+          "endMs": 4980,
+          "startMs": 4520,
+          "text": "развивал"
+        },
+        {
+          "endMs": 5660,
+          "startMs": 4980,
+          "text": "Lifecycle"
+        },
+        {
+          "endMs": 6220,
+          "startMs": 5660,
+          "text": "Messaging"
+        },
+        {
+          "endMs": 6700,
+          "startMs": 6220,
+          "text": "Platform."
+        },
+        {
+          "endMs": 7540,
+          "startMs": 7020,
+          "text": "Это"
+        },
+        {
+          "endMs": 8340,
+          "startMs": 7540,
+          "text": "маркетинговая"
+        },
+        {
+          "endMs": 9100,
+          "startMs": 8340,
+          "text": "платформа"
+        },
+        {
+          "endMs": 9620,
+          "startMs": 9100,
+          "text": "для"
+        },
+        {
+          "endMs": 10480,
+          "startMs": 9620,
+          "text": "автоматизации"
+        },
+        {
+          "endMs": 11100,
+          "startMs": 10480,
+          "text": "клиентских"
+        },
+        {
+          "endMs": 11920,
+          "startMs": 11100,
+          "text": "коммуникаций."
+        },
+        {
+          "endMs": 12740,
+          "startMs": 12320,
+          "text": "Она"
+        },
+        {
+          "endMs": 14200,
+          "startMs": 12740,
+          "text": "объединяла"
+        },
+        {
+          "endMs": 15060,
+          "startMs": 14200,
+          "text": "сегментацию"
+        },
+        {
+          "endMs": 15940,
+          "startMs": 15060,
+          "text": "аудитории,"
+        },
+        {
+          "endMs": 16680,
+          "startMs": 16160,
+          "text": "управление"
+        },
+        {
+          "endMs": 17500,
+          "startMs": 16680,
+          "text": "компаниями,"
+        },
+        {
+          "endMs": 18480,
+          "startMs": 18000,
+          "text": "сценарии"
+        },
+        {
+          "endMs": 19360,
+          "startMs": 18480,
+          "text": "согласованных"
+        },
+        {
+          "endMs": 19820,
+          "startMs": 19360,
+          "text": "SMS"
+        },
+        {
+          "endMs": 20700,
+          "startMs": 19820,
+          "text": "-коммуникаций"
+        },
+        {
+          "endMs": 21000,
+          "startMs": 20700,
+          "text": "и"
+        },
+        {
+          "endMs": 21720,
+          "startMs": 21000,
+          "text": "аналитику."
+        },
+        {
+          "endMs": 22360,
+          "startMs": 21720,
+          "text": "Я"
+        },
+        {
+          "endMs": 23080,
+          "startMs": 22360,
+          "text": "проектировал"
+        },
+        {
+          "endMs": 23700,
+          "startMs": 23080,
+          "text": "API,"
+        },
+        {
+          "endMs": 24960,
+          "startMs": 24240,
+          "text": "распределение"
+        },
+        {
+          "endMs": 25600,
+          "startMs": 24960,
+          "text": "заданий,"
+        },
+        {
+          "endMs": 26300,
+          "startMs": 25880,
+          "text": "связь"
+        },
+        {
+          "endMs": 26400,
+          "startMs": 26300,
+          "text": "с"
+        },
+        {
+          "endMs": 26960,
+          "startMs": 26400,
+          "text": "удаленными"
+        },
+        {
+          "endMs": 27500,
+          "startMs": 26960,
+          "text": "instances,"
+        },
+        {
+          "endMs": 28800,
+          "startMs": 28100,
+          "text": "мониторинг"
+        },
+        {
+          "endMs": 29060,
+          "startMs": 28800,
+          "text": "и"
+        },
+        {
+          "endMs": 29780,
+          "startMs": 29060,
+          "text": "инструменты"
+        },
+        {
+          "endMs": 30780,
+          "startMs": 29780,
+          "text": "эксплуатации."
+        },
+        {
+          "endMs": 31420,
+          "startMs": 31000,
+          "text": "А"
+        },
+        {
+          "endMs": 31560,
+          "startMs": 31420,
+          "text": "для"
+        },
+        {
+          "endMs": 32100,
+          "startMs": 31560,
+          "text": "проверки"
+        },
+        {
+          "endMs": 32780,
+          "startMs": 32100,
+          "text": "физического"
+        },
+        {
+          "endMs": 33340,
+          "startMs": 32780,
+          "text": "модемного"
+        },
+        {
+          "endMs": 33720,
+          "startMs": 33340,
+          "text": "звена"
+        },
+        {
+          "endMs": 34040,
+          "startMs": 33720,
+          "text": "я"
+        },
+        {
+          "endMs": 34520,
+          "startMs": 34040,
+          "text": "сделал"
+        },
+        {
+          "endMs": 35080,
+          "startMs": 34520,
+          "text": "локальный"
+        },
+        {
+          "endMs": 35460,
+          "startMs": 35080,
+          "text": "Digital"
+        },
+        {
+          "endMs": 35920,
+          "startMs": 35460,
+          "text": "Twin"
+        },
+        {
+          "endMs": 36360,
+          "startMs": 35920,
+          "text": "с"
+        },
+        {
+          "endMs": 37040,
+          "startMs": 36360,
+          "text": "виртуальными"
+        },
+        {
+          "endMs": 37800,
+          "startMs": 37040,
+          "text": "устройствами"
+        },
+        {
+          "endMs": 38080,
+          "startMs": 37800,
+          "text": "и"
+        },
+        {
+          "endMs": 39020,
+          "startMs": 38080,
+          "text": "воспроизводимыми"
+        },
+        {
+          "endMs": 39800,
+          "startMs": 39020,
+          "text": "сценариями."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

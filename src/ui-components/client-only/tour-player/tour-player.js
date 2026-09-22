@@ -209,7 +209,7 @@ export function resolveCvShowPlayerEntry({
 
 /** @param {any} story @param {'short' | 'full'} [mode] @param {Map<string, number>} [projectDurations] */
 function playerTimeline(story, mode = 'short', projectDurations = new Map(), detailReplacements = new Map()) {
-  const knownDurations = CV_SHOW_SCHEDULE_DURATIONS.releaseId === CV_SHOW_WEB_AUDIO_RELEASE.releaseId
+  const knownDurations = String(CV_SHOW_SCHEDULE_DURATIONS.releaseId) === String(CV_SHOW_WEB_AUDIO_RELEASE.releaseId)
     ? CV_SHOW_SCHEDULE_DURATIONS.durations
     : {};
   return Object.freeze({

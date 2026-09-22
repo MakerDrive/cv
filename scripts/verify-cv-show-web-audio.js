@@ -18,7 +18,7 @@ const DEFAULT_PUBLIC_COPY_ROOT = path.join(
   REPOSITORY_ROOT,
   'src/static-pages/copy-cv-show-audio',
 );
-const LOCKED_FFMPEG_SHA256 = '48cc76fa936aec61e6459da4366ad8d99da34e4a7f98be66ff5a9130d8ab366f';
+const LOCKED_FFMPEG_SHA256 = 'ed16af623947494a72e284b6eb8ff225f2da22b38b5d5069c2fd4b4ba3384e41';
 const FFMPEG_ARGUMENT_TEMPLATE = Object.freeze([
   '-hide_banner',
   '-loglevel', 'error',
@@ -71,7 +71,7 @@ export const CV_SHOW_WEB_AUDIO_PROFILE = Object.freeze({
   fec: 0,
   durationToleranceMs: 10,
   commandSha256: CV_SHOW_WEB_AUDIO_COMMAND_SHA256,
-  toolchainIdentity: `ffmpeg-7.1.1-libopus-1.5.2:sha256:${LOCKED_FFMPEG_SHA256}`,
+  toolchainIdentity: `ffmpeg-6.1.1-3ubuntu5-libopus-1.4:sha256:${LOCKED_FFMPEG_SHA256}`,
 });
 
 export const CV_SHOW_WEB_AUDIO_FFMPEG_ARGUMENT_TEMPLATE = FFMPEG_ARGUMENT_TEMPLATE;

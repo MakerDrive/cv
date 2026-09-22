@@ -1359,7 +1359,7 @@ async function normalizeSynthesisResult(run, result) {
   let receipt = cloneJson(result.receipt, 'synthesis receipt');
   if (
     !isPlainObject(receipt)
-    || receipt.receiptVersion !== 'symbiote-audio-synthesis-receipt-v3'
+    || !['symbiote-audio-synthesis-receipt-v2', 'symbiote-audio-synthesis-receipt-v3'].includes(receipt.receiptVersion)
     || receipt.artifactHash !== createHash('sha256').update(wavBytes).digest('hex')
   ) {
     fail('CV_SHOW_AUDIO_PIPELINE_INVALID', 'CV Show audio pipeline synthesis receipt is invalid');

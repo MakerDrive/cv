@@ -1555,12 +1555,16 @@ async function cli(argv, environment = process.env) {
   let targetProject = await loadTargetProject(options.project, current.CV_SHOW_PRESENTATION_PROJECT);
   let endpoint = options.endpoint || environment.CV_SHOW_MODEL_ENDPOINT;
   let serviceToken = options['service-token'] || environment.CV_SHOW_MODEL_SERVICE_TOKEN || '';
+  // Opt-in escape hatch for local development against a bearer-protected endpoint.
+  // CLI-only; the hosted static page never ships these headers.
+  let allowServiceHeaders = options['allow-service-headers'] === 'yes' ? ['authorization'] : [];
   let modelClient = endpoint
     ? createCvShowModelServiceClient({
         endpoint,
         headers: serviceToken ? { authorization: `Bearer ${serviceToken}` } : {},
         fetchImpl: globalThis.fetch,
         model: profile.voice.model || 'qwen3',
+        allowHeaders: allowServiceHeaders,
       })
     : null;
   if (

@@ -4935,7 +4935,7 @@ test('deferred aligned startup loads paused media without presentation admission
         audio: {
           assetId: 'cv-show:audio:symbiote-workspace',
           sourceInMs: 0,
-          sourceOutMs: 126_400,
+          sourceOutMs: 141_260,
         },
         dependsOn: [{ cellId: 'cv-show:cue:workspace.open', barrier: 'settled' }],
       },

@@ -54,10 +54,11 @@ const SOURCE_RELATIVE = 'src/static-pages/data/cvShowPresentationProject.js';
 const PROFILE = Object.freeze({
   voice: {
     selectionId: 'barzana-2',
+    voiceRef: 'barzana-2',
     model: 'qwen3-clone',
     modelVersion: 'Qwen/Qwen3-TTS-12Hz-0.6B-Base',
     language: 'ru',
-    style: 'warm natural product guide, continuous speech without long pauses',
+    style: 'narration',
     sampleRate: 24000,
     referenceSha256: '79652994e2af6fa1997a1b9118b068a870f948b173f9b71ad7cc4441b8fa3075',
     referenceTranscriptSha256: '7215050f4774fa336b660871cfc43989cc353d30f00cf7b42d6f9ceebfb87853',
@@ -75,12 +76,10 @@ const PROFILE = Object.freeze({
   asr: {
     model: 'large-v3-turbo',
     locale: 'ru',
-    recognitionVersion: 'cv-show-whisper-recognition-v1',
   },
   aligner: {
     alignedSequenceVersion: 'workspace-aligned-sequence-v3',
     anchoringVersion: 'workspace-transcript-word-anchoring-v1',
-    contract: 'workspace-observed-alignment',
   },
 });
 

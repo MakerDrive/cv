@@ -3,7 +3,6 @@ import { createHash } from 'node:crypto';
 import { canonicalize } from 'symbiote-workspace/schema/canonical-json.js';
 import { normalizeCvShowNarrationText } from '../src/static-pages/js/tour-player/ttsNormalize.js';
 
-const RECEIPT_VERSION = 'symbiote-audio-synthesis-receipt-v3';
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const SAFE_TOKEN_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$/u;
 const HEADER_NAME_PATTERN = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/u;
@@ -128,17 +127,18 @@ function freezeDeep(value) {
   return Object.freeze(value);
 }
 
-function normalizeHeaders(value) {
+function normalizeHeaders(value, { allowHeaders = [] } = {}) {
   if (value === undefined) return Object.freeze({});
   if (!isPlainObject(value)) {
     invalid('CV Show model service headers must be an explicit plain object');
   }
+  let allowed = new Set(allowHeaders.map((h) => String(h).toLowerCase()));
   let normalized = {};
   for (let [rawName, rawValue] of Object.entries(value)) {
     let name = String(rawName).toLowerCase();
     if (
       !HEADER_NAME_PATTERN.test(name)
-      || FORBIDDEN_HEADERS.has(name)
+      || (FORBIDDEN_HEADERS.has(name) && !allowed.has(name))
       || Object.hasOwn(normalized, name)
     ) {
       invalid(`CV Show model service header "${rawName}" is reserved or invalid`);
@@ -347,7 +347,22 @@ function parseWav(bytes) {
 }
 
 function validateReceipt({ receipt, item, wav, durationSec, sampleRate }) {
-  requireExactKeys(receipt, [
+  let isV2 = receipt?.receiptVersion === 'symbiote-audio-synthesis-receipt-v2';
+  requireExactKeys(receipt, isV2 ? [
+    'artifactHash',
+    'durationMs',
+    'language',
+    'model',
+    'normalization',
+    'receiptHmac',
+    'receiptVersion',
+    'requestHash',
+    'requestedVoiceRef',
+    'resolvedVoiceRef',
+    'sampleRate',
+    'speakerAttestation',
+    'speakerProbe',
+  ] : [
     'artifactHash',
     'durationMs',
     'language',
@@ -361,8 +376,8 @@ function validateReceipt({ receipt, item, wav, durationSec, sampleRate }) {
     'sampleRate',
     'voiceBindingAttestation',
   ], 'synthesis receipt');
-  if (receipt.receiptVersion !== RECEIPT_VERSION) {
-    invalid(`CV Show model service synthesis receipt version must be ${RECEIPT_VERSION}`);
+  if (!['symbiote-audio-synthesis-receipt-v2', 'symbiote-audio-synthesis-receipt-v3'].includes(receipt.receiptVersion)) {
+    invalid('CV Show model service synthesis receipt version must be v2 or v3');
   }
   let requestHash = sha256(Buffer.from(canonicalize(item), 'utf8'));
   if (requireDigest(receipt.requestHash, 'receipt requestHash') !== requestHash) {
@@ -412,7 +427,14 @@ function validateReceipt({ receipt, item, wav, durationSec, sampleRate }) {
   ) {
     invalid('CV Show model service synthesis receipt normalization evidence is invalid');
   }
-  requireDigest(receipt.voiceBindingAttestation, 'receipt voiceBindingAttestation');
+  if (isV2) {
+    requireDigest(receipt.speakerAttestation, 'receipt speakerAttestation');
+    if (!isPlainObject(receipt.speakerProbe)) {
+      invalid('CV Show model service synthesis receipt speakerProbe is invalid');
+    }
+  } else {
+    requireDigest(receipt.voiceBindingAttestation, 'receipt voiceBindingAttestation');
+  }
   requireDigest(receipt.receiptHmac, 'receipt receiptHmac');
   return freezeDeep(receipt);
 }
@@ -483,13 +505,14 @@ export function createCvShowModelServiceClient({
   headers,
   fetchImpl,
   model = 'qwen3',
+  allowHeaders = [],
 } = {}) {
   let origin = normalizeEndpoint(endpoint);
   let synthesisModel = requireNormalizedString(model, 'synthesis model');
   if (typeof fetchImpl !== 'function') {
     invalid('CV Show model service client requires an explicitly injected fetch implementation');
   }
-  let optionalHeaders = normalizeHeaders(headers);
+  let optionalHeaders = normalizeHeaders(headers, { allowHeaders });
 
   let request = async (pathname, init) => {
     let response = await fetchImpl(`${origin}${pathname}`, init);

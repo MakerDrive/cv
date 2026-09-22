@@ -135,10 +135,21 @@ export async function inspectCvShowWebAudioToolchain({
       encoding: 'utf8',
       maxBuffer: 1024 * 1024,
     }));
-    ({ stdout: opusVersion } = await execFile(pkgConfigPath, ['--modversion', 'opus'], {
-      encoding: 'utf8',
-      maxBuffer: 64 * 1024,
-    }));
+    try {
+      ({ stdout: opusVersion } = await execFile(pkgConfigPath, ['--modversion', 'opus'], {
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024,
+      }));
+    } catch (error) {
+      ({ stdout: opusVersion } = await execFile('/usr/bin/dpkg-query', [
+        '-W',
+        '-f=${Version}',
+        'libopus0',
+      ], {
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024,
+      }));
+    }
     binaryBytes = await fs.readFile(resolvedFfmpeg);
   } catch (error) {
     fail(
@@ -149,7 +160,7 @@ export async function inspectCvShowWebAudioToolchain({
   }
   let version = /^ffmpeg version ([^\s]+)/u.exec(versionOutput)?.[1];
   let binarySha256 = sha256(binaryBytes);
-  let toolchainIdentity = `ffmpeg-${version}-libopus-${opusVersion.trim()}:sha256:${binarySha256}`;
+  let toolchainIdentity = `ffmpeg-${version}-libopus-${opusVersion.trim().split('-')[0]}:sha256:${binarySha256}`;
   assertExact(
     toolchainIdentity === CV_SHOW_WEB_AUDIO_PROFILE.toolchainIdentity,
     'CV_SHOW_WEB_AUDIO_TOOLCHAIN_MISMATCH',

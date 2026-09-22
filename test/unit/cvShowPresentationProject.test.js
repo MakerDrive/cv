@@ -508,11 +508,11 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v2:sha256-jKsueCWDNW7lXE7dueufHVhX/U7noybiDYAAcprSLi0=',
+    'workspace-presentation-authoring-project-v2:sha256-I+09nVkvswaXPTqpPoPIatbufWaZ02OQjwD9UXcq3a0=',
   );
   assert.equal(
     timeline.hash,
-    'presentation-timeline-v3:sha256-JWPokvEfWbUZ5HAubQFiterAQXc7F3NDsvfG5hAQyuQ=',
+    'presentation-timeline-v3:sha256-fUdNEVKEdS90MCyRmy9TkH5ltPKc9I6EwX5eJtY3Mlo=',
   );
 
   const manifestSource = await readFile(

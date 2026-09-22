@@ -25,7 +25,7 @@ import { CV_SHOW_PRESENTATION_TIMELINE } from '../src/static-pages/data/cvShowPr
 import {
   buildCvShowTtsPreview,
   renderCvShowTtsPreviewListing,
-} from '../src/static-pages/js/tour-player/cv-show-preview/index.js';
+} from './cv-show-tts-preview-lib.js';
 
 const REPOSITORY_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const DEFAULT_OUT = path.join(REPOSITORY_ROOT, 'TMP', 'cv-show-tts-preview', 'preview.json');
