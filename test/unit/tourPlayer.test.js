@@ -2124,6 +2124,7 @@ test('CV runner skips article selection for media targets already owned by the s
 
 test('CV runner delegates navigation, attention, media, and chat events through shared APIs', async () => {
   const order = [];
+  const clickPoints = [];
   const attentionRequests = [];
   const readinessRequests = [];
   const target = { id: 'target' };
@@ -2145,6 +2146,7 @@ test('CV runner delegates navigation, attention, media, and chat events through 
     resolveMarkerTarget: (_target, directive) => directive.quote ? markerTarget : target,
     resolveText: (key) => key,
     activateTarget: () => { order.push(['activate']); return true; },
+    presentTargetClick: (target, source) => clickPoints.push([source.id, target]),
     waitForReadiness: async ({ target: requested, media }) => {
       const resolved = typeof requested === 'function' ? requested() : requested;
       readinessRequests.push({ target: resolved, media });
@@ -2192,6 +2194,8 @@ test('CV runner delegates navigation, attention, media, and chat events through 
     [],
   );
   assert.equal(order.filter(([name]) => name === 'activate').length, 1);
+  assert.deepEqual(clickPoints.map(([id]) => id), ['d.navigate', 'd.activate']);
+  assert.deepEqual(clickPoints.map(([, clickedTarget]) => clickedTarget), [target, target]);
   assert.equal(order.filter(([name]) => name === 'emit').length, 8);
   assert.equal(order.some(([name, type]) => name === 'emit' && type === 'status'), false);
 });

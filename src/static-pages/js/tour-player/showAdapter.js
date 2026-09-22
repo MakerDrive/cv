@@ -760,6 +760,7 @@ export function createCvShowDirectiveRunner(options = {}) {
     resolveText,
     resolveSelectionQuote = (source) => source?.quote || '',
     activateTarget = () => false,
+    presentTargetClick = () => {},
     actionAdapter = null,
     waitForReadiness = waitForShowDomReadiness,
     timeoutMs = 2_500,
@@ -935,6 +936,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                 throwIfAborted(controller.signal);
                 let presentationTarget = target;
                 if (source.type === 'navigate' && runtime?.entries?.has(source.target)) {
+                  presentTargetClick(target, source);
                   const selected = runtime.select(source.target, { focus: true, updateUrl: false });
                   if (selected === false) return { unavailable: true, reason: 'navigation-rejected' };
                   reportInteractionActed();
@@ -1124,6 +1126,7 @@ export function createCvShowDirectiveRunner(options = {}) {
                     attention?.seek?.(presentation.budgetMs);
                   }
                   if (source.type === 'activate') {
+                    presentTargetClick(presentationTarget || target, source);
                     activateTarget(target, source);
                     reportInteractionActed();
                   }

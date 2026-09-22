@@ -1,5 +1,6 @@
 import '../../../ui-components/client-only/tour-player/tour-player.js';
 import { createPresenterCursor } from 'symbiote-ui/chat/presenter-cursor.js';
+import { showClickRipple } from 'symbiote-ui/ui/click-ripple.js';
 import {
   ShowAttentionController,
   ShowAudioArbiter,
@@ -289,6 +290,18 @@ function visibleElement(element) {
     && style?.visibility !== 'hidden'
     ? element
     : null;
+}
+
+function showSyntheticTargetClick(target) {
+  const visible = visibleElement(target);
+  const rect = visible?.getBoundingClientRect?.();
+  if (!rect) return false;
+  const viewportWidth = Number(document.documentElement?.clientWidth) || Number(globalThis.innerWidth) || 0;
+  const viewportHeight = Number(document.documentElement?.clientHeight) || Number(globalThis.innerHeight) || 0;
+  if (rect.right <= 0 || rect.bottom <= 0 || rect.left >= viewportWidth || rect.top >= viewportHeight) return false;
+  const x = Math.min(Math.max(rect.left + rect.width / 2, 8), Math.max(8, viewportWidth - 8));
+  const y = Math.min(Math.max(rect.top + rect.height / 2, 8), Math.max(8, viewportHeight - 8));
+  return Boolean(showClickRipple({ x, y }));
 }
 
 function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
@@ -797,6 +810,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       resolveText: getLocaleMessage,
       resolveSelectionQuote: (source, target) => resolveCvShowSelectionQuote(target, source),
       activateTarget: (target, directive) => activateCvShowTarget(target, directive).handled,
+      presentTargetClick: showSyntheticTargetClick,
       emit: (directive) => getChat()?.emitShowDirective?.(directive),
       actionAdapter: createPanelActionAdapter(workspace, runtime, {
         prepareMedia: (targetId, options) => (
