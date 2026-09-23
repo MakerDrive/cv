@@ -131,6 +131,7 @@ async function loadCvShowEntryTuple(entryId, checkpointMs = null) {
   return createCvShowEntryTuple(CV_SHOW_PRESENTATION_PROJECT, entryId, sequence, {
     checkpointMs,
     adapter: {
+      playAudioClip: async () => [],
       runInteraction: async () => [],
       runAttention: async () => [],
       waitForState: async () => [],
@@ -7098,7 +7099,10 @@ test('paused workspace checkpoint restores the scene without replaying completed
   if (EXTERNAL_TEST_URL) t.skip('paused checkpoint acceptance requires the selected public Opus release');
   const workspaceTuple = await loadCvShowEntryTuple('symbiote-workspace');
   const projectCheckpointMs = 33_460;
-  const sourceCheckpointMs = 20_210;
+  // Narration for this scene starts after the 6400ms authored prelude, so
+  // the mid-scene checkpoint maps to media time minus the prelude.
+  const sourceCheckpointMs = projectCheckpointMs
+    - workspaceTuple.schedule.presentationStartMs;
   assert.equal(
     projectCvShowPlaybackCheckpoint(workspaceTuple.playbackPlan, projectCheckpointMs).sourceTimeMs,
     sourceCheckpointMs,
@@ -7684,7 +7688,10 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
   );
   assert.equal(
     CV_SHOW_WEB_AUDIO_RELEASE.revision,
-    'd36ab3bd2685565d0e816a1e5602c3891eae3384be277bc2b3b7222c5688b8b5',
+    // Selected public Barzana 2 release published by the bound narration
+    // workflow; a new publish must update this pin together with
+    // `npm run verify:cv-show-web-audio`.
+    '28e4b6f981c84e043c5bcdac434df78016e91cd38305cf80961a1e6eb8ad5bcd',
   );
   const page = await createPortfolioPage(t, {
     viewport: {
