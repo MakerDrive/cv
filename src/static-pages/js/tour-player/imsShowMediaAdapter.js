@@ -178,10 +178,39 @@ function galleryImageCount(player) {
   return Number.isSafeInteger(count) && count > 0 ? count : 0;
 }
 
-/** Adapts the approved BoothBot IMS gallery to Show frame-advance hooks. */
+/**
+ * The gallery toolbar lives in `ims-gallery`'s shadow root, its buttons in
+ * the toolbar's own shadow root. This is the public presentation surface of
+ * the widget — the only elements a visitor can physically click.
+ */
+function resolveGalleryControls(player) {
+  const gallery = playerKind(player) === 'ims-gallery'
+    ? player
+    : player?.shadowRoot?.querySelector?.('ims-gallery')
+      || player?.querySelector?.('ims-gallery')
+      || null;
+  const toolbar = gallery?.shadowRoot?.querySelector?.('ims-gallery-toolbar') || null;
+  const buttons = Array.from(toolbar?.shadowRoot?.querySelectorAll?.('ims-button') || []);
+  return {
+    gallery,
+    next: buttons[1] || null,
+    prev: buttons[0] || null,
+    autoplay: buttons[2] || null,
+    fullscreen: buttons[3] || null,
+  };
+}
+
+/**
+ * Adapts the approved BoothBot IMS gallery to Show frame-advance hooks.
+ * `presentMediaControl(element, { signal })` performs the authored visible
+ * click on one of the gallery's own toolbar controls (cursor travel +
+ * press); the montage prefers these real controls and falls back to the
+ * programmatic player API only when a control is genuinely not presented.
+ */
 export function createImsShowMediaTarget(root, {
   resolvePlayer = (element, options) => waitForImsPublicPlayer(element, options),
   clock = createAbortableGalleryClock(),
+  presentMediaControl = null,
 } = {}) {
   if (!root) throw new TypeError('an IMS host or viewer is required');
   const preparationSignal = new AbortController().signal;
@@ -339,16 +368,57 @@ export function createImsShowMediaTarget(root, {
         && Number(options.finalFrame) >= 1
         ? Number(options.finalFrame)
         : frames.at(-1) || lastGalleryFrame;
+      const controls = resolveGalleryControls(player);
+      const clickControl = async (control, intent) => {
+        if (typeof presentMediaControl !== 'function' || !control) return false;
+        const displayed = await presentMediaControl(control, { signal, intent });
+        return displayed === true;
+      };
+      // Visible accent: the montage begins by presenting the gallery's own
+      // expand control and ends by collapsing it again; each frame advances
+      // through a click on the gallery's next control. A control the show
+      // cannot present (offscreen, unavailable) fell back to the
+      // programmatic player API — narration is never blocked by decoration.
       const completion = (async () => {
-        for (const frame of frames) {
-          throwIfAborted(signal);
-          player.goTo?.(frame - 1);
-          lastGalleryFrame = frame;
-          await clock.wait(frameHoldMs, { signal });
-        }
-        if (lastGalleryFrame !== finalFrame) {
-          player.goTo?.(finalFrame - 1);
-          lastGalleryFrame = finalFrame;
+        let presentedOverlay = false;
+        try {
+          presentedOverlay = await clickControl(controls.fullscreen, 'media-expand');
+          for (const frame of frames) {
+            throwIfAborted(signal);
+            let advanced = false;
+            if (frame === lastGalleryFrame + 1 && controls.next) {
+              advanced = await clickControl(controls.next, 'gallery-next');
+            }
+            if (!advanced) {
+              // Click unavailable for this step (or the authored frame is not
+              // adjacent): the programmatic advance keeps the hold cadence.
+              player.goTo?.(frame - 1);
+            }
+            lastGalleryFrame = frame;
+            // The click travels inside the authored hold window: the viewer
+            // sees the press and then one second of the still frame.
+            await clock.wait(frameHoldMs, { signal });
+          }
+          if (lastGalleryFrame !== finalFrame) {
+            player.goTo?.(finalFrame - 1);
+            lastGalleryFrame = finalFrame;
+          }
+        } finally {
+          if (presentedOverlay) {
+            // Return the layout: collapse the overlay via the same real
+            // control, honoured even when frames were skipped. A stopped
+            // show will not schedule another presented click — the overlay
+            // is put back hand-free instead, and the brief pause returned to
+            // the user wins the overlay race.
+            if (signal?.aborted) {
+              try { controls.fullscreen?.click?.(); } catch {}
+            } else {
+              await clickControl(controls.fullscreen, 'media-collapse')
+                .catch(() => {
+                  try { controls.fullscreen?.click?.(); } catch {}
+                });
+            }
+          }
         }
       })();
       void completion.catch((error) => {

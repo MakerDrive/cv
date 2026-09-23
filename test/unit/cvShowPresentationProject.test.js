@@ -511,7 +511,7 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v2:sha256-BBCxrnnzQ2TA4BiO7+pXVZEarsluzbhr/P5r+S2Sk5Q=',
+    'workspace-presentation-authoring-project-v2:sha256-SrEMxji9/bmyAEPoRX/tSJ4tavjca0foFhROdLgOu9I=',
   );
   assert.equal(
     timeline.hash,
@@ -642,7 +642,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:agent-portal.human-decision', 3_000],
     ['cv-show:cue:symbiote-engine.workspace-join', 2_000],
     ['cv-show:cue:mobile-smm.agent-update', 3_200],
-    ['cv-show:cue:complexscan.boothbot-gallery', 6_000],
+    ['cv-show:cue:complexscan.boothbot-gallery', 7_500],
     // Real cursor travel-and-click gestures measured at calm pacing: longer
     // than the compact default, absorbed inside the authored margins before
     // the next cue.
@@ -703,7 +703,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     // start and deliberately finish while the quote is already spoken; the
     // BoothBot montage carries its five one-second frames across the anchor.
     ['cv-show:cue:complexscan.delivery', { leadMs: 1_050, overlapMs: 1_550 }],
-    ['cv-show:cue:complexscan.boothbot-gallery', { leadMs: 2_050, overlapMs: 3_950 }],
+    ['cv-show:cue:complexscan.boothbot-gallery', { leadMs: 2_050, overlapMs: 5_450 }],
     ['cv-show:cue:photopizza.page-open', { leadMs: 1_150, overlapMs: 1_450 }],
   ]);
   const markerLeadOverrides = new Map([
@@ -873,7 +873,7 @@ test('the structural fixture joins all 30 Project entries without media authorit
     // speech anchor: navigation clicks finish while the quote is already
     // voiced, and the BoothBot montage plays across its five frames.
     ['cv-show:cue:complexscan.delivery', 1_550],
-    ['cv-show:cue:complexscan.boothbot-gallery', 3_950],
+    ['cv-show:cue:complexscan.boothbot-gallery', 5_450],
     ['cv-show:cue:photopizza.page-open', 1_450],
     ['cv-show:cue:photopizza.origin', 550],
     ['cv-show:cue:photopizza.video-01', 550],
@@ -1336,8 +1336,9 @@ test('Short media choreography frames video and 360 blocks while preserving the 
     type: 'media',
     mode: 'short-muted-montage',
     frames: [1, 2, 3, 4, 5],
-    // One calm second per frame: five authored holds plus the final settle
-    // window fit the 6000ms gesture budget instead of starving the montage.
+    // One calm second per frame: five authored holds plus the presented
+    // control clicks (expand overlay, next per frame, collapse) fit the
+    // 7500ms gesture budget instead of starving the montage.
     frameHoldMs: 1_000,
     finalFrame: 5,
   });
@@ -1351,7 +1352,7 @@ test('Short media choreography frames video and 360 blocks while preserving the 
     galleryCell.timing.gestureDurationMs > montageWallMs,
     'gesture budget covers the authored holds with travel/settle margin',
   );
-  assert.equal(galleryCell.timing.gestureDurationMs, 6_000);
+  assert.equal(galleryCell.timing.gestureDurationMs, 7_500);
   assert.equal(
     directives.some(({ type, target }) => (
       type === 'marker' && target === 'media/boothbot/ims/gallery'

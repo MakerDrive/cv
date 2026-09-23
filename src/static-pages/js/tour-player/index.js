@@ -59,6 +59,7 @@ import {
 import { resolveCvShowPanelRevealState, shouldDeferMapAction } from './panelRevealPolicy.js';
 import { bindStaleNavDrawerCloser, createStaleNavDrawerCloser, shouldCloseStaleNavDrawer } from './drawerTransitionPolicy.js';
 import { createCvShowMediaTargetResolver } from './showMediaTargetResolution.js';
+import { createImsShowMediaTarget } from './imsShowMediaAdapter.js';
 import { createYouTubeNoCookieEmbedUrl } from './youtubeEmbedUrl.js';
 import { resolveVisibleShowPlayer } from '../showPlayerResolver.js';
 
@@ -290,6 +291,45 @@ function visibleElement(element) {
     && style?.visibility !== 'hidden'
     ? element
     : null;
+}
+
+/**
+ * Presents one real click on a visible media control (gallery toolbar
+ * buttons) with the presenter cursor: travel → press → release. Returns
+ * true only when the click actually fired, so the adapter falls back to the
+ * programmatic frame advance for offscreen/missing controls instead of
+ * faking a gesture. Quiet restores never present clicks.
+ */
+/**
+ * @param {() => any} getCursor
+ * @param {any} element
+ * @param {{ signal?: AbortSignal, intent?: string }} [options]
+ */
+async function presentMediaControlClick(getCursor, element, { signal, intent } = {}) {
+  if (signal?.aborted || isCvShowQuietRestoreActive()) return false;
+  const target = visibleElement(element);
+  if (!target) return false;
+  await waitForShowVisualSettlement(target, {
+    document,
+    signal,
+    inactivityMs: 150,
+    timeoutMs: 600,
+  }).catch(() => null);
+  if (signal?.aborted) return false;
+  const cursor = getCursor();
+  if (typeof cursor?.clickElement !== 'function') return false;
+  const onAbort = () => cursor.clear?.({ reason: 'media-control-aborted' }) ?? undefined;
+  signal?.addEventListener?.('abort', onAbort, { once: true });
+  try {
+    const receipt = await cursor.clickElement(target, {
+      gestureId: `cv-show-media:${intent || 'control'}`,
+    });
+    return receipt?.fired === true;
+  } catch {
+    return false;
+  } finally {
+    signal?.removeEventListener?.('abort', onAbort);
+  }
 }
 
 /**
@@ -889,6 +929,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const resolveShowMedia = createCvShowMediaTargetResolver({
     document,
     resolveTarget: (targetId) => resolveTargetElement(workspace, runtime, targetId),
+    createImsTarget: (root) => createImsShowMediaTarget(root, {
+      // Gallery controls are presented with the same presenter cursor as the
+      // navigation row clicks; the click goes through the gallery's own
+      // toolbar buttons so the audience sees one honest interaction per
+      // frame instead of silent programmatic frame jumps.
+      presentMediaControl: (element, options) => (
+        presentMediaControlClick(() => presenter?.cursor, element, options)
+      ),
+    }),
   });
 
   const createPresenterSession = () => {

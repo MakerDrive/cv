@@ -868,3 +868,142 @@ test('IMS Show spinner pauses through the shared media pause hook without touchi
   assert.deepEqual(events, ['play', 'pause']);
   assert.deepEqual(await target.captureShowMediaState(), { kind: 'ims-spinner', playing: false });
 });
+
+test('IMS Show gallery accent presents each frame through the real next control', async () => {
+  const events = [];
+  const button = (name) => ({
+    localName: 'ims-button',
+    click() { events.push(['click', name]); },
+  });
+  const toolbar = {
+    localName: 'ims-gallery-toolbar',
+    shadowRoot: {
+      querySelectorAll: (selector) => (
+        selector === 'ims-button'
+          ? [button('prev'), button('next'), button('autoplay'), button('fs')]
+          : []
+      ),
+    },
+  };
+  const gallery = {
+    localName: 'ims-gallery',
+    shadowRoot: {
+      querySelector: (selector) => (selector === 'ims-gallery-toolbar' ? toolbar : null),
+    },
+    goTo(index) { events.push(['goTo', index]); },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    presentMediaControl: async (control, { signal, intent } = {}) => {
+      assert.equal(signal.aborted, false);
+      events.push(['present', intent]);
+      control.click();
+      return true;
+    },
+    clock: {
+      wait: async (durationMs) => { events.push(['wait', durationMs]); },
+    },
+  });
+
+  const result = await target.playShowMedia({
+    frames: [1, 2, 3],
+    frameHoldMs: 1000,
+    finalFrame: 3,
+  }, { signal: new AbortController().signal });
+  await result.completion;
+
+  // Expand overlay → first frame pinned programmatically (it is already
+  // displayed) → next frames advance through visible next-control clicks →
+  // collapse back through the same control.
+  assert.deepEqual(events, [
+    ['present', 'media-expand'], ['click', 'fs'],
+    ['goTo', 0], ['wait', 1000],
+    ['present', 'gallery-next'], ['click', 'next'], ['wait', 1000],
+    ['present', 'gallery-next'], ['click', 'next'], ['wait', 1000],
+    ['present', 'media-collapse'], ['click', 'fs'],
+  ]);
+  assert.deepEqual(result.frames, [1, 2, 3]);
+});
+
+test('IMS Show gallery falls back to programmatic goTo when controls cannot be presented', async () => {
+  const events = [];
+  const gallery = {
+    localName: 'ims-gallery',
+    shadowRoot: null,
+    goTo(index) { events.push(['goTo', index]); },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    presentMediaControl: async () => false,
+    clock: {
+      wait: async (durationMs) => { events.push(['wait', durationMs]); },
+    },
+  });
+
+  const result = await target.playShowMedia({
+    frames: [1, 2],
+    frameHoldMs: 1000,
+    finalFrame: 2,
+  }, { signal: new AbortController().signal });
+  await result.completion;
+
+  assert.deepEqual(events, [
+    ['goTo', 0], ['wait', 1000],
+    ['goTo', 1], ['wait', 1000],
+  ]);
+});
+
+test('IMS Show gallery collapse restores the layout directly when the tour is stopped mid-way', async () => {
+  const events = [];
+  const clicks = [];
+  const button = (name) => ({
+    localName: 'ims-button',
+    click() { clicks.push(name); },
+  });
+  const toolbar = {
+    localName: 'ims-gallery-toolbar',
+    shadowRoot: {
+      querySelectorAll: (selector) => (
+        selector === 'ims-button'
+          ? [button('prev'), button('next'), button('autoplay'), button('fs')]
+          : []
+      ),
+    },
+  };
+  const gallery = {
+    localName: 'ims-gallery',
+    shadowRoot: {
+      querySelector: (selector) => (selector === 'ims-gallery-toolbar' ? toolbar : null),
+    },
+    goTo() {},
+  };
+  const controller = new AbortController();
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    presentMediaControl: async (control) => {
+      control.click();
+      return true;
+    },
+    clock: {
+      wait: async (_durationMs, { signal } = {}) => {
+        events.push(['wait']);
+        controller.abort();
+        const error = signal?.reason || new Error('stopped');
+        if (!error.name) error.name = 'AbortError';
+        throw error;
+      },
+    },
+  });
+
+  const result = await target.playShowMedia({
+    frames: [1, 2, 3],
+    frameHoldMs: 1000,
+    finalFrame: 3,
+  }, { signal: controller.signal });
+  await assert.rejects(result.completion, (error) => error?.name === 'AbortError');
+
+  // The expand click was presented once; after the abort the overlay is
+  // collapsed via the physical control again, with NO additional presented
+  // click (no delayed gesture after stop).
+  assert.deepEqual(clicks, ['fs', 'fs']);
+});

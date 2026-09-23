@@ -4317,7 +4317,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "компактную автоматизированную фотостудию"
         },
-        "gestureDurationMs": 6000,
+        "gestureDurationMs": 7500,
         "leadMs": 2050,
         "settleBy": "none",
         "until": null
@@ -12204,7 +12204,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 104,
+  "revision": 105,
   "schemaVersion": "workspace-presentation-authoring-project-v2",
   "script": {
     "grounding": {
@@ -13841,9 +13841,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PSlxWKHMtOSPDeDSAUej7TX+OUhBp8ab3RobdUqR/w8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-shxrNkTSWbZLhRaJuSGMk04Ptp+7SatStFU011cXKUg=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-57F9vz4xDDjjB6QhIk5WUF72t6Dcg4M5hr6aXTH39lE=",
         "entryId": "complexscan",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-yWQpBkjPHCVTndHiqwkP/OVGd+c9rik5taM/8N9xp8M=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-MPHAQL50wAayxGbDXih4hUx9M9QwE8pn3vv8TwE7PEQ=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-rhyJ4LVfNnvCNFNEKii6VVj7xw8suzlkPUb0BygA5Rc=",
         "sourceCellIds": [
           "cv-show:narration:complexscan",
@@ -14195,7 +14195,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-iIeaM4QMx3ev9k5HLtQyzGTo9t2S58Vcdxuh3Jc/wig="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-zQFzqYbL84eh9yvP1V+OkhFgXdZ1KJRO4K2HBZLklK4=",
+    "hash": "cv-show-audio-provenance-v1:sha256-Toh+qD+8CzjTtaZkP0vXL6kdbKaRGUhI44496ya5pBc=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
@@ -14255,8 +14255,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "manifestHash": "cv-show-media-manifest-v1:sha256-/kqDiyeUMuC/S32LalHRYOB8eJa8XhSIVTCQo8qE/Bc=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:6ae006451aed08ed5441e572e7f6309c95d2a1037635871aea28516949606ca5",
-  "predecessorReleaseId": "cv-show-audio-release-v1:ebf9dba39f381eec7d4cc7fcf81d036996798462825c95ff81cc130f37f3fd43",
+  "planId": "cv-show-audio-release-plan-v1:c99eab51a44fd4e85e7dee494e650332ec6abc313892a2facc23c8a8e75b0942",
+  "predecessorReleaseId": "cv-show-audio-release-v1:fbd922067c03b15d88c51921dc5b591714841049e81267777d0778d88e1ae456",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WqPoIYWG+cGu1rccIYRUR/xoDVPRH+5wau/SDrzOuwQ=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-LbWAitNz77QEwRGNo8QCR0FBI9KJw9bWz6jDOxDUsDw=",
@@ -14264,12 +14264,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-BBCxrnnzQ2TA4BiO7+pXVZEarsluzbhr/P5r+S2Sk5Q=",
-    "revision": 104
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-SrEMxji9/bmyAEPoRX/tSJ4tavjca0foFhROdLgOu9I=",
+    "revision": 105
   },
-  "releaseId": "cv-show-audio-release-v1:fbd922067c03b15d88c51921dc5b591714841049e81267777d0778d88e1ae456",
+  "releaseId": "cv-show-audio-release-v1:fbe88e46c067b215b31d7266bb43893d33562bb908b927f20d22737f51501def",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:3d504f5cd193397e727fa7d3c1fb2f64770127b48a4c83142c4b5e721496644d"
+  "verificationHash": "cv-show-audio-release-verification-v1:3588e3c0d29047fbb9dcfb1e78d3617fe2eefdcba88a0745dc5e8ac9caeb0643"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );
