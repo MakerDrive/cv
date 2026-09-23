@@ -42,6 +42,9 @@ import {
 } from '../../src/static-pages/js/tour-player/cvShowAuthoringAuthority.js';
 import { createCvShowAlignmentController } from '../../src/static-pages/js/tour-player/showAlignmentAdapter.js';
 import {
+  isCvShowQuietRestoreActive,
+} from '../../src/static-pages/js/tour-player/presentationQuietRestore.js';
+import {
   clearCvShowWebAudioReleaseCache,
   projectCvShowWebAudioReleaseConfig,
 } from '../../src/static-pages/js/tour-player/webAudioRelease.js';
@@ -2487,4 +2490,132 @@ test('aligned media waits for physical playback and completes preroll before nar
       .every(({ status }) => status === 'completed'),
     true,
   );
+});
+
+test('setup replay operations observe the quiet flag while normally sampled cells stay visible', async (t) => {
+  let { appConfig, manifest, raw: releaseRaw } = structuralWebHarness();
+  clearCvShowWebAudioReleaseCache();
+  const authority = createCvShowAuthoringAuthority({
+    seedProject: STRUCTURAL_PROJECT,
+  });
+  const fetchImpl = async (url) => {
+    const clip = manifest.clips.find(({ alignedSequenceFile }) => (
+      String(url).endsWith(alignedSequenceFile)
+    ));
+    return new Response(
+      clip ? structuralSequenceJson(clip.id) : releaseRaw,
+      { headers: { 'content-type': 'application/json' } },
+    );
+  };
+  const controller = createCvShowAlignmentController({
+    url: 'https://portfolio.example/cv/?showAudio=local',
+    baseUrl: 'https://portfolio.example/cv/',
+    appConfig,
+    fetchImpl,
+    getAuthoringView: () => authority.getView(),
+  });
+  t.after(() => {
+    controller.cancel();
+    authority.dispose();
+  });
+  await controller.prepare(CV_SHOW_STORY);
+
+  class FakeMedia extends EventTarget {
+    #currentTime = 0;
+    #src = '';
+    paused = true;
+    ended = false;
+    error = null;
+    readyState = 0;
+    preload = '';
+    muted = false;
+    seekable = { length: 1, start: () => 0, end: () => 60 };
+
+    get currentTime() { return this.#currentTime; }
+    set currentTime(value) {
+      this.#currentTime = Number(value) || 0;
+      this.dispatchEvent(new Event('seeking'));
+      this.dispatchEvent(new Event('seeked'));
+      queueMicrotask(() => this.dispatchEvent(new Event('timeupdate')));
+    }
+    get src() { return this.#src; }
+    set src(value) { this.#src = String(value); }
+    get currentSrc() { return this.#src; }
+    pause() {
+      this.paused = true;
+      this.dispatchEvent(new Event('pause'));
+      queueMicrotask(() => this.dispatchEvent(new Event('timeupdate')));
+    }
+    play() {
+      this.paused = false;
+      this.dispatchEvent(new Event('play'));
+      this.dispatchEvent(new Event('playing'));
+      return Promise.resolve();
+    }
+    load() {
+      this.dispatchEvent(new Event('loadstart'));
+      this.readyState = 1;
+      this.dispatchEvent(new Event('loadedmetadata'));
+      this.readyState = 2;
+      this.dispatchEvent(new Event('loadeddata'));
+    }
+  }
+
+  // One shared FakeMedia; seek events are avoided by exposing currentTime
+  // writes as silent, and the pump samples from explicit timeupdates only.
+  const entry = CV_SHOW_STORY.scenes.find(({ id }) => id === 'positioning');
+  const media = new FakeMedia();
+  const observed = [];
+  const aligned = await controller.createEntryRuntime({
+    entry,
+    media,
+    audioClip: manifest.clips.find(({ id }) => id === entry.id),
+    deferPresentationUntilPlayback: false,
+    runPresentationOperation: async (operation) => {
+      observed.push(Object.freeze({
+        id: operation.projectCell.id,
+        quiet: isCvShowQuietRestoreActive(),
+        state: aligned.execution.snapshot.state,
+      }));
+      return reportOperationReceipts(operation);
+    },
+  });
+  t.after(() => aligned.runtime.dispose());
+
+  // Normal scene attach (not a paused deep link, not a seek): the preroll
+  // setup still runs as a quiet state restore — the audience did not watch
+  // that gesture, it re-establishes the authored position.
+  const generation = await aligned.runtime.loadAndRestorePlayback({
+    source: 'https://portfolio.example/cv/positioning.opus',
+    positionMs: 0,
+    paused: true,
+    preload: 'auto',
+  }, { reason: 'alignment-ready' });
+  assert.equal(generation.status, 'completed');
+  const setupOps = observed.filter(({ id }) => id === 'cv-show:cue:positioning.open');
+  assert.ok(setupOps.length >= 1, 'the scene opens as a setup replay');
+  assert.ok(
+    setupOps.every(({ quiet }) => quiet === true),
+    'setup replay runs with the quiet restore flag active',
+  );
+  assert.equal(isCvShowQuietRestoreActive(), false, 'flag released after restore');
+
+  // A seek restore replays state again under the flag, and the flag is
+  // released when the restore settles — the scope is the replay itself, not
+  // a generation blackout. Normal (visible) transitions on playback are
+  // covered by the runner-level integration test in tourPlayer.test.js and
+  // the live gallery acceptance probe.
+  observed.length = 0;
+  const restored = await aligned.runtime.loadAndRestorePlayback({
+    source: 'https://portfolio.example/cv/positioning.opus',
+    positionMs: 20_000,
+    paused: true,
+    preload: 'auto',
+  }, { reason: 'test-seek' });
+  if (restored.status !== 'completed') console.log('SEEK RECEIPT', JSON.stringify(restored, null, 1));
+  assert.equal(restored.status, 'completed');
+  assert.equal(isCvShowQuietRestoreActive(), false, 'flag released after seek restore');
+  const seekReplayOps = observed.filter(({ id }) => id.startsWith('cv-show:cue:'));
+  assert.ok(seekReplayOps.every(({ quiet }) => quiet === true),
+    'seek restore replays state quietly');
 });
