@@ -1,6 +1,5 @@
 import '../../../ui-components/client-only/tour-player/tour-player.js';
 import { createPresenterCursor } from 'symbiote-ui/chat/presenter-cursor.js';
-import { showClickRipple } from 'symbiote-ui/ui/click-ripple.js';
 import {
   ShowAttentionController,
   ShowAudioArbiter,
@@ -20,6 +19,7 @@ import {
   runCvShowPresentationOperation,
 } from './showAdapter.js';
 import { createCvShowPlaybackEntries } from './presentationContext.js';
+import { isCvShowQuietRestoreActive } from './presentationQuietRestore.js';
 import {
   canonicalizeCvShowRoute,
   createCvShowRouteRequestCoordinator,
@@ -292,16 +292,119 @@ function visibleElement(element) {
     : null;
 }
 
-function showSyntheticTargetClick(target) {
-  const visible = visibleElement(target);
-  const rect = visible?.getBoundingClientRect?.();
-  if (!rect) return false;
-  const viewportWidth = Number(document.documentElement?.clientWidth) || Number(globalThis.innerWidth) || 0;
-  const viewportHeight = Number(document.documentElement?.clientHeight) || Number(globalThis.innerHeight) || 0;
-  if (rect.right <= 0 || rect.bottom <= 0 || rect.left >= viewportWidth || rect.top >= viewportHeight) return false;
-  const x = Math.min(Math.max(rect.left + rect.width / 2, 8), Math.max(8, viewportWidth - 8));
-  const y = Math.min(Math.max(rect.top + rect.height / 2, 8), Math.max(8, viewportHeight - 8));
-  return Boolean(showClickRipple({ x, y }));
+/**
+ * Finds the navigation tree view that renders portfolio entries. Only the
+ * portfolio tree panel is considered: other trees on the page (if any) must
+ * not receive tour gestures.
+ */
+function findPortfolioTreeView(workspace) {
+  const panel = workspace.querySelector('sn-tree-panel.portfolio-tree');
+  const scoped = panel?.querySelector?.('sn-tree-view');
+  if (scoped) return scoped;
+  return workspace.querySelector('sn-tree-panel sn-tree-view')
+    || workspace.querySelector('sn-tree-view')
+    || null;
+}
+
+/**
+ * Expands every ancestor branch of the requested entry so its row renders.
+ * Tree items carry their own id list; walking them is the only reliable way
+ * because directory ids are localized display paths, not entry ids. The
+ * expansion naturally persists with the tree (selection does as well) —
+ * the gesture shows exactly the action a visitor would take.
+ */
+function expandTreeBranchTo(workspace, entryId) {
+  const tree = findPortfolioTreeView(workspace);
+  if (!tree || typeof tree !== 'object') return false;
+  const items = Array.isArray(tree.items) ? tree.items : [];
+  const chain = [];
+  const visit = (nodes, ancestors) => {
+    for (const item of nodes || []) {
+      const id = String(item?.id || item?.path || '');
+      if (id === entryId) {
+        chain.push(...ancestors);
+        return true;
+      }
+      if (Array.isArray(item?.children) && item.children.length > 0) {
+        if (visit(item.children, [...ancestors, id])) return true;
+      }
+    }
+    return false;
+  };
+  if (!visit(items, []) || chain.length === 0) return false;
+  tree.expandedIds = [...new Set([...(tree.expandedIds || []), ...chain])];
+  return true;
+}
+
+/**
+ * Presents the authored navigation gesture: reveal/expansion already ran in
+ * the action lifecycle; here the row is scrolled into the visible band, the
+ * geometry settles, the presenter cursor travels to the row and performs the
+ * single click at its own position. Returns true when the click was shown on
+ * the real row; false means "no honest gesture target" — callers then fall
+ * back to a silent programmatic selection instead of painting a click on a
+ * wrong element (never at the article center).
+ */
+async function presentNavigationGesture(workspace, runtime, entryId, {
+  cursor = null,
+  signal = null,
+} = {}) {
+  if (signal?.aborted) return false;
+  // Expanding only helps when the row was hidden by a collapsed branch; rows
+  // already rendered stay untouched.
+  const existing = visibleElement(findTreeRow(workspace, entryId, runtime));
+  if (!existing) expandTreeBranchTo(workspace, entryId);
+  const ready = await waitForShowDomReadiness({
+    document,
+    target: () => visibleElement(findTreeRow(workspace, entryId, runtime)),
+    signal,
+    timeoutMs: 1_200,
+    scroll: false,
+  }).catch(() => null);
+  const row = ready?.target;
+  if (!row) return false;
+  await animateCvShowScrollIntoView(row, {
+    document,
+    signal,
+    durationMs: 260,
+  }).catch(() => {});
+  await waitForShowVisualSettlement(row, {
+    document,
+    signal,
+    inactivityMs: 250,
+    timeoutMs: 1_200,
+  }).catch(() => null);
+  if (signal?.aborted) return false;
+  const settledRow = visibleElement(findTreeRow(workspace, entryId, runtime));
+  if (!settledRow) return false;
+  if (typeof cursor?.clickElement === 'function') {
+    // Stop the in-flight travel/press the moment the tour is cancelled so a
+    // stop or seek never leaves a pending real click behind.
+    const onAbort = () => cursor.clear?.({ reason: 'nav-gesture-aborted' }) ?? undefined;
+    signal?.addEventListener?.('abort', onAbort, { once: true });
+    let receipt = null;
+    try {
+      receipt = await cursor.clickElement(settledRow, {
+        gestureId: `cv-show-nav:${entryId}`,
+      });
+    } catch (error) {
+      if (signal?.aborted || error?.name === 'AbortError') throw error;
+      return false;
+    } finally {
+      signal?.removeEventListener?.('abort', onAbort);
+    }
+    if (signal?.aborted) {
+      const abortError = signal.reason instanceof Error
+        ? signal.reason
+        : new Error('CV Show navigation gesture was aborted');
+      abortError.name = 'AbortError';
+      throw abortError;
+    }
+    // A settled click host may still report `fired: false` (no real dispatch
+    // happened): that is "not presented", not success.
+    return receipt?.fired === true;
+  }
+  return false;
 }
 
 function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
@@ -544,7 +647,6 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     if (context?.scrollOperation !== true || !ready.target?.scrollIntoView) return ready;
     const bypassScrollSettlement = shouldBypassCvShowScrollSettlement(
       context?.presentationBudgetMs,
-      { action },
     );
     const scrollDurationMs = bypassScrollSettlement
       ? 0
@@ -810,7 +912,14 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       resolveText: getLocaleMessage,
       resolveSelectionQuote: (source, target) => resolveCvShowSelectionQuote(target, source),
       activateTarget: (target, directive) => activateCvShowTarget(target, directive).handled,
-      presentTargetClick: showSyntheticTargetClick,
+      /** @param {Record<string, any>} source @param {{ signal?: AbortSignal }} [options] */
+      presentNavigationGesture: (source, { signal } = {}) => presentNavigationGesture(
+        workspace,
+        runtime,
+        source?.target,
+        { cursor, signal },
+      ),
+      isQuietRestore: isCvShowQuietRestoreActive,
       emit: (directive) => getChat()?.emitShowDirective?.(directive),
       actionAdapter: createPanelActionAdapter(workspace, runtime, {
         prepareMedia: (targetId, options) => (

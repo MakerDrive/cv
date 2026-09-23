@@ -19,6 +19,7 @@ import {
   degradePresentationOperation,
 } from './showAdapter.js';
 import { CV_SHOW_GATE_QUEUE } from './gateQueue.js';
+import { runCvShowQuietRestore } from './presentationQuietRestore.js';
 import {
   createCascadeTracker,
   cvShowCellLayerId,
@@ -655,7 +656,10 @@ export function createCvShowAlignmentController({
       for (let [type, listener] of Object.entries(mediaListeners)) {
         media.addEventListener?.(type, listener);
       }
-      const runSetup = async () => {
+      // The setup replay restores state the audience already reached at the
+      // target position (page load, seek, paused deep link): no decorative
+      // gestures may appear for those cells.
+      const runSetup = () => runCvShowQuietRestore(async () => {
         const prerollCells = tuple.schedule.cells.filter((cell) => (
           cell.kind !== 'narration'
           && cell.startMs < tuple.schedule.presentationStartMs
@@ -690,7 +694,7 @@ export function createCvShowAlignmentController({
           }
         }
         return snapshot;
-      };
+      });
       const projectCellById = new Map(tuple.project.cells.map((cell) => [cell.id, cell]));
       const crossBoundaryAttentionCells = tuple.schedule.cells.filter((cell) => {
         const projectCell = projectCellById.get(cell.cellId);
@@ -820,7 +824,7 @@ export function createCvShowAlignmentController({
       const heldAttentionCells = tuple.heldAttentionDirectiveIds.map((directiveId) => (
         tuple.schedule.cells.find(({ cellId }) => cellId === `cv-show:cue:${directiveId}`)
       )).filter(Boolean);
-      const runHeldCheckpointAttention = async () => {
+      const runHeldCheckpointAttention = () => runCvShowQuietRestore(async () => {
         for (const cell of heldAttentionCells) {
           tuple.execution.sample({
             mediaTimeMs: cell.gesture?.startMs ?? cell.startMs,
@@ -836,7 +840,7 @@ export function createCvShowAlignmentController({
           }
         }
         return tuple.execution.snapshot;
-      };
+      });
       const startDeferredPresentation = () => {
         if (deferredPresentationStarted || disposed) {
           return deferredPresentationPromise || Promise.resolve(tuple.execution.snapshot);

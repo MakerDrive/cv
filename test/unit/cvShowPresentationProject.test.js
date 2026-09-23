@@ -508,11 +508,11 @@ test('CV Show master is one stable 30-turn Authoring Project', async () => {
   assert.equal(CV_SHOW_PRESENTATION_TIMELINE.hash, timeline.hash);
   assert.equal(
     project.hash,
-    'workspace-presentation-authoring-project-v2:sha256-I+09nVkvswaXPTqpPoPIatbufWaZ02OQjwD9UXcq3a0=',
+    'workspace-presentation-authoring-project-v2:sha256-BBCxrnnzQ2TA4BiO7+pXVZEarsluzbhr/P5r+S2Sk5Q=',
   );
   assert.equal(
     timeline.hash,
-    'presentation-timeline-v3:sha256-fUdNEVKEdS90MCyRmy9TkH5ltPKc9I6EwX5eJtY3Mlo=',
+    'presentation-timeline-v3:sha256-hv9OZ9IVyS79U2BOv45IQzXZBVmXVBJV6X1XveCsEXY=',
   );
 
   const manifestSource = await readFile(
@@ -639,7 +639,12 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:agent-portal.human-decision', 3_000],
     ['cv-show:cue:symbiote-engine.workspace-join', 2_000],
     ['cv-show:cue:mobile-smm.agent-update', 3_200],
-    ['cv-show:cue:complexscan.boothbot-gallery', 1_800],
+    ['cv-show:cue:complexscan.boothbot-gallery', 6_000],
+    // Real cursor travel-and-click gestures measured at calm pacing: longer
+    // than the compact default, absorbed inside the authored margins before
+    // the next cue.
+    ['cv-show:cue:complexscan.delivery', 2_600],
+    ['cv-show:cue:photopizza.page-open', 2_600],
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 3_000],
     ['cv-show:cue:photopizza.origin', 1_600],
   ]);
@@ -691,6 +696,12 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:photopizza.origin', { leadMs: 1_050, overlapMs: 550 }],
     ['cv-show:cue:positioning.tenure-marker', { leadMs: 600, overlapMs: 1_900 }],
     ['cv-show:cue:symbiote-engine.workspace-join', { leadMs: 1_500, overlapMs: 500 }],
+    // The real cursor travel-and-click gestures keep their authored visual
+    // start and deliberately finish while the quote is already spoken; the
+    // BoothBot montage carries its five one-second frames across the anchor.
+    ['cv-show:cue:complexscan.delivery', { leadMs: 1_050, overlapMs: 1_550 }],
+    ['cv-show:cue:complexscan.boothbot-gallery', { leadMs: 2_050, overlapMs: 3_950 }],
+    ['cv-show:cue:photopizza.page-open', { leadMs: 1_150, overlapMs: 1_450 }],
   ]);
   const markerLeadOverrides = new Map([
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 3_300],
@@ -855,6 +866,12 @@ test('the structural fixture joins all 30 Project entries without media authorit
   const speechOverlappingRuntimeActions = new Map([
     ['cv-show:cue:agent-portal.human-decision', 1_500],
     ['cv-show:cue:symbiote-engine.workspace-join', 500],
+    // The real cursor gestures displace the settled mount point past their
+    // speech anchor: navigation clicks finish while the quote is already
+    // voiced, and the BoothBot montage plays across its five frames.
+    ['cv-show:cue:complexscan.delivery', 1_550],
+    ['cv-show:cue:complexscan.boothbot-gallery', 3_950],
+    ['cv-show:cue:photopizza.page-open', 1_450],
     ['cv-show:cue:photopizza.origin', 550],
     ['cv-show:cue:photopizza.video-01', 550],
     ['cv-show:cue:photopizza.video-02', 550],
@@ -1283,7 +1300,7 @@ test('positioning introduces experience once with the authored marker gesture', 
   }]);
 });
 
-test('Short media choreography frames video and 360 blocks while preserving the BoothBot gallery recipe', () => {
+test('Short media choreography frames video and 360 blocks while preserving the BoothBot gallery recipe at its retimed one-second holds', () => {
   const directives = CV_SHOW_STORY.scenes.flatMap(({ directives: sceneDirectives }) => (
     sceneDirectives
   ));
@@ -1316,9 +1333,22 @@ test('Short media choreography frames video and 360 blocks while preserving the 
     type: 'media',
     mode: 'short-muted-montage',
     frames: [1, 2, 3, 4, 5],
-    frameHoldMs: 250,
+    // One calm second per frame: five authored holds plus the final settle
+    // window fit the 6000ms gesture budget instead of starving the montage.
+    frameHoldMs: 1_000,
     finalFrame: 5,
   });
+  // Deadline evidence (cellId cv-show:cue:complexscan.boothbot-gallery): the
+  // authored montage plays five one-second holds plus the final settle —
+  // exactly the wall time the previous 1800ms budget could not cover, which
+  // starved the provider admission before the montage settled.
+  const montageWallMs = gallery.frames.length * gallery.frameHoldMs;
+  assert.equal(montageWallMs, 5_000);
+  assert.ok(
+    galleryCell.timing.gestureDurationMs > montageWallMs,
+    'gesture budget covers the authored holds with travel/settle margin',
+  );
+  assert.equal(galleryCell.timing.gestureDurationMs, 6_000);
   assert.equal(
     directives.some(({ type, target }) => (
       type === 'marker' && target === 'media/boothbot/ims/gallery'

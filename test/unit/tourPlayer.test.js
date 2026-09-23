@@ -72,6 +72,10 @@ import {
   createLocalAudioSpeechController,
 } from '../../src/static-pages/js/tour-player/localNarration.js';
 import {
+  isCvShowQuietRestoreActive,
+  runCvShowQuietRestore,
+} from '../../src/static-pages/js/tour-player/presentationQuietRestore.js';
+import {
   clearCvShowWebAudioReleaseCache,
   loadCvShowWebAudioRelease,
   projectCvShowWebAudioReleaseConfig,
@@ -438,9 +442,11 @@ test('CV Show scroll motion reserves settlement time inside the authored hard de
   assert.equal(resolveCvShowScrollDuration(null), 700);
   assert.equal(shouldBypassCvShowScrollSettlement(800), true);
   assert.equal(shouldBypassCvShowScrollSettlement(1_000), false);
+  // Media frames use the same scroll contract as every other target: only a
+  // budget that cannot carry visible motion bypasses the animated scroll.
   assert.equal(shouldBypassCvShowScrollSettlement(1_200, {
     action: { type: 'frame', target: 'media/photopizza/youtube/example' },
-  }), true);
+  }), false);
   assert.equal(shouldBypassCvShowScrollSettlement(1_200, {
     action: { type: 'frame', target: 'article.photopizza.mechanics' },
   }), false);
@@ -2146,7 +2152,11 @@ test('CV runner delegates navigation, attention, media, and chat events through 
     resolveMarkerTarget: (_target, directive) => directive.quote ? markerTarget : target,
     resolveText: (key) => key,
     activateTarget: () => { order.push(['activate']); return true; },
-    presentTargetClick: (target, source) => clickPoints.push([source.id, target]),
+    presentNavigationGesture: async (source) => {
+      clickPoints.push([source.id, source.target]);
+      order.push(['navigate-gesture', source.target]);
+      return true;
+    },
     waitForReadiness: async ({ target: requested, media }) => {
       const resolved = typeof requested === 'function' ? requested() : requested;
       readinessRequests.push({ target: resolved, media });
@@ -2174,7 +2184,7 @@ test('CV runner delegates navigation, attention, media, and chat events through 
     'projects/example',
     { focus: true, updateUrl: false },
   ]);
-  assert.equal(order.filter(([name]) => name === 'attention').length, 5);
+  assert.equal(order.filter(([name]) => name === 'attention').length, 4);
   assert.equal(
     attentionRequests.find(({ gestureId }) => gestureId === 'd.marker')?.annotation?.intent,
     'emphasize',
@@ -2194,8 +2204,10 @@ test('CV runner delegates navigation, attention, media, and chat events through 
     [],
   );
   assert.equal(order.filter(([name]) => name === 'activate').length, 1);
-  assert.deepEqual(clickPoints.map(([id]) => id), ['d.navigate', 'd.activate']);
-  assert.deepEqual(clickPoints.map(([, clickedTarget]) => clickedTarget), [target, target]);
+  // Navigation shows one honest gesture at the real tree row; activation keeps
+  // its provider click on the resolved control without an extra synthetic
+  // ripple, and nothing ever lands at the opened article center.
+  assert.deepEqual(clickPoints, [['d.navigate', 'projects/example']]);
   assert.equal(order.filter(([name]) => name === 'emit').length, 8);
   assert.equal(order.some(([name, type]) => name === 'emit' && type === 'status'), false);
 });
@@ -2279,9 +2291,7 @@ test('CV runner keeps a bounded media Project cell active until its completion b
   assert.equal(result.receipts[0].result.mode, 'short-muted-montage');
 });
 
-test('CV navigation presents the selected article instead of a hidden tree row', async () => {
-  const staleRow = { id: 'stale-row' };
-  const freshRow = { id: 'fresh-row' };
+test('CV navigation clicks the real tree row and never repaints a click on the article', async () => {
   const viewer = { id: 'viewer', getAttribute: () => null };
   const order = [];
   const runtime = {
@@ -2298,15 +2308,19 @@ test('CV navigation presents the selected article instead of a hidden tree row',
     document: {},
     runtime,
     attention: {
-      present({ target, mode }) { order.push(`present:${target.id}`); return { presented: true, mode }; },
+      present({ target }) { order.push(`present:${target?.id}`); return { presented: true }; },
       clearMarkers() {},
       clearTransient() {},
     },
-    resolveTarget: () => runtime.selectedId === 'projects/example' ? freshRow : staleRow,
+    presentNavigationGesture: async (source) => {
+      order.push(`gesture:${source.target}`);
+      return true;
+    },
+    resolveTarget: () => viewer,
     resolveText: (key) => key,
     waitForReadiness: async ({ target }) => {
       const resolved = typeof target === 'function' ? target() : target;
-      order.push(`ready:${resolved === viewer ? 'viewer' : resolved.id}`);
+      order.push(`ready:${resolved === viewer ? 'viewer' : String(resolved?.id)}`);
       return { target: resolved };
     },
   });
@@ -2323,16 +2337,282 @@ test('CV navigation presents the selected article instead of a hidden tree row',
     result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.selectedId,
     'projects/example',
   );
+  assert.equal(
+    result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.gesture,
+    'row-click',
+  );
+  // Lifecycle probes the current target, the gesture lands on the row, one
+  // selection, article readiness; the article never receives a duplicated
+  // click gesture (no `present:` entries).
   assert.deepEqual(order, [
-    'ready:stale-row',
+    'ready:viewer',
+    'gesture:projects/example',
     'select:projects/example',
     'ready:viewer',
-    'present:viewer',
   ]);
+});
+
+test('CV navigation does not reselect when the real row click already selected the entry', async () => {
+  // The click dispatched by the cursor gesture on the tree row is a real DOM
+  // click: TreeView handles it and performs the semantic selection itself.
+  // The runner must re-read live state afterwards and never stack a second
+  // programmatic select for the same target.
+  const viewer = { id: 'viewer', getAttribute: () => null };
+  const order = [];
+  const runtime = {
+    entries: new Map([['projects/example', {}]]),
+    selectedId: 'profile/photo',
+    viewer,
+    select(id) {
+      order.push(`select:${id}`);
+      this.selectedId = id;
+      return true;
+    },
+  };
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime,
+    attention: {
+      present() { return { presented: true }; },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    presentNavigationGesture: async (source) => {
+      // Simulates the fired real click: the tree already selected the entry.
+      runtime.selectedId = source.target;
+      return true;
+    },
+    resolveTarget: () => viewer,
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({
+      target: typeof target === 'function' ? target() : target,
+    }),
+  });
+
+  const result = await runner.run([{
+    id: 'example.open',
+    type: 'navigate',
+    target: 'projects/example',
+    policy: 'required',
+  }]);
+
+  assert.equal(result.status, 'success');
+  assert.deepEqual(order, [], 'no programmatic select after the row click selected');
   assert.equal(
-    result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.mode,
-    'click',
+    result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.gesture,
+    'row-click',
   );
+  assert.equal(
+    result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.selectedId,
+    'projects/example',
+  );
+});
+
+test('CV navigation abort during the row gesture cancels the run instead of navigating', async () => {
+  const viewer = { id: 'viewer', getAttribute: () => null };
+  const order = [];
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime: {
+      entries: new Map([['projects/example', {}]]),
+      selectedId: 'profile/photo',
+      viewer,
+      select(id) {
+        order.push(`select:${id}`);
+        return true;
+      },
+    },
+    attention: {
+      present() { return { presented: true }; },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    presentNavigationGesture: async () => {
+      order.push('gesture-aborted');
+      const error = new Error('CV Show stopped');
+      error.name = 'AbortError';
+      throw error;
+    },
+    resolveTarget: () => viewer,
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({
+      target: typeof target === 'function' ? target() : target,
+    }),
+  });
+
+  // The gesture surfaces a real AbortError: nothing navigates and the run
+  // terminalizes as cancelled (the runner converts the abort deliberately,
+  // it does not swallow it into a plain missing-target receipt).
+  const result = await runner.run([{
+    id: 'example.open',
+    type: 'navigate',
+    target: 'projects/example',
+    policy: 'required',
+  }]);
+  assert.equal(result.status, 'cancelled');
+  assert.deepEqual(order, ['gesture-aborted'], 'no selection after an aborted gesture');
+});
+
+test('CV navigation during quiet state restore selects silently without any gesture', async () => {
+  const viewer = { id: 'viewer', getAttribute: () => null };
+  const order = [];
+  const runtime = {
+    entries: new Map([['projects/example', {}]]),
+    selectedId: 'profile/photo',
+    viewer,
+    select(id) {
+      order.push(`select:${id}`);
+      this.selectedId = id;
+      return true;
+    },
+  };
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime,
+    attention: {
+      present({ target }) { order.push(`present:${target?.id}`); return { presented: true }; },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    presentNavigationGesture: async (source) => {
+      order.push(`gesture:${source.target}`);
+      return true;
+    },
+    isQuietRestore: () => true,
+    resolveTarget: () => viewer,
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({
+      target: typeof target === 'function' ? target() : target,
+    }),
+  });
+
+  const result = await runner.run([{
+    id: 'example.open',
+    type: 'navigate',
+    target: 'projects/example',
+    policy: 'required',
+  }]);
+
+  assert.equal(result.status, 'success');
+  assert.deepEqual(order, ['select:projects/example']);
+  assert.equal(
+    result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.gesture,
+    'quiet-restore',
+  );
+});
+
+test('CV navigation repeats the gesture outside a real setup restore and suppresses it only inside', async () => {
+  // Integration (not stubbed options): the runner reads the shared
+  // quiet-restore flag that the alignment adapter holds across its setup
+  // replay. A normal sequential transition shows the gesture; the same
+  // transition while a restore is in flight selects silently; after the
+  // restore promise settles, the next transition shows the gesture again.
+  const viewer = { id: 'viewer', getAttribute: () => null };
+  const order = [];
+  const runtime = {
+    entries: new Map([['projects/a', {}], ['projects/b', {}]]),
+    selectedId: 'profile/photo',
+    viewer,
+    select(id) {
+      order.push(`select:${id}`);
+      this.selectedId = id;
+      return true;
+    },
+  };
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime,
+    attention: {
+      present({ target }) { order.push(`present:${target?.id}`); return { presented: true }; },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    presentNavigationGesture: async (source) => {
+      order.push(`gesture:${source.target}`);
+      return true;
+    },
+    isQuietRestore: isCvShowQuietRestoreActive,
+    resolveTarget: () => viewer,
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({
+      target: typeof target === 'function' ? target() : target,
+    }),
+  });
+  const navigateTo = (target) => runner.run([{
+    id: `open.${target}`,
+    type: 'navigate',
+    target,
+    policy: 'required',
+  }]);
+
+  const first = await navigateTo('projects/a');
+  assert.equal(first.status, 'success');
+  // The gesture stub does not mutate live selection, so the runner shows the
+  // gesture and performs its one programmatic selection afterwards.
+  assert.deepEqual(order, ['gesture:projects/a', 'select:projects/a']);
+  order.length = 0;
+
+  // The restore and the concurrent normal run overlap in one JavaScript
+  // turn: the restore is the only suppression scope, and it ends when its
+  // work promise settles — never by generation inspection.
+  let releaseRestore;
+  const restoreGate = new Promise((resolve) => { releaseRestore = resolve; });
+  const restore = runCvShowQuietRestore(async () => {
+    const restored = await navigateTo('projects/b');
+    await restoreGate;
+    return restored;
+  });
+  await Promise.resolve();
+  assert.equal(isCvShowQuietRestoreActive(), true, 'restore marks the gesture scope');
+  releaseRestore();
+  await restore;
+  assert.deepEqual(order, ['select:projects/b']);
+  order.length = 0;
+
+  runtime.selectedId = 'profile/photo';
+  const third = await navigateTo('projects/a');
+  assert.equal(isCvShowQuietRestoreActive(), false, 'restore flag released');
+  assert.equal(third.status, 'success');
+  // Normal transition again: exactly one honest gesture, one selection.
+  assert.deepEqual(order, ['gesture:projects/a', 'select:projects/a']);
+});
+
+test('CV navigation to the already selected entry repeats no gesture', async () => {
+  const runtime = {
+    entries: new Map([['projects/example', {}]]),
+    selectedId: 'projects/example',
+    viewer: { getAttribute: () => null },
+    select() { throw new Error('already selected entries must not be reselected'); },
+  };
+  const order = [];
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime,
+    attention: {
+      present({ target }) { order.push(`present:${target?.id}`); return { presented: true }; },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    presentNavigationGesture: async (source) => {
+      order.push(`gesture:${source.target}`);
+      return true;
+    },
+    resolveTarget: () => runtime.viewer,
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => ({
+      target: typeof target === 'function' ? target() : target,
+    }),
+  });
+
+  const result = await runner.run([{
+    id: 'example.open',
+    type: 'navigate',
+    target: 'projects/example',
+    policy: 'required',
+  }]);
+
+  assert.equal(result.status, 'success');
+  assert.deepEqual(order, []);
 });
 
 test('CV map navigation preserves the graph target supplied by the panel lifecycle', async () => {
@@ -2939,11 +3219,13 @@ test('checkpoint-held attention seeks the admitted provider to its settled visua
   assert.deepEqual(fixture.receipts.map(({ status }) => status), ['first-frame', 'settled']);
 });
 
-test('frame-only article media settles immediately without starting a media action', () => {
+test('authored media frames follow the shared gradual attention cycle', () => {
+  // The frame around a media host is drawn progressively like any other
+  // target: no blanket instant settle and no media playback side effects.
   assert.equal(shouldInstantlySettleCvShowAttention({
     type: 'frame',
     target: 'media/photopizza/youtube/example',
-  }), true);
+  }), false);
   assert.equal(shouldInstantlySettleCvShowAttention({
     type: 'media',
     target: 'media/complexscan/ims/gallery',
@@ -2952,6 +3234,16 @@ test('frame-only article media settles immediately without starting a media acti
     type: 'frame',
     target: 'article.photopizza.mechanics',
   }), false);
+  assert.equal(shouldInstantlySettleCvShowAttention({
+    type: 'frame',
+    target: 'media/photopizza/youtube/example',
+    checkpointMode: 'restore-held',
+  }), true);
+  assert.equal(shouldInstantlySettleCvShowAttention({
+    type: 'frame',
+    target: 'article.photopizza.mechanics',
+    checkpointMode: 'restore-held',
+  }), true);
 });
 
 test('target-unresolved rejection degrades the decorative lifecycle with honest evidence', async () => {

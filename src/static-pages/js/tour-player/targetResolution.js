@@ -669,16 +669,13 @@ export function resolveCvShowScrollDuration(budgetMs, {
 }
 
 /**
- * Frame-only article media needs an immediate authored scroll: loading the
- * static player shell can otherwise consume the whole presentation deadline.
+ * An authored scroll is instant only when the remaining presentation budget
+ * cannot carry any visible motion at all. All targets — article blocks and
+ * media alike — follow the same animated contract; the media container is
+ * prepared ahead of the cue so its host is present before the scroll starts.
  * @param {number} budgetMs
- * @param {{ action?: { type?: string, target?: string } }} [options]
  */
-export function shouldBypassCvShowScrollSettlement(budgetMs, { action } = {}) {
-  if (
-    action?.type === 'frame'
-    && String(action?.target || '').startsWith('media/')
-  ) return true;
+export function shouldBypassCvShowScrollSettlement(budgetMs) {
   const budget = Number(budgetMs);
   return Number.isFinite(budget) && budget > 0 && resolveCvShowScrollDuration(budget) === 0;
 }

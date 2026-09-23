@@ -206,15 +206,14 @@ function policyOf(directive) {
 }
 
 /**
- * A frame-only media cue is a static visual reference, not a media playback
- * request. Render its final focus frame synchronously so iframe/player startup
- * cannot consume the authored presentation deadline.
+ * Instant settlement is reserved for state restoration that replays an already
+ * reached attention visual (held checkpoints, seek replay). Authored media
+ * frames go through the same gradual presenter cycle as every other target —
+ * the media container is prepared ahead of the cue so the real reveal fits the
+ * authored gesture budget instead of being snapped to its final frame.
  */
 export function shouldInstantlySettleCvShowAttention(source = {}) {
-  return source?.checkpointMode === 'restore-held' || (
-    source?.type === 'frame'
-    && String(source?.target || '').startsWith('media/')
-  );
+  return source?.checkpointMode === 'restore-held';
 }
 
 function createAction(action, resolveText) {
@@ -760,7 +759,8 @@ export function createCvShowDirectiveRunner(options = {}) {
     resolveText,
     resolveSelectionQuote = (source) => source?.quote || '',
     activateTarget = () => false,
-    presentTargetClick = () => {},
+    presentNavigationGesture = async () => false,
+    isQuietRestore = () => false,
     actionAdapter = null,
     waitForReadiness = waitForShowDomReadiness,
     timeoutMs = 2_500,
@@ -936,9 +936,44 @@ export function createCvShowDirectiveRunner(options = {}) {
                 throwIfAborted(controller.signal);
                 let presentationTarget = target;
                 if (source.type === 'navigate' && runtime?.entries?.has(source.target)) {
-                  presentTargetClick(target, source);
-                  const selected = runtime.select(source.target, { focus: true, updateUrl: false });
-                  if (selected === false) return { unavailable: true, reason: 'navigation-rejected' };
+                  const entryId = String(source.target);
+                  const alreadySelected = runtime.selectedId === entryId;
+                  const quietRestore = source.checkpointMode === 'restore-held'
+                    || isQuietRestore() === true;
+                  let gesture = quietRestore
+                    ? 'quiet-restore'
+                    : alreadySelected
+                      ? 'already-selected'
+                      : 'unavailable';
+                  if (gesture === 'unavailable') {
+                    // An authored scene transition shows exactly one honest
+                    // gesture: the presenter cursor travels to the revealed
+                    // navigation row and the single click lands at the cursor
+                    // point. The native row click performs the semantic
+                    // selection; the runner re-reads the live state afterwards
+                    // and only programmatically selects what the click could
+                    // not select — never stacking both for the same target.
+                    const presented = await Promise.resolve(
+                      presentNavigationGesture(source, { signal: controller.signal }),
+                    ).catch((error) => {
+                      // An aborted gesture is a cancellation, not a missing
+                      // row: propagate so the tour stops instead of navigating.
+                      if (error?.name === 'AbortError' || controller.signal.aborted) {
+                        throw error;
+                      }
+                      return false;
+                    });
+                    gesture = presented === true ? 'row-click' : 'unavailable';
+                    // A cancelled tour must not navigate after the gesture was
+                    // interrupted; an abort is an abort, not a plain miss.
+                    throwIfAborted(controller.signal);
+                  }
+                  if (runtime.selectedId !== entryId) {
+                    // Exactly one semantic selection: the real row click or this
+                    // programmatic fallback, never both for the same target.
+                    const selected = runtime.select(entryId, { focus: true, updateUrl: false });
+                    if (selected === false) return { unavailable: true, reason: 'navigation-rejected' };
+                  }
                   reportInteractionActed();
                   await waitForReadiness({
                     document,
@@ -954,13 +989,17 @@ export function createCvShowDirectiveRunner(options = {}) {
                     scroll: false,
                   });
                   throwIfAborted(controller.signal);
-                  // Map-opening navigation has a semantic layout target supplied by
-                  // the action adapter. Re-resolving only by entry id would replace
-                  // that graph node with the tree row after selection and can detach
-                  // the active gesture during an automatic scene transition.
-                  presentationTarget = String(source.id || '').endsWith('.map')
-                    ? target
-                    : runtime.viewer || resolveTarget(source.target) || target;
+                  // The navigation gesture above is the complete visual story
+                  // of this cue (cursor → row click → article settles): the
+                  // generic attention pass below must not repaint a second
+                  // click on the opened article. Quiet restores and already
+                  // reached states pass silently as well.
+                  reportInteractionSettled();
+                  return {
+                    status: 'success',
+                    gesture,
+                    selectedId: runtime.selectedId,
+                  };
                 }
                 if (source.type === 'marker') {
                   presentationTarget = resolveMarkerTarget(
@@ -1126,7 +1165,6 @@ export function createCvShowDirectiveRunner(options = {}) {
                     attention?.seek?.(presentation.budgetMs);
                   }
                   if (source.type === 'activate') {
-                    presentTargetClick(presentationTarget || target, source);
                     activateTarget(target, source);
                     reportInteractionActed();
                   }
