@@ -6646,6 +6646,12 @@ test('boothbot Short Show advances five gallery frames before the catalog-result
     },
   ]);
 
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `globalThis.__cvGalleryEvidence = [];
+    document.addEventListener('portfolio-show-gallery-evidence', (event) => {
+      globalThis.__cvGalleryEvidence.push(JSON.parse(JSON.stringify(event.detail || {})));
+    }, { capture: true });`,
+  });
   await navigate(
     cdp,
     `${server.origin}/cv/profile/photo/?showMode=short&showEntry=complexscan&showTime=51850&showPlay=0`,
@@ -6738,13 +6744,30 @@ test('boothbot Short Show advances five gallery frames before the catalog-result
     expression: `(() => {
       return {
         calls: globalThis.__cvImsPlayerTestHarness?.snapshot?.() || [],
+        evidence: globalThis.__cvGalleryEvidence || [],
       };
     })()`,
   }, { label: 'inspect BoothBot gallery calls', timeoutMs: 5_000 });
   const goToCalls = media.result.value.calls.filter(({ mediaId, method }) => (
     mediaId === 'media/boothbot/ims/gallery' && method === 'goTo'
   ));
-  assert.deepEqual(goToCalls.map(({ args }) => args[0]), [0, 1, 2, 3, 4]);
+  const goToIndexes = goToCalls.map(({ args }) => args[0]);
+  const evidence = media.result.value.evidence;
+  const frameEvidence = evidence.filter(({ frame }) => Number.isInteger(frame));
+  // Honest motion proof: every authored frame is observed, and only the
+  // truly advancing indices move the player (no silent pre-positioned
+  // write-off and no blind goTo of an already-current frame).
+  assert.deepEqual(frameEvidence.map(({ frame }) => frame), [1, 2, 3, 4, 5], JSON.stringify(evidence));
+  assert.ok(
+    frameEvidence.every(({ verified }) => verified === true),
+    `every montage frame must be observed at its authored index: ${JSON.stringify(frameEvidence)}`,
+  );
+  assert.ok(
+    frameEvidence.filter(({ via }) => via === 'control-click').length >= 2,
+    `contained frames advance through the real next control: ${JSON.stringify(frameEvidence)}`,
+  );
+  assert.deepEqual(frameEvidence.at(-1)?.frame, 5);
+  assert.deepEqual(goToIndexes, [1, 2, 3, 4], JSON.stringify(goToCalls));
   assert.deepEqual(
     terminal.receipts.filter(({ status }) => status === 'failed' || status === 'expired'),
     [],

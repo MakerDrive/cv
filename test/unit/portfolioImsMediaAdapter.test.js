@@ -451,12 +451,14 @@ test('IMS Show gallery derives the paced image count from the player, not from a
   const imageCount = 7;
   const gallery = {
     localName: 'ims-gallery',
+    // The state reflects wherever goTo took it — the honest observable.
     hotspotState: { image: 0 },
     srcData: {
       srcList: Array.from({ length: imageCount }, (_, index) => `img-${index}.jpg`),
     },
     goTo(index) {
       events.push(['goTo', index]);
+      this.hotspotState = { image: index };
     },
   };
   const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
@@ -477,8 +479,8 @@ test('IMS Show gallery derives the paced image count from the player, not from a
   const playedFrames = events.filter(([kind]) => kind === 'goTo');
   const heldWaits = events.filter(([kind]) => kind === 'wait').map(([, durationMs]) => durationMs);
 
-  assert.equal(playedFrames.length, imageCount, 'every gallery image is shown exactly once');
-  assert.deepEqual(playedFrames.map(([, index]) => index), [0, 1, 2, 3, 4, 5, 6]);
+  assert.equal(playedFrames.length, imageCount - 1, 'every gallery image is shown exactly once after frame 1');
+  assert.deepEqual(playedFrames.map(([, index]) => index), [1, 2, 3, 4, 5, 6]);
   assert.equal(heldWaits.length, imageCount);
   assert.ok(
     heldWaits.every((durationMs) => durationMs >= 1000),
@@ -522,8 +524,13 @@ test('IMS Show target explicitly activates a lazy media host before resolving it
   const calls = [];
   const gallery = {
     localName: 'ims-gallery',
-    hotspotState: { image: 0 },
-    goTo(index) { calls.push(['goTo', index]); },
+    // Player starts on a different image so the authored first frame must
+    // actually move it (an honest observable contrast to "already there").
+    hotspotState: { image: 4 },
+    goTo(index) {
+      calls.push(['goTo', index]);
+      this.hotspotState = { image: index };
+    },
   };
   const host = {
     localName: 'sn-media-host',
@@ -920,12 +927,12 @@ test('IMS Show gallery accent presents each frame through the real next control'
   }, { signal: new AbortController().signal });
   await result.completion;
 
-  // Expand overlay → first frame pinned programmatically (it is already
-  // displayed) → next frames advance through visible next-control clicks →
-  // collapse back through the same control.
+  // Expand overlay → first frame is already current (a state-observed
+  // hold, not a new jump) → next frames advance through visible
+  // next-control clicks → collapse back through the same control.
   assert.deepEqual(events, [
     ['present', 'media-expand'], ['click', 'fs'],
-    ['goTo', 0], ['wait', 1000],
+    ['wait', 1000],
     ['present', 'gallery-next'], ['click', 'next'], ['wait', 1000],
     ['present', 'gallery-next'], ['click', 'next'], ['wait', 1000],
     ['present', 'media-collapse'], ['click', 'fs'],
@@ -938,7 +945,11 @@ test('IMS Show gallery falls back to programmatic goTo when controls cannot be p
   const gallery = {
     localName: 'ims-gallery',
     shadowRoot: null,
-    goTo(index) { events.push(['goTo', index]); },
+    hotspotState: { image: 0 },
+    goTo(index) {
+      events.push(['goTo', index]);
+      this.hotspotState = { image: index };
+    },
   };
   const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
     resolvePlayer: async () => gallery,
@@ -954,9 +965,8 @@ test('IMS Show gallery falls back to programmatic goTo when controls cannot be p
     finalFrame: 2,
   }, { signal: new AbortController().signal });
   await result.completion;
-
   assert.deepEqual(events, [
-    ['goTo', 0], ['wait', 1000],
+    ['wait', 1000],
     ['goTo', 1], ['wait', 1000],
   ]);
 });

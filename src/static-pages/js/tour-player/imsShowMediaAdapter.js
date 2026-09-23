@@ -190,13 +190,22 @@ function resolveGalleryControls(player) {
       || player?.querySelector?.('ims-gallery')
       || null;
   const toolbar = gallery?.shadowRoot?.querySelector?.('ims-gallery-toolbar') || null;
-  const buttons = Array.from(toolbar?.shadowRoot?.querySelectorAll?.('ims-button') || []);
+  const hosts = Array.from(toolbar?.shadowRoot?.querySelectorAll?.('ims-button') || []);
+  // ims-button is itself a custom element: its actionable widget is the
+  // inner native button inside its shadow root. In the probe harness the
+  // control is the host itself; preference goes to the deepest clickable,
+  // falling back to the ims-button host when no shadow button exists.
+  const at = (host) => {
+    if (!host) return null;
+    const inner = host.shadowRoot?.querySelector?.('button, [role="button"], a');
+    return inner || host;
+  };
   return {
     gallery,
-    next: buttons[1] || null,
-    prev: buttons[0] || null,
-    autoplay: buttons[2] || null,
-    fullscreen: buttons[3] || null,
+    next: at(hosts[1]),
+    prev: at(hosts[0]),
+    autoplay: at(hosts[2]),
+    fullscreen: at(hosts[3]),
   };
 }
 
@@ -400,8 +409,20 @@ export function createImsShowMediaTarget(root, {
       // programmatic player API — narration is never blocked by decoration.
       // Per-frame evidence: one entry per authored frame with the channel
       // that actually advanced it. Receipts and the acceptance matrix draw
-      // from this, never from the assumption "we clicked".
+      // from this, never from the assumption "we clicked". A DOM event on
+      // the host emits each decision so live probes can verify the contract.
       const evidence = [];
+      const emitEvidence = (entry) => {
+        evidence.push(entry);
+        try {
+          const CustomEventImpl = root?.ownerDocument?.defaultView?.CustomEvent || globalThis.CustomEvent;
+          root?.dispatchEvent?.(new CustomEventImpl('portfolio-show-gallery-evidence', {
+            bubbles: true,
+            composed: true,
+            detail: entry,
+          }));
+        } catch {}
+      };
       const completion = (async () => {
         let presentedOverlay = false;
         let overlayOwnedByShow = false;
@@ -411,13 +432,13 @@ export function createImsShowMediaTarget(root, {
           if (!initiallyExpanded) {
             presentedOverlay = await clickControl(controls.fullscreen, 'media-expand');
             overlayOwnedByShow = presentedOverlay && readOverlayState() === true;
-            evidence.push(Object.freeze({
+            emitEvidence(Object.freeze({
               kind: 'overlay-open',
               via: presentedOverlay ? 'control-click' : 'none',
               verified: overlayOwnedByShow,
             }));
           } else {
-            evidence.push(Object.freeze({
+            emitEvidence(Object.freeze({
               kind: 'overlay-open',
               via: 'pre-expanded-by-user',
               verified: true,
@@ -425,39 +446,63 @@ export function createImsShowMediaTarget(root, {
           }
           for (const frame of frames) {
             throwIfAborted(signal);
+            // A user who collapsed our overlay now owns it — release our
+            // ownership so later user re-opens stay theirs.
+            if (overlayOwnedByShow && !readOverlayState()) overlayOwnedByShow = false;
             const before = readImageIndex();
             let advanced = false;
-            if (frame === lastGalleryFrame + 1 && controls.next) {
-              advanced = await clickControl(controls.next, 'gallery-next');
-              // Verify the click landed as a real index advance, not
-              // "we clicked so it must have happened".
-              if (advanced) {
-                const after = readImageIndex();
-                advanced = after === before + 1 || frame - 1 === after;
-                if (!advanced) {
-                  evidence.push(Object.freeze({
-                    frame,
-                    via: 'control-click-unverified',
-                    verified: false,
-                  }));
-                }
-              }
-            }
-            if (!advanced) {
-              player.goTo?.(frame - 1);
-              evidence.push(Object.freeze({
+            // If the user already moved the gallery to exactly this frame,
+            // do not fight them: count the frame observed as held.
+            if (before === frame - 1) {
+              emitEvidence(Object.freeze({
                 frame,
-                via: 'api-fallback',
-                verified: readImageIndex() === frame - 1,
-              }));
-            } else {
-              evidence.push(Object.freeze({
-                frame,
-                via: 'control-click',
+                via: before === lastGalleryFrame - 1 ? 'state-observed' : 'user-advanced',
                 verified: true,
               }));
+              lastGalleryFrame = frame;
+            } else {
+              if (frame === lastGalleryFrame + 1 && controls.next) {
+                advanced = await clickControl(controls.next, 'gallery-next');
+                // Verify the click landed as a real index advance against
+                // the AUTHORED target, not just "one forward step".
+                if (advanced) {
+                  const after = readImageIndex();
+                  advanced = after === frame - 1;
+                  if (!advanced) {
+                    emitEvidence(Object.freeze({
+                      frame,
+                      via: 'control-click-unverified',
+                      verified: false,
+                      observed: after,
+                    }));
+                  }
+                }
+              }
+              if (!advanced) {
+                player.goTo?.(frame - 1);
+                const after = readImageIndex();
+                emitEvidence(Object.freeze({
+                  frame,
+                  via: 'api-fallback',
+                  verified: after === frame - 1,
+                  observed: after,
+                }));
+                // Trust the API when the player has no observable state at
+                // all; but whenever an index was read and disagrees, never
+                // rename reality to the planned frame.
+                lastGalleryFrame = after === null
+                  ? frame
+                  : after + 1;
+              } else {
+                emitEvidence(Object.freeze({
+                  frame,
+                  via: 'control-click',
+                  verified: true,
+                  observed: frame - 1,
+                }));
+                lastGalleryFrame = frame;
+              }
             }
-            lastGalleryFrame = frame;
             // Full authored hold after the control gesture; the gesture
             // itself is priced into the cue's gestureDurationMs (verified by
             // the montage window check in the authoring test).
@@ -465,12 +510,14 @@ export function createImsShowMediaTarget(root, {
           }
           if (lastGalleryFrame !== finalFrame) {
             player.goTo?.(finalFrame - 1);
-            evidence.push(Object.freeze({
+            const finalAfter = readImageIndex();
+            emitEvidence(Object.freeze({
               frame: finalFrame,
               via: 'api-final',
-              verified: readImageIndex() === finalFrame - 1,
+              verified: finalAfter === finalFrame - 1,
+              observed: finalAfter,
             }));
-            lastGalleryFrame = finalFrame;
+            lastGalleryFrame = finalAfter === null ? finalFrame : finalAfter + 1;
           }
         } finally {
           // Restore the layout to the state the show found it in — never
@@ -481,13 +528,13 @@ export function createImsShowMediaTarget(root, {
             try {
               const collapsed = await clickControl(controls.fullscreen, 'media-collapse');
               restored = collapsed && readOverlayState() === false;
-              evidence.push(Object.freeze({
+              emitEvidence(Object.freeze({
                 kind: 'overlay-close',
                 via: restored === true ? 'control-click' : 'click-unverified',
                 verified: restored === true,
               }));
             } catch (error) {
-              evidence.push(Object.freeze({
+              emitEvidence(Object.freeze({
                 kind: 'overlay-close',
                 via: 'control-click-rejected',
                 verified: false,
@@ -500,20 +547,20 @@ export function createImsShowMediaTarget(root, {
               try {
                 controls.fullscreen?.click?.();
               } catch {}
-              evidence.push(Object.freeze({
+              emitEvidence(Object.freeze({
                 kind: 'overlay-close',
                 via: 'direct-state-restore',
                 verified: readOverlayState() === false,
               }));
             }
           } else if (overlayOwnedByShow && !readOverlayState()) {
-            evidence.push(Object.freeze({
+            emitEvidence(Object.freeze({
               kind: 'overlay-close',
               via: 'already-collapsed-by-user',
               verified: true,
             }));
           } else if (presentedOverlay && !overlayOwnedByShow) {
-            evidence.push(Object.freeze({
+            emitEvidence(Object.freeze({
               kind: 'overlay-close',
               via: 'left-open-not-owned',
               verified: readOverlayState() === true,
@@ -530,7 +577,7 @@ export function createImsShowMediaTarget(root, {
         frameHoldMs,
         finalFrame,
         running: true,
-        completion,
+        completion: completion.then(() => Object.freeze([...evidence])),
         get evidence() {
           return Object.freeze([...evidence]);
         },
