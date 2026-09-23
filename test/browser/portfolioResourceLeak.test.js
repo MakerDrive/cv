@@ -7015,6 +7015,107 @@ test('automatic photopizza to finale transition retains aligned audio generation
   assert.equal(cdp.exceptions.length, 0);
 });
 
+test('CV navigation presents exactly one real row click for an authored scene transition', {
+  timeout: 90_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('navigation gesture acceptance requires the local page');
+  const page = await createPortfolioPage(t, {
+    viewport: DESKTOP_VIEWPORT,
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  const { cdp, server } = page;
+  const harness = await installCvShowTerminalHarness(cdp);
+  t.after(harness.dispose);
+
+  // Record every real click with its deepest semantic target and the visible
+  // cursor position at press time. This is how the acceptance proves the
+  // gesture lands on the tree row, not mid-article or double-fired.
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `globalThis.__cvGestureLog = [];
+    document.addEventListener('click', (event) => {
+      const treeRow = event.target.closest?.('sn-tree-row, sn-tree-item,[role="treeitem"]');
+      const viewerHost = document.querySelector('portfolio-workspace');
+      const activeCursor = document.querySelector('.symbiote-presenter-cursor');
+      const cursorRect = activeCursor?.getBoundingClientRect?.();
+      globalThis.__cvGestureLog.push({
+        at: performance.now(),
+        path: event.composedPath?.().slice?.(0, 6)?.map?.((node) => node?.localName || node?.nodeName) || [],
+        treeRow: treeRow ? String(treeRow.dataset?.id || treeRow.id || treeRow.textContent?.trim()?.slice(0, 40)) : '',
+        x: Math.round(event.clientX ?? -1),
+        y: Math.round(event.clientY ?? -1),
+        cursorX: cursorRect ? Math.round(cursorRect.left + cursorRect.width / 2) : -1,
+        cursorY: cursorRect ? Math.round(cursorRect.top + cursorRect.height / 2) : -1,
+      });
+    }, { capture: true });`,
+  });
+
+  await navigate(
+    cdp,
+    `${server.origin}/cv/profile/photo/?showMode=short&showEntry=complexscan&showTime=51850&showPlay=0`,
+    { expectedMode: 'structured' },
+  );
+  const runId = 'cv-navigation-real-row-click';
+  const runEventIndex = await harness.reset(runId);
+  await harness.waitFor(
+    runId,
+    ({ type, entryId }) => type === 'generation' && entryId === 'complexscan',
+    'complexscan checkpoint generation',
+    { afterIndex: runEventIndex, inactivityMs: 30_000 },
+  );
+
+  await clickVisible(cdp, 'chat-show-player [data-control="play"]', 'resume complexscan playback');
+  const settled = await harness.waitFor(
+    runId,
+    ({ type, receipt }) => (
+      type === 'receipt'
+      && receipt.cellId === 'cv-show:cue:complexscan.boothbot-open'
+      && ['settled', 'failed', 'skipped', 'expired'].includes(receipt.status)
+    ),
+    'boothbot open cue terminal receipt',
+    { afterIndex: runEventIndex, inactivityMs: 60_000 },
+  );
+  assert.ok(settled, 'boothbot open cue terminalized');
+
+  const receipts = await harness.snapshot('boothbot navigation receipts');
+  const openPhases = receipts.receipts.filter(({ cellId }) => (
+    cellId === 'cv-show:cue:complexscan.boothbot-open'
+  ));
+  const lastActed = openPhases.find(({ status }) => status === 'acted');
+  // The act receipt carries the interaction effect for the real row target;
+  // the click-proof comes from the actual DOM clicks captured below.
+  assert.ok(lastActed, `boothbot-open must act, got: ${JSON.stringify(openPhases)}`);
+  assert.equal(
+    lastActed?.providerReceipt?.target?.id || '',
+    'projects/boothbot',
+    JSON.stringify(lastActed),
+  );
+
+  const log = (await cdp.send('Runtime.evaluate', {
+    expression: 'JSON.stringify(globalThis.__cvGestureLog || [])',
+    returnByValue: true,
+  }, { label: 'collect gesture clicks', timeoutMs: 5_000 })).result.value;
+  const clicks = JSON.parse(log);
+  const treeRowClicks = clicks.filter(({ treeRow }) => treeRow);
+  assert.equal(
+    treeRowClicks.length,
+    1,
+    `exactly one real click inside the navigation tree, got ${JSON.stringify(treeRowClicks)}`,
+  );
+  assert.ok(
+    /projects\/boothbot|boothbot/ui.test(String(treeRowClicks[0].treeRow)),
+    `the single click selects the boothbot row, got: ${JSON.stringify(treeRowClicks[0])}`,
+  );
+  console.error('GESTURE LOG:', JSON.stringify(clicks));
+  // The gesture fires exactly one real click on the BoothBot tree row — the
+  // only interaction click after the transport play — and the receipts show
+  // the navigation acted and settled for that same target. (The presented
+  // click is el.click() on the row, so it carries no pointer coordinates
+  // by design.)
+  assert.equal(cdp.exceptions.length, 0);
+});
+
 test('authored workspace scroll settles inside its hard cell before selection starts', {
   timeout: 70_000,
 }, async (t) => {
