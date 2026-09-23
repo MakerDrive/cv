@@ -369,55 +369,155 @@ export function createImsShowMediaTarget(root, {
         ? Number(options.finalFrame)
         : frames.at(-1) || lastGalleryFrame;
       const controls = resolveGalleryControls(player);
+      const readOverlayState = () => {
+        const scope = player.closest?.('ims-viewer') || player;
+        try {
+          return scope?.hasAttribute?.('fullscreen') === true;
+        } catch {
+          return false;
+        }
+      };
+      const readImageIndex = () => {
+        try {
+          const value = Number(player.hotspotState?.image);
+          return Number.isInteger(value) && value >= 0 ? value : null;
+        } catch {
+          return null;
+        }
+      };
       const clickControl = async (control, intent) => {
+        throwIfAborted(signal);
         if (typeof presentMediaControl !== 'function' || !control) return false;
-        const displayed = await presentMediaControl(control, { signal, intent });
-        return displayed === true;
+        const presented = await presentMediaControl(control, { signal, intent });
+        // A resolved false means the presenter could not land the click —
+        // that is an honest miss, not a click.
+        return presented === true;
       };
       // Visible accent: the montage begins by presenting the gallery's own
       // expand control and ends by collapsing it again; each frame advances
       // through a click on the gallery's next control. A control the show
       // cannot present (offscreen, unavailable) fell back to the
       // programmatic player API — narration is never blocked by decoration.
+      // Per-frame evidence: one entry per authored frame with the channel
+      // that actually advanced it. Receipts and the acceptance matrix draw
+      // from this, never from the assumption "we clicked".
+      const evidence = [];
       const completion = (async () => {
         let presentedOverlay = false;
+        let overlayOwnedByShow = false;
         try {
-          presentedOverlay = await clickControl(controls.fullscreen, 'media-expand');
+          const initiallyExpanded = readOverlayState();
+          // The overlay opens only if the user did not already open it.
+          if (!initiallyExpanded) {
+            presentedOverlay = await clickControl(controls.fullscreen, 'media-expand');
+            overlayOwnedByShow = presentedOverlay && readOverlayState() === true;
+            evidence.push(Object.freeze({
+              kind: 'overlay-open',
+              via: presentedOverlay ? 'control-click' : 'none',
+              verified: overlayOwnedByShow,
+            }));
+          } else {
+            evidence.push(Object.freeze({
+              kind: 'overlay-open',
+              via: 'pre-expanded-by-user',
+              verified: true,
+            }));
+          }
           for (const frame of frames) {
             throwIfAborted(signal);
+            const before = readImageIndex();
             let advanced = false;
             if (frame === lastGalleryFrame + 1 && controls.next) {
               advanced = await clickControl(controls.next, 'gallery-next');
+              // Verify the click landed as a real index advance, not
+              // "we clicked so it must have happened".
+              if (advanced) {
+                const after = readImageIndex();
+                advanced = after === before + 1 || frame - 1 === after;
+                if (!advanced) {
+                  evidence.push(Object.freeze({
+                    frame,
+                    via: 'control-click-unverified',
+                    verified: false,
+                  }));
+                }
+              }
             }
             if (!advanced) {
-              // Click unavailable for this step (or the authored frame is not
-              // adjacent): the programmatic advance keeps the hold cadence.
               player.goTo?.(frame - 1);
+              evidence.push(Object.freeze({
+                frame,
+                via: 'api-fallback',
+                verified: readImageIndex() === frame - 1,
+              }));
+            } else {
+              evidence.push(Object.freeze({
+                frame,
+                via: 'control-click',
+                verified: true,
+              }));
             }
             lastGalleryFrame = frame;
-            // The click travels inside the authored hold window: the viewer
-            // sees the press and then one second of the still frame.
+            // Full authored hold after the control gesture; the gesture
+            // itself is priced into the cue's gestureDurationMs (verified by
+            // the montage window check in the authoring test).
             await clock.wait(frameHoldMs, { signal });
           }
           if (lastGalleryFrame !== finalFrame) {
             player.goTo?.(finalFrame - 1);
+            evidence.push(Object.freeze({
+              frame: finalFrame,
+              via: 'api-final',
+              verified: readImageIndex() === finalFrame - 1,
+            }));
             lastGalleryFrame = finalFrame;
           }
         } finally {
-          if (presentedOverlay) {
-            // Return the layout: collapse the overlay via the same real
-            // control, honoured even when frames were skipped. A stopped
-            // show will not schedule another presented click — the overlay
-            // is put back hand-free instead, and the brief pause returned to
-            // the user wins the overlay race.
-            if (signal?.aborted) {
-              try { controls.fullscreen?.click?.(); } catch {}
-            } else {
-              await clickControl(controls.fullscreen, 'media-collapse')
-                .catch(() => {
-                  try { controls.fullscreen?.click?.(); } catch {}
-                });
+          // Restore the layout to the state the show found it in — never
+          // toggle blindly: collapse only if the show opened the overlay AND
+          // the state is still open. A user who reclaimed it keeps it.
+          if (overlayOwnedByShow && readOverlayState()) {
+            let restored = false;
+            try {
+              const collapsed = await clickControl(controls.fullscreen, 'media-collapse');
+              restored = collapsed && readOverlayState() === false;
+              evidence.push(Object.freeze({
+                kind: 'overlay-close',
+                via: restored === true ? 'control-click' : 'click-unverified',
+                verified: restored === true,
+              }));
+            } catch (error) {
+              evidence.push(Object.freeze({
+                kind: 'overlay-close',
+                via: 'control-click-rejected',
+                verified: false,
+                reason: error?.name || String(error),
+              }));
             }
+            if (!restored && readOverlayState()) {
+              // Presenter abandon or host race after stop: still restore
+              // silently — no delayed presented click after a cancel.
+              try {
+                controls.fullscreen?.click?.();
+              } catch {}
+              evidence.push(Object.freeze({
+                kind: 'overlay-close',
+                via: 'direct-state-restore',
+                verified: readOverlayState() === false,
+              }));
+            }
+          } else if (overlayOwnedByShow && !readOverlayState()) {
+            evidence.push(Object.freeze({
+              kind: 'overlay-close',
+              via: 'already-collapsed-by-user',
+              verified: true,
+            }));
+          } else if (presentedOverlay && !overlayOwnedByShow) {
+            evidence.push(Object.freeze({
+              kind: 'overlay-close',
+              via: 'left-open-not-owned',
+              verified: readOverlayState() === true,
+            }));
           }
         }
       })();
@@ -431,6 +531,9 @@ export function createImsShowMediaTarget(root, {
         finalFrame,
         running: true,
         completion,
+        get evidence() {
+          return Object.freeze([...evidence]);
+        },
       });
     },
 

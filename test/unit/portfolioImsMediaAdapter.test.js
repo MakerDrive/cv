@@ -871,9 +871,14 @@ test('IMS Show spinner pauses through the shared media pause hook without touchi
 
 test('IMS Show gallery accent presents each frame through the real next control', async () => {
   const events = [];
+  let fsOn = false;
   const button = (name) => ({
     localName: 'ims-button',
-    click() { events.push(['click', name]); },
+    click() {
+      events.push(['click', name]);
+      if (name === 'fs') fsOn = !fsOn;
+      if (name === 'next') gallery.$index += 1;
+    },
   });
   const toolbar = {
     localName: 'ims-gallery-toolbar',
@@ -887,10 +892,13 @@ test('IMS Show gallery accent presents each frame through the real next control'
   };
   const gallery = {
     localName: 'ims-gallery',
+    $index: 0,
+    get hotspotState() { return { image: this.$index }; },
+    hasAttribute: (attr) => attr === 'fullscreen' ? fsOn : false,
     shadowRoot: {
       querySelector: (selector) => (selector === 'ims-gallery-toolbar' ? toolbar : null),
     },
-    goTo(index) { events.push(['goTo', index]); },
+    goTo(index) { events.push(['goTo', index]); this.$index = index; },
   };
   const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
     resolvePlayer: async () => gallery,
@@ -956,9 +964,13 @@ test('IMS Show gallery falls back to programmatic goTo when controls cannot be p
 test('IMS Show gallery collapse restores the layout directly when the tour is stopped mid-way', async () => {
   const events = [];
   const clicks = [];
+  let fsOn = false;
   const button = (name) => ({
     localName: 'ims-button',
-    click() { clicks.push(name); },
+    click() {
+      clicks.push(name);
+      if (name === 'fs') fsOn = !fsOn;
+    },
   });
   const toolbar = {
     localName: 'ims-gallery-toolbar',
@@ -972,6 +984,8 @@ test('IMS Show gallery collapse restores the layout directly when the tour is st
   };
   const gallery = {
     localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    hasAttribute: (attr) => (attr === 'fullscreen' ? fsOn : false),
     shadowRoot: {
       querySelector: (selector) => (selector === 'ims-gallery-toolbar' ? toolbar : null),
     },

@@ -4317,7 +4317,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "компактную автоматизированную фотостудию"
         },
-        "gestureDurationMs": 7500,
+        "gestureDurationMs": 9500,
         "leadMs": 2050,
         "settleBy": "none",
         "until": null
@@ -12204,7 +12204,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 105,
+  "revision": 106,
   "schemaVersion": "workspace-presentation-authoring-project-v2",
   "script": {
     "grounding": {
@@ -13841,9 +13841,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PSlxWKHMtOSPDeDSAUej7TX+OUhBp8ab3RobdUqR/w8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-57F9vz4xDDjjB6QhIk5WUF72t6Dcg4M5hr6aXTH39lE=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-NyCS0HXsJt0tW2HORKhUf9OJa6qGNfRne+7Gh5XNNns=",
         "entryId": "complexscan",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-MPHAQL50wAayxGbDXih4hUx9M9QwE8pn3vv8TwE7PEQ=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-CccnZPXB1oA06RWb+22QCgrjvTKtkmAvzbztvWxkUIE=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-rhyJ4LVfNnvCNFNEKii6VVj7xw8suzlkPUb0BygA5Rc=",
         "sourceCellIds": [
           "cv-show:narration:complexscan",
@@ -14195,7 +14195,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-iIeaM4QMx3ev9k5HLtQyzGTo9t2S58Vcdxuh3Jc/wig="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-Toh+qD+8CzjTtaZkP0vXL6kdbKaRGUhI44496ya5pBc=",
+    "hash": "cv-show-audio-provenance-v1:sha256-xXMpUQ9UunBwVn2aNOaDKxH6Pw5T5WYboINE9qOft0s=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
@@ -14255,8 +14255,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "manifestHash": "cv-show-media-manifest-v1:sha256-/kqDiyeUMuC/S32LalHRYOB8eJa8XhSIVTCQo8qE/Bc=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:c99eab51a44fd4e85e7dee494e650332ec6abc313892a2facc23c8a8e75b0942",
-  "predecessorReleaseId": "cv-show-audio-release-v1:fbd922067c03b15d88c51921dc5b591714841049e81267777d0778d88e1ae456",
+  "planId": "cv-show-audio-release-plan-v1:f1d12377f64b4ea8cc9e0b624367a1562441d9b717522ee18007fe510cc5bdb0",
+  "predecessorReleaseId": "cv-show-audio-release-v1:fbe88e46c067b215b31d7266bb43893d33562bb908b927f20d22737f51501def",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WqPoIYWG+cGu1rccIYRUR/xoDVPRH+5wau/SDrzOuwQ=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-LbWAitNz77QEwRGNo8QCR0FBI9KJw9bWz6jDOxDUsDw=",
@@ -14264,12 +14264,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-SrEMxji9/bmyAEPoRX/tSJ4tavjca0foFhROdLgOu9I=",
-    "revision": 105
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-+4pf1DzzPzQKqTcrwNiH11pb56eDOKFHORPttR35Ci8=",
+    "revision": 106
   },
-  "releaseId": "cv-show-audio-release-v1:fbe88e46c067b215b31d7266bb43893d33562bb908b927f20d22737f51501def",
+  "releaseId": "cv-show-audio-release-v1:6105dbd4783637fe785d7255311cae4c99c78c54610f66430060416ebd430c7b",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:3588e3c0d29047fbb9dcfb1e78d3617fe2eefdcba88a0745dc5e8ac9caeb0643"
+  "verificationHash": "cv-show-audio-release-verification-v1:cf067a86896cf33eb6e711e6a45e72d4e48f043977782512340a636eb3e74bf0"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );
