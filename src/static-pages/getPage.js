@@ -34,7 +34,13 @@ function buildHeadMeta(pageData) {
             }
           }
           if (!url.search) url.searchParams.delete('');
-          return url.toString().replace(/\/$/, '/');
+          // URL lowercases the host; keep the configured casing so the
+          // canonical stays byte-identical to the publicationRoutes source.
+          const originalHost = /^\w[\w+.-]*:\/\/([^/?#]*)/u.exec(String(pageData.CANONICAL_URL))?.[1];
+          const normalized = url.toString().replace(/\/$/, '/');
+          return originalHost
+            ? normalized.replace(/^(\w[\w+.-]*:\/\/)[^/?#]*/u, `$1${originalHost}`)
+            : normalized;
         } catch {
           return pageData.CANONICAL_URL;
         }
