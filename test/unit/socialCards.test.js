@@ -110,6 +110,11 @@ test('unregistered publication stubs are noindex and do not claim a generated ca
   assert.doesNotMatch(html, /social-cards\/pulse-unregistered-stub\.png/);
 });
 
+test('social card registry agrees with local card files after the repaired publish', async () => {
+  let { auditSocialCardRegistry } = await import('../../scripts/social-card-registry-audit.js');
+  let audit = await auditSocialCardRegistry();
+  assert.equal(audit.healthy, true, JSON.stringify(audit.summary, null, 2));
+});
 test('social card URLs prefer CIT and always retain a generated local fallback', () => {
   let assetPath = './cit/cit-store/social/pulse-alpha-update-a1b2c3d4e5f6.png';
 

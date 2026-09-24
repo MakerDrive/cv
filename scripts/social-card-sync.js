@@ -90,7 +90,10 @@ export async function publishSocialCards({
     let source = await fs.readFile(sourcePath);
     let versionedPath = createVersionedPath(sourcePath, source);
     let versionedSyncPath = asSyncPath(rootDir, versionedPath);
-    await fs.copyFile(sourcePath, versionedPath);
+    // Only (re)materialise the versioned local copy when bytes differ:
+    // publish composes one render per versioned file name, never twice.
+    let currentBytes = await fs.readFile(versionedPath).catch(() => null);
+    if (!currentBytes?.equals(source)) await fs.copyFile(sourcePath, versionedPath);
 
     if (!syncData[versionedSyncPath]) {
       let upload = await connector.upload(source, path.basename(versionedPath), cfg);

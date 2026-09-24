@@ -62,3 +62,71 @@ test('social card renderer tries later media sources before using the fallback',
   ]);
   assert.ok(pixel[0] > pixel[1]);
 });
+
+test('social card diagnostics record every source failure and the chosen one', async () => {
+  let image = await sharp({
+    create: { width: 1200, height: 630, channels: 4, background: '#113355' },
+  }).png().toBuffer();
+  let out = {};
+  await renderSocialCardBuffer({
+    id: 'projects/md',
+    title: 'B',
+    sources: ['https://cdn.test/dead.png', 'https://cdn.test/corrupt.png', 'https://cdn.test/ok.png'],
+  }, {
+    loadSource: async (source) => {
+      if (source.includes('dead')) throw new Error('HTTP 404');
+      if (source.includes('corrupt')) return Buffer.from('not-exactly-a-png');
+      return image;
+    },
+    out,
+  });
+
+  assert.equal(out.selected, 'https://cdn.test/ok.png');
+  assert.equal(out.fallback, false);
+  assert.deepEqual(out.diagnostics.sources, [
+    { source: 'https://cdn.test/dead.png', ok: false, reason: 'HTTP 404' },
+    { source: 'https://cdn.test/corrupt.png', ok: false, reason: 'Input buffer contains unsupported image format' },
+    { source: 'https://cdn.test/ok.png', ok: true },
+  ]);
+});
+
+test('social card falls back to the branded layout with exposure of every failure', async () => {
+  let out = {};
+  await renderSocialCardBuffer({
+    id: 'projects/all-missing',
+    title: 'Nothing works',
+    sources: ['https://a.test/x.png', '/definitely/absent.png'],
+  }, {
+    loadSource: async (source) => {
+      if (source.startsWith('/')) throw new Error(`ENOENT: no such file`);
+      throw new Error('HTTP 500');
+    },
+    out,
+  });
+
+  assert.equal(out.fallback, true);
+  assert.equal(out.selected, null);
+  assert.equal(out.diagnostics.sources.every(({ ok }) => !ok), true);
+});
+
+test('long titles never bleed into the protected right or left edges', async () => {
+  // Render the title overlay alone on transparent space and scan the raw
+  // pixels: ink must never reach the outermost 1px frame outside the text
+  // track (x >= TITLE_LEFT and x <= WIDTH - TITLE_LEFT).
+  const { createTitleOverlay } = await import('../../scripts/social-card-renderer.js');
+  const title = 'Retail Supply Chains with Zero-Touch Production Feedback Loops';
+  // Title overlay WITHOUT the shade gradient — alpha pixels mean pure text ink.
+  const overlay = createTitleOverlay(title, { withShade: false });
+  const png = await sharp(overlay).png().toBuffer();
+  const { data: raw, info } = await sharp(png).raw().toBuffer({ resolveWithObject: true });
+  const stride = info.width * info.channels;
+  const ink = (x, y) => raw[y * stride + x * info.channels + 3] > 0;
+  let minX = info.width, maxX = -1;
+  for (let y = 0; y < info.height; y++) {
+    for (let x = 0; x < info.width; x++) {
+      if (ink(x, y)) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); }
+    }
+  }
+  assert.ok(minX >= 72, `ink begins at ${minX}px — left margin breached`);
+  assert.ok(maxX <= 1200 - 72, `ink reaches ${maxX}px — right margin breached`);
+});

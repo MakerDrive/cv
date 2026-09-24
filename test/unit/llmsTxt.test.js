@@ -101,7 +101,7 @@ test('portfolio build generates llms.txt and llms-full.txt', async () => {
   const packageJson = JSON.parse(await readFile(new URL('../../package.json', import.meta.url), 'utf8'));
 
   assert.equal(packageJson.scripts['generate-llms'], 'node ./scripts/generate-llms-txt.js');
-  assert.match(packageJson.scripts.build, /npm run generate-llms/);
+  assert.match(packageJson.scripts['build:content'], /npm run generate-llms/);
 
   await execFileAsync('node', ['./scripts/generate-llms-txt.js'], {
     cwd: new URL('../..', import.meta.url),

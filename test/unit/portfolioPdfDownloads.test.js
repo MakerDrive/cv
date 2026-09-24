@@ -42,7 +42,7 @@ test('portfolio build generates the compact two-page localized CV structure', as
 
   assert.equal(packageJson.scripts['generate-pdfs'], 'node ./scripts/generate-portfolio-pdfs.js');
   assert.equal(packageJson.devDependencies['source-sans'], '3.52.0');
-  assert.match(packageJson.scripts.build, /npm run generate-pdfs/);
+  assert.match(packageJson.scripts['build:content'], /npm run generate-pdfs/);
   for (const locale of ['en', 'ru', 'es']) {
     assert.ok(portfolioSource.includes(`downloads/vladimir-matiasevich-cv-${locale}.pdf`));
   }

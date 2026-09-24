@@ -30,9 +30,27 @@ export async function renderSocialCards({
   };
   let outputs = await Promise.all(manifest.map(async (card) => {
     let outputPath = path.resolve(rootDir, card.outputPath);
-    let output = await renderSocialCardBuffer(card, { loadSource });
+    let diag = {};
+    let buffer = await renderSocialCardBuffer(card, { loadSource, out: diag });
+    let { selected, fallback, diagnostics } = diag;
+    if (fallback) {
+      process.stderr.write(
+        `[social-cards] ${card.id}: all sources failed, using branded fallback (`
+          + diagnostics.sources.map((ds) => `${ds.source}: ${ds.reason}`).join('; ')
+          + ')\n',
+      );
+    } else {
+      let bad = diagnostics.sources.filter((ds) => !ds.ok);
+      if (bad.length) {
+        process.stderr.write(
+          `[social-cards] ${card.id}: degraded sources; used ${selected} (`
+            + bad.map((ds) => `${ds.source}: ${ds.reason}`).join('; ')
+            + ')\n',
+        );
+      }
+    }
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    await fs.writeFile(outputPath, output);
+    await fs.writeFile(outputPath, buffer);
     return card.outputPath;
   }));
   return outputs;

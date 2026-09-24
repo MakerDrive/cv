@@ -460,9 +460,17 @@ test('build script hygiene and rename contracts', async () => {
       to: './js/material-symbols-outlined-400.ttf',
     },
   ], 'JSDA must copy Material Symbols assets for build and SSG preview');
-  assert.match(pkg.scripts['build'], /npm run copy-social-cards/, 'build should copy social cards');
-  assert.match(pkg.scripts['build'], /npm run build-force-worker/, 'build should call build-force-worker');
-  assert.match(pkg.scripts['build'], /npm run verify-production-build$/, 'verification must be last in the build chain');
+  // The social card render + copy are extracted into 'build:content' so the
+  // publish chain can compose them with a single render pass.
+  assert.match(pkg.scripts['build'], /npm run render-social-cards && npm run build:content$/, 'build = render then content');
+  assert.match(pkg.scripts['build:content'], /npm run copy-social-cards/, 'content copy should copy social cards');
+  assert.match(pkg.scripts['build:content'], /npm run build-force-worker/, 'content should call build-force-worker');
+  assert.match(pkg.scripts['build:content'], /npm run verify-production-build$/, 'verification must be last in the content chain');
+  assert.equal(
+    pkg.scripts['publish-social-cards'],
+    'npm run render-social-cards && npm run sync-social-cards && npm run build:content',
+    'publish composes one render against content (no second render)',
+  );
   assert.equal(
     pkg.scripts['publish:cv-show-web-audio'],
     'node ./scripts/cv-show-web-audio-publisher.js',

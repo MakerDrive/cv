@@ -63,13 +63,14 @@ export function layoutSocialCardTitle(title) {
   return { ...selected, lineHeight, baseline };
 }
 
-function createTitleOverlay(title) {
+export function createTitleOverlay(title, { withShade = true } = {}) {
   let layout = layoutSocialCardTitle(title);
   let text = layout.lines.map((line, index) => (
     `<text x="${TITLE_LEFT}" y="${layout.baseline + (index * layout.lineHeight)}" `
       + `fill="#ffffff" font-family="Arial, sans-serif" font-size="${layout.fontSize}" `
       + `font-weight="700">${escapeXml(line)}</text>`
   )).join('');
+  const shade = withShade ? '<rect width="100%" height="100%" fill="url(#shade)"/>' : '';
   return Buffer.from(/*svg*/ `
     <svg width="${SOCIAL_CARD_WIDTH}" height="${SOCIAL_CARD_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -79,7 +80,7 @@ function createTitleOverlay(title) {
           <stop offset="100%" stop-color="#07111d" stop-opacity="0.94"/>
         </linearGradient>
       </defs>
-      <rect width="100%" height="100%" fill="url(#shade)"/>
+${shade}
       <rect x="${TITLE_LEFT}" y="${layout.baseline - layout.fontSize - 12}" width="72" height="6" rx="3" fill="#8b5cf6"/>
       ${text}
     </svg>
@@ -115,31 +116,86 @@ async function loadSource(source) {
   return Buffer.from(await response.arrayBuffer());
 }
 
+/**
+ * Resolve the card background via the sourced cascade. Every failed source
+ * is recorded as `{ source, reason }` — corruption and HTTP errors are not
+ * silently swallowed; the last resort is the local branded fallback card.
+ *
+ * @param {{ id: string, sources?: string[] }} card
+ * @param {(source: string) => Promise<Buffer>} sourceLoader
+ * @returns {Promise<{ pipeline: sharp.Sharp, selected: string | null, failures: Array<{ source: string, reason: string }>, fallback: boolean }>}
+ */
 async function resolveBackground(card, sourceLoader) {
+  let failures = [];
   for (let source of card.sources || []) {
     try {
       let input = await sourceLoader(source);
-      return sharp(input).resize(SOCIAL_CARD_WIDTH, SOCIAL_CARD_HEIGHT, {
+      let pipeline = sharp(input).resize(SOCIAL_CARD_WIDTH, SOCIAL_CARD_HEIGHT, {
         fit: 'cover',
         position: 'centre',
       });
-    } catch {
-      continue;
+      // Decode is lazy: verify now so a corrupt payload falls through to the
+      // next source instead of failing the card compose step.
+      try {
+        await pipeline.clone().metadata();
+      } catch (error) {
+        failures.push(Object.freeze({
+          source,
+          reason: error?.message || String(error),
+        }));
+        continue;
+      }
+      return {
+        pipeline,
+        selected: source,
+        failures: Object.freeze(failures),
+        fallback: false,
+      };
+    } catch (error) {
+      failures.push(Object.freeze({
+        source,
+        reason: error?.code || error?.message || String(error),
+      }));
     }
   }
-  return sharp(createFallbackBackground());
+  return {
+    pipeline: sharp(createFallbackBackground()),
+    selected: null,
+    failures: Object.freeze(failures),
+    fallback: true,
+  };
 }
 
 /**
  * @param {{ id: string, title: string, sources: string[] }} card
  * @param {Object} [options]
  * @param {(source: string) => Promise<Buffer>} [options.loadSource]
- * @returns {Promise<Buffer>}
+ * @param {{ renderSocialCardBuffer?: boolean }} [options]
+ * @returns {Promise<{ buffer: Buffer, selected: string | null, fallback: boolean, diagnostics: { sources: Array<{ source: string, ok: boolean, reason?: string }> }, facts: { width: number, height: number } }>}
  */
-export async function renderSocialCardBuffer(card, { loadSource: sourceLoader = loadSource } = {}) {
-  let background = await resolveBackground(card, sourceLoader);
-  return background
+export async function renderSocialCardBuffer(card, { loadSource: sourceLoader = loadSource, out = null } = {}) {
+  /**
+   * Image render returns the final PNG buffer. Diagnostics that matter to an
+   * irresponsible caller (e.g. which source was chosen, what else failed) are
+   * collected through `out` — a mutable object injected by the caller.
+   */
+  let resolution = await resolveBackground(card, sourceLoader);
+  let buffer = await resolution.pipeline
     .composite([{ input: createTitleOverlay(card.title), top: 0, left: 0 }])
     .png({ compressionLevel: 9 })
     .toBuffer();
+  if (out) {
+    out.selected = resolution.selected;
+    out.fallback = resolution.fallback;
+    out.diagnostics = Object.freeze({
+      sources: Object.freeze((card.sources || []).map((source) => {
+        let failure = resolution.failures.find((entry) => entry.source === source);
+        return failure
+          ? { source, ok: false, reason: failure.reason }
+          : { source: resolution.selected, ok: true };
+      })),
+    });
+    out.facts = Object.freeze({ width: SOCIAL_CARD_WIDTH, height: SOCIAL_CARD_HEIGHT });
+  }
+  return buffer;
 }
