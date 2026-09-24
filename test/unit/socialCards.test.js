@@ -144,3 +144,24 @@ test('production manifest can resolve media without a handwritten card list', ()
   assert.ok(manifest.some((card) => card.id === 'projects/symbiote-ui'));
   assert.equal(manifest.some((card) => card.id === 'pulse/agent-portal'), false);
 });
+
+test('canonical URLs exclude show-playback state; alt and libre URLs align', async () => {
+  let html = await getPortfolioPage({
+    basePath: './',
+  });
+  // Show playback parameters never become canonical.
+  assert.doesNotMatch(html, /canonical" href="[^"]*showMode=/u);
+  let canonical = /<link rel="canonical" href="([^"]+)"/u.exec(html)?.[1];
+  assert.equal(canonical, undefined, 'index page has no canonical (avoid self-duping)');
+
+  let projPage = await getPortfolioPage({
+    basePath: './../../',
+    projectId: 'projects/symbiote-ui',
+  });
+  let canonicalProj = /<link rel="canonical" href="([^"]+)"/u.exec(projPage)?.[1];
+  assert.equal(
+    canonicalProj,
+    undefined,
+    'project pages never pass CANONICAL_URL here — proj metadata has no notion of one',
+  );
+});

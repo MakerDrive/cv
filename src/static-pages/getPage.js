@@ -22,12 +22,31 @@ function buildHeadMeta(pageData) {
   let description = pageData.DESCRIPTION || SITE_DEFAULT_DESCRIPTION;
   let title = pageData.OG_TITLE || pageData.TITLE;
   let image = pageData.OG_IMAGE || SITE_OG_IMAGE;
+  const imageAlt = pageData.OG_IMAGE_ALT ?? title;
+  const safeCanonical = pageData.CANONICAL_URL
+    ? (() => {
+        try {
+          const url = new URL(pageData.CANONICAL_URL, pageData.SITE_BASE_URL || 'https://MakerDrive.github.io');
+          // Show-playback state is presentation, not content addressing.
+          for (const key of url.searchParams.keys()) {
+            if (/^(showMode|showEntry|showDetail|showTime|showPlay|dock|stack)$/u.test(key)) {
+              url.searchParams.delete(key);
+            }
+          }
+          if (!url.search) url.searchParams.delete('');
+          return url.toString().replace(/\/$/, '/');
+        } catch {
+          return pageData.CANONICAL_URL;
+        }
+      })()
+    : undefined;
   let tags = [
     `<meta name="description" content="${escapeAttr(description)}">`,
     `<meta property="og:type" content="website">`,
     `<meta property="og:title" content="${escapeAttr(title)}">`,
     `<meta property="og:description" content="${escapeAttr(description)}">`,
     `<meta property="og:image" content="${escapeAttr(image)}">`,
+    `<meta property="og:image:alt" content="${escapeAttr(imageAlt)}">`,
     ...(pageData.OG_IMAGE_WIDTH && pageData.OG_IMAGE_HEIGHT ? [
       `<meta property="og:image:width" content="${escapeAttr(pageData.OG_IMAGE_WIDTH)}">`,
       `<meta property="og:image:height" content="${escapeAttr(pageData.OG_IMAGE_HEIGHT)}">`,
@@ -36,10 +55,13 @@ function buildHeadMeta(pageData) {
     `<meta name="twitter:title" content="${escapeAttr(title)}">`,
     `<meta name="twitter:description" content="${escapeAttr(description)}">`,
     `<meta name="twitter:image" content="${escapeAttr(image)}">`,
+    ...(image !== SITE_OG_IMAGE ? [
+      `<meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">`,
+    ] : []),
   ];
-  if (pageData.CANONICAL_URL) {
-    tags.push(`<link rel="canonical" href="${escapeAttr(pageData.CANONICAL_URL)}">`);
-    tags.push(`<meta property="og:url" content="${escapeAttr(pageData.CANONICAL_URL)}">`);
+  if (safeCanonical) {
+    tags.push(`<link rel="canonical" href="${escapeAttr(safeCanonical)}">`);
+    tags.push(`<meta property="og:url" content="${escapeAttr(safeCanonical)}">`);
   }
   if (pageData.ROBOTS) {
     tags.push(`<meta name="robots" content="${escapeAttr(pageData.ROBOTS)}">`);
