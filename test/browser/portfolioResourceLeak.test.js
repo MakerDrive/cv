@@ -447,7 +447,10 @@ async function launchChrome() {
     async close() {
       chrome.kill('SIGTERM');
       await waitForExit();
-      await rm(userDataDir, { force: true, recursive: true });
+      // Chrome may still own a file handle briefly after exit on some
+      // distros; tolerate cleanup races instead of failing the assertion.
+      await rm(userDataDir, { force: true, recursive: true, maxRetries: 5, retryDelay: 100 })
+        .catch(() => undefined);
     },
   };
 }
