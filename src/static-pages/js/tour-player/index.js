@@ -295,38 +295,56 @@ function visibleElement(element) {
 
 /**
  * Presents one real click on a visible media control (gallery toolbar
- * buttons) with the presenter cursor: travel → press → release. Returns
- * true only when the click actually fired, so the adapter falls back to the
- * programmatic frame advance for offscreen/missing controls instead of
- * faking a gesture. Quiet restores never present clicks.
- */
-/**
+ * buttons) with the presenter cursor: travel → press → release. Returns a
+ * distinct reason for every failure path, so callers never have to guess
+ * why a click did not fire: 'quiet-restore' / 'control-absent' /
+ * 'control-hidden' / 'cursor-absent' / 'aborted' / 'click-error' /
+ * 'fired-false'. Quiet restores never present clicks.
  * @param {() => any} getCursor
  * @param {any} element
  * @param {{ signal?: AbortSignal, intent?: string }} [options]
+ * @returns {Promise<{ presented: boolean, fired: boolean, reason: string }>}
  */
 async function presentMediaControlClick(getCursor, element, { signal, intent } = {}) {
-  if (signal?.aborted || isCvShowQuietRestoreActive()) return false;
+  const miss = (reason, extra = {}) => ({ presented: false, fired: false, reason, ...extra });
+  if (signal?.aborted) return miss('aborted');
+  if (isCvShowQuietRestoreActive()) return miss('quiet-restore');
+  if (!element) return miss('control-absent');
   const target = visibleElement(element);
-  if (!target) return false;
+  if (!target) {
+    // Diagnostics: rect and style visibility facts, not conjecture.
+    let rect = null;
+    try { rect = element.getBoundingClientRect?.(); } catch {}
+    return miss('control-hidden', {
+      rect: rect && { width: rect.width, height: rect.height },
+      connected: element?.isConnected === true,
+    });
+  }
   await waitForShowVisualSettlement(target, {
     document,
     signal,
     inactivityMs: 150,
     timeoutMs: 600,
   }).catch(() => null);
-  if (signal?.aborted) return false;
+  if (signal?.aborted) return miss('aborted');
   const cursor = getCursor();
-  if (typeof cursor?.clickElement !== 'function') return false;
+  if (typeof cursor?.clickElement !== 'function') return miss('cursor-absent');
   const onAbort = () => cursor.clear?.({ reason: 'media-control-aborted' }) ?? undefined;
   signal?.addEventListener?.('abort', onAbort, { once: true });
   try {
     const receipt = await cursor.clickElement(target, {
       gestureId: `cv-show-media:${intent || 'control'}`,
     });
-    return receipt?.fired === true;
-  } catch {
-    return false;
+    if (signal?.aborted) return miss('aborted');
+    return {
+      presented: receipt?.fired === true,
+      fired: receipt?.fired === true,
+      reason: receipt?.fired === true ? 'ok' : 'fired-false',
+    };
+  } catch (error) {
+    return miss(
+      signal?.aborted || error?.name === 'AbortError' ? 'aborted' : 'click-error',
+    );
   } finally {
     signal?.removeEventListener?.('abort', onAbort);
   }

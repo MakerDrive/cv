@@ -6753,6 +6753,7 @@ test('boothbot Short Show advances five gallery frames before the catalog-result
   ));
   const goToIndexes = goToCalls.map(({ args }) => args[0]);
   const evidence = media.result.value.evidence;
+  console.error('EVIDENCE DUMP:', JSON.stringify(evidence, null, 1));
   const frameEvidence = evidence.filter(({ frame }) => Number.isInteger(frame));
   // Honest motion proof: every authored frame is observed, and only the
   // truly advancing indices move the player (no silent pre-positioned

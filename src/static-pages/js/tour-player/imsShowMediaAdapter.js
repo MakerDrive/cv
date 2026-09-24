@@ -190,16 +190,14 @@ function resolveGalleryControls(player) {
       || player?.querySelector?.('ims-gallery')
       || null;
   const toolbar = gallery?.shadowRoot?.querySelector?.('ims-gallery-toolbar') || null;
-  const hosts = Array.from(toolbar?.shadowRoot?.querySelectorAll?.('ims-button') || []);
-  // ims-button is itself a custom element: its actionable widget is the
-  // inner native button inside its shadow root. In the probe harness the
-  // control is the host itself; preference goes to the deepest clickable,
-  // falling back to the ims-button host when no shadow button exists.
-  const at = (host) => {
-    if (!host) return null;
-    const inner = host.shadowRoot?.querySelector?.('button, [role="button"], a');
-    return inner || host;
-  };
+  // The ims-gallery renders its canvas+toolbar in its own shadow root, but
+  // the toolbar itself is a *light-DOM* child of that root (toolbar
+  // components in IMS use rootStyles, not shadowStyles) — so the buttons
+  // are direct light-DOM children of ims-gallery-toolbar, not of its shadow
+  // root. Query both layouts, normalising to the clickable element.
+  const toolbarScope = toolbar?.shadowRoot || toolbar || null;
+  const hosts = Array.from(toolbarScope?.querySelectorAll?.('ims-button') || []);
+  const at = (host) => host || null;
   return {
     gallery,
     next: at(hosts[1]),
@@ -395,12 +393,21 @@ export function createImsShowMediaTarget(root, {
         }
       };
       const clickControl = async (control, intent) => {
-        throwIfAborted(signal);
-        if (typeof presentMediaControl !== 'function' || !control) return false;
-        const presented = await presentMediaControl(control, { signal, intent });
-        // A resolved false means the presenter could not land the click —
-        // that is an honest miss, not a click.
-        return presented === true;
+        if (typeof presentMediaControl !== 'function' || !control) {
+          return { ok: false, reason: 'control-absent' };
+        }
+        const outcome = await presentMediaControl(control, { signal, intent });
+        // Boolean outcomes are tolerated for legacy callers; the structured
+        // variant carries the precise failure (quiet-restore / hidden /
+        // cursor-absent / aborted / fired-false / click-error) per click.
+        if (outcome === true) return { ok: true, reason: 'ok' };
+        if (outcome && typeof outcome === 'object') {
+          return {
+            ok: outcome.presented === true,
+            reason: outcome.reason || 'unpresented',
+          };
+        }
+        return { ok: false, reason: 'unpresented' };
       };
       // Visible accent: the montage begins by presenting the gallery's own
       // expand control and ends by collapsing it again; each frame advances
@@ -430,11 +437,12 @@ export function createImsShowMediaTarget(root, {
           const initiallyExpanded = readOverlayState();
           // The overlay opens only if the user did not already open it.
           if (!initiallyExpanded) {
-            presentedOverlay = await clickControl(controls.fullscreen, 'media-expand');
+            const openGesture = await clickControl(controls.fullscreen, 'media-expand');
+            presentedOverlay = openGesture.ok;
             overlayOwnedByShow = presentedOverlay && readOverlayState() === true;
             emitEvidence(Object.freeze({
               kind: 'overlay-open',
-              via: presentedOverlay ? 'control-click' : 'none',
+              via: presentedOverlay ? 'control-click' : `unpresented(${openGesture.reason})`,
               verified: overlayOwnedByShow,
             }));
           } else {
@@ -461,11 +469,23 @@ export function createImsShowMediaTarget(root, {
               }));
               lastGalleryFrame = frame;
             } else {
+              let clickGestureReason = '';
               if (frame === lastGalleryFrame + 1 && controls.next) {
-                advanced = await clickControl(controls.next, 'gallery-next');
-                // Verify the click landed as a real index advance against
-                // the AUTHORED target, not just "one forward step".
-                if (advanced) {
+                const gesture = await clickControl(controls.next, 'gallery-next');
+                advanced = gesture.ok;
+                clickGestureReason = gesture.reason;
+                // If the gesture itself failed to bear (control not shown
+                // or presenter couldn't click) it is recorded explicitly —
+                // not as "we clicked".
+                if (!gesture.ok) {
+                  emitEvidence(Object.freeze({
+                    frame,
+                    via: `control-untruth(${gesture.reason})`,
+                    verified: false,
+                  }));
+                } else {
+                  // Verify the click landed as a real index advance against
+                  // the AUTHORED target, not just "one forward step".
                   const after = readImageIndex();
                   advanced = after === frame - 1;
                   if (!advanced) {
