@@ -33,7 +33,10 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 // read-only live observation, ensure/reconciliation, gated composition
 // boundary handling are explicit new runtime surfaces.
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
-  raw: 1_850_000,
+  // 2026-09-24: +20 KB headroom for the symbiote-ui modal drawer contract
+  // (inert background, Tab trap, translated a11y names); measured 1851017 raw
+  // against the previous 1850000 cap.
+  raw: 1_870_000,
   gzip: 450_000,
 });
 
