@@ -2983,6 +2983,243 @@ test('portfolio mobile graph modes expose their initial resource profiles', {
   assert.ok(flat.heapUsed < 90 * 1024 * 1024, `flat heap budget exceeded: ${flat.heapUsed}`);
 });
 
+test('tree disclosure and article selection are separate targets', {
+  timeout: 120_000,
+}, async (t) => {
+  await stat(path.join(DIST_DIR, 'index.html'));
+  const server = await startStaticServer();
+  t.after(() => server.close());
+
+  const chrome = await launchChrome();
+  if (!chrome) {
+    t.skip(`Chrome executable not found at ${CHROME_PATH}`);
+    return;
+  }
+  t.after(() => chrome.close());
+
+  const cdp = await createPage(chrome.port);
+  t.after(() => {
+    try {
+      verifyNoBlockedRequests(cdp);
+    } finally {
+      cdp.close();
+    }
+  });
+
+  await cdp.send('Page.enable');
+  await cdp.send('Runtime.enable');
+  await cdp.send('Network.enable');
+  await cdp.send('Emulation.setDeviceMetricsOverride', MOBILE_VIEWPORT);
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+  await navigate(cdp, `${server.origin}/cv/projects/autobox-v1/?mode=flat&resource-test=mobile-content-swipe`);
+  // The rail has to settle before a pointer lands on it, exactly as a thumb
+  // would find it; a press on a moving rail is a different event.
+  await waitForStableDrawerGeometry(cdp);
+
+  const initial = await getDrawerState(cdp, 'initial');
+  const openY = Math.round(initial.contentRect.top + Math.min(320, initial.contentRect.height * 0.4));
+  const openStartX = Math.round(initial.contentRect.left + 24);
+  const openEndX = Math.min(MOBILE_VIEWPORT.width - 12, openStartX + Math.max(170, Math.round(MOBILE_VIEWPORT.width * 0.65)));
+  await dispatchPointerSwipe(cdp, { startX: openStartX, startY: openY, endX: openEndX, endY: openY });
+  const opened = await waitForDrawerState(cdp, 'start drawer open', (state) => state.startOpen, 120);
+  assert.equal(opened.startOpen, true, JSON.stringify(opened));
+
+  // A collapsed branch with children: expanding it must not select it.
+  const found = await cdp.send('Runtime.evaluate', {
+    expression: `(() => {
+      const row = [...document.querySelectorAll('.sn-tree-row')].find((el) => {
+        const toggle = el.querySelector('button.sn-tree-toggle');
+        return toggle && !toggle.hidden
+          && el.getAttribute('aria-expanded') === 'false'
+          && toggle.getBoundingClientRect().width > 0;
+      });
+      if (!row) return null;
+      const toggle = row.querySelector('button.sn-tree-toggle');
+      const t = toggle.getBoundingClientRect();
+      const label = row.querySelector('.sn-tree-label');
+      const l = label.getBoundingClientRect();
+      return {
+        treeId: row.dataset.treeId,
+        toggle: [Math.round(t.x), Math.round(t.y), Math.round(t.width), Math.round(t.height)],
+        labelX: Math.round(l.x),
+        labelWidth: Math.round(l.width),
+      };
+    })()`,
+    returnByValue: true,
+  });
+  if (found.exceptionDetails) throw new Error(found.exceptionDetails.text);
+  const branch = found.result?.value;
+  assert.ok(branch, 'a collapsed tree branch with a disclosure was found');
+
+  // Geometry is re-read before every tap: expanding a branch re-renders the
+  // tree, so a coordinate captured earlier no longer points at anything.
+  const locate = async () => (await cdp.send('Runtime.evaluate', {
+    expression: `(() => {
+      const row = document.querySelector('.sn-tree-row[data-tree-id="${branch.treeId}"]');
+      if (!row) return null;
+      const toggle = row.querySelector('button.sn-tree-toggle');
+      const label = row.querySelector('.sn-tree-label');
+      const t = toggle.getBoundingClientRect();
+      const r = row.getBoundingClientRect();
+      const l = label.getBoundingClientRect();
+      return {
+        toggle: [Math.round(t.x), Math.round(t.y), Math.round(t.width), Math.round(t.height)],
+        row: [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)],
+        label: [Math.round(l.x), Math.round(l.width)],
+      };
+    })()`,
+    returnByValue: true,
+  })).result?.value;
+
+  const state = async () => (await cdp.send('Runtime.evaluate', {
+    expression: `(() => {
+      const row = document.querySelector('.sn-tree-row[data-tree-id="${branch.treeId}"]');
+      if (!row) return null;
+      return {
+        expanded: row.getAttribute('aria-expanded') === 'true',
+        selected: row.getAttribute('aria-selected') === 'true',
+      };
+    })()`,
+    returnByValue: true,
+  })).result?.value;
+
+  const tap = async (x, y) => {
+    await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', buttons: 1, clickCount: 1 });
+    await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', buttons: 0, clickCount: 1 });
+    await new Promise((resolve) => setTimeout(resolve, 140));
+    return state();
+  };
+
+  // The disclosure target, measured by what the document actually gives each
+  // point to, not by the size of a token.
+  const ownership = await cdp.send('Runtime.evaluate', {
+    expression: `(() => {
+      const row = document.querySelector('.sn-tree-row[data-tree-id="${branch.treeId}"]');
+      const toggle = row?.querySelector('button.sn-tree-toggle');
+      if (!toggle) return null;
+      const t = toggle.getBoundingClientRect();
+      const r = row.getBoundingClientRect();
+      const box = (kind) => {
+        let found = null;
+        for (let x = Math.floor(r.left) - 8; x <= Math.ceil(r.right) + 8; x += 1) {
+          for (let y = Math.floor(t.top) - 12; y <= Math.ceil(t.bottom) + 12; y += 1) {
+            const hit = document.elementFromPoint(x, y);
+            if (!hit) continue;
+            const own = hit.closest('button.sn-tree-toggle') === toggle
+              ? 'toggle'
+              : hit.closest('.sn-tree-row') === row ? 'row' : 'other';
+            if (own !== kind) continue;
+            found = found
+              ? { x0: Math.min(found.x0, x), x1: Math.max(found.x1, x), y0: Math.min(found.y0, y), y1: Math.max(found.y1, y) }
+              : { x0: x, x1: x, y0: y, y1: y };
+          }
+        }
+        return found;
+      };
+      const toggleBox = box('toggle');
+      const rowBox = box('row');
+      let unowned = 0;
+      for (let x = Math.floor(r.left); x < Math.ceil(r.right); x += 2) {
+        for (let y = Math.floor(t.top); y < Math.ceil(t.bottom); y += 2) {
+          const hit = document.elementFromPoint(x, y);
+          if (hit && (hit.closest('button.sn-tree-toggle') === toggle || hit.closest('.sn-tree-row') === row)) continue;
+          unowned += 1;
+        }
+      }
+      return {
+        paintedToggle: [Math.round(t.width), Math.round(t.height)],
+        paintedRow: [Math.round(r.width), Math.round(r.height)],
+        toggleBox: toggleBox && [toggleBox.x1 - toggleBox.x0 + 1, toggleBox.y1 - toggleBox.y0 + 1],
+        rowBox: rowBox && [rowBox.x1 - rowBox.x0 + 1, rowBox.y1 - rowBox.y0 + 1],
+        unowned,
+      };
+    })()`,
+    returnByValue: true,
+  });
+  if (ownership.exceptionDetails) throw new Error(ownership.exceptionDetails.text);
+  const area = ownership.result?.value;
+  assert.ok(area?.toggleBox, `the disclosure target was measured (${JSON.stringify(area)})`);
+  assert.equal(area.unowned, 0, 'no point in the row belongs to neither target');
+  assert.ok(area.toggleBox[0] >= area.paintedToggle[0] && area.toggleBox[1] >= area.paintedToggle[1],
+    `the pressable disclosure covers the painted one (${JSON.stringify(area)})`);
+
+  const box = await locate();
+  const toggleCentreX = Math.round(box.toggle[0] + box.toggle[2] / 2);
+  const toggleCentreY = Math.round(box.row[1] + box.row[3] / 2);
+
+  // 1. Centre of the disclosure: expands, and does not select the article.
+  const afterCentre = await tap(toggleCentreX, toggleCentreY);
+  assert.ok(afterCentre, 'the branch is still in the tree');
+  assert.equal(afterCentre.expanded, true, 'a tap on the disclosure expands the branch');
+  assert.equal(afterCentre.selected, false, 'a tap on the disclosure does not select the article');
+
+  // 2. The expanded edges of that same target do the same thing.
+  const open = await locate();
+  for (const [label, x] of [['left edge', open.toggle[0]], ['right edge', open.toggle[0] + open.toggle[2] - 1]]) {
+    const y = Math.round(open.row[1] + open.row[3] / 2);
+    await tap(x, y);
+    const afterEdge = await state();
+    assert.ok(afterEdge, `the branch is still in the tree after the ${label}`);
+    assert.equal(afterEdge.selected, false, `a tap on the ${label} of the disclosure does not select the article`);
+    const beforeEdge = afterEdge;
+    await tap(x, y);
+    const restored = await state();
+    assert.equal(restored.expanded, !beforeEdge.expanded, `the ${label} of the disclosure toggles the branch`);
+    assert.equal(restored.selected, false, `a second tap on the ${label} still does not select the article`);
+  }
+
+  // 3. The boundary with row selection: the article label is the row's own
+  //    target, and selecting it is what a user asked for there.
+  const beforeLabel = await state();
+  assert.equal(beforeLabel.selected, false, 'the branch is unselected before the label tap');
+  const live = await locate();
+  const labelX = Math.round(live.label[0] + live.label[1] / 2);
+  const labelY = Math.round(live.row[1] + live.row[3] / 2);
+  const afterLabel = await tap(labelX, labelY);
+  assert.ok(afterLabel, 'the branch is still in the tree after the label tap');
+  assert.equal(afterLabel.selected, true, 'a tap on the article label selects the article');
+
+  // 4. Neighbouring disclosures must not overlap: one tap, one owner.
+  const neighbours = await cdp.send('Runtime.evaluate', {
+    expression: `(() => {
+      const boxes = [...document.querySelectorAll('.sn-tree-row')]
+        .map((row) => {
+          const toggle = row.querySelector('button.sn-tree-toggle');
+          if (!toggle || toggle.hidden) return null;
+          const t = toggle.getBoundingClientRect();
+          return { id: row.dataset.treeId, x0: t.left, x1: t.right, y0: t.top, y1: t.bottom };
+        })
+        .filter(Boolean);
+      const overlaps = [];
+      for (let i = 0; i < boxes.length; i += 1) {
+        for (let j = i + 1; j < boxes.length; j += 1) {
+          const a = boxes[i], b = boxes[j];
+          if (a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1) overlaps.push([a.id, b.id]);
+        }
+      }
+      return { count: boxes.length, overlaps };
+    })()`,
+    returnByValue: true,
+  });
+  const overlap = neighbours.result?.value;
+  assert.ok(overlap?.count > 1, 'several disclosures were compared');
+  assert.deepEqual(overlap.overlaps, [], 'no two disclosure targets overlap');
+
+  console.log('[TREE_TARGETS]', JSON.stringify(area));
+});
+
+async function waitForStableDrawerGeometry(cdp, attempts = 40) {
+  let previous = null;
+  for (let index = 0; index < attempts; index += 1) {
+    const state = await getDrawerState(cdp, 'geometry');
+    const key = JSON.stringify([state.startRect, state.endRect]);
+    if (previous === key) return state;
+    previous = key;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return getDrawerState(cdp, 'geometry');
+}
+
 async function dispatchPointerSwipe(cdp, { startX, startY, endX, endY, steps = 8 }) {
   await cdp.send('Input.dispatchMouseEvent', {
     type: 'mousePressed',
