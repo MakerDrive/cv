@@ -3242,7 +3242,6 @@ test('portfolio mobile content surface opens and closes drawers with pointer swi
   }).then((r) => r.result?.value);
 
   let y = Math.round(initial.contentRect.top + Math.min(360, initial.contentRect.height * 0.55));
-  let centerX = Math.round(initial.contentRect.left + initial.contentRect.width / 2);
 
   // Diagnostic trace (SWIPE_DEBUG=1): records pointer-event delivery and the
   // drawer gesture lifecycle so a failed open can be pinned to "events not
@@ -3283,11 +3282,34 @@ test('portfolio mobile content surface opens and closes drawers with pointer swi
 
   // Drag length must clear the 50% drawer-width commit threshold on every
   // acceptance width (320/390/430): use 65% of the viewport width.
+  //
+  // The gesture must START where a thumb would start it — near the leading
+  // edge of the content surface — and the end of the drag is bounded by the
+  // viewport, not by the surface's own right edge. Starting at the surface
+  // centre and clamping to `contentRect.right - 16` left only 111px of travel
+  // on a 320px viewport, below the 137px the 275px drawer needs, so the
+  // gesture legitimately did not commit there. Both bounds still keep the
+  // whole drag on the content surface, so the primary (content) gesture path
+  // is the one under test.
   let swipeDistance = Math.max(170, Math.round(swipeViewport.width * 0.65));
+  let swipeStartX = Math.round(initial.contentRect.left + 24);
+  let swipeEndX = Math.min(swipeViewport.width - 12, swipeStartX + swipeDistance);
+  // The commit rule is "half the drawer width", so the test asserts its own
+  // geometry against the layout's measured drawer width rather than a magic
+  // number. If the drawer ever needs more travel than a thumb can give, the
+  // failure names that instead of showing up as a flaky swipe assertion.
+  let startDrawerOpenWidth = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => Math.round(document.querySelector('panel-layout.portfolio-layout')
+      ?._getFallbackDrawerWidth?.() || 0))()`,
+  }).then((r) => r.result?.value || 0);
+  assert.ok(startDrawerOpenWidth > 0, `drawer width must be measurable, got ${startDrawerOpenWidth}`);
+  assert.ok(swipeEndX - swipeStartX >= 0.5 * startDrawerOpenWidth,
+    `opening swipe must clear the 50% commit threshold: travel ${swipeEndX - swipeStartX}px, drawer ${startDrawerOpenWidth}px`);
   await dispatchPointerSwipe(cdp, {
-    startX: centerX,
+    startX: swipeStartX,
     startY: y,
-    endX: Math.min(initial.contentRect.right - 16, centerX + swipeDistance),
+    endX: swipeEndX,
     endY: y,
   });
   // Raised window: on loaded CI-class VMs pointer events reach the page with
