@@ -3334,6 +3334,53 @@ test('portfolio mobile content surface opens and closes drawers with pointer swi
   }
   assert.equal(startOpen.startOpen, true, JSON.stringify(startOpen));
 
+  // Real touch targets, measured by hit testing instead of by reading a CSS
+  // variable. A theme can ask for a 44px target and the box can still be much
+  // smaller, because several different things clip or bound a grown target.
+  // The box here is discovered by scanning points and asking the document what
+  // actually receives them, so this is evidence about the product, not a restatement
+  // of the token that is supposed to produce it.
+  const startHitTargets = await cdp.send('Runtime.evaluate', {
+    expression: `(() => {
+      const panel = document.querySelector('layout-node[mobile-dock="start"][drawer-open]');
+      if (!panel) return null;
+      const scan = (el) => {
+        const r = el.getBoundingClientRect();
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (let x = Math.floor(r.left) - 30; x <= Math.ceil(r.right) + 30; x += 2) {
+          for (let y = Math.floor(r.top) - 30; y <= Math.ceil(r.bottom) + 30; y += 2) {
+            const hit = document.elementFromPoint(x, y);
+            if (!hit || hit.closest('.header-btn') !== el) continue;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+          }
+        }
+        if (minX === Infinity) return null;
+        return {
+          painted: [Math.round(r.width * 100) / 100, Math.round(r.height * 100) / 100],
+          target: [maxX - minX + 1, maxY - minY + 1],
+        };
+      };
+      return [...panel.querySelectorAll('.header-btn')]
+        .filter((el) => el.getBoundingClientRect().width > 0)
+        .map((el) => ({ name: el.getAttribute('title') || el.className, ...(scan(el) || {}) }))
+        .filter((control) => control.target);
+    })()`,
+    returnByValue: true,
+  });
+  if (startHitTargets.exceptionDetails) throw new Error(startHitTargets.exceptionDetails.text);
+  const startHits = startHitTargets.result?.value;
+  assert.ok(startHits?.length >= 2, `the start drawer header was measured (${JSON.stringify(startHits)})`);
+  for (const control of startHits) {
+    // The scan samples whole pixels, so a 44px target can read as 43.
+    assert.ok(control.target[0] >= 43 && control.target[1] >= 43,
+      `start drawer ${control.name}: the pressable box is a real touch target (${JSON.stringify(control)})`);
+    assert.ok(control.target[0] > control.painted[0] + 1 && control.target[1] > control.painted[1] + 1,
+      `start drawer ${control.name}: the pressable box is larger than the painted box (${JSON.stringify(control)})`);
+  }
+
   let startCloseY = Math.round(startOpen.startRect.top + Math.min(360, startOpen.startRect.height * 0.55));
   await dispatchPointerSwipe(cdp, {
     startX: Math.round(startOpen.startRect.right - 42),
