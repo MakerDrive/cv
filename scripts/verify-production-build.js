@@ -37,7 +37,10 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // (inert background, Tab trap, translated a11y names); measured 1851017 raw
   // against the previous 1850000 cap.
   raw: 1_870_000,
-  gzip: 450_000,
+  // 2026-09-25: +5 KB gzip for the completed drawer gesture contract —
+  // deferred pointer capture, touch tree-disclosure column, click-vs-swipe
+  // separation; measured 452330 gzip against the 450000 cap.
+  gzip: 455_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);
