@@ -153,3 +153,23 @@ export const PORTFOLIO_MEDIA_CATALOG = Object.freeze([
     projectPage: 'https://rnd-pro.com/projects/svs/',
   }),
 ]);
+
+/**
+ * Media kinds the CV Show presentation can operate: an ordered frame sequence
+ * (a gallery) or a rotating 360 spinner. A new gallery in the catalog is
+ * operable the moment it is added here and mounted in an article — the tour
+ * never names a media id, so a content addition cannot silently stay inert.
+ * Everything else (YouTube, still images) stays a passive article block that
+ * attention cues can frame but that the Show can never drive.
+ */
+export const PORTFOLIO_SHOW_SEQUENCE_MEDIA_KINDS = Object.freeze(['gallery', 'spinner']);
+
+/** @type {readonly string[]} */
+export const PORTFOLIO_SHOW_SEQUENCE_MEDIA_IDS = Object.freeze(
+  PORTFOLIO_MEDIA_CATALOG
+    .filter(({ activation, kind }) => (
+      activation?.provider === 'ims'
+      && PORTFOLIO_SHOW_SEQUENCE_MEDIA_KINDS.includes(String(kind))
+    ))
+    .map(({ id }) => id),
+);

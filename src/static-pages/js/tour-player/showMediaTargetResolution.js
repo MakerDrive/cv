@@ -1,7 +1,7 @@
 import { createImsShowMediaTarget } from './imsShowMediaAdapter.js';
+import { PORTFOLIO_SHOW_SEQUENCE_MEDIA_IDS } from '../../data/portfolioMediaCatalog.js';
 
-const BOOTHBOT_GALLERY_MEDIA_ID = 'media/boothbot/ims/gallery';
-const PHOTOPIZZA_SPINNER_MEDIA_ID = 'media/photopizza/ims/spinner';
+const SHOW_SEQUENCE_MEDIA_IDS = new Set(PORTFOLIO_SHOW_SEQUENCE_MEDIA_IDS);
 
 function escapeAttributeSelectorValue(value) {
   if (globalThis.CSS?.escape) return globalThis.CSS.escape(String(value));
@@ -25,11 +25,12 @@ function imsMountRoot(target) {
 }
 
 /**
- * Resolves the media targets that the current Show is allowed to operate:
- * the BoothBot gallery montage and the PhotoPizza 360 spinner rotation.
- * Every other YouTube, 360/spinner, and native media remains an ordinary
- * passive article block; framing them is handled by attention cues and can
- * never reach media.play().
+ * Resolves the media targets the current Show is allowed to operate: every
+ * catalogued IMS frame sequence (gallery montage, 360 spinner rotation). The
+ * set comes from the media catalog, not from a list of project names, so a
+ * gallery added to the site is operable without touching the show mechanism.
+ * YouTube, still images and native HTML media remain ordinary passive article
+ * blocks: attention cues can frame them, but the Show can never drive them.
  */
 export function createCvShowMediaTargetResolver({
   document = globalThis.document,
@@ -39,7 +40,7 @@ export function createCvShowMediaTargetResolver({
   const imsTargets = new WeakMap();
 
   return function resolveCvShowMediaTarget(targetId) {
-    if (targetId !== BOOTHBOT_GALLERY_MEDIA_ID && targetId !== PHOTOPIZZA_SPINNER_MEDIA_ID) return null;
+    if (!SHOW_SEQUENCE_MEDIA_IDS.has(targetId)) return null;
     const target = mediaSlot(document, targetId) || resolveTarget(targetId);
     if (!target) return null;
 
