@@ -302,13 +302,20 @@ test('hidden CV transport persists Project time instead of raw source-audio time
     /routeSnapshot[\s\S]*?cvShowGlobalTimeOf\(timeline, timeSegmentId, localMs\)/u,
     'route snapshot exposes only the global composition coordinate',
   );
-  const playerTimelineSource = source.match(
-    /function playerTimeline\([\s\S]*?\n\}/u,
-  )?.[0];
-  assert.ok(playerTimelineSource, 'playerTimeline source');
+  const playerTimelineSource = await readFile(new URL(
+    '../../src/static-pages/js/tour-player/playerTimeline.js',
+    import.meta.url,
+  ), 'utf8');
   assert.match(playerTimelineSource, /projectDurations\.get\(durationEntry\.id\)/u);
   assert.match(playerTimelineSource, /detailReplacements\.get\(entry\.id\)/u);
   assert.doesNotMatch(playerTimelineSource, /durationMilliseconds/u);
+  // The visible clock has to read on the same scale the route's showTime
+  // carries, or a shared link lands on a different position than it advertises.
+  assert.match(
+    playerTimelineSource,
+    /const startMs = compositionStartMs\.get\(durationEntry\.id\)[\s\S]*?\.\.\.\(Number\.isFinite\(startMs\) \? \{ startMs \} : \{\}\),/u,
+  );
+  assert.match(playerTimelineSource, /totalMs: composition\.totalMs/u);
   assert.match(
     source,
     /projectCvShowScheduleDuration\(aligned\)/u,

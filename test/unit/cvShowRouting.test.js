@@ -880,3 +880,61 @@ test('scene route mapping uses durable navigate targets and explicit project own
     ],
   }), /Ambiguous CV Show route target: projects\/shared/u);
 });
+
+test('the player timeline reads on the same composition clock the route carries', async () => {
+  const { playerTimeline } = await import(
+    '../../src/static-pages/js/tour-player/playerTimeline.js'
+  );
+  const story = projectCvShowStory(CV_SHOW_PRESENTATION_PROJECT);
+  const composition = createCvShowCompositionTimeline(story);
+  const segmentById = new Map(composition.segments.map((segment) => [segment.id, segment]));
+
+  for (const mode of ['short', 'full']) {
+    const timeline = playerTimeline(story, mode);
+    assert.equal(
+      timeline.totalMs,
+      composition.totalMs,
+      `${mode}: the shown total is the composition total, not the traversal length`,
+    );
+    assert.ok(timeline.turns.length > 0, `${mode}: turns exist`);
+    for (const turn of timeline.turns) {
+      const segment = segmentById.get(turn.id);
+      assert.ok(segment, `${mode}: "${turn.id}" is a composition segment`);
+      assert.equal(
+        turn.startMs,
+        segment.startMs,
+        `${mode}: "${turn.id}" starts where the composition puts it`,
+      );
+      assert.ok(turn.startMs + turn.durationMs <= composition.totalMs, `${mode}: "${turn.id}" stays inside the composition`);
+    }
+  }
+
+  // The two audited links: the visible clock must start reading the same value
+  // the URL carries, in every mode.
+  for (const [timeMs, entryId] of [[236180, 'symbiote-ui'], [478460, 'agent-portal']]) {
+    const resolved = resolveCvShowCompositionAt(composition, timeMs);
+    assert.equal(resolved.entryId, entryId);
+    for (const mode of ['short', 'full']) {
+      const turn = playerTimeline(story, mode).turns.find(({ id }) => id === entryId);
+      assert.equal(
+        turn.startMs,
+        timeMs,
+        `${mode}: the "${entryId}" turn starts exactly at showTime=${timeMs}`,
+      );
+    }
+  }
+
+  // `full` plays every composition segment, so its turns tile the composition:
+  // a declared total larger than the played span would be a clock that runs
+  // out before the show ends.
+  const full = playerTimeline(story, 'full');
+  assert.equal(
+    full.turns.at(-1).startMs + full.turns.at(-1).durationMs,
+    full.totalMs,
+    'the full traversal ends with the composition',
+  );
+  full.turns.reduce((cursor, turn, index) => {
+    assert.equal(turn.startMs, cursor, `full turn ${index} ("${turn.id}") follows its predecessor`);
+    return cursor + turn.durationMs;
+  }, 0);
+});

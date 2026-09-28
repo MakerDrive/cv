@@ -29,7 +29,6 @@ import {
 } from '../../../static-pages/js/tour-player/failurePolicy.js';
 import { describeCvShowMissingTarget, describeCvShowSpeechFailure } from '../../../static-pages/js/tour-player/speechFailure.js';
 import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../../static-pages/data/cvShowWebAudioRelease.js';
-import { CV_SHOW_SCHEDULE_DURATIONS } from '../../../static-pages/data/cvShowScheduleDurations.js';
 import {
   createCvShowCompositionTimeline,
   cvShowGlobalTimeOf,
@@ -38,6 +37,7 @@ import {
 import {
   createCvShowMessageStreamController,
 } from '../../../static-pages/js/tour-player/messageStream.js';
+import { playerTimeline } from '../../../static-pages/js/tour-player/playerTimeline.js';
 import {
   createCvShowBranchReturnSnapshot,
   validateCvShowBranchReturnSnapshot,
@@ -205,28 +205,6 @@ export function resolveCvShowPlayerEntry({
 } = {}) {
   if (!inBranch) return currentEntry || null;
   return activeSpeechEntry || activeBranchEntry || currentEntry || null;
-}
-
-/** @param {any} story @param {'short' | 'full'} [mode] @param {Map<string, number>} [projectDurations] */
-function playerTimeline(story, mode = 'short', projectDurations = new Map(), detailReplacements = new Map()) {
-  const knownDurations = String(CV_SHOW_SCHEDULE_DURATIONS.releaseId) === String(CV_SHOW_WEB_AUDIO_RELEASE.releaseId)
-    ? CV_SHOW_SCHEDULE_DURATIONS.durations
-    : {};
-  return Object.freeze({
-    title: 'CV Show',
-    turns: Object.freeze(createCvShowPlaybackEntries(story, mode).map((entry) => {
-      const replacementId = detailReplacements.get(entry.id) || '';
-      const replacement = entry.branchId === replacementId ? story?.branches?.[replacementId] : null;
-      const durationEntry = replacement || entry;
-      const durationMs = Number(projectDurations.get(durationEntry.id) ?? knownDurations[durationEntry.id]);
-      return Object.freeze({
-        id: entry.id,
-        persona: entry.sceneId ? 'Detail' : 'CV',
-        text: entry.title || entry.id,
-        durationMs: Number.isFinite(durationMs) && durationMs > 0 ? durationMs : null,
-      });
-    })),
-  });
 }
 
 export class PortfolioShowChat extends HTMLElement {
