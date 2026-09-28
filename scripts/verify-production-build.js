@@ -39,7 +39,9 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   raw: 1_870_000,
   // 2026-09-25: +5 KB gzip for the completed drawer gesture contract —
   // deferred pointer capture, touch tree-disclosure column, click-vs-swipe
-  // separation; measured 452330 gzip against the 450000 cap.
+  // separation; measured 452330 gzip against the 450000 cap. Re-measured at
+  // 453486 gzip / 1864679 raw against symbiote-ui dd5b8e9, which added the
+  // composition time base the CV Show player clock reads.
   gzip: 455_000,
 });
 

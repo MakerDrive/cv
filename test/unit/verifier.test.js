@@ -290,9 +290,11 @@ test('verifier verifyJsMetafile rejects any import record across all outputs', (
 });
 
 test('verifier enforces the main bundle budget and runtime Markdown asset boundary', () => {
+  // The literal is pinned on purpose: a budget change must be a conscious act
+  // in MAIN_JS_SIZE_LIMITS *and* here, or the raise is invisible in review.
   assert.deepStrictEqual(MAIN_JS_SIZE_LIMITS, {
     raw: 1870000,
-    gzip: 450000,
+    gzip: 455000,
   });
 
   let measured = verifyMainBundleSize('small bundle', { raw: 100, gzip: 100 });
