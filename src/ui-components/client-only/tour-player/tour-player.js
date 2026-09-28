@@ -1108,7 +1108,20 @@ export class PortfolioShowChat extends HTMLElement {
     // `isRunning` means a session exists (a paused preview or a paused route
     // restore both set it), not that a show was already started. A start intent
     // against such a session is a play request, not a duplicate.
-    if (this.$.isRunning || this.#mode) return this.#convergeStartIntent(mode);
+    if (this.$.isRunning) return this.#convergeStartIntent(mode);
+    if (this.#mode) {
+      // A start is already in flight. `#start` claims `#mode` before it awaits
+      // narration resources, so for that window `#mode` is set while
+      // `isRunning` is still false — a start underway, not a duplicate and not
+      // a session to converge on. Refusing here dropped a legitimate start: the
+      // in-flight start then completed on its own `play` value and presented
+      // the scene paused, with nothing to say why.
+      //
+      // The audience pressing start means "play", so arm the intent that the
+      // in-flight start reads when it computes its effective play state.
+      this.#queuePendingTrustedPlay();
+      return true;
+    }
     if (mode !== 'short' && mode !== 'full') return false;
     if (this.#showCompleted && !allowCompletedReentry) return false;
     const activeTransportRequestId = transportRequestId || ++this.#transportRequestId;
