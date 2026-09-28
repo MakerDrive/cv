@@ -6570,11 +6570,14 @@ test('terminal narration errors keep the player controllable: Play repeats the s
   dock.append(player);
   document.body.append(dock);
 
-  assert.equal(await player.applyShowRoute(globalRoute("positioning", 0, false)), true);
+  // Start playing: the bounded scene-setup retry is a playback recovery, so the
+  // narration failure must arrive while the transport owns the scene.
+  assert.equal(await player.applyShowRoute(globalRoute("positioning", 0, true)), true);
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  assert.equal(player.$.isPaused, false, 'the show starts in playback');
 
   const messageCount = () => dock.textContent.length;
   const baseline = messageCount();
-  showPlayer.configs.at(-1).controller.play();
   const deadline = Date.now() + 15_000;
   while (!player.$.isError && Date.now() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, 250));
@@ -7263,6 +7266,14 @@ test('an interrupted owner scene setup is re-run when the same replaced segment 
   const player = new PortfolioShowChat();
   player.agentDock = dock;
   const sceneSetupPhases = [];
+  // The owner scene setup is held open: the second seek must interrupt a setup
+  // that is still in flight, which is the state a slow media mount leaves the
+  // page in. A setup that failed instead would latch a terminal error, and the
+  // test would prove nothing about re-running an interrupted setup.
+  const heldOwnerSetups = [];
+  const isOwnerSetup = (directives) => directives.some((directive) => (
+    directive.type === 'navigate' && directive.id === 'symbiote-ui.open'
+  ));
   player.addEventListener('portfolio-show-phase', (event) => {
     const directives = event.detail?.directives || [];
     sceneSetupPhases.push({
@@ -7273,9 +7284,16 @@ test('an interrupted owner scene setup is re-run when the same replaced segment 
     });
     if (typeof event.detail?.complete !== 'function') return;
     event.detail.handled = true;
+    if (isOwnerSetup(directives)) {
+      heldOwnerSetups.push(event.detail.complete);
+      return;
+    }
     event.detail.complete(Object.freeze({
       status: 'success',
-      receipts: Object.freeze([]),
+      receipts: Object.freeze([Object.freeze({
+        status: 'success',
+        result: Object.freeze({ status: 'completed' }),
+      })]),
     }));
   });
   dock.append(player);
@@ -7321,14 +7339,34 @@ test('an interrupted owner scene setup is re-run when the same replaced segment 
   // second seek interrupts it before the setup completed. The setup must be
   // re-run for the second seek: the physical scene was never confirmed.
   sceneSetupPhases.length = 0;
+  heldOwnerSetups.length = 0;
   currentConfig().controller.seek(2, 4_000);
   await wait(10);
+  spoken.at(-1)?.onstart?.();
+  await wait(10);
+  assert.equal(heldOwnerSetups.length, 1, 'the first seek starts the owner scene setup');
   currentConfig().controller.seek(2, 9_000);
+  await wait(10);
+  spoken.at(-1)?.onstart?.();
   await wait(10);
   assert.equal(player.$.inBranch, true);
   assert.equal(player.routeSnapshot.detailId, 'symbiote-ui-details');
-  spoken.at(-1)?.onstart?.();
-  await wait(40);
+  assert.equal(
+    heldOwnerSetups.length,
+    2,
+    'the interrupted owner scene setup is re-run for the second seek',
+  );
+  // Both held setups settle as the first seek's was superseded.
+  for (const complete of heldOwnerSetups) {
+    complete(Object.freeze({
+      status: 'success',
+      receipts: Object.freeze([Object.freeze({
+        status: 'success',
+        result: Object.freeze({ status: 'completed' }),
+      })]),
+    }));
+  }
+  await wait(20);
 
   const ownerSceneSetupReRan = sceneSetupPhases.some((phase) => (
     phase.directives.some((directive) => (

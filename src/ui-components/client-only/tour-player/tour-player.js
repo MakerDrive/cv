@@ -318,6 +318,15 @@ export class PortfolioShowChat extends HTMLElement {
   #activeSpeechEntry = null;
   #speechRetryAttempts = new Map();
   #sceneRetryScheduled = false;
+  /** @type {ReturnType<typeof globalThis.setTimeout> | null} */
+  #sceneRetryTimer = null;
+  /**
+   * Failure observed while the transport is paused. A paused show owns no
+   * automatic recovery: the attempt is suspended, not retried, so the next
+   * explicit Play makes exactly one fresh attempt instead of a timer loop.
+   * @type {{ entryId: string, positionMs: number } | null}
+   */
+  #suspendedSceneFailure = null;
   #messageStream = createCvShowMessageStreamController();
 
   constructor() {
@@ -641,6 +650,7 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   pauseShow(reason = 'explicit') {
+    this.#cancelSceneRetry();
     const cancelledPendingPlay = this.#cancelPendingTrustedPlay();
     if (
       !this.$.isRunning
@@ -712,6 +722,11 @@ export class PortfolioShowChat extends HTMLElement {
     this.#showReceiptSummary = createPresentationReceiptSummary();
     this.#requestId += 1;
     this.#transportRequestId += 1;
+    this.#cancelSceneRetry();
+    // The retry budget is per show, not per page: a stopped show must not
+    // carry its exhausted attempts into the next one.
+    this.#speechRetryAttempts.clear();
+    this.#suspendedSceneFailure = null;
     this.#stopSpeech('show-stopped');
     this.#cancelMessageStreams();
     this.$.isRunning = false;
@@ -863,7 +878,7 @@ export class PortfolioShowChat extends HTMLElement {
           host.#pendingTransportIntent
           || (host.$.isRunning && host.$.resumeRequired && !host.#activeSpeechEntry)
         ) {
-          if (host.$.isRunning && host.$.isError && !host.#sceneRetryScheduled) host.#repeatCurrentEntry();
+          if (host.$.isRunning && host.#needsSceneRecovery()) host.#repeatCurrentEntry();
           else host.#queuePendingTrustedPlay();
         }
         else if (!host.$.isRunning && host.#mode) void host.#start(host.#mode);
@@ -898,6 +913,17 @@ export class PortfolioShowChat extends HTMLElement {
       preview(index) { void host.#preview(index); },
       seek(index, positionMs) { void host.#seek(index, positionMs); },
     };
+  }
+
+  /**
+   * True when the next Play is the explicit answer to a failed or suspended
+   * scene attempt. A reported terminal error is the visible case; a failure the
+   * audience caused by pausing is held in #suspendedSceneFailure so the chat
+   * is not filled with duplicate retry messages while the transport waits.
+   */
+  #needsSceneRecovery() {
+    if (this.#sceneRetryScheduled) return false;
+    return this.$.isError || this.#suspendedSceneFailure !== null;
   }
 
   #queuePendingTrustedPlay() {
@@ -1479,6 +1505,9 @@ export class PortfolioShowChat extends HTMLElement {
     positionMs = 0,
     precedingSetupEntry = null,
   } = {}) {
+    // A new scene supersedes any pending retry: the older timer must never
+    // re-present a scene the transport already replaced.
+    this.#cancelSceneRetry();
     this.#requestId += 1;
     const requestId = this.#requestId;
     this.#stopSpeech('scene-changed', { retainEntryId: entry.id });
@@ -1621,9 +1650,15 @@ export class PortfolioShowChat extends HTMLElement {
    * Replays the current scene after a terminal presentation failure. A fresh
    * #presentEntry run supersedes every stale callback and gives the step a
    * clean scene setup, so Play/Retry always restores control.
+   *
+   * The recovery is exactly one attempt per user action: the suspended-failure
+   * record, the pending retry timer and the per-entry attempt budget are all
+   * cleared here, so a Play can neither re-consume a failed promise nor be
+   * swallowed by a still-armed retry flag.
    */
   #repeatCurrentEntry() {
     if (!this.$.isRunning) return;
+    this.#cancelSceneRetry();
     if (this.$.inBranch) {
       // Retry inside a Detail branch: leave the failed branch session and
       // re-enter the same Detail with its owner scene setup forced, so the
@@ -1652,6 +1687,7 @@ export class PortfolioShowChat extends HTMLElement {
     const entry = this.#playbackEntries[this.#sceneIndex];
     if (!entry) return;
     this.#speechRetryAttempts.delete(entry.id);
+    this.#suspendedSceneFailure = null;
     this.$.isError = false;
     this.$.errorText = '';
     this.#clearSystemErrors();
@@ -1666,7 +1702,28 @@ export class PortfolioShowChat extends HTMLElement {
     };
   }
 
+  /**
+   * Cancels a pending scene retry. A retry that survives a pause, a stop or a
+   * newer scene would re-present the entry and burn a retry attempt while the
+   * show is suspended, so every owner of the transport lifecycle cancels it.
+   */
+  #cancelSceneRetry() {
+    if (this.#sceneRetryTimer !== null) {
+      globalThis.clearTimeout?.(this.#sceneRetryTimer);
+      this.#sceneRetryTimer = null;
+    }
+    this.#sceneRetryScheduled = false;
+  }
+
   #scheduleSceneRetry(entryId, requestId, positionMs = 0) {
+    // While the show is paused there is no recovery to schedule: a failure the
+    // audience is sitting through is suspended and consumed by the next
+    // explicit Play. Retrying here restarted the scene under the pause, which
+    // replayed the entry intro and duplicated «Повторяю шаг…» in the chat.
+    if (this.$.isPaused) {
+      this.#suspendedSceneFailure = Object.freeze({ entryId, positionMs });
+      return true;
+    }
     if (this.#sceneRetryScheduled) return true;
     // Retry replays a timeline Short entry. A Detail branch is not a timeline
     // entry: keep the failure visible and let the player recovery action
@@ -1677,16 +1734,24 @@ export class PortfolioShowChat extends HTMLElement {
     if (attempts >= CV_SHOW_SCENE_RETRY_LIMIT) return false;
     this.#sceneRetryScheduled = true;
     const settleMs = CV_SHOW_SCENE_RETRY_SETTLE_MS * (attempts + 1);
-    globalThis.setTimeout?.(() => {
+    this.#sceneRetryTimer = globalThis.setTimeout?.(() => {
+      this.#sceneRetryTimer = null;
       this.#sceneRetryScheduled = false;
       if (requestId !== this.#requestId || !this.isConnected) return;
+      // The audience paused while the settle window was open: the retry is
+      // dropped, the attempt budget is untouched, and the next Play makes one
+      // fresh attempt.
+      if (this.$.isPaused) {
+        this.#suspendedSceneFailure = Object.freeze({ entryId, positionMs });
+        return;
+      }
       this.#speechRetryAttempts.set(entryId, attempts + 1);
       this.$.isError = false;
       this.$.errorText = '';
       this.#appendSystemMessage(this.#message('tour.status.retry'));
       this.#sceneIndex = Math.max(0, this.#playbackEntries.indexOf(retryEntry));
       this.#presentEntry(retryEntry, { positionMs, startPaused: !this.#playRequested });
-    }, settleMs);
+    }, settleMs) ?? null;
     return true;
   }
 
@@ -2315,7 +2380,7 @@ export class PortfolioShowChat extends HTMLElement {
     }
     if (!this.$.resumeRequired || this.$.mediaBlocksResume) return;
     if (!this.#activeSpeechEntry) {
-      if (this.$.isError && !this.#sceneRetryScheduled) {
+      if (this.#needsSceneRecovery()) {
         this.#repeatCurrentEntry();
         return;
       }
