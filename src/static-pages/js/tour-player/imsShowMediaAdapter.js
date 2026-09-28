@@ -261,6 +261,22 @@ function galleryImageCount(player) {
 }
 
 /**
+ * Public ims-gallery frame readback: the current image is the zero-based index
+ * the player publishes as `hotspotState.image`. A restore or a montage frame is
+ * only ever *claimed* by an `api` call until this agrees with it, so a read
+ * that cannot be made stays unknown instead of silently reading as success.
+ * @returns {number | null} zero-based index, or null when unreadable
+ */
+function galleryImageIndex(player) {
+  try {
+    const image = Number(player?.hotspotState?.image);
+    return Number.isInteger(image) && image >= 0 ? image : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The gallery toolbar lives in `ims-gallery`'s shadow root, its buttons in
  * the toolbar's own shadow root. This is the public presentation surface of
  * the widget — the only elements a visitor can physically click.
@@ -441,6 +457,10 @@ export function createImsShowMediaTarget(root, {
       { signal } = /** @type {{ signal?: AbortSignal }} */ ({}),
     ) {
       throwIfAborted(signal);
+      // A montage owns the frame sequence from here on. Any checkpoint restore
+      // still waiting for its player is now stale: letting one land would yank
+      // the gallery backwards into an audience that already pressed Play.
+      restoreGeneration += 1;
       const player = actuatedPlayer(await getPlayer(signal));
       throwIfAborted(signal);
       const kind = playerKind(player);
@@ -713,6 +733,42 @@ export function createImsShowMediaTarget(root, {
       });
     },
 
+    /**
+     * Restores the frame a montage had reached at a paused deep link or a seek.
+     * This is a state restore, not a presentation: no control is clicked, no
+     * sequence is replayed and no frame hold is spent.
+     *
+     * It returns an honest verdict rather than an assumption: the frame index
+     * is read back from the player, and a restore the audience has already
+     * resumed past reports itself superseded instead of moving the gallery.
+     * @param {{ frame?: unknown }} [checkpoint]
+     */
+    async restoreShowMediaCheckpoint({ frame } = {}) {
+      const generation = ++restoreGeneration;
+      const player = actuatedPlayer(await getPlayer());
+      const kind = playerKind(player);
+      if (kind !== 'ims-gallery') return null;
+      if (!Number.isInteger(Number(frame))) return null;
+      if (generation !== restoreGeneration) {
+        return Object.freeze({ status: 'superseded', frame: lastGalleryFrame });
+      }
+      lastGalleryFrame = Math.max(1, Number(frame));
+      player.goTo?.(lastGalleryFrame - 1);
+      const observed = galleryImageIndex(player);
+      const verified = observed === lastGalleryFrame - 1;
+      return Object.freeze({
+        status: verified ? 'restored' : 'unverified',
+        frame: lastGalleryFrame,
+        observed: verified ? observed : null,
+      });
+    },
+
+    /**
+     * A paused show keeps the gallery on its current frame: the montage clock
+     * is suspended by the pause gate (so the hold is not spent either), and
+     * the gallery's autoplay loop was already taken off at disclosure. Only the
+     * 360 spinner has an independent rotation to stop here.
+     */
     async pauseShowMedia() {
       try {
         const player = actuatedPlayer(await getPlayer());

@@ -287,6 +287,10 @@ export class PortfolioShowChat extends HTMLElement {
   #narrationReady = Promise.resolve();
   #presentationDirectiveFilter = null;
   #alignment = createCvShowAlignmentController({
+    // The element is the event host: a paused checkpoint asks the page to put a
+    // gallery back on the frame it was reading, and only the page knows where
+    // that gallery is mounted.
+    host: this,
     url: globalThis.location?.href,
     baseUrl: globalThis.document?.baseURI,
     getAuthoringView: () => this.#authoringView,

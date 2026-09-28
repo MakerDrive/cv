@@ -1207,3 +1207,64 @@ test('an unreadable autoplay state is never resolved by stopping the audience sl
   });
   assert.equal((await inert.captureShowMediaState()).autoplay, false);
 });
+test('a checkpoint restore the audience resumed past reports itself superseded', async () => {
+  let releasePlayer;
+  let markRequested;
+  const requested = new Promise((resolve) => { markRequested = resolve; });
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    startAutoplay() {},
+    stopAutoplay() {},
+    goTo(index) { this.hotspotState = { image: index }; },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    // The restore blocks on the same cold player mount a paused deep link hits.
+    resolvePlayer: () => new Promise((resolve) => {
+      releasePlayer = () => resolve(gallery);
+      markRequested();
+    }),
+  });
+
+  const pending = target.restoreShowMediaCheckpoint({ frame: 3 });
+  await requested;
+  // Play is pressed before the player finished mounting: the montage takes the
+  // frame sequence, and the pending restore must not drag the gallery back.
+  const montage = target.playShowMedia(
+    { frames: [1, 2, 3], frameHoldMs: 1000, finalFrame: 3 },
+    { signal: new AbortController().signal },
+  );
+  releasePlayer();
+
+  const restored = await pending;
+  assert.equal(restored.status, 'superseded', 'the abandoned restore says so instead of moving the gallery');
+  assert.equal(gallery.hotspotState.image, 0, 'the gallery was never yanked backwards');
+
+  await (await montage).completion;
+});
+
+test('a checkpoint restore reports whether the gallery really landed on the frame', async () => {
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    goTo() {},
+  };
+  const verified = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+  });
+  gallery.goTo = function goTo(index) { this.hotspotState = { image: index }; };
+  assert.deepEqual(
+    await verified.restoreShowMediaCheckpoint({ frame: 4 }),
+    { status: 'restored', frame: 4, observed: 3 },
+  );
+
+  // A player that swallows goTo must not be reported as a restore that worked.
+  const deaf = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => ({ localName: 'ims-gallery', hotspotState: { image: 0 }, goTo() {} }),
+  });
+  assert.deepEqual(
+    await deaf.restoreShowMediaCheckpoint({ frame: 4 }),
+    { status: 'unverified', frame: 4, observed: null },
+  );
+});
+

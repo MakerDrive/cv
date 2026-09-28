@@ -20,6 +20,7 @@ import {
 } from './showAdapter.js';
 import { CV_SHOW_GATE_QUEUE } from './gateQueue.js';
 import { runCvShowQuietRestore } from './presentationQuietRestore.js';
+import { resolveCvShowGalleryCheckpoint } from './galleryCheckpoint.js';
 import {
   createCascadeTracker,
   cvShowCellLayerId,
@@ -235,6 +236,7 @@ export function requireCvShowSceneSetupSuccess(receipt, entryId = '') {
  *   userSettings?: any,
  *   getAuthoringView?: () => any,
  *   getSpeechDirectiveIds?: (entry: any) => string[] | null,
+ *   host?: EventTarget | null,
  *   playbackClock?: { request?: Function, cancel?: Function, document?: Document },
  * }} [options]
  */
@@ -246,6 +248,7 @@ export function createCvShowAlignmentController({
   userSettings,
   getAuthoringView = () => cvShowRuntimeAuthority.getView(),
   getSpeechDirectiveIds = () => null,
+  host = null,
   playbackClock,
 } = {}) {
   let manifest = null;
@@ -656,18 +659,73 @@ export function createCvShowAlignmentController({
       for (let [type, listener] of Object.entries(mediaListeners)) {
         media.addEventListener?.(type, listener);
       }
+      const projectCellById = new Map(tuple.project.cells.map((cell) => [cell.id, cell]));
+      // Directives that leave the page in a state the audience must see again
+      // at a checkpoint: which article is open and what is selected inside it.
+      // Framing, markers and the gallery montage are NOT state — replaying them
+      // would re-present gestures the audience never made.
+      const CHECKPOINT_STATE_INTERACTIONS = new Set(['navigate', 'native']);
+      const checkpointStateCells = (checkpointMs) => {
+        const at = Number(checkpointMs) || 0;
+        return tuple.schedule.cells.filter((cell) => {
+          if (cell.kind === 'narration') return false;
+          if (!Number.isFinite(cell.plannedBarriers?.settled)) return false;
+          if (cell.startMs >= at || cell.plannedBarriers.settled > at) return false;
+          const projectCell = projectCellById.get(cell.cellId);
+          const interaction = String(projectCell?.cue?.interaction?.type || '');
+          return CHECKPOINT_STATE_INTERACTIONS.has(interaction);
+        });
+      };
+      // The gallery frame a paused checkpoint landed on. The montage itself is
+      // never replayed: the audience gets the frame it was reading, not the
+      // whole sequence again.
+      const galleryCheckpoint = (checkpointMs) => {
+        const at = Number(checkpointMs) || 0;
+        for (const cell of tuple.schedule.cells) {
+          const projectCell = projectCellById.get(cell.cellId);
+          if (String(projectCell?.cue?.interaction?.type || '') !== 'click') continue;
+          const directive = projectCvShowDirective(projectCell, tuple.project);
+          if (directive?.type !== 'media' || !Array.isArray(directive.frames)) continue;
+          const resolved = resolveCvShowGalleryCheckpoint({
+            cellStartMs: cell.startMs,
+            gestureDurationMs: Number(projectCell?.timing?.gestureDurationMs) || 0,
+            frames: directive.frames,
+            frameHoldMs: directive.frameHoldMs,
+            checkpointMs: at,
+          });
+          if (resolved) return Object.freeze({ target: String(directive.target || ''), ...resolved });
+        }
+        return null;
+      };
+      // Hands the page the frame to put the gallery back on. Deliberately not
+      // awaited: the show is pausing here and the gallery player mounts lazily,
+      // so gating the transport pause on a media mount would hang a paused deep
+      // link behind a spinner. The page reports a failed restore as a runtime
+      // error rather than letting the audience sit on a silently wrong frame.
+      const restoreGalleryCheckpoint = (checkpoint) => {
+        if (!checkpoint?.target || !host) return;
+        host.dispatchEvent(new CustomEvent('portfolio-show-media-checkpoint', {
+          bubbles: true,
+          composed: true,
+          detail: Object.freeze({ target: checkpoint.target, frame: checkpoint.frame }),
+        }));
+      };
       // The setup replay restores state the audience already reached at the
       // target position (page load, seek, paused deep link): no decorative
       // gestures may appear for those cells.
-      const runSetup = () => runCvShowQuietRestore(async () => {
+      const runSetup = (checkpointMs = tuple.schedule.presentationStartMs) => runCvShowQuietRestore(async () => {
         const prerollCells = tuple.schedule.cells.filter((cell) => (
           cell.kind !== 'narration'
           && cell.startMs < tuple.schedule.presentationStartMs
           && Number.isFinite(cell.plannedBarriers?.settled)
           && cell.plannedBarriers.settled <= tuple.schedule.presentationStartMs
         ));
+        const replayed = new Map();
+        for (const cell of [...prerollCells, ...checkpointStateCells(checkpointMs)]) {
+          replayed.set(cell.cellId, cell);
+        }
         let snapshot = tuple.execution.snapshot;
-        for (const cell of prerollCells) {
+        for (const cell of [...replayed.values()].sort((left, right) => left.startMs - right.startMs)) {
           tuple.execution.sample({
             mediaTimeMs: cell.startMs,
             reason: cell.startMs === 0 ? 'entry-setup' : 'entry-preroll',
@@ -695,7 +753,6 @@ export function createCvShowAlignmentController({
         }
         return snapshot;
       });
-      const projectCellById = new Map(tuple.project.cells.map((cell) => [cell.id, cell]));
       const crossBoundaryAttentionCells = tuple.schedule.cells.filter((cell) => {
         const projectCell = projectCellById.get(cell.cellId);
         return cell.kind !== 'narration'
@@ -907,8 +964,9 @@ export function createCvShowAlignmentController({
           deferredMediaStartSeconds = checkpoint.sourceTimeMs / 1_000;
           if (!deferPresentation) {
             await beforeDeferredPresentation?.();
-            await runSetup();
+            await runSetup(checkpoint.projectTimeMs);
             await runHeldCheckpointAttention();
+            restoreGalleryCheckpoint(galleryCheckpoint(checkpoint.projectTimeMs));
           }
           await tuple.execution.pause();
           if (presentationComplete) {
