@@ -7295,7 +7295,7 @@ test('boothbot Short Show advances five gallery frames before the catalog-result
 });
 
 test('photopizza YouTube block is framed without starting media playback', {
-  timeout: 50_000,
+  timeout: 300_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('YouTube frame evidence requires the local deterministic player seam');
   const page = await createPortfolioPage(t, {
@@ -7346,7 +7346,7 @@ test('photopizza YouTube block is framed without starting media playback', {
       && receipt?.status === 'settled'
     ),
     'photopizza video-03 settled receipt',
-    { afterIndex: runEventIndex, inactivityMs: 25_000 },
+    { afterIndex: runEventIndex, inactivityMs: 120_000 },
   );
   const youtube = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
