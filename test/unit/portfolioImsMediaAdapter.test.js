@@ -597,6 +597,7 @@ test('IMS Show gallery never reads the private dollar-state fallback', async () 
   assert.deepEqual(await target.captureShowMediaState(), {
     kind: 'ims-gallery',
     frame: 1,
+    autoplay: false,
   });
 
   const source = await readFile(
@@ -823,6 +824,7 @@ test('IMS Show target forwards capture abort and retries a rejected public-playe
   assert.deepEqual(await target.captureShowMediaState(), {
     kind: 'ims-gallery',
     frame: 3,
+    autoplay: false,
   });
   assert.equal(attempts, 2);
 });
@@ -1122,3 +1124,86 @@ test('a montage that starts while the show is already paused never spends its fr
   );
 });
 
+test('a montage takes the gallery autoplay off and the restore hook gives it back', async () => {
+  const events = [];
+  // The toolbar is the gallery's only autoplay readback, and its order is
+  // prev, next, autoplay, fullscreen. A 'pause' icon means the slideshow runs.
+  const autoplayButton = { icon: 'pause' };
+  const toolbarButtons = [{ icon: 'left' }, { icon: 'right' }, autoplayButton, { icon: 'fullscreen' }];
+  const viewer = { localName: 'ims-viewer', hasAttribute: () => false };
+  const player = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    autoplaying: true,
+    closest: () => viewer,
+    shadowRoot: {
+      querySelector: selector => (selector === 'ims-gallery-toolbar'
+        ? { querySelectorAll: () => toolbarButtons }
+        : null),
+    },
+    // The real gallery republishes the slideshow state on the toolbar button.
+    startAutoplay() { events.push('start'); this.autoplaying = true; autoplayButton.icon = 'pause'; },
+    stopAutoplay() { events.push('stop'); this.autoplaying = false; autoplayButton.icon = 'play'; },
+    goTo(index) { events.push(`goTo:${index}`); this.hotspotState = { image: index }; },
+  };
+  const target = createImsShowMediaTarget(viewer, {
+    resolvePlayer: async () => player,
+    clock: { wait: async () => {} },
+  });
+
+  const captured = await target.captureShowMediaState();
+  assert.equal(captured.autoplay, true, 'the captured state records the audience autoplay');
+
+  const result = await target.playShowMedia(
+    { frames: [1, 2], frameHoldMs: 1000, finalFrame: 2 },
+    { signal: new AbortController().signal },
+  );
+  await result.completion;
+  assert.equal(
+    player.autoplaying,
+    false,
+    'the montage owns the frame sequence: the gallery loop is off while it runs',
+  );
+  assert.deepEqual(
+    events.filter((name) => name === 'start'),
+    [],
+    'the montage never restarts the loop it took over',
+  );
+  assert.ok(
+    result.evidence.some(({ kind, via, verified }) => (
+      kind === 'autoplay-hold' && via === 'player-api' && verified === true
+    )),
+    'taking the autoplay off is a labelled player-API decision, not a proven click',
+  );
+
+  await target.restoreShowMediaState(captured);
+  assert.equal(player.autoplaying, true, 'the restore hook gives the audience autoplay back');
+});
+
+test('an unreadable autoplay state is never resolved by stopping the audience slideshow', async () => {
+  const events = [];
+  // The player owns a slideshow, but its toolbar is not readable, so the show
+  // has no claim either way.
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    startAutoplay() { events.push('start'); },
+    stopAutoplay() { events.push('stop'); },
+    goTo() {},
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+  });
+
+  const captured = await target.captureShowMediaState();
+  assert.equal(captured.autoplay, null, 'an unreadable toolbar is unknown, not "off"');
+
+  await target.restoreShowMediaState(captured);
+  assert.deepEqual(events, [], 'restore leaves an unknown slideshow exactly as it found it');
+
+  // A player with no slideshow at all still yields a usable claim.
+  const inert = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => ({ localName: 'ims-gallery', hotspotState: { image: 0 } }),
+  });
+  assert.equal((await inert.captureShowMediaState()).autoplay, false);
+});

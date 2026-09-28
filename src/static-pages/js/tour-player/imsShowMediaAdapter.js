@@ -152,6 +152,33 @@ function findImsPublicPlayer(root) {
   return viewer?.querySelector?.(IMS_PUBLIC_PLAYER_SELECTOR) || null;
 }
 
+/**
+ * Reads whether the gallery's own autoplay slideshow is running. The gallery
+ * exposes it only through its toolbar button, whose icon is the slideshow
+ * state ('pause' while autoplay advances frames, 'play' while it does not),
+ * so this is a real readback rather than an assumption.
+ *
+ * Tri-state on purpose. `false` is a claim — the player has no slideshow, or
+ * its button says 'play' — and only a claim may be acted on. A player that
+ * owns a slideshow whose toolbar is not readable returns `null`, because
+ * treating that as `false` would let the restore switch off a slideshow the
+ * audience had running. The read is strictly read-only: the button is never
+ * clicked, so a mis-indexed control can only degrade the read, never act.
+ *
+ * @returns {boolean | null} true/false, or null when the state is unknown
+ */
+function galleryAutoplayRunning(player, controls) {
+  if (typeof player?.startAutoplay !== 'function') return false;
+  let icon = '';
+  try {
+    icon = String(controls?.autoplay?.icon || '');
+  } catch {
+    return null;
+  }
+  if (!icon) return null;
+  return icon === 'pause';
+}
+
 function hasImsPublicReadyEvidence(player) {
   if (IMS_READY_PLAYERS.has(player)) return true;
   try {
@@ -398,6 +425,10 @@ export function createImsShowMediaTarget(root, {
       return Object.freeze({
         kind,
         frame: lastGalleryFrame,
+        // The gallery's own autoplay loop is part of the state the show found:
+        // the montage takes it off for the sequence and the restore hook gives
+        // it back, so a paused show cannot keep flipping frames on its own.
+        autoplay: galleryAutoplayRunning(player, resolveGalleryControls(player)),
       });
     },
 
@@ -494,6 +525,23 @@ export function createImsShowMediaTarget(root, {
       const completion = (async () => {
         let presentedOverlay = false;
         let overlayOwnedByShow = false;
+        // The montage has to be the only thing that moves the gallery: its own
+        // autoplay loop would keep flipping frames while the sequence presents
+        // them, and it would keep flipping them under a pause. The loop is
+        // taken off through the player's public API — a degradation compared
+        // with the toolbar click, and labelled as one — and the restore hook
+        // gives the audience's own state back when the operation ends.
+        const autoplayHeld = galleryAutoplayRunning(player, controls);
+        if (autoplayHeld) {
+          try {
+            player.stopAutoplay?.();
+          } catch {}
+          emitEvidence(Object.freeze({
+            kind: 'autoplay-hold',
+            via: 'player-api',
+            verified: !galleryAutoplayRunning(player, controls),
+          }));
+        }
         try {
           const initiallyExpanded = readOverlayState();
           // The overlay opens only if the user did not already open it.
@@ -696,6 +744,16 @@ export function createImsShowMediaTarget(root, {
       if (Number.isInteger(Number(state.frame))) {
         lastGalleryFrame = Math.max(1, Number(state.frame));
         player.goTo?.(lastGalleryFrame - 1);
+      }
+      // Give the audience its own autoplay state back, the same way the frame
+      // goes back to where the show found it. Only a read CLAIM is acted on:
+      // an unreadable toolbar (null) leaves the loop exactly as it is, because
+      // guessing `off` here would switch off a slideshow nobody asked to stop.
+      if (typeof player?.startAutoplay === 'function' && typeof state.autoplay === 'boolean') {
+        try {
+          if (state.autoplay) player.startAutoplay?.();
+          else player.stopAutoplay?.();
+        } catch {}
       }
     },
   });
