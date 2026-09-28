@@ -405,8 +405,8 @@ export class PortfolioShowChat extends HTMLElement {
       globalThis.open?.(contactUrl, '_blank', 'noopener,noreferrer');
       return;
     }
-    if (actionId === 'start-short') void this.#start('short');
-    else if (actionId === 'start-full') void this.#start('full');
+    if (actionId === 'start-short') this.#acceptStartIntent('short', event.detail);
+    else if (actionId === 'start-full') this.#acceptStartIntent('full', event.detail);
     else if (actionId === 'details') void this.#enterDetails(payload?.branchId, {
       contextualCardId: event.detail?.id,
       contextualActionId: actionId,
@@ -1041,6 +1041,59 @@ export class PortfolioShowChat extends HTMLElement {
     this.#appendSystemMessage(this.$.errorText, { error: true });
   }
 
+  /**
+   * The start button's answer is observed, not discarded.
+   *
+   * `#start` refuses for four distinct and legitimate reasons (not ready, wrong
+   * mode, completed, stale request). Dropping the boolean on the floor made all
+   * four look identical to the audience: the card stopped responding and nothing
+   * said why. A refusal is now a reported status, so a start that cannot happen
+   * is never mistaken for a start that did.
+   *
+   * @param {'short' | 'full'} mode
+   * @param {any} [detail] originating action detail
+   */
+  #acceptStartIntent(mode, detail = null) {
+    void this.#start(mode).catch((error) => {
+      this.#reportStartRefusal(mode, error?.message || 'start-failed');
+    }).then((accepted) => {
+      if (!accepted) this.#reportStartRefusal(mode, detail?.reason || 'start-unavailable');
+    });
+  }
+
+  /** @param {'short' | 'full'} mode @param {string} reason */
+  #reportStartRefusal(mode, reason) {
+    // A refusal is only interesting while the audience is still looking at the
+    // card; a refusal after the show already moved on is not an error.
+    if (!this.isConnected || this.$.isRunning) return;
+    this.$.errorText = this.#message('tour.status.unavailable') || reason;
+    this.#appendSystemMessage(this.$.errorText, { error: true });
+  }
+
+  /**
+   * A start intent is a PLAY intent, and it converges rather than being dropped.
+   *
+   * A paused route restore leaves a live session that is `isRunning` with
+   * `isPaused` and nothing playing. A paused preview presents a frame under the
+   * same two flags. In both cases the audience pressing "start" means "play this
+   * from where it is", and returning false here left the show prepared but
+   * permanently paused with no error and no way back — the scene was rendered,
+   * its narration was generated, and the transport never moved.
+   *
+   * So a session that exists but is not playing is resumed instead of refused.
+   * A session that is already playing is idempotently successful. Only a real
+   * refusal (not ready, wrong mode, completed) returns false, and the caller is
+   * told instead of discarding the answer.
+   *
+   * @returns {boolean} whether the start intent was accepted
+   */
+  #convergeStartIntent(mode) {
+    if (!this.$.isRunning) return false;
+    if (!this.$.isPaused) return true;
+    this.#resume();
+    return true;
+  }
+
   /** @param {'short' | 'full' | ''} [mode] */
   async #start(mode = '', {
     entryId = '',
@@ -1051,7 +1104,11 @@ export class PortfolioShowChat extends HTMLElement {
     transportRequestId = 0,
     allowCompletedReentry = false,
   } = {}) {
-    if (!this.$.isReady || this.$.isRunning || this.#mode) return false;
+    if (!this.$.isReady) return false;
+    // `isRunning` means a session exists (a paused preview or a paused route
+    // restore both set it), not that a show was already started. A start intent
+    // against such a session is a play request, not a duplicate.
+    if (this.$.isRunning || this.#mode) return this.#convergeStartIntent(mode);
     if (mode !== 'short' && mode !== 'full') return false;
     if (this.#showCompleted && !allowCompletedReentry) return false;
     const activeTransportRequestId = transportRequestId || ++this.#transportRequestId;
