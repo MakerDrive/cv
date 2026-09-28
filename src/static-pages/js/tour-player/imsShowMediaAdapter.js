@@ -6,7 +6,7 @@ const IMS_READY_EVENT = 'ims-ready';
  * image per second. Authored frame choreography is clamped to this floor so a
  * montage can never outrun the narration that describes it.
  */
-const MIN_GALLERY_FRAME_HOLD_MS = 1000;
+export const MIN_GALLERY_FRAME_HOLD_MS = 1000;
 const IMS_READY_PLAYERS = new WeakSet();
 
 function abortError(signal) {
@@ -20,27 +20,82 @@ function throwIfAborted(signal) {
   if (signal?.aborted) throw abortError(signal);
 }
 
+/**
+ * Frame-hold clock for a media montage.
+ *
+ * The hold is a reading budget, not a deadline: when the show pauses, the
+ * elapsed part of the hold is banked and the remainder is re-armed on resume,
+ * so a paused gallery keeps its current frame and still shows every frame for
+ * its full authored time. The alternative — a plain timeout — both advanced the
+ * montage under the pause and quietly shortened the frame the audience had not
+ * finished reading.
+ */
 function createAbortableGalleryClock({
   setTimer = globalThis.setTimeout?.bind(globalThis),
   clearTimer = globalThis.clearTimeout?.bind(globalThis),
+  now = () => (globalThis.performance?.now?.() ?? Date.now()),
+  pauseGate = null,
 } = {}) {
   return Object.freeze({
     wait(durationMs, { signal } = /** @type {{ signal?: AbortSignal }} */ ({})) {
       throwIfAborted(signal);
       if (!setTimer) return Promise.reject(new TypeError('a timer implementation is required'));
       return new Promise((resolve, reject) => {
+        let remainingMs = Math.max(0, Number(durationMs) || 0);
+        let startedAt = now();
         let timer = null;
-        const cleanup = () => signal?.removeEventListener?.('abort', onAbort);
-        const onAbort = () => {
+        let unsubscribe = null;
+        const bank = () => {
+          remainingMs = Math.max(0, remainingMs - (now() - startedAt));
+        };
+        const cleanup = () => {
           if (timer !== null) clearTimer?.(timer);
+          timer = null;
+          unsubscribe?.();
+          unsubscribe = null;
+          signal?.removeEventListener?.('abort', onAbort);
+        };
+        const onAbort = () => {
           cleanup();
           reject(abortError(signal));
         };
+        const onTick = () => {
+          timer = null;
+          bank();
+          arm();
+        };
+        const arm = () => {
+          if (remainingMs <= 0) {
+            cleanup();
+            resolve();
+            return;
+          }
+          startedAt = now();
+          timer = setTimer(onTick, remainingMs);
+        };
+        const onGateChange = ({ paused }) => {
+          if (paused) {
+            if (timer === null) return;
+            bank();
+            clearTimer?.(timer);
+            timer = null;
+            return;
+          }
+          if (timer === null && remainingMs > 0) arm();
+        };
         signal?.addEventListener?.('abort', onAbort, { once: true });
-        timer = setTimer(() => {
+        if (typeof pauseGate?.subscribe === 'function') {
+          unsubscribe = pauseGate.subscribe(onGateChange);
+        }
+        // A hold requested while the gate is ALREADY paused must not arm: the
+        // audience paused between two frames, and arming here would spend the
+        // whole reading budget under the pause. The gate answers it, so the
+        // next resume re-arms from the full authored hold.
+        if (remainingMs > 0 && !pauseGate?.paused) arm();
+        else if (remainingMs <= 0) {
           cleanup();
           resolve();
-        }, Math.max(0, Number(durationMs) || 0));
+        }
       });
     },
   });
@@ -216,15 +271,21 @@ function resolveGalleryControls(player) {
  */
 export function createImsShowMediaTarget(root, {
   resolvePlayer = (element, options) => waitForImsPublicPlayer(element, options),
-  clock = createAbortableGalleryClock(),
+  clock = null,
   presentMediaControl = null,
+  pauseGate = null,
 } = {}) {
+  const galleryClock = clock || createAbortableGalleryClock({ pauseGate });
   if (!root) throw new TypeError('an IMS host or viewer is required');
   const preparationSignal = new AbortController().signal;
   let playerPromise = null;
   let preparationPromise = null;
   let hostActivationRequested = false;
   let lastGalleryFrame = 1;
+  // Monotonic ticket for checkpoint restores. The show does not await a
+  // restore, so a resume can start a montage while one is still waiting for its
+  // player; the ticket lets the abandoned restore recognise that it lost.
+  let restoreGeneration = 0;
   let lastSpinnerPlaying = false;
   const activateHost = () => {
     if (hostActivationRequested || typeof root.activate !== 'function') return;
@@ -526,7 +587,7 @@ export function createImsShowMediaTarget(root, {
             // Full authored hold after the control gesture; the gesture
             // itself is priced into the cue's gestureDurationMs (verified by
             // the montage window check in the authoring test).
-            await clock.wait(frameHoldMs, { signal });
+            await galleryClock.wait(frameHoldMs, { signal });
           }
           if (lastGalleryFrame !== finalFrame) {
             player.goTo?.(finalFrame - 1);

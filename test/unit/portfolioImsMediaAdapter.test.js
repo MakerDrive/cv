@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import { createPortfolioImsMediaAdapter } from '../../src/static-pages/js/portfolioImsMediaAdapter.js';
+import { createCvShowPauseGate } from '../../src/static-pages/js/tour-player/pauseGate.js';
 import {
   createImsShowMediaTarget,
   waitForImsPublicPlayer,
@@ -1031,3 +1032,93 @@ test('IMS Show gallery collapse restores the layout directly when the tour is st
   // click (no delayed gesture after stop).
   assert.deepEqual(clicks, ['fs', 'fs']);
 });
+
+test('a paused gallery montage holds its frame and does not spend the frame hold', async () => {
+  const pauseGate = createCvShowPauseGate();
+  const events = [];
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    startAutoplay() { events.push(['startAutoplay']); },
+    stopAutoplay() { events.push(['stopAutoplay']); },
+    goTo(index) {
+      events.push(['goTo', index]);
+      this.hotspotState = { image: index };
+    },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    pauseGate,
+  });
+
+  const result = await target.playShowMedia(
+    { frames: [1, 2, 3], frameHoldMs: 1000, finalFrame: 3 },
+    { signal: new AbortController().signal },
+  );
+
+  // The gallery already sits on frame 1, so the montage holds it and starts the
+  // first frame hold without clicking.
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.deepEqual(events, []);
+
+  // The audience pauses: the montage must not advance and must not return.
+  pauseGate.pause();
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  assert.deepEqual(events, [], 'a paused montage never advances to the next frame');
+  assert.equal(gallery.hotspotState.image, 0, 'the paused gallery keeps its current frame');
+
+  let settled = false;
+  void result.completion.then(() => { settled = true; });
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(settled, false, 'a paused montage never completes');
+
+  pauseGate.resume();
+  await result.completion;
+
+  assert.deepEqual(events, [['goTo', 1], ['goTo', 2]], 'the sequence resumes where it stopped');
+  assert.equal(gallery.hotspotState.image, 2, 'the montage finishes on the authored final frame');
+});
+
+test('a montage that starts while the show is already paused never spends its frame hold', async () => {
+  const pauseGate = createCvShowPauseGate();
+  // The audience pauses BETWEEN two frames: the gate is closed before the next
+  // hold is ever requested, which is the case a mid-hold pause cannot catch.
+  pauseGate.pause();
+  const events = [];
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    startAutoplay() {},
+    stopAutoplay() {},
+    goTo(index) {
+      events.push(['goTo', index]);
+      this.hotspotState = { image: index };
+    },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    pauseGate,
+  });
+
+  let settled = false;
+  const result = await target.playShowMedia(
+    { frames: [1, 2, 3], frameHoldMs: 1000, finalFrame: 3 },
+    { signal: new AbortController().signal },
+  );
+  void result.completion.then(() => { settled = true; });
+
+  // Well past the authored 1000 ms hold: a hold armed under the pause would
+  // have fired here and moved the gallery.
+  await new Promise((resolve) => setTimeout(resolve, 1_200));
+  assert.deepEqual(events, [], 'a montage that began paused advances nothing');
+  assert.equal(settled, false, 'and it has not completed');
+
+  pauseGate.resume();
+  await result.completion;
+  assert.deepEqual(
+    events.map(([, index]) => index),
+    [1, 2],
+    'resume re-arms the full authored holds, so every frame still gets its time',
+  );
+});
+

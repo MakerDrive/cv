@@ -60,6 +60,7 @@ import { resolveCvShowPanelRevealState, shouldDeferMapAction } from './panelReve
 import { bindStaleNavDrawerCloser, createStaleNavDrawerCloser, shouldCloseStaleNavDrawer } from './drawerTransitionPolicy.js';
 import { createCvShowMediaTargetResolver } from './showMediaTargetResolution.js';
 import { createImsShowMediaTarget } from './imsShowMediaAdapter.js';
+import { createCvShowPauseGate } from './pauseGate.js';
 import { createYouTubeNoCookieEmbedUrl } from './youtubeEmbedUrl.js';
 import { resolveVisibleShowPlayer } from '../showPlayerResolver.js';
 
@@ -944,6 +945,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     audioArbiter,
     reportError: reportRuntimeError,
   });
+  // One gate per show session: the transport pause and the effects it freezes
+  // share the same "time is stopped" fact, so a gallery montage suspends on
+  // its current frame instead of advancing or spending its frame hold.
+  const showPauseGate = createCvShowPauseGate();
   const resolveShowMedia = createCvShowMediaTargetResolver({
     document,
     resolveTarget: (targetId) => resolveTargetElement(workspace, runtime, targetId),
@@ -955,6 +960,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       presentMediaControl: (element, options) => (
         presentMediaControlClick(() => presenter?.cursor, element, options)
       ),
+      pauseGate: showPauseGate,
     }),
   });
 
@@ -1036,15 +1042,20 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   const pausePresenter = (event) => {
     if (event.target !== getChat()) return;
+    showPauseGate.pause();
     presenter?.runner.pause();
   };
 
   const resumePresenter = (event) => {
     if (event.target !== getChat()) return;
     presenter?.runner.resume();
+    showPauseGate.resume();
   };
 
   const disposePresenter = () => {
+    // A stopped show owns no paused time: reopen the gate so a later show in
+    // the same page never starts against a suspension nothing will clear.
+    showPauseGate.resume();
     if (!presenter) return;
     const session = presenter;
     presenter = null;
@@ -1396,6 +1407,29 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     ).finally(() => activePresentationOperations.delete(pending));
   };
 
+  /**
+   * A paused deep link, a reload or a seek can land inside a gallery montage.
+   * The show asks for the frame it was reading, not for the sequence again: the
+   * adapter restores the frame through the media API, with no control click and
+   * no frame hold, and the audience's own state is left alone.
+   *
+   * The restore is not awaited by the show — it is pausing, and the gallery
+   * mounts lazily — but a failed restore is reported, never swallowed: a
+   * gallery left on the wrong frame is a visible defect the audience would
+   * otherwise read as the show's own state.
+   */
+  const onMediaCheckpoint = (event) => {
+    const target = resolveShowMedia(String(event.detail?.target || ''));
+    if (!target) return;
+    target.restoreShowMediaCheckpoint({ frame: event.detail?.frame }).catch((error) => {
+      reportRuntimeError(Object.freeze({
+        operation: 'ims-gallery-checkpoint',
+        code: error?.code || 'ims-gallery-checkpoint-restore-failed',
+        message: error?.message || String(error),
+      }));
+    });
+  };
+
   const onBeforeAdvance = (event) => {
     const complete = event.detail?.complete;
     if (typeof complete !== 'function') return;
@@ -1596,6 +1630,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   workspace.addEventListener('portfolio-show-phase', onPhase);
   workspace.addEventListener('portfolio-show-aligned-reset', onAlignedReset);
   workspace.addEventListener('portfolio-show-presentation-operation', onPresentationOperation);
+  workspace.addEventListener('portfolio-show-media-checkpoint', onMediaCheckpoint);
   workspace.addEventListener('portfolio-show-before-advance', onBeforeAdvance);
   workspace.addEventListener('portfolio-show-stop', restoreOrigin);
   workspace.addEventListener('portfolio-show-complete', restoreOrigin);
@@ -1622,6 +1657,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     workspace.removeEventListener('portfolio-show-phase', onPhase);
     workspace.removeEventListener('portfolio-show-aligned-reset', onAlignedReset);
     workspace.removeEventListener('portfolio-show-presentation-operation', onPresentationOperation);
+    workspace.removeEventListener('portfolio-show-media-checkpoint', onMediaCheckpoint);
     workspace.removeEventListener('portfolio-show-before-advance', onBeforeAdvance);
     workspace.removeEventListener('portfolio-show-stop', restoreOrigin);
     workspace.removeEventListener('portfolio-show-complete', restoreOrigin);
