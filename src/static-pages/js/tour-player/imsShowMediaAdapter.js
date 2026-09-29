@@ -8,7 +8,6 @@ const IMS_READY_EVENT = 'ims-ready';
  */
 export const MIN_GALLERY_FRAME_HOLD_MS = 1000;
 const IMS_READY_PLAYERS = new WeakSet();
-const ACTIVATED_HOSTS = new WeakSet();
 
 function abortError(signal) {
   if (signal?.reason instanceof Error) return signal.reason;
@@ -333,10 +332,7 @@ export function createImsShowMediaTarget(root, {
   let lastSpinnerPlaying = false;
   const activateHost = () => {
     if (hostActivationRequested || typeof root.activate !== 'function') return;
-    if (ACTIVATED_HOSTS.has(root)) return;
-    if (root.querySelector?.(IMS_PUBLIC_PLAYER_SELECTOR)) return;
     hostActivationRequested = true;
-    ACTIVATED_HOSTS.add(root);
     root.activate();
   };
   const actuatedPlayer = (player) => {
