@@ -1,6 +1,7 @@
 const IMS_PUBLIC_PLAYER_SELECTOR = 'ims-gallery, ims-spinner';
 const IMS_PUBLIC_PLAYER_KINDS = Object.freeze(['ims-gallery', 'ims-spinner']);
 const IMS_READY_EVENT = 'ims-ready';
+const IMS_ERROR_EVENT = 'ims-error';
 /**
  * Narration-paced gallery invariant: viewers must be able to read at most one
  * image per second. Authored frame choreography is clamped to this floor so a
@@ -208,6 +209,7 @@ export function waitForImsPublicPlayer(root, {
       observer?.disconnect?.();
       signal?.removeEventListener?.('abort', onAbort);
       root?.removeEventListener?.(IMS_READY_EVENT, onReady);
+      root?.removeEventListener?.(IMS_ERROR_EVENT, onError);
     };
     const finish = (callback, value) => {
       if (settled) return;
@@ -231,8 +233,14 @@ export function waitForImsPublicPlayer(root, {
       IMS_READY_PLAYERS.add(player);
       inspect();
     };
+    const onError = (event) => {
+      finish(reject, new Error(
+        `IMS player failed to initialize: ${event?.detail?.reason || 'unknown'}`,
+      ));
+    };
 
     root?.addEventListener?.(IMS_READY_EVENT, onReady);
+    root?.addEventListener?.(IMS_ERROR_EVENT, onError);
     signal?.addEventListener?.('abort', onAbort, { once: true });
     if (signal?.aborted) {
       onAbort();
