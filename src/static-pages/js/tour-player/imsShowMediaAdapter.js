@@ -252,7 +252,7 @@ export function waitForImsPublicPlayer(root, {
       return;
     }
     observer = new MutationObserverImpl(inspect);
-    observer.observe(root, { childList: true, subtree: true });
+    observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['active'] });
     inspect();
   });
 }
