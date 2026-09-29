@@ -756,17 +756,12 @@ async function installDeterministicYouTubePlayerHarness(cdp) {
   });
 }
 
-async function installDeterministicImsPlayerHarness(cdp) {
-  await cdp.send('Runtime.evaluate', {
-    awaitPromise: true,
-    expression: `(async () => {
-      const calls = [];
-      await customElements.whenDefined('sn-media-host');
-      const prototype = customElements.get('sn-media-host')?.prototype;
+function imsPlayerHarnessScript() {
+  return `(() => {
+    const calls = [];
+    const patchActivate = (prototype) => {
       const originalActivate = prototype?.activate;
-      if (!prototype || typeof originalActivate !== 'function') {
-        throw new Error('sn-media-host public activation seam unavailable');
-      }
+      if (!prototype || typeof originalActivate !== 'function') return;
       prototype.activate = function activateForCvShowTest() {
           if (this.descriptor?.activation?.provider !== 'ims') {
             return originalActivate.call(this);
@@ -779,6 +774,7 @@ async function installDeterministicImsPlayerHarness(cdp) {
           const player = document.createElement('ims-' + kind);
           if (kind === 'spinner') {
             player.currentFrame = 0;
+            player.setAttribute('active', '');
             player.play = () => {
               player.setAttribute('data-playing', '');
               calls.push({ method: 'play', mediaId: this.closest('[data-media-id]')?.dataset?.mediaId || '' });
@@ -807,10 +803,52 @@ async function installDeterministicImsPlayerHarness(cdp) {
             composed: true,
           })));
       };
-      Object.defineProperty(globalThis, '__cvImsPlayerTestHarness', {
-        configurable: true,
-        value: Object.freeze({ snapshot: () => calls.map((entry) => ({ ...entry })) }),
-      });
+    };
+    // Intercept customElements.define so the patch is applied BEFORE any
+    // instance's activate() runs — the CV article renderer calls activate()
+    // synchronously during page load, which is too late for a post-load patch.
+    const origDefine = customElements.define.bind(customElements);
+    customElements.define = function(name, ctor, opts) {
+      origDefine(name, ctor, opts);
+      if (name === 'sn-media-host') {
+        patchActivate(ctor.prototype);
+      }
+    };
+    // Fallback: if sn-media-host was already defined (e.g. page re-use), patch now.
+    const existing = customElements.get('sn-media-host');
+    if (existing) patchActivate(existing.prototype);
+    Object.defineProperty(globalThis, '__cvImsPlayerTestHarness', {
+      configurable: true,
+      value: Object.freeze({ snapshot: () => calls.map((entry) => ({ ...entry })) }),
+    });
+  })()`;
+}
+
+/**
+ * Install the deterministic IMS player harness before page navigation so that
+ * the prototype patch is applied before any activate() call during page load.
+ */
+async function installDeterministicImsPlayerHarnessBeforeNavigation(cdp) {
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: imsPlayerHarnessScript(),
+  });
+}
+
+/**
+ * Install the deterministic IMS player harness after page navigation.
+ * Use installDeterministicImsPlayerHarnessBeforeNavigation instead when
+ * the show may call activate() during page load.
+ */
+async function installDeterministicImsPlayerHarness(cdp) {
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `(async () => {
+      await customElements.whenDefined('sn-media-host');
+      const prototype = customElements.get('sn-media-host')?.prototype;
+      if (!prototype || typeof prototype.activate !== 'function') {
+        throw new Error('sn-media-host public activation seam unavailable');
+      }
+      ${imsPlayerHarnessScript()}
       return true;
     })()`,
     returnByValue: true,
