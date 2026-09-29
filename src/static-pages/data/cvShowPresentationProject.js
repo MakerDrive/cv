@@ -14414,8 +14414,14 @@ export function projectCvShowStory(projectInput) {
   });
 }
 
+const validatedProjectCache = new WeakMap();
+
 export function projectCvShowDirective(projectCell, projectInput) {
-  const project = validatePresentationAuthoringProject(projectInput);
+  let project = validatedProjectCache.get(projectInput);
+  if (!project) {
+    project = validatePresentationAuthoringProject(projectInput);
+    validatedProjectCache.set(projectInput, project);
+  }
   const cellId = projectCell.id.endsWith(':scroll')
     ? projectCell.id.slice(0, -':scroll'.length)
     : projectCell.id;

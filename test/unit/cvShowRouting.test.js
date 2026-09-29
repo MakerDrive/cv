@@ -169,7 +169,7 @@ test('profile CV Show link starts in the current document while preserving nativ
   assert.deepEqual(selected, ['projects/agent-portal']);
 });
 
-test('header CV Show activation requests the positioning Short Show directly', async () => {
+test('header CV Show activation opens the mode chooser without autostarting', async () => {
   const source = await readFile(
     new URL('../../src/static-pages/js/index.js', import.meta.url),
     'utf8',
@@ -179,8 +179,8 @@ test('header CV Show activation requests the positioning Short Show directly', a
   )?.[0];
   assert.ok(branch, 'header CV Show click branch');
   assert.match(branch, /new CustomEvent\('portfolio-open-tour'/u);
-  assert.match(branch, /entryId: 'positioning'/u);
   assert.match(branch, /source: 'portfolio-header'/u);
+  assert.doesNotMatch(branch, /entryId:/u, 'header button must not request a specific entry — the user chooses short/full first');
 });
 
 test('header Show activation coordinates native overlays before opening the player', async () => {

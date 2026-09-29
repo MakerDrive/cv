@@ -754,7 +754,7 @@ document.addEventListener('click', (event) => {
   if (target instanceof Element && target.closest('.pulse-tour-button')) {
     event.preventDefault();
     document.dispatchEvent(new CustomEvent('portfolio-open-tour', {
-      detail: { entryId: 'positioning', source: 'portfolio-header' },
+      detail: { source: 'portfolio-header' },
     }));
     return;
   }

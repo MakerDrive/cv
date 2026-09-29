@@ -31,12 +31,26 @@ function imsMountRoot(target) {
  * gallery added to the site is operable without touching the show mechanism.
  * YouTube, still images and native HTML media remain ordinary passive article
  * blocks: attention cues can frame them, but the Show can never drive them.
+ *
+ * @param {object} options
+ * @param {Document} [options.document]
+ * @param {(targetId: string) => Element|null} [options.resolveTarget]
+ * @param {(root: Element, options: { pauseGate: object }) => object} options.createImsTarget
+ *   Required factory; must receive the pause gate so gallery frame holds
+ *   bank across pauses. The default `createImsShowMediaTarget` without a
+ *   gate silently produces unpauseable clocks — a trap for the next author.
  */
 export function createCvShowMediaTargetResolver({
   document = globalThis.document,
   resolveTarget = (_targetId) => null,
-  createImsTarget = createImsShowMediaTarget,
+  createImsTarget,
 } = {}) {
+  if (typeof createImsTarget !== 'function') {
+    throw new TypeError(
+      'createCvShowMediaTargetResolver requires a createImsTarget factory; '
+      + 'the default createImsShowMediaTarget without a pause gate produces unpauseable clocks',
+    );
+  }
   const imsTargets = new WeakMap();
 
   return function resolveCvShowMediaTarget(targetId) {

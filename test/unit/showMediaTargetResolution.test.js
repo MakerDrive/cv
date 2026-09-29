@@ -58,6 +58,7 @@ test('Show media resolution does not expose native HTML media playback', () => {
       matches: () => false,
       querySelector: selector => selector === 'video, audio' ? video : null,
     }),
+    createImsTarget: (root) => ({ kind: 'ims-target', root }),
   });
 
   assert.equal(resolve('article.example.video'), null);
