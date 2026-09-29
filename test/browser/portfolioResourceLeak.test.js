@@ -796,7 +796,13 @@ function imsPlayerHarnessScript() {
             };
           }
           viewer.append(player);
-          this.ref?.stage?.replaceChildren(viewer);
+          // ref.stage may be null if activate() is called before the Symbiote
+          // template renders. Fall back to querying by class or appending to
+          // the host itself.
+          const stage = this.ref?.stage
+            || this.querySelector('.sn-media-stage')
+            || this;
+          stage.replaceChildren(viewer);
           this.setAttribute('data-activated', '');
           queueMicrotask(() => player.dispatchEvent(new CustomEvent('ims-ready', {
             bubbles: true,
@@ -7433,6 +7439,10 @@ test('photopizza IMS spinner is framed without starting continuous playback', {
   const { cdp, server } = page;
   const harness = await installCvShowTerminalHarness(cdp);
   t.after(harness.dispose);
+  // Install IMS harness BEFORE navigation: the CV article renderer calls
+  // activate() synchronously during page load with an external IMS data URL
+  // that fails in the test environment. The harness intercepts and mocks it.
+  await installDeterministicImsPlayerHarnessBeforeNavigation(cdp);
 
   await navigate(
     cdp,
@@ -7457,7 +7467,6 @@ test('photopizza IMS spinner is framed without starting continuous playback', {
       check();
     })`,
   }, { label: 'wait for paused photopizza spinner probe', timeoutMs: 17_000 });
-  await installDeterministicImsPlayerHarness(cdp);
   await clickVisible(cdp, 'chat-show-player [data-control="play"]', 'play photopizza spinner probe');
   await harness.waitFor(
     runId,
