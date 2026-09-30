@@ -2020,6 +2020,21 @@ export class PortfolioShowChat extends HTMLElement {
       media,
       onCaptionTimeUpdate,
     }) : null;
+    // Completion handoff: the presentation plan exhausting its non-narration
+    // cells is the authoritative end of the final scene. The physical
+    // narration 'ended' stays the middle-scene advance trigger; a last entry
+    // whose audio never reports ended must not stall the show forever.
+    if (aligned?.runtime?.whenComplete) {
+      const completedRuntime = aligned.runtime;
+      const completionRequestId = requestId;
+      void completedRuntime.whenComplete().then(() => {
+        if (completionRequestId !== this.#requestId) return;
+        if (this.#alignedEntry?.runtime !== completedRuntime) return;
+        if (!this.$.isRunning || this.$.isPaused) return;
+        if (this.#sceneIndex !== this.#playbackEntries.length - 1) return;
+        this.stopShow({ completed: true, reason: 'natural-end' });
+      }).catch(() => {});
+    }
     if (!aligned) return Object.freeze({ status: 'failed', reason: 'alignment-unavailable' });
     const projectDurationMs = projectCvShowScheduleDuration(aligned);
     if (Number.isFinite(projectDurationMs) && projectDurationMs > 0) {

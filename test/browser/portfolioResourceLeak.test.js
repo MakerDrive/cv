@@ -7420,8 +7420,11 @@ test('photopizza YouTube block is framed without starting media playback', {
   assert.equal(cdp.exceptions.length, 0);
 });
 
-test('photopizza IMS spinner is framed without starting continuous playback', {
-  timeout: 120_000,
+test('photopizza IMS spinner is framed and rotation starts only after focus settles', {
+  // The spinner cue is authored at ~186s of the photopizza turn (behind
+  // video-05); entering at showTime=46000 needs ~140s of narration before the
+  // cue becomes due. 120s cannot observe it — this was the missing receipt.
+  timeout: 300_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('IMS spinner evidence requires the local deterministic public-player seam');
   const page = await createPortfolioPage(t, {
@@ -7474,8 +7477,28 @@ test('photopizza IMS spinner is framed without starting continuous playback', {
       && receipt?.cellId === 'cv-show:cue:photopizza.spinner'
       && ['settled', 'failed', 'expired'].includes(receipt?.status),
     'photopizza spinner terminal receipt',
-    { afterIndex: runEventIndex, inactivityMs: 90_000 },
+    { afterIndex: runEventIndex, inactivityMs: 150_000 },
   );
+  // Settled is reported before the fire-and-forget rotation playback starts;
+  // wait for the authored playOnSettle play to be observed by the harness.
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const calls = globalThis.__cvImsPlayerTestHarness?.snapshot?.() || [];
+        const played = calls.some(({ method, mediaId }) => (
+          method === 'play' && mediaId === 'media/photopizza/ims/spinner'
+        ));
+        if (played) return resolve(true);
+        if (performance.now() - started > 15_000) {
+          return reject(new Error('spinner rotation play was not observed after frame settle'));
+        }
+        setTimeout(check, 250);
+      };
+      check();
+    })`,
+  }, { label: 'wait for photopizza spinner play after settle', timeoutMs: 17_000 });
   const terminal = await harness.snapshot('photopizza IMS spinner');
   const operation = terminal.operations.find(
     ({ cellId }) => cellId === 'cv-show:cue:photopizza.spinner',
@@ -7512,20 +7535,26 @@ test('photopizza IMS spinner is framed without starting continuous playback', {
   assert.equal(media.result.value.spinner, true);
   assert.equal(operation?.kind, 'attention', JSON.stringify(operation));
   assert.equal(operation?.source?.type, 'frame', JSON.stringify(operation));
-  assert.equal(media.result.value.playing, false);
+  // Authored behavior (1050501): the frame cue owns playOnSettle, so rotation
+  // starts once through the semantic media API when the frame settles.
   const imsMethods = media.result.value.calls
     .filter(({ mediaId }) => mediaId === 'media/photopizza/ims/spinner')
     .map(({ method }) => method);
-  assert.deepEqual(
-    imsMethods,
-    ['activate'],
-    `the static IMS frame may mount, but the tour must not play, pause, or seek it: ${JSON.stringify(imsMethods)}`,
+  const plays = imsMethods.filter((method) => method === 'play');
+  assert.equal(plays.length, 1, `exactly one spinner play after settle: ${JSON.stringify(imsMethods)}`);
+  assert.ok(
+    imsMethods.indexOf('activate') > -1 && imsMethods.indexOf('activate') < imsMethods.indexOf('play'),
+    `activation precedes playback: ${JSON.stringify(imsMethods)}`,
   );
+  assert.equal(media.result.value.playing, true, 'rotation is active at observation');
   assert.equal(cdp.exceptions.length, 0);
 });
 
 test('automatic photopizza to finale transition retains aligned audio generation ownership', {
-  timeout: 180_000,
+  // The photopizza turn is ~198s of authored narration; entering at
+  // showTime=46000 runs at 1x, so completion needs ~200s of wall clock —
+  // the previous 180s window expired a few seconds before the terminal event.
+  timeout: 300_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('transition ownership requires the selected public Opus release');
   const page = await createPortfolioPage(t, {

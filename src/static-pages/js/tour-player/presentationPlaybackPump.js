@@ -143,6 +143,14 @@ export function createPresentationPlaybackPump({
   let loopPromise = null;
   let queuedResume = false;
   let lastSampledCellId = '';
+  let completeResolve;
+  const completedPromise = new Promise((resolve) => { completeResolve = resolve; });
+  let completedSignalled = false;
+  const signalComplete = (snapshot) => {
+    if (completedSignalled) return;
+    completedSignalled = true;
+    completeResolve(snapshot);
+  };
   const cellById = new Map(playbackPlan.cells.map((cell) => [cell.id, cell]));
 
   const presentationPositionMs = () => {
@@ -304,11 +312,33 @@ export function createPresentationPlaybackPump({
             });
             continue;
           }
+          // Structured dependency failure: every remaining pending cell with
+          // its exact missing barrier set, so a silently hanging chain is
+          // impossible to distinguish from a schedulable one.
+          const barrierMap = barriersById(snapshot);
+          const details = {
+            mediaTimeMs: Number(snapshot.mediaTimeMs) || 0,
+            state: snapshot.state || '',
+            knownBarriers: Array.from(barrierMap.entries()).map(([cellId, barriers]) => (
+              `${cellId}#${Array.from(barriers).join(',')}`
+            )),
+            remaining: remaining.map(({ id, kind, dependsOn = [] }) => ({
+              id,
+              kind,
+              missing: dependsOn
+                .filter(({ cellId, barrier }) => barrierMap.get(cellId)?.has(barrier) !== true)
+                .map(({ cellId, barrier }) => `${cellId}#${barrier}`),
+            })),
+          };
           throw Object.assign(new Error('Presentation playback dependencies are blocked'), {
             code: 'PRESENTATION_PLAYBACK_DEPENDENCY_BLOCKED',
-            details: { cellIds: remaining.map(({ id }) => id) },
+            details: { cellIds: remaining.map(({ id }) => id), blocked: details },
           });
         }
+        // Plan exhausted: every non-narration cell reached its terminal. Signal
+        // completion authoritatively so the player does not have to rely on a
+        // physical narration 'ended' event to finish the scene.
+        signalComplete(snapshot);
         return snapshot;
       }
       const mediaTimeMs = resumedTimelinePosition(cell, snapshot, media);
@@ -386,6 +416,9 @@ export function createPresentationPlaybackPump({
     },
     whenIdle() {
       return execution.whenIdle();
+    },
+    whenComplete() {
+      return completedPromise;
     },
   });
 }

@@ -278,6 +278,12 @@ test('real finale execution settles native audio end without a final timeupdate 
   assert.equal(tuple.execution.snapshot.terminal.length, tuple.playbackPlan.cells.length);
   assert.deepEqual(failures, []);
 
+  // Plan exhaustion resolves the completion handoff: the player uses it to
+  // finish the final scene authoritatively, not only via a DOM audio 'ended'.
+  await pump.whenComplete();
+  await settleTurns();
+  assert.equal(tuple.execution.snapshot.terminal.length, tuple.playbackPlan.cells.length);
+
   // A duplicate browser notification cannot restart a completed Project
   // execution or fabricate another audio completion.
   media.dispatchEvent(new Event('ended'));

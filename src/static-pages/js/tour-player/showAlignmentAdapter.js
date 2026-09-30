@@ -1021,6 +1021,9 @@ export function createCvShowAlignmentController({
           if (deferredPresentationError) throw deferredPresentationError;
           return tuple.execution.whenIdle();
         },
+        whenComplete() {
+          return playbackPump.whenComplete();
+        },
         stop() {
           playbackRequested = false;
           return playbackPump.stop('runtime-stop');

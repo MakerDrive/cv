@@ -333,15 +333,36 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
 
 /**
  * Deep-linked runs can start past the authored navigation cue that opens the
- * article owning a media target. Select that project before resolving media
- * so mid-show required media cells cannot fail on an unmounted host.
+ * article owning a media target. Navigation ownership stays with the show:
+ * select the owning project and then wait for the article to settle before any
+ * media resolution, so a concurrent navigation cannot leave a media cue
+ * waiting on a destroyed host forever. Returns the owning project id, or ''
+ * when the target has no owning project in this runtime.
  */
-function ensureMediaArticleProject(targetId, runtime) {
+async function selectMediaArticleProject(
+  targetId,
+  runtime,
+  { document, signal = null, waitForReadiness, timeoutMs } = {},
+) {
   const match = String(targetId || '').match(/^media\/([a-z0-9][a-z0-9-]*)\//u);
-  if (!match) return;
+  if (!match) return '';
   const projectId = `projects/${match[1]}`;
-  if (!runtime?.entries?.has?.(projectId) || runtime.selectedId === projectId) return;
+  if (!runtime?.entries?.has?.(projectId) || runtime.selectedId === projectId) return projectId;
   runtime.select?.(projectId, { focus: true, updateUrl: false });
+  await waitForReadiness({
+    document,
+    target: () => (
+      runtime.selectedId === projectId
+      && runtime.viewer
+      && runtime.viewer.getAttribute?.('aria-busy') !== 'true'
+        ? runtime.viewer
+        : null
+    ),
+    signal,
+    timeoutMs,
+    scroll: false,
+  });
+  return runtime.selectedId === projectId ? projectId : '';
 }
 
 function missingReceipt(adapted, reason, details = null) {  return Object.freeze({
@@ -880,7 +901,10 @@ export function createCvShowDirectiveRunner(options = {}) {
       .map((source) => String(source.target || ''));
     const prepareMediaTargets = () => {
       for (const targetId of mediaDirectiveTargets) {
-        ensureMediaArticleProject(targetId, runtime);
+        // Navigation ownership belongs to the show's own cues. The prologue
+        // only warms media targets that are already resolvable on the current
+        // article — it must never navigate away from the article the show
+        // is presenting.
         try {
           resolveMedia?.(targetId)?.prepareShowMedia?.({
             signal: controller.signal,
@@ -935,6 +959,26 @@ export function createCvShowDirectiveRunner(options = {}) {
                 await waitUntilResumed(controller.signal);
                 throwIfAborted(controller.signal);
                 let presentationTarget = target;
+                if (
+                  /^media\/[a-z0-9][a-z0-9-]*\//u.test(String(source.target || ''))
+                  && typeof resolveMedia === 'function'
+                ) {
+                  // A media cue owns its article: select the owning project
+                  // and wait for the article to settle BEFORE the presenting
+                  // phase, so a concurrent navigation cannot strand this cue
+                  // on a destroyed host. Target semantics stay with
+                  // resolveTarget — presentation targets are unchanged.
+                  await selectMediaArticleProject(source.target, runtime, {
+                    document,
+                    signal: controller.signal,
+                    waitForReadiness,
+                    timeoutMs,
+                  });
+                  throwIfAborted(controller.signal);
+                  if (!presentationTarget) {
+                    presentationTarget = resolveMedia(source.target)?.element ?? null;
+                  }
+                }
                 if (source.type === 'navigate' && runtime?.entries?.has(source.target)) {
                   const entryId = String(source.target);
                   const alreadySelected = runtime.selectedId === entryId;
@@ -1252,10 +1296,33 @@ export function createCvShowDirectiveRunner(options = {}) {
         }
 
         if (adapted.directive.type === 'media') {
-          ensureMediaArticleProject(source.target, runtime);
-          const mediaTarget = resolveMedia(source.target);
+          // Same show-owned sequencing as for attention cues: the article is
+          // settled before resolution; a selection failure becomes an
+          // explicit terminal (`media-unresolved`) instead of a wait forever.
+          let mediaTarget = null;
+          let mediaSelectError = null;
+          try {
+            await selectMediaArticleProject(source.target, runtime, {
+              document,
+              signal: controller.signal,
+              waitForReadiness,
+              timeoutMs,
+            });
+            mediaTarget = resolveMedia(source.target);
+          } catch (error) {
+            // Phase cancellation during article readiness is a cancellation,
+            // never a missing media cell: propagate the abort semantics.
+            if (error?.name === 'AbortError') throw error;
+            mediaSelectError = error;
+          }
           if (!mediaTarget) {
-            let receipt = missingReceipt(adapted, 'media-unresolved');
+            let receipt = missingReceipt(
+              adapted,
+              mediaSelectError?.code || 'media-unresolved',
+              mediaSelectError
+                ? { detail: String(mediaSelectError?.message || mediaSelectError) }
+                : null,
+            );
             receipts.push(receipt);
             if (adapted.policy === 'required') {
               return Object.freeze({ status: 'required-missing', receipts: Object.freeze(receipts) });
@@ -1333,6 +1400,18 @@ export function createCvShowDirectiveRunner(options = {}) {
       act: async () => {
         await waitUntilResumed(signal);
         throwIfAborted(signal);
+        // A scroll toward a media target owns its article as well: settle the
+        // owning project's selection first so the settled milestone never
+        // reports against an article that a later navigation destroys.
+        if (/^media\/[a-z0-9][a-z0-9-]*\//u.test(String(source.target || ''))) {
+          await selectMediaArticleProject(source.target, runtime, {
+            document,
+            signal,
+            waitForReadiness,
+            timeoutMs,
+          });
+          throwIfAborted(signal);
+        }
         context.retainRevealedPanel = true;
         return { settled: true };
       },

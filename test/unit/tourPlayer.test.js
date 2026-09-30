@@ -2065,11 +2065,15 @@ test('CV runner prepares media targets when the phase starts', async () => {
     { id: 'd.gallery', type: 'media', target: 'media/boothbot/ims/gallery', mode: 'short-muted-montage' },
   ]);
   assert.equal(result.status, 'success');
-  assert.deepEqual(order.slice(0, 3), [
-    ['select', 'projects/boothbot', { focus: true, updateUrl: false }],
-    ['resolveMedia', 'media/boothbot/ims/gallery'],
-    ['prepare', true],
-  ]);
+  // The prologue no longer navigates: it only warms already-resolvable media.
+  // The owning article is selected by the show-owned cue path instead.
+  assert.ok(order[0][0] === 'resolveMedia', 'prologue warms media without selecting');
+  const selectIndex = order.findIndex(([name, id]) => name === 'select' && id === 'projects/boothbot');
+  const prepareIndex = order.findIndex(([name]) => name === 'prepare');
+  const mediaIndex = order.findIndex(([name]) => name === 'media');
+  assert.ok(selectIndex >= 0, 'cue path selects the owning project');
+  assert.ok(prepareIndex > -1, 'media is prepared');
+  assert.ok(mediaIndex > prepareIndex, 'playback starts after preparation');
   assert.ok(order.some(([name, value]) => name === 'media' && value === mediaTarget));
 });
 
@@ -2097,12 +2101,37 @@ test('CV runner opens the owning article project for media targets before resolv
     { id: 'd.gallery', type: 'media', target: 'media/boothbot/ims/gallery', mode: 'short-muted-montage' },
   ]);
   assert.equal(result.status, 'success');
-  assert.deepEqual(order.slice(0, 4), [
+  // First resolveMedia comes from the navigation-free prologue; the selection
+  // happens in the show-owned cue path before playback.
+  assert.deepEqual(order.slice(0, 3), [
+    ['resolveMedia', 'media/boothbot/ims/gallery'],
     ['select', 'projects/boothbot', { focus: true, updateUrl: false }],
     ['resolveMedia', 'media/boothbot/ims/gallery'],
-    ['resolveMedia', 'media/boothbot/ims/gallery'],
-    ['media', mediaTarget],
   ]);
+  assert.ok(order.some(([name, value]) => name === 'media' && value === mediaTarget));
+});
+
+test('CV runner treats an aborted media article selection as cancellation', async () => {
+  const runtime = {
+    entries: new Map([['projects/boothbot', {}]]),
+    selectedId: 'projects/complexscan',
+    select(id) { this.selectedId = id; },
+  };
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime,
+    media: { play: async () => ({ played: true }) },
+    resolveMedia: () => ({ element: { matches: () => false } }),
+    resolveText: (key) => key,
+    waitForReadiness: async () => {
+      throw new DOMException('CV Show phase cancelled', 'AbortError');
+    },
+  });
+
+  const result = await runner.run([
+    { id: 'd.gallery', type: 'media', target: 'media/boothbot/ims/gallery', mode: 'short-muted-montage' },
+  ]);
+  assert.equal(result.status, 'cancelled');
 });
 
 test('CV runner skips article selection for media targets already owned by the selected project', async () => {
