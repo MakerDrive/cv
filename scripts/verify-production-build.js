@@ -32,17 +32,20 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 // Budget raised 2026-09-18 (+4% raw, +4% gzip): Slice A/B/C landed —
 // read-only live observation, ensure/reconciliation, gated composition
 // boundary handling are explicit new runtime surfaces.
+// Budget raised 2026-10-25 (+15 KB raw / +5 KB gzip) for provider-owned nested
+// fullscreen tabs; measured 1876606 raw / 454839 gzip with symbiote-ui
+// 632161f, leaving 8394 raw / 5161 gzip bytes of headroom.
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // 2026-09-24: +20 KB headroom for the symbiote-ui modal drawer contract
   // (inert background, Tab trap, translated a11y names); measured 1851017 raw
   // against the previous 1850000 cap.
-  raw: 1_870_000,
+  raw: 1_885_000,
   // 2026-09-25: +5 KB gzip for the completed drawer gesture contract —
   // deferred pointer capture, touch tree-disclosure column, click-vs-swipe
   // separation; measured 452330 gzip against the 450000 cap. Re-measured at
   // 453486 gzip / 1864679 raw against symbiote-ui dd5b8e9, which added the
   // composition time base the CV Show player clock reads.
-  gzip: 455_000,
+  gzip: 460_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);
