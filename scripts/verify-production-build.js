@@ -33,8 +33,8 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 // read-only live observation, ensure/reconciliation, gated composition
 // boundary handling are explicit new runtime surfaces.
 // Budget raised 2026-10-25 (+15 KB raw / +5 KB gzip) for provider-owned nested
-// fullscreen tabs; measured 1876606 raw / 454839 gzip with symbiote-ui
-// 632161f, leaving 8394 raw / 5161 gzip bytes of headroom.
+// fullscreen tabs; measured 1876620 raw / 454842 gzip with symbiote-ui
+// 7f5cbd0, leaving 8380 raw / 5158 gzip bytes of headroom.
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // 2026-09-24: +20 KB headroom for the symbiote-ui modal drawer contract
   // (inert background, Tab trap, translated a11y names); measured 1851017 raw
