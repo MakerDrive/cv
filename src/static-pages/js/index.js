@@ -1,5 +1,8 @@
 import { createRuntimeAssetUrl } from './runtimeAssetUrl.js';
-import { createCvShowMockAgentProvider } from './tour-player/mockAgentProvider.js';
+import {
+  createCvShowMockAgentProvider,
+  resolveTrustedCvContactAction,
+} from './tour-player/mockAgentProvider.js';
 import {
   capturePortfolioGraphRenderSnapshot,
   createPortfolioGraphSnapshotRuntime,
@@ -3712,6 +3715,9 @@ class PortfolioThemePanel extends HTMLElement {
 }
 
 class PortfolioWorkspace extends HTMLElement {
+  #captureTrustedAgentContactClick = null;
+  #onAgentShowAction = null;
+
   resetPanelDefaults(source = 'api') {
     let current = this._layout?.getLayout?.();
     if (!current) return false;
@@ -3775,6 +3781,25 @@ class PortfolioWorkspace extends HTMLElement {
     if (!dock || !layout) return;
     this._dock = dock;
     this._layout = layout;
+    this.#captureTrustedAgentContactClick = (event) => {
+      if (!event.isTrusted) return;
+      let path = typeof event.composedPath === 'function' ? event.composedPath() : [event.target];
+      let button = path.find((element) => element instanceof Element
+        && element.matches('button[data-action-id]'));
+      if (!button || !dock.contains(button)) return;
+      let actionId = button.dataset.actionId || '';
+      let contactUrl = resolveTrustedCvContactAction(actionId, actionId);
+      if (contactUrl) globalThis.open?.(contactUrl, '_blank', 'noopener,noreferrer');
+    };
+    this.#onAgentShowAction = (event) => {
+      if (this.querySelector('portfolio-show-chat')) return;
+      let actionId = String(event.detail?.actionId || '');
+      if (actionId === 'projects') {
+        portfolioRuntime.select('projects/index', { focus: true });
+      }
+    };
+    document.addEventListener('click', this.#captureTrustedAgentContactClick, true);
+    dock.addEventListener('agent-show-action', this.#onAgentShowAction);
     dock.addEventListener('agent-dock-responsive-change', (event) => {
       layout.setLayoutBehavior({
         responsiveMode: event.detail?.mobile ? 'swipe' : 'preserve',
@@ -3893,6 +3918,12 @@ class PortfolioWorkspace extends HTMLElement {
   }
 
   disconnectedCallback() {
+    if (this.#captureTrustedAgentContactClick) {
+      document.removeEventListener('click', this.#captureTrustedAgentContactClick, true);
+    }
+    if (this.#onAgentShowAction) {
+      this._dock?.removeEventListener('agent-show-action', this.#onAgentShowAction);
+    }
     if (this._onThemeOpenFull) {
       document.removeEventListener('cascade-theme-open-full', this._onThemeOpenFull);
     }
