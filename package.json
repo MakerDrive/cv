@@ -54,7 +54,7 @@
     "@symbiotejs/symbiote": "3.8.0-webmcp.2",
     "immersive-media-spots": "^1.3.7",
     "jsda-kit": "1.6.0",
-    "symbiote-ui": "https://codeload.github.com/rnd-pro/symbiote-ui/tar.gz/01d1ad36906ecac5338bd17e35f39188d4fa6146",
+    "symbiote-ui": "https://codeload.github.com/rnd-pro/symbiote-ui/tar.gz/37f596519466483a84146259cdf958caa2f475df",
     "symbiote-workspace": "https://codeload.github.com/rnd-pro/symbiote-workspace/tar.gz/dbd7ee24e823d304503169b1bbce81726ba8b09b"
   },
   "overrides": {
@@ -67,7 +67,7 @@
     "cloud-images-toolkit": "^1.3.2",
     "esbuild": "0.28.1",
     "pdfkit": "^0.19.1",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "source-sans": "3.52.0",
     "typescript": "^6.0.3"
   }
