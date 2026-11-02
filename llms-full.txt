@@ -1,6 +1,6 @@
 # Vladimir Matiasevich Portfolio - Full LLM Context
 
-> Lead R&D Engineer — designing and developing systems and platforms for complex process automation across software, media, and hardware.
+> Product Engineer | Full-Stack, R&D & Systems Engineering | Complex Process Automation Across Software, Media & Hardware | AI Agent Tooling
 
 Generated from structured portfolio data in the `cv` site build. This file expands profile copy, project case studies, and Pulse publications for English, Russian, and Spanish.
 
@@ -14,7 +14,7 @@ Generated from structured portfolio data in the `cv` site build. This file expan
 
 ### Professional profile
 
-Lead R&D Engineer — designing and developing systems and platforms for complex process automation across software, media, and hardware.
+Product Engineer | Full-Stack, R&D & Systems Engineering | Complex Process Automation Across Software, Media & Hardware | AI Agent Tooling
 
 Current status: Open to new opportunities.
 
@@ -208,6 +208,10 @@ The accepted demo path is read-only: open a work order, inspect its linked asset
 The work-order surface keeps the queue, status, priority, and related operational context visible in one place.
 
 Asset and location context stays linked to the selected work order, so a person and an agent can inspect the same current information.
+
+Agentic EAM Demo 1 shows the agent assembling a workspace for a specific task, then explaining the interface it created.
+
+XR EAM Example extends the same idea into spatial interaction, with a connected three-dimensional asset that can be picked up, rotated, and inspected.
 
 The interface declares the actions available in the current state. Any operation that could change an external system remains unavailable in this public demo.
 
@@ -1841,7 +1845,7 @@ The experiment implemented tool contracts and stdio server wiring. Terminal exec
 
 ### Профиль
 
-Ведущий R&D-инженер — проектирование и разработка систем и платформ для автоматизации сложных процессов на стыке software, media и hardware.
+Продуктовый инженер | Full-Stack, R&D и системная инженерия | Автоматизация сложных процессов в software, media и hardware | Инструменты для ИИ-агентов
 
 Текущий статус: Открыт к новым предложениям.
 
@@ -2037,6 +2041,10 @@ Adaptive Maximo Workbench — конфигурация Demo / Alpha для пр�
 Поверхность заявок показывает очередь, статус, приоритет и связанный рабочий контекст в одном месте.
 
 Контекст оборудования и локации связан с выбранной заявкой, поэтому человек и агент видят одну актуальную информацию.
+
+Agentic EAM Demo 1 показывает, как агент собирает рабочее пространство под конкретную задачу, а затем объясняет созданный интерфейс.
+
+XR EAM Example развивает ту же идею в пространственном интерфейсе, где связанный с задачей трёхмерный объект можно взять, повернуть и рассмотреть.
 
 Интерфейс объявляет действия, доступные в текущем состоянии. Операции, способные изменить внешнюю систему, недоступны в публичном demo.
 
@@ -3672,7 +3680,7 @@ Period: 2025
 
 ### Perfil profesional
 
-Ingeniero principal de I+D — diseño y desarrollo de sistemas y plataformas para automatizar procesos complejos en la intersección de software, medios y hardware.
+Ingeniero de producto | Full-Stack, I+D e ingeniería de sistemas | Automatización de procesos complejos en software, medios y hardware | Herramientas para agentes de IA
 
 Estado actual: Abierto a nuevas oportunidades.
 
@@ -3866,6 +3874,10 @@ El recorrido aceptado es read-only: abrir una orden, inspeccionar el activo vinc
 La superficie de órdenes mantiene visibles la cola, el estado, la prioridad y el contexto operativo relacionado.
 
 El contexto del activo y de la ubicación permanece vinculado a la orden seleccionada, de modo que la persona y el agente consultan la misma información actual.
+
+Agentic EAM Demo 1 muestra cómo el agente construye un espacio de trabajo para una tarea concreta y después explica la interfaz creada.
+
+XR EAM Example lleva la misma idea a una interfaz espacial, donde un objeto tridimensional vinculado a la tarea se puede tomar, girar e inspeccionar.
 
 La interfaz declara las acciones disponibles en el estado actual. Las operaciones capaces de modificar un sistema externo no están disponibles en este demo público.
 

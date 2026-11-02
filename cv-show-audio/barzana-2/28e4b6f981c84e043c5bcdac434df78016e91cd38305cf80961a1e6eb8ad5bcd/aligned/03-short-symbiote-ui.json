@@ -1,0 +1,696 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-2r1VInw9iTyodEVr7vwARrJ7BjS0eQ45Gkb2k/2M5Kc=",
+  "media": {
+    "durationMs": 69200,
+    "hash": "sha256:047b5066a73789ee509524e71f78b4615dfde8c1c16251551b67bb222920f1e7",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-mvuhZQp82s99i5OdxAuUcW7WLGihKEcq+dPgtvrn2Vc=",
+  "turns": [
+    {
+      "endMs": 69200,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "В 2026 году визуальной основой Workspace стала моя open-source библиотека Symbiote UI. В ней собраны компоненты, компоновки, графовые инструменты и семантические контракты интерфейса. Агент не просто берет готовые блоки и размещает их на экране. Вместе с интерфейсом он формирует машиночитаемый контекст. Он описывает, что это за элементы, зачем они находятся на этом месте, какие у них состояния и какие действия доступны. В том числе такой контекст может публиковаться через WebMCP. Благодаря этому агент после сборки понимает структуру собственного интерфейса и может использовать тот же контекст, чтобы объяснить ее человеку. На Symbiote UI построен и интерфейс этого CV. На нем работают панели, чат и сама интерактивная система презентации. То, что происходит прямо сейчас, это пример того же подхода. Рассказ синхронизирован со страницей. Интерфейс переводит внимание между элементами, выделяет их и буквально объясняет сам себя.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 340,
+          "startMs": 0,
+          "text": "В"
+        },
+        {
+          "endMs": 1520,
+          "startMs": 340,
+          "text": "2026"
+        },
+        {
+          "endMs": 2060,
+          "startMs": 1520,
+          "text": "году"
+        },
+        {
+          "endMs": 2740,
+          "startMs": 2060,
+          "text": "визуальной"
+        },
+        {
+          "endMs": 3220,
+          "startMs": 2740,
+          "text": "основой"
+        },
+        {
+          "endMs": 3760,
+          "startMs": 3220,
+          "text": "Workspace"
+        },
+        {
+          "endMs": 4320,
+          "startMs": 3760,
+          "text": "стала"
+        },
+        {
+          "endMs": 4740,
+          "startMs": 4320,
+          "text": "моя"
+        },
+        {
+          "endMs": 5220,
+          "startMs": 4740,
+          "text": "open"
+        },
+        {
+          "endMs": 5580,
+          "startMs": 5220,
+          "text": "-source"
+        },
+        {
+          "endMs": 6380,
+          "startMs": 5580,
+          "text": "библиотека"
+        },
+        {
+          "endMs": 7060,
+          "startMs": 6380,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 7460,
+          "startMs": 7060,
+          "text": "UI."
+        },
+        {
+          "endMs": 8200,
+          "startMs": 7860,
+          "text": "В"
+        },
+        {
+          "endMs": 8360,
+          "startMs": 8200,
+          "text": "ней"
+        },
+        {
+          "endMs": 8960,
+          "startMs": 8360,
+          "text": "собраны"
+        },
+        {
+          "endMs": 9580,
+          "startMs": 8960,
+          "text": "компоненты,"
+        },
+        {
+          "endMs": 10320,
+          "startMs": 9680,
+          "text": "компоновки,"
+        },
+        {
+          "endMs": 11720,
+          "startMs": 11060,
+          "text": "графовые"
+        },
+        {
+          "endMs": 12580,
+          "startMs": 11720,
+          "text": "инструменты"
+        },
+        {
+          "endMs": 12800,
+          "startMs": 12580,
+          "text": "и"
+        },
+        {
+          "endMs": 13600,
+          "startMs": 12800,
+          "text": "семантические"
+        },
+        {
+          "endMs": 14260,
+          "startMs": 13600,
+          "text": "контракты"
+        },
+        {
+          "endMs": 15140,
+          "startMs": 14260,
+          "text": "интерфейса."
+        },
+        {
+          "endMs": 16020,
+          "startMs": 15500,
+          "text": "Агент"
+        },
+        {
+          "endMs": 16200,
+          "startMs": 16020,
+          "text": "не"
+        },
+        {
+          "endMs": 16500,
+          "startMs": 16200,
+          "text": "просто"
+        },
+        {
+          "endMs": 16840,
+          "startMs": 16500,
+          "text": "берет"
+        },
+        {
+          "endMs": 17360,
+          "startMs": 16840,
+          "text": "готовые"
+        },
+        {
+          "endMs": 17920,
+          "startMs": 17360,
+          "text": "блоки"
+        },
+        {
+          "endMs": 18300,
+          "startMs": 17920,
+          "text": "и"
+        },
+        {
+          "endMs": 19040,
+          "startMs": 18300,
+          "text": "размещает"
+        },
+        {
+          "endMs": 19240,
+          "startMs": 19040,
+          "text": "их"
+        },
+        {
+          "endMs": 19380,
+          "startMs": 19240,
+          "text": "на"
+        },
+        {
+          "endMs": 19840,
+          "startMs": 19380,
+          "text": "экране."
+        },
+        {
+          "endMs": 20680,
+          "startMs": 20200,
+          "text": "Вместе"
+        },
+        {
+          "endMs": 20840,
+          "startMs": 20680,
+          "text": "с"
+        },
+        {
+          "endMs": 21520,
+          "startMs": 20840,
+          "text": "интерфейсом"
+        },
+        {
+          "endMs": 21740,
+          "startMs": 21520,
+          "text": "он"
+        },
+        {
+          "endMs": 22320,
+          "startMs": 21740,
+          "text": "формирует"
+        },
+        {
+          "endMs": 23200,
+          "startMs": 22320,
+          "text": "машиночитаемый"
+        },
+        {
+          "endMs": 23740,
+          "startMs": 23200,
+          "text": "контекст."
+        },
+        {
+          "endMs": 24400,
+          "startMs": 23740,
+          "text": "Он"
+        },
+        {
+          "endMs": 24880,
+          "startMs": 24400,
+          "text": "описывает,"
+        },
+        {
+          "endMs": 25100,
+          "startMs": 24920,
+          "text": "что"
+        },
+        {
+          "endMs": 25400,
+          "startMs": 25100,
+          "text": "это"
+        },
+        {
+          "endMs": 25760,
+          "startMs": 25400,
+          "text": "за"
+        },
+        {
+          "endMs": 26400,
+          "startMs": 25760,
+          "text": "элементы,"
+        },
+        {
+          "endMs": 27040,
+          "startMs": 26760,
+          "text": "зачем"
+        },
+        {
+          "endMs": 27300,
+          "startMs": 27040,
+          "text": "они"
+        },
+        {
+          "endMs": 27860,
+          "startMs": 27300,
+          "text": "находятся"
+        },
+        {
+          "endMs": 28020,
+          "startMs": 27860,
+          "text": "на"
+        },
+        {
+          "endMs": 28260,
+          "startMs": 28020,
+          "text": "этом"
+        },
+        {
+          "endMs": 28600,
+          "startMs": 28260,
+          "text": "месте,"
+        },
+        {
+          "endMs": 29000,
+          "startMs": 28760,
+          "text": "какие"
+        },
+        {
+          "endMs": 29240,
+          "startMs": 29000,
+          "text": "у"
+        },
+        {
+          "endMs": 29360,
+          "startMs": 29240,
+          "text": "них"
+        },
+        {
+          "endMs": 30060,
+          "startMs": 29360,
+          "text": "состояния"
+        },
+        {
+          "endMs": 30160,
+          "startMs": 30060,
+          "text": "и"
+        },
+        {
+          "endMs": 30440,
+          "startMs": 30160,
+          "text": "какие"
+        },
+        {
+          "endMs": 30980,
+          "startMs": 30440,
+          "text": "действия"
+        },
+        {
+          "endMs": 31640,
+          "startMs": 30980,
+          "text": "доступны."
+        },
+        {
+          "endMs": 32200,
+          "startMs": 31840,
+          "text": "В"
+        },
+        {
+          "endMs": 32320,
+          "startMs": 32200,
+          "text": "том"
+        },
+        {
+          "endMs": 32640,
+          "startMs": 32320,
+          "text": "числе"
+        },
+        {
+          "endMs": 32960,
+          "startMs": 32640,
+          "text": "такой"
+        },
+        {
+          "endMs": 33480,
+          "startMs": 32960,
+          "text": "контекст"
+        },
+        {
+          "endMs": 33800,
+          "startMs": 33480,
+          "text": "может"
+        },
+        {
+          "endMs": 34640,
+          "startMs": 33800,
+          "text": "публиковаться"
+        },
+        {
+          "endMs": 34920,
+          "startMs": 34640,
+          "text": "через"
+        },
+        {
+          "endMs": 36120,
+          "startMs": 34920,
+          "text": "WebMCP."
+        },
+        {
+          "endMs": 37360,
+          "startMs": 36660,
+          "text": "Благодаря"
+        },
+        {
+          "endMs": 37660,
+          "startMs": 37360,
+          "text": "этому"
+        },
+        {
+          "endMs": 38120,
+          "startMs": 37660,
+          "text": "агент"
+        },
+        {
+          "endMs": 38680,
+          "startMs": 38120,
+          "text": "после"
+        },
+        {
+          "endMs": 39180,
+          "startMs": 38680,
+          "text": "сборки"
+        },
+        {
+          "endMs": 39720,
+          "startMs": 39180,
+          "text": "понимает"
+        },
+        {
+          "endMs": 40260,
+          "startMs": 39720,
+          "text": "структуру"
+        },
+        {
+          "endMs": 40880,
+          "startMs": 40260,
+          "text": "собственного"
+        },
+        {
+          "endMs": 41620,
+          "startMs": 40880,
+          "text": "интерфейса"
+        },
+        {
+          "endMs": 42260,
+          "startMs": 41620,
+          "text": "и"
+        },
+        {
+          "endMs": 42580,
+          "startMs": 42260,
+          "text": "может"
+        },
+        {
+          "endMs": 43140,
+          "startMs": 42580,
+          "text": "использовать"
+        },
+        {
+          "endMs": 43460,
+          "startMs": 43140,
+          "text": "тот"
+        },
+        {
+          "endMs": 43660,
+          "startMs": 43460,
+          "text": "же"
+        },
+        {
+          "endMs": 44300,
+          "startMs": 43660,
+          "text": "контекст,"
+        },
+        {
+          "endMs": 44860,
+          "startMs": 44560,
+          "text": "чтобы"
+        },
+        {
+          "endMs": 45420,
+          "startMs": 44860,
+          "text": "объяснить"
+        },
+        {
+          "endMs": 45640,
+          "startMs": 45420,
+          "text": "ее"
+        },
+        {
+          "endMs": 46300,
+          "startMs": 45640,
+          "text": "человеку."
+        },
+        {
+          "endMs": 46980,
+          "startMs": 46600,
+          "text": "На"
+        },
+        {
+          "endMs": 47480,
+          "startMs": 46980,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 47740,
+          "startMs": 47480,
+          "text": "UI"
+        },
+        {
+          "endMs": 48420,
+          "startMs": 47740,
+          "text": "построен"
+        },
+        {
+          "endMs": 48700,
+          "startMs": 48420,
+          "text": "и"
+        },
+        {
+          "endMs": 49240,
+          "startMs": 48700,
+          "text": "интерфейс"
+        },
+        {
+          "endMs": 49620,
+          "startMs": 49240,
+          "text": "этого"
+        },
+        {
+          "endMs": 50020,
+          "startMs": 49620,
+          "text": "CV."
+        },
+        {
+          "endMs": 50820,
+          "startMs": 50020,
+          "text": "На"
+        },
+        {
+          "endMs": 51000,
+          "startMs": 50820,
+          "text": "нем"
+        },
+        {
+          "endMs": 51540,
+          "startMs": 51000,
+          "text": "работают"
+        },
+        {
+          "endMs": 52000,
+          "startMs": 51540,
+          "text": "панели,"
+        },
+        {
+          "endMs": 52380,
+          "startMs": 52140,
+          "text": "чат"
+        },
+        {
+          "endMs": 52620,
+          "startMs": 52380,
+          "text": "и"
+        },
+        {
+          "endMs": 52880,
+          "startMs": 52620,
+          "text": "сама"
+        },
+        {
+          "endMs": 53640,
+          "startMs": 52880,
+          "text": "интерактивная"
+        },
+        {
+          "endMs": 54020,
+          "startMs": 53640,
+          "text": "система"
+        },
+        {
+          "endMs": 54880,
+          "startMs": 54020,
+          "text": "презентации."
+        },
+        {
+          "endMs": 55560,
+          "startMs": 55160,
+          "text": "То,"
+        },
+        {
+          "endMs": 55840,
+          "startMs": 55700,
+          "text": "что"
+        },
+        {
+          "endMs": 56480,
+          "startMs": 55840,
+          "text": "происходит"
+        },
+        {
+          "endMs": 57160,
+          "startMs": 56480,
+          "text": "прямо"
+        },
+        {
+          "endMs": 57660,
+          "startMs": 57160,
+          "text": "сейчас,"
+        },
+        {
+          "endMs": 58520,
+          "startMs": 58020,
+          "text": "это"
+        },
+        {
+          "endMs": 58840,
+          "startMs": 58520,
+          "text": "пример"
+        },
+        {
+          "endMs": 59080,
+          "startMs": 58840,
+          "text": "того"
+        },
+        {
+          "endMs": 59300,
+          "startMs": 59080,
+          "text": "же"
+        },
+        {
+          "endMs": 59900,
+          "startMs": 59300,
+          "text": "подхода."
+        },
+        {
+          "endMs": 60920,
+          "startMs": 60200,
+          "text": "Рассказ"
+        },
+        {
+          "endMs": 61920,
+          "startMs": 60920,
+          "text": "синхронизирован"
+        },
+        {
+          "endMs": 62120,
+          "startMs": 61920,
+          "text": "со"
+        },
+        {
+          "endMs": 62820,
+          "startMs": 62120,
+          "text": "страницей."
+        },
+        {
+          "endMs": 63880,
+          "startMs": 63160,
+          "text": "Интерфейс"
+        },
+        {
+          "endMs": 64340,
+          "startMs": 63880,
+          "text": "переводит"
+        },
+        {
+          "endMs": 64780,
+          "startMs": 64340,
+          "text": "внимание"
+        },
+        {
+          "endMs": 65140,
+          "startMs": 64780,
+          "text": "между"
+        },
+        {
+          "endMs": 65800,
+          "startMs": 65140,
+          "text": "элементами,"
+        },
+        {
+          "endMs": 66740,
+          "startMs": 66220,
+          "text": "выделяет"
+        },
+        {
+          "endMs": 66920,
+          "startMs": 66740,
+          "text": "их"
+        },
+        {
+          "endMs": 67120,
+          "startMs": 66920,
+          "text": "и"
+        },
+        {
+          "endMs": 67640,
+          "startMs": 67120,
+          "text": "буквально"
+        },
+        {
+          "endMs": 68300,
+          "startMs": 67640,
+          "text": "объясняет"
+        },
+        {
+          "endMs": 68460,
+          "startMs": 68300,
+          "text": "сам"
+        },
+        {
+          "endMs": 68800,
+          "startMs": 68460,
+          "text": "себя."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

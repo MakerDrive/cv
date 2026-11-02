@@ -1,6 +1,6 @@
 # Vladimir Matiasevich Portfolio
 
-> Lead R&D Engineer — designing and developing systems and platforms for complex process automation across software, media, and hardware.
+> Product Engineer | Full-Stack, R&D & Systems Engineering | Complex Process Automation Across Software, Media & Hardware | AI Agent Tooling
 
 Curated R&D portfolio covering AI tooling, agent systems, product platforms, media systems, process automation, and selected hardware-backed/open-source case studies. The site supports English, Russian, and Spanish through the `lang` query parameter.
 

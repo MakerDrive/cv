@@ -1,0 +1,246 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-n7AkAWn4gHZ9zhGpAoY1yU2rehbJjE8O0Z93k+2MWbc=",
+  "media": {
+    "durationMs": 24600,
+    "hash": "sha256:c3c8f96cf93b7bd81e3ed6eac8b53a1d60fc8853cbe13af568c6e575a1a3ea75",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-X+4EJg/eofJ9/Es/tZloAa3cju/0x3ASANeTufVBOh8=",
+  "turns": [
+    {
+      "endMs": 24600,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "В 2025 и 2026 годах я развивал Symbiot Video Studio. Сейчас этот проект постепенно оформляется как конфигурация Workspace. Материалы Graph, Timeline, предпросмотр и рендер собраны здесь в один видимый процесс. Агент работает с семантическими элементами интерфейса. А человек может видеть и проверять каждый этап.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 340,
+          "startMs": 0,
+          "text": "В"
+        },
+        {
+          "endMs": 1460,
+          "startMs": 340,
+          "text": "2025"
+        },
+        {
+          "endMs": 2300,
+          "startMs": 1460,
+          "text": "и"
+        },
+        {
+          "endMs": 3580,
+          "startMs": 2300,
+          "text": "2026"
+        },
+        {
+          "endMs": 4200,
+          "startMs": 3580,
+          "text": "годах"
+        },
+        {
+          "endMs": 4540,
+          "startMs": 4200,
+          "text": "я"
+        },
+        {
+          "endMs": 5060,
+          "startMs": 4540,
+          "text": "развивал"
+        },
+        {
+          "endMs": 5580,
+          "startMs": 5060,
+          "text": "Symbiot"
+        },
+        {
+          "endMs": 5880,
+          "startMs": 5580,
+          "text": "Video"
+        },
+        {
+          "endMs": 6340,
+          "startMs": 5880,
+          "text": "Studio."
+        },
+        {
+          "endMs": 7300,
+          "startMs": 6740,
+          "text": "Сейчас"
+        },
+        {
+          "endMs": 7800,
+          "startMs": 7300,
+          "text": "этот"
+        },
+        {
+          "endMs": 8200,
+          "startMs": 7800,
+          "text": "проект"
+        },
+        {
+          "endMs": 8940,
+          "startMs": 8200,
+          "text": "постепенно"
+        },
+        {
+          "endMs": 9500,
+          "startMs": 8940,
+          "text": "оформляется"
+        },
+        {
+          "endMs": 9780,
+          "startMs": 9500,
+          "text": "как"
+        },
+        {
+          "endMs": 10700,
+          "startMs": 9780,
+          "text": "конфигурация"
+        },
+        {
+          "endMs": 11420,
+          "startMs": 10700,
+          "text": "Workspace."
+        },
+        {
+          "endMs": 12580,
+          "startMs": 11840,
+          "text": "Материалы"
+        },
+        {
+          "endMs": 12880,
+          "startMs": 12580,
+          "text": "Graph,"
+        },
+        {
+          "endMs": 13580,
+          "startMs": 13080,
+          "text": "Timeline,"
+        },
+        {
+          "endMs": 14460,
+          "startMs": 13760,
+          "text": "предпросмотр"
+        },
+        {
+          "endMs": 14740,
+          "startMs": 14460,
+          "text": "и"
+        },
+        {
+          "endMs": 15100,
+          "startMs": 14740,
+          "text": "рендер"
+        },
+        {
+          "endMs": 15700,
+          "startMs": 15100,
+          "text": "собраны"
+        },
+        {
+          "endMs": 15940,
+          "startMs": 15700,
+          "text": "здесь"
+        },
+        {
+          "endMs": 16240,
+          "startMs": 15940,
+          "text": "в"
+        },
+        {
+          "endMs": 16460,
+          "startMs": 16240,
+          "text": "один"
+        },
+        {
+          "endMs": 16900,
+          "startMs": 16460,
+          "text": "видимый"
+        },
+        {
+          "endMs": 17240,
+          "startMs": 16900,
+          "text": "процесс."
+        },
+        {
+          "endMs": 18200,
+          "startMs": 17660,
+          "text": "Агент"
+        },
+        {
+          "endMs": 18660,
+          "startMs": 18200,
+          "text": "работает"
+        },
+        {
+          "endMs": 18840,
+          "startMs": 18660,
+          "text": "с"
+        },
+        {
+          "endMs": 19580,
+          "startMs": 18840,
+          "text": "семантическими"
+        },
+        {
+          "endMs": 20400,
+          "startMs": 19580,
+          "text": "элементами"
+        },
+        {
+          "endMs": 21260,
+          "startMs": 20400,
+          "text": "интерфейса."
+        },
+        {
+          "endMs": 21840,
+          "startMs": 21520,
+          "text": "А"
+        },
+        {
+          "endMs": 22160,
+          "startMs": 21840,
+          "text": "человек"
+        },
+        {
+          "endMs": 22460,
+          "startMs": 22160,
+          "text": "может"
+        },
+        {
+          "endMs": 22800,
+          "startMs": 22460,
+          "text": "видеть"
+        },
+        {
+          "endMs": 22960,
+          "startMs": 22800,
+          "text": "и"
+        },
+        {
+          "endMs": 23480,
+          "startMs": 22960,
+          "text": "проверять"
+        },
+        {
+          "endMs": 23900,
+          "startMs": 23480,
+          "text": "каждый"
+        },
+        {
+          "endMs": 24300,
+          "startMs": 23900,
+          "text": "этап."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

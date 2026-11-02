@@ -1,0 +1,531 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-BA28kt1FQLCGN1+kjbXcHFNYoQE4p+fLCYnZYC8oM4c=",
+  "media": {
+    "durationMs": 53220,
+    "hash": "sha256:db2dcaf9b27c024025dba390c70728284b6e93375c069303e647f5638cde1c79",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-slvlIBgsy+jjEoLU5VInbA/18CT+duZZXCpZUvhKtdw=",
+  "turns": [
+    {
+      "endMs": 53220,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "В основе студию лежит отдельное ядро симбиот-видео. Структура ролика описывается семантически, например, через сцены, слои, клипы и переходы. Агент может сформировать такое описание в формате JSON. После этого движок превращает его в реальные рабочие представления. Можно посмотреть граф. Можно проверить таймлайн. Можно запустить живой предпросмотр результата. Состояние проекта сохраняется, после чего процесс может перейти к экспорту. Для меня здесь снова важна одна и та же идея. Агент работает не с непрозрачным редактором через случайные клики. У него есть семантическая модель проекта и объявленные действия. В идее ядро уже работает. Сама студию, как универсальная конфигурация Workspace, продолжает развиваться в альфа-режиме.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 320,
+          "startMs": 0,
+          "text": "В"
+        },
+        {
+          "endMs": 720,
+          "startMs": 320,
+          "text": "основе"
+        },
+        {
+          "endMs": 1180,
+          "startMs": 720,
+          "text": "студию"
+        },
+        {
+          "endMs": 1580,
+          "startMs": 1180,
+          "text": "лежит"
+        },
+        {
+          "endMs": 2240,
+          "startMs": 1580,
+          "text": "отдельное"
+        },
+        {
+          "endMs": 2660,
+          "startMs": 2240,
+          "text": "ядро"
+        },
+        {
+          "endMs": 3420,
+          "startMs": 2660,
+          "text": "симбиот"
+        },
+        {
+          "endMs": 3840,
+          "startMs": 3420,
+          "text": "-видео."
+        },
+        {
+          "endMs": 4860,
+          "startMs": 4120,
+          "text": "Структура"
+        },
+        {
+          "endMs": 5280,
+          "startMs": 4860,
+          "text": "ролика"
+        },
+        {
+          "endMs": 5940,
+          "startMs": 5280,
+          "text": "описывается"
+        },
+        {
+          "endMs": 6820,
+          "startMs": 5940,
+          "text": "семантически,"
+        },
+        {
+          "endMs": 7660,
+          "startMs": 7200,
+          "text": "например,"
+        },
+        {
+          "endMs": 8160,
+          "startMs": 7920,
+          "text": "через"
+        },
+        {
+          "endMs": 8740,
+          "startMs": 8160,
+          "text": "сцены,"
+        },
+        {
+          "endMs": 9440,
+          "startMs": 8960,
+          "text": "слои,"
+        },
+        {
+          "endMs": 10140,
+          "startMs": 9680,
+          "text": "клипы"
+        },
+        {
+          "endMs": 10260,
+          "startMs": 10140,
+          "text": "и"
+        },
+        {
+          "endMs": 10920,
+          "startMs": 10260,
+          "text": "переходы."
+        },
+        {
+          "endMs": 11740,
+          "startMs": 11100,
+          "text": "Агент"
+        },
+        {
+          "endMs": 12080,
+          "startMs": 11740,
+          "text": "может"
+        },
+        {
+          "endMs": 12800,
+          "startMs": 12080,
+          "text": "сформировать"
+        },
+        {
+          "endMs": 13180,
+          "startMs": 12800,
+          "text": "такое"
+        },
+        {
+          "endMs": 13860,
+          "startMs": 13180,
+          "text": "описание"
+        },
+        {
+          "endMs": 14000,
+          "startMs": 13860,
+          "text": "в"
+        },
+        {
+          "endMs": 14520,
+          "startMs": 14000,
+          "text": "формате"
+        },
+        {
+          "endMs": 15100,
+          "startMs": 14520,
+          "text": "JSON."
+        },
+        {
+          "endMs": 16080,
+          "startMs": 15640,
+          "text": "После"
+        },
+        {
+          "endMs": 16420,
+          "startMs": 16080,
+          "text": "этого"
+        },
+        {
+          "endMs": 17000,
+          "startMs": 16420,
+          "text": "движок"
+        },
+        {
+          "endMs": 17760,
+          "startMs": 17000,
+          "text": "превращает"
+        },
+        {
+          "endMs": 17960,
+          "startMs": 17760,
+          "text": "его"
+        },
+        {
+          "endMs": 18100,
+          "startMs": 17960,
+          "text": "в"
+        },
+        {
+          "endMs": 18540,
+          "startMs": 18100,
+          "text": "реальные"
+        },
+        {
+          "endMs": 19060,
+          "startMs": 18540,
+          "text": "рабочие"
+        },
+        {
+          "endMs": 19780,
+          "startMs": 19060,
+          "text": "представления."
+        },
+        {
+          "endMs": 20660,
+          "startMs": 20020,
+          "text": "Можно"
+        },
+        {
+          "endMs": 21280,
+          "startMs": 20660,
+          "text": "посмотреть"
+        },
+        {
+          "endMs": 21620,
+          "startMs": 21280,
+          "text": "граф."
+        },
+        {
+          "endMs": 22900,
+          "startMs": 22440,
+          "text": "Можно"
+        },
+        {
+          "endMs": 23420,
+          "startMs": 22900,
+          "text": "проверить"
+        },
+        {
+          "endMs": 24060,
+          "startMs": 23420,
+          "text": "таймлайн."
+        },
+        {
+          "endMs": 24920,
+          "startMs": 24480,
+          "text": "Можно"
+        },
+        {
+          "endMs": 25520,
+          "startMs": 24920,
+          "text": "запустить"
+        },
+        {
+          "endMs": 26000,
+          "startMs": 25520,
+          "text": "живой"
+        },
+        {
+          "endMs": 26740,
+          "startMs": 26000,
+          "text": "предпросмотр"
+        },
+        {
+          "endMs": 27500,
+          "startMs": 26740,
+          "text": "результата."
+        },
+        {
+          "endMs": 28680,
+          "startMs": 27500,
+          "text": "Состояние"
+        },
+        {
+          "endMs": 29120,
+          "startMs": 28680,
+          "text": "проекта"
+        },
+        {
+          "endMs": 29800,
+          "startMs": 29120,
+          "text": "сохраняется,"
+        },
+        {
+          "endMs": 30180,
+          "startMs": 29960,
+          "text": "после"
+        },
+        {
+          "endMs": 30500,
+          "startMs": 30180,
+          "text": "чего"
+        },
+        {
+          "endMs": 30960,
+          "startMs": 30500,
+          "text": "процесс"
+        },
+        {
+          "endMs": 31400,
+          "startMs": 30960,
+          "text": "может"
+        },
+        {
+          "endMs": 31840,
+          "startMs": 31400,
+          "text": "перейти"
+        },
+        {
+          "endMs": 32040,
+          "startMs": 31840,
+          "text": "к"
+        },
+        {
+          "endMs": 32720,
+          "startMs": 32040,
+          "text": "экспорту."
+        },
+        {
+          "endMs": 33400,
+          "startMs": 33020,
+          "text": "Для"
+        },
+        {
+          "endMs": 33620,
+          "startMs": 33400,
+          "text": "меня"
+        },
+        {
+          "endMs": 33860,
+          "startMs": 33620,
+          "text": "здесь"
+        },
+        {
+          "endMs": 34360,
+          "startMs": 33860,
+          "text": "снова"
+        },
+        {
+          "endMs": 34780,
+          "startMs": 34360,
+          "text": "важна"
+        },
+        {
+          "endMs": 35080,
+          "startMs": 34780,
+          "text": "одна"
+        },
+        {
+          "endMs": 35300,
+          "startMs": 35080,
+          "text": "и"
+        },
+        {
+          "endMs": 35460,
+          "startMs": 35300,
+          "text": "та"
+        },
+        {
+          "endMs": 35620,
+          "startMs": 35460,
+          "text": "же"
+        },
+        {
+          "endMs": 36120,
+          "startMs": 35620,
+          "text": "идея."
+        },
+        {
+          "endMs": 36960,
+          "startMs": 36420,
+          "text": "Агент"
+        },
+        {
+          "endMs": 37420,
+          "startMs": 36960,
+          "text": "работает"
+        },
+        {
+          "endMs": 37760,
+          "startMs": 37420,
+          "text": "не"
+        },
+        {
+          "endMs": 37900,
+          "startMs": 37760,
+          "text": "с"
+        },
+        {
+          "endMs": 38620,
+          "startMs": 37900,
+          "text": "непрозрачным"
+        },
+        {
+          "endMs": 39240,
+          "startMs": 38620,
+          "text": "редактором"
+        },
+        {
+          "endMs": 39500,
+          "startMs": 39240,
+          "text": "через"
+        },
+        {
+          "endMs": 40160,
+          "startMs": 39500,
+          "text": "случайные"
+        },
+        {
+          "endMs": 40540,
+          "startMs": 40160,
+          "text": "клики."
+        },
+        {
+          "endMs": 41140,
+          "startMs": 40800,
+          "text": "У"
+        },
+        {
+          "endMs": 41280,
+          "startMs": 41140,
+          "text": "него"
+        },
+        {
+          "endMs": 41500,
+          "startMs": 41280,
+          "text": "есть"
+        },
+        {
+          "endMs": 42260,
+          "startMs": 41500,
+          "text": "семантическая"
+        },
+        {
+          "endMs": 42600,
+          "startMs": 42260,
+          "text": "модель"
+        },
+        {
+          "endMs": 43140,
+          "startMs": 42600,
+          "text": "проекта"
+        },
+        {
+          "endMs": 43300,
+          "startMs": 43140,
+          "text": "и"
+        },
+        {
+          "endMs": 43920,
+          "startMs": 43300,
+          "text": "объявленные"
+        },
+        {
+          "endMs": 44460,
+          "startMs": 43920,
+          "text": "действия."
+        },
+        {
+          "endMs": 45100,
+          "startMs": 44980,
+          "text": "В"
+        },
+        {
+          "endMs": 45540,
+          "startMs": 45100,
+          "text": "идее"
+        },
+        {
+          "endMs": 45860,
+          "startMs": 45540,
+          "text": "ядро"
+        },
+        {
+          "endMs": 46160,
+          "startMs": 45860,
+          "text": "уже"
+        },
+        {
+          "endMs": 46740,
+          "startMs": 46160,
+          "text": "работает."
+        },
+        {
+          "endMs": 47600,
+          "startMs": 47300,
+          "text": "Сама"
+        },
+        {
+          "endMs": 48140,
+          "startMs": 47600,
+          "text": "студию,"
+        },
+        {
+          "endMs": 48440,
+          "startMs": 48260,
+          "text": "как"
+        },
+        {
+          "endMs": 49100,
+          "startMs": 48440,
+          "text": "универсальная"
+        },
+        {
+          "endMs": 49860,
+          "startMs": 49100,
+          "text": "конфигурация"
+        },
+        {
+          "endMs": 50580,
+          "startMs": 49860,
+          "text": "Workspace,"
+        },
+        {
+          "endMs": 51360,
+          "startMs": 50820,
+          "text": "продолжает"
+        },
+        {
+          "endMs": 51920,
+          "startMs": 51360,
+          "text": "развиваться"
+        },
+        {
+          "endMs": 52100,
+          "startMs": 51920,
+          "text": "в"
+        },
+        {
+          "endMs": 52380,
+          "startMs": 52100,
+          "text": "альфа"
+        },
+        {
+          "endMs": 52880,
+          "startMs": 52380,
+          "text": "-режиме."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

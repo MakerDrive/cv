@@ -1,0 +1,631 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-obKXQ+SOc+9bn6vfgbwaGMxYuz/Ky8wu9iq7gJE37V0=",
+  "media": {
+    "durationMs": 63260,
+    "hash": "sha256:d9eb096a5d1236614919a325eede8bafa7c50258c85eada7e0422c72a0bac644",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-LuwV2dwxWaZOKfuC08u5Yc3AEP6/+UFqRVOX1LxPvrM=",
+  "turns": [
+    {
+      "endMs": 63260,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Привет, я Владимир. Я Рэнди-инженер. Больше всего мне интересны задачи, где готового технического задания еще нет. Есть цель или проблема, и сначала нужно понять, как это вообще должно работать. За свою карьеру я был сооснователем Megavizor, создавал собственный коммерческий и open-source проекты и работал с программными платформами, медиа-автоматизацией и оборудованием. Сейчас, в 2026 году, мой основной фокус — это программные платформы и агентные продукты. Для этой презентации я отобрал несколько проектов, где хорошо виден мой подход. Я не только решаю уже сформулированные задачи. Я нахожу проблемы и новые возможности, формирую идеи проектов и продуктов, запускаю их с нуля или развиваю новые направления внутри существующих систем. В каждом проекте я отдельно покажу, какую задачу решал и за что именно отвечал.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 480,
+          "startMs": 0,
+          "text": "Привет,"
+        },
+        {
+          "endMs": 1160,
+          "startMs": 1040,
+          "text": "я"
+        },
+        {
+          "endMs": 1700,
+          "startMs": 1160,
+          "text": "Владимир."
+        },
+        {
+          "endMs": 2320,
+          "startMs": 1900,
+          "text": "Я"
+        },
+        {
+          "endMs": 2900,
+          "startMs": 2320,
+          "text": "Рэнди"
+        },
+        {
+          "endMs": 3420,
+          "startMs": 2900,
+          "text": "-инженер."
+        },
+        {
+          "endMs": 4220,
+          "startMs": 3720,
+          "text": "Больше"
+        },
+        {
+          "endMs": 4560,
+          "startMs": 4220,
+          "text": "всего"
+        },
+        {
+          "endMs": 4780,
+          "startMs": 4560,
+          "text": "мне"
+        },
+        {
+          "endMs": 5260,
+          "startMs": 4780,
+          "text": "интересны"
+        },
+        {
+          "endMs": 5860,
+          "startMs": 5260,
+          "text": "задачи,"
+        },
+        {
+          "endMs": 6280,
+          "startMs": 6100,
+          "text": "где"
+        },
+        {
+          "endMs": 6740,
+          "startMs": 6280,
+          "text": "готового"
+        },
+        {
+          "endMs": 7320,
+          "startMs": 6740,
+          "text": "технического"
+        },
+        {
+          "endMs": 7780,
+          "startMs": 7320,
+          "text": "задания"
+        },
+        {
+          "endMs": 8020,
+          "startMs": 7780,
+          "text": "еще"
+        },
+        {
+          "endMs": 8320,
+          "startMs": 8020,
+          "text": "нет."
+        },
+        {
+          "endMs": 9160,
+          "startMs": 8580,
+          "text": "Есть"
+        },
+        {
+          "endMs": 9580,
+          "startMs": 9160,
+          "text": "цель"
+        },
+        {
+          "endMs": 9920,
+          "startMs": 9580,
+          "text": "или"
+        },
+        {
+          "endMs": 10500,
+          "startMs": 9920,
+          "text": "проблема,"
+        },
+        {
+          "endMs": 10840,
+          "startMs": 10500,
+          "text": "и"
+        },
+        {
+          "endMs": 11200,
+          "startMs": 10840,
+          "text": "сначала"
+        },
+        {
+          "endMs": 11540,
+          "startMs": 11200,
+          "text": "нужно"
+        },
+        {
+          "endMs": 12080,
+          "startMs": 11540,
+          "text": "понять,"
+        },
+        {
+          "endMs": 12800,
+          "startMs": 12280,
+          "text": "как"
+        },
+        {
+          "endMs": 13220,
+          "startMs": 12800,
+          "text": "это"
+        },
+        {
+          "endMs": 13640,
+          "startMs": 13220,
+          "text": "вообще"
+        },
+        {
+          "endMs": 14040,
+          "startMs": 13640,
+          "text": "должно"
+        },
+        {
+          "endMs": 14580,
+          "startMs": 14040,
+          "text": "работать."
+        },
+        {
+          "endMs": 15440,
+          "startMs": 14940,
+          "text": "За"
+        },
+        {
+          "endMs": 15660,
+          "startMs": 15440,
+          "text": "свою"
+        },
+        {
+          "endMs": 16080,
+          "startMs": 15660,
+          "text": "карьеру"
+        },
+        {
+          "endMs": 16260,
+          "startMs": 16080,
+          "text": "я"
+        },
+        {
+          "endMs": 16500,
+          "startMs": 16260,
+          "text": "был"
+        },
+        {
+          "endMs": 17360,
+          "startMs": 16500,
+          "text": "сооснователем"
+        },
+        {
+          "endMs": 18080,
+          "startMs": 17360,
+          "text": "Megavizor,"
+        },
+        {
+          "endMs": 19000,
+          "startMs": 18480,
+          "text": "создавал"
+        },
+        {
+          "endMs": 19520,
+          "startMs": 19000,
+          "text": "собственный"
+        },
+        {
+          "endMs": 20280,
+          "startMs": 19520,
+          "text": "коммерческий"
+        },
+        {
+          "endMs": 20580,
+          "startMs": 20280,
+          "text": "и"
+        },
+        {
+          "endMs": 20860,
+          "startMs": 20580,
+          "text": "open"
+        },
+        {
+          "endMs": 21120,
+          "startMs": 20860,
+          "text": "-source"
+        },
+        {
+          "endMs": 21700,
+          "startMs": 21120,
+          "text": "проекты"
+        },
+        {
+          "endMs": 21900,
+          "startMs": 21700,
+          "text": "и"
+        },
+        {
+          "endMs": 22320,
+          "startMs": 21900,
+          "text": "работал"
+        },
+        {
+          "endMs": 22420,
+          "startMs": 22320,
+          "text": "с"
+        },
+        {
+          "endMs": 23020,
+          "startMs": 22420,
+          "text": "программными"
+        },
+        {
+          "endMs": 23780,
+          "startMs": 23020,
+          "text": "платформами,"
+        },
+        {
+          "endMs": 24460,
+          "startMs": 24140,
+          "text": "медиа"
+        },
+        {
+          "endMs": 25520,
+          "startMs": 24460,
+          "text": "-автоматизацией"
+        },
+        {
+          "endMs": 25860,
+          "startMs": 25520,
+          "text": "и"
+        },
+        {
+          "endMs": 26680,
+          "startMs": 25860,
+          "text": "оборудованием."
+        },
+        {
+          "endMs": 27600,
+          "startMs": 26680,
+          "text": "Сейчас,"
+        },
+        {
+          "endMs": 28540,
+          "startMs": 28000,
+          "text": "в"
+        },
+        {
+          "endMs": 29880,
+          "startMs": 28540,
+          "text": "2026"
+        },
+        {
+          "endMs": 30440,
+          "startMs": 29880,
+          "text": "году,"
+        },
+        {
+          "endMs": 31180,
+          "startMs": 30700,
+          "text": "мой"
+        },
+        {
+          "endMs": 31640,
+          "startMs": 31180,
+          "text": "основной"
+        },
+        {
+          "endMs": 32060,
+          "startMs": 31640,
+          "text": "фокус"
+        },
+        {
+          "endMs": 32360,
+          "startMs": 32280,
+          "text": "это"
+        },
+        {
+          "endMs": 33000,
+          "startMs": 32360,
+          "text": "программные"
+        },
+        {
+          "endMs": 33740,
+          "startMs": 33000,
+          "text": "платформы"
+        },
+        {
+          "endMs": 34000,
+          "startMs": 33740,
+          "text": "и"
+        },
+        {
+          "endMs": 34580,
+          "startMs": 34000,
+          "text": "агентные"
+        },
+        {
+          "endMs": 35160,
+          "startMs": 34580,
+          "text": "продукты."
+        },
+        {
+          "endMs": 35900,
+          "startMs": 35500,
+          "text": "Для"
+        },
+        {
+          "endMs": 36140,
+          "startMs": 35900,
+          "text": "этой"
+        },
+        {
+          "endMs": 36900,
+          "startMs": 36140,
+          "text": "презентации"
+        },
+        {
+          "endMs": 37140,
+          "startMs": 36900,
+          "text": "я"
+        },
+        {
+          "endMs": 37620,
+          "startMs": 37140,
+          "text": "отобрал"
+        },
+        {
+          "endMs": 38020,
+          "startMs": 37620,
+          "text": "несколько"
+        },
+        {
+          "endMs": 38660,
+          "startMs": 38020,
+          "text": "проектов,"
+        },
+        {
+          "endMs": 38940,
+          "startMs": 38760,
+          "text": "где"
+        },
+        {
+          "endMs": 39360,
+          "startMs": 38940,
+          "text": "хорошо"
+        },
+        {
+          "endMs": 39800,
+          "startMs": 39360,
+          "text": "виден"
+        },
+        {
+          "endMs": 39980,
+          "startMs": 39800,
+          "text": "мой"
+        },
+        {
+          "endMs": 40420,
+          "startMs": 39980,
+          "text": "подход."
+        },
+        {
+          "endMs": 41160,
+          "startMs": 40840,
+          "text": "Я"
+        },
+        {
+          "endMs": 41300,
+          "startMs": 41160,
+          "text": "не"
+        },
+        {
+          "endMs": 41560,
+          "startMs": 41300,
+          "text": "только"
+        },
+        {
+          "endMs": 42080,
+          "startMs": 41560,
+          "text": "решаю"
+        },
+        {
+          "endMs": 42320,
+          "startMs": 42080,
+          "text": "уже"
+        },
+        {
+          "endMs": 43220,
+          "startMs": 42320,
+          "text": "сформулированные"
+        },
+        {
+          "endMs": 43840,
+          "startMs": 43220,
+          "text": "задачи."
+        },
+        {
+          "endMs": 44600,
+          "startMs": 44000,
+          "text": "Я"
+        },
+        {
+          "endMs": 45240,
+          "startMs": 44600,
+          "text": "нахожу"
+        },
+        {
+          "endMs": 45840,
+          "startMs": 45240,
+          "text": "проблемы"
+        },
+        {
+          "endMs": 46100,
+          "startMs": 45840,
+          "text": "и"
+        },
+        {
+          "endMs": 46420,
+          "startMs": 46100,
+          "text": "новые"
+        },
+        {
+          "endMs": 47240,
+          "startMs": 46420,
+          "text": "возможности,"
+        },
+        {
+          "endMs": 48460,
+          "startMs": 47940,
+          "text": "формирую"
+        },
+        {
+          "endMs": 48820,
+          "startMs": 48460,
+          "text": "идеи"
+        },
+        {
+          "endMs": 49420,
+          "startMs": 48820,
+          "text": "проектов"
+        },
+        {
+          "endMs": 49640,
+          "startMs": 49420,
+          "text": "и"
+        },
+        {
+          "endMs": 50340,
+          "startMs": 49640,
+          "text": "продуктов,"
+        },
+        {
+          "endMs": 51500,
+          "startMs": 50880,
+          "text": "запускаю"
+        },
+        {
+          "endMs": 51640,
+          "startMs": 51500,
+          "text": "их"
+        },
+        {
+          "endMs": 51760,
+          "startMs": 51640,
+          "text": "с"
+        },
+        {
+          "endMs": 52040,
+          "startMs": 51760,
+          "text": "нуля"
+        },
+        {
+          "endMs": 52540,
+          "startMs": 52040,
+          "text": "или"
+        },
+        {
+          "endMs": 53760,
+          "startMs": 52540,
+          "text": "развиваю"
+        },
+        {
+          "endMs": 54120,
+          "startMs": 53760,
+          "text": "новые"
+        },
+        {
+          "endMs": 54720,
+          "startMs": 54120,
+          "text": "направления"
+        },
+        {
+          "endMs": 55100,
+          "startMs": 54720,
+          "text": "внутри"
+        },
+        {
+          "endMs": 56040,
+          "startMs": 55100,
+          "text": "существующих"
+        },
+        {
+          "endMs": 56400,
+          "startMs": 56040,
+          "text": "систем."
+        },
+        {
+          "endMs": 57140,
+          "startMs": 56680,
+          "text": "В"
+        },
+        {
+          "endMs": 57580,
+          "startMs": 57140,
+          "text": "каждом"
+        },
+        {
+          "endMs": 58120,
+          "startMs": 57580,
+          "text": "проекте"
+        },
+        {
+          "endMs": 58340,
+          "startMs": 58120,
+          "text": "я"
+        },
+        {
+          "endMs": 58900,
+          "startMs": 58340,
+          "text": "отдельно"
+        },
+        {
+          "endMs": 59400,
+          "startMs": 58900,
+          "text": "покажу,"
+        },
+        {
+          "endMs": 59940,
+          "startMs": 59540,
+          "text": "какую"
+        },
+        {
+          "endMs": 60520,
+          "startMs": 59940,
+          "text": "задачу"
+        },
+        {
+          "endMs": 60940,
+          "startMs": 60520,
+          "text": "решал"
+        },
+        {
+          "endMs": 61220,
+          "startMs": 60940,
+          "text": "и"
+        },
+        {
+          "endMs": 61340,
+          "startMs": 61220,
+          "text": "за"
+        },
+        {
+          "endMs": 61580,
+          "startMs": 61340,
+          "text": "что"
+        },
+        {
+          "endMs": 62080,
+          "startMs": 61580,
+          "text": "именно"
+        },
+        {
+          "endMs": 62920,
+          "startMs": 62080,
+          "text": "отвечал."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

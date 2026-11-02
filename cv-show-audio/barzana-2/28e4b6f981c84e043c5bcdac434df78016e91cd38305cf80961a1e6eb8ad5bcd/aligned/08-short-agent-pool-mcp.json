@@ -1,0 +1,231 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-xWBs+npGeRGpZYQtilPQHBQR9SHtceOBC7bJRnCyv54=",
+  "media": {
+    "durationMs": 24670,
+    "hash": "sha256:5ff5633bb1acd316ca0b3e0dc5b888a8bcff2c232f443bd38635d6cd275a4d2b",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-Kp1+4ZZNmx+Tt2DissxIWk4sjAJ8tbHVrfWRlKvKuLU=",
+  "turns": [
+    {
+      "endMs": 24670,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "В начале 2026 года Agent Pool MCP оформился как самостоятельный MCP сервер. Его можно подключить непосредственно к агенту. В Agent Portal он работает как исполнительный слой. Он распределяет задачи между агентами, отслеживает состояние и владение задачей, передает сессии и маршрутизирует ресурсы.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 340,
+          "startMs": 0,
+          "text": "В"
+        },
+        {
+          "endMs": 760,
+          "startMs": 340,
+          "text": "начале"
+        },
+        {
+          "endMs": 2200,
+          "startMs": 760,
+          "text": "2026"
+        },
+        {
+          "endMs": 2920,
+          "startMs": 2200,
+          "text": "года"
+        },
+        {
+          "endMs": 3480,
+          "startMs": 2920,
+          "text": "Agent"
+        },
+        {
+          "endMs": 3860,
+          "startMs": 3480,
+          "text": "Pool"
+        },
+        {
+          "endMs": 4660,
+          "startMs": 3860,
+          "text": "MCP"
+        },
+        {
+          "endMs": 5540,
+          "startMs": 4660,
+          "text": "оформился"
+        },
+        {
+          "endMs": 5800,
+          "startMs": 5540,
+          "text": "как"
+        },
+        {
+          "endMs": 6800,
+          "startMs": 5800,
+          "text": "самостоятельный"
+        },
+        {
+          "endMs": 7760,
+          "startMs": 6800,
+          "text": "MCP"
+        },
+        {
+          "endMs": 8240,
+          "startMs": 7760,
+          "text": "сервер."
+        },
+        {
+          "endMs": 8940,
+          "startMs": 8520,
+          "text": "Его"
+        },
+        {
+          "endMs": 9260,
+          "startMs": 8940,
+          "text": "можно"
+        },
+        {
+          "endMs": 9880,
+          "startMs": 9260,
+          "text": "подключить"
+        },
+        {
+          "endMs": 10580,
+          "startMs": 9880,
+          "text": "непосредственно"
+        },
+        {
+          "endMs": 10760,
+          "startMs": 10580,
+          "text": "к"
+        },
+        {
+          "endMs": 11260,
+          "startMs": 10760,
+          "text": "агенту."
+        },
+        {
+          "endMs": 11900,
+          "startMs": 11500,
+          "text": "В"
+        },
+        {
+          "endMs": 12140,
+          "startMs": 11900,
+          "text": "Agent"
+        },
+        {
+          "endMs": 12500,
+          "startMs": 12140,
+          "text": "Portal"
+        },
+        {
+          "endMs": 12740,
+          "startMs": 12500,
+          "text": "он"
+        },
+        {
+          "endMs": 13180,
+          "startMs": 12740,
+          "text": "работает"
+        },
+        {
+          "endMs": 13560,
+          "startMs": 13180,
+          "text": "как"
+        },
+        {
+          "endMs": 14460,
+          "startMs": 13560,
+          "text": "исполнительный"
+        },
+        {
+          "endMs": 14780,
+          "startMs": 14460,
+          "text": "слой."
+        },
+        {
+          "endMs": 15520,
+          "startMs": 15060,
+          "text": "Он"
+        },
+        {
+          "endMs": 16260,
+          "startMs": 15520,
+          "text": "распределяет"
+        },
+        {
+          "endMs": 16760,
+          "startMs": 16260,
+          "text": "задачи"
+        },
+        {
+          "endMs": 17060,
+          "startMs": 16760,
+          "text": "между"
+        },
+        {
+          "endMs": 17820,
+          "startMs": 17060,
+          "text": "агентами,"
+        },
+        {
+          "endMs": 18900,
+          "startMs": 18320,
+          "text": "отслеживает"
+        },
+        {
+          "endMs": 19580,
+          "startMs": 18900,
+          "text": "состояние"
+        },
+        {
+          "endMs": 19740,
+          "startMs": 19580,
+          "text": "и"
+        },
+        {
+          "endMs": 20220,
+          "startMs": 19740,
+          "text": "владение"
+        },
+        {
+          "endMs": 20880,
+          "startMs": 20220,
+          "text": "задачей,"
+        },
+        {
+          "endMs": 21800,
+          "startMs": 21360,
+          "text": "передает"
+        },
+        {
+          "endMs": 22440,
+          "startMs": 21800,
+          "text": "сессии"
+        },
+        {
+          "endMs": 22680,
+          "startMs": 22440,
+          "text": "и"
+        },
+        {
+          "endMs": 23660,
+          "startMs": 22680,
+          "text": "маршрутизирует"
+        },
+        {
+          "endMs": 24340,
+          "startMs": 23660,
+          "text": "ресурсы."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

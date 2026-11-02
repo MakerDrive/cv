@@ -1,0 +1,601 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-kGiq5IHHkjZfpMh5d6oYAg7j8jEjplgfEt4mYR0RyIU=",
+  "media": {
+    "durationMs": 56750,
+    "hash": "sha256:1d46070962af8c21773dec3b1c0ce34fab8245bac04f204884a52a146fd1cae3",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-HiY3FFhnVFArQPt5Xl+A/5Muu46Iwj04K9iFfM47CDs=",
+  "turns": [
+    {
+      "endMs": 56750,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "С начала 2026 года я развиваю Agent Portal. Сейчас я постепенно переношу его в Symbiote Workspace как одну из конфигураций. Проект появился как мой собственный управляющий слой над разными агентными средами. По сути, это единый процесс поверх разных агентов, моделей и способов доступа к ним. Он позволяет сохранять контроль над контекстом, задачами и ресурсами и при этом менять исполнителей под конкретный этап. Когда я начинал эту линию, я не нашел готового решения с нужным мне сочетанием возможностей, поэтому стал развивать собственную архитектуру. Часть слоя управления мы открыли как open-source проект. А внутри Agent Portal есть два важных инструмента. Agent Pool отвечает за исполнение и распределение ресурсов. Project Graph отвечает за структуру и контекст проекта.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 340,
+          "startMs": 0,
+          "text": "С"
+        },
+        {
+          "endMs": 660,
+          "startMs": 340,
+          "text": "начала"
+        },
+        {
+          "endMs": 2080,
+          "startMs": 660,
+          "text": "2026"
+        },
+        {
+          "endMs": 2620,
+          "startMs": 2080,
+          "text": "года"
+        },
+        {
+          "endMs": 2940,
+          "startMs": 2620,
+          "text": "я"
+        },
+        {
+          "endMs": 3520,
+          "startMs": 2940,
+          "text": "развиваю"
+        },
+        {
+          "endMs": 3840,
+          "startMs": 3520,
+          "text": "Agent"
+        },
+        {
+          "endMs": 4440,
+          "startMs": 3840,
+          "text": "Portal."
+        },
+        {
+          "endMs": 5320,
+          "startMs": 4820,
+          "text": "Сейчас"
+        },
+        {
+          "endMs": 5600,
+          "startMs": 5320,
+          "text": "я"
+        },
+        {
+          "endMs": 6220,
+          "startMs": 5600,
+          "text": "постепенно"
+        },
+        {
+          "endMs": 6700,
+          "startMs": 6220,
+          "text": "переношу"
+        },
+        {
+          "endMs": 6900,
+          "startMs": 6700,
+          "text": "его"
+        },
+        {
+          "endMs": 7060,
+          "startMs": 6900,
+          "text": "в"
+        },
+        {
+          "endMs": 7440,
+          "startMs": 7060,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 7940,
+          "startMs": 7440,
+          "text": "Workspace"
+        },
+        {
+          "endMs": 8200,
+          "startMs": 7940,
+          "text": "как"
+        },
+        {
+          "endMs": 8460,
+          "startMs": 8200,
+          "text": "одну"
+        },
+        {
+          "endMs": 8600,
+          "startMs": 8460,
+          "text": "из"
+        },
+        {
+          "endMs": 9380,
+          "startMs": 8600,
+          "text": "конфигураций."
+        },
+        {
+          "endMs": 10260,
+          "startMs": 9680,
+          "text": "Проект"
+        },
+        {
+          "endMs": 10820,
+          "startMs": 10260,
+          "text": "появился"
+        },
+        {
+          "endMs": 11020,
+          "startMs": 10820,
+          "text": "как"
+        },
+        {
+          "endMs": 11260,
+          "startMs": 11020,
+          "text": "мой"
+        },
+        {
+          "endMs": 11860,
+          "startMs": 11260,
+          "text": "собственный"
+        },
+        {
+          "endMs": 12600,
+          "startMs": 11860,
+          "text": "управляющий"
+        },
+        {
+          "endMs": 12940,
+          "startMs": 12600,
+          "text": "слой"
+        },
+        {
+          "endMs": 13160,
+          "startMs": 12940,
+          "text": "над"
+        },
+        {
+          "endMs": 13620,
+          "startMs": 13160,
+          "text": "разными"
+        },
+        {
+          "endMs": 14500,
+          "startMs": 13620,
+          "text": "агентными"
+        },
+        {
+          "endMs": 15120,
+          "startMs": 14500,
+          "text": "средами."
+        },
+        {
+          "endMs": 15780,
+          "startMs": 15420,
+          "text": "По"
+        },
+        {
+          "endMs": 16000,
+          "startMs": 15780,
+          "text": "сути,"
+        },
+        {
+          "endMs": 16200,
+          "startMs": 16100,
+          "text": "это"
+        },
+        {
+          "endMs": 16580,
+          "startMs": 16200,
+          "text": "единый"
+        },
+        {
+          "endMs": 16920,
+          "startMs": 16580,
+          "text": "процесс"
+        },
+        {
+          "endMs": 17280,
+          "startMs": 16920,
+          "text": "поверх"
+        },
+        {
+          "endMs": 17780,
+          "startMs": 17280,
+          "text": "разных"
+        },
+        {
+          "endMs": 18300,
+          "startMs": 17780,
+          "text": "агентов,"
+        },
+        {
+          "endMs": 19300,
+          "startMs": 18600,
+          "text": "моделей"
+        },
+        {
+          "endMs": 19600,
+          "startMs": 19300,
+          "text": "и"
+        },
+        {
+          "endMs": 20180,
+          "startMs": 19600,
+          "text": "способов"
+        },
+        {
+          "endMs": 20760,
+          "startMs": 20180,
+          "text": "доступа"
+        },
+        {
+          "endMs": 20860,
+          "startMs": 20760,
+          "text": "к"
+        },
+        {
+          "endMs": 21060,
+          "startMs": 20860,
+          "text": "ним."
+        },
+        {
+          "endMs": 21840,
+          "startMs": 21260,
+          "text": "Он"
+        },
+        {
+          "endMs": 22440,
+          "startMs": 21840,
+          "text": "позволяет"
+        },
+        {
+          "endMs": 23000,
+          "startMs": 22440,
+          "text": "сохранять"
+        },
+        {
+          "endMs": 23500,
+          "startMs": 23000,
+          "text": "контроль"
+        },
+        {
+          "endMs": 23700,
+          "startMs": 23500,
+          "text": "над"
+        },
+        {
+          "endMs": 24500,
+          "startMs": 23700,
+          "text": "контекстом,"
+        },
+        {
+          "endMs": 25480,
+          "startMs": 24960,
+          "text": "задачами"
+        },
+        {
+          "endMs": 25720,
+          "startMs": 25480,
+          "text": "и"
+        },
+        {
+          "endMs": 26340,
+          "startMs": 25720,
+          "text": "ресурсами"
+        },
+        {
+          "endMs": 26600,
+          "startMs": 26340,
+          "text": "и"
+        },
+        {
+          "endMs": 26780,
+          "startMs": 26600,
+          "text": "при"
+        },
+        {
+          "endMs": 27080,
+          "startMs": 26780,
+          "text": "этом"
+        },
+        {
+          "endMs": 27600,
+          "startMs": 27080,
+          "text": "менять"
+        },
+        {
+          "endMs": 28320,
+          "startMs": 27600,
+          "text": "исполнителей"
+        },
+        {
+          "endMs": 28580,
+          "startMs": 28320,
+          "text": "под"
+        },
+        {
+          "endMs": 29200,
+          "startMs": 28580,
+          "text": "конкретный"
+        },
+        {
+          "endMs": 29540,
+          "startMs": 29200,
+          "text": "этап."
+        },
+        {
+          "endMs": 30240,
+          "startMs": 30000,
+          "text": "Когда"
+        },
+        {
+          "endMs": 30400,
+          "startMs": 30240,
+          "text": "я"
+        },
+        {
+          "endMs": 30860,
+          "startMs": 30400,
+          "text": "начинал"
+        },
+        {
+          "endMs": 31040,
+          "startMs": 30860,
+          "text": "эту"
+        },
+        {
+          "endMs": 31460,
+          "startMs": 31040,
+          "text": "линию,"
+        },
+        {
+          "endMs": 31640,
+          "startMs": 31520,
+          "text": "я"
+        },
+        {
+          "endMs": 31760,
+          "startMs": 31640,
+          "text": "не"
+        },
+        {
+          "endMs": 32120,
+          "startMs": 31760,
+          "text": "нашел"
+        },
+        {
+          "endMs": 32620,
+          "startMs": 32120,
+          "text": "готового"
+        },
+        {
+          "endMs": 33060,
+          "startMs": 32620,
+          "text": "решения"
+        },
+        {
+          "endMs": 33220,
+          "startMs": 33060,
+          "text": "с"
+        },
+        {
+          "endMs": 33600,
+          "startMs": 33220,
+          "text": "нужным"
+        },
+        {
+          "endMs": 33860,
+          "startMs": 33600,
+          "text": "мне"
+        },
+        {
+          "endMs": 34560,
+          "startMs": 33860,
+          "text": "сочетанием"
+        },
+        {
+          "endMs": 35400,
+          "startMs": 34560,
+          "text": "возможностей,"
+        },
+        {
+          "endMs": 36140,
+          "startMs": 35600,
+          "text": "поэтому"
+        },
+        {
+          "endMs": 36480,
+          "startMs": 36140,
+          "text": "стал"
+        },
+        {
+          "endMs": 37140,
+          "startMs": 36480,
+          "text": "развивать"
+        },
+        {
+          "endMs": 37880,
+          "startMs": 37140,
+          "text": "собственную"
+        },
+        {
+          "endMs": 38840,
+          "startMs": 37880,
+          "text": "архитектуру."
+        },
+        {
+          "endMs": 39680,
+          "startMs": 39120,
+          "text": "Часть"
+        },
+        {
+          "endMs": 40180,
+          "startMs": 39680,
+          "text": "слоя"
+        },
+        {
+          "endMs": 40840,
+          "startMs": 40180,
+          "text": "управления"
+        },
+        {
+          "endMs": 41220,
+          "startMs": 40840,
+          "text": "мы"
+        },
+        {
+          "endMs": 41800,
+          "startMs": 41220,
+          "text": "открыли"
+        },
+        {
+          "endMs": 42080,
+          "startMs": 41800,
+          "text": "как"
+        },
+        {
+          "endMs": 42540,
+          "startMs": 42080,
+          "text": "open"
+        },
+        {
+          "endMs": 42920,
+          "startMs": 42540,
+          "text": "-source"
+        },
+        {
+          "endMs": 43360,
+          "startMs": 42920,
+          "text": "проект."
+        },
+        {
+          "endMs": 44000,
+          "startMs": 43660,
+          "text": "А"
+        },
+        {
+          "endMs": 44380,
+          "startMs": 44000,
+          "text": "внутри"
+        },
+        {
+          "endMs": 44940,
+          "startMs": 44380,
+          "text": "Agent"
+        },
+        {
+          "endMs": 45400,
+          "startMs": 44940,
+          "text": "Portal"
+        },
+        {
+          "endMs": 45920,
+          "startMs": 45400,
+          "text": "есть"
+        },
+        {
+          "endMs": 46400,
+          "startMs": 45920,
+          "text": "два"
+        },
+        {
+          "endMs": 47080,
+          "startMs": 46400,
+          "text": "важных"
+        },
+        {
+          "endMs": 47840,
+          "startMs": 47080,
+          "text": "инструмента."
+        },
+        {
+          "endMs": 48600,
+          "startMs": 48120,
+          "text": "Agent"
+        },
+        {
+          "endMs": 48940,
+          "startMs": 48600,
+          "text": "Pool"
+        },
+        {
+          "endMs": 49580,
+          "startMs": 48940,
+          "text": "отвечает"
+        },
+        {
+          "endMs": 49720,
+          "startMs": 49580,
+          "text": "за"
+        },
+        {
+          "endMs": 50400,
+          "startMs": 49720,
+          "text": "исполнение"
+        },
+        {
+          "endMs": 50800,
+          "startMs": 50400,
+          "text": "и"
+        },
+        {
+          "endMs": 51800,
+          "startMs": 50800,
+          "text": "распределение"
+        },
+        {
+          "endMs": 52440,
+          "startMs": 51800,
+          "text": "ресурсов."
+        },
+        {
+          "endMs": 53120,
+          "startMs": 52640,
+          "text": "Project"
+        },
+        {
+          "endMs": 53480,
+          "startMs": 53120,
+          "text": "Graph"
+        },
+        {
+          "endMs": 54160,
+          "startMs": 53480,
+          "text": "отвечает"
+        },
+        {
+          "endMs": 54300,
+          "startMs": 54160,
+          "text": "за"
+        },
+        {
+          "endMs": 54880,
+          "startMs": 54300,
+          "text": "структуру"
+        },
+        {
+          "endMs": 55200,
+          "startMs": 54880,
+          "text": "и"
+        },
+        {
+          "endMs": 55780,
+          "startMs": 55200,
+          "text": "контекст"
+        },
+        {
+          "endMs": 56460,
+          "startMs": 55780,
+          "text": "проекта."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

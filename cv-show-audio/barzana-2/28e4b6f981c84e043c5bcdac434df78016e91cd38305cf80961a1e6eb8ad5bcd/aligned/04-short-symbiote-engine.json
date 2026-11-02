@@ -1,0 +1,226 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-WRUJUshL2UdftrDNYKubxusBw10zkkDV1xqv/DJsA68=",
+  "media": {
+    "durationMs": 23620,
+    "hash": "sha256:095ce6829172cb9aebef61a144b717d710f603c4c16d281f588a2b9f2623655a",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-5CUBaqksm8bZmikJU+ptbaVuiM1Cyn/PDQkim9GtcKg=",
+  "turns": [
+    {
+      "endMs": 23620,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "В 2026 году я также выделил серверный исполнительный слой в Symbiote Engine. Если Symbiote UI дает визуальные блоки, то Engine дает функциональные. Это библиотека для сервисов, графов выполнения, автоматизации и состояния. Workspaces связывает визуальную и исполнительную части в одной конфигурации.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 340,
+          "startMs": 0,
+          "text": "В"
+        },
+        {
+          "endMs": 1500,
+          "startMs": 340,
+          "text": "2026"
+        },
+        {
+          "endMs": 1980,
+          "startMs": 1500,
+          "text": "году"
+        },
+        {
+          "endMs": 2600,
+          "startMs": 1980,
+          "text": "я"
+        },
+        {
+          "endMs": 2900,
+          "startMs": 2600,
+          "text": "также"
+        },
+        {
+          "endMs": 3440,
+          "startMs": 2900,
+          "text": "выделил"
+        },
+        {
+          "endMs": 3960,
+          "startMs": 3440,
+          "text": "серверный"
+        },
+        {
+          "endMs": 4680,
+          "startMs": 3960,
+          "text": "исполнительный"
+        },
+        {
+          "endMs": 5020,
+          "startMs": 4680,
+          "text": "слой"
+        },
+        {
+          "endMs": 5160,
+          "startMs": 5020,
+          "text": "в"
+        },
+        {
+          "endMs": 5540,
+          "startMs": 5160,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 5860,
+          "startMs": 5540,
+          "text": "Engine."
+        },
+        {
+          "endMs": 6880,
+          "startMs": 6260,
+          "text": "Если"
+        },
+        {
+          "endMs": 7540,
+          "startMs": 6880,
+          "text": "Symbiote"
+        },
+        {
+          "endMs": 7980,
+          "startMs": 7540,
+          "text": "UI"
+        },
+        {
+          "endMs": 8420,
+          "startMs": 7980,
+          "text": "дает"
+        },
+        {
+          "endMs": 9080,
+          "startMs": 8420,
+          "text": "визуальные"
+        },
+        {
+          "endMs": 9620,
+          "startMs": 9080,
+          "text": "блоки,"
+        },
+        {
+          "endMs": 10060,
+          "startMs": 9980,
+          "text": "то"
+        },
+        {
+          "endMs": 10500,
+          "startMs": 10060,
+          "text": "Engine"
+        },
+        {
+          "endMs": 10900,
+          "startMs": 10500,
+          "text": "дает"
+        },
+        {
+          "endMs": 11820,
+          "startMs": 10900,
+          "text": "функциональные."
+        },
+        {
+          "endMs": 12580,
+          "startMs": 12060,
+          "text": "Это"
+        },
+        {
+          "endMs": 13280,
+          "startMs": 12580,
+          "text": "библиотека"
+        },
+        {
+          "endMs": 13480,
+          "startMs": 13280,
+          "text": "для"
+        },
+        {
+          "endMs": 14220,
+          "startMs": 13480,
+          "text": "сервисов,"
+        },
+        {
+          "endMs": 14940,
+          "startMs": 14420,
+          "text": "графов"
+        },
+        {
+          "endMs": 15660,
+          "startMs": 14940,
+          "text": "выполнения,"
+        },
+        {
+          "endMs": 16920,
+          "startMs": 15980,
+          "text": "автоматизации"
+        },
+        {
+          "endMs": 17200,
+          "startMs": 16920,
+          "text": "и"
+        },
+        {
+          "endMs": 18000,
+          "startMs": 17200,
+          "text": "состояния."
+        },
+        {
+          "endMs": 19180,
+          "startMs": 18460,
+          "text": "Workspaces"
+        },
+        {
+          "endMs": 19820,
+          "startMs": 19180,
+          "text": "связывает"
+        },
+        {
+          "endMs": 20460,
+          "startMs": 19820,
+          "text": "визуальную"
+        },
+        {
+          "endMs": 20820,
+          "startMs": 20460,
+          "text": "и"
+        },
+        {
+          "endMs": 21600,
+          "startMs": 20820,
+          "text": "исполнительную"
+        },
+        {
+          "endMs": 21960,
+          "startMs": 21600,
+          "text": "части"
+        },
+        {
+          "endMs": 22140,
+          "startMs": 21960,
+          "text": "в"
+        },
+        {
+          "endMs": 22340,
+          "startMs": 22140,
+          "text": "одной"
+        },
+        {
+          "endMs": 23260,
+          "startMs": 22340,
+          "text": "конфигурации."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}

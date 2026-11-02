@@ -1,0 +1,666 @@
+{
+  "contractVersion": "workspace-aligned-sequence-v3",
+  "events": [],
+  "hash": "workspace-aligned-sequence-v3:sha256-16xfGDGO3sZUHO4zX077eCeH/FZe9G95ClN4fePXsQ0=",
+  "media": {
+    "durationMs": 70400,
+    "hash": "sha256:e283b0b28fd72090cabf2a22451df83169b8c91e04651053614fea85f17327ca",
+    "locale": "ru"
+  },
+  "timelineHash": "presentation-timeline-v3:sha256-ZyPN7t6vX721eg/Df0hth/UKRI2DbhiubOOdUqImd/M=",
+  "turns": [
+    {
+      "endMs": 70400,
+      "speaker": "barzana-2",
+      "startMs": 0,
+      "transcript": "Этот проект соединял сразу несколько разных слоев. Был веб-продукт, была серверная инфраструктура и был физический контур доставки через модемы. API и база по сгресквил хранили продуктовые данные и состояния системы. WebSket связывал сервер с удаленными исполнительными instances. Эти инстанции управляли пулами gsm-модемов через Serial Interface и AT-команды. В таком контуре нельзя исходить из того, что сети устройства всегда находятся в идеальном состоянии. Связь может пропасть, модем может изменить состояние, удаленный инстанц может перезапуститься. Поэтому очередь, повторяемое выполнение, состояние задач и мониторинг были частью самой архитектуры. Я старался сделать процесс восстанавливаемым и наблюдаемым на каждом этапе. При этом тестировать все только на реальном пуле модемов неудобно и дорого. Поэтому я сделал локальный Digital Twin. Он воспроизводил физический контур виртуальными устройствами и позволял повторять нужные сценарии локально.",
+      "turnIndex": 0,
+      "words": [
+        {
+          "endMs": 440,
+          "startMs": 0,
+          "text": "Этот"
+        },
+        {
+          "endMs": 860,
+          "startMs": 440,
+          "text": "проект"
+        },
+        {
+          "endMs": 1520,
+          "startMs": 860,
+          "text": "соединял"
+        },
+        {
+          "endMs": 1860,
+          "startMs": 1520,
+          "text": "сразу"
+        },
+        {
+          "endMs": 2340,
+          "startMs": 1860,
+          "text": "несколько"
+        },
+        {
+          "endMs": 2800,
+          "startMs": 2340,
+          "text": "разных"
+        },
+        {
+          "endMs": 3340,
+          "startMs": 2800,
+          "text": "слоев."
+        },
+        {
+          "endMs": 3980,
+          "startMs": 3600,
+          "text": "Был"
+        },
+        {
+          "endMs": 4200,
+          "startMs": 3980,
+          "text": "веб"
+        },
+        {
+          "endMs": 4760,
+          "startMs": 4200,
+          "text": "-продукт,"
+        },
+        {
+          "endMs": 5500,
+          "startMs": 4880,
+          "text": "была"
+        },
+        {
+          "endMs": 6160,
+          "startMs": 5500,
+          "text": "серверная"
+        },
+        {
+          "endMs": 7000,
+          "startMs": 6160,
+          "text": "инфраструктура"
+        },
+        {
+          "endMs": 7600,
+          "startMs": 7000,
+          "text": "и"
+        },
+        {
+          "endMs": 7840,
+          "startMs": 7600,
+          "text": "был"
+        },
+        {
+          "endMs": 8420,
+          "startMs": 7840,
+          "text": "физический"
+        },
+        {
+          "endMs": 8820,
+          "startMs": 8420,
+          "text": "контур"
+        },
+        {
+          "endMs": 9380,
+          "startMs": 8820,
+          "text": "доставки"
+        },
+        {
+          "endMs": 9620,
+          "startMs": 9380,
+          "text": "через"
+        },
+        {
+          "endMs": 10140,
+          "startMs": 9620,
+          "text": "модемы."
+        },
+        {
+          "endMs": 11120,
+          "startMs": 10480,
+          "text": "API"
+        },
+        {
+          "endMs": 11520,
+          "startMs": 11120,
+          "text": "и"
+        },
+        {
+          "endMs": 12000,
+          "startMs": 11520,
+          "text": "база"
+        },
+        {
+          "endMs": 12180,
+          "startMs": 12000,
+          "text": "по"
+        },
+        {
+          "endMs": 12740,
+          "startMs": 12180,
+          "text": "сгресквил"
+        },
+        {
+          "endMs": 13240,
+          "startMs": 12740,
+          "text": "хранили"
+        },
+        {
+          "endMs": 13940,
+          "startMs": 13240,
+          "text": "продуктовые"
+        },
+        {
+          "endMs": 14340,
+          "startMs": 13940,
+          "text": "данные"
+        },
+        {
+          "endMs": 14480,
+          "startMs": 14340,
+          "text": "и"
+        },
+        {
+          "endMs": 14940,
+          "startMs": 14480,
+          "text": "состояния"
+        },
+        {
+          "endMs": 15520,
+          "startMs": 14940,
+          "text": "системы."
+        },
+        {
+          "endMs": 16560,
+          "startMs": 16020,
+          "text": "WebSket"
+        },
+        {
+          "endMs": 17240,
+          "startMs": 16560,
+          "text": "связывал"
+        },
+        {
+          "endMs": 17700,
+          "startMs": 17240,
+          "text": "сервер"
+        },
+        {
+          "endMs": 17880,
+          "startMs": 17700,
+          "text": "с"
+        },
+        {
+          "endMs": 18560,
+          "startMs": 17880,
+          "text": "удаленными"
+        },
+        {
+          "endMs": 19500,
+          "startMs": 18560,
+          "text": "исполнительными"
+        },
+        {
+          "endMs": 20080,
+          "startMs": 19500,
+          "text": "instances."
+        },
+        {
+          "endMs": 21040,
+          "startMs": 20680,
+          "text": "Эти"
+        },
+        {
+          "endMs": 21600,
+          "startMs": 21040,
+          "text": "инстанции"
+        },
+        {
+          "endMs": 22140,
+          "startMs": 21600,
+          "text": "управляли"
+        },
+        {
+          "endMs": 22720,
+          "startMs": 22140,
+          "text": "пулами"
+        },
+        {
+          "endMs": 23940,
+          "startMs": 22720,
+          "text": "gsm"
+        },
+        {
+          "endMs": 24600,
+          "startMs": 23940,
+          "text": "-модемов"
+        },
+        {
+          "endMs": 24860,
+          "startMs": 24600,
+          "text": "через"
+        },
+        {
+          "endMs": 25300,
+          "startMs": 24860,
+          "text": "Serial"
+        },
+        {
+          "endMs": 25940,
+          "startMs": 25300,
+          "text": "Interface"
+        },
+        {
+          "endMs": 26240,
+          "startMs": 25940,
+          "text": "и"
+        },
+        {
+          "endMs": 26920,
+          "startMs": 26240,
+          "text": "AT"
+        },
+        {
+          "endMs": 27640,
+          "startMs": 26920,
+          "text": "-команды."
+        },
+        {
+          "endMs": 28180,
+          "startMs": 27640,
+          "text": "В"
+        },
+        {
+          "endMs": 28440,
+          "startMs": 28180,
+          "text": "таком"
+        },
+        {
+          "endMs": 28860,
+          "startMs": 28440,
+          "text": "контуре"
+        },
+        {
+          "endMs": 29180,
+          "startMs": 28860,
+          "text": "нельзя"
+        },
+        {
+          "endMs": 29760,
+          "startMs": 29180,
+          "text": "исходить"
+        },
+        {
+          "endMs": 29900,
+          "startMs": 29760,
+          "text": "из"
+        },
+        {
+          "endMs": 30120,
+          "startMs": 29900,
+          "text": "того,"
+        },
+        {
+          "endMs": 30360,
+          "startMs": 30220,
+          "text": "что"
+        },
+        {
+          "endMs": 30760,
+          "startMs": 30360,
+          "text": "сети"
+        },
+        {
+          "endMs": 31480,
+          "startMs": 30760,
+          "text": "устройства"
+        },
+        {
+          "endMs": 32280,
+          "startMs": 31480,
+          "text": "всегда"
+        },
+        {
+          "endMs": 33020,
+          "startMs": 32280,
+          "text": "находятся"
+        },
+        {
+          "endMs": 33240,
+          "startMs": 33020,
+          "text": "в"
+        },
+        {
+          "endMs": 33740,
+          "startMs": 33240,
+          "text": "идеальном"
+        },
+        {
+          "endMs": 34540,
+          "startMs": 33740,
+          "text": "состоянии."
+        },
+        {
+          "endMs": 35480,
+          "startMs": 34740,
+          "text": "Связь"
+        },
+        {
+          "endMs": 35720,
+          "startMs": 35480,
+          "text": "может"
+        },
+        {
+          "endMs": 36340,
+          "startMs": 35720,
+          "text": "пропасть,"
+        },
+        {
+          "endMs": 37200,
+          "startMs": 36860,
+          "text": "модем"
+        },
+        {
+          "endMs": 37540,
+          "startMs": 37200,
+          "text": "может"
+        },
+        {
+          "endMs": 38080,
+          "startMs": 37540,
+          "text": "изменить"
+        },
+        {
+          "endMs": 39000,
+          "startMs": 38080,
+          "text": "состояние,"
+        },
+        {
+          "endMs": 40000,
+          "startMs": 39560,
+          "text": "удаленный"
+        },
+        {
+          "endMs": 40480,
+          "startMs": 40000,
+          "text": "инстанц"
+        },
+        {
+          "endMs": 40820,
+          "startMs": 40480,
+          "text": "может"
+        },
+        {
+          "endMs": 41780,
+          "startMs": 40820,
+          "text": "перезапуститься."
+        },
+        {
+          "endMs": 42640,
+          "startMs": 42220,
+          "text": "Поэтому"
+        },
+        {
+          "endMs": 43300,
+          "startMs": 42640,
+          "text": "очередь,"
+        },
+        {
+          "endMs": 44440,
+          "startMs": 43740,
+          "text": "повторяемое"
+        },
+        {
+          "endMs": 45140,
+          "startMs": 44440,
+          "text": "выполнение,"
+        },
+        {
+          "endMs": 46200,
+          "startMs": 45680,
+          "text": "состояние"
+        },
+        {
+          "endMs": 46500,
+          "startMs": 46200,
+          "text": "задач"
+        },
+        {
+          "endMs": 46820,
+          "startMs": 46500,
+          "text": "и"
+        },
+        {
+          "endMs": 47540,
+          "startMs": 46820,
+          "text": "мониторинг"
+        },
+        {
+          "endMs": 47860,
+          "startMs": 47540,
+          "text": "были"
+        },
+        {
+          "endMs": 48380,
+          "startMs": 47860,
+          "text": "частью"
+        },
+        {
+          "endMs": 48880,
+          "startMs": 48380,
+          "text": "самой"
+        },
+        {
+          "endMs": 49940,
+          "startMs": 48880,
+          "text": "архитектуры."
+        },
+        {
+          "endMs": 50600,
+          "startMs": 50180,
+          "text": "Я"
+        },
+        {
+          "endMs": 51120,
+          "startMs": 50600,
+          "text": "старался"
+        },
+        {
+          "endMs": 51500,
+          "startMs": 51120,
+          "text": "сделать"
+        },
+        {
+          "endMs": 52060,
+          "startMs": 51500,
+          "text": "процесс"
+        },
+        {
+          "endMs": 53380,
+          "startMs": 52060,
+          "text": "восстанавливаемым"
+        },
+        {
+          "endMs": 53640,
+          "startMs": 53380,
+          "text": "и"
+        },
+        {
+          "endMs": 54440,
+          "startMs": 53640,
+          "text": "наблюдаемым"
+        },
+        {
+          "endMs": 54620,
+          "startMs": 54440,
+          "text": "на"
+        },
+        {
+          "endMs": 55000,
+          "startMs": 54620,
+          "text": "каждом"
+        },
+        {
+          "endMs": 55440,
+          "startMs": 55000,
+          "text": "этапе."
+        },
+        {
+          "endMs": 56080,
+          "startMs": 55440,
+          "text": "При"
+        },
+        {
+          "endMs": 56320,
+          "startMs": 56080,
+          "text": "этом"
+        },
+        {
+          "endMs": 56940,
+          "startMs": 56320,
+          "text": "тестировать"
+        },
+        {
+          "endMs": 57180,
+          "startMs": 56940,
+          "text": "все"
+        },
+        {
+          "endMs": 57500,
+          "startMs": 57180,
+          "text": "только"
+        },
+        {
+          "endMs": 57680,
+          "startMs": 57500,
+          "text": "на"
+        },
+        {
+          "endMs": 58120,
+          "startMs": 57680,
+          "text": "реальном"
+        },
+        {
+          "endMs": 58500,
+          "startMs": 58120,
+          "text": "пуле"
+        },
+        {
+          "endMs": 59040,
+          "startMs": 58500,
+          "text": "модемов"
+        },
+        {
+          "endMs": 59660,
+          "startMs": 59040,
+          "text": "неудобно"
+        },
+        {
+          "endMs": 59740,
+          "startMs": 59660,
+          "text": "и"
+        },
+        {
+          "endMs": 60160,
+          "startMs": 59740,
+          "text": "дорого."
+        },
+        {
+          "endMs": 60980,
+          "startMs": 60400,
+          "text": "Поэтому"
+        },
+        {
+          "endMs": 61220,
+          "startMs": 60980,
+          "text": "я"
+        },
+        {
+          "endMs": 61620,
+          "startMs": 61220,
+          "text": "сделал"
+        },
+        {
+          "endMs": 62160,
+          "startMs": 61620,
+          "text": "локальный"
+        },
+        {
+          "endMs": 62480,
+          "startMs": 62160,
+          "text": "Digital"
+        },
+        {
+          "endMs": 62920,
+          "startMs": 62480,
+          "text": "Twin."
+        },
+        {
+          "endMs": 63740,
+          "startMs": 63220,
+          "text": "Он"
+        },
+        {
+          "endMs": 64480,
+          "startMs": 63740,
+          "text": "воспроизводил"
+        },
+        {
+          "endMs": 65120,
+          "startMs": 64480,
+          "text": "физический"
+        },
+        {
+          "endMs": 65560,
+          "startMs": 65120,
+          "text": "контур"
+        },
+        {
+          "endMs": 66220,
+          "startMs": 65560,
+          "text": "виртуальными"
+        },
+        {
+          "endMs": 67000,
+          "startMs": 66220,
+          "text": "устройствами"
+        },
+        {
+          "endMs": 67440,
+          "startMs": 67000,
+          "text": "и"
+        },
+        {
+          "endMs": 67900,
+          "startMs": 67440,
+          "text": "позволял"
+        },
+        {
+          "endMs": 68440,
+          "startMs": 67900,
+          "text": "повторять"
+        },
+        {
+          "endMs": 68900,
+          "startMs": 68440,
+          "text": "нужные"
+        },
+        {
+          "endMs": 69460,
+          "startMs": 68900,
+          "text": "сценарии"
+        },
+        {
+          "endMs": 70040,
+          "startMs": 69460,
+          "text": "локально."
+        }
+      ]
+    }
+  ],
+  "voice": {
+    "mode": "single",
+    "speakerId": "barzana-2"
+  }
+}
