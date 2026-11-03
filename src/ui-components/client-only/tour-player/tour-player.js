@@ -51,6 +51,7 @@ const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
 const CV_SHOW_SCENE_RETRY_LIMIT = 3;
 const CV_SHOW_SCENE_RETRY_SETTLE_MS = 900;
+const CV_SHOW_SECTION_LINK_FEEDBACK_MS = 2_000;
 
 function formatProgress(message, current, total) {
   return message.replace('{current}', String(current)).replace('{total}', String(total));
@@ -197,6 +198,29 @@ export function createCvShowVideoControls(directives = [], resolveMessage = valu
   return Object.freeze([]);
 }
 
+const CV_SHOW_SECTION_LINK_MARKUP =
+  '<button type="button" class="chat-show-header-action material-symbols-outlined" data-cv-show-action="section-link"></button>';
+
+const CV_SHOW_SECTION_LINK_GLYPHS = Object.freeze({
+  '': 'content_copy',
+  copied: 'check',
+  failed: 'error',
+});
+
+/**
+ * Header action of the Show: what the press does, or the transient answer of
+ * the last press — the glyph carries the state and the label names it.
+ */
+export function resolveCvShowSectionLinkAction(
+  resolveMessage = value => value,
+  feedback = '',
+) {
+  return Object.freeze({
+    glyph: CV_SHOW_SECTION_LINK_GLYPHS[feedback] || CV_SHOW_SECTION_LINK_GLYPHS[''],
+    label: resolveMessage(feedback ? `tour.sectionLink.${feedback}` : 'tour.sectionLink'),
+  });
+}
+
 export function resolveCvShowPlayerEntry({
   inBranch = false,
   activeSpeechEntry = null,
@@ -328,6 +352,10 @@ export class PortfolioShowChat extends HTMLElement {
    */
   #suspendedSceneFailure = null;
   #messageStream = createCvShowMessageStreamController();
+  /** Transient 'copied' / 'failed' answer of the last section-link press. */
+  #sectionLinkFeedback = '';
+  /** @type {ReturnType<typeof globalThis.setTimeout> | null} */
+  #sectionLinkFeedbackTimer = null;
 
   constructor() {
     super();
@@ -498,6 +526,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.#dock?.removeEventListener('click', this.#captureTrustedContactClick, { capture: true });
     this.#unsubscribeAuthoring?.();
     this.#unsubscribeAuthoring = null;
+    this.#clearSectionLinkFeedbackTimer();
     this.stopShow();
   }
 
@@ -861,6 +890,7 @@ export class PortfolioShowChat extends HTMLElement {
     if (!this.#dock || !this.#story || !this.#controller || !this.#mode) return null;
     this.#agent = this.#dock.getChat?.() || this.#agent;
     this.#showPlayer = this.#dock.setShow('short', this.#showConfig()) || this.#showPlayer;
+    this.#ensureSectionLinkAction();
     this.dispatchEvent(new CustomEvent('portfolio-show-player-mounted', { bubbles: true }));
     return this.#showPlayer;
   }
@@ -973,6 +1003,66 @@ export class PortfolioShowChat extends HTMLElement {
       return true;
     },
   });
+
+  /**
+   * The Show header belongs to the player, and its `<slot name="actions">` is
+   * already resolved when the consumer receives the player, so the share action
+   * joins the header buttons as markup rather than through the config seam.
+   */
+  #ensureSectionLinkAction() {
+    const header = this.#showPlayer?.querySelector?.('.chat-show-header');
+    if (!header) return;
+    const settings = header.querySelector('[data-header-action="settings"]') || null;
+    let button = header.querySelector('[data-cv-show-action="section-link"]');
+    if (!button) {
+      header.insertAdjacentHTML('beforeend', CV_SHOW_SECTION_LINK_MARKUP);
+      button = header.querySelector('[data-cv-show-action="section-link"]');
+      if (!button) return;
+      button.addEventListener('click', () => this.#copySectionLink());
+      header.insertBefore(button, settings);
+    }
+    const action = resolveCvShowSectionLinkAction(key => this.#message(key), this.#sectionLinkFeedback);
+    button.textContent = action.glyph;
+    button.setAttribute('aria-label', action.label);
+    button.title = action.label;
+  }
+
+  // The player never builds a Show URL: the runtime that owns the route answers
+  // this request with the share address of the segment on screen.
+  #copySectionLink() {
+    const answer = { url: '' };
+    this.dispatchEvent(new CustomEvent('portfolio-show-section-link-request', {
+      bubbles: true,
+      composed: true,
+      detail: answer,
+    }));
+    const request = navigator.clipboard?.writeText?.(answer.url);
+    if (!answer.url || !request) {
+      this.#reportSectionLinkFeedback('failed');
+      return;
+    }
+    void request.then(
+      () => this.#reportSectionLinkFeedback('copied'),
+      () => this.#reportSectionLinkFeedback('failed'),
+    );
+  }
+
+  #reportSectionLinkFeedback(feedback) {
+    this.#clearSectionLinkFeedbackTimer();
+    this.#sectionLinkFeedback = feedback;
+    this.#ensureSectionLinkAction();
+    this.#sectionLinkFeedbackTimer = globalThis.setTimeout?.(() => {
+      this.#sectionLinkFeedback = '';
+      this.#clearSectionLinkFeedbackTimer();
+      this.#ensureSectionLinkAction();
+    }, CV_SHOW_SECTION_LINK_FEEDBACK_MS);
+  }
+
+  #clearSectionLinkFeedbackTimer() {
+    if (this.#sectionLinkFeedbackTimer === null) return;
+    globalThis.clearTimeout?.(this.#sectionLinkFeedbackTimer);
+    this.#sectionLinkFeedbackTimer = null;
+  }
 
   #videoControls(entry) {
     return createCvShowVideoControls(entry?.directives, key => this.#message(key));

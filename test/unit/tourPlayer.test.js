@@ -6246,7 +6246,22 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   ]);
   assert.doesNotMatch(`${logic}\n${runtime}`, /onboundary|voiceschanged|triggerWord|querySelector\(directive\.target/);
   assert.doesNotMatch(logic, /history\.(?:pushState|replaceState)/, 'the reusable player remains URL-agnostic');
-  assert.match(runtime, /serializeCvShowRoute/);
+  assert.match(runtime, /createCvShowSectionUrl/);
+  assert.match(
+    `${logic}\n${runtime}`,
+    /portfolio-show-section-link-request/,
+    'the player asks the route owner for the segment link instead of building one',
+  );
+  assert.match(
+    logic,
+    /header\.insertAdjacentHTML\('beforeend', CV_SHOW_SECTION_LINK_MARKUP\)[\s\S]*?insertBefore\(button, settings\)/u,
+    'the share action joins the player header buttons as markup, not as a control strip',
+  );
+  assert.doesNotMatch(
+    logic,
+    /action: 'copySectionLink'/,
+    'the header action is not routed through the provider video-controls seam',
+  );
   assert.match(runtime, /history\[push \? 'pushState' : 'replaceState'\]/);
   assert.match(
     runtime,
@@ -6411,7 +6426,7 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.doesNotMatch(main, /client-only\/tour-player\/tour-player\.js/);
 });
 
-test('Show captions keep canonical Whisper timing and non-actionable video controls stay hidden', async (t) => {
+test('Show captions keep canonical Whisper timing and the header action answers the copy result', async (t) => {
   const { parseHTML } = await import('linkedom');
   const { window } = parseHTML('<!doctype html><html lang="ru"><body></body></html>');
   const globalKeys = [
@@ -6448,6 +6463,7 @@ test('Show captions keep canonical Whisper timing and non-actionable video contr
     createCvShowCanonicalCaption,
     createCvShowVideoControls,
     resolveCvShowPlayerEntry,
+    resolveCvShowSectionLinkAction,
   } = await import(
     '../../src/ui-components/client-only/tour-player/tour-player.js?canonical-caption-unit-test'
   );
@@ -6479,10 +6495,30 @@ test('Show captions keep canonical Whisper timing and non-actionable video contr
   const controls = createCvShowVideoControls([
     { id: 'autobox.video-01', type: 'media', mode: 'short-muted-montage' },
     { id: 'autobox.video-02', type: 'media', mode: 'short-muted-montage' },
-    { id: 'autobox.video-03', type: 'media', mode: 'short-muted-montage' },
     { id: 'autobox.full-video', type: 'media', mode: 'full-with-media-audio' },
   ], (key) => key);
-  assert.deepEqual(controls, []);
+  assert.deepEqual(controls, [], 'media directives stay cue-owned: no control strip');
+
+  assert.deepEqual(
+    resolveCvShowSectionLinkAction((key) => key),
+    { glyph: 'content_copy', label: 'tour.sectionLink' },
+    'the header action names what the press does while idle',
+  );
+  assert.deepEqual(
+    resolveCvShowSectionLinkAction((key) => key, 'copied'),
+    { glyph: 'check', label: 'tour.sectionLink.copied' },
+    'a reached clipboard is answered by the same action, not by a new one',
+  );
+  assert.deepEqual(
+    resolveCvShowSectionLinkAction((key) => key, 'failed'),
+    { glyph: 'error', label: 'tour.sectionLink.failed' },
+    'a refused clipboard stays visible instead of failing silently',
+  );
+  assert.equal(
+    resolveCvShowSectionLinkAction((key) => key, 'nonsense').glyph,
+    'content_copy',
+    'an unknown state cannot leave the action without a glyph',
+  );
 
   const branchEntry = {
     id: 'autobox-details',

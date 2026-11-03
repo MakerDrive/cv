@@ -302,8 +302,13 @@ export function resolvePulseKindMessageKey(kind) {
   return key;
 }
 
+/** Published URL path of a portfolio entry id, without the app base or slashes. */
+export function resolvePortfolioEntryRoute(id) {
+  return String(id || '').trim().replace(/^\/+|\/+$/g, '').replace(/\/index$/, '');
+}
+
 export function createPortfolioEntryHref(id, { basePath = '/', locale = 'en' } = {}) {
-  let route = String(id || '').trim().replace(/^\/+|\/+$/g, '').replace(/\/index$/, '');
+  let route = resolvePortfolioEntryRoute(id);
   let normalizedBase = `/${String(basePath || '/').replace(/^\/+|\/+$/g, '')}/`
     .replace(/\/{2,}/g, '/');
   let pathname = route ? `${normalizedBase}${route}/` : normalizedBase;

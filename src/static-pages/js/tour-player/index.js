@@ -23,8 +23,8 @@ import { isCvShowQuietRestoreActive } from './presentationQuietRestore.js';
 import {
   canonicalizeCvShowRoute,
   createCvShowRouteRequestCoordinator,
+  createCvShowSectionUrl,
   resolveCvShowEntryForPortfolioRoute,
-  serializeCvShowRoute,
   stripCvShowRoute,
 } from './routing.js';
 import {
@@ -784,6 +784,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const routeRequests = createCvShowRouteRequestCoordinator();
   let routeWriteTimer = null;
   let lastRouteWriteAt = 0;
+  // Show playback moves the address onto each section's own page so a shared
+  // link previews that section. The page the viewer was standing on is remembered
+  // only while the show holds the address, and the stop hands it back.
+  let preShowPathname = '';
   let lastPlaybackEntryId = '';
   let lastRouteSemanticKey = '';
   let mobileShowPlacementRequested = false;
@@ -907,14 +911,20 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     if (url.href !== location.href) history.replaceState(history.state, '', url.href);
   };
 
+  const sectionUrl = (state) => createCvShowSectionUrl(location.href, state, {
+    ...routePolicy(),
+    baseHref: document.baseURI,
+  });
+
   const writeRouteState = (state, { push = false } = {}) => {
     if (typeof history === 'undefined' || typeof location === 'undefined' || !state?.mode) return;
     let url;
     try {
-      url = serializeCvShowRoute(location.href, state, routePolicy());
+      url = sectionUrl(state);
     } catch {
       return;
     }
+    if (url.pathname !== location.pathname && !preShowPathname) preShowPathname = location.pathname;
     if (url.href === location.href) return;
     history[push ? 'pushState' : 'replaceState'](history.state, '', url.href);
     lastRouteWriteAt = Date.now();
@@ -922,7 +932,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   const stripRouteState = () => {
     if (typeof location === 'undefined') return;
-    replaceRouteUrl(stripCvShowRoute(location.href));
+    const url = stripCvShowRoute(location.href);
+    if (preShowPathname && url.pathname !== preShowPathname) url.pathname = preShowPathname;
+    preShowPathname = '';
+    replaceRouteUrl(url);
   };
   const media = new ShowMediaController({
     audioArbiter,
@@ -1138,9 +1151,14 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       // Clear the route while leaving explicit resume/return actions alive in
       // the chat history for a deliberate re-entry.
       stripRouteState();
-    } else if (!routeDriven) {
-      if (routeRequests.applying) stripRouteWhenIdle = true;
-      else stripRouteState();
+    } else if (routeDriven) {
+      // A route-driven stop leaves the section address as the route: nothing
+      // is handed back, and the next episode starts from the address it sees.
+      preShowPathname = '';
+    } else if (routeRequests.applying) {
+      stripRouteWhenIdle = true;
+    } else {
+      stripRouteState();
     }
   };
 
@@ -1284,6 +1302,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       return;
     }
     scheduleRouteStateWrite(event.detail?.state);
+  };
+
+  // The player asks for the address of the segment it is showing; this runtime
+  // is the only owner of the Show URL scheme, so it answers and the player
+  // decides what to do with the answer.
+  const onSectionLinkRequest = (event) => {
+    const state = getChat()?.routeSnapshot;
+    if (!state?.mode) return;
+    event.detail.url = sectionUrl(state).href;
   };
 
   const onDockResponsiveChange = () => {
@@ -1625,6 +1652,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   workspace.addEventListener('portfolio-show-seek', onSeek);
   workspace.addEventListener('portfolio-show-route-change', onRouteChange);
   workspace.addEventListener('portfolio-show-route-change', onPlaybackEntryChange);
+  workspace.addEventListener('portfolio-show-section-link-request', onSectionLinkRequest);
   document.addEventListener('portfolio-show-pause', pausePresenter, { capture: true });
   document.addEventListener('portfolio-show-resume', resumePresenter, { capture: true });
   workspace.addEventListener('portfolio-show-phase', onPhase);
@@ -1652,6 +1680,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     workspace.removeEventListener('portfolio-show-seek', onSeek);
     workspace.removeEventListener('portfolio-show-route-change', onRouteChange);
     workspace.removeEventListener('portfolio-show-route-change', onPlaybackEntryChange);
+    workspace.removeEventListener('portfolio-show-section-link-request', onSectionLinkRequest);
     document.removeEventListener('portfolio-show-pause', pausePresenter, { capture: true });
     document.removeEventListener('portfolio-show-resume', resumePresenter, { capture: true });
     workspace.removeEventListener('portfolio-show-phase', onPhase);

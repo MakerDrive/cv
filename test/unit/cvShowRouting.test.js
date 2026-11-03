@@ -6,8 +6,11 @@ import {
   canonicalizeCvShowRoute,
   createCvShowRouteRequestCoordinator,
   createCvShowSceneRouteMap,
+  createCvShowSectionPageMap,
+  createCvShowSectionUrl,
   parseCvShowRoute,
   resolveCvShowEntryForPortfolioRoute,
+  resolveCvShowSectionPageId,
   serializeCvShowRoute,
   stripCvShowRoute,
 } from '../../src/static-pages/js/tour-player/routing.js';
@@ -500,6 +503,12 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
       currentUrl = new URL(href, currentUrl);
     },
   };
+  // Every published CV page resolves <base href> to the portfolio root, which is
+  // what lets the runtime rewrite the address onto the current section page.
+  Object.defineProperty(document, 'baseURI', {
+    configurable: true,
+    value: 'https://portfolio.example/cv/',
+  });
   globalThis.requestAnimationFrame = (callback) => {
     callback(0);
     return 1;
@@ -758,6 +767,11 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
 
   emitRoute(100);
   assert.equal(currentUrl.searchParams.get('showTime'), '100');
+  assert.equal(
+    currentUrl.pathname,
+    '/cv/profile/photo/',
+    'a Show route moves the address onto the section page whose preview represents it',
+  );
   emitRoute(900);
   assert.equal(pendingTimers.size, 1, 'the second same-segment update is throttled');
 
@@ -777,6 +791,11 @@ test('CV Show host strips an early Stop after route preparation and cancels stal
   );
   assert.equal(currentUrl.searchParams.get('lang'), 'ru');
   assert.equal(currentUrl.hash, '#profile');
+  assert.equal(
+    currentUrl.pathname,
+    '/cv/',
+    'the stopped Show hands the page the viewer stood on back to the address',
+  );
 });
 
 const REAL_STORY = projectCvShowStory(CV_SHOW_PRESENTATION_PROJECT);
@@ -879,6 +898,86 @@ test('scene route mapping uses durable navigate targets and explicit project own
       { id: 'two', directives: [{ type: 'navigate', target: 'projects/shared' }] },
     ],
   }), /Ambiguous CV Show route target: projects\/shared/u);
+});
+
+// A static host selects the social preview by PATH, so the share URL of a
+// segment must address the page that owns that segment's preview.
+test('show share URL addresses the section page whose preview represents it', () => {
+  const story = Object.freeze({
+    scenes: Object.freeze([
+      {
+        id: 'positioning',
+        directives: Object.freeze([{ type: 'navigate', target: 'profile/photo' }]),
+      },
+      {
+        id: 'complexscan',
+        branchId: 'complexscan-details',
+        directives: Object.freeze([
+          { type: 'navigate', target: 'pulse/complexscan-launch' },
+          { type: 'navigate', target: 'projects/complexscan' },
+        ]),
+      },
+      { id: 'projects', directives: Object.freeze([{ type: 'navigate', target: 'projects/index' }]) },
+      { id: 'unrouted', directives: Object.freeze([]) },
+    ]),
+    branches: Object.freeze({
+      'complexscan-details': { id: 'complexscan-details', sceneId: 'complexscan' },
+    }),
+  });
+
+  assert.equal(resolveCvShowSectionPageId(story, { entryId: 'positioning' }), 'profile/photo');
+  assert.equal(
+    resolveCvShowSectionPageId(story, { entryId: 'complexscan', detailId: 'complexscan-details' }),
+    'projects/complexscan',
+    'a branch has no page of its own and inherits the scene page named after the scene',
+  );
+  assert.equal(resolveCvShowSectionPageId(story, { entryId: 'unrouted' }), '');
+
+  // Every published page carries <base href> that resolves to the portfolio
+  // root, so document.baseURI is the app base at any depth.
+  const shared = { story, baseHref: 'https://portfolio.example/cv/' };
+  const sectionUrl = createCvShowSectionUrl(
+    'https://portfolio.example/cv/profile/photo/?lang=ru&mode=structured&sn-theme=cascade#media',
+    { mode: 'short', entryId: 'complexscan', detailId: 'complexscan-details', timeMs: 74_000, play: false },
+    shared,
+  );
+  assert.equal(sectionUrl.pathname, '/cv/projects/complexscan/');
+  assert.equal(sectionUrl.searchParams.get('lang'), 'ru');
+  assert.equal(sectionUrl.searchParams.get('mode'), 'structured');
+  assert.equal(sectionUrl.searchParams.get('sn-theme'), 'cascade');
+  assert.equal(sectionUrl.hash, '#media');
+  assert.equal(sectionUrl.searchParams.get('showMode'), 'short');
+  assert.equal(sectionUrl.searchParams.get('showTime'), '74000');
+  assert.equal(sectionUrl.searchParams.get('showPlay'), '0');
+  assert.equal(sectionUrl.searchParams.has('showEntry'), false, 'entry must never be written');
+  assert.equal(sectionUrl.searchParams.has('showDetail'), false, 'detail must never be written');
+
+  // A page id that names an index page publishes as its directory, and the
+  // site root publishes as the base path.
+  assert.equal(
+    createCvShowSectionUrl('https://portfolio.example/cv/pulse/', {
+      mode: 'full', entryId: 'projects', detailId: '', timeMs: 0, play: true,
+    }, shared).pathname,
+    '/cv/projects/',
+  );
+
+  const unrouted = createCvShowSectionUrl(
+    'https://portfolio.example/cv/profile/photo/?lang=en&showMode=short',
+    { mode: 'short', entryId: 'unrouted', detailId: '', timeMs: 0, play: true },
+    shared,
+  );
+  assert.equal(unrouted.pathname, '/cv/profile/photo/', 'no section page leaves the path alone');
+
+  const authored = projectCvShowStory(CV_SHOW_PRESENTATION_PROJECT);
+  const pageByScene = createCvShowSectionPageMap(authored);
+  assert.deepEqual([...pageByScene.keys()], authored.short, 'every Short scene has one section page');
+  for (const [sceneId, pageId] of pageByScene) {
+    assert.equal(
+      resolveCvShowEntryForPortfolioRoute(authored, pageId),
+      sceneId,
+      `the section page of ${sceneId} navigates back to the same scene`,
+    );
+  }
 });
 
 test('the player timeline reads on the same composition clock the route carries', async () => {

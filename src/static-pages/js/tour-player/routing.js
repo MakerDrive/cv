@@ -2,18 +2,21 @@
  * CV Show routing around GLOBAL COMPOSITION TIME.
  *
  * Canonical URL contract (show playback):
- *   ?showMode=short|full&showTime=<global composition ms>[&showPlay=0][&showCompleted=1]
+ *   <section page path>?showMode=short|full&showTime=<global composition ms>[&showPlay=0][&showCompleted=1]
  *
  * The URL never names an entry, branch, clip or local position: those are
  * DERIVED through resolveCvShowCompositionAt(). Legacy links that still
  * carry showEntry/showDetail are converted once and replaced with the
  * canonical global coordinate (history.replaceState, no extra navigation).
+ * createCvShowSectionUrl additionally moves the path onto the section's own
+ * page, because a static host can only preview what the path addresses.
  */
 import {
   createCvShowCompositionTimeline,
   cvShowGlobalTimeOf,
   resolveCvShowCompositionAt,
 } from './compositionTime.js';
+import { resolvePortfolioEntryRoute } from '../portfolioPulseRuntime.js';
 
 export const CV_SHOW_ROUTE_PARAMS = Object.freeze([
   'showMode',
@@ -251,4 +254,51 @@ export function resolveCvShowEntryForPortfolioRoute(story, routeId, { ownerProje
     if (entryId) return entryId;
   }
   return '';
+}
+
+/**
+ * Invert the navigation map into scene id -> portfolio page id. A scene may
+ * navigate through several pages; the page named after the scene owns its
+ * preview, so it wins over any other target.
+ */
+export function createCvShowSectionPageMap(story) {
+  const byScene = new Map();
+  for (const [targetId, sceneId] of createCvShowSceneRouteMap(story)) {
+    const current = byScene.get(sceneId);
+    if (!current || targetId.split('/').at(-1) === sceneId) byScene.set(sceneId, targetId);
+  }
+  return byScene;
+}
+
+/**
+ * The portfolio page whose published social preview represents this segment.
+ * Detail branches have no page of their own and inherit their scene's page.
+ */
+export function resolveCvShowSectionPageId(story, { entryId = '', detailId = '' } = {}) {
+  const sceneId = detailId
+    ? String(story?.branches?.[detailId]?.sceneId || entryId || '')
+    : String(entryId || '');
+  return sceneId ? createCvShowSectionPageMap(story).get(sceneId) || '' : '';
+}
+
+/**
+ * Share URL for the segment a state is playing at.
+ *
+ * Static hosts choose social previews by PATH, so the section page path joins
+ * the global time coordinate; without it every show link would preview the
+ * page the viewer happened to open. Entry and detail ids still never enter the
+ * URL — the path names a page, not a segment.
+ *
+ * `baseHref` is the app base published for every page (the document's own
+ * <base> resolves to it at any depth), so the path is written against the
+ * portfolio root rather than the directory the viewer is standing in.
+ */
+export function createCvShowSectionUrl(value, state, policy = {}) {
+  const url = serializeCvShowRoute(value, state, policy);
+  const pageId = policy.story ? resolveCvShowSectionPageId(policy.story, state || {}) : '';
+  if (!pageId || !policy.baseHref) return url;
+  const prefix = toUrl(policy.baseHref, url.href).pathname;
+  const route = resolvePortfolioEntryRoute(pageId);
+  url.pathname = route ? `${prefix}${route}/` : prefix;
+  return url;
 }
