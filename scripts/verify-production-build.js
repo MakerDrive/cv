@@ -36,13 +36,19 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // 2026-09-24: +20 KB headroom for the symbiote-ui modal drawer contract
   // (inert background, Tab trap, translated a11y names); measured 1851017 raw
   // against the previous 1850000 cap.
-  raw: 1_870_000,
+  // 2026-11-03: +2 KB for the mobile side-panel footer and swipe paging;
+  // measured 1871199 raw after the responsive panel controls landed.
+  // 2026-11-04: +58 KB for the notchset theme styles and the extracted show
+  // resize/compact-progress modules; measured 1925846 raw.
+  raw: 1_930_000,
   // 2026-09-25: +5 KB gzip for the completed drawer gesture contract —
   // deferred pointer capture, touch tree-disclosure column, click-vs-swipe
   // separation; measured 452330 gzip against the 450000 cap. Re-measured at
   // 453486 gzip / 1864679 raw against symbiote-ui dd5b8e9, which added the
   // composition time base the CV Show player clock reads.
-  gzip: 455_000,
+  // 2026-11-03: +1 KB for the same mobile panel navigation; measured 455315 gzip.
+  // 2026-11-04: +14 KB for the same theme/show work; measured 469363 gzip.
+  gzip: 470_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);
