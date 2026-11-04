@@ -179,8 +179,7 @@ function resolveVariant() {
   let locale = document.documentElement.lang || 'en';
   let widget = /** @type {any} */ (document.querySelector('cascade-theme-widget'));
   let theme = widget?.state?.mode === 'dark' ? 'dark' : 'light';
-  let viewport = matchMedia('(max-width: 899px)').matches ? 'narrow' : 'wide';
-  return { locale, theme, viewport };
+  return { locale, theme, viewport: 'wide' };
 }
 
 function revealLiveGraph(panel, resolution) {

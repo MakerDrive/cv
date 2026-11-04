@@ -10,7 +10,7 @@ export const PORTFOLIO_GRAPH_SNAPSHOT_VISUAL_LAYER = 'connections-only';
 export const PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS = Object.freeze({
   locales: Object.freeze(['en', 'ru', 'es']),
   themes: Object.freeze(['light', 'dark']),
-  viewports: Object.freeze(['wide', 'narrow']),
+  viewports: Object.freeze(['wide']),
 });
 export const PORTFOLIO_GRAPH_SNAPSHOT_PROVIDER = Object.freeze({
   package: 'symbiote-ui',

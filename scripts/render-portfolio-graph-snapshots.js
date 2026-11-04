@@ -39,7 +39,6 @@ const CHROME_CANDIDATES = Object.freeze([
 ].filter(Boolean));
 const VIEWPORTS = Object.freeze({
   wide: Object.freeze({ width: 1440, height: 900 }),
-  narrow: Object.freeze({ width: 390, height: 844 }),
 });
 const THEMES = Object.freeze({
   light: PORTFOLIO_THEME_LIGHT_STATE,
@@ -268,7 +267,7 @@ async function captureVariant(cdp, origin, locale, viewportName, themeName) {
     width: viewport.width,
     height: viewport.height,
     deviceScaleFactor: 1,
-    mobile: viewportName === 'narrow',
+    mobile: false,
   });
   await cdp.send('Page.navigate', { url: `${origin}/cv/?lang=${locale}` });
   await waitForPageReady(cdp);
@@ -290,17 +289,6 @@ async function captureVariant(cdp, origin, locale, viewportName, themeName) {
     widget.setState?.(${theme}, { source: 'graph-snapshot-build' });
     await document.fonts.ready;
     let panel = await waitFor(() => document.querySelector('portfolio-graph-panel'), 'graph panel');
-    let layout = await waitFor(() => panel.closest('panel-layout'), 'graph panel layout');
-    if (${JSON.stringify(viewportName)} === 'narrow') {
-      let rect = panel.getBoundingClientRect();
-      if (rect.width < 128 || rect.height < 128) {
-        let handle = layout.querySelector(
-          '.layout-drawer-handle-stack-end [data-drawer-panel-id="portfolio-graph"]',
-        );
-        if (handle) handle.click();
-        else layout.toggleDrawer?.('end');
-      }
-    }
     await waitFor(() => {
       let rect = panel.getBoundingClientRect();
       return rect.width >= 128 && rect.height >= 128 && panel._structuredBound && panel.canvas;
@@ -393,7 +381,10 @@ export async function renderPortfolioGraphSnapshots() {
             width: capture.rect.width,
             height: capture.rect.height,
           });
-          process.stdout.write(`graph snapshot ${entries.length}/12 ${locale}/${viewport}/${theme}\n`);
+          let total = PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.locales.length
+            * PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.viewports.length
+            * PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.themes.length;
+          process.stdout.write(`graph snapshot ${entries.length}/${total} ${locale}/${viewport}/${theme}\n`);
         }
       }
     }

@@ -91,7 +91,7 @@ test('manifest selects the exact RU viewport and theme variant', () => {
   let entry = {
     locale: 'ru',
     theme: 'dark',
-    viewport: 'narrow',
+    viewport: 'wide',
     svg: `portfolio-graph-snapshots/${'a'.repeat(64)}.svg`,
     snapshot: `portfolio-graph-snapshots/${'b'.repeat(64)}.snapshot.json`,
     routeFingerprint: createFingerprint(),
@@ -110,14 +110,14 @@ test('manifest selects the exact RU viewport and theme variant', () => {
     selectPortfolioGraphSnapshotEntry(manifest, {
       locale: 'ru',
       theme: 'dark',
-      viewport: 'narrow',
+      viewport: 'wide',
     })?.snapshot,
     entry.snapshot,
   );
   assert.equal(selectPortfolioGraphSnapshotEntry(manifest, {
     locale: 'en',
     theme: 'dark',
-    viewport: 'narrow',
+    viewport: 'wide',
   }), null);
 });
 
@@ -175,13 +175,4 @@ test('six measured subpixel nodes are stabilized without weakening the exact fin
   assert.match(source, /padding-block-end: 0\.5px/);
   assert.match(source, /padding-inline-end: 0\.5px/);
   assert.doesNotMatch(source, /route-fingerprint-tolerance|Math\.(?:floor|ceil)\([^)]*(?:width|height)/);
-});
-
-test('narrow snapshot capture opens the graph panel in its owning layout, not the Agent dock', async () => {
-  let source = await readFile(
-    new URL('../../scripts/render-portfolio-graph-snapshots.js', import.meta.url),
-    'utf8',
-  );
-  assert.match(source, /panel\.closest\('panel-layout'\)/);
-  assert.doesNotMatch(source, /document\.querySelector\('panel-layout'\)/);
 });
