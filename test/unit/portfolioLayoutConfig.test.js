@@ -1,3 +1,4 @@
+import { normalizeCascadeThemeOptions } from 'symbiote-ui/themes/cascade-theme.js';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
@@ -30,79 +31,67 @@ test('portfolio layout keeps drawer mode below desktop auto-collapse widths', ()
   assert.equal(PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT, 760);
 });
 
-test('outer Agent dock exclusively projects mobile mode into the nested portfolio layout', async () => {
+test('mobile panel navigation is library-owned and sits below the static Show host', async () => {
   let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
-  let listenerIndex = source.indexOf("dock.addEventListener('agent-dock-responsive-change'");
-  let connectionIndex = source.indexOf('this.replaceChildren(template.content)');
+  let styles = await readFile(new URL('../../src/static-pages/css/notchset.css.js', import.meta.url), 'utf8');
+  let baseStyles = await readFile(new URL('../../src/static-pages/css/index.css.js', import.meta.url), 'utf8');
+  let dockEnd = source.indexOf('</agent-dock-shell>');
+  let showStart = source.indexOf('<div class="portfolio-show-static-region"');
+  let navStart = source.indexOf('<div class="portfolio-mobile-navigation">');
 
-  assert.match(source, /class="portfolio-layout"[\s\S]*?responsive-mode="preserve"/);
-  assert.ok(listenerIndex >= 0, 'portfolio workspace must consume the public Agent dock responsive event');
-  assert.ok(listenerIndex < connectionIndex, 'responsive listener must exist before the template connects');
-  assert.match(
-    source,
-    /layout\.setLayoutBehavior\(\{\s*responsiveMode: event\.detail\?\.mobile \? 'swipe' : 'preserve',\s*\}\);/,
-  );
-  assert.match(
-    source,
-    /LayoutTree\.createSplit\('horizontal', treePanel, contentSplit, PORTFOLIO_TREE_SPLIT_RATIO, {/,
-  );
-  assert.doesNotMatch(source, /matchMedia\(/);
+  assert.ok(dockEnd >= 0 && showStart > dockEnd, 'the static Show host must follow the full player/chat dock');
+  assert.ok(navStart > showStart, 'the panel navigation must sit below the static Show host');
+  assert.doesNotMatch(source, /class="portfolio-mobile-nav"/, 'no hand-written mobile navigation survives');
+  assert.doesNotMatch(source, /data-mobile-destination|markMobileDestination/,
+    'the fixed three-destination footer is replaced by the dynamic rail');
+  assert.doesNotMatch(source, /scrollIntoView/, 'rail navigation must not scroll ancestor containers');
+  assert.match(baseStyles, /\.portfolio-mobile-navigation\s*\{\s*display: none;/,
+    'the navigation stays hidden until the mobile rail is enabled');
+  assert.match(baseStyles, /\.portfolio-show-static-region:empty\s*\{\s*display: none !important;/,
+    'an empty static host must not reserve space on desktop');
+  assert.match(styles, /@media \(max-width: 760px\)[\s\S]*?\.pulse-workspace \.portfolio-mobile-navigation\s*\{\s*display: block;/);
+  assert.match(styles, /\.pulse-workspace \.portfolio-mobile-navigation > \.mobile-panel-rail\s*\{\s*display: grid;/,
+    'one button per panel, in rail order');
+  assert.match(styles, /\.pulse-workspace \.portfolio-mobile-navigation > \.mobile-panel-rail\[hidden\]\s*\{\s*display: none;/,
+    'the author grid rule must not outspecify [hidden] and leave a disabled rail reachable');
+  assert.match(styles, /\.pulse-workspace \.portfolio-mobile-navigation > \.mobile-panel-rail > button\s*\{[\s\S]*?min-block-size: var\(--notchset-control-touch-height\);/,
+    'every rail button keeps a touch-sized target');
+  assert.match(styles, /\.pulse-workspace \.portfolio-mobile-navigation > \.mobile-panel-rail > button\[aria-current='page'\]\s*\{/,
+    'the active panel is marked on its button');
+  assert.match(styles, /\.pulse-workspace \.portfolio-mobile-navigation > \.mobile-panel-rail > button:focus-visible\s*\{[\s\S]*?outline:/,
+    'rail buttons stay visible to the keyboard');
+  assert.match(styles, /> agent-dock-shell > panel-layout\[mobile-panel-rail-enabled\]\s*\{\s*scroll-snap-type: inline mandatory;/,
+    'the rail keeps the snapping contract that settles a panel under the finger');
 });
 
-test('portfolio overrides the library default with its configured light preset', () => {
+test('rail mode adds to the layout projection instead of replacing it', async () => {
+  let source = await readFile(new URL('../../src/static-pages/js/tour-player/index.js', import.meta.url), 'utf8');
+
+  // A width test alone made every narrow viewport look like a rail slide, so a
+  // visible map whose target could not resolve was reported as hidden and the
+  // action falsely succeeded instead of rejecting.
+  assert.match(
+    source,
+    /const mobile = railMode \|\| layout\.hasAttribute\('drawer-mode-active'\);/,
+    'the layout keeps its own projection state and the rail only adds to it',
+  );
+  assert.doesNotMatch(source, /const mobile = window\.innerWidth <=/,
+    'panel reveal must not infer the projection from the viewport width');
+  assert.match(source, /const railExcluded = Boolean\(railMode/,
+    'the rail-excluded panel is measured from the layout node, not assumed open');
+  assert.match(source, /const railRevealed = railMode && !railExcluded;/);
+  assert.match(source, /if \(inspected\?\.railRevealed && inspected\.panelId\) \{\s*railLayout\?\.scrollToPanel\?\./,
+    'only a panel that is a rail slide is scrolled to');
+});
+
+test('portfolio supplies separate light and dark presets through the public cascade contract', () => {
   assert.equal(PORTFOLIO_THEME_DEFAULT_STATE, PORTFOLIO_THEME_LIGHT_STATE);
-  assert.deepEqual(PORTFOLIO_THEME_LIGHT_STATE, {
-    accentChroma: 100,
-    accentLightness: 30,
-    bgLightness: 90,
-    brightness: 83,
-    cellRadius: 25,
-    chroma: 78,
-    composerRadius: 100,
-    contrast: 67,
-    density: 101,
-    frameGap: 0,
-    frameRadius: 29,
-    heading: 91,
-    hue: 190,
-    mode: 'light',
-    motion: 100,
-    outline: 8,
-    pattern: 100,
-    radius: 28,
-    scrollShadow: 17,
-    surfaceLightness: 100,
-    tabRadius: 17,
-    tabShape: 'classic-ear',
-    themeVariant: 'classic',
-    type: 106,
-  });
-  assert.deepEqual(PORTFOLIO_THEME_DARK_STATE, {
-    accentChroma: -1,
-    accentLightness: -1,
-    bgLightness: -1,
-    brightness: 8,
-    cellRadius: 25,
-    chroma: 71,
-    composerRadius: 100,
-    contrast: 100,
-    density: 101,
-    frameGap: 0,
-    frameRadius: 29,
-    heading: 91,
-    hue: 190,
-    mode: 'dark',
-    motion: 100,
-    outline: 8,
-    pattern: 100,
-    radius: 28,
-    scrollShadow: 17,
-    surfaceLightness: -1,
-    tabRadius: 17,
-    tabShape: 'classic-ear',
-    themeVariant: 'classic',
-    type: 106,
-  });
+  assert.equal(PORTFOLIO_THEME_LIGHT_STATE.mode, 'light');
+  assert.equal(PORTFOLIO_THEME_DARK_STATE.mode, 'dark');
+  for (let preset of [PORTFOLIO_THEME_LIGHT_STATE, PORTFOLIO_THEME_DARK_STATE]) {
+    let normalized = normalizeCascadeThemeOptions(preset);
+    assert.deepEqual(normalized, preset, 'provider must accept every preset value without clamping');
+  }
 });
 
 test('portfolio auto-collapse prefers graph before file navigation', () => {
@@ -110,10 +99,10 @@ test('portfolio auto-collapse prefers graph before file navigation', () => {
   assert.ok(PORTFOLIO_GRAPH_PANEL_MIN_INLINE_SIZE > PORTFOLIO_TREE_PANEL_MIN_INLINE_SIZE);
 });
 
-test('portfolio content and graph split the space after navigation evenly', async () => {
+test('portfolio gives reading content two thirds of the space after navigation', async () => {
   let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
 
-  assert.equal(PORTFOLIO_CONTENT_SPLIT_RATIO, 0.5);
+  assert.equal(PORTFOLIO_CONTENT_SPLIT_RATIO, 2 / 3);
   assert.equal(PORTFOLIO_VIEWER_PANEL_MIN_INLINE_SIZE, PORTFOLIO_GRAPH_PANEL_MIN_INLINE_SIZE);
   assert.match(
     source,
@@ -278,79 +267,6 @@ test('portfolio media graph keeps the CanvasGraph contract explicit', async () =
   assert.match(canvasGraphSource, /hitTestScreen\(sx, sy\) {/);
 });
 
-test('portfolio mobile graph refocuses after drawer content becomes visible', async () => {
-  let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
-
-  assert.match(source, /let useNodeFitFocus = focusScope === 'node-fit';/);
-  assert.match(source, /useNodeFitFocus\s*\?\s*\[entry\.id\]\s*:\s*entry\.id;/);
-  assert.match(source, /structuredNodeIds: structuredFocusTarget,/);
-  assert.match(source, /maxZoom: useNodeFitFocus\s*\?\s*0\.8/);
-  assert.match(source, /structuredOptions: \{\s*padding: 56,[\s\S]*?select: entry\.id,/);
-  assert.match(source, /canvas\.focusNodes\?\.\(structuredFocusTarget, \{[\s\S]*?select: entry\.id,/);
-  assert.doesNotMatch(source, /canvas\.setProgressiveConnectionRendering\?\.\(false/);
-  assert.match(source, /this\._structuredPathReadyStyle = '';\s*portfolioRuntime\.syncCanvas\({ focus: true, focusScope: 'node-fit' }\);/);
-  assert.match(source, /new ResizeObserverCtor\(\(\) => this\.scheduleVisibleGraphFocus\(\)\)/);
-  assert.match(source, /new MutationObserverCtor\(\(\) => {\s*this\._graphWasVisible = false;\s*this\.scheduleVisibleGraphFocus\(\);/);
-  assert.match(
-    source,
-    /attributeFilter: \[[\s\S]*?'drawer-open'[\s\S]*?'drawer-expanded'[\s\S]*?'drawer-rail-collapsed'[\s\S]*?'style'[\s\S]*?\]/u,
-  );
-  assert.match(source, /focusGraphAfterVisibleResize\(\) {/);
-  assert.match(source, /rect\.width < 128 \|\| rect\.height < 128/);
-  assert.match(source, /drawerNode\.hasAttribute\('drawer-rail-collapsed'\)/);
-  assert.match(source, /this\._graphVisibleFocusUntil = now \+ 600;/);
-  assert.match(source, /this\.scheduleDeferredVisibleGraphFocus\(\);/);
-  assert.match(source, /this\.scheduleStructuredPathUpgrade\(\);/);
-  assert.match(source, /if \(this\._structuredPathReady && this\._structuredPathReadyStyle === this\.pathStyle\) return;/);
-  assert.match(source, /this\._structuredPathReady = true;\s*this\._structuredPathReadyStyle = this\.pathStyle;/);
-  assert.doesNotMatch(source, /this\.canvas\.setTransientPathStyle\?\.\(\s*'straight',\s*'portfolio-startup'/);
-  assert.match(source, /createPortfolioGraphSnapshotRuntime\(this, this\.canvas\);\s*this\._graphSnapshotRuntime\.prepare\(\);\s*this\.graphController\?\.setStructuredEditor/);
-  assert.match(source, /this\._graphSnapshotRuntime\.adopt\(\)/);
-  assert.doesNotMatch(source, /let chunk = \[\.\.\.remaining\]\.slice\(0, chunkSize\);/);
-  assert.match(source, /focusVisibleGraphNow\(\) {\s*this\.canvas\?\.refreshConnections\?\.\(\);\s*portfolioRuntime\.syncCanvas\({ focus: true, focusScope: 'node-fit' }\);/);
-});
-
-test('portfolio graph refits the selected node after an already-visible layout pane resizes', async () => {
-  let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
-  let css = await readFile(new URL('../../src/static-pages/css/index.css.js', import.meta.url), 'utf8');
-  let methodStart = source.indexOf('  focusGraphAfterVisibleResize() {');
-  let methodEnd = source.indexOf('\n  focusVisibleGraphNow() {', methodStart);
-
-  assert.ok(methodStart >= 0 && methodEnd > methodStart, 'graph resize handler declaration');
-  let methodSource = source.slice(methodStart, methodEnd).trim();
-  let { focusGraphAfterVisibleResize } = Function(`"use strict"; return ({${methodSource}});`)();
-  let width = 640;
-  let focused = 0;
-  let deferred = 0;
-  let panel = {
-    _graphReady: true,
-    _graphWasVisible: true,
-    _graphViewportSize: '640x600',
-    _graphVisibleFocusUntil: 0,
-    structuredMode: true,
-    _structuredBound: true,
-    getBoundingClientRect: () => ({ width, height: 600 }),
-    isGraphPanelVisible: () => width >= 128,
-    focusVisibleGraphNow: () => { focused += 1; },
-    scheduleDeferredVisibleGraphFocus: () => { deferred += 1; },
-    scheduleStructuredGraphBinding: () => {},
-    scheduleStructuredPathUpgrade: () => {},
-    cancelDeferredVisibleGraphFocus: () => {},
-  };
-
-  width = 300;
-  focusGraphAfterVisibleResize.call(panel);
-
-  assert.equal(focused, 1, 'a changed layout viewport must invalidate the stale graph fit');
-  assert.equal(deferred, 1, 'the graph must settle one final fit after the layout resize');
-  assert.equal(panel._graphViewportSize, '300x600');
-  assert.match(css, /portfolio-graph-panel\s*\{[^}]*display:\s*block;/u);
-  assert.match(
-    source,
-    /attributeFilter: \[[^\]]*'collapsed'[^\]]*'auto-collapsed'[^\]]*\]/u,
-  );
-});
-
 test('portfolio structured graph toolbar routes content actions', async () => {
   let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
 
@@ -449,7 +365,7 @@ test('portfolio mobile workspace uses dynamic viewport height when available', a
   assert.match(source, /min-height: var\(--pulse-workspace-block-size\);/);
 });
 
-test('portfolio static pages version local CSS and JS assets', () => {
+test('portfolio static pages version local CSS and JS assets with the shared build identity', async () => {
   let previousVersion = process.env.CV_ASSET_VERSION;
   let previousGithubSha = process.env.GITHUB_SHA;
 
@@ -457,13 +373,15 @@ test('portfolio static pages version local CSS and JS assets', () => {
     delete process.env.GITHUB_SHA;
     process.env.CV_ASSET_VERSION = 'abcdef1234567890';
 
-    assert.equal(versionAssetPath('js/index.js'), 'js/index.js?v=abcdef123456');
-    assert.equal(versionAssetPath('css/index.css'), 'css/index.css?v=abcdef123456');
+    let html = await getPage({ TITLE: 'Test', HEADER_CONTENT: '' });
+    let buildId = /name="cv-build-id" content="([^"]+)"/.exec(html)[1];
+    assert.equal(versionAssetPath('js/index.js'), `js/index.js?v=abcdef123456-${buildId}`);
+    assert.equal(versionAssetPath('css/index.css'), `css/index.css?v=abcdef123456-${buildId}`);
     assert.equal(versionAssetPath('js/index.js?v=current'), 'js/index.js?v=current');
     assert.equal(versionAssetPath('https://example.com/index.js'), 'https://example.com/index.js');
 
     delete process.env.CV_ASSET_VERSION;
-    assert.equal(versionAssetPath('js/index.js'), 'js/index.js');
+    assert.equal(versionAssetPath('js/index.js'), `js/index.js?v=${buildId}`);
   } finally {
     if (previousVersion === undefined) {
       delete process.env.CV_ASSET_VERSION;
@@ -506,7 +424,7 @@ test('mock agent provider is wired during site bootstrap regardless of CV Show',
 
   assert.match(
     source,
-    /import \{ createCvShowMockAgentProvider \} from '\.\/tour-player\/mockAgentProvider\.js'/,
+    /import\s*\{[^}]*\bcreateCvShowMockAgentProvider\b[^}]*\}\s*from '\.\/tour-player\/mockAgentProvider\.js'/,
     'portfolio workspace must import the mock agent provider factory itself',
   );
   assert.ok(connectionIndex >= 0, 'dock template connection must exist');

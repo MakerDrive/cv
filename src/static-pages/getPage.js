@@ -1,13 +1,15 @@
 import fs from 'fs';
+import { randomUUID } from 'node:crypto';
 import { applyData } from 'jsda-kit/iso/applyData.js';
 import ICONS_LINK from '../icons/link.html.js';
 
 const template = fs.readFileSync('./src/static-pages/page.tpl.html', 'utf8');
+const BUILD_ID = randomUUID();
 
 const SITE_BASE_URL = 'https://MakerDrive.github.io/cv/';
 const SITE_OG_IMAGE = 'https://rnd-pro.com/idn/93c81af5-aaae-4b92-f288-1f0499726500/public';
 const SITE_DEFAULT_DESCRIPTION =
-  'Vladimir Matiasevich — lead AI & full-stack R&D engineer. Custom agent tooling and product platforms, with media systems and process automation as supporting lines, from idea to production.';
+  'Vladimir Matiasevich — Product Engineer | Full-Stack, R&D & Systems Engineering | Complex Process Automation Across Software, Media & Hardware | AI Agent Tooling';
 
 function escapeAttr(value = '') {
   return String(value)
@@ -76,13 +78,14 @@ function buildHeadMeta(pageData) {
 }
 
 function getAssetVersion() {
-  return String(process.env.CV_ASSET_VERSION || process.env.GITHUB_SHA || '').trim();
+  let revision = String(process.env.CV_ASSET_VERSION || process.env.GITHUB_SHA || '').trim();
+  return revision ? `${revision.slice(0, 12)}-${BUILD_ID}` : BUILD_ID;
 }
 
 function versionAssetPath(path) {
   let version = getAssetVersion();
-  if (!version || path.includes('?') || path.startsWith('http')) return path;
-  return `${path}?v=${encodeURIComponent(version.slice(0, 12))}`;
+  if (path.includes('?') || path.startsWith('http')) return path;
+  return `${path}?v=${encodeURIComponent(version)}`;
 }
 
 /**
@@ -122,6 +125,7 @@ export async function getPage(pageData) {
   return applyData(template, {
     ICONS_LINK,
     TITLE: pageData.TITLE,
+    BUILD_ID,
     HEAD_META: buildHeadMeta(pageData),
     BODY_ATTRS: pageData.BODY_ATTRS || '',
     BASE_PATH: pageData.BASE_PATH || './',

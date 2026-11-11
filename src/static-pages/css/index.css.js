@@ -1,3 +1,4 @@
+import notchset from './notchset.css.js';
 import styles from '../../common-styles/styles.css.js';
 
 export default /*css*/ `
@@ -25,9 +26,7 @@ body:has(.pulse-screen) {
   --calc-top-pan-height: var(--sn-app-topbar-height, 40px);
   --pulse-workspace-block-size: calc(100vh - var(--calc-top-pan-height));
   background-color: var(--pulse-surface);
-  background-image: linear-gradient(to bottom, var(--pulse-surface-raised), var(--pulse-surface));
-  background-repeat: no-repeat;
-  background-size: 100% var(--sn-shell-top-gradient-size, 78px);
+  background-image: none;
 }
 
 @supports (height: 100dvh) {
@@ -63,7 +62,7 @@ body:has(.pulse-screen) > header {
   background: transparent;
   background-color: transparent;
   color: var(--pulse-text);
-  font-family: var(--sn-font, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  font-family: var(--sn-font-mono);
   font-size: var(--sn-app-title-size, 13px);
   line-height: 1;
   z-index: var(--pulse-header-z, 100);
@@ -220,6 +219,30 @@ agent-dock-shell:has(panel-layout[fullscreen-active]) {
   min-block-size: 0;
 }
 
+.pulse-workspace > agent-dock-shell {
+  block-size: auto;
+}
+
+.portfolio-show-static-region:empty {
+  display: none !important;
+}
+
+.portfolio-show-static-region > chat-show-player {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.portfolio-mobile-navigation {
+  display: none;
+}
+
+.portfolio-show-resizer {
+  display: none;
+}
+
 portfolio-workspace,
 agent-dock-shell,
 .portfolio-layout,
@@ -262,9 +285,9 @@ portfolio-graph-panel {
   block-size: 100%;
   border: 0;
   background: transparent;
+  object-fit: cover;
   opacity: 1;
   pointer-events: none;
-  transition: opacity 160ms ease-out;
 }
 
 portfolio-graph-panel > .portfolio-graph-snapshot {
@@ -273,17 +296,9 @@ portfolio-graph-panel > .portfolio-graph-snapshot {
   block-size: 100%;
 }
 
-.portfolio-graph-snapshot[data-removing] {
-  opacity: 0;
-}
-
 .portfolio-canvas[data-snapshot-pending] {
-  opacity: 1;
-  pointer-events: none;
-}
-
-.portfolio-canvas[data-snapshot-pending] .sn-connections {
   opacity: 0;
+  pointer-events: none;
 }
 
 portfolio-graph-panel[data-loading]::after {
@@ -334,24 +349,22 @@ portfolio-theme-panel,
 
 .portfolio-tree {
   --sn-icon-font: 'Material Symbols Outlined';
-  --sn-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --sn-font-family: var(--sn-font);
-  --sn-tree-panel-content-padding: 6px;
-  --sn-tree-panel-gap: 4px;
-  --sn-tree-panel-indent: 14px;
-  --sn-tree-toggle-width: 18px;
-  --sn-tree-icon-width: 18px;
-  --sn-tree-row-height: 26px;
-  --sn-tree-row-min-height: 26px;
-  --sn-tree-row-padding-block: 1px;
-  --sn-tree-panel-row-min-height: 26px;
-  --sn-tree-row-radius: 5px;
-  --sn-tree-icon-size: 16px;
-  --sn-tree-panel-icon-size: 16px;
+  --sn-tree-panel-content-padding: var(--sn-step-4);
+  --sn-tree-panel-gap: var(--sn-step-2);
+  --sn-tree-panel-indent: var(--sn-step-8);
+  --sn-tree-toggle-width: var(--sn-step-9);
+  --sn-tree-icon-width: var(--sn-step-9);
+  --sn-tree-row-height: var(--sn-step-12);
+  --sn-tree-row-min-height: var(--sn-step-12);
+  --sn-tree-row-padding-block: var(--sn-step-2);
+  --sn-tree-panel-row-min-height: var(--sn-step-12);
+  --sn-tree-row-radius: var(--sn-radius-sm);
+  --sn-tree-icon-size: var(--sn-text-lg);
+  --sn-tree-panel-icon-size: var(--sn-text-lg);
+  --sn-tree-panel-label-size: var(--sn-text-md);
   --sn-tree-label-color: var(--pulse-text);
   --sn-tree-panel-label-weight: 500;
-  --sn-tree-row-selected-bg: color-mix(in oklab, var(--pulse-accent) 22%, transparent);
-  --sn-tree-row-hover-bg: color-mix(in oklab, var(--pulse-accent) 12%, transparent);
 }
 
 .portfolio-tree .sn-tree-panel-toolbar {
@@ -359,12 +372,12 @@ portfolio-theme-panel,
 }
 
 .portfolio-tree .sn-tree-panel-filter {
-  min-height: 26px;
+  min-block-size: var(--notchset-field-height);
 }
 
 .portfolio-tree .sn-tree-row {
   grid-template-columns: var(--sn-tree-toggle-width) var(--sn-tree-icon-width) minmax(0, 1fr);
-  column-gap: 5px;
+  column-gap: var(--sn-step-2);
 }
 
 .portfolio-tree .sn-tree-toggle,
@@ -391,7 +404,6 @@ portfolio-theme-panel,
   display: block;
   inline-size: 100%;
   block-size: 100%;
-  --sn-node-radius: 8px;
   --sn-port-outline: var(--sn-conn-dot-stroke);
 }
 
@@ -415,7 +427,7 @@ portfolio-theme-panel,
   margin-block: var(--sn-step-8, 18px) var(--sn-step-10, 28px);
   scroll-margin-block: var(--sn-step-10, 28px);
   border: 1px solid var(--pulse-outline);
-  border-radius: var(--sn-node-radius, 8px);
+  border-radius: var(--sn-node-radius);
   overflow: hidden;
   background: var(--pulse-surface-raised);
   container-type: inline-size;
@@ -630,7 +642,7 @@ body > footer a {
   }
 
   .pulse-header-menu-button {
-    display: inline-flex;
+    display: none;
   }
 
   .pulse-header-menu-button,
@@ -1050,4 +1062,6 @@ dialog.sn-theme-share-copy-overlay::backdrop {
   to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
+
+${notchset}
 `;
