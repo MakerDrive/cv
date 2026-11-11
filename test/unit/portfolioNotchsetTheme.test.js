@@ -37,8 +37,9 @@ test('Modern accents stay vivid while frame and text colors remain neutral', () 
   let overrides = getPortfolioNotchsetOverrides(state, PRESETS);
   assert.equal(overrides['--sn-layout-border'], 'var(--notchset-foreground)');
   assert.equal(overrides['--sn-sys-on-surface'], 'var(--notchset-foreground)');
-  assert.match(overrides['--sn-button-primary-bg'], /h \+ 206/);
-  assert.match(overrides['--sn-button-primary-bg'], /s \* 1\.000/);
+  assert.equal(overrides['--sn-button-primary-bg'], 'var(--notchset-primary)');
+  assert.match(overrides['--sn-portfolio-signal'], /h \+ 206/);
+  assert.match(overrides['--sn-portfolio-signal'], /s \* 0\.890/);
 });
 
 test('theme bridge follows root state changes and leaves isolated scopes alone', () => {
@@ -74,7 +75,9 @@ test('automatic colour controls keep source surfaces and inherit global chroma',
   let overrides = getPortfolioNotchsetOverrides(state, PRESETS);
   assert.equal(overrides['--sn-sys-surface'], 'var(--notchset-background)');
   assert.equal(overrides['--sn-sys-surface-panel'], 'var(--notchset-card)');
-  assert.match(overrides['--sn-portfolio-signal'], /s \* 0\.040/);
+  assert.equal(overrides['--sn-portfolio-signal'], 'var(--notchset-signal)');
+  let grayscale = getPortfolioNotchsetOverrides({ ...state, chroma: 0 }, PRESETS);
+  assert.match(grayscale['--sn-portfolio-signal'], /s \* 0\.000/);
   assert.deepEqual(createCascadeTheme({ params: state, overrides }).overrides, overrides);
 });
 

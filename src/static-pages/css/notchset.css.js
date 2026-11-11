@@ -26,7 +26,7 @@ ${palette}
   --notchset-heading-tracking: -0.01em;
   --notchset-heading-width: 62%;
   --notchset-heading-weight: 800;
-  --notchset-heading-size: calc(clamp(2rem, 9.1cqi, 3.4rem) * var(--sn-theme-heading-scale));
+  --notchset-heading-size: calc(clamp(2rem, 9.1cqi, 3.4rem) * var(--sn-theme-type-scale) * var(--sn-theme-heading-scale));
   --notchset-heading-leading: 0.95;
   --notchset-control-size: calc(12px * var(--sn-theme-type-scale));
   --notchset-control-weight: 500;

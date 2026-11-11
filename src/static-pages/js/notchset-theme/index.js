@@ -50,36 +50,34 @@ const TOKEN_GROUPS = {
 };
 
 let colorValue = (source, state, preset) => {
-  let signal = source.startsWith('signal') || ['primary', 'destructive'].includes(source);
-  let neutral = ['foreground', 'muted-foreground', 'frame'].includes(source);
+  let signal = source.startsWith('signal') || source === 'destructive';
+  let neutral = ['foreground', 'muted-foreground', 'frame', 'primary', 'primary-hover', 'on-signal']
+    .includes(source);
   let hue = neutral ? 0 : state.hue - preset.hue;
   let accentChroma = state.accentChroma < 0 ? state.chroma : state.accentChroma;
-  let chroma = neutral ? 0 : signal ? accentChroma / preset.accentChroma : state.chroma / preset.chroma;
+  let presetAccentChroma = preset.accentChroma < 0 ? preset.chroma : preset.accentChroma;
+  let chroma = neutral ? 0 : signal ? accentChroma / presetAccentChroma : state.chroma / preset.chroma;
   let dark = state.mode === 'dark';
   let lightness = (state.brightness - preset.brightness) * (dark ? 0.18 : -0.32);
-  if (source === 'background' && state.bgLightness >= 0) {
-    lightness += state.bgLightness - preset.bgLightness;
-  }
-  if (source === 'card' && state.surfaceLightness >= 0) {
-    lightness += state.surfaceLightness - preset.surfaceLightness;
-  }
-  if (['foreground', 'primary', 'frame'].includes(source)) {
+  if (['foreground', 'primary', 'primary-hover', 'frame', 'on-signal'].includes(source)) {
     lightness = (state.contrast - preset.contrast) * (dark ? 0.12 : -0.26);
   }
   if (source === 'muted-foreground') {
     lightness = (state.contrast - preset.contrast) * (dark ? 0.18 : -0.22);
   }
-  if (signal) {
-    lightness = state.accentLightness < 0
-      ? (state.contrast - preset.contrast) * (dark ? 0.12 : -0.10)
-      : state.accentLightness - preset.accentLightness;
-  }
+  if (signal) lightness = (state.contrast - preset.contrast) * (dark ? 0.12 : -0.10);
+  let explicitLightness = source === 'background' ? state.bgLightness
+    : source === 'card' ? state.surfaceLightness : signal ? state.accentLightness : -1;
   let alpha = ['border', 'frame'].includes(source) ? state.outline / preset.outline
     : source === 'dot' ? state.pattern / preset.pattern : 1;
   let color = `var(--notchset-${source === 'frame' ? 'foreground' : source})`;
-  if (!hue && (neutral || chroma === 1) && !lightness && alpha === 1) return color;
+  if (!hue && (neutral || chroma === 1) && !lightness && alpha === 1 && explicitLightness < 0) {
+    return color;
+  }
+  let lightnessChannel = explicitLightness >= 0
+    ? `${explicitLightness}%` : `calc(l + ${lightness.toFixed(2)})`;
   return `hsl(from ${color} calc(h + ${hue}) calc(s * ${chroma.toFixed(3)}) `
-    + `calc(l + ${lightness.toFixed(2)}) / calc(alpha * ${alpha.toFixed(3)}))`;
+    + `${lightnessChannel} / calc(alpha * ${alpha.toFixed(3)}))`;
 };
 
 /**
@@ -121,7 +119,7 @@ export function getPortfolioNotchsetOverrides(state, presets) {
     '--sn-app-topbar-height': 'calc(64px * var(--sn-theme-density))',
     '--sn-code-markdown-padding': 'calc(24px * var(--sn-theme-density))',
     '--sn-code-markdown-size': 'calc(16px * var(--sn-theme-type-scale))',
-    '--sn-markdown-h2-size': 'calc(28px * var(--sn-theme-heading-scale))',
+    '--sn-markdown-h2-size': 'calc(28px * var(--sn-theme-type-scale) * var(--sn-theme-heading-scale))',
     '--sn-layout-header-block-size': 'calc(40px * var(--sn-theme-density))',
     '--sn-source-header-block-size': 'calc(32px * var(--sn-theme-density))',
     '--sn-layout-header-padding': '0 var(--sn-step-4)',

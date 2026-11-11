@@ -28,13 +28,17 @@ test('verifier requires matching 1200x630 social metadata on public portfolio pa
   let distDir = '/mock/dist';
   let htmlPath = '/mock/dist/projects/alpha/index.html';
   let valid = `
-    <meta property="og:image" content="https://cdn.test/alpha.png">
+    <meta property="og:image" content="https://MakerDrive.github.io/cv/social-cards/projects-alpha.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta name="twitter:image" content="https://cdn.test/alpha.png">
+    <meta name="twitter:image" content="https://MakerDrive.github.io/cv/social-cards/projects-alpha.png">
   `;
 
   assert.equal(verifyPortfolioSocialMetadata(valid, htmlPath, distDir), true);
+  assert.throws(
+    () => verifyPortfolioSocialMetadata(valid, '/mock/dist/skills/agentic-ai/index.html', distDir),
+    /must reference its own generated social card/,
+  );
   assert.throws(
     () => verifyPortfolioSocialMetadata(
       valid.replace('content="630"', 'content="720"'),
@@ -342,6 +346,8 @@ test('full verifier success and failure scenarios', async () => {
         path.join(tmpDir, 'js/index.js'),
         'const markdown = "js/markdown-viewer/index.js"; const tour = "js/tour-player/index.js";',
       );
+      await fs.mkdir(path.join(tmpDir, 'js/notchset-theme'), { recursive: true });
+      await fs.writeFile(path.join(tmpDir, 'js/notchset-theme/index.js'), 'export default () => {};');
       await fs.mkdir(path.join(tmpDir, 'js/markdown-viewer'), { recursive: true });
       await fs.writeFile(
         path.join(tmpDir, 'js/markdown-viewer/index.js'),

@@ -9,6 +9,27 @@ presets, locale and layout state remain intact. Subsequent edits persist across
 reloads and navigation within that build. Reset to defaults also restores the
 source-derived appearance manually.
 
+## Control state
+
+The header Appearance action shows an icon with an accessible name. The quick
+widget and full editor share the same target and storage scope; changes propagate
+between them without reapplying stale values. Mode changes preserve other edited
+parameters. Reset loads the CV preset without resetting panel sizes or media.
+
+The editor exposes 21 numeric controls: brightness, contrast, hue, chroma, accent
+chroma, accent lightness, background lightness, surface lightness, pattern,
+motion, density, radius, frame radius, frame gap, type, heading, outline,
+cell radius, tab radius, composer radius, and scroll shadow. Explicit lightness uses the absolute
+0–100 range; Auto retains the source palette. Global chroma also affects the
+accent when accent chroma is Auto. Primary ink remains neutral.
+
+Heading-to-body balance multiplies the global type scale. Frame radius is
+independent of the general radius. Geometry registers survive
+unrelated theme edits; directly editing Density or Radius returns the register
+to Default so the explicit value takes effect. Mode, variant, tab shape and
+register controls use the provider state contract. Edits persist across route
+navigation and reloads within the current build.
+
 ## Component mapping
 
 | CV surface | Reference and adaptation |

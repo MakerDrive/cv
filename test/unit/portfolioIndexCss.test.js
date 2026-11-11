@@ -22,7 +22,8 @@ test('portfolio header follows the symbiote shell topbar contract', async () => 
   assert.match(themeWidgetSource, /min-height: var\(--sn-shell-menu-action-height, 26px\);/);
 
   assert.match(source, /body:has\(\.pulse-screen\) \{\s*padding-left: 0;\s*--calc-top-pan-height: var\(--sn-app-topbar-height, 40px\);/);
-  assert.match(source, /body:has\(\.pulse-screen\) \{[^}]*background-image: linear-gradient\(to bottom, var\(--pulse-surface-raised\), var\(--pulse-surface\)\);[^}]*background-size: 100% var\(--sn-shell-top-gradient-size, 78px\);/s);
+  assert.match(source, /body:has\(\.pulse-screen\) \{[^}]*background-image: none;/s);
+  assert.doesNotMatch(source, /body:has\(\.pulse-screen\) \{[^}]*background-size: 100% var\(--sn-shell-top-gradient-size, 78px\);/s);
   assert.match(source, /--sn-sys-on-accent: var\(--pulse-surface\);/);
   assert.match(source, /body:has\(\.pulse-screen\) > header \{[^}]*position: relative;[^}]*padding: var\(--sn-app-topbar-padding, 0 16px\);[^}]*border: 0;[^}]*background: transparent;/s);
   assert.match(source, /\.pulse-header-title \{[^}]*font-size: var\(--sn-app-title-size, 13px\);[^}]*font-weight: 700;[^}]*letter-spacing: var\(--sn-app-title-letter-spacing, 0\.5px\);/s);

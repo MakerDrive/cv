@@ -1,3 +1,6 @@
+import { applyTheme } from 'symbiote-ui/themes/Theme.js';
+import installShowResize from './installShowResize.js';
+import resetPortfolioThemeForBuild from './resetPortfolioThemeForBuild.js';
 import { createRuntimeAssetUrl } from './runtimeAssetUrl.js';
 import {
   createCvShowMockAgentProvider,
@@ -11,6 +14,15 @@ import { createPortfolioGraphConnectionId } from '../data/portfolioGraphSnapshot
 import { coordinatePortfolioShowOverlays } from './showOverlayCoordinator.js';
 
 let tourModule;
+
+let buildId = document.querySelector('meta[name="cv-build-id"]')?.getAttribute('content');
+try {
+  resetPortfolioThemeForBuild(buildId, globalThis.localStorage);
+} catch (error) {
+  if (!(error instanceof DOMException)
+    || !['SecurityError', 'QuotaExceededError'].includes(error.name)) throw error;
+  console.warn('CV theme storage is unavailable; allow site storage to save theme settings.');
+}
 
 let markdownViewer = document.querySelector('markdown-viewer');
 if (markdownViewer) {
@@ -191,6 +203,13 @@ const [
   import('symbiote-ui/locale'),
 ]);
 
+let { default: installPortfolioNotchsetTheme } = await import(
+  createRuntimeAssetUrl('js/notchset-theme/index.js').href
+);
+installPortfolioNotchsetTheme(document, {
+  light: PORTFOLIO_THEME_LIGHT_STATE,
+  dark: PORTFOLIO_THEME_DARK_STATE,
+}, applyTheme);
 document.querySelector('.pulse-theme-widget')?.setAttribute('default-state', PORTFOLIO_THEME_DEFAULT_STATE_ATTR);
 
 await Promise.all([
@@ -223,8 +242,7 @@ const PORTFOLIO_SUPPORTED_LOCALES = ['en', 'ru', 'es'];
 const PORTFOLIO_LINKEDIN_URL = 'https://www.linkedin.com/in/v-matiasevich/';
 const PORTFOLIO_TELEGRAM_URL = 'https://t.me/text2code';
 const PORTFOLIO_ONLINE_CV_URL = 'https://MakerDrive.github.io/cv/';
-const PORTFOLIO_TREE_SPLIT_RATIO = 0.25;
-const PORTFOLIO_THEME_SPLIT_RATIO = 0.72;
+const PORTFOLIO_TREE_SPLIT_RATIO = 0.2;
 const PORTFOLIO_PDF_DOWNLOADS = Object.freeze([
   { locale: 'en', href: 'downloads/vladimir-matiasevich-cv-en.pdf' },
   { locale: 'ru', href: 'downloads/vladimir-matiasevich-cv-ru.pdf' },
@@ -591,26 +609,6 @@ function startPortfolioChromeLocalization() {
     customElements.whenDefined(tagName).then(schedulePortfolioChromeLocalization).catch(() => {});
   }
   document.addEventListener('cascade-theme-change', onPortfolioCascadeThemeChange);
-  document.addEventListener('cascade-theme-change', (event) => {
-    let detail = event.detail;
-    if (detail?.source === 'reset') {
-      for (let workspace of document.querySelectorAll('portfolio-workspace')) {
-        /** @type {any} */ (workspace).resetPanelDefaults?.('appearance-reset');
-      }
-      return;
-    }
-    if (!detail || detail.source !== 'mode') return;
-    let widget = event.target?.closest?.('cascade-theme-widget, cascade-theme-editor');
-    if (!widget || typeof widget.state !== 'object') return;
-    let preset = widget.state.mode === 'light'
-      ? PORTFOLIO_THEME_LIGHT_STATE
-      : PORTFOLIO_THEME_DARK_STATE;
-    if (typeof widget.setState === 'function') {
-      widget.setState(preset);
-    } else {
-      widget.state = preset;
-    }
-  });
   document.addEventListener('cascade-theme-copy', (event) => {
     let detail = event.detail;
     if (!detail || !detail.state) return;
@@ -697,7 +695,10 @@ function getPortfolioPdfDownloadLabel(locale) {
 }
 
 document.title = tPortfolio('page.title');
-document.querySelector('.pulse-header-title')?.replaceChildren(tPortfolio('page.title'));
+document.querySelector('.pulse-header-title')?.replaceChildren('Vladimir Matiasevich');
+let portfolioHomeUrl = new URL('./', document.baseURI);
+portfolioHomeUrl.searchParams.set('lang', portfolioLocalization.locale);
+document.querySelector('.pulse-header-title')?.setAttribute('href', portfolioHomeUrl.href);
 let localeToggle = /** @type {any} */ (document.querySelector('.pulse-locale-toggle'));
 let headerMenuButton = document.querySelector('.pulse-header-menu-button');
 headerMenuButton?.setAttribute('aria-label', tPortfolio('header.openMaterials'));
@@ -2781,6 +2782,12 @@ class PortfolioTreePanel extends HTMLElement {
             treeSelectionId: item?.id || item?.path || '',
           }, () => {
             let layout = /** @type {any} */ (this.closest('panel-layout'));
+            let rail = /** @type {any} */ (this.closest('agent-dock-shell'))?.ref?.layout;
+            let viewer = LayoutTree.findPanelByType(layout?.getLayout?.(), 'portfolio-viewer');
+            if (rail?.hasAttribute('mobile-panel-rail-enabled') && viewer) {
+              rail.scrollToPanel(viewer.id, { layout });
+              return;
+            }
             layout?.closeDrawer?.('start');
           });
         },
@@ -3109,6 +3116,7 @@ class PortfolioGraphPanel extends HTMLElement {
     if (this.canvas) return this.canvas;
     let canvas = /** @type {any} */ (document.createElement('node-canvas'));
     canvas.className = 'portfolio-canvas';
+    canvas.setAttribute('data-snapshot-pending', '');
     if (this.firstChild) {
       this.insertBefore(canvas, this.firstChild);
     } else {
@@ -3231,7 +3239,7 @@ class PortfolioGraphPanel extends HTMLElement {
     try {
       let editor = this._structuredEditor || createPortfolioEditor();
       this._structuredEditor = editor;
-      this._graphSnapshotRuntime ||= createPortfolioGraphSnapshotRuntime(this, this.canvas);
+      this._graphSnapshotRuntime ||= createPortfolioGraphSnapshotRuntime(this, this.canvas, editor);
       this._graphSnapshotRuntime.prepare();
       this.graphController?.setStructuredEditor?.(editor);
       setNodePositions(this.canvas, orderedPortfolioProjects);
@@ -3292,7 +3300,7 @@ class PortfolioGraphPanel extends HTMLElement {
     if (!this.canvas || !this._structuredBound) {
       throw new Error('Graph capture requires a bound structured canvas.');
     }
-    return capturePortfolioGraphRenderSnapshot(this, this.canvas);
+    return capturePortfolioGraphRenderSnapshot(this, this.canvas, this._structuredEditor);
   }
 
   scheduleStructuredPathUpgrade() {
@@ -3715,41 +3723,9 @@ class PortfolioThemePanel extends HTMLElement {
 }
 
 class PortfolioWorkspace extends HTMLElement {
+  #disposeShowResize = null;
   #captureTrustedAgentContactClick = null;
   #onAgentShowAction = null;
-
-  resetPanelDefaults(source = 'api') {
-    let current = this._layout?.getLayout?.();
-    if (!current) return false;
-    let tree = LayoutTree.findPanelByType(current, 'portfolio-tree');
-    let viewer = LayoutTree.findPanelByType(current, 'portfolio-viewer');
-    let graph = LayoutTree.findPanelByType(current, 'portfolio-graph');
-    let theme = LayoutTree.findPanelByType(current, 'portfolio-theme', { uiInvoked: true });
-    if (!tree || !viewer || !graph) return false;
-
-    let resetRatios = (node) => {
-      if (node?.type !== 'split') return;
-      let childIds = new Set([node.first?.id, node.second?.id]);
-      if (childIds.has(viewer.id) && childIds.has(graph.id)) {
-        node.ratio = PORTFOLIO_CONTENT_SPLIT_RATIO;
-      } else if (childIds.has(tree.id)) {
-        node.ratio = PORTFOLIO_TREE_SPLIT_RATIO;
-      } else if (theme && childIds.has(theme.id)) {
-        node.ratio = PORTFOLIO_THEME_SPLIT_RATIO;
-      }
-      resetRatios(node.first);
-      resetRatios(node.second);
-    };
-    resetRatios(current);
-    this._layout.setLayout(current);
-    this._dock?.resetPanelLayout?.(source);
-    this.dispatchEvent(new CustomEvent('portfolio-layout-reset', {
-      bubbles: true,
-      composed: true,
-      detail: { source },
-    }));
-    return true;
-  }
 
   connectedCallback() {
     if (this._ready) return;
@@ -3767,6 +3743,7 @@ class PortfolioWorkspace extends HTMLElement {
         <panel-layout
           slot="main"
           class="portfolio-layout"
+          mobile-panel-rail-child
           min-panel-size="150"
           min-panel-inline-size="220"
           min-panel-block-size="180"
@@ -3775,6 +3752,10 @@ class PortfolioWorkspace extends HTMLElement {
           swipe-control="rail"
           overflow-mode="collapse"></panel-layout>
       </agent-dock-shell>
+      <div class="portfolio-show-resizer" role="separator" tabindex="0"
+        aria-orientation="horizontal" aria-label="Resize Show"></div>
+      <div class="portfolio-show-static-region" hidden aria-label="CV Show player"></div>
+      <div class="portfolio-mobile-navigation"></div>
     `;
     let dock = /** @type {any} */ (template.content.querySelector('agent-dock-shell'));
     let layout = /** @type {any} */ (dock?.querySelector('.portfolio-layout'));
@@ -3800,11 +3781,28 @@ class PortfolioWorkspace extends HTMLElement {
     };
     document.addEventListener('click', this.#captureTrustedAgentContactClick, true);
     dock.addEventListener('agent-show-action', this.#onAgentShowAction);
-    dock.addEventListener('agent-dock-responsive-change', (event) => {
-      layout.setLayoutBehavior({
-        responsiveMode: event.detail?.mobile ? 'swipe' : 'preserve',
+    let mobileNavigation = template.content.querySelector('.portfolio-mobile-navigation');
+    let staticShowHost = template.content.querySelector('.portfolio-show-static-region');
+    this.#disposeShowResize = installShowResize(this,
+      template.content.querySelector('.portfolio-show-resizer'), staticShowHost, mobileNavigation);
+    this._applyMobilePanelRail = (mobile = window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT) => {
+      let dockLayout = dock.ref?.layout;
+      if (!dockLayout) return;
+      dockLayout.setLayoutBehavior(mobile
+        ? { responsiveMode: 'preserve', overflow: 'collapse', collapse: 'never' }
+        : { responsiveMode: 'preserve', overflow: 'collapse', minInlineSize: 720 });
+      dockLayout.setMobilePanelRail?.(mobile, {
+        label: tPortfolio('mobile.navigation'),
+        target: mobileNavigation,
+        initialPanelType: 'portfolio-viewer',
+        animateInitialPanel: true,
       });
-    });
+      dock.setStaticShowHost?.(mobile ? staticShowHost : null);
+    };
+    this._onDockResponsiveChange = () => this._applyMobilePanelRail?.();
+    this._onViewportResize = () => this._applyMobilePanelRail?.();
+    dock.addEventListener('agent-dock-responsive-change', this._onDockResponsiveChange);
+    window.addEventListener('resize', this._onViewportResize);
     dock.addEventListener('portfolio-show-overlay-coordinate', () => {
       coordinatePortfolioShowOverlays({
         layout,
@@ -3820,6 +3818,7 @@ class PortfolioWorkspace extends HTMLElement {
     // call waits for the definition and pends inside the dock until the chat
     // panel mounts.
     customElements.whenDefined('agent-dock-shell').then(() => {
+      this._applyMobilePanelRail?.();
       this._dock?.setAgentProvider?.(
         createCvShowMockAgentProvider({ locale: document.documentElement.lang || 'en' }),
       );
@@ -3828,11 +3827,7 @@ class PortfolioWorkspace extends HTMLElement {
     // attached. Configure the embedded workspace from the actual viewport
     // immediately; later dock events keep it in sync across breakpoints.
     queueMicrotask(() => {
-      layout.setLayoutBehavior({
-        responsiveMode: typeof window !== 'undefined'
-          && window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT
-          ? 'swipe' : 'preserve',
-      });
+      this._applyMobilePanelRail?.();
     });
     layout.registerPanelType('portfolio-tree', {
       title: tPortfolio('panel.materials'),
@@ -3892,6 +3887,13 @@ class PortfolioWorkspace extends HTMLElement {
       });
     };
     this._onOpenMaterials = () => {
+      let dockLayout = this._dock?.ref?.layout;
+      let treePanel = LayoutTree.findPanelByType(layout.$.layoutTree, 'portfolio-tree');
+      if (window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT
+        && dockLayout?.hasAttribute('mobile-panel-rail-enabled') && treePanel) {
+        dockLayout.scrollToPanel?.(treePanel.id, { layout });
+        return;
+      }
       if (typeof layout.toggleDrawer === 'function' && layout.hasAttribute('drawer-mode-active')) {
         layout.toggleDrawer('start');
         return;
@@ -3918,6 +3920,11 @@ class PortfolioWorkspace extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this.#disposeShowResize?.();
+    if (this._onViewportResize) window.removeEventListener('resize', this._onViewportResize);
+    if (this._onDockResponsiveChange) {
+      this._dock?.removeEventListener('agent-dock-responsive-change', this._onDockResponsiveChange);
+    }
     if (this.#captureTrustedAgentContactClick) {
       document.removeEventListener('click', this.#captureTrustedAgentContactClick, true);
     }

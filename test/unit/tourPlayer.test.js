@@ -30,6 +30,10 @@ import { createCvShowCompositionTimeline, cvShowGlobalTimeOf } from '../../src/s
 const ROUTE_SHORT_TIMELINE = createCvShowCompositionTimeline(CV_SHOW_STORY);
 const globalRoute = (entryId, localMs = 0, play = false) => ({ mode: 'short', timeMs: cvShowGlobalTimeOf(ROUTE_SHORT_TIMELINE, entryId, localMs), play });
 const globalTimeOf = (entryId, localMs = 0) => cvShowGlobalTimeOf(ROUTE_SHORT_TIMELINE, entryId, localMs);
+// The Show transport speaks display time at the current rate (1.5x by
+// default), so a composition-time seek intent is expressed through this
+// conversion and the assertions keep reading composition coordinates.
+const transportMs = (compositionMs) => compositionMs / 1.5;
 import {
   CV_SHOW_AUDIO_RELEASE,
   CV_SHOW_PRESENTATION_PROJECT,
@@ -1157,20 +1161,22 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   const pausedScrubRoute = pausedScrub.player.applyShowRoute(globalRoute("positioning", 1500, false));
   assert.equal(await pausedScrubRoute, true);
   await new Promise((resolve) => setImmediate(resolve));
-  pausedScrub.config.controller.seek(1, 2_200);
+  pausedScrub.config.controller.seek(1, transportMs(2_200));
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(pausedScrub.player.routeSnapshot.entryId, 'symbiote-workspace');
   assert.equal(pausedScrub.player.routeSnapshot.timeMs, globalTimeOf(pausedScrub.player.routeSnapshot.entryId, 2_200));
   assert.equal(pausedScrub.player.routeSnapshot.play, false);
-  pausedScrub.config.controller.play();
+  pausedScrub.dock.dispatchEvent(new CustomEvent('agent-show-action', {
+    detail: { actionId: 'start-short' },
+  }));
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(pausedScrub.player.routeSnapshot.entryId, 'symbiote-workspace');
   assert.equal(pausedScrub.player.routeSnapshot.timeMs, globalTimeOf(pausedScrub.player.routeSnapshot.entryId, 2_200));
   assert.equal(pausedScrub.player.routeSnapshot.play, true);
   assert.equal(
     pausedScrub.showPlayer.states.at(-1)?.progress?.positionMs,
-    2_200,
-    'the native player transport receives the new seek position after Play',
+    transportMs(2_200),
+    'the native player transport receives the seek position in display time after Play',
   );
 
   const pendingTrustedPlay = createFixture();
@@ -1254,7 +1260,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   const pendingSeekPlay = createFixture();
   const pendingSeekPlaySpeechCount = spoken.length;
   const supersededPendingSeekRoute = pendingSeekPlay.player.applyShowRoute(globalRoute("symbiote-workspace", 0, false));
-  pendingSeekPlay.config.controller.seek(1, 1_000);
+  pendingSeekPlay.config.controller.seek(1, transportMs(1_000));
   pendingSeekPlay.config.controller.play();
   assert.equal(await supersededPendingSeekRoute, false);
   await new Promise((resolve) => setImmediate(resolve));
@@ -1371,7 +1377,9 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
   assert.equal(restarted.player.$.isPaused, false);
   assert.equal(restarted.player.routeSnapshot.completed, true);
   assert.equal(restarted.player.routeSnapshot.entryId, '');
-  assert.equal(restarted.player.routeSnapshot.timeMs, finalTimeMs);
+  // The route snapshot reads the composition clock: the display-time seek
+  // (scaled timeline) converts back at the controller boundary.
+  assert.equal(restarted.player.routeSnapshot.timeMs, Math.round(finalTimeMs * 1.5));
   assert.equal(completionEvents.length, 1);
   assert.equal(completionEvents[0].reason, 'natural-end');
   assert.equal(completionEvents[0].routeState.completed, true);
@@ -1564,8 +1572,8 @@ test('detail admission rejects stale live media before branch or presentation mu
   const firstProgressTurn = progressConfig.timeline.turns[0];
   assert.equal(
     firstProgressTurn.durationMs,
-    CV_SHOW_SCHEDULE_DURATIONS.durations[firstProgressTurn.id],
-    'the shared player advertises exact Project schedule durations, never raw source-audio duration',
+    CV_SHOW_SCHEDULE_DURATIONS.durations[firstProgressTurn.id] / 1.5,
+    'the shared player advertises the Project schedule durations at the display rate, never raw source-audio duration',
   );
   assert.equal(
     showPlayer.states.at(-1).progress.positionMs,
@@ -1663,8 +1671,8 @@ test('detail admission rejects stale live media before branch or presentation mu
   assert.deepEqual(restartEvents, [{ index: 0, positionMs: 0 }]);
 
   restartEvents.length = 0;
-  progressConfig.controller.seek(0, 1_111);
-  progressConfig.controller.seek(0, 2_222);
+  progressConfig.controller.seek(0, transportMs(1_111));
+  progressConfig.controller.seek(0, transportMs(2_222));
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(
     restartEvents,
@@ -4672,6 +4680,10 @@ test('browser speech controller publishes physical starts, ignores stale complet
   assert.deepEqual(started, ['second']);
   spoken[3].onstart?.();
   assert.deepEqual(started, ['second', 'paused-resume']);
+  speech.speak('Fast', { lang: 'ru', rate: 2 });
+  assert.equal(spoken[4].rate, 2, 'the Show speed reaches browser speech');
+  speech.speak('Default', { lang: 'ru' });
+  assert.equal(spoken[5].rate, 1, 'browser speech keeps the normal rate without a request');
   speech.pause();
   assert.equal(paused, true);
   speech.cancel();
@@ -6262,6 +6274,37 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
     /action: 'copySectionLink'/,
     'the header action is not routed through the provider video-controls seam',
   );
+  assert.match(
+    logic,
+    /CV_SHOW_DEFAULT_PLAYBACK_RATE = CV_SHOW_PLAYBACK_RATE_MEDIUM/u,
+    'the Show starts at 1.5× playback',
+  );
+  assert.match(
+    logic,
+    /CV_SHOW_PLAYBACK_RATE_CYCLE = Object\.freeze\(\[[\s\S]{0,80}CV_SHOW_PLAYBACK_RATE_FAST,?\s*\]\)/u,
+    'the speed toggle cycles through 1x, 1.5x and 2x',
+  );
+  assert.match(
+    logic,
+    /positionMs \* host\.#displayRate\(\)/u,
+    'player seeks arrive in display time and convert back to the composition clock',
+  );
+  assert.match(
+    logic,
+    /totalMs: timeline\.totalMs \/ rate/u,
+    'the player clock is rescaled by the rate, so displayed time reflects the speed',
+  );
+  assert.match(
+    logic,
+    /controls\.insertAdjacentHTML\('beforeend', CV_SHOW_SPEED_CONTROL_MARKUP\)/u,
+    'the speed toggle joins the player transport row as markup',
+  );
+  assert.match(
+    logic,
+    /#attachAlignedEntry\([\s\S]{0,500}this\.#applyPlaybackRate\(media\);/u,
+    'every narration media element receives the selected speed before playback',
+  );
+  assert.match(logic, /rate: this\.#playbackRate/u, 'browser speech receives the same speed');
   assert.match(runtime, /history\[push \? 'pushState' : 'replaceState'\]/);
   assert.match(
     runtime,
@@ -6336,7 +6379,11 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   assert.doesNotMatch(runtime, /registerPanelType\('portfolio-tour'/);
   assert.doesNotMatch(logic, /createElement\('agent-show-chat'\)/);
   assert.doesNotMatch(logic, /agent\.style\.|this\.style\./);
-  assert.doesNotMatch(logic, /<chat-workspace|<sn-transport|show-transcript|show-message-actions|show-branch-controls|show-controls/);
+  assert.doesNotMatch(
+    logic,
+    /<chat-workspace|<sn-transport|show-transcript|show-message-actions|show-branch-controls|class="[^"]*chat-show-controls/u,
+    'the player extends the transport row instead of rebuilding the shared Show shell',
+  );
   assert.doesNotMatch(logic, /type: 'embed', key: 'short'/);
   assert.match(logic, /setVoiceControls/);
   assert.match(logic, /input: \{ visible: true, enabled: true, state: 'idle' \}/);
@@ -6882,7 +6929,7 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
   assert.equal(currentConfig().state.index, 2, 'the next segment after the replacement is the following Short');
   assert.deepEqual(player.routeSnapshot.entryId, 'symbiote-ui');
 
-  currentConfig().controller.seek(1, 2_000);
+  currentConfig().controller.seek(1, transportMs(2_000));
   await wait(50);
   assert.equal(player.$.inBranch, true, 'seek into the replaced segment reopens the selected detail');
   assert.equal(player.routeSnapshot.detailId, 'workspace-details');
@@ -6908,7 +6955,7 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
 
   // Manual Next while the replacement detail is playing continues into the
   // next Short without a pause, matching the previous playback intent.
-  currentConfig().controller.seek(1, 500);
+  currentConfig().controller.seek(1, transportMs(500));
   await wait(50);
   assert.equal(player.$.inBranch, true);
   const utterancesBeforePlayingNext = spoken.length;
@@ -6922,12 +6969,12 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
   // Seek back into the replaced segment, then rewind while the detail is
   // already active: the player stays inside the branch and only repositions
   // the detail recording; its natural end then advances to the next Short.
-  currentConfig().controller.seek(1, 2_000);
+  currentConfig().controller.seek(1, transportMs(2_000));
   await wait(50);
   assert.equal(player.$.inBranch, true);
   assert.equal(player.routeSnapshot.detailId, 'workspace-details');
   const rewoundDetailSpeechIndex = spoken.length;
-  currentConfig().controller.seek(1, 4_000);
+  currentConfig().controller.seek(1, transportMs(4_000));
   await wait(50);
   assert.equal(player.$.inBranch, true, 'seek inside the active replacement detail stays in the detail');
   assert.equal(player.routeSnapshot.detailId, 'workspace-details');
@@ -7240,7 +7287,7 @@ test('a seek back into a replaced segment runs the owner scene setup before the 
   // must run its setup phase again before the detail narration is replayed;
   // otherwise the real page presentation of the detail fails silently.
   sceneSetupPhases.length = 0;
-  currentConfig().controller.seek(2, 4_000);
+  currentConfig().controller.seek(2, transportMs(4_000));
   await wait(30);
   assert.equal(player.$.inBranch, true, 'the re-seek opens the selected detail');
   assert.equal(player.routeSnapshot.detailId, 'symbiote-ui-details');
@@ -7405,7 +7452,7 @@ test('an interrupted owner scene setup is re-run when the same replaced segment 
   // re-run for the second seek: the physical scene was never confirmed.
   sceneSetupPhases.length = 0;
   heldOwnerSetups.length = 0;
-  currentConfig().controller.seek(2, 4_000);
+  currentConfig().controller.seek(2, transportMs(4_000));
   await wait(10);
   spoken.at(-1)?.onstart?.();
   await wait(10);
@@ -7509,6 +7556,159 @@ test('CV adapter preserves an authored marker label instead of defaulting digits
 });
 
 
+
+test('the Show transport starts a three-rate speed toggle that narration and the clock follow', async (t) => {
+  const { parseHTML } = await import('linkedom');
+  const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
+  const globalKeys = [
+    'window',
+    'document',
+    'customElements',
+    'HTMLElement',
+    'CustomEvent',
+    'Event',
+    'Node',
+    'Element',
+    'DOMParser',
+    'MutationObserver',
+    'DocumentFragment',
+    'CSSStyleSheet',
+    'location',
+    'speechSynthesis',
+    'SpeechSynthesisUtterance',
+  ];
+  const previousGlobals = new Map(globalKeys.map((key) => (
+    [key, Object.getOwnPropertyDescriptor(globalThis, key)]
+  )));
+  for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  globalThis.CSSStyleSheet = class CSSStyleSheet {
+    replaceSync() {}
+  };
+  globalThis.location = new URL('https://portfolio.example/cv/');
+  const spoken = [];
+  globalThis.speechSynthesis = {
+    paused: false,
+    cancel() {},
+    pause() { this.paused = true; },
+    resume() { this.paused = false; },
+    speak(utterance) { spoken.push(utterance); },
+  };
+  globalThis.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+    constructor(text) { this.text = text; }
+  };
+
+  const { PortfolioShowChat } = await import(
+    '../../src/ui-components/client-only/tour-player/tour-player.js?speed-toggle-test'
+  );
+  const showPlayer = document.createElement('div');
+  showPlayer.innerHTML = [
+    '<div class="chat-show-header"><button data-header-action="settings"></button></div>',
+    '<div class="chat-show-controls"><button data-control="play"></button></div>',
+  ].join('');
+  showPlayer.configs = [];
+  showPlayer.bind = (config) => { showPlayer.configs.push(config); };
+  showPlayer.setState = () => {};
+  const dock = document.createElement('div');
+  dock.setAgentProvider = () => {};
+  dock.setMessages = () => {};
+  dock.getChat = () => null;
+  dock.setShow = () => showPlayer;
+  dock.removeShow = () => {};
+  const player = new PortfolioShowChat();
+  player.agentDock = dock;
+  player.addEventListener('portfolio-show-phase', (event) => {
+    if (typeof event.detail?.complete !== 'function') return;
+    event.detail.handled = true;
+    event.detail.complete(Object.freeze({
+      status: 'success',
+      receipts: Object.freeze([Object.freeze({
+        status: 'success',
+        result: Object.freeze({ status: 'completed' }),
+      })]),
+    }));
+  });
+  dock.append(player);
+  document.body.append(dock);
+  t.after(() => {
+    dock.remove();
+    for (const [key, descriptor] of previousGlobals) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  });
+
+  assert.equal(await player.applyShowRoute(globalRoute('positioning', 0, true)), true);
+  await new Promise((resolve) => setImmediate(resolve));
+
+  const controls = showPlayer.querySelector('.chat-show-controls');
+  const speedButton = controls.querySelector('[data-cv-show-action="speed"]');
+  assert.ok(speedButton, 'the transport row carries the speed toggle');
+  assert.equal(speedButton.textContent, '1.5x', 'the Show opens at the default 1.5x');
+  assert.equal(spoken.at(-1)?.rate, 1.5, 'narration starts at 1.5x');
+  assert.equal(
+    speedButton.getAttribute('aria-label'),
+    'Playback speed 1.5×',
+    'the toggle announces the speed it plays at',
+  );
+  assert.equal(
+    speedButton.hasAttribute('aria-pressed'),
+    false,
+    'three rates cannot be a pressed flag',
+  );
+  const defaultConfig = showPlayer.configs.at(-1);
+  assert.ok(defaultConfig?.timeline?.totalMs > 0, 'the bound config carries the display timeline');
+
+  // 1.5x -> 2x: the utterance in flight keeps its rate until the next speak
+  // (browser TTS cannot change mid-utterance), and the displayed clock
+  // rescales immediately so the total shown time shrinks with the speed.
+  speedButton.dispatchEvent(new window.Event('click'));
+  assert.equal(speedButton.textContent, '2x');
+  assert.equal(speedButton.getAttribute('aria-label'), 'Playback speed 2×');
+  const fastConfig = showPlayer.configs.at(-1);
+  assert.equal(
+    fastConfig.timeline.totalMs,
+    defaultConfig.timeline.totalMs * (1.5 / 2),
+    'the displayed total is the composition total divided by the rate',
+  );
+  assert.equal(
+    fastConfig.timeline.turns[0].durationMs,
+    defaultConfig.timeline.turns[0].durationMs * (1.5 / 2),
+    'turn spans rescale with the rate',
+  );
+
+  // 2x -> 1x: the next narration speak follows the selected rate, and the
+  // displayed clock reads composition time again.
+  speedButton.dispatchEvent(new window.Event('click'));
+  assert.equal(speedButton.textContent, '1x');
+  assert.equal(speedButton.getAttribute('aria-label'), 'Playback speed 1×');
+  showPlayer.configs.at(-1).controller.seek(1, 0);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(spoken.at(-1)?.rate, 1, 'narration after the toggle plays at 1x');
+  const normalConfig = showPlayer.configs.at(-1);
+  assert.equal(
+    normalConfig.timeline.totalMs,
+    defaultConfig.timeline.totalMs * 1.5,
+    '1x shows the composition total as-is',
+  );
+
+  // 1x -> 1.5x: the cycle closes, and the transport row keeps a single toggle.
+  speedButton.dispatchEvent(new window.Event('click'));
+  assert.equal(speedButton.textContent, '1.5x');
+  assert.equal(
+    controls.querySelectorAll('[data-cv-show-action="speed"]').length,
+    1,
+    'the transport row keeps a single toggle across re-renders',
+  );
+
+  // A player seek arrives in display time and converts back to composition.
+  showPlayer.configs.at(-1).controller.seek(1, 1_000);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(
+    player.routeSnapshot.timeMs,
+    globalTimeOf(player.routeSnapshot.entryId, 1_500),
+    'the 1.5x display seek lands on the same composition position',
+  );
+});
 
 test('TTS normalization resolves brand names to pronounceable Russian', async () => {
   const { normalizeCvShowNarrationText } = await import('../../src/static-pages/js/tour-player/ttsNormalize.js');

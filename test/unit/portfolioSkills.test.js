@@ -87,15 +87,10 @@ test('localized profile and PDF preserve the compact semantic structure', () => 
     const keys = Object.keys(messages);
     const profile = keys.filter((key) => key.startsWith('portfolio.profile.')).map((key) => messages[key]).join('\n');
     const pdf = keys.filter((key) => key.startsWith('portfolio.pdf.')).map((key) => messages[key]).join('\n');
-    const pageTitleOutcome = {
-      en: /systems and platforms[^|]*complex process automation/i,
-      ru: /системы и платформы[^|]*автоматизаци[а-яё]* сложных процессов/iu,
-      es: /sistemas y plataformas[^|]*automatizar procesos complejos/iu,
-    };
-    const pdfHeaderOutcome = {
-      en: /process automation[^|]*systems and platforms/i,
-      ru: /системы и платформы[^|]*автоматизаци[а-яё]* процессов/iu,
-      es: /sistemas y plataformas[^|]*automatización de procesos/iu,
+    let headlineRole = {
+      en: /^Product Engineer \| Full-Stack, R&D & Systems Engineering \| Complex Process Automation Across Software, Media & Hardware \| AI Agent Tooling$/u,
+      ru: /^Продуктовый инженер \| Full-Stack, R&D и системная инженерия \| Автоматизация сложных процессов в software, media и hardware \| Инструменты для ИИ-агентов$/u,
+      es: /^Ingeniero de producto \| Full-Stack, I\+D e ingeniería de sistemas \| Automatización de procesos complejos en software, medios y hardware \| Herramientas para agentes de IA$/u,
     };
     const collaborationTitle = {
       en: /engagement(?: options)?/i,
@@ -113,8 +108,10 @@ test('localized profile and PDF preserve the compact semantic structure', () => 
       es: 'SMM y automatización de la presencia digital.',
     };
 
-    assert.match(messages['portfolio.page.title'], pageTitleOutcome[locale]);
-    assert.match(messages['portfolio.pdf.headerTitle'], pdfHeaderOutcome[locale]);
+    let headline = messages['portfolio.profile.summary'];
+    assert.match(headline, headlineRole[locale]);
+    assert.equal(messages['portfolio.page.title'], `Vladimir Matiasevich | ${headline}`);
+    assert.equal(messages['portfolio.pdf.headerTitle'], headline);
     assert.match(messages['portfolio.profile.collaborationTitle'], collaborationTitle[locale]);
 
     assert.equal(keys.filter((key) => /^portfolio\.profile\.expertise\..+\.label$/.test(key)).length, 4);
@@ -128,11 +125,6 @@ test('localized profile and PDF preserve the compact semantic structure', () => 
     assert.equal(keys.some((key) => key.startsWith('portfolio.experience.')), false);
 
     assert.match(messages['portfolio.profile.details'], /15\+/);
-    const summaryOutcomePhrasing = {
-      en: /Lead R&D Engineer[^—]*—[^.]*designing and developing systems and platforms[^.]*complex process automation[^.]*software, media, and hardware/i,
-      ru: /Ведущий R&D-инженер[^—]*—[^.]*проектирование и разработка систем и платформ[^.]*автоматизации сложных процессов[^.]*software, media и hardware/iu,
-      es: /Ingeniero principal de I\+D[^—]*—[^.]*diseño y desarrollo de sistemas y plataformas[^.]*automatizar procesos complejos[^.]*software, medios y hardware/iu,
-    };
     const outcomeFirstPhrasing = {
       en: /I design and develop automation loops for complex processes and systems across domains at the intersection of software, media, and hardware/i,
       ru: /Проектирую и разрабатываю контуры автоматизации для сложных процессов и систем в разных предметных областях на стыке software, media и hardware/iu,
@@ -143,7 +135,6 @@ test('localized profile and PDF preserve the compact semantic structure', () => 
       ru: /собственн\w+ инструмент\w+[^.\n]*(?:незнаком|освоен)|подключаю человека|эскалаци\w+ человеку/iu,
       es: /mis herramientas[^.\n]*(?:bases de código|stacks desconocidos)|intervención humana|escalamiento humano/iu,
     };
-    assert.match(messages['portfolio.profile.summary'], summaryOutcomePhrasing[locale]);
     assert.doesNotMatch(messages['portfolio.profile.summary'], /loop|MCP|RAG/i);
     const summaryCopy = [messages['portfolio.profile.details'], messages['portfolio.pdf.summaryDetails']];
     for (const value of summaryCopy) {

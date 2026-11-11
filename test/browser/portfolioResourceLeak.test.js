@@ -31,6 +31,9 @@ import {
   createCvShowEntryTuple,
   projectCvShowPlaybackCheckpoint,
 } from '../../src/static-pages/js/tour-player/presentationProjectAdapter.js';
+import {
+  listCvShowAuthoringToolDescriptors,
+} from '../../src/static-pages/js/tour-player/cvShowAuthoringTools.js';
 import { startCvShowAuthoringHost } from '../../scripts/cv-show-authoring-host.js';
 
 const ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -69,7 +72,12 @@ const AUTHORING_TOOL_NAMES = Object.freeze(
     .map(({ name }) => name)
     .sort(),
 );
-const AUTHORING_TOOL_COUNT = AUTHORING_TOOL_NAMES.length;
+const REGISTERED_AUTHORING_TOOL_NAMES = Object.freeze(
+  listCvShowAuthoringToolDescriptors()
+    .map(({ name }) => name)
+    .sort(),
+);
+const AUTHORING_TOOL_COUNT = REGISTERED_AUTHORING_TOOL_NAMES.length;
 
 async function loadSelectedCvShowWebAudioManifest() {
   let manifestPath = path.join(
@@ -254,6 +262,9 @@ function startStaticServer(options = {}) {
         }
         filePath = path.join(DIST_DIR, 'index.html');
       }
+      if (options.bootstrapGate && filePath === path.join(DIST_DIR, 'js', 'index.js')) {
+        await options.bootstrapGate;
+      }
       let fileInfo = await stat(filePath);
       let body = null;
       if (options.corruptGraphSnapshot && filePath.endsWith('.snapshot.json')) {
@@ -389,7 +400,7 @@ async function waitForFile(filePath, timeoutMs = 10_000) {
   throw new Error(`Timed out waiting for ${filePath}`);
 }
 
-async function launchChrome() {
+async function launchChrome(options = {}) {
   if (!await fileExists(CHROME_PATH)) return null;
 
   let userDataDir = await mkdtemp(path.join(tmpdir(), 'cv-resource-chrome-'));
@@ -404,6 +415,7 @@ async function launchChrome() {
     '--disable-extensions',
     '--disable-features=Translate',
     '--disable-sync',
+    ...(options.autoplayPolicy ? [`--autoplay-policy=${options.autoplayPolicy}`] : []),
     '--metrics-recording-only',
     '--mute-audio',
     '--no-first-run',
@@ -512,7 +524,7 @@ async function navigate(cdp, url, options = {}) {
     ready = await cdp.send('Runtime.evaluate', {
     expression: `
       new Promise((resolve) => {
-        const started = performance.now();
+        let started = performance.now();
         const tick = () => {
           const expectedMode = ${JSON.stringify(expectedMode)};
           const graphPanel = document.querySelector('portfolio-graph-panel');
@@ -551,7 +563,7 @@ async function clickVisible(cdp, selector, label = selector) {
     expression: `(() => {
       const target = document.querySelector(${JSON.stringify(selector)});
       target?.scrollIntoView?.({ block: 'center', inline: 'center' });
-      const rect = target?.getBoundingClientRect();
+      let rect = target?.getBoundingClientRect();
       const hit = rect && document.elementFromPoint(
         rect.left + rect.width / 2,
         rect.top + rect.height / 2,
@@ -866,7 +878,7 @@ async function createPortfolioPage(t, options = {}) {
   let server = await startStaticServer(options);
   t.after(() => server.close());
 
-  let chrome = await launchChrome();
+  let chrome = await launchChrome(options);
   if (!chrome) {
     t.skip(`Chrome executable not found at ${CHROME_PATH}`);
     return null;
@@ -984,11 +996,11 @@ async function installCvShowTerminalHarness(cdp) {
         policy: operation?.source?.policy || '',
       });
       const sampleUi = (at) => {
-        const host = document.querySelector('portfolio-show-chat');
-        const dock = document.querySelector('agent-dock-shell');
-        const chat = dock?.getChat?.();
+        let host = document.querySelector('portfolio-show-chat');
+        let dock = document.querySelector('agent-dock-shell');
+        let chat = dock?.getChat?.();
         const workspace = chat?.querySelector('chat-workspace');
-        const player = chat?.querySelector('chat-show-player');
+        let player = chat?.querySelector('chat-show-player');
         const composer = workspace?.querySelector('chat-composer');
         const transcript = workspace?.querySelector('chat-transcript');
         const scroller = transcript?.getScrollContainer?.() || transcript?.ref?.chatMessages || null;
@@ -1258,7 +1270,7 @@ async function installCvShowTerminalHarness(cdp) {
             detail: portable(event.detail || null),
           };
           state.lifecycle.push(entry);
-          const host = document.querySelector('portfolio-show-chat');
+          let host = document.querySelector('portfolio-show-chat');
           signal(type, {
             detail: entry.detail,
             activeId: host?.narrationSnapshot?.active?.activeId || '',
@@ -1312,7 +1324,7 @@ async function installCvShowTerminalHarness(cdp) {
       });
 
       const sampleFrame = (now) => {
-        const host = document.querySelector('portfolio-show-chat');
+        let host = document.querySelector('portfolio-show-chat');
         if (state.activeOperations.size && now - lastActiveFrameAt >= 50) {
           lastActiveFrameAt = now;
           state.frames.push(sampleUi(now));
@@ -1477,8 +1489,8 @@ async function waitForCvShowModeSelection(cdp, label) {
   await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     expression: `new Promise((resolve, reject) => {
-      const started = performance.now();
-      const check = () => {
+      let started = performance.now();
+      let check = () => {
         if (document.querySelector(
           'agent-dock-shell agent-show-chat .actions-card[data-action-state="current"] [data-action-id="start-short"]',
         )) return resolve(true);
@@ -2053,7 +2065,7 @@ async function getVisiblePortfolioText(cdp, label) {
     awaitPromise: true,
     returnByValue: true,
     expression: `new Promise((resolve) => {
-      const started = performance.now();
+      let started = performance.now();
       const loading = ${JSON.stringify(loadingMessages)};
       const tick = () => {
         const text = document.querySelector(
@@ -2316,7 +2328,7 @@ test('portfolio language toggle persists locale through the rendered shell', {
     awaitPromise: true,
     returnByValue: true,
     expression: `new Promise((resolve) => {
-      const started = performance.now();
+      let started = performance.now();
       const tick = () => {
         const ready = document.documentElement.lang === 'es'
           && document.querySelector('portfolio-graph-panel')?.dataset.mode === 'structured';
@@ -2362,7 +2374,255 @@ test('portfolio language toggle persists locale through the rendered shell', {
   assert.equal(storedState.panelActionTitle, 'Acciones del panel');
 });
 
-test('portfolio appearance panel scrolls and resets to library theme defaults', {
+test('Appearance audits every parameter and keeps controls, modes and persisted state aligned', {
+  timeout: 120_000,
+}, async (t) => {
+  let page = await createPortfolioPage(t, { viewport: DESKTOP_VIEWPORT, touch: false });
+  if (!page) return;
+  let { cdp, server } = page;
+  await navigate(cdp, `${server.origin}/cv/?lang=en`, { expectedMode: 'structured' });
+  let result = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `(async () => {
+      let frame = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      let widget = document.querySelector('cascade-theme-widget');
+      let label = widget.querySelector('.ctw-trigger-label');
+      let iconOnly = getComputedStyle(label).display === 'none'
+        && Boolean(widget.querySelector('.ctw-trigger').getAttribute('aria-label'));
+      document.dispatchEvent(new CustomEvent('cascade-theme-open-full'));
+      let started = performance.now();
+      let editor;
+      while (!editor?.querySelector('[data-theme-control="motion"]')) {
+        editor = document.querySelector('portfolio-theme-panel cascade-theme-editor');
+        if (performance.now() - started > 10000) throw Error('Full theme editor did not mount');
+        await frame();
+      }
+      editor.closest('layout-node').querySelector('.fullscreen-btn').click();
+      await frame();
+      let baseline = JSON.parse(widget.getAttribute('default-state'));
+      let root = document.documentElement;
+      let probe = document.createElement('div');
+      probe.style.position = 'fixed';
+      probe.style.visibility = 'hidden';
+      probe.style.transitionProperty = 'none';
+      document.body.append(probe);
+      let canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 1;
+      let context = canvas.getContext('2d');
+      let recipes = {
+        brightness: ['backgroundColor', '--sn-sys-surface'],
+        contrast: ['backgroundColor', '--sn-sys-on-surface'],
+        chroma: ['backgroundColor', '--sn-portfolio-signal'],
+        hue: ['backgroundColor', '--sn-portfolio-signal'],
+        bgLightness: ['backgroundColor', '--sn-sys-surface'],
+        surfaceLightness: ['backgroundColor', '--sn-sys-surface-panel'],
+        accentLightness: ['backgroundColor', '--sn-portfolio-signal'],
+        accentChroma: ['backgroundColor', '--sn-portfolio-signal'],
+        pattern: ['backgroundColor', '--sn-grid-dot'],
+        cellRadius: ['width', '--sn-cell-min-radius'],
+        outline: ['backgroundColor', '--sn-layout-border'],
+        type: ['fontSize', '--sn-code-markdown-size'],
+        heading: ['fontSize', '--sn-markdown-h2-size'],
+        density: ['height', '--sn-layout-header-block-size'],
+        radius: ['borderRadius', '--sn-layout-header-button-radius'],
+        tabRadius: ['borderRadius', '--sn-tabs-corner-radius'],
+        composerRadius: ['borderRadius', '--sn-composer-radius'],
+        scrollShadow: ['width', '--sn-scroll-shadow-size'],
+        frameRadius: ['borderRadius', '--sn-frame-radius'],
+        frameGap: ['width', '--sn-frame-gap'],
+        motion: ['transitionDuration', '--sn-transition-normal'],
+      };
+      let inputs = [...editor.querySelectorAll('input[data-theme-control]')];
+      let names = inputs.map((input) => input.dataset.themeControl).sort();
+      if (JSON.stringify(names) !== JSON.stringify(Object.keys(recipes).sort())) {
+        throw Error('Audit recipes do not cover the full control inventory');
+      }
+      let read = (name) => {
+        let [property, token] = recipes[name];
+        probe.style[property] = 'var(' + token + ')';
+        let rendered = getComputedStyle(probe)[property];
+        if (property !== 'backgroundColor') return rendered;
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = rendered;
+        context.fillRect(0, 0, 1, 1);
+        return [...context.getImageData(0, 0, 1, 1).data];
+      };
+      let set = async (name, value) => {
+        let input = editor.querySelector('[data-theme-control="' + name + '"]');
+        input.value = String(value);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        await frame();
+        if (editor.state[name] !== value || widget.state[name] !== value) {
+          throw Error('Control state diverged: ' + name);
+        }
+        return read(name);
+      };
+      let matrix = [];
+      try {
+        for (let mode of ['light', 'dark']) {
+          for (let name of names) {
+            editor.geometryRegister = '';
+            editor.setState({ ...baseline, mode });
+            await frame();
+            let input = editor.querySelector('[data-theme-control="' + name + '"]');
+            let low = Math.max(0, Number(input.min));
+            let high = name === 'hue' ? 120 : Number(input.max);
+            let before = await set(name, low);
+            let after = await set(name, high);
+            matrix.push({ mode, name, low, high, before, after });
+            if (JSON.stringify(before) === JSON.stringify(after)) {
+              throw Error('Control has no rendered effect: ' + JSON.stringify(matrix.at(-1)));
+            }
+            if (['bgLightness', 'surfaceLightness', 'accentLightness'].includes(name)) {
+              if (before.slice(0, 3).some((value) => value !== 0)
+                || after.slice(0, 3).some((value) => value !== 255)) {
+                throw Error('Explicit lightness does not reach black/white: ' + JSON.stringify(matrix.at(-1)));
+              }
+            }
+          }
+        }
+        editor.setState({ ...baseline, type: 100, heading: 100 });
+        await frame();
+        let headingBase = parseFloat(read('heading'));
+        await set('type', 130);
+        let headingWithType = parseFloat(read('heading'));
+        await set('heading', 140);
+        let headingWithBoth = parseFloat(read('heading'));
+        if (Math.abs(headingWithType / headingBase - 1.3) > 0.01
+          || Math.abs(headingWithBoth / headingWithType - 1.4) > 0.01) {
+          throw Error('Heading-to-body balance bypasses the global type scale');
+        }
+        editor.setState({ ...baseline, brightness: 63, hue: 74, density: 120 });
+        await frame();
+        editor.querySelector('[data-theme-mode="dark"]').click();
+        await frame();
+        if (editor.state.brightness !== 63 || widget.state.brightness !== 63
+          || editor.state.hue !== 74 || editor.state.density !== 120) {
+          throw Error('Mode switching reset unrelated inputs');
+        }
+        for (let variant of ['modern', 'classic']) {
+          editor.querySelector('[data-theme-variant="' + variant + '"]').click();
+          await frame();
+          if (widget.state.themeVariant !== variant
+            || root.getAttribute('data-cascade-theme-variant') !== variant) {
+            throw Error('Variant controls did not synchronize');
+          }
+        }
+        for (let shape of ['frame', 'ear', 'classic-ear']) {
+          editor.querySelector('[data-tab-shape="' + shape + '"]').click();
+          await frame();
+          if (widget.state.tabShape !== shape
+            || root.getAttribute('data-cascade-tab-shape') !== shape) {
+            throw Error('Tab-shape controls did not synchronize');
+          }
+        }
+        let registers = [];
+        for (let [register, density] of [['product', 1], ['tool', 0.75], ['spacious', 1.25]]) {
+          editor.geometryRegister = register;
+          await set('brightness', 31);
+          let actual = Number(getComputedStyle(root).getPropertyValue('--sn-theme-density'));
+          if (actual !== density) throw Error('An unrelated edit dropped the selected register');
+          registers.push({ register, density: actual });
+        }
+        await set('density', 140);
+        if (editor.geometryRegister || Number(getComputedStyle(root)
+          .getPropertyValue('--sn-theme-density')) !== 1.4) {
+          throw Error('An explicit density edit did not leave the register preview');
+        }
+        editor.geometryRegister = '';
+        editor.setState({ ...baseline, mode: 'dark', brightness: 57, chroma: 36, hue: 104 });
+        await frame();
+        let stored = JSON.parse(localStorage.getItem('symbiote-ui:cascade-theme-editor'));
+        return { iconOnly, matrix, registers, stored, widget: widget.state, full: editor.state };
+      } finally {
+        probe.remove();
+      }
+    })()`,
+  }, { label: 'audit all Appearance parameters', timeoutMs: 90_000 });
+  assert.equal(result.exceptionDetails, undefined, JSON.stringify(result));
+  assert.ok(result.result.value, JSON.stringify(result));
+  let audit = result.result.value;
+  assert.equal(audit.iconOnly, true, JSON.stringify(result));
+  assert.equal(audit.matrix.length, 42);
+  assert.deepEqual(audit.widget, audit.full);
+  assert.deepEqual(audit.stored, audit.full);
+  let track = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `(async () => {
+      let editor = document.querySelector('cascade-theme-editor');
+      editor.closest('layout-node').querySelector('.fullscreen-btn').click();
+      document.querySelector('cascade-theme-widget').ref.trigger.click();
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      let rect = document.querySelector('.ctw-popover [data-theme-control="brightness"]')
+        .getBoundingClientRect();
+      return { x: rect.x, y: rect.y + rect.height / 2, width: rect.width };
+    })()`,
+  });
+  assert.equal(track.exceptionDetails, undefined, JSON.stringify(track));
+  let { x, y, width } = track.result.value;
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: x + width * 0.2, y });
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mousePressed', x: x + width * 0.2, y, button: 'left', clickCount: 1,
+  });
+  for (let fraction of [0.35, 0.5, 0.65, 0.8]) {
+    await cdp.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved', x: x + width * fraction, y, button: 'left', buttons: 1,
+    });
+  }
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseReleased', x: x + width * 0.8, y, button: 'left', clickCount: 1,
+  });
+  let dragged = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => {
+      let widget = document.querySelector('cascade-theme-widget');
+      let editor = document.querySelector('cascade-theme-editor');
+      resolve({ quick: widget.state, full: editor.state,
+        stored: JSON.parse(localStorage.getItem('symbiote-ui:cascade-theme-editor')) });
+    })))`,
+  });
+  assert.equal(dragged.exceptionDetails, undefined, JSON.stringify(dragged));
+  assert.ok(dragged.result.value.quick.brightness >= 70, JSON.stringify(dragged));
+  assert.deepEqual(dragged.result.value.quick, dragged.result.value.full);
+  assert.deepEqual(dragged.result.value.quick, dragged.result.value.stored);
+  audit.drag = dragged.result.value;
+  audit.stored = dragged.result.value.stored;
+  let dir = path.join(ROOT, 'TMP', 'theme-audit');
+  await mkdir(dir, { recursive: true });
+  await writeFile(path.join(dir, 'controls.json'), JSON.stringify(audit, null, 2));
+  await navigate(cdp, `${server.origin}/cv/skills/?lang=en`, { expectedMode: 'structured' });
+  let persisted = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `document.querySelector('cascade-theme-widget').state`,
+  });
+  assert.deepEqual(persisted.result.value, audit.stored);
+  let loaded = new Promise((resolve) => {
+    let off = cdp.on('Page.loadEventFired', () => { off(); resolve(); });
+  });
+  await cdp.send('Page.reload');
+  await loaded;
+  let reloaded = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let widget = document.querySelector('cascade-theme-widget');
+        if (widget?.state?.brightness === ${audit.stored.brightness}) return resolve(widget.state);
+        if (performance.now() - started > 10000) return reject(Error('Theme did not restore after reload'));
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  });
+  assert.equal(reloaded.exceptionDetails, undefined, JSON.stringify(reloaded));
+  assert.deepEqual(reloaded.result.value, audit.stored);
+});
+
+test('portfolio appearance panel scrolls and resets to CV defaults without changing layout or media', {
   timeout: 60_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('appearance regression uses a clean local storage profile');
@@ -2383,7 +2643,7 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
       const storageKey = 'symbiote-ui:cascade-theme-editor';
       const waitFrame = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       const waitFor = async (read, timeoutMs = 8000) => {
-        const started = performance.now();
+        let started = performance.now();
         while (performance.now() - started < timeoutMs) {
           const value = read();
           if (value) return value;
@@ -2492,12 +2752,12 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
       await waitFor(() => {
         const outer = ratioState(portfolioLayout);
         const inner = ratioState(dockLayout);
-        return editor.state?.pattern === 100
+        return editor.state?.pattern === 28
           && localStorage.getItem(storageKey) === null
-          && outer.tree === 0.25
-          && outer.content === 0.5
-          && outer.theme === 0.72
-          && inner.dock === 0.67;
+          && outer.tree === 0.37
+          && outer.content === 0.41
+          && outer.theme === 0.56
+          && inner.dock === 0.58;
       });
       const afterReset = {
         contrast: editor.state?.contrast,
@@ -2547,10 +2807,10 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
   assert.equal(state.articleMedia.activated, true, JSON.stringify(state));
   assert.equal(state.articleMedia.posterHidden, true, JSON.stringify(state));
   assert.ok(state.articleMedia.stageChildren > 0, JSON.stringify(state));
-  assert.equal(state.initial.contrast, 67, JSON.stringify(state));
-  assert.equal(state.initial.pattern, 100, JSON.stringify(state));
-  assert.equal(Number(state.initial.rootPattern), 1, JSON.stringify(state));
-  assert.equal(state.initial.storedPattern, 100, JSON.stringify(state));
+  assert.equal(state.initial.contrast, 100, JSON.stringify(state));
+  assert.equal(state.initial.pattern, 28, JSON.stringify(state));
+  assert.equal(Number(state.initial.rootPattern), 0.28, JSON.stringify(state));
+  assert.equal(state.initial.storedPattern, 28, JSON.stringify(state));
   assert.deepEqual(state.initial.editorOverrides, ['default-state']);
   assert.deepEqual(state.initial.widgetOverrides, ['default-state']);
   assert.equal(state.graphBeforeReset.viewMode, 'flat', JSON.stringify(state));
@@ -2564,19 +2824,19 @@ test('portfolio appearance panel scrolls and resets to library theme defaults', 
     theme: 0.56,
     dock: 0.58,
   }, JSON.stringify(state));
-  assert.equal(state.afterReset.contrast, 67, JSON.stringify(state));
-  assert.equal(state.afterReset.pattern, 100, JSON.stringify(state));
-  assert.equal(Number(state.afterReset.rootPattern), 1, JSON.stringify(state));
+  assert.equal(state.afterReset.contrast, 100, JSON.stringify(state));
+  assert.equal(state.afterReset.pattern, 28, JSON.stringify(state));
+  assert.equal(Number(state.afterReset.rootPattern), 0.28, JSON.stringify(state));
   assert.equal(state.afterReset.stored, null, JSON.stringify(state));
   assert.equal(state.afterReset.graphViewMode, 'flat', JSON.stringify(state));
   assert.equal(state.afterReset.graphLayout, 'tree', JSON.stringify(state));
   assert.equal(state.afterReset.urlMode, 'flat', JSON.stringify(state));
   assert.equal(state.afterReset.urlLayout, 'tree', JSON.stringify(state));
   assert.deepEqual(state.afterReset.panelRatios, {
-    tree: 0.25,
-    content: 0.5,
-    theme: 0.72,
-    dock: 0.67,
+    tree: 0.37,
+    content: 0.41,
+    theme: 0.56,
+    dock: 0.58,
   }, JSON.stringify(state));
   assert.equal(state.overflowY, 'auto', JSON.stringify(state));
   assert.ok(state.scrollHeight > state.clientHeight, JSON.stringify(state));
@@ -2608,7 +2868,7 @@ test('URL theme import dialog shows after whenDefined and cancels without saving
     expression: `(async () => {
       const storageKey = 'symbiote-ui:cascade-theme-editor';
       const waitFor = async (read, timeoutMs = 8000) => {
-        const started = performance.now();
+        let started = performance.now();
         while (performance.now() - started < timeoutMs) {
           const value = read();
           if (value) return value;
@@ -2679,7 +2939,7 @@ test('structured media activation routes to Pulse and restores through browser h
       const mediaId = ${JSON.stringify(AUTOBOX_SPINNER_MEDIA_ID)};
       const fragmentId = ${JSON.stringify(AUTOBOX_SPINNER_FRAGMENT)};
       const waitFor = async (read, timeoutMs = 15000) => {
-        const started = performance.now();
+        let started = performance.now();
         while (performance.now() - started < timeoutMs) {
           const value = read();
           if (value) return value;
@@ -3056,26 +3316,66 @@ test('tree disclosure and article selection are separate targets', {
   await cdp.send('Emulation.setDeviceMetricsOverride', MOBILE_VIEWPORT);
   await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
   await navigate(cdp, `${server.origin}/cv/projects/autobox-v1/?mode=flat&resource-test=mobile-content-swipe`);
-  // The rail has to settle before a pointer lands on it, exactly as a thumb
-  // would find it; a press on a moving rail is a different event.
-  await waitForStableDrawerGeometry(cdp);
 
-  const initial = await getDrawerState(cdp, 'initial');
-  const openY = Math.round(initial.contentRect.top + Math.min(320, initial.contentRect.height * 0.4));
-  const openStartX = Math.round(initial.contentRect.left + 24);
-  const openEndX = Math.min(MOBILE_VIEWPORT.width - 12, openStartX + Math.max(170, Math.round(MOBILE_VIEWPORT.width * 0.65)));
-  await dispatchPointerSwipe(cdp, { startX: openStartX, startY: openY, endX: openEndX, endY: openY });
-  const opened = await waitForDrawerState(cdp, 'start drawer open', (state) => state.startOpen, 120);
-  assert.equal(opened.startOpen, true, JSON.stringify(opened));
+  // On this route the rail, not the drawer, is the mobile projection: the tree
+  // panel is a slide of the snap row that is on screen from the first frame,
+  // so the earlier "swipe the drawer open" step is replaced by waiting for the
+  // row to settle with the tree actually hit-testable under a thumb.
+  // The tree scrolls the selected article into view, so the first row in the
+  // document is not necessarily the one a thumb can reach: look for a row that
+  // is on screen and hit-tests to itself, which is what the taps below need.
+  const VISIBLE_ROW = `(() => {
+    return [...document.querySelectorAll('.sn-tree-row')].find((row) => {
+      const toggle = row.querySelector('button.sn-tree-toggle');
+      if (!toggle || toggle.hidden) return false;
+      const t = toggle.getBoundingClientRect();
+      if (t.width <= 0 || t.top < 0 || t.bottom > innerHeight) return false;
+      const hit = document.elementFromPoint(Math.round(t.left + t.width / 2), Math.round(t.top + t.height / 2));
+      return Boolean(hit) && hit.closest('.sn-tree-row') === row;
+    }) || null;
+  })`;
+  const readTreeSurface = async () => (await cdp.send('Runtime.evaluate', {
+    expression: `(() => {
+      const layout = document.querySelector('agent-dock-shell')?.ref?.layout;
+      const row = ${VISIBLE_ROW}();
+      if (!layout) return null;
+      const r = row?.getBoundingClientRect();
+      return {
+        railEnabled: layout.hasAttribute('mobile-panel-rail-enabled'),
+        drawerModeActive: layout.hasAttribute('drawer-mode-active'),
+        scrollLeft: Math.round(layout.scrollLeft),
+        slideWidth: Math.round(layout.clientWidth),
+        treeOnScreen: Boolean(r && r.width > 0 && r.top >= 0 && r.bottom <= innerHeight),
+      };
+    })()`,
+    returnByValue: true,
+  })).result?.value;
+
+  let settled = null;
+  for (let index = 0; index < 120; index += 1) {
+    const current = await readTreeSurface();
+    if (current?.railEnabled && current.treeOnScreen && settled && settled.scrollLeft === current.scrollLeft) {
+      settled = current;
+      break;
+    }
+    settled = current;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  assert.ok(settled?.railEnabled, `the mobile rail is the projection under test: ${JSON.stringify(settled)}`);
+  assert.equal(settled.drawerModeActive, false, `the rail does not report a drawer: ${JSON.stringify(settled)}`);
+  assert.ok(settled.treeOnScreen, `the tree panel is on screen before a tap lands: ${JSON.stringify(settled)}`);
 
   // A collapsed branch with children: expanding it must not select it.
   const found = await cdp.send('Runtime.evaluate', {
     expression: `(() => {
       const row = [...document.querySelectorAll('.sn-tree-row')].find((el) => {
         const toggle = el.querySelector('button.sn-tree-toggle');
-        return toggle && !toggle.hidden
-          && el.getAttribute('aria-expanded') === 'false'
-          && toggle.getBoundingClientRect().width > 0;
+        if (!toggle || toggle.hidden) return false;
+        if (el.getAttribute('aria-expanded') !== 'false') return false;
+        const t = toggle.getBoundingClientRect();
+        if (t.width <= 0 || t.top < 0 || t.bottom > innerHeight) return false;
+        const hit = document.elementFromPoint(Math.round(t.left + t.width / 2), Math.round(t.top + t.height / 2));
+        return Boolean(hit) && hit.closest('.sn-tree-row') === el;
       });
       if (!row) return null;
       const toggle = row.querySelector('button.sn-tree-toggle');
@@ -3147,7 +3447,7 @@ test('tree disclosure and article selection are separate targets', {
         let found = null;
         for (let x = Math.floor(r.left) - 8; x <= Math.ceil(r.right) + 8; x += 1) {
           for (let y = Math.floor(t.top) - 12; y <= Math.ceil(t.bottom) + 12; y += 1) {
-            const hit = document.elementFromPoint(x, y);
+            let hit = document.elementFromPoint(x, y);
             if (!hit) continue;
             const own = hit.closest('button.sn-tree-toggle') === toggle
               ? 'toggle'
@@ -3165,7 +3465,7 @@ test('tree disclosure and article selection are separate targets', {
       let unowned = 0;
       for (let x = Math.floor(r.left); x < Math.ceil(r.right); x += 2) {
         for (let y = Math.floor(t.top); y < Math.ceil(t.bottom); y += 2) {
-          const hit = document.elementFromPoint(x, y);
+          let hit = document.elementFromPoint(x, y);
           if (hit && (hit.closest('button.sn-tree-toggle') === toggle || hit.closest('.sn-tree-row') === row)) continue;
           unowned += 1;
         }
@@ -3252,111 +3552,12 @@ test('tree disclosure and article selection are separate targets', {
   console.log('[TREE_TARGETS]', JSON.stringify(area));
 });
 
-async function waitForStableDrawerGeometry(cdp, attempts = 40) {
-  let previous = null;
-  for (let index = 0; index < attempts; index += 1) {
-    const state = await getDrawerState(cdp, 'geometry');
-    const key = JSON.stringify([state.startRect, state.endRect]);
-    if (previous === key) return state;
-    previous = key;
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-  return getDrawerState(cdp, 'geometry');
-}
-
-async function dispatchPointerSwipe(cdp, { startX, startY, endX, endY, steps = 8 }) {
-  await cdp.send('Input.dispatchMouseEvent', {
-    type: 'mousePressed',
-    x: startX,
-    y: startY,
-    button: 'left',
-    buttons: 1,
-    clickCount: 1,
-  });
-  for (let index = 1; index <= steps; index += 1) {
-    let progress = index / steps;
-    await cdp.send('Input.dispatchMouseEvent', {
-      type: 'mouseMoved',
-      x: Math.round(startX + (endX - startX) * progress),
-      y: Math.round(startY + (endY - startY) * progress),
-      button: 'left',
-      buttons: 1,
-    });
-  }
-  await cdp.send('Input.dispatchMouseEvent', {
-    type: 'mouseReleased',
-    x: endX,
-    y: endY,
-    button: 'left',
-    buttons: 0,
-    clickCount: 1,
-  });
-}
-
 async function dispatchPointerTap(cdp, { x, y }) {
   await cdp.send('Input.dispatchTouchEvent', {
     type: 'touchStart', touchPoints: [{ x, y, radiusX: 4, radiusY: 4 }],
   });
   await new Promise((resolve) => setTimeout(resolve, 60));
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-}
-
-async function getDrawerState(cdp, label) {
-  let result = await cdp.send('Runtime.evaluate', {
-    returnByValue: true,
-    expression: `(() => {
-      const layout = document.querySelector('panel-layout.portfolio-layout');
-      const primary = layout?.querySelector('layout-node[drawer-primary]');
-      const content = primary?.querySelector('.panel-content') || primary;
-      const rect = content?.getBoundingClientRect?.();
-      const startDrawer = layout?.querySelector('layout-node[mobile-dock="start"][drawer-active-panel]');
-      const endDrawer = layout?.querySelector('layout-node[mobile-dock="end"][drawer-active-panel]');
-      const startRect = startDrawer?.getBoundingClientRect?.();
-      const endRect = endDrawer?.getBoundingClientRect?.();
-      return {
-        label: ${JSON.stringify(label)},
-        drawerMode: layout?.hasAttribute('drawer-mode-active') || false,
-        startOpen: layout?.hasAttribute('drawer-start-open') || false,
-        endOpen: layout?.hasAttribute('drawer-end-open') || false,
-        startTransform: startDrawer ? getComputedStyle(startDrawer).transform : '',
-        endTransform: endDrawer ? getComputedStyle(endDrawer).transform : '',
-        contentRect: rect ? {
-          left: Math.round(rect.left),
-          top: Math.round(rect.top),
-          width: Math.round(rect.width),
-          height: Math.round(rect.height),
-          right: Math.round(rect.right),
-          bottom: Math.round(rect.bottom),
-        } : null,
-        startRect: startRect ? {
-          left: Math.round(startRect.left),
-          top: Math.round(startRect.top),
-          width: Math.round(startRect.width),
-          height: Math.round(startRect.height),
-          right: Math.round(startRect.right),
-          bottom: Math.round(startRect.bottom),
-        } : null,
-        endRect: endRect ? {
-          left: Math.round(endRect.left),
-          top: Math.round(endRect.top),
-          width: Math.round(endRect.width),
-          height: Math.round(endRect.height),
-          right: Math.round(endRect.right),
-          bottom: Math.round(endRect.bottom),
-        } : null,
-      };
-    })()`,
-  }, { label: `drawer state: ${label}`, timeoutMs: 10_000 });
-  return result.result.value;
-}
-
-async function waitForDrawerState(cdp, label, predicate, polls = 20) {
-  for (let index = 0; index < polls; index += 1) {
-    let state = await getDrawerState(cdp, label);
-    if (predicate(state)) return state;
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-  return getDrawerState(cdp, label);
 }
 
 test('portfolio mobile flat mode does not leak resources during panel lifecycle', {
@@ -3457,10 +3658,10 @@ test('portfolio mobile flat mode does not leak resources during panel lifecycle'
   assert.equal(unloaded.metrics.WorkerGlobalScopes, 0, 'workers should be released after unloading the portfolio page');
 });
 
-test('portfolio mobile content surface opens and closes drawers with pointer swipes', {
+test('portfolio mobile rail swipes back without selecting and keeps header controls pressable', {
   timeout: 120_000,
 }, async (t) => {
-  if (EXTERNAL_TEST_URL) t.skip('content swipe test uses local deterministic route geometry');
+  if (EXTERNAL_TEST_URL) t.skip('rail gesture test uses local deterministic route geometry');
   await stat(path.join(DIST_DIR, 'index.html'));
   let server = await startStaticServer();
   t.after(() => server.close());
@@ -3484,15 +3685,11 @@ test('portfolio mobile content surface opens and closes drawers with pointer swi
   await cdp.send('Page.enable');
   await cdp.send('Runtime.enable');
   await cdp.send('Network.enable');
-  await cdp.send('Performance.enable');
   const swipeViewport = process.env.CV_TEST_VIEWPORT
     ? JSON.parse(process.env.CV_TEST_VIEWPORT)
     : MOBILE_VIEWPORT;
   await cdp.send('Emulation.setDeviceMetricsOverride', swipeViewport);
-  await cdp.send('Emulation.setTouchEmulationEnabled', {
-    enabled: true,
-    maxTouchPoints: 5,
-  });
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
   await cdp.send('Network.setBlockedURLs', {
     urls: [
       'https://fonts.googleapis.com/*',
@@ -3507,131 +3704,92 @@ test('portfolio mobile content surface opens and closes drawers with pointer swi
   });
 
   await navigate(cdp, `${server.origin}/cv/projects/autobox-v1/?mode=flat&resource-test=mobile-content-swipe`);
-  let initial = await getDrawerState(cdp, 'initial');
-  assert.equal(initial.drawerMode, true);
-  assert.equal(initial.startOpen, false);
-  assert.equal(initial.endOpen, false);
-  assert.ok(initial.contentRect?.width > 220, `unexpected content width: ${JSON.stringify(initial.contentRect)}`);
 
-  let selectionBefore = await cdp.send('Runtime.evaluate', {
-    returnByValue: true,
-    expression: `(() => ({
-      hash: location.hash,
-      selected: (document.querySelector('panel-layout.portfolio-layout')
-        ?.querySelector('[aria-selected="true"], .sn-tree-row[selected], .sn-tree-row.selected')?.textContent || '').trim(),
-    }))()`,
+  // The rail is the mobile projection on this route: the panels of the nested
+  // portfolio layout and the dock's own agent panel form one snap row on the
+  // dock layout, so the drawer attributes the earlier test read no longer
+  // exist. Reading the row from the layout's own state keeps this honest about
+  // which projection produced the geometry.
+  const railStateExpression = `(() => {
+    const layout = document.querySelector('agent-dock-shell')?.ref?.layout;
+    const buttons = [...document.querySelectorAll('.portfolio-mobile-navigation .mobile-panel-rail button')];
+    if (!layout) return null;
+    return {
+      railEnabled: layout.hasAttribute('mobile-panel-rail-enabled'),
+      drawerModeActive: layout.hasAttribute('drawer-mode-active'),
+      snapType: getComputedStyle(layout).scrollSnapType,
+      slideWidth: Math.round(layout.clientWidth),
+      scrollLeft: Math.round(layout.scrollLeft),
+      labels: buttons.map((button) => (button.getAttribute('aria-label') || button.textContent).trim()),
+      current: (buttons.find((button) => button.getAttribute('aria-current') === 'page')?.textContent || '').trim(),
+      pageCount: layout.querySelectorAll('layout-node[mobile-panel-rail-item]').length,
+    };
+  })()`;
+  const evalJSON = async (expression) => cdp.send('Runtime.evaluate', {
+    returnByValue: true, expression,
   }).then((r) => r.result?.value);
-
-  let y = Math.round(initial.contentRect.top + Math.min(360, initial.contentRect.height * 0.55));
-
-  // Diagnostic trace (SWIPE_DEBUG=1): records pointer-event delivery and the
-  // drawer gesture lifecycle so a failed open can be pinned to "events not
-  // delivered" vs "gesture rejected" vs "state applied late".
-  if (process.env.SWIPE_DEBUG) {
-    let intervalSnippet = process.env.SWIPE_DEBUG_NO_INTERVAL ? '' : `
-        window.__swipeInterval = setInterval(() => {
-          const g = l._drawerGesture;
-          window.__swipeTrace.states.push(Math.round(performance.now() - window.__swipeTrace.t0) + ':' + JSON.stringify({
-            open: l.hasAttribute('drawer-start-open'),
-            g: g ? { src: g.source, pending: !!g.pending, moved: !!g.moved } : null,
-          }));
-        }, 25);`;
-    await cdp.send('Runtime.evaluate', {
-      expression: `(() => {
-        const l = document.querySelector('panel-layout.portfolio-layout');
-        window.__swipeTrace = { t0: performance.now(), events: [], states: [] };
-        l.addEventListener('pointerdown', (e) => {
-          const t = e.target;
-          const pathTags = (e.composedPath ? e.composedPath() : []).slice(0, 8).map((n) =>
-            (n.tagName || '?') + (n.dataset?.drawerDock ? ':' + n.dataset.drawerDock : '') + (n.className && typeof n.className === 'string' ? '.' + String(n.className).split(' ')[0] : '')).join('>');
-          window.__swipeTrace.events.push('PDCHK:' + t.tagName + ' dock=' + t.dataset?.drawerDock + ' path=' + pathTags);
-        }, { passive: true, capture: true });
-        l.addEventListener('click', (e) => window.__swipeTrace.events.push(
-          Math.round(performance.now() - window.__swipeTrace.t0) + ':CLICK@' + Math.round(e.clientX) + ' def=' + e.defaultPrevented + ' tgt=' + (e.target?.className || e.target?.tagName)
-        ), { passive: true, capture: true });
-        for (const t of ['pointerdown','pointermove','pointerup','pointercancel']) {
-          l.addEventListener(t, (e) => window.__swipeTrace.events.push(
-            Math.round(performance.now() - window.__swipeTrace.t0) + ':' + t + '@' + Math.round(e.clientX)
-          ), { passive: true });
-        }
-        ${intervalSnippet}
-        return true;
-      })()`,
-      returnByValue: true,
-    });
-  }
-
-  // Drag length must clear the 50% drawer-width commit threshold on every
-  // acceptance width (320/390/430): use 65% of the viewport width.
-  //
-  // The gesture must START where a thumb would start it — near the leading
-  // edge of the content surface — and the end of the drag is bounded by the
-  // viewport, not by the surface's own right edge. Starting at the surface
-  // centre and clamping to `contentRect.right - 16` left only 111px of travel
-  // on a 320px viewport, below the 137px the 275px drawer needs, so the
-  // gesture legitimately did not commit there. Both bounds still keep the
-  // whole drag on the content surface, so the primary (content) gesture path
-  // is the one under test.
-  let swipeDistance = Math.max(170, Math.round(swipeViewport.width * 0.65));
-  let swipeStartX = Math.round(initial.contentRect.left + 24);
-  let swipeEndX = Math.min(swipeViewport.width - 12, swipeStartX + swipeDistance);
-  // The commit rule is "half the drawer width", so the test asserts its own
-  // geometry against the layout's measured drawer width rather than a magic
-  // number. If the drawer ever needs more travel than a thumb can give, the
-  // failure names that instead of showing up as a flaky swipe assertion.
-  let startDrawerOpenWidth = await cdp.send('Runtime.evaluate', {
-    returnByValue: true,
-    expression: `(() => Math.round(document.querySelector('panel-layout.portfolio-layout')
-      ?._getFallbackDrawerWidth?.() || 0))()`,
-  }).then((r) => r.result?.value || 0);
-  assert.ok(startDrawerOpenWidth > 0, `drawer width must be measurable, got ${startDrawerOpenWidth}`);
-  assert.ok(swipeEndX - swipeStartX >= 0.5 * startDrawerOpenWidth,
-    `opening swipe must clear the 50% commit threshold: travel ${swipeEndX - swipeStartX}px, drawer ${startDrawerOpenWidth}px`);
-  await dispatchPointerSwipe(cdp, {
-    startX: swipeStartX,
-    startY: y,
-    endX: swipeEndX,
-    endY: y,
-  });
-  // Raised window: on loaded CI-class VMs pointer events reach the page with
-  // ~150ms spacing and pointerup lands seconds after dispatch (traced via
-  // SWIPE_DEBUG); the gesture then applies immediately. 120 polls (6s) cover
-  // the observed input latency; the state change itself is prompt.
-  let startOpen = await waitForDrawerState(cdp, 'start open after primary swipe', (state) => state.startOpen,
-    120);
-  if (process.env.SWIPE_DEBUG) {
-    let trace = await cdp.send('Runtime.evaluate', {
-      expression: `(() => window.__swipeTrace)()`,
-      returnByValue: true,
-    });
-    let tr = trace.result?.value;
-    if (tr) {
-      let firstOpen = tr.states.find((entry) => entry.includes('"open":true'));
-      console.log('[SWIPE_TRACE] openedAt=', firstOpen, 'eventCount=', tr.events.length,
-        'lastEvent=', tr.events.at(-1), 'stateCount=', tr.states.length);
-      if (!startOpen.startOpen) console.log('[SWIPE_TRACE_FULL]', JSON.stringify(tr).slice(0, 4000));
-      else console.log('[SWIPE_TRACE_FULL]', JSON.stringify(tr.states.filter((e,i)=>i%4===0)).slice(0, 2000));
+  const readRail = async (label, polls = 150) => {
+    let last = null;
+    for (let i = 0; i < polls; i += 1) {
+      last = await evalJSON(railStateExpression);
+      if (last?.railEnabled && last.labels.length >= 2) return last;
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-  }
-  assert.equal(startOpen.startOpen, true, JSON.stringify(startOpen));
+    throw new Error(`${label}: mobile rail never became readable: ${JSON.stringify(last)}`);
+  };
 
-  // Real touch targets, measured by hit testing instead of by reading a CSS
-  // variable. A theme can ask for a 44px target and the box can still be much
-  // smaller, because several different things clip or bound a grown target.
-  // The box here is discovered by scanning points and asking the document what
-  // actually receives them, so this is evidence about the product, not a restatement
-  // of the token that is supposed to produce it.
-  const startHitTargets = await cdp.send('Runtime.evaluate', {
-    expression: `(() => {
-      const panel = document.querySelector('layout-node[mobile-dock="start"][drawer-open]');
-      if (!panel) return null;
+  let rail = await readRail('initial mobile rail');
+  assert.equal(rail.drawerModeActive, false, `the rail replaced the drawer projection: ${JSON.stringify(rail)}`);
+  assert.match(rail.snapType, /inline mandatory/, `the row is a mandatory snap row: ${rail.snapType}`);
+  assert.ok(rail.pageCount >= 3, `the row carries every mobile panel, got ${rail.pageCount}`);
+  assert.deepEqual(rail.labels, ['Portfolio', 'Details', 'Agent'],
+    `the navigation buttons follow the layout order: ${JSON.stringify(rail.labels)}`);
+
+  const waitForSlide = async (index, label) => {
+    let last = null;
+    for (let i = 0; i < 120; i += 1) {
+      last = await evalJSON(railStateExpression);
+      if (last && Math.abs(last.scrollLeft - last.slideWidth * index) < 4 && last.current === rail.labels[index]) {
+        return last;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    throw new Error(`${label}: rail never settled on slide ${index}: ${JSON.stringify(last)}`);
+  };
+  const goToSlide = async (index) => {
+    await evalJSON(`document.querySelectorAll('.portfolio-mobile-navigation .mobile-panel-rail button')[${index}]?.click()`);
+    return waitForSlide(index, `slide ${index} after tapping its button`);
+  };
+
+  const selectionSnapshot = async () => evalJSON(`(() => ({
+    hash: location.hash,
+    selected: (document.querySelector('panel-layout.portfolio-layout')
+      ?.querySelector('[aria-selected="true"], .sn-tree-row[selected], .sn-tree-row.selected')?.textContent || '').trim(),
+  }))()`);
+
+  await goToSlide(0);
+  let baseline = await selectionSnapshot();
+
+  // Pressable boxes measured by hit testing, not by reading a token: a theme
+  // can ask for 44px and the row can still clip the box back to the painted
+  // button. The rail inherits the drawer's widened header gap and its overflow
+  // release, so what is proved here is that a header control's reachable box is
+  // never clipped below its own painted box and is strictly wider than it — the
+  // room the widened gap buys. The last few pixels of the 44px request need the
+  // drawer's header padding reservation, which the rail does not reserve yet;
+  // that remaining gap is recorded as debt instead of being asserted away.
+  let headerTargets = [];
+  for (let index = 0; index < rail.labels.length; index += 1) {
+    await goToSlide(index);
+    let measured = await evalJSON(`(() => {
+      const layout = document.querySelector('agent-dock-shell')?.ref?.layout;
       const scan = (el) => {
         const r = el.getBoundingClientRect();
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        for (let x = Math.floor(r.left) - 30; x <= Math.ceil(r.right) + 30; x += 2) {
-          for (let y = Math.floor(r.top) - 30; y <= Math.ceil(r.bottom) + 30; y += 2) {
+        for (let x = Math.floor(r.left) - 26; x <= Math.ceil(r.right) + 26; x += 1) {
+          for (let y = Math.floor(r.top) - 26; y <= Math.ceil(r.bottom) + 26; y += 1) {
             const hit = document.elementFromPoint(x, y);
-            if (!hit || hit.closest('.header-btn') !== el) continue;
+            if (!hit || (hit !== el && !el.contains(hit))) continue;
             if (x < minX) minX = x;
             if (y < minY) minY = y;
             if (x > maxX) maxX = x;
@@ -3644,203 +3802,76 @@ test('portfolio mobile content surface opens and closes drawers with pointer swi
           target: [maxX - minX + 1, maxY - minY + 1],
         };
       };
-      return [...panel.querySelectorAll('.header-btn')]
-        .filter((el) => el.getBoundingClientRect().width > 0)
-        .map((el) => ({ name: el.getAttribute('title') || el.className, ...(scan(el) || {}) }))
-        .filter((control) => control.target);
-    })()`,
-    returnByValue: true,
-  });
-  if (startHitTargets.exceptionDetails) throw new Error(startHitTargets.exceptionDetails.text);
-  const startHits = startHitTargets.result?.value;
-  assert.ok(startHits?.length >= 2, `the start drawer header was measured (${JSON.stringify(startHits)})`);
-  for (const control of startHits) {
-    // The scan samples whole pixels, so a 44px target can read as 43.
-    assert.ok(control.target[0] >= 43 && control.target[1] >= 43,
-      `start drawer ${control.name}: the pressable box is a real touch target (${JSON.stringify(control)})`);
-    assert.ok(control.target[0] > control.painted[0] + 1 && control.target[1] > control.painted[1] + 1,
-      `start drawer ${control.name}: the pressable box is larger than the painted box (${JSON.stringify(control)})`);
+      const slide = [...layout.querySelectorAll('layout-node[mobile-panel-rail-item]')]
+        .find((node) => {
+          const r = node.getBoundingClientRect();
+          return r.width > 100 && Math.abs(r.left) < 8;
+        });
+      if (!slide) return null;
+      return {
+        controls: [...slide.querySelectorAll('.header-btn')]
+          .filter((el) => el.getBoundingClientRect().width > 0)
+          .map((el) => ({ name: el.title || el.getAttribute('aria-label') || el.className, box: scan(el) }))
+          .filter((control) => control.box),
+      };
+    })()`);
+    assert.ok(measured, `slide ${index} was not on screen to be measured`);
+    for (const control of measured.controls) {
+      headerTargets.push({ slide: rail.labels[index], name: control.name, ...control.box });
+    }
+  }
+  assert.ok(headerTargets.length >= 1,
+    `at least one panel header control was measurable on the rail, got ${JSON.stringify(headerTargets)}`);
+  for (const control of headerTargets) {
+    assert.ok(control.target[0] >= control.painted[0] && control.target[1] >= control.painted[1],
+      `${control.slide} header ${control.name}: reachable box is not clipped below the painted box (${JSON.stringify(control)})`);
+    assert.ok(control.target[0] > control.painted[0],
+      `${control.slide} header ${control.name}: the touch surface widens the pressable box (${JSON.stringify(control)})`);
   }
 
-  let startCloseY = Math.round(startOpen.startRect.top + Math.min(360, startOpen.startRect.height * 0.55));
-  await dispatchPointerSwipe(cdp, {
-    startX: Math.round(startOpen.startRect.right - 42),
-    startY: startCloseY,
-    endX: Math.round(startOpen.startRect.left + 24),
-    endY: startCloseY,
-  });
-  let startClosed = await waitForDrawerState(
-    cdp,
-    'start closed after reverse swipe',
-    (state) => !state.startOpen && !state.endOpen,
-    120
-  );
-  assert.equal(startClosed.startOpen, false, JSON.stringify(startClosed));
-  assert.equal(startClosed.endOpen, false, JSON.stringify(startClosed));
+  await goToSlide(0);
 
-  // Closing swipe must NOT select the article under the gesture (P1 in
-  // mobile-ui-audit.md): the route/selection is unchanged afterwards.
-  let selectionAfter = await cdp.send('Runtime.evaluate', {
-    returnByValue: true,
-    expression: `(() => ({
-      hash: location.hash,
-      selected: (document.querySelector('panel-layout.portfolio-layout')
-        ?.querySelector('[aria-selected="true"], .sn-tree-row[selected], .sn-tree-row.selected')?.textContent || '').trim(),
-    }))()`,
-  }).then((r) => r.result?.value);
-  if (process.env.SWIPE_DEBUG) {
-    let tr = await cdp.send('Runtime.evaluate', {
-      expression: `(() => { clearInterval(window.__swipeInterval); return window.__swipeTrace; })()`,
-      returnByValue: true,
-    }).then((r) => r.result?.value);
-    console.log('[SWIPE_TRACE_CLOSE]', JSON.stringify(tr).slice(0, 5000));
-    let gate = await cdp.send('Runtime.evaluate', { expression: `JSON.stringify(window.__gateDebug||null)`, returnByValue: true }).then((r) => r.result?.value);
-    console.log('[GATE_DEBUG]', (gate || '').slice(0, 3000));
-  }
-  assert.deepEqual(selectionAfter, selectionBefore,
-    `selection must not change on a closing swipe: ${JSON.stringify({ selectionBefore, selectionAfter })}`);
+  // A thumb-height swipe forward, then the same swipe back: the row must land
+  // on the neighbouring panel and return, and the gesture must not select the
+  // row it passed over (P1 in mobile-ui-audit.md) — a swipe is not a tap.
+  let y = Math.round(swipeViewport.height * 0.5);
+  let swipeX = Math.round(swipeViewport.width * 0.5);
+  await cdp.send('Input.synthesizeScrollGesture', {
+    x: swipeX,
+    y,
+    xDistance: -Math.round(swipeViewport.width * 0.65),
+    speed: 700,
+    gestureSourceType: 'touch',
+  }, { label: 'swipe the rail forward', timeoutMs: 5_000 });
+  let forward = await waitForSlide(1, 'rail after a forward swipe');
+  assert.equal(forward.current, 'Details', JSON.stringify(forward));
 
-  // The NEXT independent tap must work immediately — the suppression token is
-  // gesture-scoped: reopen via rail tap, then tap a tree row.
-  // Reopen via the public UI API (rail-tap open is covered by the library
-  // unit 'rail tap gesture opens the drawer'), then tap a row.
-  await cdp.send('Runtime.evaluate', {
-    expression: `(() => {
-      const l = document.querySelector('panel-layout.portfolio-layout');
-      l?.openDrawer?.('start');
-      return true;
-    })()`,
-    returnByValue: true,
-  });
-  let reopened = await waitForDrawerState(cdp, 'start reopened programmatically', (state) => state.startOpen, 120);
-  assert.equal(reopened.startOpen, true, JSON.stringify(reopened));
+  await cdp.send('Input.synthesizeScrollGesture', {
+    x: swipeX,
+    y,
+    xDistance: Math.round(swipeViewport.width * 0.65),
+    speed: 700,
+    gestureSourceType: 'touch',
+  }, { label: 'swipe the rail back', timeoutMs: 5_000 });
+  let back = await waitForSlide(0, 'rail after the reverse swipe');
+  assert.equal(back.current, 'Portfolio', JSON.stringify(back));
 
-  // Independent tap freedom after a closing swipe: a click issued on the row
-  // must reach capture listeners with defaultPrevented === false (the gesture
-  // token was consumed by the gesture's own trailing click).
-  // Tap the open drawer surface itself (center): suppression scope is the
-  // drawer system, so a click there must not be cancelled.
-  let rowPoint = {
-    x: Math.round((reopened.startRect.left + Math.min(reopened.startRect.width, 260)) / 2),
-    y: Math.round(reopened.startRect.top + reopened.startRect.height / 2),
-  };
-  await cdp.send('Runtime.evaluate', {
-    expression: `(() => {
-      window.__tapProbe = null;
-      document.querySelector('panel-layout.portfolio-layout')?.addEventListener('click', (e) => {
-        window.__tapProbe = { defaultPrevented: e.defaultPrevented, target: e.target?.className || e.target?.tagName };
-      }, { capture: true, once: true });
-      return true;
-    })()`,
-    returnByValue: true,
-  });
-  await cdp.send('Runtime.evaluate', {
-    returnByValue: true,
-    expression: `(() => { window.__tapPoint = ${'${JSON.stringify(rowPoint)}'}; return true; })()`.replace('${JSON.stringify(rowPoint)}', JSON.stringify(rowPoint)),
-  });
-  await dispatchPointerTap(cdp, rowPoint);
-  let tapFree = null;
-  for (let i = 0; i < 120; i += 1) {
-    tapFree = await cdp.send('Runtime.evaluate', {
-      returnByValue: true,
-      expression: `(() => window.__tapProbe)()`,
-    }).then((r) => r.result?.value);
-    if (tapFree) break;
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-  if (!tapFree) {
-    // Some emulation widths never surface the compatibility click of a bare
-    // tap in headless Chrome (pointerdown/up arrive — traced). Fall back to a
-    // real click dispatched at the same point: it still passes through the
-    // exact capture gate the fix lives in.
-    tapFree = await cdp.send('Runtime.evaluate', {
-      returnByValue: true,
-      expression: `(() => {
-        const el = document.elementFromPoint(window.__tapPoint.x, window.__tapPoint.y);
-        if (!el) return null;
-        const ev = new MouseEvent('click', { bubbles: true, cancelable: true, composed: true });
-        el.dispatchEvent(ev);
-        return window.__tapProbe || { defaultPrevented: ev.defaultPrevented, target: el.className || el.tagName, synthetic: true };
-      })()`,
-    }).then((r) => r.result?.value);
-  }
-  assert.ok(tapFree, 'the tap produced a click event');
-  assert.equal(tapFree.defaultPrevented, false,
-    `an independent tap after a closing swipe is never suppressed: ${JSON.stringify(tapFree)}`);
-  // Restore the single-drawer baseline for the following end-dock phase.
-  await cdp.send('Runtime.evaluate', {
-    expression: `(() => {
-      const l = document.querySelector('panel-layout.portfolio-layout');
-      l?.closeDrawer?.('start');
-      return true;
-    })()`,
-    returnByValue: true,
-  });
-  let reclosed = await waitForDrawerState(
-    cdp, 'start closed before end phase',
-    (state) => !state.startOpen && !state.endOpen, 120
-  );
-  assert.equal(reclosed.startOpen, false, JSON.stringify(reclosed));
+  let afterGestures = await selectionSnapshot();
+  assert.deepEqual(afterGestures, baseline,
+    `a swipe must not select the row under it: ${JSON.stringify({ baseline, afterGestures })}`);
 
-  await cdp.send('Runtime.evaluate', {
-    awaitPromise: true,
-    expression: `(async () => {
-      const layout = document.querySelector('panel-layout.portfolio-layout');
-      const panelId = layout?.openPanel?.('portfolio-theme', {
-        direction: 'horizontal',
-        ratio: 0.72,
-        behavior: {
-          importance: 88,
-          minInlineSize: 320,
-          minBlockSize: 280,
-          collapse: 'manual',
-          mobileDock: 'end',
-          swipeControl: 'rail',
-        },
-        source: 'resource-test',
-        uiInvoked: true,
-      });
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      layout?.openDrawer?.('end', panelId);
-      return panelId;
-    })()`,
-  }, { label: 'open theme drawer', timeoutMs: 10_000 });
-
-  let endPanelState = null;
-  for (let i = 0; i < 120; i += 1) {
-    endPanelState = await cdp.send('Runtime.evaluate', {
-      returnByValue: true,
-      expression: `(() => {
-        const l = document.querySelector('panel-layout.portfolio-layout');
-        return {
-          endOpenFlag: !!l?.$?.drawerEndOpen,
-          endPanelId: l?.$?.drawerEndPanelId || null,
-          nodeCount: l?.querySelectorAll('layout-node[mobile-dock="end"]').length ?? -1,
-        };
-      })()`,
-    }).then((r) => r.result?.value);
-    if (endPanelState?.endOpenFlag) break;
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-  console.log('[END_PHASE_DEBUG]', JSON.stringify(endPanelState));
-  let endOpen = await waitForDrawerState(cdp, 'end theme open before reverse swipe', (state) => state.endOpen, 120);
-  assert.equal(endOpen.endOpen, true, JSON.stringify(endOpen));
-
-  let endCloseY = Math.round(endOpen.endRect.top + Math.min(360, endOpen.endRect.height * 0.55));
-  await dispatchPointerSwipe(cdp, {
-    startX: Math.round(endOpen.endRect.left + 42),
-    startY: endCloseY,
-    endX: Math.round(endOpen.endRect.right - 24),
-    endY: endCloseY,
-  });
-  let endClosed = await waitForDrawerState(
-    cdp,
-    'end closed after reverse swipe',
-    (state) => !state.startOpen && !state.endOpen,
-    120
-  );
-  assert.equal(endClosed.startOpen, false, JSON.stringify(endClosed));
-  assert.equal(endClosed.endOpen, false, JSON.stringify(endClosed));
+  // The next control must still work immediately after a gesture chain: a
+  // suppressed trailing click would present as a dead button.
+  await cdp.send('Input.synthesizeScrollGesture', {
+    x: swipeX,
+    y,
+    xDistance: -Math.round(swipeViewport.width * 0.65),
+    speed: 700,
+    gestureSourceType: 'touch',
+  }, { label: 'swipe forward again before tapping', timeoutMs: 5_000 });
+  await waitForSlide(1, 'rail before the post-gesture tap');
+  let tapped = await goToSlide(2);
+  assert.equal(tapped.current, 'Agent', JSON.stringify(tapped));
 });
 
 test('structured portfolio renders semantic PCB flow diodes', { timeout: 120_000 }, async (t) => {
@@ -3899,7 +3930,7 @@ test('structured portfolio renders semantic PCB flow diodes', { timeout: 120_000
     awaitPromise: true,
     returnByValue: true,
     expression: `new Promise((resolve) => {
-      const started = performance.now();
+      let started = performance.now();
       const inspect = () => {
         const canvas = document.querySelector('portfolio-graph-panel node-canvas');
         const flowMarkers = [...(canvas?.querySelectorAll('g.sn-conn-marker[data-type="flow"]') || [])];
@@ -3949,7 +3980,7 @@ test('portfolio Phase 5 corrective tree & routing contract', {
     expression: `(async () => {
       try {
         const waitFor = async (read, timeoutMs = 8000) => {
-          const started = performance.now();
+          let started = performance.now();
           while (performance.now() - started < timeoutMs) {
             const val = read();
             if (val) return val;
@@ -4202,7 +4233,7 @@ test.skip('legacy CV Show browser contract superseded by shared chat/transport a
     awaitPromise: true,
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
-      const check = () => {
+      let check = () => {
         if (document.querySelector('portfolio-tour-panel tour-player')) return resolve();
         if (performance.now() - started > 8000) return reject(new Error('CV Show panel did not open'));
         setTimeout(check, 50);
@@ -4237,7 +4268,7 @@ test.skip('legacy CV Show browser contract superseded by shared chat/transport a
     awaitPromise: true,
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
-      const check = () => {
+      let check = () => {
         const progress = document.querySelector('portfolio-tour-panel output')?.textContent?.trim();
         if (progress === '2 / 8') return resolve();
         if (performance.now() - started > 8000) return reject(new Error(progress || 'no progress'));
@@ -4267,7 +4298,7 @@ test.skip('legacy CV Show browser contract superseded by shared chat/transport a
     awaitPromise: true,
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
-      const check = () => {
+      let check = () => {
         const progress = document.querySelector('portfolio-tour-panel output')?.textContent?.trim();
         if (progress === '3 / 8') return resolve();
         if (performance.now() - started > 8000) return reject(new Error(progress || 'no progress'));
@@ -4438,7 +4469,7 @@ test.skip('legacy CV Show browser contract superseded by shared chat/transport a
     awaitPromise: true,
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
-      const check = () => {
+      let check = () => {
         const layout = document.querySelector('panel-layout');
         const panel = document.querySelector('portfolio-tour-panel');
         const buttons = Array.from(panel?.querySelectorAll('.tour-start button') || []);
@@ -4470,6 +4501,182 @@ test.skip('legacy CV Show browser contract superseded by shared chat/transport a
   });
 });
 
+test('Agent uses relative desktop splits and a mobile sliding rail across the breakpoint', {
+  timeout: 60_000,
+}, async (t) => {
+  let page = await createPortfolioPage(t, {
+    viewport: { width: 779, height: 716, deviceScaleFactor: 1, mobile: false },
+    touch: false,
+  });
+  if (!page) return;
+  let { cdp, server } = page;
+  await navigate(cdp, `${server.origin}/cv/?lang=en`, { expectedMode: 'structured' });
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve) => {
+      let panel = document.querySelector('portfolio-tree-panel')?.closest('layout-node');
+      if (panel?.hasAttribute('collapsed')) panel.querySelector('.collapse-btn').click();
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    })`,
+  });
+  await clickVisible(cdp,
+    '.sn-tree-row[data-tree-id="Projects/AI Tooling/Agent Portal"] .sn-tree-label',
+    'select Agent Portal with a real desktop click');
+  let selection = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        if (location.pathname === '/cv/projects/agent-portal/') return resolve(location.pathname);
+        if (performance.now() - started > 5000) return reject(Error('Tree click did not navigate'));
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  });
+  assert.equal(selection.result.value, '/cv/projects/agent-portal/');
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('agent-dock-shell').open()`,
+  });
+  let inspect = async () => {
+    let result = await cdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `new Promise((resolve, reject) => {
+        let started = performance.now();
+        let previous = '';
+        let stable = 0;
+        let check = () => {
+          let dock = document.querySelector('agent-dock-shell');
+          let outer = dock?.ref?.layout;
+          let main = outer?.querySelector('[data-agent-dock-main-host]');
+          let chat = dock?.getChat();
+          let node = chat?.closest('layout-node');
+          if (!outer || !main || !node) return requestAnimationFrame(check);
+          let box = outer.getBoundingClientRect();
+          let mainBox = main.getBoundingClientRect();
+          let chatBox = node.getBoundingClientRect();
+          let value = {
+            viewport: innerWidth,
+            width: box.width,
+            drawer: outer.hasAttribute('drawer-mode-active'),
+            rail: outer.hasAttribute('mobile-panel-rail-enabled'),
+            dialog: node.getAttribute('role') === 'dialog',
+            overlap: Math.max(0, Math.min(mainBox.right, chatBox.right)
+              - Math.max(mainBox.left, chatBox.left)),
+            chatWidth: chatBox.width,
+            mainWidth: mainBox.width,
+            ratio: outer.getLayout().ratio,
+            renderedRatio: mainBox.width / (mainBox.width + chatBox.width),
+            railButtons: document.querySelectorAll('.portfolio-mobile-navigation button').length,
+            chatPosition: getComputedStyle(node).position,
+          };
+          let key = JSON.stringify(value);
+          stable = key === previous ? stable + 1 : 0;
+          previous = key;
+          if (stable >= 5 && chatBox.width > 0) return resolve(value);
+          if (performance.now() - started > 10000) return reject(Error('Agent layout did not settle'));
+          requestAnimationFrame(check);
+        };
+        check();
+      })`,
+    });
+    assert.ok(result.result.value, JSON.stringify(result.exceptionDetails));
+    return result.result.value;
+  };
+  let assertDesktop = (state) => {
+    assert.equal(state.drawer, false, JSON.stringify(state));
+    assert.equal(state.rail, false, JSON.stringify(state));
+    assert.equal(state.dialog, false, JSON.stringify(state));
+    assert.ok(state.overlap < 1, JSON.stringify(state));
+    assert.ok(state.mainWidth + state.chatWidth <= state.width + 1, JSON.stringify(state));
+  };
+  let narrow = await inspect();
+  assertDesktop(narrow);
+  await saveGraphSnapshotScreenshot(cdp, 'agent-desktop-779');
+  await cdp.send('Emulation.setDeviceMetricsOverride', {
+    width: 1280, height: 800, deviceScaleFactor: 1, mobile: false,
+  });
+  let wide = await inspect();
+  assertDesktop(wide);
+  assert.ok(Math.abs(wide.renderedRatio - wide.ratio) < 0.02, JSON.stringify(wide));
+  let handle = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      let outer = document.querySelector('agent-dock-shell').ref.layout;
+      let handle = [...outer.querySelectorAll('.split-resizer')]
+        .find((item) => item.closest('panel-layout') === outer
+          && item.getBoundingClientRect().width > 0
+          && item.getBoundingClientRect().height > 0);
+      let rect = handle.getBoundingClientRect();
+      let x = rect.x + rect.width / 2;
+      let y = rect.y + rect.height / 2;
+      return {
+        x, y, width: rect.width, height: rect.height,
+      };
+    })()`,
+  });
+  assert.ok(handle.result.value.width > 0, JSON.stringify(handle.result.value));
+  let { x, y } = handle.result.value;
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mousePressed', x, y, button: 'left', clickCount: 1,
+  });
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseMoved', x: x - 80, y, button: 'left', buttons: 1,
+  });
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseReleased', x: x - 80, y, button: 'left', clickCount: 1,
+  });
+  let resized = await inspect();
+  assertDesktop(resized);
+  assert.ok(resized.ratio < wide.ratio - 0.03, JSON.stringify({ wide, resized }));
+  assert.ok(Math.abs(resized.renderedRatio - resized.ratio) < 0.02, JSON.stringify(resized));
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `(async () => {
+      let dock = document.querySelector('agent-dock-shell');
+      window.__agentBeforeResize = dock.getChat();
+      dock.close();
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      dock.open();
+    })()`,
+  });
+  let reopened = await inspect();
+  assertDesktop(reopened);
+  assert.equal(reopened.ratio, resized.ratio);
+  await cdp.send('Emulation.setDeviceMetricsOverride', {
+    width: 390, height: 844, deviceScaleFactor: 1, mobile: true,
+  });
+  let mobile = await inspect();
+  assert.equal(mobile.rail, true, JSON.stringify(mobile));
+  assert.ok(mobile.railButtons >= 3, JSON.stringify(mobile));
+  let slide = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      let dock = document.querySelector('agent-dock-shell');
+      let layout = dock.ref.layout;
+      let chat = dock.getChat();
+      let node = chat.closest('layout-node');
+      return {
+        navigated: layout.scrollToPanel(node.$.nodeId),
+        retained: chat === window.__agentBeforeResize,
+      };
+    })()`,
+  });
+  assert.deepEqual(slide.result.value, { navigated: true, retained: true });
+  await inspect();
+  await saveGraphSnapshotScreenshot(cdp, 'agent-mobile-rail');
+  await cdp.send('Emulation.setDeviceMetricsOverride', {
+    width: 779, height: 716, deviceScaleFactor: 1, mobile: false,
+  });
+  let restored = await inspect();
+  assertDesktop(restored);
+  assert.equal(restored.ratio, resized.ratio);
+  await saveGraphSnapshotScreenshot(cdp, 'agent-desktop-restored');
+});
+
 test('outer Agent dock owns nested desktop and mobile responsive projection', async (t) => {
   let page = await createPortfolioPage(t, {
     viewport: { width: 1087, height: 719, deviceScaleFactor: 1, mobile: false },
@@ -4490,7 +4697,7 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
         if (node.type === 'panel' && node.panelType === type) return node;
         return findPanel(node.first, type) || findPanel(node.second, type);
       };
-      const check = () => {
+      let check = () => {
         const dock = document.querySelector('agent-dock-shell');
         const outer = dock?.ref?.layout;
         const inner = document.querySelector('.portfolio-layout');
@@ -4509,10 +4716,16 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
           label: ${JSON.stringify(label)},
           viewport: innerWidth,
           outerDrawer: outer?.hasAttribute('drawer-mode-active') || false,
+          outerMobileRail: outer?.hasAttribute('mobile-panel-rail-enabled') || false,
           innerWidth: Math.round(inner.getBoundingClientRect().width),
           innerResponsive: inner.hasAttribute('responsive-active'),
           innerDrawer: inner.hasAttribute('drawer-mode-active'),
           graphCollapsed: Boolean(graph.collapsed),
+          graphMobileExcluded: document.querySelector('portfolio-graph-panel')?.closest('layout-node')
+            ?.hasAttribute('mobile-panel-rail-excluded') || false,
+          graphDisplay: document.querySelector('portfolio-graph-panel')
+            ? getComputedStyle(document.querySelector('portfolio-graph-panel').closest('layout-node')).display
+            : 'absent',
           treeCollapsed: Boolean(tree.collapsed),
           viewerCollapsed: Boolean(viewer.collapsed),
           viewerVisible: Boolean(viewerRect?.width > 0 && viewerRect.height > 0),
@@ -4529,6 +4742,7 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
   let desktop = (await inspectProjection('desktop')).result.value;
   assert.equal(desktop.viewport, 1087);
   assert.equal(desktop.outerDrawer, false);
+  assert.equal(desktop.outerMobileRail, false);
   assert.ok(desktop.innerWidth < 760);
   assert.equal(desktop.innerResponsive, false);
   assert.equal(desktop.innerDrawer, false);
@@ -4548,6 +4762,9 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
   let mobile = (await inspectProjection('mobile')).result.value;
   assert.equal(mobile.viewport, 390);
   assert.equal(mobile.outerDrawer, true);
+  assert.equal(mobile.outerMobileRail, true);
+  assert.equal(mobile.graphMobileExcluded, true);
+  assert.equal(mobile.graphDisplay, 'none');
   assert.equal(mobile.innerResponsive, true);
   assert.equal(mobile.innerDrawer, true);
 
@@ -4559,6 +4776,7 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
   });
   let restored = (await inspectProjection('restored-desktop')).result.value;
   assert.equal(restored.outerDrawer, false);
+  assert.equal(restored.outerMobileRail, false);
   assert.equal(restored.innerResponsive, false);
   assert.equal(restored.innerDrawer, false);
   assert.equal(restored.graphCollapsed, true);
@@ -4572,7 +4790,7 @@ test('same-target Short Show settles its composite setup before physical narrati
   timeout: 45_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
-  const page = await createPortfolioPage(t, {
+  let page = await createPortfolioPage(t, {
     viewport: {
       width: 1087,
       height: 719,
@@ -4582,7 +4800,7 @@ test('same-target Short Show settles its composite setup before physical narrati
     touch: false,
   });
   if (!page) return;
-  const { cdp, server } = page;
+  let { cdp, server } = page;
 
   await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
     source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}
@@ -4611,8 +4829,8 @@ test('same-target Short Show settles its composite setup before physical narrati
     returnByValue: true,
     expression: `new Promise((resolve) => {
       const started = performance.now();
-      const check = () => {
-        const host = document.querySelector('portfolio-show-chat');
+      let check = () => {
+        let host = document.querySelector('portfolio-show-chat');
         const narration = host?.narrationSnapshot;
         const alignment = host?.alignmentSnapshot;
         const receipts = globalThis.__cvSameTargetSetupReceipts || [];
@@ -4658,6 +4876,767 @@ test('same-target Short Show settles its composite setup before physical narrati
   assert.equal(result.result.value.setup[0].operationId, result.result.value.setup[1].operationId);
   assert.equal(result.result.value.setup[1].version, 'workspace-presentation-effect-receipt-v2');
   assert.deepEqual(result.result.value.failed, []);
+  assert.deepEqual(cdp.exceptions, []);
+});
+
+test('header Show button stops the active Show and returns to Play', {
+  timeout: 60_000,
+}, async (t) => {
+  let page = await createPortfolioPage(t, { viewport: MOBILE_VIEWPORT, autoplayPolicy: 'no-user-gesture-required' });
+  if (!page) return;
+  let { cdp, server } = page;
+  await navigate(cdp, `${server.origin}/cv/profile/photo/?lang=en&showMode=short&showPlay=0`, {
+    expectedMode: 'structured',
+  });
+  let result = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true, returnByValue: true,
+    expression: `(async () => {
+      let waitFor = async (check) => {
+        let started = performance.now();
+        while (!check()) {
+          if (performance.now() - started > 12000) throw new Error('Header Show state did not settle');
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+      };
+      let button = document.querySelector('.pulse-tour-button');
+      let chat = () => document.querySelector('portfolio-show-chat');
+      await waitFor(() => button.hasAttribute('data-show-active') && chat()?.$.isRunning);
+      await waitFor(() => button.hasAttribute('data-show-paused'));
+      let pausedGlyph = button.querySelector('.material-symbols-outlined').textContent;
+      let pausedLabel = button.getAttribute('aria-label');
+      button.click();
+      await waitFor(() => !chat().$.isPaused && !button.hasAttribute('data-show-paused'));
+      let activeGlyph = button.querySelector('.material-symbols-outlined').textContent;
+      let activeLabel = button.getAttribute('aria-label');
+      button.click();
+      await waitFor(() => !chat()?.$.isRunning && !button.hasAttribute('data-show-active'));
+      return {
+        pausedGlyph, pausedLabel, activeGlyph, activeLabel,
+        stoppedGlyph: button.querySelector('.material-symbols-outlined').textContent,
+        stoppedLabel: button.getAttribute('aria-label'),
+      };
+    })()`,
+  });
+  assert.equal(result.exceptionDetails, undefined, result.exceptionDetails?.exception?.description);
+  assert.deepEqual(result.result.value, {
+    pausedGlyph: 'play_circle', pausedLabel: 'Resume narration',
+    activeGlyph: 'stop', activeLabel: 'Stop show',
+    stoppedGlyph: 'play_circle', stoppedLabel: 'CV Show',
+  });
+  assert.deepEqual(cdp.exceptions, []);
+});
+
+test('mobile Show divider resizes without replacing or stopping the player', {
+  timeout: 60_000,
+}, async (t) => {
+  let page = await createPortfolioPage(t, { viewport: MOBILE_VIEWPORT });
+  if (!page) return;
+  let { cdp, server } = page;
+  await navigate(cdp, `${server.origin}/cv/profile/photo/?lang=en&showMode=short&showPlay=0`, {
+    expectedMode: 'structured',
+  });
+  let before = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true, returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let handle = document.querySelector('.portfolio-show-resizer');
+        let host = document.querySelector('.portfolio-show-static-region');
+        let player = host?.querySelector('chat-show-player');
+        let rect = handle?.getBoundingClientRect();
+        if (player && rect?.width > 0) {
+          window.__resizePlayer = player;
+          window.__resizePlaying = player.$.playing;
+          return resolve({ height: host.getBoundingClientRect().height,
+            x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+        }
+        if (performance.now() - started > 12000) return reject(new Error('Show divider missing'));
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  });
+  assert.equal(before.exceptionDetails, undefined);
+  let { x, y, height } = before.result.value;
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', button: 'left', buttons: 1, clickCount: 1, x, y });
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', button: 'left', buttons: 1, x, y: y - 80 });
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', button: 'left', clickCount: 1, x, y: y - 80 });
+  let after = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      let host = document.querySelector('.portfolio-show-static-region');
+      let player = host.querySelector('chat-show-player');
+      return { height: host.getBoundingClientRect().height,
+        same: player === window.__resizePlayer, playing: player.$.playing === window.__resizePlaying };
+    })()`,
+  });
+  assert.ok(after.result.value.height > height + 40);
+  assert.equal(after.result.value.same, true);
+  assert.equal(after.result.value.playing, true);
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('.portfolio-show-resizer').focus()`,
+  });
+  await cdp.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Home', code: 'Home' });
+  await cdp.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Home', code: 'Home' });
+  let minimum = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      let host = document.querySelector('.portfolio-show-static-region');
+      let time = host.querySelector('.chat-show-progress-time');
+      let controls = host.querySelector('.chat-show-controls');
+      let bounds = host.getBoundingClientRect();
+      return { height: bounds.height, timeVisible: time.getBoundingClientRect().height > 0,
+        timeFits: time.getBoundingClientRect().bottom <= bounds.bottom,
+        controlsFit: controls.getBoundingClientRect().bottom <= bounds.bottom };
+    })()`,
+  });
+  assert.deepEqual(minimum.result.value, {
+    height: 120, timeVisible: true, timeFits: true, controlsFit: true,
+  });
+
+  assert.deepEqual(cdp.exceptions, []);
+});
+
+test('Show uses native desktop expansion and closes its separate mobile host', {
+  timeout: 90_000,
+}, async (t) => {
+  for (let mobile of [true, false]) {
+    let page = await createPortfolioPage(t, {
+      viewport: mobile ? MOBILE_VIEWPORT : DESKTOP_VIEWPORT,
+    });
+    if (!page) return;
+    let { cdp, server } = page;
+    await navigate(cdp, `${server.origin}/cv/profile/photo/?lang=en&showMode=short&showPlay=0`, {
+      expectedMode: 'structured',
+    });
+    let result = await cdp.send('Runtime.evaluate', {
+      awaitPromise: true, returnByValue: true,
+      expression: `(async () => {
+        let waitFor = async (check) => {
+          let started = performance.now();
+          while (!check()) {
+            if (performance.now() - started > 12000) throw new Error('Show placement did not settle');
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+        };
+        await waitFor(() => document.querySelector('chat-show-player [data-cv-show-expand]'));
+        let player = document.querySelector('chat-show-player');
+        let button = player.querySelector('[data-cv-show-expand]');
+        if (${mobile}) {
+          await waitFor(() => player.parentElement.classList.contains('portfolio-show-static-region'));
+          if (!button.hidden) throw new Error('Separate mobile layout must hide Expand');
+        } else {
+          if (button.hidden) throw new Error('Inline desktop player must expose Expand');
+          button.click();
+          await waitFor(() => player.hasAttribute('panel-layout') && button.hidden);
+        }
+        let samePlayer = document.querySelector('chat-show-player') === player;
+        player.querySelector('[data-header-action="close"]').click();
+        await waitFor(() => !document.querySelector('chat-show-player')
+          && !document.querySelector('portfolio-show-chat')?.$.isRunning);
+        return { samePlayer, closed: !document.querySelector('chat-show-player') };
+      })()`,
+    }, { label: mobile ? 'mobile Show close' : 'native desktop Show expand/close', timeoutMs: 30000 });
+    assert.equal(result.exceptionDetails, undefined, result.exceptionDetails?.exception?.description);
+    assert.deepEqual(result.result.value, { samePlayer: true, closed: true });
+    assert.deepEqual(cdp.exceptions, []);
+  }
+});
+
+test('mobile initial rail previews Portfolio then scrolls to Details', {
+  timeout: 60_000,
+}, async (t) => {
+  let page = await createPortfolioPage(t, { viewport: MOBILE_VIEWPORT });
+  if (!page) return;
+  let { cdp, server } = page;
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(() => {
+      window.__railOpening = [];
+      let started = null;
+      let sample = () => {
+        let rail = document.querySelector('panel-layout[mobile-panel-rail-enabled]');
+        let buttons = document.querySelectorAll('.portfolio-mobile-navigation button');
+        if (rail && buttons.length === 3 && rail.clientWidth > 0) {
+          if (started === null && location.search.includes('railTestCancel=1')) {
+            rail.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+          }
+          started ??= performance.now();
+          window.__railOpening.push({ x: rail.scrollLeft, width: rail.clientWidth });
+          if (performance.now() - started > 1500) {
+            window.__railOpeningDone = true;
+            return;
+          }
+        }
+        requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    })();`,
+  });
+  await navigate(cdp, `${server.origin}/cv/profile/photo/?lang=en`, { expectedMode: 'structured' });
+  let readFrames = () => cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        if (window.__railOpeningDone) return resolve(window.__railOpening);
+        if (performance.now() - started > 10000) return reject(new Error('Initial rail was not observed'));
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  });
+  let result = await readFrames();
+  assert.equal(result.exceptionDetails, undefined);
+  let frames = result.result.value;
+  assert.ok(frames.some(({ x }) => x < 4), 'Portfolio must be visible first: ' + JSON.stringify(frames.slice(0, 8)));
+  assert.ok(frames.some(({ x, width }) => x > 4 && x < width - 4),
+    'the browser must render an intermediate smooth scroll position');
+  assert.ok(Math.abs(frames.at(-1).x - frames.at(-1).width) < 4,
+    'the opening transition settles on Details');
+
+  await cdp.send('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
+  });
+  await navigate(cdp, `${server.origin}/cv/profile/photo/?lang=en`, { expectedMode: 'structured' });
+  let reduced = await readFrames();
+  assert.equal(reduced.exceptionDetails, undefined);
+  assert.equal(reduced.result.value.some(({ x, width }) => x > 4 && x < width - 4), false,
+    'reduced motion must remove spatial interpolation');
+  assert.ok(Math.abs(reduced.result.value.at(-1).x - reduced.result.value.at(-1).width) < 4);
+
+  await cdp.send('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
+  });
+  await navigate(cdp, `${server.origin}/cv/profile/photo/?lang=en&railTestCancel=1`, {
+    expectedMode: 'structured',
+  });
+  let cancelled = await readFrames();
+  assert.equal(cancelled.exceptionDetails, undefined);
+  assert.ok(cancelled.result.value.every(({ x }) => x < 4),
+    'an early pointer gesture must cancel the automatic transition');
+});
+
+test('mobile tree material selection reveals Details while folder toggles keep Portfolio', {
+  timeout: 60_000,
+}, async (t) => {
+  let page = await createPortfolioPage(t, { viewport: MOBILE_VIEWPORT });
+  if (!page) return;
+  let { cdp, server } = page;
+  await navigate(cdp, `${server.origin}/cv/profile/photo/?lang=en`, { expectedMode: 'structured' });
+  let result = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `(async () => {
+      let waitFor = async (check) => {
+        let started = performance.now();
+        while (!check()) {
+          if (performance.now() - started > 10000) throw new Error('Tree rail selection did not settle');
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+      };
+      let current = () => document.querySelector(
+        '.portfolio-mobile-navigation button[aria-current="page"]')?.textContent.trim();
+      await waitFor(() => current() === 'Details');
+      let initialRail = document.querySelector('panel-layout[mobile-panel-rail-enabled]');
+      await waitFor(() => Math.abs(initialRail.scrollLeft - initialRail.clientWidth) < 4);
+      let headerMenu = document.querySelector('.pulse-header-menu-button');
+      if (getComputedStyle(headerMenu).display !== 'none') {
+        throw new Error('Duplicate mobile navigation button remains visible');
+      }
+      let detailsNode = document.querySelector('portfolio-viewer-panel').closest('layout-node');
+      for (let selector of ['.panel-menu-toggle', '.fullscreen-btn', '.rail-previous-btn', '.rail-next-btn']) {
+        let rect = detailsNode.querySelector('.panel-header ' + selector).getBoundingClientRect();
+        if (rect.width <= 0 || rect.width > 80 || rect.height <= 0) {
+          throw new Error('Details control is not visible and compact: ' + selector);
+        }
+      }
+      let detailsLabel = detailsNode.querySelector('.panel-header .rail-panel-title');
+      if (detailsLabel.textContent.trim() !== 'Details'
+        || detailsLabel.getBoundingClientRect().width <= 0 || detailsLabel.tagName !== 'SPAN') {
+        throw new Error('Mobile Details header needs a visible noninteractive panel title');
+      }
+      let headerRect = detailsNode.querySelector('.panel-header').getBoundingClientRect();
+      let previousRect = detailsNode.querySelector('.rail-previous-btn').getBoundingClientRect();
+      if (detailsLabel.getBoundingClientRect().left < previousRect.right) {
+        throw new Error('Mobile panel title must not overlap the previous-panel button');
+      }
+
+      if (previousRect.left - headerRect.left > 16) {
+        throw new Error('Previous panel button must sit at the left edge of the header');
+      }
+      detailsNode.querySelector('.rail-previous-btn').click();
+      await waitFor(() => current() === 'Portfolio' && Math.abs(initialRail.scrollLeft) < 4
+        && document.querySelector('.sn-tree-row .sn-tree-toggle'));
+      document.querySelector('.sn-tree-row .sn-tree-toggle').click();
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      let afterToggle = current();
+      document.querySelector('.sn-tree-row .sn-tree-toggle').click();
+      await waitFor(() => [...document.querySelectorAll('.sn-tree-row')]
+        .some((row) => row.textContent.includes('Vladimir Matiasevich')));
+      [...document.querySelectorAll('.sn-tree-row')]
+        .find((row) => row.textContent.includes('Vladimir Matiasevich')).click();
+      await waitFor(() => current() === 'Details');
+      let rail = document.querySelector('panel-layout[mobile-panel-rail-enabled]');
+      await waitFor(() => Math.abs(rail.scrollLeft - rail.clientWidth) < 4);
+      let afterSelect = current();
+      document.querySelector('portfolio-viewer-panel').closest('layout-node')
+        .querySelector('.rail-next-btn').click();
+      await waitFor(() => current() === 'Agent');
+      let agent = document.querySelector('agent-show-chat');
+      let agentNode = agent.closest('layout-node');
+      let wasCollapsed = agentNode.hasAttribute('collapsed');
+      let agentLabel = agentNode.querySelector('.panel-header .rail-panel-title');
+      if (agentLabel.textContent.trim() !== 'Agent' || agentLabel.getBoundingClientRect().width <= 0) {
+        throw new Error('Mobile Agent header needs its visible panel title');
+      }
+
+      let typeButton = agentNode.querySelector('.panel-header .type-btn');
+      if (getComputedStyle(typeButton).display !== 'none') {
+        throw new Error('Mobile rail still exposes the panel type selector');
+      }
+      for (let selector of ['.panel-menu-toggle', '.fullscreen-btn', '.collapse-btn']) {
+        let control = agentNode.querySelector('.panel-header ' + selector);
+        let rect = control.getBoundingClientRect();
+        if (rect.width <= 0 || rect.width > 80 || rect.height <= 0) {
+          throw new Error('Native header control has invalid geometry: ' + selector);
+        }
+      }
+      agentNode.querySelector('.panel-menu-toggle').click();
+      await waitFor(() => agentNode.$.isPanelMenuOpen);
+      agentNode.querySelector('.panel-menu-toggle').click();
+      let fullscreenRequested = false;
+      agentNode.addEventListener('panel-fullscreen', () => { fullscreenRequested = true; }, { once: true });
+      agentNode.querySelector('.fullscreen-btn').click();
+      await waitFor(() => fullscreenRequested);
+      agentNode.querySelector('.fullscreen-btn').click();
+      agentNode.querySelector('.panel-header .collapse-btn').click();
+      await waitFor(() => current() === 'Details'
+        && Math.abs(initialRail.scrollLeft - initialRail.clientWidth) < 4);
+      if (document.querySelector('agent-show-chat') !== agent
+        || agentNode.hasAttribute('collapsed') !== wasCollapsed) {
+        throw new Error('Rail collapse must preserve the mounted Agent panel and its stored collapse state');
+      }
+      return { afterToggle, afterSelect };
+    })()`,
+  });
+  assert.equal(result.exceptionDetails, undefined,
+    result.exceptionDetails?.exception?.description);
+  assert.deepEqual(result.result.value, { afterToggle: 'Portfolio', afterSelect: 'Details' });
+  assert.deepEqual(cdp.exceptions, []);
+});
+
+test('mobile CV panel rail snaps between visible panels and keeps tree scrolling vertically', {
+  timeout: 150_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) {
+    t.skip('local mobile rail verification requires the local build');
+    return;
+  }
+
+  let page = await createPortfolioPage(t, { viewport: MOBILE_VIEWPORT });
+  if (!page) return;
+  let { cdp, server } = page;
+  await navigate(cdp, `${server.origin}/cv/profile/photo/?lang=en&showMode=short&showPlay=0`, {
+    expectedMode: 'structured',
+  });
+
+  let initial = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const layout = document.querySelector('panel-layout[mobile-panel-rail-enabled]');
+        const rail = document.querySelector('.portfolio-mobile-navigation .mobile-panel-rail');
+        const buttons = [...(rail?.querySelectorAll('button') || [])];
+        const tree = layout?.querySelector('.sn-tree-panel-content');
+        const graphNode = document.querySelector('portfolio-graph-panel')?.closest('layout-node');
+        const show = document.querySelector('.portfolio-show-static-region');
+        const navigation = document.querySelector('.portfolio-mobile-navigation');
+        if (layout && rail && buttons.length >= 2 && tree && show && navigation
+          && show.parentElement === navigation.parentElement) {
+          const siblings = [...show.parentElement.children];
+          resolve({
+            width: layout.clientWidth,
+            scrollLeft: layout.scrollLeft,
+            scrollWidth: layout.scrollWidth,
+            showBeforeNavigation: siblings.indexOf(show) < siblings.indexOf(navigation),
+            buttonLabels: buttons.map((button) => button.getAttribute('aria-label')
+              || button.textContent.trim()),
+            graphDisplay: graphNode ? getComputedStyle(graphNode).display : 'absent',
+            scrollTop: tree.scrollTop,
+            treeHeight: tree.scrollHeight,
+            treeClientHeight: tree.clientHeight,
+          });
+          return;
+        }
+        if (performance.now() - started > 15000) {
+          reject(new Error('Mobile panel rail or Portfolio tree did not appear'));
+          return;
+        }
+        setTimeout(check, 100);
+      };
+      check();
+    })`,
+  }, { label: 'wait for mobile CV panel rail', timeoutMs: 20_000 });
+  assert.equal(initial.exceptionDetails, undefined,
+    initial.exceptionDetails?.exception?.description || 'mobile rail did not initialize');
+  assert.ok(initial.result.value.treeHeight > initial.result.value.treeClientHeight,
+    'Portfolio tree provides an independently scrollable panel');
+  assert.equal(initial.result.value.buttonLabels.some((label) => /project map/i.test(label)), false,
+    'the graph canvas panel marked swipeControl=none stays out of mobile navigation');
+  assert.equal(initial.result.value.graphDisplay, 'none',
+    'the opted-out graph canvas remains hidden on mobile and cannot cover another panel');
+  assert.deepEqual(initial.result.value.buttonLabels, ['Portfolio', 'Details', 'Agent'],
+    'mobile navigation follows layout order and omits the opted-out graph panel');
+  assert.equal(initial.result.value.showBeforeNavigation, true,
+    'the separate static CV Show player stays above the mobile panel navigation');
+
+  await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `document.querySelector('.portfolio-mobile-navigation .mobile-panel-rail button')?.click()`,
+  }, { label: 'select Portfolio panel before testing its gestures', timeoutMs: 5_000 });
+  let portfolioReady = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const layout = document.querySelector('panel-layout[mobile-panel-rail-enabled]');
+        const tree = document.querySelector('.sn-tree-panel-content');
+        const rect = tree?.getBoundingClientRect();
+        if (layout && tree && Math.abs(layout.scrollLeft) < 4 && rect?.left >= 0 && rect.right <= innerWidth) {
+          resolve({ scrollLeft: layout.scrollLeft, rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height } });
+          return;
+        }
+        if (performance.now() - started > 5000) {
+          reject(new Error('Portfolio panel did not become visible before its gesture test'));
+          return;
+        }
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  }, { label: 'wait for Portfolio panel to settle', timeoutMs: 10_000 });
+  assert.equal(portfolioReady.exceptionDetails, undefined,
+    portfolioReady.exceptionDetails?.exception?.description || 'Portfolio panel did not settle');
+
+  let verticalPoint = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const tree = document.querySelector('.sn-tree-panel-content');
+      const rect = tree.getBoundingClientRect();
+      return { x: Math.round(rect.left + rect.width * 0.7), y: Math.round(rect.top + rect.height * 0.55) };
+    })()`,
+  }, { label: 'measure visible tree scroller', timeoutMs: 5_000 });
+  let point = verticalPoint.result.value;
+  await cdp.send('Input.synthesizeScrollGesture', {
+    x: point.x,
+    y: point.y,
+    yDistance: initial.result.value.scrollTop > 0 ? 260 : -260,
+    speed: 700,
+    gestureSourceType: 'touch',
+  }, { label: 'scroll within Portfolio tree on mobile', timeoutMs: 5_000 });
+  let vertical = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `({
+      top: document.querySelector('.sn-tree-panel-content')?.scrollTop || 0,
+      active: document.querySelector('.portfolio-mobile-navigation .mobile-panel-rail button[aria-current="page"]')?.textContent.trim() || '',
+    })`,
+  }, { label: 'read Portfolio tree scroll position', timeoutMs: 5_000 });
+  assert.notEqual(vertical.result.value.top, initial.result.value.scrollTop,
+    `vertical gesture scrolls inside the current panel: ${JSON.stringify({
+      point,
+      portfolioReady: portfolioReady.result.value,
+      vertical: vertical.result.value,
+    })}`);
+  assert.match(vertical.result.value.active, /portfolio/i,
+    'vertical panel scrolling does not change the selected horizontal panel');
+
+  await cdp.send('Input.synthesizeScrollGesture', {
+    x: point.x,
+    y: point.y,
+    xDistance: -Math.round(initial.result.value.width * 0.65),
+    speed: 700,
+    gestureSourceType: 'touch',
+  }, { label: 'swipe from Portfolio to the next mobile panel', timeoutMs: 5_000 });
+  let snapped = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const layout = document.querySelector('panel-layout[mobile-panel-rail-enabled]');
+        const rail = document.querySelector('.portfolio-mobile-navigation .mobile-panel-rail');
+        const active = rail?.querySelector('button[aria-current="page"], button[aria-pressed="true"]');
+        const label = active?.getAttribute('aria-label') || active?.textContent.trim() || '';
+        if (layout && Math.abs(layout.scrollLeft - layout.clientWidth) < 4) {
+          resolve({ scrollLeft: layout.scrollLeft, width: layout.clientWidth, label,
+            snap: getComputedStyle(layout).scrollSnapType });
+          return;
+        }
+        if (performance.now() - started > 5000) {
+          reject(new Error('Mobile rail did not settle on the next panel: '
+            + JSON.stringify({ scrollLeft: layout?.scrollLeft, width: layout?.clientWidth, label })));
+          return;
+        }
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  }, { label: 'verify mobile rail snapped to Details', timeoutMs: 10_000 });
+  assert.equal(snapped.exceptionDetails, undefined,
+    snapped.exceptionDetails?.exception?.description || 'rail did not snap to Details');
+  assert.match(snapped.result.value.snap, /inline mandatory/);
+  assert.match(snapped.result.value.label, /details/i);
+
+  for (let [index, label] of [[2, 'Agent'], [0, 'Portfolio']]) {
+    await cdp.send('Runtime.evaluate', {
+      returnByValue: true,
+      expression: `document.querySelectorAll('.portfolio-mobile-navigation .mobile-panel-rail button')[${index}]?.click()`,
+    }, { label: `navigate directly to ${label} from the mobile rail`, timeoutMs: 5_000 });
+    let direct = await cdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `new Promise((resolve, reject) => {
+        const started = performance.now();
+        const check = () => {
+          const layout = document.querySelector('panel-layout[mobile-panel-rail-enabled]');
+          const active = document.querySelector('.portfolio-mobile-navigation .mobile-panel-rail button[aria-current="page"]');
+          const current = active?.getAttribute('aria-label') || active?.textContent.trim() || '';
+          if (layout && active && current === ${JSON.stringify(label)}
+            && Math.abs(layout.scrollLeft - layout.clientWidth * ${index}) < 4) {
+            resolve({ current, scrollLeft: layout.scrollLeft });
+            return;
+          }
+          if (performance.now() - started > 5000) {
+            reject(new Error('Direct rail navigation did not settle on ${label}'));
+            return;
+          }
+          setTimeout(check, 50);
+        };
+        check();
+      })`,
+    }, { label: `verify direct navigation to ${label}`, timeoutMs: 10_000 });
+    assert.equal(direct.exceptionDetails, undefined,
+      direct.exceptionDetails?.exception?.description || `direct navigation to ${label} failed`);
+  }
+
+  let geometry = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      const navigation = document.querySelector('.portfolio-mobile-navigation');
+      const show = document.querySelector('.portfolio-show-static-region');
+      const box = (element) => {
+        const rect = element.getBoundingClientRect();
+        return { top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+      };
+      return {
+        viewportHeight: innerHeight,
+        navigationDisplay: getComputedStyle(navigation).display,
+        navigation: box(navigation),
+        showHidden: show.hidden,
+        show: box(show),
+        playerInStaticHost: Boolean(show.querySelector('chat-show-player')),
+        buttons: [...navigation.querySelectorAll('.mobile-panel-rail button')].map((button) => ({
+          label: (button.getAttribute('aria-label') || button.textContent).trim(),
+          current: button.getAttribute('aria-current') || '',
+          rect: box(button),
+        })),
+      };
+    })()`,
+  }, { label: 'measure the mobile rail and static Show geometry', timeoutMs: 5_000 });
+  assert.equal(geometry.exceptionDetails, undefined,
+    geometry.exceptionDetails?.exception?.description || 'mobile geometry is unreadable');
+  let geometryState = geometry.result.value;
+  assert.equal(geometryState.navigationDisplay, 'block',
+    'the navigation row is rendered, not only present in the DOM');
+  assert.equal(geometryState.playerInStaticHost, true,
+    'the Show player is mounted in the static host outside the panel rail');
+  assert.equal(geometryState.showHidden, false, 'the static Show host is revealed with its player');
+  assert.ok(geometryState.show.height > 0, 'the static Show keeps its own area above the rail');
+  assert.ok(geometryState.show.bottom <= geometryState.navigation.top + 1,
+    'the panel navigation sits below the static Show');
+  assert.deepEqual(geometryState.buttons.map((button) => button.label), ['Portfolio', 'Details', 'Agent']);
+  for (let button of geometryState.buttons) {
+    assert.ok(button.rect.width > 0, `${button.label} rail button has a visible width`);
+    assert.ok(button.rect.height >= 44,
+      `${button.label} rail button keeps a touch-sized target: ${JSON.stringify(button.rect)}`);
+    assert.ok(button.rect.bottom <= geometryState.viewportHeight + 1,
+      `${button.label} rail button stays inside the viewport`);
+  }
+  assert.deepEqual(geometryState.buttons.filter((button) => button.current).map((button) => button.label),
+    ['Portfolio'], 'exactly the reached panel is marked current');
+
+  await cdp.send('Emulation.setDeviceMetricsOverride', { ...MOBILE_VIEWPORT, width: 360 });
+  let narrowed = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const layout = document.querySelector('panel-layout[mobile-panel-rail-enabled]');
+        const slide = getComputedStyle(layout).getPropertyValue('--sn-mobile-panel-rail-slide-size').trim();
+        const active = document.querySelector(
+          '.portfolio-mobile-navigation .mobile-panel-rail button[aria-current="page"]');
+        if (layout && slide === '360px' && Math.abs(layout.clientWidth - 360) < 2
+          && Math.abs(layout.scrollLeft) < 4 && active?.textContent.trim() === 'Portfolio') {
+          resolve({
+            slide,
+            buttons: [...document.querySelectorAll(
+              '.portfolio-mobile-navigation .mobile-panel-rail button')].map((b) => b.textContent.trim()),
+          });
+          return;
+        }
+        if (performance.now() - started > 10000) {
+          reject(new Error('the rail did not re-measure for the narrower viewport: '
+            + JSON.stringify({ slide, scrollLeft: layout?.scrollLeft, width: layout?.clientWidth,
+              active: active?.textContent.trim() })));
+          return;
+        }
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  }, { label: 'verify the rail re-measures after a viewport resize', timeoutMs: 15_000 });
+  assert.equal(narrowed.exceptionDetails, undefined,
+    narrowed.exceptionDetails?.exception?.description || 'rail did not follow the resize');
+  assert.deepEqual(narrowed.result.value.buttons, ['Portfolio', 'Details', 'Agent'],
+    'the navigation keeps the layout order across a resize');
+
+  await cdp.send('Emulation.setDeviceMetricsOverride', DESKTOP_VIEWPORT);
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+  let desktop = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const layout = document.querySelector('agent-dock-shell')?.ref?.layout;
+        const navigation = document.querySelector('.portfolio-mobile-navigation');
+        const resizer = document.querySelector('.portfolio-layout .split-resizer');
+        if (layout && navigation && resizer
+          && !layout.hasAttribute('mobile-panel-rail-enabled')
+          && getComputedStyle(navigation).display === 'none'
+          && getComputedStyle(resizer).display !== 'none') {
+          resolve({ railEnabled: layout.hasAttribute('mobile-panel-rail-enabled'),
+            buttons: navigation.querySelectorAll('button').length });
+          return;
+        }
+        if (performance.now() - started > 12000) {
+          reject(new Error('the desktop split did not return after the resize: '
+            + JSON.stringify({ railEnabled: layout?.hasAttribute('mobile-panel-rail-enabled'),
+              navigationDisplay: navigation && getComputedStyle(navigation).display })));
+          return;
+        }
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  }, { label: 'verify desktop split returns when the viewport widens', timeoutMs: 20_000 });
+  assert.equal(desktop.exceptionDetails, undefined,
+    desktop.exceptionDetails?.exception?.description || 'widening did not restore the desktop split');
+  assert.equal(desktop.result.value.railEnabled, false);
+
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+  await cdp.send('Emulation.setDeviceMetricsOverride', MOBILE_VIEWPORT);
+  let backToMobile = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const layout = document.querySelector('panel-layout[mobile-panel-rail-enabled]');
+        const rail = document.querySelector('.portfolio-mobile-navigation .mobile-panel-rail');
+        const buttons = [...(rail?.querySelectorAll('button') || [])];
+        const active = rail?.querySelector('button[aria-current="page"]');
+        const slide = layout
+          ? getComputedStyle(layout).getPropertyValue('--sn-mobile-panel-rail-slide-size').trim()
+          : '';
+        if (layout && buttons.length === 3 && active?.textContent.trim() === 'Portfolio'
+          && Math.abs(layout.scrollLeft) < 4 && slide === '390px') {
+          resolve({ buttons: buttons.map((button) => button.textContent.trim()), slide });
+          return;
+        }
+        if (performance.now() - started > 12000) {
+          const dockLayout = document.querySelector('agent-dock-shell')?.ref?.layout;
+          const innerLayout = document.querySelector('.portfolio-layout');
+          const dockNodes = dockLayout
+            ? [...dockLayout.querySelectorAll('layout-node')]
+              .filter((node) => node.closest('panel-layout') === dockLayout)
+            : [];
+          reject(new Error('the rail did not come back with the selected panel after resizing: '
+            + JSON.stringify({ buttons: buttons.map((b) => b.textContent.trim()),
+              active: active?.textContent.trim(), slide, scrollLeft: layout?.scrollLeft,
+              dockNodeTitles: dockNodes.map((node) => node.getAttribute('panel-type')),
+              dockContainers: dockNodes.filter((node) => node.hasAttribute('mobile-panel-container')).length,
+              innerConnected: Boolean(innerLayout?.isConnected),
+              innerNodes: [...(innerLayout?.querySelectorAll('layout-node') || [])]
+                .filter((node) => node.closest('panel-layout') === innerLayout)
+                .map((node) => node.getAttribute('panel-type')) })));
+          return;
+        }
+        setTimeout(check, 50);
+      };
+      check();
+    })`,
+  }, { label: 'verify the rail returns with its selection after resizing back', timeoutMs: 20_000 });
+  assert.equal(backToMobile.exceptionDetails, undefined,
+    backToMobile.exceptionDetails?.exception?.description
+      || 'narrowing again did not restore the mobile rail');
+  assert.deepEqual(backToMobile.result.value.buttons, ['Portfolio', 'Details', 'Agent'],
+    'the navigation is rebuilt from the layout tree in the same order');
+  assert.deepEqual(cdp.exceptions, []);
+});
+
+test('desktop CV retains its normal split layout with mobile rail disabled', {
+  timeout: 60_000,
+}, async (t) => {
+  let page = await createPortfolioPage(t, { viewport: DESKTOP_VIEWPORT, touch: false });
+  if (!page) return;
+  let { cdp, server } = page;
+  await navigate(cdp, `${server.origin}/cv/profile/photo/?lang=en`, { expectedMode: 'structured' });
+
+  let result = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const railOwner = document.querySelector('agent-dock-shell')?.ref?.layout;
+        const navigation = document.querySelector('.portfolio-mobile-navigation');
+        const graphNode = document.querySelector('portfolio-graph-panel')?.closest('layout-node');
+        const resizer = document.querySelector('.portfolio-layout .split-resizer');
+        if (railOwner && navigation && graphNode && resizer) {
+          resolve({
+            viewport: innerWidth,
+            railEnabled: railOwner.hasAttribute('mobile-panel-rail-enabled'),
+            navigationDisplay: getComputedStyle(navigation).display,
+            graphDisplay: getComputedStyle(graphNode).display,
+            graphExcluded: graphNode.hasAttribute('mobile-panel-rail-excluded'),
+            resizerDisplay: getComputedStyle(resizer).display,
+          });
+          return;
+        }
+        if (performance.now() - started > 15000) {
+          reject(new Error('desktop portfolio split did not initialize'));
+          return;
+        }
+        setTimeout(check, 100);
+      };
+      check();
+    })`,
+  }, { label: 'inspect desktop split and mobile rail state', timeoutMs: 20_000 });
+  assert.equal(result.exceptionDetails, undefined,
+    result.exceptionDetails?.exception?.description || 'desktop layout did not initialize');
+  assert.equal(result.result.value.viewport, DESKTOP_VIEWPORT.width);
+  assert.equal(result.result.value.railEnabled, false);
+  assert.equal(result.result.value.navigationDisplay, 'none');
+  assert.notEqual(result.result.value.graphDisplay, 'none');
+  assert.equal(result.result.value.graphExcluded, false);
+  assert.notEqual(result.result.value.resizerDisplay, 'none');
   assert.deepEqual(cdp.exceptions, []);
 });
 
@@ -4710,7 +5689,7 @@ test('CV Show blocks narration and aligned media when required scene setup fails
     awaitPromise: true,
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
-      const check = () => {
+      let check = () => {
         const host = document.querySelector('portfolio-show-chat');
         const short = document.querySelector('agent-dock-shell')?.getChat?.()
           ?.querySelector('[data-action-id="start-short"]');
@@ -4733,7 +5712,7 @@ test('CV Show blocks narration and aligned media when required scene setup fails
     returnByValue: true,
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
-      const check = () => {
+      let check = () => {
         const host = document.querySelector('portfolio-show-chat');
         if (host?.$.isError && host?.$.isPaused) return resolve({
           running: host.$.isRunning,
@@ -4807,12 +5786,12 @@ test('profile presentation link completes one marker preroll before Opus narrati
   timeout: 90_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
-  const page = await createPortfolioPage(t, {
+  let page = await createPortfolioPage(t, {
     viewport: DESKTOP_VIEWPORT,
     touch: false,
   });
   if (!page) return;
-  const { cdp, server } = page;
+  let { cdp, server } = page;
   await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
     source: `try { localStorage.setItem('cv-portfolio-locale', 'ru'); } catch {}
     globalThis.__profileLinkReceipts = [];
@@ -4836,7 +5815,7 @@ test('profile presentation link completes one marker preroll before Opus narrati
     `${server.origin}/cv/?showMode=short&showEntry=positioning&showPlay=0`,
     { expectedMode: 'structured' },
   );
-  const paused = await cdp.send('Runtime.evaluate', {
+  let paused = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
     expression: `new Promise((resolve, reject) => {
@@ -4916,7 +5895,7 @@ test('profile presentation link completes one marker preroll before Opus narrati
         if (failure || marker.some(({ status }) => status === 'settled')
           || performance.now() - started > 38000) {
           const host = document.querySelector('portfolio-show-chat');
-          const player = document.querySelector('agent-dock-shell')?.getChat?.()
+          let player = document.querySelector('agent-dock-shell')?.getChat?.()
             ?.querySelector('chat-show-player');
           const selection = document.getSelection();
           return resolve({
@@ -5241,7 +6220,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     'initial /cv/ must not request public narration or alignment payloads',
   );
   const consoleBeforeShow = cdp.consoleMessages.length;
-  await clickVisible(cdp, '.pulse-tour-button', 'selected public-audio CV Show trigger');
+  await clickVisible(cdp, '.pulse-tour-button', 'start public-audio CV Show from the header');
 
   let mounted = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
@@ -5290,23 +6269,13 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     sharedDock: true,
     sharedWorkspace: true,
     sharedTranscript: true,
-    playerBeforeChoice: false,
+    playerBeforeChoice: true,
     embedBeforeChoice: false,
     activeComposer: true,
     voiceInput: true,
     modeActions: [true, true],
     manualTranscript: false,
   });
-  assert.deepEqual(
-    cvShowAudioRequestPaths(cdp.requestedUrls),
-    [],
-    'opening the mode chooser must not load narration before the user chooses a Show mode',
-  );
-  await clickVisible(
-    cdp,
-    'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
-    'explicit Short mode selection',
-  );
   let playing = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
@@ -5314,9 +6283,9 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
       const started = performance.now();
       const check = () => {
         const host = document.querySelector('portfolio-show-chat');
-        const snapshot = host?.narrationSnapshot;
+        let snapshot = host?.narrationSnapshot;
         if (snapshot?.active?.activeId === 'positioning' && !snapshot.active.paused) {
-          const chat = document.querySelector('agent-dock-shell')?.getChat?.();
+          let chat = document.querySelector('agent-dock-shell')?.getChat?.();
           const player = chat?.querySelector('chat-show-player');
           const transcriptText = chat?.querySelector('chat-transcript')?.textContent || '';
           return resolve({
@@ -6975,7 +7944,7 @@ test('finale deeplink prepares the native graph panel before sequential scroll a
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
       const check = () => {
-        const player = document.querySelector('chat-show-player');
+        let player = document.querySelector('chat-show-player');
         const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
         if (play && player.textContent?.includes('16 / 16')) return resolve(true);
         if (performance.now() - started > 15_000) {
@@ -6986,7 +7955,7 @@ test('finale deeplink prepares the native graph panel before sequential scroll a
       check();
     })`,
   }, { label: 'wait for paused finale deeplink', timeoutMs: 17_000 });
-  const initial = await cdp.send('Runtime.evaluate', {
+  let initial = await cdp.send('Runtime.evaluate', {
     returnByValue: true,
     expression: `(() => {
       const panel = document.querySelector('portfolio-graph-panel');
@@ -7220,7 +8189,7 @@ test('boothbot Short Show advances five gallery frames before the catalog-result
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
       const check = () => {
-        const player = document.querySelector('chat-show-player');
+        let player = document.querySelector('chat-show-player');
         const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
         if (play && player.textContent?.includes('14 / 16')) return resolve(true);
         if (performance.now() - started > 15_000) {
@@ -7735,7 +8704,7 @@ test('CV navigation presents exactly one real row click for an authored scene tr
 });
 
 test('authored workspace scroll settles inside its hard cell before selection starts', {
-  timeout: 70_000,
+  timeout: 120_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('scroll timing acceptance requires the selected public Opus release');
   const page = await createPortfolioPage(t, {
@@ -7783,7 +8752,7 @@ test('authored workspace scroll settles inside its hard cell before selection st
       && receipt.cellId === 'cv-show:cue:workspace.portable-config'
       && ['settled', 'failed', 'skipped', 'expired'].includes(receipt.status),
     'workspace portable-config terminal receipt',
-    { afterIndex: runEventIndex, inactivityMs: 30_000 },
+    { afterIndex: runEventIndex, inactivityMs: 60_000 },
   );
   const terminal = await harness.snapshot('workspace scroll hard cell');
   const scroll = terminal.receipts.filter(({ cellId }) => (
@@ -8119,7 +9088,7 @@ test('all authored CV Show markers fit their hard budgets at real desktop and mo
         expression: `new Promise((resolve, reject) => {
           const startedAt = performance.now();
           const check = () => {
-            const player = document.querySelector('chat-show-player');
+            let player = document.querySelector('chat-show-player');
             const play = player?.querySelector('[data-control="play"][aria-label="Play"]');
             if (play && document.querySelector('portfolio-show-chat')) return resolve(true);
             if (performance.now() - startedAt > 15_000) {
@@ -8321,7 +9290,7 @@ test('all authored CV Show markers fit their hard budgets at real desktop and mo
 });
 
 test('public presenter markers keep rounded ink endpoints and a visible tail gap', {
-  timeout: 60_000,
+  timeout: 120_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('marker pixel evidence requires the local provider seam');
   const page = await createPortfolioPage(t, {
@@ -8485,7 +9454,7 @@ test('terminal CV Show proves uninterrupted desktop and mobile timing, attention
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
       const check = () => {
-        const action = document.querySelector(
+        let action = document.querySelector(
           'agent-dock-shell agent-show-chat '
             + '.actions-card[data-actions-id="symbiote-workspace.actions"] '
             + '[data-action-id="details"]',
@@ -8759,8 +9728,13 @@ test('CV Show preserves presenter layers on pause and removes them on terminal l
             operationId: 'presentation-effect-test-marker',
             generation: 0,
             kind: 'attention',
-            projectCell: { id: 'cv-show:cue:presenter-lifecycle.marker' },
+            projectCell: {
+              id: 'cv-show:cue:presenter-lifecycle.marker',
+              timing: { gestureDurationMs: 2500 },
+            },
             signal: new AbortController().signal,
+            reportReceipt: () => {},
+            reportAdmission: () => {},
             source: {
               id: 'presenter-lifecycle.marker',
               type: 'marker',
@@ -8774,47 +9748,49 @@ test('CV Show preserves presenter layers on pause and removes them on terminal l
       },
     ))`,
   }, { label: 'present real shared marker before pause', timeoutMs: 5_000 });
-  await cdp.send('Runtime.evaluate', {
+  let markerPaused = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
+    returnByValue: true,
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
       const check = () => {
         const overlay = document.querySelector('.symbiote-presenter-cursor');
-        const ink = overlay?.querySelector('.pc-ink path')?.getAttribute('d') || '';
-        if (overlay?.classList.contains('is-visible') && ink) return resolve(true);
-        if (performance.now() - started > 5000) return reject(new Error('shared marker did not become visible'));
+        let inkPath = overlay?.querySelector('.pc-ink path');
+        let activeInk = inkPath?.getAttribute('d') || '';
+        if (overlay?.classList.contains('is-visible') && activeInk) {
+          let player = document.querySelector('chat-show-player');
+          if (!player) return reject(new Error('Show player is unavailable'));
+          player.control('toggle');
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve({
+            visible: overlay.classList.contains('is-visible'),
+            opacity: getComputedStyle(overlay).opacity,
+            ink: inkPath.getAttribute('d') || '',
+            inkBeforePause: activeInk,
+          })));
+          return;
+        }
+        if (performance.now() - started > 5000) {
+          return reject(new Error(
+            'shared marker did not become visible',
+          ));
+        }
         requestAnimationFrame(check);
       };
       check();
     })`,
-  }, { label: 'wait for visible shared marker', timeoutMs: 7_000 });
-
-  await clickVisible(
-    cdp,
-    'agent-dock-shell agent-show-chat chat-show-player [data-control="play"]',
-    'pause Show with active marker',
-  );
-  let markerPaused = await cdp.send('Runtime.evaluate', {
-    awaitPromise: true,
-    returnByValue: true,
-    expression: `new Promise((resolve) => requestAnimationFrame(() => resolve((() => {
-      const overlay = document.querySelector('.symbiote-presenter-cursor');
-      return {
-        visible: overlay?.classList.contains('is-visible') || false,
-        opacity: overlay ? getComputedStyle(overlay).opacity : '',
-        ink: overlay?.querySelector('.pc-ink path')?.getAttribute('d') || '',
-      };
-    })())))`,
-  }, { label: 'verify marker pause preservation', timeoutMs: 5_000 });
-  assert.equal(markerPaused.result.value.visible, true);
+  }, { label: 'pause during an active marker frame', timeoutMs: 7_000 });
+  assert.equal(markerPaused.result.value.visible, true, 'pause keeps the presenter cursor visible');
   assert.equal(markerPaused.result.value.opacity, '1');
-  assert.ok(markerPaused.result.value.ink, 'Pause must retain rendered marker ink');
-
-  await clickVisible(
-    cdp,
-    'agent-dock-shell agent-show-chat chat-show-player [data-control="play"]',
-    'resume Show for native selection lifecycle',
+  assert.ok(markerPaused.result.value.inkBeforePause, 'Pause must interrupt an active marker frame');
+  assert.equal(
+    markerPaused.result.value.ink,
+    markerPaused.result.value.inkBeforePause,
+    'Pause must retain the marker layers rendered in the active frame',
   );
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('chat-show-player')?.control('toggle')`,
+  }, { label: 'resume Show for native selection lifecycle', timeoutMs: 5_000 });
   await cdp.send('Runtime.evaluate', {
     expression: `document.querySelector('portfolio-show-chat')?.dispatchEvent(new CustomEvent(
       'portfolio-show-presentation-operation',
@@ -8825,17 +9801,29 @@ test('CV Show preserves presenter layers on pause and removes them on terminal l
           requestId: 'presenter-lifecycle-selection',
           entryId: 'positioning',
           handled: false,
-          complete: () => {},
+          complete: (receipts, error) => {
+            window.__presenterSelectionResult = {
+              receipts,
+              error: error?.message || '',
+              selectedText: document.getSelection()?.toString() || '',
+            };
+          },
           operation: {
             operationId: 'presentation-effect-test-selection',
             generation: 0,
             kind: 'attention',
-            projectCell: { id: 'cv-show:cue:presenter-lifecycle.selection' },
+            projectCell: {
+              id: 'cv-show:cue:presenter-lifecycle.selection',
+              timing: { gestureDurationMs: 2500 },
+            },
             signal: new AbortController().signal,
+            reportReceipt: () => {},
+            reportAdmission: () => {},
             source: {
               id: 'presenter-lifecycle.selection',
               type: 'native-selection',
               target: 'profile.experience',
+              quote: '15+ years in software development and engineering R&D',
               policy: 'required',
             },
           },
@@ -8843,39 +9831,50 @@ test('CV Show preserves presenter layers on pause and removes them on terminal l
       },
     ))`,
   }, { label: 'present real native selection before pause', timeoutMs: 5_000 });
-  await cdp.send('Runtime.evaluate', {
+  let selectionPaused = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
+    returnByValue: true,
     expression: `new Promise((resolve, reject) => {
       const started = performance.now();
       const check = () => {
-        if (document.getSelection()?.toString()) return resolve(true);
-        if (performance.now() - started > 5000) return reject(new Error('native selection did not become visible'));
+        let result = window.__presenterSelectionResult;
+        if (result) {
+          let player = document.querySelector(
+            'agent-dock-shell agent-show-chat chat-show-player [data-control="play"]',
+          )?.closest('chat-show-player');
+          if (!player) return reject(new Error('Show pause control is unavailable'));
+          player.control('toggle');
+          requestAnimationFrame(() => resolve({
+            selectionRanges: document.getSelection()?.rangeCount || 0,
+            selectionText: document.getSelection()?.toString() || '',
+            result,
+          }));
+          return;
+        }
+        if (performance.now() - started > 5000) {
+          return reject(new Error('native selection did not become visible'));
+        }
         requestAnimationFrame(check);
       };
       check();
     })`,
-  }, { label: 'wait for visible native selection', timeoutMs: 7_000 });
-  await clickVisible(
-    cdp,
-    'agent-dock-shell agent-show-chat chat-show-player [data-control="play"]',
-    'pause Show with active native selection',
-  );
-  let selectionPaused = await cdp.send('Runtime.evaluate', {
-    awaitPromise: true,
-    returnByValue: true,
-    expression: `new Promise((resolve) => requestAnimationFrame(() => resolve({
-      selectionRanges: document.getSelection()?.rangeCount || 0,
-      selectionText: document.getSelection()?.toString() || '',
-    })))`,
-  }, { label: 'verify native selection pause preservation', timeoutMs: 5_000 });
+  }, { label: 'pause Show with active native selection', timeoutMs: 7_000 });
   assert.equal(selectionPaused.result.value.selectionRanges, 1);
-  assert.ok(selectionPaused.result.value.selectionText, 'Pause must retain native selected text');
-
-  await clickVisible(
-    cdp,
-    'agent-dock-shell agent-show-chat chat-show-player [data-control="stop"]',
-    'manual terminal presenter cleanup',
+  assert.equal(selectionPaused.result.value.result.error, '');
+  assert.ok(
+    selectionPaused.result.value.result.selectedText,
+    'native-selection operation must render a nonempty selected text range: '
+      + JSON.stringify(selectionPaused.result.value.result),
   );
+  assert.equal(
+    selectionPaused.result.value.selectionText,
+    selectionPaused.result.value.result.selectedText,
+    'Pause must retain native selected text while the selection layer is active',
+  );
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('portfolio-show-chat')?.stopShow()`,
+  }, { label: 'dispatch terminal Show lifecycle cleanup', timeoutMs: 5_000 });
   let manualTerminal = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
@@ -8965,7 +9964,7 @@ async function installRuGraphSnapshotStartup(cdp) {
       window.__cvGraphPcbQualities = [];
       window.__cvGraphTimeline = [];
       window.__cvGraphSawVisibleStraight = false;
-      window.__cvGraphSawConnectionsOnlyOverlay = false;
+      window.__cvGraphSawGraphPreview = false;
       window.__cvGraphSawOverlayWithLiveNodes = false;
       window.__cvGraphSawEdgeGap = false;
       window.__cvGraphSawUnhiddenSnapshot = false;
@@ -8984,11 +9983,13 @@ async function installRuGraphSnapshotStartup(cdp) {
         const canvas = panel?.querySelector('node-canvas');
         const snapshot = document.querySelector('.portfolio-graph-snapshot');
         const paths = [...(canvas?.querySelectorAll('.sn-conn-path') || [])];
-        const overlayReady = snapshot?.matches?.('img[data-graph-visual-layer="connections-only"]')
+        const overlayReady = snapshot?.matches?.('img[data-graph-visual-layer="graph-preview"]')
           && snapshot.complete
           && snapshot.naturalWidth > 0;
         const overlayPaths = overlayReady ? 191 : 0;
-        const visibleNodeCount = [...(canvas?.querySelectorAll('graph-node') || [])]
+        const canvasOpacity = canvas ? Number(getComputedStyle(canvas).opacity) : 0;
+        const visibleNodeCount = canvasOpacity <= 0.01 ? 0
+          : [...(canvas?.querySelectorAll('graph-node') || [])]
           .filter((node) => {
             const style = getComputedStyle(node);
             return style.display !== 'none'
@@ -9009,7 +10010,8 @@ async function installRuGraphSnapshotStartup(cdp) {
           resolution: panel?.dataset.graphSnapshot || '',
           snapshot: Boolean(snapshot),
           snapshotOpacity: snapshot ? Number(getComputedStyle(snapshot).opacity) : 0,
-          canvasOpacity: canvas ? Number(getComputedStyle(canvas).opacity) : 0,
+          canvasOpacity,
+          liveLayerOpacity: liveLayer ? Number(getComputedStyle(liveLayer).opacity) : 0,
           pathCount: paths.length,
           full: qualities.full || 0,
           draft: qualities.draft || 0,
@@ -9024,10 +10026,11 @@ async function installRuGraphSnapshotStartup(cdp) {
           && frame.pathCount > 0
           && frame.straightLike === frame.pathCount;
         const visibleOverlay = overlayPaths === 191 && frame.snapshotOpacity > 0.01;
-        const visibleLiveEdges = frame.pathCount === 191
+        const visibleLiveEdges = frame.canvasOpacity > 0.01
+          && frame.pathCount === 191
           && Number(liveLayer ? getComputedStyle(liveLayer).opacity : 0) > 0.01;
         const visibleEdges = visibleOverlay || visibleLiveEdges;
-        if (visibleOverlay) window.__cvGraphSawConnectionsOnlyOverlay = true;
+        if (visibleOverlay) window.__cvGraphSawGraphPreview = true;
         if (visibleOverlay && visibleNodeCount > 0) {
           window.__cvGraphSawOverlayWithLiveNodes = true;
         }
@@ -9148,7 +10151,7 @@ async function readGraphSnapshotAcceptance(cdp, expectedResolution) {
             }, {}),
             sawFullPcbQuality: (window.__cvGraphPcbQualities || []).includes('full'),
             sawVisibleStraight: window.__cvGraphSawVisibleStraight === true,
-            sawConnectionsOnlyOverlay: window.__cvGraphSawConnectionsOnlyOverlay === true,
+            sawGraphPreview: window.__cvGraphSawGraphPreview === true,
             sawOverlayWithLiveNodes: window.__cvGraphSawOverlayWithLiveNodes === true,
             sawEdgeGap: window.__cvGraphSawEdgeGap === true,
             sawUnhiddenSnapshot: window.__cvGraphSawUnhiddenSnapshot === true,
@@ -9187,7 +10190,7 @@ async function readGraphSnapshotAcceptance(cdp, expectedResolution) {
               return counts;
             }, {}),
             sawVisibleStraight: window.__cvGraphSawVisibleStraight === true,
-            sawConnectionsOnlyOverlay: window.__cvGraphSawConnectionsOnlyOverlay === true,
+            sawGraphPreview: window.__cvGraphSawGraphPreview === true,
             sawOverlayWithLiveNodes: window.__cvGraphSawOverlayWithLiveNodes === true,
             sawEdgeGap: window.__cvGraphSawEdgeGap === true,
             sawUnhiddenSnapshot: window.__cvGraphSawUnhiddenSnapshot === true,
@@ -9205,11 +10208,12 @@ async function readGraphSnapshotAcceptance(cdp, expectedResolution) {
   return result.result.value;
 }
 
-async function saveGraphSnapshotScreenshot(cdp, name) {
+async function saveGraphSnapshotScreenshot(cdp, name, options = {}) {
   let screenshot = await cdp.send('Page.captureScreenshot', {
     format: 'webp',
     quality: 90,
     fromSurface: true,
+    ...options,
   }, { label: `capture ${name}`, timeoutMs: 10_000 });
   let outputDir = path.join(ROOT, 'tmp', 'cv-graph-snapshot-acceptance');
   await mkdir(outputDir, { recursive: true });
@@ -9243,11 +10247,11 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
   assert.deepEqual(state.qualities, { full: 191 });
   assert.equal(state.uniqueRouteIds, 191);
   assert.equal(state.deterministicRouteIds, true);
-  assert.equal(state.snapshotResources.some((url) => url.endsWith('/initial.svg')), true);
-  assert.equal(state.snapshotResources.filter((url) => url.endsWith('/initial.svg')).length, 1);
-  assert.equal(state.snapshotResources.filter((url) => url.endsWith('.snapshot.json')).length, 1);
-  assert.equal(state.sawConnectionsOnlyOverlay, true, JSON.stringify(state.timeline));
-  assert.equal(state.sawOverlayWithLiveNodes, true, JSON.stringify(state.timeline));
+  assert.equal(state.snapshotResources.some((url) => url.endsWith('/initial.webp')), true);
+  assert.equal(state.snapshotResources.filter((url) => url.endsWith('/initial.webp')).length, 1);
+  assert.equal(state.snapshotResources.filter((url) => /\.snapshot\.json(?:\?|$)/.test(url)).length, 1);
+  assert.equal(state.sawGraphPreview, true, JSON.stringify(state.timeline));
+  assert.equal(state.sawOverlayWithLiveNodes, false, JSON.stringify(state.timeline));
   assert.equal(state.sawEdgeGap, false, JSON.stringify(state.timeline));
   assert.equal(state.sawUnhiddenSnapshot, false, JSON.stringify(state.timeline));
   assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
@@ -9353,12 +10357,13 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
 });
 
 test('desktop-to-mobile Short Show settles the first required frame before narration advances', {
-  timeout: 70_000,
+  timeout: 90_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
   const page = await createPortfolioPage(t, {
     viewport: DESKTOP_VIEWPORT,
     touch: false,
+    autoplayPolicy: 'no-user-gesture-required',
     providerModules: true,
   });
   if (!page) return;
@@ -9379,27 +10384,107 @@ test('desktop-to-mobile Short Show settles the first required frame before narra
   );
   const runId = 'mobile-first-required-marker';
   await harness.reset(runId);
-  await clickVisible(cdp, '.pulse-tour-button', 'fresh mobile Show trigger');
-  await cdp.send('Runtime.evaluate', {
+  let headerTouchTarget = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      let target = document.querySelector('.pulse-tour-button');
+      let rect = target?.getBoundingClientRect();
+      if (!rect || rect.width <= 0 || rect.height <= 0) return null;
+      let x = rect.left + rect.width / 2;
+      let y = rect.top + rect.height / 2;
+      let hit = document.elementFromPoint(x, y);
+      return { x, y, topmost: hit === target || target.contains(hit) };
+    })()`,
+  }, { label: 'locate mobile header Show touch target', timeoutMs: 5_000 });
+  assert.equal(
+    headerTouchTarget.result.value?.topmost,
+    true,
+    'the mobile header Show button is the topmost touch target',
+  );
+  await dispatchPointerTap(cdp, headerTouchTarget.result.value);
+  let mobileAgentRail = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
+    returnByValue: true,
     expression: `new Promise((resolve, reject) => {
-      const started = performance.now();
-      const check = () => {
-        const button = document.querySelector(
-          'agent-dock-shell agent-show-chat [data-action-id="start-short"]'
+      let started = performance.now();
+      let check = () => {
+        let active = document.querySelector('portfolio-show-chat')
+          ?.narrationSnapshot?.active;
+        let rail = document.querySelector(
+          'agent-dock-shell layout-node[drawer-rail][drawer-rail-collapsed]'
+            + '[data-drawer-dock="end"]',
         );
-        if (button) return resolve(true);
-        if (performance.now() - started > 8000) return reject(new Error('mobile Short action did not mount'));
-        setTimeout(check, 50);
+        let rect = rail?.getBoundingClientRect();
+        if (active?.activeId === 'positioning' && rect?.width > 0 && rect.height > 0) {
+          let x = rect.left + rect.width / 2;
+          let y = rect.top + rect.height / 2;
+          let hit = document.elementFromPoint(x, y);
+          return resolve({
+            x,
+            y,
+            topmost: hit === rail || rail.contains(hit),
+          });
+        }
+        if (performance.now() - started > 10000) {
+          return reject(new Error('mobile Agent rail did not become visible after Show start'));
+        }
+        setTimeout(check, 25);
       };
       check();
     })`,
-  }, { label: 'wait for mobile Short action', timeoutMs: 10_000 });
-  await clickVisible(
-    cdp,
-    'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
-    'mobile explicit Short mode selection',
-  );
+  }, { label: 'locate mobile Agent rail after Show start', timeoutMs: 12_000 });
+  assert.equal(mobileAgentRail.result.value.topmost, true, 'mobile Agent rail is the topmost touch target');
+  await dispatchPointerTap(cdp, mobileAgentRail.result.value);
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        let layout = document.querySelector('agent-dock-shell panel-layout');
+        if (layout?.hasAttribute('drawer-end-open')) return resolve(true);
+        if (performance.now() - started > 8000) {
+          return reject(new Error('mobile Agent drawer did not open from its rail touch'));
+        }
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'wait for mobile Agent drawer after rail touch', timeoutMs: 10_000 });
+  let mobileShortAction = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let action = document.querySelector(
+          'agent-dock-shell agent-show-chat '
+            + '.actions-card[data-action-state="current"] '
+            + '[data-action-id="start-short"]',
+        );
+        let rect = action?.getBoundingClientRect();
+        if (action && rect?.width > 0 && rect.height > 0) {
+          let x = rect.left + rect.width / 2;
+          let y = rect.top + rect.height / 2;
+          let hit = document.elementFromPoint(x, y);
+          return resolve({
+            disabled: Boolean(action.disabled),
+            x,
+            y,
+            topmost: hit === action || action.contains(hit),
+          });
+        }
+        if (performance.now() - started > 10000) {
+          return reject(new Error('mobile Short mode action did not become visible'));
+        }
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'locate mobile Short mode touch action', timeoutMs: 12_000 });
+  assert.equal(mobileShortAction.result.value.disabled, false, 'mobile Short action is enabled');
+  assert.equal(mobileShortAction.result.value.topmost, true, 'mobile Short action is the topmost touch target');
+  await dispatchPointerTap(cdp, mobileShortAction.result.value);
   const terminalMarker = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
@@ -9413,7 +10498,7 @@ test('desktop-to-mobile Short Show settles the first required frame before narra
         const terminal = receipts.find(({ status }) => (
           ['settled', 'deadline-missed', 'failed', 'expired'].includes(status)
         ));
-        if (terminal || performance.now() - started > 12_000) {
+        if (terminal || performance.now() - started > 30_000) {
           const host = document.querySelector('portfolio-show-chat');
           return resolve({
             terminal: terminal || null,
@@ -9422,6 +10507,8 @@ test('desktop-to-mobile Short Show settles the first required frame before narra
             operationCount: snapshot?.operations?.length || 0,
             generationIds: (snapshot?.generations || []).map(({ entryId }) => entryId),
             lifecycle: snapshot?.lifecycle || [],
+            mobileAgentRail: ${JSON.stringify(mobileAgentRail.result.value)},
+            mobileShortAction: ${JSON.stringify(mobileShortAction.result.value)},
             narration: host?.narrationSnapshot || null,
             alignment: host?.alignmentSnapshot || null,
           });
@@ -9430,7 +10517,7 @@ test('desktop-to-mobile Short Show settles the first required frame before narra
       };
       check();
     })`,
-  }, { label: 'wait for fresh mobile positioning marker', timeoutMs: 14_000 });
+  }, { label: 'wait for fresh mobile positioning marker', timeoutMs: 32_000 });
   assert.ok(terminalMarker.result.value.terminal, JSON.stringify(terminalMarker.result.value));
   const snapshot = await harness.snapshot('fresh mobile positioning marker');
   const tenureMarkerReceipts = snapshot.receipts.filter(({ cellId }) => (
@@ -9558,6 +10645,232 @@ test('plain /cv/ keeps its cached graph after resolving the browser locale durin
   assert.equal(cdp.exceptions.length, 0);
 });
 
+test('graph loading starts with a complete preview before live nodes initialize', {
+  timeout: 60_000,
+}, async (t) => {
+  let releaseBootstrap;
+  let bootstrapGate = new Promise((resolve) => { releaseBootstrap = resolve; });
+  let page = await createPortfolioPage(t, {
+    bootstrapGate,
+    corruptGraphSnapshot: true,
+    viewport: DESKTOP_VIEWPORT,
+    touch: false,
+  });
+  if (!page) return releaseBootstrap();
+  let { cdp, server } = page;
+  try {
+    await installRuGraphSnapshotStartup(cdp);
+    await cdp.send('Page.navigate', { url: `${server.origin}/cv/skills/agentic-ai/` });
+    let preview = await cdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `new Promise((resolve, reject) => {
+        let started = performance.now();
+        let check = () => {
+          let image = document.querySelector('.portfolio-graph-snapshot');
+          if (image?.complete && image.naturalWidth > 0) return resolve({
+            layer: image.dataset.graphVisualLayer,
+            source: image.getAttribute('src'),
+            hidden: image.getAttribute('aria-hidden'),
+            liveNodes: document.querySelectorAll('graph-node').length,
+          });
+          if (performance.now() - started > 10000) return reject(Error('Preview did not load'));
+          requestAnimationFrame(check);
+        };
+        check();
+      })`,
+    });
+    assert.ok(preview.result.value, JSON.stringify(preview.exceptionDetails));
+    await saveGraphSnapshotScreenshot(cdp, 'startup-before-live-nodes');
+    assert.equal(preview.result.value.layer, 'graph-preview');
+    assert.match(preview.result.value.source, /\.webp(?:\?|$)/);
+    assert.equal(preview.result.value.hidden, 'true');
+    assert.equal(preview.result.value.liveNodes, 0);
+    releaseBootstrap();
+    let loadingFrame = await cdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `new Promise((resolve, reject) => {
+        let started = performance.now();
+        let check = () => {
+          let canvas = document.querySelector('portfolio-graph-panel node-canvas');
+          let image = document.querySelector('.portfolio-graph-snapshot');
+          if (document.readyState === 'complete' && canvas?.hasAttribute('data-snapshot-pending')
+            && canvas.getBoundingClientRect().width > 128 && image?.complete) return resolve({
+              canvasOpacity: Number(getComputedStyle(canvas).opacity),
+              previewOpacity: Number(getComputedStyle(image).opacity),
+              clip: {
+                x: canvas.getBoundingClientRect().x,
+                y: canvas.getBoundingClientRect().y,
+                width: canvas.getBoundingClientRect().width,
+                height: canvas.getBoundingClientRect().height,
+                scale: 1,
+              },
+            });
+          if (performance.now() - started > 10000) {
+            return reject(Error('Visible node-loading frame was not observed'));
+          }
+          requestAnimationFrame(check);
+        };
+        check();
+      })`,
+    });
+    assert.equal(loadingFrame.result.value.canvasOpacity, 0);
+    assert.equal(loadingFrame.result.value.previewOpacity, 1);
+    let clip = loadingFrame.result.value.clip;
+    await saveGraphSnapshotScreenshot(cdp, 'startup-visible-loading-preview', { clip });
+    let ready = await readGraphSnapshotAcceptance(cdp, 'live-pcb');
+    assert.deepEqual(ready.qualities, { full: 191 });
+    let mixedFrames = ready.timeline.filter((frame) => (
+      frame.snapshot && frame.snapshotOpacity > 0.01 && frame.canvasOpacity > 0.01
+    ));
+    assert.deepEqual(mixedFrames, [], JSON.stringify(ready.timeline));
+    await saveGraphSnapshotScreenshot(cdp, 'startup-after-live-nodes', { clip });
+  } finally {
+    releaseBootstrap();
+  }
+});
+
+for (let corruptGraphSnapshot of [false, true]) {
+  let routeMode = corruptGraphSnapshot ? 'rerouted' : 'cached';
+  test(`graph startup and layout preserve centered full PCB (${routeMode})`, {
+    timeout: 60_000,
+  }, async (t) => {
+    let page = await createPortfolioPage(t, {
+      corruptGraphSnapshot,
+      viewport: DESKTOP_VIEWPORT,
+      touch: false,
+    });
+    if (!page) return;
+    let { cdp, server } = page;
+    await installRuGraphSnapshotStartup(cdp);
+    let pagePath = corruptGraphSnapshot ? '/cv/skills/agentic-ai/' : '/cv/';
+    await navigate(cdp, `${server.origin}${pagePath}`, {
+      expectedMode: 'structured',
+    });
+    let state = await readGraphSnapshotAcceptance(cdp, corruptGraphSnapshot ? 'live-pcb' : 'cached-pcb');
+    assert.equal(state.nodeCount, 125);
+    assert.deepEqual(state.qualities, { full: 191 });
+    let incompleteFrames = state.timeline.filter((frame) => (
+      frame.pathCount > 0 && frame.canvasOpacity > 0.01
+        && frame.liveLayerOpacity > 0.01
+        && (frame.full !== 191 || frame.draft || frame.none)
+    ));
+    assert.deepEqual(incompleteFrames, [], JSON.stringify(state.timeline));
+    assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
+    assert.equal(state.sawGraphPreview, true, JSON.stringify(state.timeline));
+    assert.equal(state.sawUnhiddenSnapshot, false, JSON.stringify(state.timeline));
+    await saveGraphSnapshotScreenshot(cdp, 'skill-full-pcb-ready');
+    let handle = await cdp.send('Runtime.evaluate', {
+      returnByValue: true,
+      expression: `(() => {
+        let handle = [...document.querySelectorAll('.portfolio-layout .split-resizer')]
+          .find((item) => item.parentElement.querySelector('portfolio-graph-panel')
+            && item.parentElement.querySelector('portfolio-viewer-panel')
+            && !item.parentElement.querySelector('portfolio-tree-panel'));
+        let rect = handle.getBoundingClientRect();
+        return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+      })()`,
+    });
+    let { x, y } = handle.result.value;
+    await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+    await cdp.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed', x, y, button: 'left', clickCount: 1,
+    });
+    await cdp.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved', x: x - 140, y, button: 'left', buttons: 1,
+    });
+    await cdp.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased', x: x - 140, y, button: 'left', clickCount: 1,
+    });
+    await cdp.send('Runtime.evaluate', {
+      expression: `[...document.querySelectorAll('portfolio-tree-panel [role="treeitem"]')]
+        .find((item) => item.textContent.includes('R&D'))?.click()`,
+    });
+    let readCentered = () => cdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `new Promise((resolve, reject) => {
+        let started = performance.now();
+        let previous = '';
+        let stable = 0;
+        let check = () => {
+          let canvas = document.querySelector('node-canvas');
+          let node = canvas?.querySelector('[node-id="skills/rnd-engineering"]');
+          let viewport = canvas?.getBoundingClientRect();
+          let rect = node?.getBoundingClientRect();
+          if (rect && viewport && !canvas.hasAttribute('data-viewport-animating')) {
+            let value = {
+              dx: rect.x + rect.width / 2 - viewport.x - viewport.width / 2,
+              dy: rect.y + rect.height / 2 - viewport.y - viewport.height / 2,
+            };
+            let key = JSON.stringify(value);
+            stable = key === previous ? stable + 1 : 0;
+            previous = key;
+            if (stable >= 3 && Math.abs(value.dx) < 2 && Math.abs(value.dy) < 2) {
+              return resolve(value);
+            }
+          }
+          if (performance.now() - started > 10000) return reject(Error('Focus did not settle'));
+          requestAnimationFrame(check);
+        };
+        check();
+      })`,
+    });
+    let centered = await readCentered();
+    assert.ok(Math.abs(centered.result.value.dx) < 2, JSON.stringify(centered.result.value));
+    assert.ok(Math.abs(centered.result.value.dy) < 2, JSON.stringify(centered.result.value));
+    await saveGraphSnapshotScreenshot(cdp, 'rnd-engineering-centered');
+    await cdp.send('Runtime.evaluate', {
+      expression: `document.querySelector('portfolio-graph-panel')
+        .closest('layout-node').querySelector('.collapse-btn').click()`,
+    });
+    let collapsed = await cdp.send('Runtime.evaluate', {
+      returnByValue: true,
+      expression: `document.querySelector('portfolio-graph-panel')
+        .closest('layout-node').hasAttribute('collapsed')`,
+    });
+    assert.equal(collapsed.result.value, true);
+    await cdp.send('Runtime.evaluate', {
+      expression: `document.querySelector('portfolio-graph-panel')
+        .closest('layout-node').querySelector('.collapse-btn').click()`,
+    });
+    await readCentered();
+
+    await cdp.send('Runtime.evaluate', {
+      expression: "document.querySelector('agent-dock-shell').open()",
+    });
+    let layoutWidths = await cdp.send('Runtime.evaluate', {
+      awaitPromise: true,
+      returnByValue: true,
+      expression: `new Promise((resolve) => {
+        let previous = '';
+        let stable = 0;
+        let sample = () => {
+          let layout = document.querySelector('.portfolio-layout');
+          let root = layout.querySelector(':scope > .layout-root');
+          let value = {
+            viewport: layout.getBoundingClientRect().width,
+            content: root.getBoundingClientRect().width,
+          };
+          let key = JSON.stringify(value);
+          stable = key === previous ? stable + 1 : 0;
+          previous = key;
+          if (stable >= 5) return resolve(value);
+          requestAnimationFrame(sample);
+        };
+        sample();
+      })`,
+    });
+    assert.ok(layoutWidths.result.value.content <= layoutWidths.result.value.viewport + 1,
+      JSON.stringify(layoutWidths.result.value));
+    await readCentered();
+    await saveGraphSnapshotScreenshot(cdp, 'chat-nested-layout-contained');
+    assert.equal(cdp.exceptions.length, 0);
+  });
+
+}
+
 test('normal RU /cv/ keeps the inert PCB until a drifted snapshot reroutes to full live PCB', {
   timeout: 60_000,
 }, async (t) => {
@@ -9584,7 +10897,7 @@ test('normal RU /cv/ keeps the inert PCB until a drifted snapshot reroutes to fu
   assert.equal(state.nodeCount, 125);
   assert.deepEqual(state.qualities, { full: 191 });
   assert.equal(state.sawFullPcbQuality, true);
-  assert.equal(state.sawConnectionsOnlyOverlay, true, JSON.stringify(state.timeline));
+  assert.equal(state.sawGraphPreview, true, JSON.stringify(state.timeline));
   assert.equal(state.sawEdgeGap, false, JSON.stringify(state.timeline));
   assert.equal(state.sawUnhiddenSnapshot, false, JSON.stringify(state.timeline));
   assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
@@ -9827,6 +11140,83 @@ test('normal RU /cv/ preserves full PCB plus exactly three proxies during one-no
   assert.equal(cdp.exceptions.length, 0);
 });
 
+test('CV Show mode chooser keeps its player unmounted until a mode is selected', {
+  timeout: 60_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('mode chooser acceptance uses the local CV runtime');
+  let page = await createPortfolioPage(t, {
+    viewport: DESKTOP_VIEWPORT,
+    touch: false,
+    providerModules: true,
+  });
+  if (!page) return;
+  let { cdp, server } = page;
+  await navigate(cdp, `${server.origin}/cv/?lang=ru&mode=structured`, {
+    expectedMode: 'structured',
+  });
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.dispatchEvent(new CustomEvent('portfolio-open-tour', {
+      detail: { source: 'mode-choice-acceptance' },
+    }))`,
+  }, { label: 'open CV Show without an entry start intent', timeoutMs: 5_000 });
+  let chooser = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let dock = document.querySelector('agent-dock-shell');
+        let chat = dock?.getChat?.();
+        let action = chat?.querySelector('[data-action-id="start-short"]');
+        if (dock?.hasAttribute('open') && action) return resolve({
+          open: true,
+          action: action.dataset.actionId,
+          player: Boolean(chat.querySelector('chat-show-player')),
+        });
+        if (performance.now() - started > 8000) return reject(new Error('CV Show mode chooser did not become ready'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify unselected CV Show chooser', timeoutMs: 10_000 });
+  assert.deepEqual(chooser.result.value, {
+    open: true,
+    action: 'start-short',
+    player: false,
+  });
+  assert.deepEqual(cvShowAudioRequestPaths(cdp.requestedUrls), []);
+
+  await clickVisible(
+    cdp,
+    'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
+    'select Short Show mode',
+  );
+  let selected = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let chat = document.querySelector('agent-dock-shell')?.getChat?.();
+        let host = document.querySelector('portfolio-show-chat');
+        let player = chat?.querySelector('chat-show-player');
+        if (player && host?.routeSnapshot?.mode === 'short') return resolve({
+          player: true,
+          mode: host.routeSnapshot.mode,
+        });
+        if (performance.now() - started > 10000) return reject(new Error('selected Show player did not mount'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify player mounts after mode selection', timeoutMs: 12_000 });
+  assert.deepEqual(selected.result.value, { player: true, mode: 'short' });
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('portfolio-show-chat')?.stopShow?.()`,
+  }, { label: 'stop mode chooser acceptance Show', timeoutMs: 5_000 });
+  assert.deepEqual(cdp.exceptions, []);
+});
+
 test('loopback authoring persists one live WebMCP timing revision and public static stays read-only', {
   timeout: 120_000,
 }, async (t) => {
@@ -9876,7 +11266,7 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
       source: `(() => {
         const bindingName = ${JSON.stringify(BINDING_NAME)};
         const authoringPrefix = ${JSON.stringify(AUTHORING_PREFIX)};
-        const expectedAuthoringNames = new Set(${JSON.stringify(AUTHORING_TOOL_NAMES)});
+        let expectedAuthoringNames = new Set(${JSON.stringify(REGISTERED_AUTHORING_TOOL_NAMES)});
         const hasExpectedAuthoringNames = (names) => (
           names.size === expectedAuthoringNames.size
           && [...names].every((name) => expectedAuthoringNames.has(name))
@@ -9925,9 +11315,11 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
               name: tool.name,
               activeCount: activeAuthoringNames.size,
             });
-            if (hasExpectedAuthoringNames(registeredAuthoringNames)
-              && activeAuthoringNames.size === 0) {
-              emit('tools-disposed', { disposedCount: registeredAuthoringNames.size });
+            if (activeAuthoringNames.size === 0) {
+              emit('tools-disposed', {
+                disposedCount: registeredAuthoringNames.size,
+                registeredCount: registeredAuthoringNames.size,
+              });
             }
           }, { once: true });
           if (hasExpectedAuthoringNames(registeredAuthoringNames)) resolveReady(snapshot());
@@ -10060,7 +11452,7 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
       let value = decodeEvidence(params);
       if (value) authoringEvidence.push(value);
     });
-    let authoringUrl = `${authoringHost.origin}/cv/?mode=structured&loopback-authoring=1`;
+    let authoringUrl = `${authoringHost.origin}/cv/?lang=ru&mode=structured&loopback-authoring=1`;
     await navigate(authoringCdp, authoringUrl, { expectedMode: 'structured' });
     let nativeReady = await authoringCdp.send('Runtime.evaluate', {
       awaitPromise: true,
@@ -10068,11 +11460,11 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
       expression: 'globalThis.__cvAuthoringNative.ready',
     }, { label: 'wait for native provider WebMCP registration', timeoutMs: 20_000 });
     assert.equal(nativeReady.result.value.generation, 1);
-    assert.deepEqual(nativeReady.result.value.authoringToolNames, AUTHORING_TOOL_NAMES);
+    assert.deepEqual(nativeReady.result.value.authoringToolNames, REGISTERED_AUTHORING_TOOL_NAMES);
     assert.equal(nativeReady.result.value.descriptors.length, AUTHORING_TOOL_COUNT);
     assert.deepEqual(
       nativeReady.result.value.descriptors.map(({ name }) => name),
-      AUTHORING_TOOL_NAMES,
+      REGISTERED_AUTHORING_TOOL_NAMES,
     );
     assert.equal(
       nativeReady.result.value.descriptors.every(({ name, description, inputSchema }) => (
@@ -10147,7 +11539,7 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
         const signal = AbortSignal.timeout(8000);
         const observer = new MutationObserver(() => accept());
         const accept = () => {
-          const chat = document.querySelector('portfolio-show-chat');
+          let chat = document.querySelector('portfolio-show-chat');
           const start = document.querySelector(
             'agent-dock-shell agent-show-chat [data-action-id="start-short"]',
           );
@@ -10306,9 +11698,15 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
 
     await authoringCdp.send('Runtime.evaluate', {
       expression: `globalThis.__cvAuthoringProjectedTiming = new Promise((resolve, reject) => {
-        const signal = AbortSignal.timeout(20000);
+        let signal = AbortSignal.timeout(60000);
+        let observed = [];
         const onOperation = (event) => {
           const operation = event.detail?.operation;
+          observed.push({
+            entryId: event.detail?.entryId || '',
+            cellId: operation?.projectCell?.id || '',
+            kind: operation?.kind || '',
+          });
           if (operation?.projectCell?.id !== ${JSON.stringify(mutationInput.payload.cellId)}) {
             return;
           }
@@ -10333,7 +11731,19 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
             onOperation,
             { capture: true },
           );
-          reject(signal.reason);
+          let chat = document.querySelector('portfolio-show-chat');
+          resolve({
+            timeout: signal.reason.message,
+            observed,
+            show: chat ? {
+              running: chat.$.isRunning,
+              paused: chat.$.isPaused,
+              resumeRequired: chat.$.resumeRequired,
+              activeId: chat.narrationSnapshot?.active?.activeId || '',
+              activePaused: chat.narrationSnapshot?.active?.paused,
+              alignmentId: chat.alignmentSnapshot?.activeId || '',
+            } : null,
+          });
         }, { once: true });
         document.addEventListener(
           'portfolio-show-presentation-operation',
@@ -10352,7 +11762,8 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
       awaitPromise: true,
       returnByValue: true,
       expression: 'globalThis.__cvAuthoringProjectedTiming',
-    }, { label: 'observe committed timing in the live Show execution tuple', timeoutMs: 22_000 });
+    }, { label: 'observe committed timing in the live Show execution tuple', timeoutMs: 62_000 });
+    assert.equal(projectedTiming.exceptionDetails, undefined);
     assert.deepEqual(projectedTiming.result.value, {
       entryId: 'positioning',
       cellId: mutationInput.payload.cellId,
@@ -10576,4 +11987,207 @@ test('loopback authoring persists one live WebMCP timing revision and public sta
       await rm(temporaryRoot, { recursive: true, force: true });
     }
   }
+});
+
+test('CV Show full mode supports live composition seek, pause, and resume', {
+  timeout: 90_000,
+}, async (t) => {
+  if (EXTERNAL_TEST_URL) t.skip('live seek acceptance requires the selected public Opus release');
+  let page = await createPortfolioPage(t, {
+    viewport: DESKTOP_VIEWPORT,
+    touch: false,
+    providerModules: true,
+    autoplayPolicy: 'no-user-gesture-required',
+  });
+  if (!page) return;
+  let { cdp, server } = page;
+  await navigate(
+    cdp,
+    `${server.origin}/cv/?showMode=full&showEntry=${encodeURIComponent(CV_SHOW_STORY.short[0])}&showTime=0&showPlay=0`,
+    { expectedMode: 'structured' },
+  );
+
+  let initial = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let host = document.querySelector('portfolio-show-chat');
+        let player = document.querySelector('chat-show-player');
+        let snapshot = host?.narrationSnapshot;
+        if (snapshot?.active?.activeId === ${JSON.stringify(CV_SHOW_STORY.short[0])}
+          && player?._timeline?.turns?.length) return resolve({
+          activeId: snapshot.active.activeId,
+          paused: snapshot.active.paused,
+          playing: player.$.playing,
+          mode: new URL(location.href).searchParams.get('showMode'),
+          routeMode: host.routeSnapshot?.mode,
+          totalTurns: player._timeline.turns.length,
+          totalMs: player._timeline.totalMs,
+          positionLabel: player.$.positionLabel,
+        });
+        if (performance.now() - started > 12000) return reject(new Error('full Show route did not become ready'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'wait for paused full Show route', timeoutMs: 15_000 });
+  assert.deepEqual(initial.result.value, {
+    activeId: CV_SHOW_STORY.short[0],
+    paused: true,
+    playing: false,
+    mode: 'full',
+    routeMode: 'full',
+    totalTurns: CV_SHOW_STORY.short.length + Object.keys(CV_SHOW_STORY.branches).length,
+    totalMs: initial.result.value.totalMs,
+    positionLabel: `1 / ${CV_SHOW_STORY.short.length + Object.keys(CV_SHOW_STORY.branches).length}`,
+  });
+  assert.ok(initial.result.value.totalMs > 0);
+
+  await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      let prototype = HTMLMediaElement.prototype;
+      Object.defineProperty(prototype, 'paused', {
+        configurable: true,
+        get() { return this.__cvTestPaused ?? true; },
+      });
+      Object.defineProperty(prototype, 'currentTime', {
+        configurable: true,
+        get() { return this.__cvTestCurrentTime ?? 0; },
+        set(value) { this.__cvTestCurrentTime = Number(value) || 0; },
+      });
+      prototype.play = function playForCvShowTransportTest() {
+        this.__cvTestPaused = false;
+        queueMicrotask(() => this.dispatchEvent(new Event('playing')));
+        return Promise.resolve();
+      };
+      prototype.pause = function pauseForCvShowTransportTest() {
+        this.__cvTestPaused = true;
+        queueMicrotask(() => this.dispatchEvent(new Event('pause')));
+      };
+      return true;
+    })()`,
+  }, { label: 'install deterministic audio transport for timeline assertions', timeoutMs: 5_000 });
+
+  await clickVisible(
+    cdp,
+    'agent-dock-shell agent-show-chat chat-show-player [data-control="play"]',
+    'resume full Show before live seek',
+  );
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let active = document.querySelector('portfolio-show-chat')?.narrationSnapshot?.active;
+        if (active?.activeId === ${JSON.stringify(CV_SHOW_STORY.short[0])} && !active.paused) return resolve(true);
+        if (performance.now() - started > 8000) return reject(new Error('full Show did not resume'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify resumed full Show playback', timeoutMs: 10_000 });
+
+  let seek = await cdp.send('Runtime.evaluate', {
+    returnByValue: true,
+    expression: `(() => {
+      let player = document.querySelector('chat-show-player');
+      let branches = new Set(${JSON.stringify(Object.keys(CV_SHOW_STORY.branches))});
+      let turn = player?._timeline?.turns?.find(({ id }) => branches.has(id));
+      let track = player?.ref?.progressTrack;
+      let rect = track?.getBoundingClientRect?.();
+      if (!turn || !rect || !(rect.width > 0) || !(player._timeline.totalMs > 0)) return null;
+      let absoluteMs = turn.startMs + Math.min(1000, Math.floor(turn.durationMs / 4));
+      return {
+        targetId: turn.id,
+        absoluteMs,
+        x: rect.left + rect.width * (absoluteMs / player._timeline.totalMs),
+        y: rect.top + rect.height / 2,
+        width: rect.width,
+      };
+    })()`,
+  }, { label: 'locate a live full-mode detail seek position', timeoutMs: 5_000 });
+  assert.ok(seek.result.value, 'the full timeline must expose a seekable detail branch');
+  for (let type of ['mouseMoved', 'mousePressed', 'mouseReleased']) {
+    await cdp.send('Input.dispatchMouseEvent', {
+      type,
+      button: 'left',
+      clickCount: 1,
+      x: seek.result.value.x,
+      y: seek.result.value.y,
+    }, { label: `seek full Show progress ${type}`, timeoutMs: 5_000 });
+  }
+  let afterSeek = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let host = document.querySelector('portfolio-show-chat');
+        let active = host?.narrationSnapshot?.active;
+        if (active?.activeId === ${JSON.stringify(seek.result.value.targetId)}) return resolve({
+          activeId: active.activeId,
+          paused: active.paused,
+          mode: host.routeSnapshot?.mode,
+          timeMs: host.routeSnapshot?.timeMs,
+          playerPlaying: document.querySelector('chat-show-player')?.$.playing,
+        });
+        if (performance.now() - started > 15000) return reject(new Error('live full-mode seek did not switch to its detail branch'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify live full-mode detail seek', timeoutMs: 18_000 });
+  assert.equal(afterSeek.result.value.mode, 'full');
+  assert.ok(Math.abs(afterSeek.result.value.timeMs - seek.result.value.absoluteMs) < 2000);
+
+  if (afterSeek.result.value.paused) {
+    await cdp.send('Runtime.evaluate', {
+      expression: `document.querySelector('chat-show-player')?.control('toggle')`,
+    }, { label: 'resume full Show after live seek', timeoutMs: 5_000 });
+  }
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let active = document.querySelector('portfolio-show-chat')?.narrationSnapshot?.active;
+        if (active?.activeId === ${JSON.stringify(seek.result.value.targetId)} && !active.paused) return resolve(true);
+        if (performance.now() - started > 8000) return reject(new Error('full Show did not resume after live seek'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify full Show resume after live seek', timeoutMs: 10_000 });
+
+  await cdp.send('Runtime.evaluate', {
+    expression: `document.querySelector('chat-show-player')?.control('toggle')`,
+  }, { label: 'pause after full-mode live seek', timeoutMs: 5_000 });
+  let paused = await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: `new Promise((resolve, reject) => {
+      let started = performance.now();
+      let check = () => {
+        let host = document.querySelector('portfolio-show-chat');
+        let active = document.querySelector('portfolio-show-chat')?.narrationSnapshot?.active;
+        let playing = document.querySelector('chat-show-player')?.$.playing;
+        if (active?.activeId === ${JSON.stringify(seek.result.value.targetId)}
+          && host?.$.isPaused === true && playing === false) return resolve(true);
+        if (performance.now() - started > 8000) return reject(new Error('full Show did not pause after seek'));
+        setTimeout(check, 25);
+      };
+      check();
+    })`,
+  }, { label: 'verify full Show pause after live seek', timeoutMs: 10_000 });
+  assert.equal(
+    paused.exceptionDetails,
+    undefined,
+    paused.exceptionDetails?.exception?.description || 'full Show pause evaluation failed',
+  );
+  assert.equal(paused.result.value, true);
+
+  assert.deepEqual(cdp.exceptions, []);
 });

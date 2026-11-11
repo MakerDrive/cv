@@ -1,3 +1,4 @@
+import { PORTFOLIO_PAGE_METADATA } from './data/portfolioPageMetadata.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getPage } from './getPage.js';
@@ -32,7 +33,7 @@ const RETIREMENT_COPY = Object.freeze({
   },
 });
 const PORTFOLIO_HEADER_CONTROLS = /*html*/ `
-  <span class="pulse-header-title">${PAGE_TITLE}</span>
+  <a class="pulse-header-title" href="./">Vladimir Matiasevich</a>
   <button
     class="pulse-tour-button"
     type="button"
@@ -102,10 +103,12 @@ export function getProjectPage(sourceUrl) {
  * @param {string} [options.basePath]
  * @param {string} [options.publicationId]
  * @param {string} [options.projectId]
+ * @param {string} [options.pageId]
  * @returns {Promise<string>}
  */
 export async function getPortfolioPage({
   basePath = './',
+  pageId = 'site/index',
   publicationId,
   projectId,
 } = {}) {
@@ -131,6 +134,13 @@ export async function getPortfolioPage({
       pageTitle = `${project.title} | ${PAGE_TITLE}`;
       pageDescription = project.summary;
     }
+  }
+
+  if (!publicationId && !projectId) {
+    let page = PORTFOLIO_PAGE_METADATA[pageId];
+    if (!page) throw new Error(`Unknown portfolio page ${pageId}; register its metadata first.`);
+    pageTitle = page.title === PAGE_TITLE ? PAGE_TITLE : `${page.title} | ${PAGE_TITLE}`;
+    pageDescription = page.summary;
   }
 
   let isRetired = Boolean(metadata?.retired);
@@ -160,16 +170,18 @@ export async function getPortfolioPage({
       <section class="pulse-screen" aria-label="Vladimir Matiasevich portfolio">
         <img
           class="portfolio-graph-snapshot"
-          src="portfolio-graph-snapshots/initial.svg"
+          src="portfolio-graph-snapshots/initial.webp"
           alt=""
           aria-hidden="true"
-          data-graph-visual-layer="connections-only"
+          data-graph-visual-layer="graph-preview"
           draggable="false"
         >
         <portfolio-workspace class="pulse-workspace"></portfolio-workspace>
       </section>
     `;
-  let socialCardId = metadata && !isRetired ? publicationId : projectId;
+  let socialCardId = publicationId
+    ? (metadata && !isRetired ? publicationId : undefined)
+    : projectId || pageId;
 
   return getPage({
     BASE_PATH: basePath,

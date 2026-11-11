@@ -203,6 +203,30 @@ coordinate via `history.replaceState`. Production runtime never writes
 entry/branch names to the URL; those params exist only in the legacy parser
 and its tests.
 
+## Playback speed control
+
+The transport row carries a `2x` toggle owned by the CV Show component
+(`#ensureSpeedControl()` in
+src/ui-components/client-only/tour-player/tour-player.js); the shared
+`<chat-show-player>` never grows a second speed implementation. The Show opens
+at `CV_SHOW_DEFAULT_PLAYBACK_RATE` (`2`), so the toggle starts pressed and
+authoring previews match the published default.
+
+The selected rate is the single source of truth for narration speed:
+
+- local audio clips receive `playbackRate` (and `defaultPlaybackRate`) before
+  they start, and again on every clip transition;
+- browser speech receives the same value as `speechSynthesis` `rate`;
+- toggling applies to the active narration immediately and the new value is
+  announced through `aria-pressed` and the `tour.speed` / `tour.speed.normal`
+  label.
+
+Because the composition clock samples the narration media element, `showTime`,
+captions, progress and presentation cues follow the 2× clock without any
+separate timing table. Authored cell spans remain composition milliseconds, so
+2× playback halves their wall-clock duration rather than their authored
+geometry.
+
 ## Failure semantics: AUTO REWIND after narration start is forbidden
 
 **Gate (Slice C):** `live_ensure(target, state, sync: 'gate')` on the live

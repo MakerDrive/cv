@@ -1,3 +1,3 @@
 import { getPortfolioPage } from '../../portfolioPage.js';
 
-export default await getPortfolioPage({ basePath: '../../' });
+export default await getPortfolioPage({ pageId: 'skills/agentic-ai', basePath: '../../' });

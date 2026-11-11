@@ -1,3 +1,5 @@
+import { PORTFOLIO_PAGE_METADATA } from '../src/static-pages/data/portfolioPageMetadata.js';
+import { resolveSocialCardUrl } from '../src/static-pages/data/socialCards.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +22,7 @@ import { verifyCvShowWebAudio } from './verify-cv-show-web-audio.js';
 
 export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
   'js/index.js',
+  'js/notchset-theme/index.js',
   'js/markdown-viewer/index.js',
   'js/tour-player/index.js',
   'js/live-observation/index.js',
@@ -32,9 +35,6 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
 // Budget raised 2026-09-18 (+4% raw, +4% gzip): Slice A/B/C landed —
 // read-only live observation, ensure/reconciliation, gated composition
 // boundary handling are explicit new runtime surfaces.
-// Budget raised 2026-10-25 (+15 KB raw / +5 KB gzip) for provider-owned nested
-// fullscreen tabs; measured 1876620 raw / 454842 gzip with symbiote-ui
-// 7f5cbd0, leaving 8380 raw / 5158 gzip bytes of headroom.
 export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // 2026-09-24: +20 KB headroom for the symbiote-ui modal drawer contract
   // (inert background, Tab trap, translated a11y names); measured 1851017 raw
@@ -104,7 +104,12 @@ export function verifyPortfolioSocialMetadata(content, htmlPath, distDir) {
   let isArticleOrProject = /^(?:projects\/[^/]+|pulse\/[^/]+|projects\/[^/]+\/pulse\/[^/]+)\/index\.html$/.test(
     relativePath,
   );
-  if (!isArticleOrProject) return false;
+  if (relativePath === 'index.html' && !/\bid=["']?pulse-projects-data\b/.test(content)) return false;
+  let routeId = relativePath === 'index.html'
+    ? 'site/index'
+    : relativePath.replace(/\/index\.html$/, '');
+  if (!routeId.includes('/')) routeId += '/index';
+  if (!isArticleOrProject && !Object.hasOwn(PORTFOLIO_PAGE_METADATA, routeId)) return false;
   let robots = getMetaContent(content, 'name', 'robots') || '';
   if (robots.split(',').some((value) => value.trim() === 'noindex')) return false;
 
@@ -120,6 +125,12 @@ export function verifyPortfolioSocialMetadata(content, htmlPath, distDir) {
     || getMetaContent(content, 'property', 'og:image:height') !== '630'
   ) {
     throw new Error(`HTML file "${relativePath}" must declare a 1200x630 social image.`);
+  }
+  let pageId = routeId.includes('/pulse/')
+    ? `pulse/${routeId.split('/').at(-1)}`
+    : routeId;
+  if (openGraphImage !== resolveSocialCardUrl(pageId)) {
+    throw new Error(`HTML file "${relativePath}" must reference its own generated social card.`);
   }
   return true;
 }
@@ -422,7 +433,7 @@ export async function verifyPortfolioGraphSnapshots(distDir) {
   if (validation.manifest.entries.length !== expectedCount) {
     throw new Error(`Portfolio graph snapshot manifest must contain ${expectedCount} variants.`);
   }
-  let referencedFiles = new Set(['initial.svg', 'manifest.json']);
+  let referencedFiles = new Set(['initial.webp', 'manifest.json']);
   for (let locale of PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.locales) {
     for (let viewport of PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.viewports) {
       for (let theme of PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.themes) {
@@ -432,19 +443,22 @@ export async function verifyPortfolioGraphSnapshots(distDir) {
           theme,
         });
         if (!entry) throw new Error(`Portfolio graph snapshot variant is missing: ${locale}/${viewport}/${theme}.`);
-        let svgName = path.basename(entry.svg);
+        let previewName = path.basename(entry.preview);
         let snapshotName = path.basename(entry.snapshot);
-        referencedFiles.add(svgName);
+        referencedFiles.add(previewName);
+        referencedFiles.add(`initial-${locale}-${theme}.webp`);
         referencedFiles.add(snapshotName);
-        let svg = await fs.readFile(path.join(snapshotDir, svgName), 'utf8');
-        let pathCount = svg.match(/<path\b[^>]*\bdata-conn-id=/g)?.length || 0;
-        if (
-          /<script\b|<foreignObject\b|\son[a-z]+\s*=|(?:href|src)\s*=\s*["']https?:/i.test(svg)
-          || /<image\b|<text\b/i.test(svg)
-          || !/<svg\b[^>]*aria-hidden="true"/i.test(svg)
-          || pathCount !== 191
-        ) {
-          throw new Error(`Portfolio graph connections-only SVG is invalid: ${svgName}.`);
+        let previewPath = path.join(snapshotDir, previewName);
+        let image = await sharp(previewPath).metadata();
+        if (image.format !== 'webp' || image.width !== entry.width
+          || image.height !== entry.height || !entry.previewNodeIds.length) {
+          throw new Error(`Portfolio graph preview is invalid: ${previewName}.`);
+        }
+        let alias = await fs.readFile(
+          path.join(snapshotDir, `initial-${locale}-${theme}.webp`),
+        );
+        if (!alias.equals(await fs.readFile(previewPath))) {
+          throw new Error(`Portfolio graph preview alias is stale: ${locale}/${theme}.`);
         }
         let snapshot = JSON.parse(await fs.readFile(path.join(snapshotDir, snapshotName), 'utf8'));
         let binding = validatePortfolioGraphSnapshotBinding(snapshot, entry.routeFingerprint);
@@ -462,9 +476,9 @@ export async function verifyPortfolioGraphSnapshots(distDir) {
     viewport: 'wide',
     theme: 'light',
   });
-  let initialSvg = await fs.readFile(path.join(snapshotDir, 'initial.svg'));
-  let expectedInitialSvg = await fs.readFile(path.join(distDir, initialEntry.svg));
-  if (!initialSvg.equals(expectedInitialSvg)) {
+  let initialPreview = await fs.readFile(path.join(snapshotDir, 'initial.webp'));
+  let expectedInitialPreview = await fs.readFile(path.join(distDir, initialEntry.preview));
+  if (!initialPreview.equals(expectedInitialPreview)) {
     throw new Error('Portfolio graph initial snapshot must be the RU wide/light variant.');
   }
   let snapshotFiles = await fs.readdir(snapshotDir);
@@ -486,7 +500,7 @@ export async function runVerification(distDir) {
   let rootIndexPath = path.join(distDir, 'index.html');
   if (await fileExists(rootIndexPath)) {
     let rootIndex = await fs.readFile(rootIndexPath, 'utf8');
-    if (rootIndex.includes('id="pulse-projects-data"')) {
+    if (/\bid=["']?pulse-projects-data\b/.test(rootIndex)) {
       await verifyPortfolioGraphSnapshots(distDir);
     }
   }

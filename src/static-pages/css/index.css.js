@@ -96,6 +96,10 @@ body:has(.pulse-screen) > header {
   --sn-theme-widget-z: var(--pulse-theme-widget-z, 20030);
 }
 
+.pulse-theme-widget .ctw-trigger-label {
+  display: none;
+}
+
 .pulse-locale-toggle {
   flex: 0 0 auto;
   border: 0;
