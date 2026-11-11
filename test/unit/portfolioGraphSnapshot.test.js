@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import { createNodeCanvasRenderSnapshot } from 'symbiote-ui/manifest';
@@ -13,7 +12,10 @@ import {
   validatePortfolioGraphSnapshotBinding,
   validatePortfolioGraphSnapshotManifest,
 } from '../../src/static-pages/data/portfolioGraphSnapshot.js';
-import { createPortfolioGraphSnapshotRuntime } from '../../src/static-pages/js/portfolioGraphSnapshot.js';
+import {
+  createPortfolioGraphSnapshotRuntime,
+  readPortfolioGraphRouteFingerprint,
+} from '../../src/static-pages/js/portfolioGraphSnapshot.js';
 
 function createFingerprint(overrides = {}) {
   return createPortfolioGraphRouteFingerprint({
@@ -92,7 +94,10 @@ test('manifest selects the exact RU viewport and theme variant', () => {
     locale: 'ru',
     theme: 'dark',
     viewport: 'wide',
-    svg: `portfolio-graph-snapshots/${'a'.repeat(64)}.svg`,
+    preview: `portfolio-graph-snapshots/${'a'.repeat(64)}.webp`,
+    previewNodeIds: ['a'],
+    width: 600,
+    height: 400,
     snapshot: `portfolio-graph-snapshots/${'b'.repeat(64)}.snapshot.json`,
     routeFingerprint: createFingerprint(),
   };
@@ -102,6 +107,9 @@ test('manifest selects the exact RU viewport and theme variant', () => {
     entries: [entry],
   };
   assert.equal(validatePortfolioGraphSnapshotManifest(manifest).valid, true);
+  assert.equal(validatePortfolioGraphSnapshotManifest({
+    ...manifest, entries: [{ ...entry, previewNodeIds: [] }],
+  }).valid, false);
   assert.equal(
     validatePortfolioGraphSnapshotManifest({ ...manifest, visualLayer: 'full-raster' }).reason,
     'manifest-visual-layer',
@@ -133,46 +141,54 @@ test('snapshot binding accepts the full fingerprint and rejects locale drift', (
   });
 });
 
-test('runtime snapshot fingerprint uses intrinsic canvas geometry and retains PCB fallback', async () => {
-  let source = await readFile(new URL('../../src/static-pages/js/portfolioGraphSnapshot.js', import.meta.url), 'utf8');
-  assert.match(source, /node\.offsetWidth \|\| node\._cachedW/);
-  assert.match(source, /node\.offsetHeight \|\| node\._cachedH/);
-  assert.match(source, /node\.style\?\.transform/);
-  assert.match(source, /translate\(\?:3d\)\?/);
-  assert.doesNotMatch(source, /let rect = node\.getBoundingClientRect\(\)/);
-  assert.doesNotMatch(source, /scrollWidth|scrollHeight/);
-  assert.match(source, /fontFamily: style\.fontFamily/);
-  assert.match(source, /fontSize: style\.fontSize/);
-  assert.doesNotMatch(source, /setTransientPathStyle\?\.\('straight', 'portfolio-startup'/);
-  assert.match(source, /waitForLiveGraphGeometry\(/);
-  assert.match(source, /requireFullPcb: true/);
-  assert.match(source, /waitForFullLivePcb\(canvas, expectedRouteCount, signal\)/);
-  assert.match(source, /revealLiveGraph\(panel, 'live-pcb'\)/);
-  let workspace = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(workspace, /setProgressiveConnectionRendering\?\.\(false/);
-  let page = await readFile(new URL('../../src/static-pages/portfolioPage.js', import.meta.url), 'utf8');
-  assert.match(page, /<img[\s\S]*class="portfolio-graph-snapshot"[\s\S]*aria-hidden="true"/);
-  assert.match(page, /data-graph-visual-layer="connections-only"/);
-  assert.doesNotMatch(page, /<object[\s\S]*class="portfolio-graph-snapshot"/);
-  let css = await readFile(new URL('../../src/static-pages/css/index.css.js', import.meta.url), 'utf8');
-  assert.match(css, /portfolio-canvas\[data-snapshot-pending\] \.sn-connections/);
-  assert.match(css, /\.portfolio-graph-snapshot\s*\{[^}]*background:\s*transparent/);
-  assert.doesNotMatch(css, /\.portfolio-graph-snapshot\s*\{[^}]*background:\s*var\(--pulse-surface\)/);
-});
-
-test('six measured subpixel nodes are stabilized without weakening the exact fingerprint', async () => {
-  let source = await readFile(new URL('../../src/static-pages/css/index.css.js', import.meta.url), 'utf8');
-  for (let nodeId of [
-    'media/autobox-v1/ims/spinner',
-    'media/autobox-v1/youtube/FugBzpZqXZ0',
-    'media/autobox-v1/youtube/us3vQHuTYPw',
-    'projects/photopizza-remote',
-    'projects/photosnail-public',
-    'pulse/terminal-x-mcp-terminal-execution-state',
-  ]) {
-    assert.match(source, new RegExp(`node-id=\\"${nodeId.replaceAll('/', '\\/')}\\"`));
-  }
-  assert.match(source, /padding-block-end: 0\.5px/);
-  assert.match(source, /padding-inline-end: 0\.5px/);
-  assert.doesNotMatch(source, /route-fingerprint-tolerance|Math\.(?:floor|ceil)\([^)]*(?:width|height)/);
+test('route fingerprint retains logical geometry when the viewport is transformed', (t) => {
+  let previousGetComputedStyle = globalThis.getComputedStyle;
+  let fontMetrics = {
+    fontFamily: 'sans-serif',
+    fontSize: '12px',
+    fontWeight: '400',
+    lineHeight: '18px',
+    letterSpacing: '0px',
+  };
+  globalThis.getComputedStyle = () => fontMetrics;
+  t.after(() => { globalThis.getComputedStyle = previousGetComputedStyle; });
+  let attributes = {
+    'node-id': 'a',
+    'node-type': 'asset',
+    'node-category': 'data',
+    'node-shape': 'rect',
+    'node-label': 'Node A',
+  };
+  let viewport = { x: 700, y: 300, width: 240, height: 160 };
+  let node = {
+    style: { transform: 'translate3d(25px, -10px, 0px)' },
+    offsetWidth: 120,
+    offsetHeight: 80,
+    textContent: ' Node   A ',
+    getAttribute: (name) => attributes[name] || '',
+    getBoundingClientRect: () => viewport,
+  };
+  let canvas = {
+    querySelectorAll: (selector) => selector === 'graph-node'
+      ? [node]
+      : [{ getAttribute: () => 'a-b' }],
+  };
+  let expected = createPortfolioGraphRouteFingerprint({
+    canonicalGraph: {
+      nodes: [{ id: 'a', type: 'asset', category: 'data', shape: 'rect' }],
+      connectionIds: ['a-b'],
+    },
+    localeContent: {
+      locale: 'en',
+      nodes: [{ id: 'a', label: 'Node A', text: 'Node A' }],
+    },
+    nodePositions: [{ id: 'a', x: 25, y: -10 }],
+    nodeSizes: [{ id: 'a', width: 120, height: 80 }],
+    fontMetrics: [{ id: 'a', ...fontMetrics }],
+  });
+  assert.deepEqual(readPortfolioGraphRouteFingerprint(canvas, 'en'), expected);
+  viewport = { x: 0, y: 0, width: 60, height: 40 };
+  assert.deepEqual(readPortfolioGraphRouteFingerprint(canvas, 'en'), expected);
+  node.offsetWidth = 121;
+  assert.notEqual(readPortfolioGraphRouteFingerprint(canvas, 'en').nodeSizes, expected.nodeSizes);
 });

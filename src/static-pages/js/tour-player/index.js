@@ -474,8 +474,11 @@ function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
   const panelComponent = panelType ? layout?.querySelector?.(`${panelType}-panel`) : null;
   const panelId = panel?.id || panelComponent?.dataset?.panelId || '';
   const agentDock = /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
-  const outerMobile = Boolean(agentDock?.ref?.layout?.hasAttribute?.('drawer-mode-active'));
-  const outerOpen = Boolean(agentDock?.hasAttribute?.('open'));
+  const outerLayout = agentDock?.ref?.layout;
+  const railMode = window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT
+    && Boolean(outerLayout?.hasAttribute?.('mobile-panel-rail-enabled'));
+  const outerMobile = railMode || Boolean(outerLayout?.hasAttribute?.('drawer-mode-active'));
+  const outerOpen = railMode || Boolean(agentDock?.hasAttribute?.('open'));
   if (!layout || !panelId) {
     return Object.freeze({
       targetId,
@@ -483,17 +486,26 @@ function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
       panelType,
       panelId: '',
       mobile: false,
+      railMode,
+      railRevealed: false,
       dock: '',
       open: true,
       outerMobile,
       outerOpen,
     });
   }
-  const mobile = layout.hasAttribute('drawer-mode-active');
+  // The layout's own projection stays the source of truth: a rail slide and a
+  // drawer panel are both "responsive", while a wide desktop split is neither.
+  const mobile = railMode || layout.hasAttribute('drawer-mode-active');
+  // A `swipeControl: none` panel is hidden from the rail, so it is not revealed
+  // by scrolling to it: it keeps the closed-panel policy and defers.
+  const railExcluded = Boolean(railMode
+    && findPanelElement(layout, panelId, panelType)?.hasAttribute?.('mobile-panel-rail-excluded'));
+  const railRevealed = railMode && !railExcluded;
   const revealState = resolveCvShowPanelRevealState({
     mobile,
-    mobileDock: panel?.behavior?.mobileDock,
-    collapsed: panel?.collapsed,
+    mobileDock: railRevealed ? '' : panel?.behavior?.mobileDock,
+    collapsed: railRevealed ? false : panel?.collapsed,
     drawerStartOpen: Boolean(layout.$.drawerStartOpen),
     drawerEndOpen: Boolean(layout.$.drawerEndOpen),
     activeStartPanelId: layout.$.drawerStartPanelId,
@@ -507,6 +519,8 @@ function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
     panelType,
     panelId,
     mobile,
+    railMode,
+    railRevealed,
     dock: revealState.dock,
     open: revealState.open,
     outerMobile,
@@ -519,6 +533,7 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
   const reveal = ({ action, inspected }) => {
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
     const agentDock = /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
+    const railLayout = agentDock?.ref?.layout;
     const mapClosed = Boolean(
       inspected?.panelType === 'portfolio-graph'
       && inspected.panelId
@@ -532,6 +547,14 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
       return {
         changed: false,
         mapDeferred: true,
+        ...inspectTargetPanel(workspace, runtime, action.target, action.id),
+      };
+    }
+    if (inspected?.railRevealed && inspected.panelId) {
+      railLayout?.scrollToPanel?.(inspected.panelId, { layout });
+      return {
+        changed: false,
+        railSelected: true,
         ...inspectTargetPanel(workspace, runtime, action.target, action.id),
       };
     }
@@ -570,8 +593,13 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
   };
   const awaitTransition = async ({ action, inspected, signal }) => {
     if (!inspected?.panelId && !inspected?.outerMobile) return { ready: true, panelId: '' };
+    // The nested panel and outer dock share the one mobile rail; the host
+    // Layout API owns both selection and the snap position, so only the
+    // deferred-hidden map may short-circuit this wait.
+    const railReveal = inspected?.railRevealed && inspected.panelId;
     if (
-      inspected?.panelType === 'portfolio-graph'
+      !railReveal
+      && inspected?.panelType === 'portfolio-graph'
       && inspected.panelId
       && !inspected.open
     ) {
@@ -584,7 +612,8 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
       target: () => {
         const state = inspectTargetPanel(workspace, runtime, action.target, action.id);
         const layout = workspace.querySelector('.portfolio-layout');
-        const outerReady = !inspected.outerMobile
+        const outerReady = inspected.railMode
+          || !inspected.outerMobile
           || state.outerOpen === (inspected.surface === 'outer-dock');
         if (!outerReady) return null;
         if (!inspected.panelId) {
@@ -793,23 +822,38 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let mobileShowPlacementRequested = false;
   let reconcileRouteWhenIdle = false;
   let stripRouteWhenIdle = false;
+  let showLayoutObserver = null;
+  let showLayoutPlayer = null;
+  let showLayoutButton = null;
 
   const isMobileDock = () => (
     typeof window !== 'undefined' && window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT
   ) || Boolean(getDock()?.querySelector?.('panel-layout[drawer-mode-active]'));
+
+  const syncShowExpandButton = (player = null) => {
+    const active = player
+      || getDock()?.getChat?.()?.getShowPlayer?.()
+      || getChat()?.getShowPlayer?.();
+    const button = active?.querySelector?.('[data-cv-show-expand]');
+    if (!button) return;
+    button.hidden = active.parentElement?.classList?.contains('portfolio-show-static-region')
+      || active.hasAttribute('panel-layout');
+    active.setShowLayoutAction?.(false);
+  };
 
   const clearMobileShowPlacement = () => {
     const chat = getDock()?.getChat?.();
     const player = chat?.getShowPlayer?.();
     player?.setShowSettings?.(true);
     player?.setShowClose?.(true);
-    player?.setShowLayoutAction?.(true);
+    player?.setShowLayoutAction?.(false);
     player?.setResizable?.(false);
     player?.requestLayoutPlacement?.('inline');
     player?.removeAttribute?.('compact-caption');
     workspace._mobileShowActive = false;
     mobileShowPlacementRequested = false;
     workspace.classList.remove('portfolio-show-mobile-active');
+    syncShowExpandButton(player);
   };
 
   const syncMobileShowPlacement = () => {
@@ -839,15 +883,21 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     // there only; the desktop chat keeps its caption.
     player.setAttribute('compact-caption', '');
     workspace.classList.add('portfolio-show-mobile-active');
-    // Let the native layout request establish the Show panel and its drawer
-    // owner. Closing the shared dock here races that request and can detach
-    // the live player, causing route reconciliation to restart the segment.
-    if (player.hasAttribute?.('panel-layout') || mobileShowPlacementRequested) return;
+    syncShowExpandButton(player);
+    let staticHost = dock.getStaticShowHost?.();
+    if (staticHost) {
+      dock.setStaticShowHost(staticHost);
+      syncShowExpandButton(player);
+      return;
+    }
+    if (player.parentElement?.classList?.contains('portfolio-show-static-region')
+      || player.hasAttribute?.('panel-layout') || mobileShowPlacementRequested) return;
     mobileShowPlacementRequested = true;
     player.requestLayoutPlacement?.('panel');
   };
 
   const onShowLayoutChange = (event) => {
+    syncShowExpandButton(event.detail?.player);
     if (event.detail?.placement === 'panel' || event.detail?.placement === 'inline') {
       mobileShowPlacementRequested = false;
     }
@@ -1020,6 +1070,18 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   let originTargetId = '';
   let running = false;
+  const syncHeaderShowButton = (active = running || getChat()?.$?.isRunning === true) => {
+    let button = document.querySelector('.pulse-tour-button');
+    if (!button) return;
+    let icon = button.querySelector('.material-symbols-outlined');
+    let paused = active && getChat()?.$?.isPaused === true;
+    if (icon) icon.textContent = active && !paused ? 'stop' : 'play_circle';
+    let label = getLocaleMessage(paused ? 'tour.resume' : active ? 'tour.stop' : 'panel.tour');
+    button.setAttribute('aria-label', label);
+    button.setAttribute('title', label);
+    button.toggleAttribute('data-show-active', active);
+    button.toggleAttribute('data-show-paused', paused);
+  };
   const staleNavDrawerCloser = createStaleNavDrawerCloser({
     isActive: () => running,
     onClose: closeStaleStartDrawer,
@@ -1108,6 +1170,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       // here makes the route reconciler recreate the old terminal segment.
       cancelPendingRouteWrite();
       running = false;
+      syncHeaderShowButton(false);
       disposePresenter();
       void runtimeCleanup.stopAndRelease('show-terminal', {
         operation: 'show-terminal-cleanup',
@@ -1129,6 +1192,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     const reason = event?.detail?.reason || '';
     const routeDriven = reason.startsWith('route-');
     running = false;
+    syncHeaderShowButton(false);
     disposePresenter();
     void runtimeCleanup.stopAndRelease('show-terminal', {
       operation: 'show-terminal-cleanup',
@@ -1252,6 +1316,17 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onOpen = (event) => {
+    if (event.detail?.source === 'portfolio-header'
+      && (running || getChat()?.$?.isRunning === true)) {
+      if (getChat()?.$?.isPaused === true) {
+        getDock()?.getChat?.()?.getShowPlayer?.()?.control('toggle');
+        queueMicrotask(() => syncHeaderShowButton());
+        return;
+      }
+      getChat()?.stopShow?.({ reason: 'header-stop' });
+      syncHeaderShowButton(false);
+      return;
+    }
     // Ask the host shell to atomically clear every existing overlay before
     // projecting the shared Show player. The shell owns the concrete layout;
     // this semantic request keeps header activation independent of its shape.
@@ -1290,6 +1365,12 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     void applyRouteState(state);
   };
 
+  const onPlayerCloseRequest = () => {
+    routeRequests.cancel();
+    cancelPendingRouteWrite();
+    getChat()?.stopShow?.({ reason: 'player-close' });
+  };
+
   const onSourceViewerAction = (event) => {
     if (event.detail?.action?.intent !== 'cv-show') return;
     onOpen({ detail: { entryId: event.detail.action.payload?.entryId || runtime.selectedId } });
@@ -1297,6 +1378,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
 
   const onRouteChange = (event) => {
     if (event.target !== getChat()) return;
+    syncHeaderShowButton();
     if (routeRequests.applying) {
       reconcileRouteWhenIdle = true;
       return;
@@ -1319,7 +1401,39 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   };
 
   const onShowPlayerMounted = () => {
-    queueMicrotask(syncMobileShowPlacement);
+    queueMicrotask(() => {
+      syncMobileShowPlacement();
+      const player = getDock()?.getChat?.()?.getShowPlayer?.() || getChat()?.getShowPlayer?.();
+      const header = player?.querySelector?.('.chat-show-header');
+      if (!player || !header) return;
+      if (showLayoutPlayer !== player) {
+        showLayoutObserver?.disconnect();
+        showLayoutButton?.remove();
+        showLayoutPlayer = player;
+      }
+      showLayoutButton = header.querySelector('[data-cv-show-expand]') || document.createElement('button');
+      showLayoutButton.type = 'button';
+      showLayoutButton.className = 'chat-show-header-action material-symbols-outlined';
+      showLayoutButton.dataset.cvShowExpand = '';
+      showLayoutButton.onclick = () => {
+        player.requestLayoutPlacement?.('panel');
+      };
+      if (!showLayoutButton.isConnected) header.insertBefore(showLayoutButton,
+        header.querySelector('[data-header-action="settings"]'));
+      const syncButton = () => {
+        const key = 'tour.expand';
+        showLayoutButton.textContent = 'open_in_full';
+        showLayoutButton.setAttribute('aria-label', getLocaleMessage(key));
+        showLayoutButton.title = getLocaleMessage(key);
+        syncShowExpandButton(player);
+      };
+      syncButton();
+      showLayoutObserver?.disconnect();
+      showLayoutObserver = new MutationObserver(syncButton);
+      showLayoutObserver.observe(player, {
+        attributes: true, attributeFilter: ['panel-layout'],
+      });
+    });
   };
 
   const onPopState = () => {
@@ -1343,6 +1457,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       dock.close?.('show-start');
     }
     running = true;
+    syncHeaderShowButton(true);
     ensurePresenterLifecycle();
   };
 
@@ -1648,6 +1763,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   globalThis.addEventListener?.('pagehide', flushRouteNow);
 
   workspace.addEventListener('portfolio-show-start', onStart);
+  workspace.addEventListener('chat-show-close-request', onPlayerCloseRequest, { capture: true });
+  const onHeaderPlaybackChange = () => queueMicrotask(() => syncHeaderShowButton());
+  workspace.addEventListener('portfolio-show-pause', onHeaderPlaybackChange);
+  workspace.addEventListener('portfolio-show-resume', onHeaderPlaybackChange);
   workspace.addEventListener('portfolio-show-player-mounted', onShowPlayerMounted);
   workspace.addEventListener('portfolio-show-seek', onSeek);
   workspace.addEventListener('portfolio-show-route-change', onRouteChange);
@@ -1676,7 +1795,12 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     document.removeEventListener('visibilitychange', onVisibilityFlush);
     globalThis.removeEventListener?.('pagehide', flushRouteNow);
     workspace.removeEventListener('portfolio-show-start', onStart);
+    workspace.removeEventListener('chat-show-close-request', onPlayerCloseRequest, { capture: true });
+    workspace.removeEventListener('portfolio-show-pause', onHeaderPlaybackChange);
+    workspace.removeEventListener('portfolio-show-resume', onHeaderPlaybackChange);
     workspace.removeEventListener('portfolio-show-player-mounted', onShowPlayerMounted);
+    showLayoutObserver?.disconnect();
+    showLayoutButton?.remove();
     workspace.removeEventListener('portfolio-show-seek', onSeek);
     workspace.removeEventListener('portfolio-show-route-change', onRouteChange);
     workspace.removeEventListener('portfolio-show-route-change', onPlaybackEntryChange);

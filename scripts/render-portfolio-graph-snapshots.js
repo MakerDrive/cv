@@ -15,9 +15,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import WebSocket from 'ws';
+import sharp from 'sharp';
 
 import {
   PORTFOLIO_GRAPH_SNAPSHOT_MANIFEST_SCHEMA,
+  PORTFOLIO_GRAPH_SNAPSHOT_VISUAL_LAYER,
   PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS,
   serializePortfolioGraphSnapshotValue,
 } from '../src/static-pages/data/portfolioGraphSnapshot.js';
@@ -46,14 +48,6 @@ const THEMES = Object.freeze({
 });
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
-}
-
-function escapeXml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }
 
 async function fileExists(filePath) {
@@ -294,23 +288,27 @@ async function captureVariant(cdp, origin, locale, viewportName, themeName) {
       return rect.width >= 128 && rect.height >= 128 && panel._structuredBound && panel.canvas;
     }, 'visible bound graph');
     let capture = await panel.captureGraphRenderSnapshot();
-    let content = panel.canvas.querySelector('.content');
-    let paths = [...panel.canvas.querySelectorAll('svg.sn-connections .sn-conn-path')];
+    await waitFor(() => !panel.canvas.hasAttribute('data-snapshot-pending')
+      && !panel.querySelector('.portfolio-graph-snapshot'), 'live graph preview');
+    await waitFor(() => {
+      let marker = panel.canvas.querySelector('.sn-focus-transition-marker');
+      return !marker || Number(getComputedStyle(marker).opacity) <= 0.01;
+    }, 'settled focus marker');
+    let rect = panel.getBoundingClientRect();
+    let visibleNodes = [...panel.canvas.querySelectorAll('graph-node')].filter((node) => {
+      let box = node.getBoundingClientRect();
+      return box.width > 0 && box.height > 0
+        && box.right > rect.left && box.left < rect.right
+        && box.bottom > rect.top && box.top < rect.bottom;
+    });
+    if (!visibleNodes.length || visibleNodes.some((node) => (
+      node.querySelector('.sn-node-label')?.textContent.trim()
+        !== (node.getAttribute('node-label') || '').trim()
+    ))) throw new Error('Graph preview requires visible rendered node cards');
     return {
       ...capture,
-      connectionOverlay: {
-        transform: getComputedStyle(content).transform,
-        paths: paths.map((path) => {
-          let style = getComputedStyle(path);
-          return {
-            connectionId: path.getAttribute('data-conn-id') || '',
-            path: path.getAttribute('d') || '',
-            stroke: style.stroke,
-            strokeWidth: style.strokeWidth,
-            opacity: style.opacity,
-          };
-        }),
-      },
+      rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+      previewNodeIds: visibleNodes.map((node) => node.getAttribute('node-id')),
     };
   })()`);
   if (result.snapshot?.routes?.length !== 191 || result.snapshot?.nodeRects?.length !== 125) {
@@ -320,25 +318,13 @@ async function captureVariant(cdp, origin, locale, viewportName, themeName) {
       + `${result.snapshot?.nodeRects?.length || 0}/125 nodes.`,
     );
   }
-  if (
-    result.connectionOverlay?.paths?.length !== 191
-    || !/^matrix\([^)]*\)$/.test(result.connectionOverlay.transform || '')
-  ) {
-    throw new Error(`${locale}/${viewportName}/${themeName} did not capture 191 PCB paths.`);
-  }
-  return result;
-}
-
-function renderInertSvg(capture) {
-  let { width, height } = capture.rect;
-  let paths = capture.connectionOverlay.paths.map((route) => (
-    `<path data-conn-id="${escapeXml(route.connectionId)}" d="${escapeXml(route.path)}" `
-    + `fill="none" stroke="${escapeXml(route.stroke)}" `
-    + `stroke-width="${escapeXml(route.strokeWidth)}" opacity="${escapeXml(route.opacity)}"/>`
-  )).join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" `
-    + `viewBox="0 0 ${width} ${height}" aria-hidden="true" focusable="false">`
-    + `<g transform="${escapeXml(capture.connectionOverlay.transform)}">${paths}</g></svg>\n`;
+  let screenshot = await cdp.send('Page.captureScreenshot', {
+    format: 'webp',
+    quality: 90,
+    fromSurface: true,
+    clip: { ...result.rect, scale: 1 },
+  });
+  return { ...result, preview: Buffer.from(screenshot.data, 'base64') };
 }
 
 export async function renderPortfolioGraphSnapshots() {
@@ -348,7 +334,7 @@ export async function renderPortfolioGraphSnapshots() {
   let chrome = await launchChrome();
   let cdp = await createPage(chrome.port);
   let entries = [];
-  let uniqueSvg = new Set();
+  let uniquePreviews = new Set();
   let uniqueSnapshots = new Set();
   try {
     for (let locale of PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.locales) {
@@ -362,24 +348,28 @@ export async function renderPortfolioGraphSnapshots() {
             uniqueSnapshots.add(snapshotHash);
             await writeFile(path.join(OUTPUT_DIR, snapshotName), snapshotText);
           }
-          let svg = renderInertSvg(capture);
-          let svgHash = sha256(svg);
-          let svgName = `${svgHash}.svg`;
-          if (!uniqueSvg.has(svgHash)) {
-            uniqueSvg.add(svgHash);
-            await writeFile(path.join(OUTPUT_DIR, svgName), svg);
+          let previewHash = sha256(capture.preview);
+          let previewName = `${previewHash}.webp`;
+          if (!uniquePreviews.has(previewHash)) {
+            uniquePreviews.add(previewHash);
+            await writeFile(path.join(OUTPUT_DIR, previewName), capture.preview);
           }
+          let image = await sharp(capture.preview).metadata();
+          await writeFile(
+            path.join(OUTPUT_DIR, `initial-${locale}-${theme}.webp`), capture.preview,
+          );
           entries.push({
             locale,
             viewport,
             theme,
-            svg: `portfolio-graph-snapshots/${svgName}`,
+            preview: `portfolio-graph-snapshots/${previewName}`,
+            previewNodeIds: capture.previewNodeIds,
             snapshot: `portfolio-graph-snapshots/${snapshotName}`,
             routeFingerprint: capture.routeFingerprint,
             nodeCount: capture.snapshot.nodeRects.length,
             routeCount: capture.snapshot.routes.length,
-            width: capture.rect.width,
-            height: capture.rect.height,
+            width: image.width,
+            height: image.height,
           });
           let total = PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.locales.length
             * PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS.viewports.length
@@ -395,10 +385,10 @@ export async function renderPortfolioGraphSnapshots() {
   }
   let manifest = {
     schema: PORTFOLIO_GRAPH_SNAPSHOT_MANIFEST_SCHEMA,
-    visualLayer: 'connections-only',
+    visualLayer: PORTFOLIO_GRAPH_SNAPSHOT_VISUAL_LAYER,
     entries,
     measuredDedupe: {
-      svgFiles: uniqueSvg.size,
+      previewFiles: uniquePreviews.size,
       snapshotFiles: uniqueSnapshots.size,
       variants: entries.length,
     },
@@ -410,7 +400,7 @@ export async function renderPortfolioGraphSnapshots() {
   let initialEntry = entries.find((entry) => (
     entry.locale === 'ru' && entry.viewport === 'wide' && entry.theme === 'light'
   ));
-  await cp(path.join(DIST_DIR, initialEntry.svg), path.join(OUTPUT_DIR, 'initial.svg'));
+  await cp(path.join(DIST_DIR, initialEntry.preview), path.join(OUTPUT_DIR, 'initial.webp'));
   return manifest;
 }
 

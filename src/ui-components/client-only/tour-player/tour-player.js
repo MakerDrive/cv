@@ -1,3 +1,4 @@
+import syncCompactShowProgress from '../../../static-pages/js/tour-player/compactShowProgress.js';
 import 'symbiote-ui/chat/show-chat';
 import { ShowSessionState } from 'symbiote-ui/chat/show-runtime';
 import { TOUR_LOCALE_MESSAGES } from '../../../static-pages/data/tourTranslations.js';
@@ -207,6 +208,27 @@ const CV_SHOW_SECTION_LINK_GLYPHS = Object.freeze({
   failed: 'error',
 });
 
+const CV_SHOW_SPEED_CONTROL_MARKUP =
+  '<button type="button" class="chat-show-speed-control" data-cv-show-action="speed">1.5x</button>';
+
+const CV_SHOW_PLAYBACK_RATE_NORMAL = 1;
+const CV_SHOW_PLAYBACK_RATE_MEDIUM = 1.5;
+const CV_SHOW_PLAYBACK_RATE_FAST = 2;
+const CV_SHOW_DEFAULT_PLAYBACK_RATE = CV_SHOW_PLAYBACK_RATE_MEDIUM;
+// The transport speed toggle cycles through three rates. The narration media
+// element carries the selected one, and the player-facing clock is rescaled by
+// it (see #displayTimeline), so the displayed time reflects the real pace.
+const CV_SHOW_PLAYBACK_RATE_CYCLE = Object.freeze([
+  CV_SHOW_PLAYBACK_RATE_NORMAL,
+  CV_SHOW_PLAYBACK_RATE_MEDIUM,
+  CV_SHOW_PLAYBACK_RATE_FAST,
+]);
+const CV_SHOW_PLAYBACK_RATE_MESSAGES = Object.freeze({
+  [CV_SHOW_PLAYBACK_RATE_NORMAL]: 'tour.speed.normal',
+  [CV_SHOW_PLAYBACK_RATE_MEDIUM]: 'tour.speed.medium',
+  [CV_SHOW_PLAYBACK_RATE_FAST]: 'tour.speed',
+});
+
 /**
  * Header action of the Show: what the press does, or the transient answer of
  * the last press — the glyph carries the state and the label names it.
@@ -356,6 +378,7 @@ export class PortfolioShowChat extends HTMLElement {
   #sectionLinkFeedback = '';
   /** @type {ReturnType<typeof globalThis.setTimeout> | null} */
   #sectionLinkFeedbackTimer = null;
+  #playbackRate = CV_SHOW_DEFAULT_PLAYBACK_RATE;
 
   constructor() {
     super();
@@ -850,21 +873,48 @@ export class PortfolioShowChat extends HTMLElement {
     });
   }
 
+  // The composition clock stays canonical: URLs, seeks and captions read it.
+  // The player's visible clock speaks real time instead, so everything the
+  // player renders (labels, slider, segments) is rescaled by the current
+  // rate; #controller.seek is the single boundary converting back.
+  #displayRate() {
+    return this.#playbackRate > 0 ? this.#playbackRate : 1;
+  }
+
+  #displayPositionMs() {
+    return this.#presentationPositionMsForUI() / this.#displayRate();
+  }
+
+  #displayTimeline() {
+    const timeline = playerTimeline(
+      this.#story,
+      this.#mode || 'short',
+      this.#projectDurationMsByEntry,
+      this.#detailReplacementByEntry,
+    );
+    const rate = this.#displayRate();
+    if (rate === 1) return timeline;
+    return Object.freeze({
+      ...timeline,
+      totalMs: timeline.totalMs / rate,
+      turns: Object.freeze(timeline.turns.map((turn) => Object.freeze({
+        ...turn,
+        ...(Number.isFinite(turn.startMs) ? { startMs: turn.startMs / rate } : {}),
+        ...(Number.isFinite(turn.durationMs) ? { durationMs: turn.durationMs / rate } : {}),
+      }))),
+    });
+  }
+
   #showConfig() {
     const entry = this.#playerEntry();
-    return {
+    let config = {
       controller: this.#controller,
-      timeline: playerTimeline(
-        this.#story,
-        this.#mode || 'short',
-        this.#projectDurationMsByEntry,
-        this.#detailReplacementByEntry,
-      ),
+      timeline: this.#displayTimeline(),
       state: {
         index: Math.max(0, this.#sceneIndex),
         playing: this.#transportPlaying,
         progress: {
-          positionMs: this.#presentationPositionMsForUI(),
+          positionMs: this.#displayPositionMs(),
         },
         caption: {
           speaker: entry?.sceneId ? this.#message('tour.details') : 'CV',
@@ -884,6 +934,8 @@ export class PortfolioShowChat extends HTMLElement {
       videoController: this.#videoController,
       videoControls: this.#videoControls(entry),
     };
+    queueMicrotask(() => syncCompactShowProgress(this.#showPlayer, config));
+    return config;
   }
 
   #mountSharedShow() {
@@ -891,6 +943,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.#agent = this.#dock.getChat?.() || this.#agent;
     this.#showPlayer = this.#dock.setShow('short', this.#showConfig()) || this.#showPlayer;
     this.#ensureSectionLinkAction();
+    this.#ensureSpeedControl();
     this.dispatchEvent(new CustomEvent('portfolio-show-player-mounted', { bubbles: true }));
     return this.#showPlayer;
   }
@@ -941,7 +994,12 @@ export class PortfolioShowChat extends HTMLElement {
         host.pauseShow('explicit-stop');
       },
       preview(index) { void host.#preview(index); },
-      seek(index, positionMs) { void host.#seek(index, positionMs); },
+      seek(index, positionMs) {
+        // The player slider and the compact scrub report display time at the
+        // current rate; the route/session seek below stays on the composition
+        // clock the URLs and captions speak.
+        void host.#seek(index, positionMs * host.#displayRate());
+      },
     };
   }
 
@@ -1025,6 +1083,50 @@ export class PortfolioShowChat extends HTMLElement {
     button.textContent = action.glyph;
     button.setAttribute('aria-label', action.label);
     button.title = action.label;
+  }
+
+  /**
+   * The transport row belongs to the player, so the speed toggle joins it as
+   * markup; it drives the narration media element, which the runtime samples
+   * for captions, progress and presentation cues.
+   */
+  #ensureSpeedControl() {
+    const controls = this.#showPlayer?.querySelector?.('.chat-show-controls');
+    if (!controls) return;
+    let button = controls.querySelector('[data-cv-show-action="speed"]');
+    if (!button) {
+      controls.insertAdjacentHTML('beforeend', CV_SHOW_SPEED_CONTROL_MARKUP);
+      button = controls.querySelector('[data-cv-show-action="speed"]');
+      if (!button) return;
+      button.addEventListener('click', () => this.#togglePlaybackRate());
+    }
+    // Three rates do not fit a pressed flag: the visible text names the rate
+    // the Show plays at, and the accessible label announces the same state.
+    const label = this.#message(CV_SHOW_PLAYBACK_RATE_MESSAGES[this.#playbackRate] || 'tour.speed');
+    button.textContent = `${this.#playbackRate}x`;
+    button.setAttribute('aria-label', label);
+    button.title = label;
+  }
+
+  #togglePlaybackRate() {
+    const rates = CV_SHOW_PLAYBACK_RATE_CYCLE;
+    const at = rates.indexOf(this.#playbackRate);
+    this.#setPlaybackRate(rates[(at + 1) % rates.length] ?? CV_SHOW_DEFAULT_PLAYBACK_RATE);
+  }
+
+  #setPlaybackRate(rate) {
+    this.#playbackRate = rate;
+    this.#applyPlaybackRate(this.#alignedEntry?.media || this.#speech.media);
+    this.#ensureSpeedControl();
+    // The player-facing clock speaks real time at the selected rate, so a
+    // speed change rescales the displayed timeline and position in one rebind.
+    this.#showPlayer?.bind?.(this.#showConfig());
+  }
+
+  #applyPlaybackRate(media) {
+    if (!media || typeof media.playbackRate !== 'number') return;
+    media.playbackRate = this.#playbackRate;
+    if ('defaultPlaybackRate' in media) media.defaultPlaybackRate = this.#playbackRate;
   }
 
   // The player never builds a Show URL: the runtime that owns the route answers
@@ -2017,6 +2119,7 @@ export class PortfolioShowChat extends HTMLElement {
     beforeDeferredPresentation = null,
     restorePausedCheckpoint = false,
   } = {}) {
+    this.#applyPlaybackRate(media);
     await sceneSetupReady;
     if (requestId !== this.#requestId) {
       return Object.freeze({ status: 'cancelled', reason: 'scene-replaced' });
@@ -2234,6 +2337,7 @@ export class PortfolioShowChat extends HTMLElement {
     const started = this.#speech.speak(entry.speech, {
       id: entry.id,
       lang: this.#story.narrationLocale,
+      rate: this.#playbackRate,
       startPaused: effectiveStartPaused,
       onStart: () => {
         if (!this.#publishPhysicalStart(entry, requestId)) return;
@@ -2744,7 +2848,7 @@ export class PortfolioShowChat extends HTMLElement {
       index: Math.max(0, this.#sceneIndex),
       playing: this.#transportPlaying,
       state: terminalState || (this.#transportPlaying ? 'playing' : this.$.isRunning ? 'paused' : 'stopped'),
-      progress: { positionMs: captionPositionMs },
+      progress: { positionMs: this.#displayPositionMs() },
       caption: {
         speaker: this.$.inBranch ? this.#message('tour.details') : 'CV',
         ...caption,

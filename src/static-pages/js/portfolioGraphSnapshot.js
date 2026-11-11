@@ -1,3 +1,4 @@
+import { createRuntimeAssetUrl } from './runtimeAssetUrl.js';
 import {
   createPortfolioGraphRouteFingerprint,
   selectPortfolioGraphSnapshotEntry,
@@ -5,8 +6,6 @@ import {
 } from '../data/portfolioGraphSnapshot.js';
 
 const MANIFEST_URL = 'portfolio-graph-snapshots/manifest.json';
-const PORTFOLIO_GRAPH_NODE_COUNT = 121;
-const PORTFOLIO_GRAPH_ROUTE_COUNT = 182;
 
 function roundMetric(value) {
   return Math.round(Number(value || 0) * 1000) / 1000;
@@ -109,23 +108,23 @@ export function readPortfolioGraphRouteFingerprint(canvas, locale) {
 
 /**
  * @param {any} canvas
- * @param {string} [locale]
- * @param {{requireFullPcb?: boolean, signal?: AbortSignal}} [options]
+ * @param {string} locale
+ * @param {{requireFullPcb?: boolean, signal?: AbortSignal, nodeCount: number, routeCount: number}} options
  * @returns {Promise<object>}
  */
 export async function settlePortfolioGraphForSnapshot(
   canvas,
-  locale = document.documentElement.lang || 'en',
-  { requireFullPcb = false, signal } = {},
+  locale,
+  { requireFullPcb = false, signal, nodeCount, routeCount },
 ) {
   await customElements.whenDefined('cascade-theme-widget');
   await document.fonts?.ready;
   let graphReady = requireFullPcb
-    ? await waitForFullLivePcb(canvas, PORTFOLIO_GRAPH_ROUTE_COUNT, signal)
+    ? await waitForFullLivePcb(canvas, routeCount, signal)
     : await waitForLiveGraphGeometry(
       canvas,
-      PORTFOLIO_GRAPH_NODE_COUNT,
-      PORTFOLIO_GRAPH_ROUTE_COUNT,
+      nodeCount,
+      routeCount,
       signal,
     );
   if (!graphReady) return readPortfolioGraphRouteFingerprint(canvas, locale);
@@ -185,44 +184,58 @@ function resolveVariant() {
 function revealLiveGraph(panel, resolution) {
   panel.dataset.graphSnapshot = resolution;
   panel.querySelector('node-canvas')?.removeAttribute('data-snapshot-pending');
-  let object = panel.querySelector('.portfolio-graph-snapshot');
-  if (!object) return;
-  object.setAttribute('data-removing', '');
-  globalThis.setTimeout?.(() => object.remove(), 180);
+  panel.querySelector('.portfolio-graph-snapshot')?.remove();
 }
 
 function waitForFullLivePcb(canvas, expectedRouteCount, signal) {
   return new Promise((resolve) => {
-    let observer = null;
+    let frame = 0;
+    let previous = '';
+    let progress = '';
+    let stablePasses = 0;
     /** @type {ReturnType<typeof globalThis.setTimeout>|undefined} */
     let timeout;
     let finish = (ready) => {
-      observer?.disconnect();
-      globalThis.clearTimeout?.(timeout);
-      signal?.removeEventListener?.('abort', onAbort);
+      cancelAnimationFrame(frame);
+      globalThis.clearTimeout(timeout);
+      signal?.removeEventListener('abort', onAbort);
       resolve(ready);
     };
     let onAbort = () => finish(false);
     let check = () => {
+      if (signal?.aborted) return finish(false);
       let paths = [...canvas.querySelectorAll('.sn-conn-path')];
-      let fullCount = paths.filter((path) => path.getAttribute('data-pcb-quality') === 'full').length;
-      if (
-        paths.length > 0
-        && fullCount === paths.length
-        && (!expectedRouteCount || paths.length === expectedRouteCount)
-      ) {
-        finish(true);
+      let geometry = JSON.stringify({
+        nodes: getGraphNodes(canvas),
+        paths: paths.map((path) => [
+          path.getAttribute('data-conn-id'),
+          path.getAttribute('data-pcb-quality'),
+          path.getAttribute('d'),
+        ]),
+      });
+      if (geometry !== progress) {
+        progress = geometry;
+        globalThis.clearTimeout(timeout);
+        timeout = globalThis.setTimeout(() => finish(false), 15_000);
       }
+      let nodes = [...canvas.querySelectorAll('graph-node')];
+      let cardsReady = nodes.length > 0 && nodes.every((node) => (
+        node.querySelector('.sn-node-label')?.textContent.trim()
+          === (node.getAttribute('node-label') || '').trim()
+        && !node.querySelector('.sn-node-summary')?.textContent.includes('{{')
+      ));
+      let ready = cardsReady
+        && document.fonts.status === 'loaded'
+        && !canvas.hasAttribute('data-viewport-animating')
+        && paths.length === expectedRouteCount
+        && paths.length > 0
+        && paths.every((path) => path.getAttribute('data-pcb-quality') === 'full');
+      stablePasses = ready && geometry === previous ? stablePasses + 1 : 0;
+      previous = geometry;
+      if (stablePasses >= 2) return finish(true);
+      frame = requestAnimationFrame(check);
     };
-    observer = new MutationObserver(check);
-    observer.observe(canvas, {
-      attributes: true,
-      attributeFilter: ['data-pcb-quality'],
-      childList: true,
-      subtree: true,
-    });
-    signal?.addEventListener?.('abort', onAbort, { once: true });
-    timeout = globalThis.setTimeout?.(() => finish(false), 15_000);
+    signal?.addEventListener('abort', onAbort, { once: true });
     check();
   });
 }
@@ -245,9 +258,10 @@ async function failClosed(panel, canvas, reason, expectedRouteCount, signal) {
 /**
  * @param {HTMLElement} panel
  * @param {any} canvas
+ * @param {any} editor
  * @returns {object}
  */
-export function createPortfolioGraphSnapshotRuntime(panel, canvas) {
+export function createPortfolioGraphSnapshotRuntime(panel, canvas, editor) {
   let abortController = null;
   let prepared = false;
 
@@ -257,11 +271,21 @@ export function createPortfolioGraphSnapshotRuntime(panel, canvas) {
     canvas.setAttribute('data-snapshot-pending', '');
     canvas.setTransientPathStyle?.('bezier', 'portfolio-startup', {});
     let placeholder = document.querySelector('.portfolio-graph-snapshot');
-    if (placeholder && placeholder.parentElement !== panel) panel.prepend(placeholder);
+    if (placeholder) {
+      if (placeholder.parentElement !== panel) panel.prepend(placeholder);
+      let { locale, theme } = resolveVariant();
+      if (locale !== 'ru' || theme !== 'light') {
+        placeholder.setAttribute('src', createRuntimeAssetUrl(
+          `portfolio-graph-snapshots/initial-${locale}-${theme}.webp`,
+        ).href);
+      }
+    }
   };
 
-  let fail = async (reason, expectedRouteCount, signal) => {
-    let receipt = await failClosed(panel, canvas, reason, expectedRouteCount, signal);
+  let fail = async (reason, signal) => {
+    let receipt = await failClosed(
+      panel, canvas, reason, editor.getConnections().length, signal,
+    );
     prepared = false;
     return receipt;
   };
@@ -271,32 +295,36 @@ export function createPortfolioGraphSnapshotRuntime(panel, canvas) {
     async adopt() {
       abortController?.abort();
       abortController = new AbortController();
+      let { signal } = abortController;
       prepare();
       try {
         let routeFingerprint = await settlePortfolioGraphForSnapshot(
           canvas,
           document.documentElement.lang || 'en',
-          { signal: abortController.signal },
+          {
+            signal,
+            nodeCount: editor.getNodes().length,
+            routeCount: editor.getConnections().length,
+          },
         );
-        let manifestResponse = await fetch(new URL(MANIFEST_URL, document.baseURI), {
-          signal: abortController.signal,
+        let manifestResponse = await fetch(createRuntimeAssetUrl(MANIFEST_URL), {
+          signal,
         });
         if (!manifestResponse.ok) {
-          return fail('manifest-unavailable', 0, abortController.signal);
+          return fail('manifest-unavailable', signal);
         }
         let manifest = await manifestResponse.json();
         let entry = selectPortfolioGraphSnapshotEntry(manifest, resolveVariant());
         if (!entry) {
-          return fail('manifest-variant-missing', 0, abortController.signal);
+          return fail('manifest-variant-missing', signal);
         }
-        let snapshotResponse = await fetch(new URL(entry.snapshot, document.baseURI), {
-          signal: abortController.signal,
+        let snapshotResponse = await fetch(createRuntimeAssetUrl(entry.snapshot), {
+          signal,
         });
         if (!snapshotResponse.ok) {
           return fail(
             'snapshot-unavailable',
-            entry.routeCount,
-            abortController.signal,
+            signal,
           );
         }
         let snapshot = await snapshotResponse.json();
@@ -304,25 +332,27 @@ export function createPortfolioGraphSnapshotRuntime(panel, canvas) {
         if (!binding.valid) {
           return fail(
             binding.reason,
-            entry.routeCount,
-            abortController.signal,
+            signal,
           );
         }
         let receipt = canvas.adoptPcbRouteSnapshot?.(binding.snapshot, { routeFingerprint });
         if (!receipt?.adopted) {
           return fail(
             receipt?.reason || 'provider-rejected',
-            entry.routeCount,
-            abortController.signal,
+            signal,
           );
         }
         canvas.setTransientPathStyle?.('', 'portfolio-startup', {});
+        let ready = await waitForFullLivePcb(
+          canvas, editor.getConnections().length, signal,
+        );
+        if (!ready) return { adopted: false, reason: 'live-pcb-not-ready' };
         prepared = false;
         revealLiveGraph(panel, 'cached-pcb');
         return receipt;
       } catch (error) {
         if (error?.name === 'AbortError') return { adopted: false, reason: 'aborted' };
-        return fail('runtime-error');
+        return fail('runtime-error', signal);
       }
     },
     stop() {
@@ -331,23 +361,28 @@ export function createPortfolioGraphSnapshotRuntime(panel, canvas) {
       if (prepared) canvas.setTransientPathStyle?.('', 'portfolio-startup', {});
       prepared = false;
       canvas.removeAttribute?.('data-snapshot-pending');
+      panel.querySelector('.portfolio-graph-snapshot')?.remove();
     },
   };
 }
 
 /**
- * Build-only capture seam used after the graph and fonts have settled.
  * @param {HTMLElement} panel
  * @param {any} canvas
+ * @param {any} editor
  * @returns {Promise<object>}
  */
-export async function capturePortfolioGraphRenderSnapshot(panel, canvas) {
+export async function capturePortfolioGraphRenderSnapshot(panel, canvas, editor) {
   canvas.setTransientPathStyle?.('', 'portfolio-startup', {});
   canvas.setPathStyle?.('pcb');
   let routeFingerprint = await settlePortfolioGraphForSnapshot(
     canvas,
     document.documentElement.lang || 'en',
-    { requireFullPcb: true },
+    {
+      requireFullPcb: true,
+      nodeCount: editor.getNodes().length,
+      routeCount: editor.getConnections().length,
+    },
   );
   let snapshot = canvas.capturePcbRouteSnapshot?.(routeFingerprint);
   let rect = panel.getBoundingClientRect();

@@ -5,8 +5,8 @@ import {
 } from 'symbiote-ui/manifest';
 
 export const PORTFOLIO_GRAPH_SNAPSHOT_MANIFEST_SCHEMA =
-  'portfolio-graph-snapshot-manifest-v2';
-export const PORTFOLIO_GRAPH_SNAPSHOT_VISUAL_LAYER = 'connections-only';
+  'portfolio-graph-snapshot-manifest-v3';
+export const PORTFOLIO_GRAPH_SNAPSHOT_VISUAL_LAYER = 'graph-preview';
 export const PORTFOLIO_GRAPH_SNAPSHOT_VARIANTS = Object.freeze({
   locales: Object.freeze(['en', 'ru', 'es']),
   themes: Object.freeze(['light', 'dark']),
@@ -111,8 +111,13 @@ export function validatePortfolioGraphSnapshotManifest(manifest) {
     if (
       !key
       || keys.has(key)
-      || typeof entry.svg !== 'string'
-      || !/^portfolio-graph-snapshots\/[a-f0-9]{64}\.svg$/.test(entry.svg)
+      || typeof entry.preview !== 'string'
+      || !/^portfolio-graph-snapshots\/[a-f0-9]{64}\.webp$/.test(entry.preview)
+      || !Array.isArray(entry.previewNodeIds)
+      || entry.previewNodeIds.length === 0
+      || !entry.previewNodeIds.every((id) => typeof id === 'string' && id.length > 0)
+      || !Number.isSafeInteger(entry.width) || entry.width < 1
+      || !Number.isSafeInteger(entry.height) || entry.height < 1
       || typeof entry.snapshot !== 'string'
       || !/^portfolio-graph-snapshots\/[a-f0-9]{64}\.snapshot\.json$/.test(entry.snapshot)
       || !entry.routeFingerprint

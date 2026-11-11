@@ -35,10 +35,11 @@ function imsMountRoot(target) {
  * @param {object} options
  * @param {Document} [options.document]
  * @param {(targetId: string) => Element|null} [options.resolveTarget]
- * @param {(root: Element, options: { pauseGate: object }) => object} options.createImsTarget
- *   Required factory; must receive the pause gate so gallery frame holds
- *   bank across pauses. The default `createImsShowMediaTarget` without a
- *   gate silently produces unpauseable clocks — a trap for the next author.
+ * @param {(root: Element) => object} [options.createImsTarget]
+ *   Required factory; the caller must close over the pause gate when creating
+ *   it so gallery frame holds bank across pauses. The default
+ *   `createImsShowMediaTarget` without a gate silently produces unpauseable
+ *   clocks — a trap for the next author.
  */
 export function createCvShowMediaTargetResolver({
   document = globalThis.document,

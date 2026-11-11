@@ -32,7 +32,8 @@ export function createBrowserSpeechController({
     const { token, text, options } = state;
     const utterance = new Utterance(text);
     utterance.lang = options.lang;
-    utterance.rate = 1;
+    const rate = Number(options.rate);
+    utterance.rate = Number.isFinite(rate) && rate > 0 ? rate : 1;
     utterance.pitch = 1;
     const current = () => token === generation && active === state && state.utterance === utterance;
     const reportStart = () => {

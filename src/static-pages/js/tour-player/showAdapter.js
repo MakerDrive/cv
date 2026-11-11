@@ -338,11 +338,16 @@ export function adaptCvShowDirective(directive, { resolveText = (key) => key } =
  * media resolution, so a concurrent navigation cannot leave a media cue
  * waiting on a destroyed host forever. Returns the owning project id, or ''
  * when the target has no owning project in this runtime.
+ * @param {string} targetId
+ * @param {object} runtime
+ * @param {{document: Document, signal?: AbortSignal|null,
+ *   waitForReadiness: typeof waitForShowDomReadiness, timeoutMs?: number}} options
+ * @returns {Promise<string>}
  */
 async function selectMediaArticleProject(
   targetId,
   runtime,
-  { document, signal = null, waitForReadiness, timeoutMs } = {},
+  { document, signal = null, waitForReadiness, timeoutMs },
 ) {
   const match = String(targetId || '').match(/^media\/([a-z0-9][a-z0-9-]*)\//u);
   if (!match) return '';
