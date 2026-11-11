@@ -43,7 +43,9 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // measured 1871199 raw after the responsive panel controls landed.
   // 2026-11-04: +58 KB for the notchset theme styles and the extracted show
   // resize/compact-progress modules; measured 1925846 raw.
-  raw: 1_930_000,
+  // 2026-11-11: +10 KB for the four CV Show V4.1 Pulse publications registered
+  // in the bundled publication registry; measured 1934466 raw.
+  raw: 1_940_000,
   // 2026-09-25: +5 KB gzip for the completed drawer gesture contract —
   // deferred pointer capture, touch tree-disclosure column, click-vs-swipe
   // separation; measured 452330 gzip against the 450000 cap. Re-measured at
@@ -51,7 +53,8 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // composition time base the CV Show player clock reads.
   // 2026-11-03: +1 KB for the same mobile panel navigation; measured 455315 gzip.
   // 2026-11-04: +14 KB for the same theme/show work; measured 469363 gzip.
-  gzip: 470_000,
+  // 2026-11-11: +5 KB for the same four Pulse publications; measured 471249 gzip.
+  gzip: 475_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);
@@ -439,7 +442,7 @@ export async function verifyPortfolioGraphSnapshots(distDir) {
           /<script\b|<foreignObject\b|\son[a-z]+\s*=|(?:href|src)\s*=\s*["']https?:/i.test(svg)
           || /<image\b|<text\b/i.test(svg)
           || !/<svg\b[^>]*aria-hidden="true"/i.test(svg)
-          || pathCount !== 182
+          || pathCount !== 191
         ) {
           throw new Error(`Portfolio graph connections-only SVG is invalid: ${svgName}.`);
         }
@@ -448,8 +451,8 @@ export async function verifyPortfolioGraphSnapshots(distDir) {
         if (!binding.valid) {
           throw new Error(`Portfolio graph route snapshot is invalid: ${snapshotName}: ${binding.reason}.`);
         }
-        if (binding.snapshot.nodeRects.length !== 121 || binding.snapshot.routes.length !== 182) {
-          throw new Error(`Portfolio graph route snapshot must contain 121 nodes and 182 routes: ${snapshotName}.`);
+        if (binding.snapshot.nodeRects.length !== 125 || binding.snapshot.routes.length !== 191) {
+          throw new Error(`Portfolio graph route snapshot must contain 125 nodes and 191 routes: ${snapshotName}.`);
         }
       }
     }

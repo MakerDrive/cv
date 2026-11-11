@@ -2265,6 +2265,90 @@ export const PUBLICATIONS = [
     "sourceLinks": [
       { "href": "https://github.com/rnd-pro/terminal-x-mcp", "label": "github.com" }
     ]
+  },
+  {
+    "id": "pulse/fullstack-systems-integration",
+    "slug": "fullstack-systems-integration",
+    "kind": "article",
+    "status": "published",
+    "publishedAt": "2026-11-11T12:00:00Z",
+    "updatedAt": null,
+    "subjectPeriod": null,
+    "relatedProjectIds": ["projects/lifecycle-messaging-platform"],
+    "primaryProjectId": "projects/lifecycle-messaging-platform",
+    "tags": [],
+    "locales": {
+      "en": { "title": "Full-Stack and Systems Integration", "summary": "Interface, server logic, API, storage, and operations form one product; the lifecycle messaging platform case shows the Digital Twin boundary and the path from the server runtime to GSM modem pools." },
+      "ru": { "title": "Full-stack и системная интеграция", "summary": "Интерфейс, серверная логика, API, хранилище и эксплуатация образуют один продукт; на примере lifecycle messaging platform показаны границы Digital Twin и путь от серверного runtime к пулам GSM-модемов." },
+      "es": { "title": "Full-stack e integración de sistemas", "summary": "Interfaz, lógica de servidor, API, almacenamiento y operación forman un solo producto; el caso de lifecycle messaging platform muestra los límites del Digital Twin y el camino del runtime de servidor hasta los pools de módems GSM." }
+    },
+    "sourceLinks": []
+  },
+  {
+    "id": "pulse/ai-infrastructure-deployment-control",
+    "slug": "ai-infrastructure-deployment-control",
+    "kind": "article",
+    "status": "published",
+    "publishedAt": "2026-11-11T12:00:00Z",
+    "updatedAt": null,
+    "subjectPeriod": null,
+    "relatedProjectIds": ["projects/agent-portal"],
+    "primaryProjectId": "projects/agent-portal",
+    "tags": [],
+    "locales": {
+      "en": { "title": "AI Infrastructure Under Placement Constraints", "summary": "A local machine, the cloud, and a hybrid contour differ in data exposure, operation, and quota; the Agent Portal resource groups show a measured choice between fast and strong models." },
+      "ru": { "title": "AI-инфраструктура под контролем ограничений", "summary": "Локальная машина, облако и гибридный контур различаются передачей данных, эксплуатацией и лимитами; группы ресурсов Agent Portal показывают измеримый выбор между быстрыми и сильными моделями." },
+      "es": { "title": "Infraestructura de IA bajo control de restricciones", "summary": "La máquina local, la nube y el contorno híbrido se diferencian en exposición de datos, operación y cuotas; los grupos de recursos de Agent Portal muestran una elección medible entre modelos rápidos y fuertes." }
+    },
+    "sourceLinks": [
+      { "href": "https://rnd-pro.com/projects/agent-portal/", "label": "rnd-pro.com" }
+    ]
+  },
+  {
+    "id": "pulse/web-form-application-automation",
+    "slug": "web-form-application-automation",
+    "kind": "article",
+    "status": "published",
+    "publishedAt": "2026-11-11T12:00:00Z",
+    "updatedAt": null,
+    "subjectPeriod": null,
+    "relatedProjectIds": ["projects/browser-x-mcp", "projects/mobile-smm-platform"],
+    "primaryProjectId": "projects/browser-x-mcp",
+    "tags": [],
+    "locales": {
+      "en": { "title": "Web Form Automation with a Verified Request Route", "summary": "An anonymized multi-stage request shows the admissibility check, the validation on every step, the status returned by the service as the confirmation of submission, and the duplicate check before a repeat." },
+      "ru": { "title": "Автоматизация веб-форм с проверяемым маршрутом заявки", "summary": "Обезличенная многоэтапная заявка показывает проверку допустимости, валидацию на каждом шаге, статус, возвращённый сервисом как подтверждение отправки, и проверку дубля перед повтором." },
+      "es": { "title": "Automatización de formularios web con una ruta de solicitud verificable", "summary": "Una solicitud de varias etapas anonimizada muestra la comprobación de admisibilidad, la validación en cada paso, el estado devuelto por el servicio como confirmación de envío, y la comprobación de duplicados antes de repetir." }
+    },
+    "sourceLinks": [
+      { "href": "https://github.com/rnd-pro/browser-x-mcp", "label": "github.com" }
+    ]
+  },
+  {
+    "id": "pulse/digital-employee-delegation-to-action",
+    "slug": "digital-employee-delegation-to-action",
+    "kind": "article",
+    "status": "published",
+    "publishedAt": "2026-11-11T12:00:00Z",
+    "updatedAt": null,
+    "subjectPeriod": null,
+    "relatedProjectIds": [
+      "projects/agent-portal",
+      "projects/mobile-smm-platform",
+      "projects/photopizza-remote",
+      "projects/browser-x-mcp",
+      "projects/symbiote-ui"
+    ],
+    "primaryProjectId": "projects/agent-portal",
+    "tags": [],
+    "locales": {
+      "en": { "title": "Digital Employee: From Delegation to Verified Action", "summary": "Chat, the executable Kanban board, and Android scenarios are implemented and verified; the phone channel, an agent hosted on the device itself, and a shared device pool remain development direction." },
+      "ru": { "title": "Цифровой сотрудник: от поручения к проверенному действию", "summary": "Чат, исполняемая Kanban-доска и сценарии на Android-устройствах реализованы и проверены; телефонный канал, агент на самом устройстве и общий пул устройств остаются направлением развития." },
+      "es": { "title": "Empleado digital: del encargo a la acción verificada", "summary": "El chat, el tablero Kanban ejecutable y los escenarios sobre dispositivos Android están implementados y verificados; el canal telefónico, el agente alojado en el propio dispositivo y el pool de dispositivos compartido siguen siendo dirección de desarrollo." }
+    },
+    "sourceLinks": [
+      { "href": "https://rnd-pro.com/projects/agent-portal/", "label": "rnd-pro.com" }
+    ]
   }
 ];
 

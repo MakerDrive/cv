@@ -147,6 +147,19 @@ const SECOND_DEPLOYMENT_SLUGS = new Set([
   'photosnail-public-motion-control-object-tracking',
 ]);
 
+const SOURCE_FREE_PROJECT_IDS = new Set([
+  'projects/lifecycle-messaging-platform',
+  'projects/adaptive-maximo-workbench',
+  'projects/mobile-smm-platform',
+]);
+
+const CV_SHOW_ARTICLE_SLUGS = new Set([
+  'fullstack-systems-integration',
+  'ai-infrastructure-deployment-control',
+  'web-form-application-automation',
+  'digital-employee-delegation-to-action',
+]);
+
 const UNDATED_PUBLICATION_SLUGS = new Set([
   'agent-portal-retrospective',
   'symbiote-video-studio-retrospective',
@@ -316,7 +329,7 @@ function getPublicationBody(publication, locale) {
 }
 
 test('Production PUBLICATIONS registry integrity', () => {
-  assert.equal(PUBLICATIONS.length, 100, 'Production registry must contain exactly 100 portfolio publications');
+  assert.equal(PUBLICATIONS.length, 104, 'Production registry must contain exactly 104 portfolio publications');
   for (const pub of PUBLICATIONS) {
     assert.ok(['retrospective', 'article', 'release', 'field-note', 'research-note'].includes(pub.kind), `Publication ${pub.id} must be a retrospective, article, release, field-note or research-note`);
     assert.ok(['published', 'retired'].includes(pub.status), `Publication ${pub.id} must be published or retired`);
@@ -338,18 +351,18 @@ test('Production PUBLICATIONS registry integrity', () => {
   assert.doesNotThrow(() => validateRetirementTargets(PUBLICATIONS));
 });
 
-test('Production editorial classification matches the current 6/56/23/15 matrix', () => {
+test('Production editorial classification matches the current 6/60/23/15 matrix', () => {
   let retired = getRetiredPublications(PUBLICATIONS);
   let published = getPublicPublications(PUBLICATIONS);
   let bySlug = new Map(PUBLICATIONS.map(publication => [publication.slug, publication]));
 
-  assert.equal(PUBLICATIONS.length, 100);
+  assert.equal(PUBLICATIONS.length, 104);
   assert.equal(KEEP_PUBLICATION_SLUGS.size, 6);
   assert.equal(DIRECT_RETIREMENT_TARGETS.size, 15);
   assert.equal(MERGE_RETIREMENT_TARGETS.size, 23);
   assert.equal(RETIREMENT_TARGETS.size, 38);
   assert.equal(retired.length, 38);
-  assert.equal(published.length, 62);
+  assert.equal(published.length, 66);
 
   for (let slug of KEEP_PUBLICATION_SLUGS) {
     assert.equal(bySlug.get(slug)?.status, 'published', `${slug} must remain published`);
@@ -364,7 +377,7 @@ test('Production editorial classification matches the current 6/56/23/15 matrix'
   let rewriteSlugs = published
     .map(publication => publication.slug)
     .filter(slug => !KEEP_PUBLICATION_SLUGS.has(slug));
-  assert.equal(rewriteSlugs.length, 56);
+  assert.equal(rewriteSlugs.length, 60);
   assert.deepEqual(
     retired.map(publication => publication.slug).sort(),
     [...RETIREMENT_TARGETS.keys()].sort(),
@@ -493,6 +506,14 @@ test('All 22 projects have at least one Pulse publication', () => {
 test('All articles must have original source links (Canonical protection)', () => {
   const articles = getPublicPublications(PUBLICATIONS).filter(pub => pub.kind === 'article');
   for (const pub of articles) {
+    if (SOURCE_FREE_PROJECT_IDS.has(pub.primaryProjectId)) {
+      assert.deepEqual(
+        pub.sourceLinks,
+        [],
+        `Article publication ${pub.id} belongs to a source-free project and must not invent a public source`,
+      );
+      continue;
+    }
     assert.ok(Array.isArray(pub.sourceLinks) && pub.sourceLinks.length > 0, `Article publication ${pub.id} must have non-empty sourceLinks`);
     assert.ok(pub.sourceLinks.every(link => {
       try {
@@ -530,17 +551,12 @@ test('Published articles are associated with projects', () => {
 test('Published project records use their authoritative HTTPS project source', () => {
   let projectPublications = getPublicPublications(PUBLICATIONS)
     .filter(publication => publication.primaryProjectId !== null);
-  let sourceFreeProjectIds = new Set([
-    'projects/lifecycle-messaging-platform',
-    'projects/adaptive-maximo-workbench',
-    'projects/mobile-smm-platform',
-  ]);
   let sourceFreePublications = projectPublications
-    .filter(publication => sourceFreeProjectIds.has(publication.primaryProjectId));
+    .filter(publication => SOURCE_FREE_PROJECT_IDS.has(publication.primaryProjectId));
   let sourcedPublications = projectPublications
-    .filter(publication => !sourceFreeProjectIds.has(publication.primaryProjectId));
+    .filter(publication => !SOURCE_FREE_PROJECT_IDS.has(publication.primaryProjectId));
 
-  assert.ok(sourceFreePublications.length >= sourceFreeProjectIds.size);
+  assert.ok(sourceFreePublications.length >= SOURCE_FREE_PROJECT_IDS.size);
   for (let publication of sourceFreePublications) {
     assert.deepEqual(publication.sourceLinks, [], `${publication.slug} must not invent a public source`);
   }
@@ -560,10 +576,14 @@ test('Published project records use their authoritative HTTPS project source', (
   }
 });
 
-test('CV-native dated publications use the exact first public deployment cohorts', () => {
+test('CV-native dated publications use the exact deployment cohorts', () => {
   let datedProjectPublications = getPublicPublications(PUBLICATIONS)
     .filter(publication => publication.primaryProjectId !== null && publication.publishedAt !== null);
-  let expectedSlugs = new Set([...FIRST_DEPLOYMENT_SLUGS, ...SECOND_DEPLOYMENT_SLUGS]);
+  let expectedSlugs = new Set([
+    ...FIRST_DEPLOYMENT_SLUGS,
+    ...SECOND_DEPLOYMENT_SLUGS,
+    ...CV_SHOW_ARTICLE_SLUGS,
+  ]);
 
   assert.deepEqual(
     datedProjectPublications.map(publication => publication.slug).sort(),
@@ -572,7 +592,9 @@ test('CV-native dated publications use the exact first public deployment cohorts
   for (let publication of datedProjectPublications) {
     let expectedDate = FIRST_DEPLOYMENT_SLUGS.has(publication.slug)
       ? '2026-07-31T18:50:57Z'
-      : '2026-07-31T22:20:44Z';
+      : (SECOND_DEPLOYMENT_SLUGS.has(publication.slug)
+        ? '2026-07-31T22:20:44Z'
+        : '2026-11-11T12:00:00Z');
     assert.equal(publication.publishedAt, expectedDate, publication.slug);
   }
 });

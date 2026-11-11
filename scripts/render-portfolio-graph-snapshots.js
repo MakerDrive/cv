@@ -313,18 +313,18 @@ async function captureVariant(cdp, origin, locale, viewportName, themeName) {
       },
     };
   })()`);
-  if (result.snapshot?.routes?.length !== 182 || result.snapshot?.nodeRects?.length !== 121) {
+  if (result.snapshot?.routes?.length !== 191 || result.snapshot?.nodeRects?.length !== 125) {
     throw new Error(
       `${locale}/${viewportName}/${themeName} captured `
-      + `${result.snapshot?.routes?.length || 0}/182 routes and `
-      + `${result.snapshot?.nodeRects?.length || 0}/121 nodes.`,
+      + `${result.snapshot?.routes?.length || 0}/191 routes and `
+      + `${result.snapshot?.nodeRects?.length || 0}/125 nodes.`,
     );
   }
   if (
-    result.connectionOverlay?.paths?.length !== 182
+    result.connectionOverlay?.paths?.length !== 191
     || !/^matrix\([^)]*\)$/.test(result.connectionOverlay.transform || '')
   ) {
-    throw new Error(`${locale}/${viewportName}/${themeName} did not capture 182 PCB paths.`);
+    throw new Error(`${locale}/${viewportName}/${themeName} did not capture 191 PCB paths.`);
   }
   return result;
 }
