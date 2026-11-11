@@ -1,6 +1,8 @@
-name: Deploy to GitHub Pages
+name: Deploy locally built site to GitHub Pages
 
 on:
+  push:
+    branches: [gh-pages]
   workflow_dispatch:
 
 permissions:
@@ -13,33 +15,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
-
-      - run: npm ci --cache "${RUNNER_TEMP}/npm-cache"
-
-      - run: npm run build
-
-
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: gh-pages
+          persist-credentials: false
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+
       - id: deployment
         uses: actions/deploy-pages@v5
