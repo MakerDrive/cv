@@ -11,16 +11,6 @@ function contentHash(buffer) {
 }
 
 /**
- * Audits cit/social-cards.json against the local social store and the
- * current manifest. Classifies every entry as:
- *  - 'ok' — entry path exists and its file name hash equals the file content;
- *  - 'missing-file' — the registry points at a file that does not exist;
- *  - 'hash-stale' — the file exists but its bytes do not match the
- *    versioned name (content drift after publish);
- *  - 'registry-stale' — current manifest has an entry with no registry row;
- *  - 'orphan-file' — store file not referenced by the registry (and not produced
- *    by the current manifest at any path).
- *
  * @param {{ rootDir?: string, manifest?: Array<Object> }} [options]
  * @returns {Promise<{ perId: Object<string, string>, extraFiles: string[], summary: { byReason: Object<string, number> }, healthy: boolean }>}
  */
@@ -45,14 +35,19 @@ export async function auditSocialCardRegistry({ rootDir = process.cwd(), manifes
       continue;
     }
     let bytes = await fs.readFile(absolute);
-    // The registry pins content by embedding the byte hash in the file
-    // name: `<descriptive>-<sha256-first-12>.png`. Detect drift by comparing
-    // against bytes of the mapped file, not the path itself.
     let expected = `-${contentHash(bytes)}.png`;
     perId[id] = storePath.endsWith(expected) ? 'ok' : 'hash-stale';
   }
   for (let card of manifest || createSocialCardManifest()) {
-    if (!Object.hasOwn(cards, card.id)) perId[card.id] = 'registry-stale';
+    if (!Object.hasOwn(cards, card.id)) {
+      let generated = await fs.stat(path.join(rootDir, card.outputPath))
+        .then((entry) => entry.isFile())
+        .catch((error) => {
+          if (error.code !== 'ENOENT') throw error;
+          return false;
+        });
+      perId[card.id] = generated ? 'local-only' : 'registry-stale';
+    }
   }
   let unusedFiles = [...storeNames].filter((name) => (
     !Object.values(cards).map((entry) => String(entry).replace(/^\.\//, '')).includes(name)
@@ -62,7 +57,8 @@ export async function auditSocialCardRegistry({ rootDir = process.cwd(), manifes
     acc[reason] = (acc[reason] || 0) + 1;
     return acc;
   }, {});
-  let healthy = byReason['ok'] === Object.keys(perId).length && unusedFiles.length === 0;
+  let healthy = Object.values(perId).every((reason) => reason === 'ok' || reason === 'local-only')
+    && unusedFiles.length === 0;
   return Object.freeze({
     perId: Object.freeze(perId),
     extraFiles: Object.freeze(unusedFiles),

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { getSocialCardLocalUrl } from './socialCardPaths.js';
+import { createHash } from 'node:crypto';
+import { getSocialCardLocalUrl, getSocialCardOutputPath } from './socialCardPaths.js';
 
 const syncDataPath = path.resolve('cit/cit-sync-data.json');
 const socialCardsPath = path.resolve('cit/social-cards.json');
@@ -19,11 +20,17 @@ export function resolveSocialCardUrl(
   pageId,
   syncData = loadSyncData(),
   assets = SOCIAL_CARD_ASSETS,
+  { rootDir = process.cwd() } = {},
 ) {
   if (!pageId) return undefined;
+  let generatedPath = path.resolve(rootDir, getSocialCardOutputPath(pageId));
+  let version = fs.existsSync(generatedPath)
+    ? createHash('sha256').update(fs.readFileSync(generatedPath)).digest('hex').slice(0, 12)
+    : '';
   let assetPath = assets[pageId];
   let cdnId = assetPath && syncData[assetPath]?.cdnId;
-  return cdnId
+  let currentCdn = cdnId && (!version || assetPath.endsWith(`-${version}.png`));
+  return currentCdn
     ? cdnUrlTemplate.replace('{UID}', cdnId)
-    : getSocialCardLocalUrl(pageId);
+    : getSocialCardLocalUrl(pageId, version);
 }

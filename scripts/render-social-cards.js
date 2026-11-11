@@ -33,13 +33,13 @@ export async function renderSocialCards({
     let diag = {};
     let buffer = await renderSocialCardBuffer(card, { loadSource, out: diag });
     let { selected, fallback, diagnostics } = diag;
-    if (fallback) {
+    if (fallback && diagnostics.sources.length) {
       process.stderr.write(
         `[social-cards] ${card.id}: all sources failed, using branded fallback (`
           + diagnostics.sources.map((ds) => `${ds.source}: ${ds.reason}`).join('; ')
           + ')\n',
       );
-    } else {
+    } else if (!fallback) {
       let bad = diagnostics.sources.filter((ds) => !ds.ok);
       if (bad.length) {
         process.stderr.write(
