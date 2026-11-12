@@ -18,7 +18,7 @@ const PORTFOLIO_THEME_SHARED_STATE = Object.freeze({
   surfaceLightness: -1,
   tabRadius: 0,
   tabShape: 'frame',
-  themeVariant: 'classic',
+  themeVariant: 'default',
   type: 100,
 });
 

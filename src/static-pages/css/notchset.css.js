@@ -46,6 +46,8 @@ ${palette}
   --notchset-reading-leading: 1.5;
 }
 
+@scope (:root[data-portfolio-theme-mode]) {
+
 body:has(.pulse-screen) > header {
   min-block-size: var(--sn-app-topbar-height);
   padding-inline: var(--sn-step-10);
@@ -621,6 +623,7 @@ body:has(.pulse-screen)
   body:has(.pulse-screen) :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger) {
     min-block-size: var(--notchset-control-touch-height);
   }
+}
 }
 
 @media (prefers-reduced-motion: reduce) {

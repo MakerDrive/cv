@@ -19,6 +19,7 @@ declare module 'symbiote-ui/themes/Theme.js' {
 }
 
 declare module 'symbiote-ui/themes/cascade-theme.js' {
+  export function applyCascadeGeometryRegister(element: HTMLElement, register: string): string;
   export const CASCADE_THEME_REGISTER_STORAGE_SUFFIX: string;
   export type CascadeThemeMode = 'dark' | 'light';
   export type CascadeThemeOptions = {

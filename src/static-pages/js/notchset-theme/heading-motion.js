@@ -23,7 +23,7 @@ export default function installHeadingMotion(doc) {
   let query = view.matchMedia('(prefers-reduced-motion: reduce)');
   let handled = new WeakSet();
   let active = new Map();
-  let motionOff = () => query.matches || doc.hidden
+  let motionOff = () => !doc.documentElement.dataset.portfolioThemeMode || query.matches || doc.hidden
     || doc.documentElement.dataset.portfolioMotion === 'off';
   let finish = (heading) => {
     let record = active.get(heading);

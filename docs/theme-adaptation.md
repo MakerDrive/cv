@@ -11,6 +11,15 @@ source-derived appearance manually.
 
 ## Control state
 
+Default selects the CV Notchset skin; Classic and Modern select the library's
+complete presets. The native selector exposes Default when a host declares
+`default-state`. Choosing a preset clears a geometry-register preview.
+Notchset CSS, fonts, heading animation, semantic overrides and decorative
+workspace corner marks apply only while Default is selected. Library choices
+remove the host override layer and use native Cascade tokens. The selection
+persists together with parameters and can be restored through Default or Reset.
+
+
 The header Appearance action shows an icon with an accessible name. The quick
 widget and full editor share the same target and storage scope; changes propagate
 between them without reapplying stale values. Mode changes preserve other edited

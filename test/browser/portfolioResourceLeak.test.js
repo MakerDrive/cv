@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import WebSocket from 'ws';
+import { createCascadeTheme, resolveCascadeThemeVariantState } from 'symbiote-ui/themes/cascade-theme.js';
 import { listPresentationAuthoringToolDescriptors } from 'symbiote-workspace/browser';
 import { encodeCascadeThemeShare } from 'symbiote-ui/themes/cascade-theme-share.js';
 import { stripPortfolioArticleBlockMarkers } from '../../src/static-pages/data/portfolioArticleMedia.js';
@@ -2493,6 +2494,30 @@ test('Appearance audits every parameter and keeps controls, modes and persisted 
           || Math.abs(headingWithBoth / headingWithType - 1.4) > 0.01) {
           throw Error('Heading-to-body balance bypasses the global type scale');
         }
+        let workspace = document.querySelector('portfolio-workspace');
+        let readCorners = () => getComputedStyle(workspace, '::before').content;
+        if (readCorners() === 'none') throw Error('CV theme lost its corner decoration');
+        let libraryStates = [];
+        for (let variant of ['classic', 'modern']) {
+          editor.querySelector('[data-theme-variant="' + variant + '"]').click();
+          await frame();
+          if (root.dataset.portfolioThemeMode || readCorners() !== 'none') {
+            throw Error('CV skin leaked into library ' + variant);
+          }
+          libraryStates.push({ variant, state: editor.state,
+            font: getComputedStyle(root).getPropertyValue('--sn-font').trim(),
+            inlineSurface: root.style.getPropertyValue('--sn-sys-surface') });
+        }
+        await set('brightness', 45);
+        let nativeStyle = getComputedStyle(root);
+        if (nativeStyle.getPropertyValue('--bg-panel').trim()
+          !== nativeStyle.getPropertyValue('--sn-sys-surface-raised').trim()) {
+          throw Error('Library theme edits left stale layout bridge colors');
+        }
+        editor.querySelector('[data-theme-variant="default"]').click();
+        await frame();
+        if (editor.state.themeVariant !== 'default' || readCorners() === 'none'
+          || !root.dataset.portfolioThemeMode) throw Error('CV Default did not restore its skin');
         editor.setState({ ...baseline, brightness: 63, hue: 74, density: 120 });
         await frame();
         editor.querySelector('[data-theme-mode="dark"]').click();
@@ -2534,7 +2559,7 @@ test('Appearance audits every parameter and keeps controls, modes and persisted 
         editor.setState({ ...baseline, mode: 'dark', brightness: 57, chroma: 36, hue: 104 });
         await frame();
         let stored = JSON.parse(localStorage.getItem('symbiote-ui:cascade-theme-editor'));
-        return { iconOnly, matrix, registers, stored, widget: widget.state, full: editor.state };
+        return { iconOnly, matrix, libraryStates, registers, stored, widget: widget.state, full: editor.state };
       } finally {
         probe.remove();
       }
@@ -2545,6 +2570,12 @@ test('Appearance audits every parameter and keeps controls, modes and persisted 
   let audit = result.result.value;
   assert.equal(audit.iconOnly, true, JSON.stringify(result));
   assert.equal(audit.matrix.length, 42);
+  for (let entry of audit.libraryStates) {
+    let expected = resolveCascadeThemeVariantState(entry.variant);
+    assert.deepEqual(entry.state, expected);
+    assert.equal(entry.inlineSurface, createCascadeTheme(expected).tokens['--sn-sys-surface']);
+    assert.doesNotMatch(entry.font, /Archivo|Martian/);
+  }
   assert.deepEqual(audit.widget, audit.full);
   assert.deepEqual(audit.stored, audit.full);
   let track = await cdp.send('Runtime.evaluate', {
@@ -3744,6 +3775,27 @@ test('portfolio mobile rail swipes back without selecting and keeps header contr
   assert.ok(rail.pageCount >= 3, `the row carries every mobile panel, got ${rail.pageCount}`);
   assert.deepEqual(rail.labels, ['Portfolio', 'Details', 'Agent'],
     `the navigation buttons follow the layout order: ${JSON.stringify(rail.labels)}`);
+
+  let mobileFullscreen = await evalJSON(`(() => {
+    let buttons = [...document.querySelectorAll('layout-node[mobile-panel-rail-item] > .panel-view > .panel-header .fullscreen-btn')];
+    return { width: innerWidth, media: matchMedia('(max-width: 760px)').matches, count: buttons.length, visible: buttons.filter((button) => getComputedStyle(button).display !== 'none').length, styles: buttons.map((button) => ({ inline: button.getAttribute('style'), display: getComputedStyle(button).display, parent: button.closest('layout-node').outerHTML.slice(0, 220) })) };
+  })()`);
+  assert.ok(mobileFullscreen.count > 0);
+  assert.equal(mobileFullscreen.visible, 0, JSON.stringify(mobileFullscreen));
+  await cdp.send('Emulation.setDeviceMetricsOverride', DESKTOP_VIEWPORT);
+  await cdp.send('Runtime.evaluate', { awaitPromise: true, expression: `(async () => {
+    for (let i = 0; i < 30; i++) await new Promise(requestAnimationFrame);
+    let button = [...document.querySelectorAll('layout-node .fullscreen-btn')]
+      .find((item) => item.getBoundingClientRect().width > 0);
+    if (!button) throw Error('Desktop fullscreen control disappeared');
+    button.click();
+  })()` });
+  let desktopFullscreen = await evalJSON(`Boolean(document.querySelector('panel-layout[fullscreen-active], layout-node[fullscreen]'))`);
+  assert.equal(desktopFullscreen, true);
+  await cdp.send('Emulation.setDeviceMetricsOverride', swipeViewport);
+  rail = await readRail('return from desktop fullscreen');
+  let retainedFullscreen = await evalJSON(`Boolean(document.querySelector('panel-layout[fullscreen-active], layout-node[fullscreen]'))`);
+  assert.equal(retainedFullscreen, false, 'entering the mobile rail ends desktop fullscreen');
 
   const waitForSlide = async (index, label) => {
     let last = null;

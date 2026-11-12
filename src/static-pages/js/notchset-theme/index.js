@@ -1,3 +1,4 @@
+import { applyCascadeGeometryRegister } from 'symbiote-ui/themes/cascade-theme.js';
 import installMobileShowResize from './mobileShowResize.js';
 import installHeadingMotion from './heading-motion.js';
 
@@ -162,7 +163,6 @@ export default function installPortfolioNotchsetTheme(doc, presets, applyTheme) 
     let state = event.detail?.state || control.state;
     if (!state || (targetSelector && ![':root', 'html'].includes(targetSelector))) return;
     let root = doc.documentElement;
-    root.dataset.portfolioThemeMode = state.mode;
     root.dataset.portfolioMotion = state.motion === 0 ? 'off' : 'on';
     for (let element of doc.querySelectorAll('chat-workspace')) {
       let workspace = /** @type {ThemeChatWorkspace} */ (element);
@@ -173,10 +173,34 @@ export default function installPortfolioNotchsetTheme(doc, presets, applyTheme) 
       }
     }
     previousMotion = state.motion;
+    if (state.themeVariant !== 'default') {
+      let wasHostTheme = Boolean(root.dataset.portfolioThemeMode);
+      delete root.dataset.portfolioThemeMode;
+      let nativeTokens = event.detail?.theme?.tokens || {};
+      if (wasHostTheme) {
+        let hostTokens = getPortfolioNotchsetOverrides(state, presets);
+        for (let key of Object.keys(hostTokens)) {
+          if (!Object.hasOwn(nativeTokens, key)) root.style.removeProperty(key);
+        }
+        for (let overlay of doc.querySelectorAll('[data-overlay-portal]')) {
+          for (let key of Object.keys(hostTokens)) {
+            /** @type {HTMLElement} */ (overlay).style.removeProperty(key);
+          }
+        }
+      }
+      if (Object.keys(nativeTokens).length) {
+        applyTheme(root, { tokens: nativeTokens });
+        if (event.detail?.register && event.detail.register !== 'default') {
+          applyCascadeGeometryRegister(root, event.detail.register);
+        }
+      }
+      return;
+    }
+    root.dataset.portfolioThemeMode = state.mode;
     let overrides = getPortfolioNotchsetOverrides(state, presets);
     applyTheme(root, { name: 'notchset', tokens: overrides });
     queueMicrotask(() => {
-      if (!active) return;
+      if (!active || !root.dataset.portfolioThemeMode) return;
       let overlays = doc.querySelectorAll(':is(.ctw-popover, quick-toolbar, context-menu, panel-menu)[data-overlay-portal]');
       if (!overlays.length) return;
       let computed = doc.defaultView.getComputedStyle(root);
