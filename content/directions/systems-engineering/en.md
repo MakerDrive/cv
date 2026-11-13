@@ -8,11 +8,11 @@ Typical tasks: an existing process has to be put on a maintainable runtime; a pr
 
 | Project | Period | What the project proved |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | A confidential product platform: API services, PostgreSQL, WebSocket runtime sync, a queue, and a device contour kept behind an explicit boundary. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | 2018–2019 | Browser control of a physical device over a local network, used in the field rather than in the lab. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | 2016 | Motion-control camera experiments and the first media-presentation contour around automated shooting. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Date pending | A demo contour for maintenance operations that declares which actions exist and which integration layers belong to the host. |
-| [Symbiote Node](../../projects/symbiote-node/) | 2026 | Package and migration glue between UI primitives and execution-engine prototypes. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | A confidential product platform: API services, PostgreSQL, WebSocket runtime sync, a queue, and a device contour kept behind an explicit boundary. |
+| [PhotoPizza Remote](projects/photopizza-remote/) | 2018–2019 | Browser control of a physical device over a local network, used in the field rather than in the lab. |
+| [PhotoSnail Public](projects/photosnail-public/) | 2016 | Motion-control camera experiments and the first media-presentation contour around automated shooting. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | Date pending | A demo contour for maintenance operations that declares which actions exist and which integration layers belong to the host. |
+| [Symbiote Node](projects/symbiote-node/) | 2026 | Package and migration glue between UI primitives and execution-engine prototypes. |
 
 The dates describe when the projects ran. They are not the date this page was written and not the date the competence started.
 

@@ -2,16 +2,16 @@
 
 Process automation is the part of my work where a repeatable operation has to run without a person watching every step — and where every step still has to be provable afterwards. The subject is usually a form, a web or Android application, a publishing routine, or a campaign operation: something that a human used to click through, and that now has to survive a changed interface, a dropped session, and a repeated run.
 
-Typical tasks: a request has to be prepared, filled, checked, and submitted by a machine; a duplicate submission must be impossible; an agent must be able to work in a browser or on a device without imitating someone else's consent; a run must be resumable and its stops must be explained.
+Typical tasks: a machine prepares, fills, and checks a request; service-supported idempotency constrains repeated submissions; an agent works in a browser or on a device within its granted permissions; a run can resume and its stops can be explained.
 
 ## Where the experience comes from
 
 | Project | Period | What the project proved |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | Campaign orchestration, audience segmentation, queues, and repeatable operational workflows around a modem-backed runtime. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | 2025 | Page inspection, form workflows, structured operation logs, and browser-state evidence usable by an agent. |
-| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | Date pending | A controlled multi-profile publishing case with approvals, limits, deduplication, and an action log. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Date pending | A demo contour that declares which actions exist in the current state and keeps external operations unavailable. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | Campaign orchestration, audience segmentation, queues, and repeatable operational workflows around a modem-backed runtime. |
+| [Browser X MCP](projects/browser-x-mcp/) | 2025 | Page inspection, form workflows, structured operation logs, and browser-state evidence usable by an agent. |
+| [Mobile SMM Operations Platform](projects/mobile-smm-platform/) | Date pending | A controlled multi-profile publishing case with approvals, limits, deduplication, and an action log. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | Date pending | A demo contour that declares which actions exist in the current state and keeps external operations unavailable. |
 
 SMM and digital-presence automation is a related capability of mine: content planning and adaptation, channel publishing, profile synchronization, monitoring, and analytics. The platform case above is the engineering evidence; the capability page holds the channel-level detail.
 
@@ -21,24 +21,22 @@ I design the process as a route with entry conditions and a completion criterion
 
 I built the browser contour as an MCP server on Playwright — navigation, structured page extraction, form input, atomic and batched actions, screenshots as a separate evidence source — and I kept it honest about its limits: it runs in a local process, its actions require an active page, and it does not claim W3C conformance or process isolation.
 
-On the Android side I built the scenario contour: a verified JSON scenario that walks a stable path on a connected test device, records the result, and stops at a safe point when the screen structure changes. The public demonstration ends with a local draft, a test target, and approval or dry-run evidence; it does not send content to an external service.
+On the Android side I prepared a JSON scenario with checks and a safe stop when the screen structure changes. The public demonstration is limited to a local draft, a test target, and approval or dry-run evidence; it does not demonstrate a completed external submission.
 
 ## How I work
 
 - **Reaction speed does not cancel the admissibility check.** A matching option starts the work only after the configured rules accept it.
 - **Verification at every step.** The selected option, the filled fields, the documents, the server responses, and the actual request status are checked. A failed check stops the run until the cause is known.
-- **A click is not a confirmation.** Submission is confirmed by the status the service returns; until the server answers, the operation stays unconfirmed.
+- **The returned status confirms submission.** After an interface action, the system waits for the service status and records completion only after checking that response.
 - **Duplicates are constrained by design.** Limits and durable deduplication keep a repeated run from becoming a series of identical submissions, and a repeated step runs only after a check that it will not duplicate.
-- **Human approval where it belongs.** Undecided questions, actions with legal consequences, and confirmations requested by a service go to a person; the agent does not imitate someone else's consent.
+- **Consent comes from the right participant.** Undecided questions, actions with legal consequences, and confirmations requested by a service go to the person whose consent is required.
 - **Recovery is a normal case.** A changed interface, a dropped connection, a lost session, and a server refusal are expected: state is preserved and the decision to repeat is taken after comparing with the log.
 - **The log is the evidence.** Transitions, checks, events, and reasons for stopping are recorded, and the safe mode does not try to bypass captchas, service prohibitions, or access restrictions.
 
 ## Confirmed results
 
-- A multi-stage form route was executed on an anonymised test contour: the event arrived in the feed, the rules selected a matching option, the chosen service, data set, and required documents were verified before the start, the scenario walked the screens in order, every transition landed in the log, and submission was confirmed by the actual request status returned by the service.
-- A duplicate check ran before any repeated step, with limits and durable deduplication constraining outgoing operations.
 - The browser contour performed navigation, structured extraction, form input, atomic and batched actions, and screenshots as a separate evidence source.
-- The Android contour executed a stable path on a connected test device, recorded the result, and stopped at a safe point when the screen structure changed, with the proposed revision going to a person.
+- The Android scenario describes checks and a safe stop for a changed screen; the available public demo shows a local draft and approval or dry-run evidence, not a completed external submission.
 - The SMM platform case keeps profiles, accounts, media, schedules, queues, Android devices, approvals, limits, deduplication, and an action log in one operating model.
 
 ## Implemented, prototype, and open work

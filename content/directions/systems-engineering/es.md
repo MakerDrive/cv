@@ -8,11 +8,11 @@ Tareas típicas: llevar un proceso existente a un runtime mantenible; separar la
 
 | Proyecto | Período | Qué demostró el proyecto |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | Una plataforma de producto confidencial: servicios API, PostgreSQL, sincronización de runtime por WebSocket, una cola y un contorno de dispositivos tras una frontera explícita. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | 2018–2019 | Control de un dispositivo físico desde el navegador por red local, usado en campo y no en laboratorio. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | 2016 | Experimentos de movimiento controlado de cámara y el primer contorno de presentación de medios alrededor de la toma automatizada. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Fecha pendiente | Un contorno de demostración para operaciones de mantenimiento que declara qué acciones existen y qué capas de integración pertenecen al host. |
-| [Symbiote Node](../../projects/symbiote-node/) | 2026 | Capa de empaquetado y migración entre primitivas de UI y prototipos del motor de ejecución. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | Una plataforma de producto confidencial: servicios API, PostgreSQL, sincronización de runtime por WebSocket, una cola y un contorno de dispositivos tras una frontera explícita. |
+| [PhotoPizza Remote](projects/photopizza-remote/) | 2018–2019 | Control de un dispositivo físico desde el navegador por red local, usado en campo y no en laboratorio. |
+| [PhotoSnail Public](projects/photosnail-public/) | 2016 | Experimentos de movimiento controlado de cámara y el primer contorno de presentación de medios alrededor de la toma automatizada. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | Fecha pendiente | Un contorno de demostración para operaciones de mantenimiento que declara qué acciones existen y qué capas de integración pertenecen al host. |
+| [Symbiote Node](projects/symbiote-node/) | 2026 | Capa de empaquetado y migración entre primitivas de UI y prototipos del motor de ejecución. |
 
 Las fechas describen cuándo se ejecutaron los proyectos. No son la fecha en que se escribió esta página ni la fecha en que empezó la competencia.
 

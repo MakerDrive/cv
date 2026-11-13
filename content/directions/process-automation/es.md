@@ -2,16 +2,16 @@
 
 La automatización de procesos es la parte de mi trabajo en la que una operación repetible debe ejecutarse sin una persona vigilando cada paso, y en la que cada paso debe seguir siendo demostrable después. El objeto suele ser un formulario, una aplicación web o Android, una rutina de publicación o una operación de campaña: algo que una persona recorría a clics y que ahora debe sobrevivir a una interfaz cambiada, a una sesión perdida y a una ejecución repetida.
 
-Tareas típicas: preparar, rellenar, comprobar y enviar una solicitud con una máquina; hacer imposible un envío duplicado; permitir que un agente trabaje en un navegador o en un dispositivo sin imitar el consentimiento de otra persona; conseguir que una ejecución sea reanudable y que sus paradas estén explicadas.
+Tareas típicas: una máquina prepara, rellena y comprueba una solicitud; la idempotencia admitida por el servicio limita los envíos repetidos; un agente trabaja en un navegador o dispositivo con los permisos concedidos; la ejecución se puede reanudar y sus paradas se pueden explicar.
 
 ## De dónde viene la experiencia
 
 | Proyecto | Período | Qué demostró el proyecto |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | Orquestación de campañas, segmentación de audiencias, colas y flujos operativos repetibles alrededor de un runtime de módems. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | 2025 | Inspección de página, flujos de formularios, registros estructurados de operaciones y evidencia de navegador utilizable por un agente. |
-| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | Fecha pendiente | Un caso controlado de publicación multi-perfil con aprobaciones, límites, deduplicación y registro de acciones. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Fecha pendiente | Un contorno de demostración que declara qué acciones existen en el estado actual y deja fuera las operaciones externas. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | Orquestación de campañas, segmentación de audiencias, colas y flujos operativos repetibles alrededor de un runtime de módems. |
+| [Browser X MCP](projects/browser-x-mcp/) | 2025 | Inspección de página, flujos de formularios, registros estructurados de operaciones y evidencia de navegador utilizable por un agente. |
+| [Mobile SMM Operations Platform](projects/mobile-smm-platform/) | Fecha pendiente | Un caso controlado de publicación multi-perfil con aprobaciones, límites, deduplicación y registro de acciones. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | Fecha pendiente | Un contorno de demostración que declara qué acciones existen en el estado actual y deja fuera las operaciones externas. |
 
 La automatización de SMM y presencia digital es una capacidad relacionada: planificación y adaptación de contenido, publicación por canal, sincronización de perfiles, monitorización y analítica. La evidencia de ingeniería es el caso de la plataforma anterior; el detalle de nivel de canal está en la página de capacidades.
 
@@ -21,24 +21,22 @@ Diseño el proceso como una ruta con condiciones de entrada y un criterio de fin
 
 Construí el contorno de navegador como un servidor MCP sobre Playwright —navegación, extracción estructurada de página, entrada en formularios, acciones atómicas y por lotes, capturas como fuente de evidencia separada— y lo dejé honesto sobre sus límites: funciona en un proceso local, sus acciones requieren una página activa y no declara conformidad con W3C ni aislamiento de procesos.
 
-En el lado de Android construí el contorno de escenarios: un escenario JSON verificado recorre una ruta estable en un dispositivo de prueba conectado, registra el resultado y se detiene en un punto seguro cuando cambia la estructura de la pantalla. La demostración pública termina con un borrador local, un objetivo de prueba y evidencia de aprobación o dry-run; no envía contenido a un servicio externo.
+En el lado de Android preparé un escenario JSON con comprobaciones y una parada segura si cambia la estructura de la pantalla. La demo pública se limita a un borrador local, un objetivo de prueba y evidencia de aprobación o dry-run; no muestra un envío externo completado.
 
 ## Cómo trabajo
 
 - **La velocidad de reacción no cancela la comprobación de admisibilidad.** Una opción que coincide inicia el trabajo solo después de que las reglas configuradas la acepten.
 - **Verificación en cada paso.** Se comprueban la opción elegida, los campos rellenados, los documentos, las respuestas del servidor y el estado real de la solicitud. Una comprobación fallida detiene la ejecución hasta conocer la causa.
-- **Un clic no es una confirmación.** El envío se confirma con el estado que devuelve el servicio; hasta que el servidor responde, la operación sigue sin confirmar.
+- **El estado recibido confirma el envío.** Después de una acción en la interfaz, el sistema espera el estado del servicio y registra la finalización solo después de comprobar esa respuesta.
 - **Los duplicados se limitan por diseño.** Límites y deduplicación durable impiden que una ejecución repetida se convierta en una serie de envíos idénticos, y un paso repetido se ejecuta solo tras comprobar que no generará un duplicado.
-- **Aprobación humana donde corresponde.** Las preguntas sin resolver, las acciones con consecuencias legales y las confirmaciones solicitadas por un servicio pasan a una persona; el agente no imita el consentimiento de otro.
+- **El consentimiento lo da la persona correspondiente.** Las preguntas sin resolver, las acciones con consecuencias legales y las confirmaciones solicitadas por un servicio pasan a quien debe otorgar el consentimiento.
 - **La recuperación es un caso normal.** Una interfaz cambiada, una conexión caída, una sesión perdida y un rechazo del servidor son esperables: el estado se conserva y la decisión de repetir se toma tras comparar con el registro.
 - **El registro es la evidencia.** Transiciones, comprobaciones, eventos y motivos de parada quedan registrados, y el modo seguro no intenta eludir captchas, prohibiciones del servicio ni restricciones de acceso.
 
 ## Resultados confirmados
 
-- Una ruta de formulario multietapa se ejecutó en un contorno de prueba anonimizado: el evento llegó al feed, las reglas eligieron una opción coincidente, el servicio elegido, el conjunto de datos y los documentos requeridos se verificaron antes del inicio, el escenario recorrió las pantallas en orden, cada transición quedó en el registro y el envío se confirmó con el estado real de la solicitud devuelto por el servicio.
-- Una comprobación de duplicados se ejecutó antes de cualquier paso repetido, con límites y deduplicación durable restringiendo las operaciones salientes.
 - El contorno de navegador realizó navegación, extracción estructurada, entrada en formularios, acciones atómicas y por lotes, y capturas como fuente de evidencia separada.
-- El contorno de Android ejecutó una ruta estable en un dispositivo de prueba conectado, registró el resultado y se detuvo en un punto seguro cuando cambió la estructura de la pantalla, con la revisión propuesta pasando a una persona.
+- El escenario Android describe comprobaciones y una parada segura ante cambios en la pantalla; la demo pública disponible muestra un borrador local y evidencia de aprobación o dry-run, no un envío externo completado.
 - El caso de la plataforma SMM mantiene perfiles, cuentas, medios, programaciones, colas, dispositivos Android, aprobaciones, límites, deduplicación y un registro de acciones en un solo modelo operativo.
 
 ## Implementado, prototipo y trabajo abierto

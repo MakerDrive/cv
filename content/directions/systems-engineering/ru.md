@@ -8,11 +8,11 @@
 
 | Проект | Период | Что подтвердил проект |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | Конфиденциальная продуктовая платформа: API-сервисы, PostgreSQL, синхронизация runtime через WebSocket, очередь и аппаратный контур за явной границей. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | 2018–2019 | Управление физическим устройством из браузера по локальной сети — в поле, а не в лаборатории. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | 2016 | Эксперименты с управляемым движением камеры и первый медийный контур вокруг автоматической съёмки. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | дата уточняется | Демо-контур для ремонтных операций, который объявляет, какие действия доступны, а какие слои интеграции принадлежат хосту. |
-| [Symbiote Node](../../projects/symbiote-node/) | 2026 | Пакетный и миграционный слой между UI-примитивами и прототипами execution-engine. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | Конфиденциальная продуктовая платформа: API-сервисы, PostgreSQL, синхронизация runtime через WebSocket, очередь и аппаратный контур за явной границей. |
+| [PhotoPizza Remote](projects/photopizza-remote/) | 2018–2019 | Управление физическим устройством из браузера по локальной сети — в поле, а не в лаборатории. |
+| [PhotoSnail Public](projects/photosnail-public/) | 2016 | Эксперименты с управляемым движением камеры и первый медийный контур вокруг автоматической съёмки. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | дата уточняется | Демо-контур для ремонтных операций, который объявляет, какие действия доступны, а какие слои интеграции принадлежат хосту. |
+| [Symbiote Node](projects/symbiote-node/) | 2026 | Пакетный и миграционный слой между UI-примитивами и прототипами execution-engine. |
 
 Даты описывают, когда проекты выполнялись. Это не дата написания страницы и не дата начала компетенции.
 

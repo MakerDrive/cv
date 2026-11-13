@@ -145,11 +145,11 @@ Typical tasks: an existing process has to be put on a maintainable runtime; a pr
 
 | Project | Period | What the project proved |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | A confidential product platform: API services, PostgreSQL, WebSocket runtime sync, a queue, and a device contour kept behind an explicit boundary. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | 2018–2019 | Browser control of a physical device over a local network, used in the field rather than in the lab. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | 2016 | Motion-control camera experiments and the first media-presentation contour around automated shooting. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Date pending | A demo contour for maintenance operations that declares which actions exist and which integration layers belong to the host. |
-| [Symbiote Node](../../projects/symbiote-node/) | 2026 | Package and migration glue between UI primitives and execution-engine prototypes. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | A confidential product platform: API services, PostgreSQL, WebSocket runtime sync, a queue, and a device contour kept behind an explicit boundary. |
+| [PhotoPizza Remote](projects/photopizza-remote/) | 2018–2019 | Browser control of a physical device over a local network, used in the field rather than in the lab. |
+| [PhotoSnail Public](projects/photosnail-public/) | 2016 | Motion-control camera experiments and the first media-presentation contour around automated shooting. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | Date pending | A demo contour for maintenance operations that declares which actions exist and which integration layers belong to the host. |
+| [Symbiote Node](projects/symbiote-node/) | 2026 | Package and migration glue between UI primitives and execution-engine prototypes. |
 
 The dates describe when the projects ran. They are not the date this page was written and not the date the competence started.
 
@@ -197,7 +197,7 @@ Where AI execution runs, how a model or resource group is chosen, what data may 
 
 #### What this direction covers
 
-Applied AI work here is not a model wrapper: it is a contour that decides where execution happens, which executor receives a task, what data may leave the boundary, and how a result is verified. The same contour also decides how work is delegated — to an agent on a server, to a browser session, or to a phone connected as a tool.
+Applied AI work here brings together execution placement, task routing between executors, data-transfer rules, and result verification. Work can be delegated to a server-side agent, a browser session, or a phone connected as a tool.
 
 Typical tasks: an AI feature has to run without sending confidential documents outside a controlled boundary; several executors have to share one queue without losing ownership; a browser or device has to be driven by an agent without inventing confirmations; a result has to be accepted only when the environment actually reports success.
 
@@ -205,11 +205,11 @@ Typical tasks: an AI feature has to run without sending confidential documents o
 
 | Project | Period | What the project proved |
 | --- | --- | --- |
-| [Agent Portal](../../projects/agent-portal/) | 2025–2026 | Resource groups, model and subscription routing, executable kanban process, and human decision on conflict. |
-| [Agent Pool MCP](../../projects/agent-pool-mcp/) | 2026 | Delegation across CLI agents with visible ownership, handoffs, and structured execution state. |
-| [Project Graph MCP](../../projects/project-graph-mcp/) | 2026 | Graph-based code intelligence as a tool for agents. |
-| [Symbiote Workspace](../../projects/symbiote-workspace/) | 2026 | Task-adaptive workspaces assembled from portable configurations. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | 2025 | Browser evidence and controlled UI operations as an agent tool. |
+| [Agent Portal](projects/agent-portal/) | 2025–2026 | Resource groups, model and subscription routing, executable kanban process, and human decision on conflict. |
+| [Agent Pool MCP](projects/agent-pool-mcp/) | 2026 | Delegation across CLI agents with visible ownership, handoffs, and structured execution state. |
+| [Project Graph MCP](projects/project-graph-mcp/) | 2026 | Graph-based code intelligence as a tool for agents. |
+| [Symbiote Workspace](projects/symbiote-workspace/) | 2026 | Task-adaptive workspaces assembled from portable configurations. |
+| [Browser X MCP](projects/browser-x-mcp/) | 2025 | Browser evidence and controlled UI operations as an agent tool. |
 
 I have over 15 years of experience in software development and engineering R&D. My work with AI tooling and agent systems is evidenced by projects dating from 2025.
 
@@ -219,28 +219,26 @@ I designed the placement rule in Agent Portal: models and subscriptions are comb
 
 I also designed the delegation path: a delegation starts a CLI worker and returns a task identifier immediately, while the acceptance decision stays with the orchestrator. The constraint is measurable — the resource-group limit and the compressed context budget — so "cheaper executor" does not silently become "unverified result".
 
-On the device side I built the contour that connects executors to execution resources: a verified JSON scenario on a connected Android device, a browser tool with structured evidence, and a native application that drives a turntable over the local network. Each of them records state and stops at a safe point instead of guessing.
+For device work I prepared a JSON scenario with checks and a browser tool that captures structured evidence. PhotoPizza is a separate equipment-control project; running an agent directly on a smartphone remains open work.
 
 #### How I work
 
-- **Three deployment modes, one process.** A contour runs on a local machine, in cloud infrastructure, or in a hybrid combination; moving between them is gradual and does not change the task model.
-- **Placement is a decision, not a default.** Fast models take simple and exploratory work; strong models take complex decisions on compressed context; the deciding factors are task rules, data requirements, cost, and available capacity.
-- **A data boundary that is implemented.** For confidential documents, the system defines what stays inside and what may be sent to an external API; the boundary needs technical implementation and verification, because the scheme alone guarantees no privacy.
+- **The task determines deployment.** A contour runs on a local machine, in cloud infrastructure, or in a hybrid combination. Fast models take simple and exploratory work; strong models take complex decisions on compressed context. The choice accounts for task rules, data requirements, cost, and available capacity.
+- **Data-transfer boundary.** For confidential documents, the rules specify what stays inside and what may be sent to an external API. Technical enforcement and verification make the documented boundary effective.
 - **Delegation with visible ownership.** An assignment passes through registration, context collection, executor selection, action, result verification, and reporting; state is preserved at every stage so a failure can be investigated and work can continue after a stop.
-- **Roles, not shared accounts.** Each digital employee can have its own accounts, chats, and permitted operations; roles decide which data and applications it works with and which decisions it passes to a person.
+- **Role-scoped access.** Each digital employee can have its own accounts, chats, and permitted operations; roles decide which data and applications it works with and which decisions it passes to a person.
 - **Stop reasons are part of the contract.** When an interface changed, a connection dropped, or a result could not be verified, the system records the state and the reason for stopping.
 
 #### Confirmed results
 
 - **Portal chat:** chat creation and resumption through the MCP gateway, model routing, and tool access — implemented and verified.
 - **Executable kanban board:** a column runs part of the process with its own actions, roles, and pool of specialised agents; a conflict returns the card to a human decision — implemented and verified.
-- **Android scenario:** a verified JSON scenario executes a stable path on a connected test device and records the result; when the screen structure changes, execution stops at a safe point and the proposed scenario revision goes to a person — implemented and verified.
-- **PhotoPizza Remote:** a native Android application drives a turntable over the local Wi-Fi network and WebSocket — direction, frame count, speed, pause, delay, motion start, and motion stop — implemented and verified.
+- **Android scenario:** a JSON scenario defines a checked route and a safe stop when the screen structure changes. The available public demo covers a local draft, test target, and approval or dry-run evidence; it does not establish a completed external submission.
 - **Browser X MCP 1.0.0-beta.1:** an MCP server on Playwright with stdio transport — browser start, navigation, structured page extraction, form input, scroll, element inspection, atomic and batched actions, screenshots, and code execution in the page context — a verified prototype.
 
 #### Implemented, prototype, and open work
 
-- **Implemented and verified:** the four contours listed above.
+- **Implemented and verified:** the portal chat and kanban board. The Android scenario is described separately from the public demo evidence above.
 - **Verified prototype:** Browser X MCP 1.0.0-beta.1. Its beta release states its limits: the browser lives in a local process, actions require an active page, and the repository does not guarantee strict W3C conformance, process isolation between separate browser instances, or a CDP disable policy.
 - **Development direction, with no confirmed implementation in the public portfolio:** a phone channel for calling a digital employee and assigning work by voice; running the agent on the smartphone itself (today the device is a connected tool of a server-side executor); a shared device pool across several executors; a personal voice per employee. At the persona level, voices are implemented in the narrated tours of Symbiote UI, where each persona gets its own `speechSynthesis` channel in a hidden iframe and the profile stores locale, voice, rate, pitch, and volume; a timbre for a specific digital employee remains an open task and depends on the services in use and the rights to the source recordings.
 
@@ -260,16 +258,16 @@ Repeatable operations that run without a person at every step and still prove ea
 
 Process automation is the part of my work where a repeatable operation has to run without a person watching every step — and where every step still has to be provable afterwards. The subject is usually a form, a web or Android application, a publishing routine, or a campaign operation: something that a human used to click through, and that now has to survive a changed interface, a dropped session, and a repeated run.
 
-Typical tasks: a request has to be prepared, filled, checked, and submitted by a machine; a duplicate submission must be impossible; an agent must be able to work in a browser or on a device without imitating someone else's consent; a run must be resumable and its stops must be explained.
+Typical tasks: a machine prepares, fills, and checks a request; service-supported idempotency constrains repeated submissions; an agent works in a browser or on a device within its granted permissions; a run can resume and its stops can be explained.
 
 #### Where the experience comes from
 
 | Project | Period | What the project proved |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | Campaign orchestration, audience segmentation, queues, and repeatable operational workflows around a modem-backed runtime. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | 2025 | Page inspection, form workflows, structured operation logs, and browser-state evidence usable by an agent. |
-| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | Date pending | A controlled multi-profile publishing case with approvals, limits, deduplication, and an action log. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Date pending | A demo contour that declares which actions exist in the current state and keeps external operations unavailable. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | Campaign orchestration, audience segmentation, queues, and repeatable operational workflows around a modem-backed runtime. |
+| [Browser X MCP](projects/browser-x-mcp/) | 2025 | Page inspection, form workflows, structured operation logs, and browser-state evidence usable by an agent. |
+| [Mobile SMM Operations Platform](projects/mobile-smm-platform/) | Date pending | A controlled multi-profile publishing case with approvals, limits, deduplication, and an action log. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | Date pending | A demo contour that declares which actions exist in the current state and keeps external operations unavailable. |
 
 SMM and digital-presence automation is a related capability of mine: content planning and adaptation, channel publishing, profile synchronization, monitoring, and analytics. The platform case above is the engineering evidence; the capability page holds the channel-level detail.
 
@@ -279,24 +277,22 @@ I design the process as a route with entry conditions and a completion criterion
 
 I built the browser contour as an MCP server on Playwright — navigation, structured page extraction, form input, atomic and batched actions, screenshots as a separate evidence source — and I kept it honest about its limits: it runs in a local process, its actions require an active page, and it does not claim W3C conformance or process isolation.
 
-On the Android side I built the scenario contour: a verified JSON scenario that walks a stable path on a connected test device, records the result, and stops at a safe point when the screen structure changes. The public demonstration ends with a local draft, a test target, and approval or dry-run evidence; it does not send content to an external service.
+On the Android side I prepared a JSON scenario with checks and a safe stop when the screen structure changes. The public demonstration is limited to a local draft, a test target, and approval or dry-run evidence; it does not demonstrate a completed external submission.
 
 #### How I work
 
 - **Reaction speed does not cancel the admissibility check.** A matching option starts the work only after the configured rules accept it.
 - **Verification at every step.** The selected option, the filled fields, the documents, the server responses, and the actual request status are checked. A failed check stops the run until the cause is known.
-- **A click is not a confirmation.** Submission is confirmed by the status the service returns; until the server answers, the operation stays unconfirmed.
+- **The returned status confirms submission.** After an interface action, the system waits for the service status and records completion only after checking that response.
 - **Duplicates are constrained by design.** Limits and durable deduplication keep a repeated run from becoming a series of identical submissions, and a repeated step runs only after a check that it will not duplicate.
-- **Human approval where it belongs.** Undecided questions, actions with legal consequences, and confirmations requested by a service go to a person; the agent does not imitate someone else's consent.
+- **Consent comes from the right participant.** Undecided questions, actions with legal consequences, and confirmations requested by a service go to the person whose consent is required.
 - **Recovery is a normal case.** A changed interface, a dropped connection, a lost session, and a server refusal are expected: state is preserved and the decision to repeat is taken after comparing with the log.
 - **The log is the evidence.** Transitions, checks, events, and reasons for stopping are recorded, and the safe mode does not try to bypass captchas, service prohibitions, or access restrictions.
 
 #### Confirmed results
 
-- A multi-stage form route was executed on an anonymised test contour: the event arrived in the feed, the rules selected a matching option, the chosen service, data set, and required documents were verified before the start, the scenario walked the screens in order, every transition landed in the log, and submission was confirmed by the actual request status returned by the service.
-- A duplicate check ran before any repeated step, with limits and durable deduplication constraining outgoing operations.
 - The browser contour performed navigation, structured extraction, form input, atomic and batched actions, and screenshots as a separate evidence source.
-- The Android contour executed a stable path on a connected test device, recorded the result, and stopped at a safe point when the screen structure changed, with the proposed revision going to a person.
+- The Android scenario describes checks and a safe stop for a changed screen; the available public demo shows a local draft and approval or dry-run evidence, not a completed external submission.
 - The SMM platform case keeps profiles, accounts, media, schedules, queues, Android devices, approvals, limits, deduplication, and an action log in one operating model.
 
 #### Implemented, prototype, and open work
@@ -2025,31 +2021,179 @@ The experiment implemented tool contracts and stdio server wiring. Terminal exec
 
 - [github.com](https://github.com/rnd-pro/terminal-x-mcp)
 
-#### Three permanent directions replace the article set
+#### Full-Stack and Systems Integration
 
-URL: https://makerdrive.github.io/cv/pulse/directions-section/?lang=en
+URL: https://makerdrive.github.io/cv/pulse/fullstack-systems-integration/?lang=en
 
-Date: 2026-11-12T12:00:00Z
+Date: 2026-11-11T12:00:00Z
 
-Systems engineering, applied AI infrastructure and delegation, and process automation are now permanent sections; the four articles moved into them and their old Pulse addresses point at the new pages.
+Interface, server logic, API, storage, and operations form one product; the lifecycle messaging platform case shows the Digital Twin boundary and the path from the server runtime to GSM modem pools.
 
-#### What changed
+#### What holds the layers together
 
-Four Pulse articles described the same practice areas from a single moment in time. They are now permanent sections of the portfolio, because a direction is not a publication: it is the accumulated answer to "what do you solve", with the project periods, the personal contribution, and the line between what runs and what is still a plan.
+Full-stack work starts by treating the interface, server logic, API, storage, and operations as one product. A delivery failure is not closed by an interface fix, and a slow request is not cured by a larger browser timeout: a failure in one layer is visible in the others. JavaScript and Node.js carry most of my work, and the remaining components follow the requirements of the system.
 
-#### Where the texts went
+#### The request path
 
-- **Systems Engineering and Integration** — [read the direction](../directions/systems-engineering/). Source: the article on full-stack and systems integration.
-- **Applied AI Infrastructure and Agent Delegation** — [read the direction](../directions/applied-ai/). Sources: the articles on AI deployment control and on delegation to verified action.
-- **Process Automation and Verification** — [read the direction](../directions/process-automation/). Source: the article on web form automation with a verified request route.
+A request travels through a chain: web interface → HTTP/API → application services → database and queues → execution nodes. Monitoring and recovery sit as separate contours above that chain: a queue holds the work, repeatable execution keeps delivery manageable, and observability shows which step the process stopped at.
 
-#### What happens to the old addresses
+#### How the toolset is chosen
 
-The old Pulse addresses keep working. Each of them now leads to the permanent section that replaced it, is marked `noindex, follow`, and points its canonical tag at that section, so the article text is not duplicated as a competing page.
+The toolset is not fixed in advance — it follows the requirements of the system. Clear contracts and manageable process state let me swap components without rewriting the product.
 
-#### Why this is dated today
+#### Example: lifecycle messaging platform
 
-The date on this note is the date the portfolio was reorganised, not the date the practice started. The projects keep their own periods, and each direction page states when its source text was published.
+A confidential platform developed as a commercial R&D project. The product level carries API services on JavaScript and Node.js, PostgreSQL, runtime synchronization over WebSocket, a RabbitMQ-compatible intake, Swagger documentation, and admin interfaces. Campaigns, audiences, consents, and analytics stay at that level.
+
+The product does not talk to the physical devices directly. The boundary runs through the delivery instances: they are managed over serialport/COM connections with AT commands, and the modem runtime performs SMS inbox and USSD operations. The server runtime reaches the remote instances through SSH/WebSocket tunnels, so device commands stay inside the delivery subsystem.
+
+For reproducible testing without continuous access to physical devices, I built a local Digital Twin with virtual modems and repeatable traffic scenarios. The twin mirrored the GSM modem pool in both directions: device behavior could be replayed locally, while the same operational flow — queue, repeatable execution, monitoring — stayed applicable to the physical runtime. The twin exercised delivery logic on virtual devices.
+
+The client and the details of the specific deployment stay out of the public description: categories of functions, the stack profile, and subsystem boundaries remain. Tests run on the local twin, production delivery stays on the physical pools, and the product level does not change when the hardware contour is replaced.
+
+#### AI Infrastructure Under Placement Constraints
+
+URL: https://makerdrive.github.io/cv/pulse/ai-infrastructure-deployment-control/?lang=en
+
+Date: 2026-11-11T12:00:00Z
+
+A local machine, the cloud, and a hybrid contour differ in data exposure, operation, and quota; the Agent Portal resource groups show a measured choice between fast and strong models.
+
+#### Three deployment modes
+
+An AI contour runs in one of three ways: a local machine, cloud infrastructure, or a hybrid contour. The move between them is gradual — a local contour gains external resources as the load grows.
+
+**Local machine.** The model and the data it needs stay inside a managed environment. Less information leaves the boundary, and the same decision brings own operation, updates, and performance control.
+
+**Cloud.** It fits variable load, ready-made models, and external services. Cost and availability depend on the provider, the quotas, and the network connection, while data transfer is described by a separate policy.
+
+**Hybrid contour.** Local execution combines with external resources, and the executor is chosen by the rules of the task, data requirements, cost, and available capacity.
+
+#### A confirmed placement decision
+
+In Agent Portal, models and subscriptions are grouped into resource groups, so a stage receives an executor with matching capabilities and an available quota. Fast models take simple and exploratory work; strong models take complex decisions on compressed project context.
+
+Execution stays local in that setup: a delegation starts a CLI worker and returns a task identifier immediately, while the acceptance decision belongs to the orchestrator. The constraint is measurable — the resource group quota and the compressed context budget. The external API stays part of the contour: the local runtime keeps running, and the orchestrator accepts the result.
+
+#### The data boundary
+
+For confidential documents, a boundary of permitted transfer is defined. The system decides what stays inside and which data may be sent to an external API. That boundary takes technical implementation and verification; the scheme itself guarantees no privacy.
+
+#### Operations
+
+Operations cover roles and access, secret storage, observability, queues, redundancy, logging, and cost control. Configurations grow with the load: a local machine, the cloud, and a hybrid contour remain available options of the same process.
+
+##### Project resources
+
+- [rnd-pro.com](https://rnd-pro.com/projects/agent-portal/)
+
+#### Web Form Automation with a Verified Request Route
+
+URL: https://makerdrive.github.io/cv/pulse/web-form-application-automation/?lang=en
+
+Date: 2026-11-11T12:00:00Z
+
+An anonymized multi-stage request shows the admissibility check, the validation on every step, the status returned by the service as the confirmation of submission, and the duplicate check before a repeat.
+
+#### The request route
+
+The process scheme: a matching option appears → conditions are checked → the request starts → the filling stages run in order → verification → confirmed result. Every stage has entry conditions and a completion criterion.
+
+#### The starting point
+
+The first step is a matching option or event appearing. The system compares it with the configured rules and only then starts working. Reaction speed matters, and it does not cancel the admissibility check.
+
+#### Verification at every step
+
+Each stage is validated: the selected option, the filled fields, the documents, the server responses, and the actual request status. A failed check stops the run until the cause is known.
+
+#### An example request route
+
+For a multi-stage form, the route can be described this way; the service and data remain anonymized.
+
+1. An event arrives in the feed, the rules select a matching option, and the chosen service, the data set, and the required documents are verified before the start.
+2. The scenario walks the screens in order: option selection, data, documents.
+3. Every transition lands in the log: the selected option, the filled fields, the attached documents, the server responses.
+4. Completion is recorded only after receiving and checking the request status from the service; until then, the log keeps the attempt unfinished.
+5. Before a retry, compare the current status with the log. Retry only when the service supports a safe idempotent operation; send an ambiguous outcome for human review.
+
+In the browser contour this looks like an MCP server built on Playwright: navigation, structured page extraction, form input, atomic and batched actions, screenshots as a separate evidence source. The Browser X MCP beta runs in a local process and its actions require an active page; current Agent Portal treats browser access as a configurable tool boundary.
+
+In the Android automation contour, the same rules are expressed in a JSON scenario with checks, approval records, and a safe stop when the screen structure changes. The public demo is limited to a local draft, a test target, and approval or dry-run evidence; it does not demonstrate a completed external submission. Device credentials and production account data stay out of the public case.
+
+#### Recovery
+
+A changed interface, a dropped connection, a lost session, and a server refusal are normal cases the process prepares for: state is preserved, and the decision to repeat is taken after comparing with the log.
+
+#### Human approval
+
+Undecided questions, actions with legal consequences, and confirmations requested by the service go to the person who must provide consent.
+
+#### The log
+
+The log records transitions, checks, events, and reasons for stopping. The safe mode does not try to bypass captchas, service prohibitions, or access restrictions.
+
+##### Project resources
+
+- [github.com](https://github.com/rnd-pro/browser-x-mcp)
+
+#### Digital Employee: From Delegation to Verified Action
+
+URL: https://makerdrive.github.io/cv/pulse/digital-employee-delegation-to-action/?lang=en
+
+Date: 2026-11-11T12:00:00Z
+
+Chat, the executable Kanban board, and Android scenarios are implemented and verified; the phone channel, an agent hosted on the device itself, and a shared device pool remain development direction.
+
+#### What a digital employee is
+
+A digital employee is an executor with its own contour of assignments: a role, a task, tools, work state, and result verification. Executors run on servers and on connected devices, and the control contour connects them.
+
+#### Three levels of maturity
+
+Implemented and verified:
+
+- Portal chat: chat creation and resumption through the MCP gateway, model routing, and tool access.
+- Kanban board: a column runs part of the process and gets its own actions, roles, and pool of specialized agents; a conflict returns the card to a human decision.
+- Scenario on an Android device: a verified JSON scenario executes a stable path on a connected test device and records the result; when the screen structure changes, execution stops at a safe point and the proposed scenario revision goes to a person for review.
+- PhotoPizza: the ecosystem includes a native Android client for turntable control. The separate PhotoPizza Remote project is a browser interface that controls the device over local Wi-Fi and WebSocket. These clients demonstrate equipment control; hosting a digital employee on a smartphone remains open work.
+
+A verified prototype:
+
+- Browser X MCP 1.0.0-beta.1: an MCP server on Playwright with stdio transport — browser start, navigation, structured page extraction, form input, scroll, element inspection, atomic and batched actions, screenshots, and code execution in the page context. The beta release states its limits: the browser lives in a local process, actions require an active page, and the repository does not guarantee strict W3C conformance, process isolation between separate browser instances, or a CDP disable policy.
+
+Development direction, with no confirmed implementation in the public portfolio:
+
+- Phone channel: calling a digital employee and assigning work by voice — such a channel is absent from the verified contour.
+- Running the agent on the smartphone itself: today the device is a connected tool of a server-side executor; an agent hosted on the phone remains a separate task.
+- Shared device pool: several executors over one device pool are possible when coordination separates their tasks and access rights; the public portfolio does not show that mode.
+- A personal voice per employee: at the persona level, voices are implemented in the narrated tours of Symbiote UI — each persona gets its own `speechSynthesis` channel in a hidden iframe, and the profile stores locale, voice, rate, pitch, and volume. A timbre for a specific digital employee is an open task, and the available ways to create one depend on the services in use and on the rights to the source recordings.
+
+#### The path of an assignment
+
+An assignment passes through task registration, context collection, executor selection, action, result verification, and reporting. State is preserved at every stage, which makes failures investigable and lets work continue safely after a stop.
+
+An example of splitting the work: one agent collects material for publication, another prepares the text and the layout, and an executor works with the required app. Before a public action, the result can be handed to a person for approval.
+
+#### A team of digital employees
+
+The control contour distributes tasks and passes context between executors. Smartphones, servers, and other connected tools form the execution resources. The pool of specialized agents on a Kanban column lets me extend the executor count for a given load; a shared device pool across executors is still development direction.
+
+#### Channels and access rights
+
+Each digital employee can have its own accounts, chats, and permitted operations. Roles decide which data and apps it works with, which decisions it makes itself, and which ones it passes to a person.
+
+#### Control and confirmations
+
+Each tool gets permitted operations, confirmation conditions, and completion rules. When the interface changed, the connection dropped, or the result could not be verified, the system records the state and the reason for stopping. The user sees the progress and decides whether to continue.
+
+#### My engineering focus
+
+In this direction I combine AI agents, server automation, smartphones, interfaces, and process design. The architecture connects scattered tools and helps a person manage execution and results.
+
+##### Project resources
+
+- [rnd-pro.com](https://rnd-pro.com/projects/agent-portal/)
 
 ## Locale: Russian
 
@@ -2186,11 +2330,11 @@ URL: https://makerdrive.github.io/cv/directions/systems-engineering/?lang=ru
 
 | Проект | Период | Что подтвердил проект |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | Конфиденциальная продуктовая платформа: API-сервисы, PostgreSQL, синхронизация runtime через WebSocket, очередь и аппаратный контур за явной границей. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | 2018–2019 | Управление физическим устройством из браузера по локальной сети — в поле, а не в лаборатории. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | 2016 | Эксперименты с управляемым движением камеры и первый медийный контур вокруг автоматической съёмки. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | дата уточняется | Демо-контур для ремонтных операций, который объявляет, какие действия доступны, а какие слои интеграции принадлежат хосту. |
-| [Symbiote Node](../../projects/symbiote-node/) | 2026 | Пакетный и миграционный слой между UI-примитивами и прототипами execution-engine. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | Конфиденциальная продуктовая платформа: API-сервисы, PostgreSQL, синхронизация runtime через WebSocket, очередь и аппаратный контур за явной границей. |
+| [PhotoPizza Remote](projects/photopizza-remote/) | 2018–2019 | Управление физическим устройством из браузера по локальной сети — в поле, а не в лаборатории. |
+| [PhotoSnail Public](projects/photosnail-public/) | 2016 | Эксперименты с управляемым движением камеры и первый медийный контур вокруг автоматической съёмки. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | дата уточняется | Демо-контур для ремонтных операций, который объявляет, какие действия доступны, а какие слои интеграции принадлежат хосту. |
+| [Symbiote Node](projects/symbiote-node/) | 2026 | Пакетный и миграционный слой между UI-примитивами и прототипами execution-engine. |
 
 Даты описывают, когда проекты выполнялись. Это не дата написания страницы и не дата начала компетенции.
 
@@ -2238,7 +2382,7 @@ URL: https://makerdrive.github.io/cv/directions/applied-ai/?lang=ru
 
 #### Какие задачи закрывает направление
 
-Прикладная работа с ИИ здесь — не обёртка над моделью, а контур, который решает, где выполняется вычисление, какой исполнитель получает задачу, какие данные могут покинуть границу и как проверяется результат. Тот же контур решает, как делегируется работа — агенту на сервере, браузерной сессии или телефону, подключённому как инструмент.
+Прикладная работа с ИИ объединяет выбор среды исполнения, маршрутизацию задач между исполнителями, правила передачи данных и проверку результата. Работа делегируется агенту на сервере, браузерной сессии или телефону, подключённому как инструмент.
 
 Типовые задачи: ИИ-функция должна работать, не отправляя конфиденциальные документы за контролируемую границу; несколько исполнителей должны делить одну очередь, не теряя владения задачей; браузер или устройство должно управляться агентом без выдуманных подтверждений; результат принимается только тогда, когда окружение действительно сообщило об успехе.
 
@@ -2246,11 +2390,11 @@ URL: https://makerdrive.github.io/cv/directions/applied-ai/?lang=ru
 
 | Проект | Период | Что подтвердил проект |
 | --- | --- | --- |
-| [Agent Portal](../../projects/agent-portal/) | 2025–2026 | Группы ресурсов, маршрутизация моделей и подписок, исполняемая kanban-процесс-доска и решение человека при конфликте. |
-| [Agent Pool MCP](../../projects/agent-pool-mcp/) | 2026 | Делегирование между CLI-агентами с видимым владением, передачами и структурированным состоянием исполнения. |
-| [Project Graph MCP](../../projects/project-graph-mcp/) | 2026 | Графовый code intelligence как инструмент агента. |
-| [Symbiote Workspace](../../projects/symbiote-workspace/) | 2026 | Рабочие пространства, собираемые под задачу из переносимых конфигураций. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | 2025 | Браузерные доказательства и контролируемые UI-операции как инструмент агента. |
+| [Agent Portal](projects/agent-portal/) | 2025–2026 | Группы ресурсов, маршрутизация моделей и подписок, исполняемая kanban-процесс-доска и решение человека при конфликте. |
+| [Agent Pool MCP](projects/agent-pool-mcp/) | 2026 | Делегирование между CLI-агентами с видимым владением, передачами и структурированным состоянием исполнения. |
+| [Project Graph MCP](projects/project-graph-mcp/) | 2026 | Графовый code intelligence как инструмент агента. |
+| [Symbiote Workspace](projects/symbiote-workspace/) | 2026 | Рабочие пространства, собираемые под задачу из переносимых конфигураций. |
+| [Browser X MCP](projects/browser-x-mcp/) | 2025 | Браузерные доказательства и контролируемые UI-операции как инструмент агента. |
 
 Мой опыт разработки ПО и инженерного R&D превышает 15 лет. Практика ИИ-инструментов и агентных систем подтверждена проектами с 2025 года.
 
@@ -2260,28 +2404,26 @@ URL: https://makerdrive.github.io/cv/directions/applied-ai/?lang=ru
 
 Я также спроектировал путь делегирования: делегирование запускает CLI-воркера и сразу возвращает идентификатор задачи, а решение о приёмке остаётся за оркестратором. Ограничение измеримо — лимит группы ресурсов и бюджет сжатого контекста, поэтому «более дешёвый исполнитель» не превращается молча в «непроверенный результат».
 
-На стороне устройств я построил контур, который соединяет исполнителей с ресурсами исполнения: проверяемый JSON-сценарий на подключённом Android-устройстве, браузерный инструмент со структурированными доказательствами и нативное приложение, управляющее поворотным столом по локальной сети. Каждый из них фиксирует состояние и останавливается в безопасной точке вместо догадок.
+Для работы с устройствами я подготовил JSON-сценарий с проверками и браузерный инструмент, который сохраняет структурированные свидетельства. PhotoPizza — отдельный проект управления оборудованием; запуск агента непосредственно на смартфоне остаётся открытым направлением.
 
 #### Как я работаю
 
-- **Три режима развёртывания, один процесс.** Контур работает на локальной машине, в облачной инфраструктуре или в гибридной комбинации; переход между ними постепенный и не меняет модель задачи.
-- **Размещение — решение, а не умолчание.** Быстрые модели берут простую и исследовательскую работу; сильные модели принимают сложные решения на сжатом контексте; решают правила задачи, требования к данным, стоимость и доступная ёмкость.
-- **Граница данных, которая реализована.** Для конфиденциальных документов система определяет, что остаётся внутри, а что может уйти во внешний API; граница требует технической реализации и проверки, потому что сама схема приватности не гарантирует.
+- **Размещение следует задаче.** Контур работает на локальной машине, в облачной инфраструктуре или в гибридной комбинации. Быстрые модели берут простую и исследовательскую работу; сильные модели принимают сложные решения на сжатом контексте. Выбор учитывает правила задачи, требования к данным, стоимость и доступную ёмкость.
+- **Граница передачи данных.** Для конфиденциальных документов задаются сведения, которые остаются внутри, и сведения, допустимые для внешнего API. Техническое применение правил и их проверка обеспечивают фактическую защиту данных.
 - **Делегирование с видимым владением.** Задание проходит регистрацию, сбор контекста, выбор исполнителя, действие, проверку результата и отчёт; состояние сохраняется на каждом этапе, чтобы сбой можно было разобрать, а работу — продолжить после остановки.
-- **Роли, а не общие аккаунты.** У каждого цифрового сотрудника могут быть свои аккаунты, чаты и разрешённые операции; роли определяют, с какими данными и приложениями он работает и какие решения передаёт человеку.
+- **Ролевой доступ.** У каждого цифрового сотрудника могут быть свои аккаунты, чаты и разрешённые операции; роли определяют, с какими данными и приложениями он работает и какие решения передаёт человеку.
 - **Причина остановки — часть контракта.** Когда интерфейс изменился, соединение прервалось или результат не удалось проверить, система фиксирует состояние и причину остановки.
 
 #### Подтверждённые результаты
 
 - **Чат портала:** создание и возобновление чата через MCP-шлюз, маршрутизация моделей и доступ к инструментам — реализовано и проверено.
 - **Исполняемая kanban-доска:** колонка ведёт часть процесса с собственными действиями, ролями и пулом специализированных агентов; конфликт возвращает карточку человеку — реализовано и проверено.
-- **Сценарий на Android:** проверяемый JSON-сценарий выполняет стабильный путь на подключённом тестовом устройстве и записывает результат; при изменении структуры экрана исполнение останавливается в безопасной точке, а предложенная правка сценария уходит человеку — реализовано и проверено.
-- **PhotoPizza Remote:** нативное Android-приложение управляет поворотным столом по локальной Wi-Fi сети и WebSocket — направление, число кадров, скорость, пауза, задержка, старт и остановка движения — реализовано и проверено.
+- **Сценарий Android:** JSON-сценарий задаёт проверяемый маршрут и безопасную остановку при изменении структуры экрана. Доступная публичная демонстрация показывает локальный черновик, тестовую цель и свидетельство согласования или dry-run; она не подтверждает завершённую внешнюю отправку.
 - **Browser X MCP 1.0.0-beta.1:** MCP-сервер на Playwright с stdio-транспортом — запуск браузера, навигация, структурированное извлечение страницы, ввод в формы, прокрутка, осмотр элементов, атомарные и пакетные действия, скриншоты и выполнение кода в контексте страницы — проверенный прототип.
 
 #### Реализованное, прототипы и открытые задачи
 
-- **Реализовано и проверено:** четыре контура выше.
+- **Реализовано и проверено:** чат портала и kanban-доска. Android-сценарий описан отдельно от свидетельств публичной демонстрации выше.
 - **Проверенный прототип:** Browser X MCP 1.0.0-beta.1. Его бета-релиз фиксирует ограничения: браузер живёт в локальном процессе, действиям нужна активная страница, а репозиторий не гарантирует строгого соответствия W3C, изоляции процессов между отдельными экземплярами браузера и политики отключения CDP.
 - **Направление развития, без подтверждённой реализации в публичном портфеле:** телефонный канал для звонка цифровому сотруднику и постановки задачи голосом; запуск агента на самом смартфоне (сейчас устройство — подключённый инструмент серверного исполнителя); общий пул устройств для нескольких исполнителей; индивидуальный тембр на сотрудника. На уровне персон голоса реализованы в нарративных турах Symbiote UI: каждая персона получает собственный канал `speechSynthesis` в скрытом iframe, а профиль хранит locale, voice, rate, pitch и volume; тембр для конкретного цифрового сотрудника остаётся открытой задачей и зависит от используемых сервисов и прав на исходные записи.
 
@@ -2301,16 +2443,16 @@ URL: https://makerdrive.github.io/cv/directions/process-automation/?lang=ru
 
 Автоматизация процессов — это часть работы, где повторяемая операция должна выполняться без человека, следящего за каждым шагом, и где каждый шаг при этом должен быть доказуемым. Предмет обычно — форма, веб- или Android-приложение, публикационная рутина или плановая операция: то, что человек раньше проходил кликами, а теперь должно пережить изменённый интерфейс, оборванную сессию и повторный запуск.
 
-Типовые задачи: запрос должен подготовиться, заполниться, провериться и отправиться машиной; повторная отправка должна быть невозможна; агент должен уметь работать в браузере или на устройстве, не имитируя чужое согласие; запуск должен быть возобновляемым, а его остановки — объяснёнными.
+Типовые задачи: машина готовит, заполняет и проверяет запрос; поддерживаемая сервисом идемпотентность ограничивает повторные отправки; агент работает в браузере или на устройстве в рамках выданных полномочий; запуск можно возобновить, а остановку — объяснить.
 
 #### Откуда берётся опыт
 
 | Проект | Период | Что подтвердил проект |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | Оркестрация кампаний, сегментация аудиторий, очереди и повторяемые операционные процессы вокруг модемного runtime. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | 2025 | Осмотр страницы, заполнение форм, структурированные логи операций и браузерные доказательства, пригодные для агента. |
-| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | дата уточняется | Управляемый кейс публикаций с несколькими профилями: подтверждения, лимиты, дедупликация и журнал действий. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | дата уточняется | Демо-контур, который объявляет доступные в текущем состоянии действия и оставляет внешние операции недоступными. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | Оркестрация кампаний, сегментация аудиторий, очереди и повторяемые операционные процессы вокруг модемного runtime. |
+| [Browser X MCP](projects/browser-x-mcp/) | 2025 | Осмотр страницы, заполнение форм, структурированные логи операций и браузерные доказательства, пригодные для агента. |
+| [Mobile SMM Operations Platform](projects/mobile-smm-platform/) | дата уточняется | Управляемый кейс публикаций с несколькими профилями: подтверждения, лимиты, дедупликация и журнал действий. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | дата уточняется | Демо-контур, который объявляет доступные в текущем состоянии действия и оставляет внешние операции недоступными. |
 
 Автоматизация SMM и цифрового присутствия — связанная компетенция: планирование и адаптация контента, публикация по каналам, синхронизация профилей, мониторинг и аналитика. Инженерное подтверждение — кейс платформы выше; детали канального уровня — на странице компетенции.
 
@@ -2320,24 +2462,22 @@ URL: https://makerdrive.github.io/cv/directions/process-automation/?lang=ru
 
 Браузерный контур я собрал как MCP-сервер на Playwright — навигация, структурированное извлечение страницы, ввод в формы, атомарные и пакетные действия, скриншоты как отдельный источник доказательств — и оставил его честным насчёт ограничений: он работает в локальном процессе, действиям нужна активная страница, и он не заявляет соответствия W3C или изоляции процессов.
 
-На стороне Android я собрал сценарный контур: проверяемый JSON-сценарий проходит стабильный путь на подключённом тестовом устройстве, записывает результат и останавливается в безопасной точке при изменении структуры экрана. Публичная демонстрация заканчивается локальным черновиком, тестовой целью и подтверждением или dry-run; она не отправляет контент во внешний сервис.
+В Android-контуре я подготовил JSON-сценарий с проверками и безопасной остановкой при изменении структуры экрана. Публичная демонстрация ограничена локальным черновиком, тестовой целью и свидетельством согласования или dry-run; завершённую внешнюю отправку она не показывает.
 
 #### Как я работаю
 
 - **Скорость реакции не отменяет проверку допустимости.** Подходящий вариант запускает работу только после того, как настроенные правила его приняли.
 - **Проверка на каждом шаге.** Выбранный вариант, заполненные поля, документы, ответы сервера и фактический статус запроса проверяются. Неудачная проверка останавливает запуск, пока причина не известна.
-- **Клик — не подтверждение.** Отправка подтверждается статусом, который вернул сервис; пока сервер не ответил, операция считается неподтверждённой.
+- **Статус подтверждает отправку.** После действия в интерфейсе система ждёт статус от сервиса и фиксирует завершение только после проверки этого ответа.
 - **Дубли ограничены конструкцией.** Лимиты и долговечная дедупликация не дают повторному запуску превратиться в серию одинаковых отправок, а повторный шаг выполняется только после проверки, что он не создаст дубль.
-- **Подтверждение человека там, где оно нужно.** Нерешённые вопросы, действия с правовыми последствиями и подтверждения, запрошенные сервисом, уходят человеку; агент не имитирует чужое согласие.
+- **Согласие даёт нужный участник.** Нерешённые вопросы, действия с правовыми последствиями и подтверждения, запрошенные сервисом, передаются человеку, от которого требуется согласие.
 - **Восстановление — штатный случай.** Изменённый интерфейс, оборванное соединение, потерянная сессия и отказ сервера ожидаемы: состояние сохраняется, а решение о повторе принимается после сравнения с журналом.
 - **Журнал — это доказательство.** Переходы, проверки, события и причины остановки записываются, а безопасный режим не пытается обойти капчи, запреты сервиса и ограничения доступа.
 
 #### Подтверждённые результаты
 
-- Маршрут многоэтапной формы был выполнен на обезличенном тестовом контуре: событие пришло в ленту, правила выбрали подходящий вариант, выбранный сервис, набор данных и требуемые документы были проверены до старта, сценарий прошёл экраны по порядку, каждый переход попал в журнал, а отправка подтвердилась фактическим статусом запроса, который вернул сервис.
-- Перед любым повторным шагом выполнялась проверка дубля, а лимиты и долговечная дедупликация ограничивали исходящие операции.
 - Браузерный контур выполнял навигацию, структурированное извлечение, ввод в формы, атомарные и пакетные действия и скриншоты как отдельный источник доказательств.
-- Android-контур выполнял стабильный путь на подключённом тестовом устройстве, записывал результат и останавливался в безопасной точке при изменении структуры экрана, а предложенная правка уходила человеку.
+- Android-сценарий описывает проверки и безопасную остановку при изменении экрана; доступная публичная демонстрация показывает локальный черновик и свидетельство согласования или dry-run, но не завершённую внешнюю отправку.
 - Кейс SMM-платформы держит в одной операционной модели профили, аккаунты, медиа, расписания, очереди, Android-устройства, подтверждения, лимиты, дедупликацию и журнал действий.
 
 #### Реализованное, прототипы и открытые задачи
@@ -4070,31 +4210,179 @@ Period: 2025
 
 - [github.com](https://github.com/rnd-pro/terminal-x-mcp)
 
-#### Три постоянных направления вместо статей
+#### Full-stack и системная интеграция
 
-URL: https://makerdrive.github.io/cv/pulse/directions-section/?lang=ru
+URL: https://makerdrive.github.io/cv/pulse/fullstack-systems-integration/?lang=ru
 
-Date: 2026-11-12T12:00:00Z
+Date: 2026-11-11T12:00:00Z
 
-Системная инженерия, прикладная ИИ-инфраструктура с делегированием и автоматизация процессов стали постоянными разделами; четыре статьи переехали в них, а прежние адреса Pulse ведут на новые страницы.
+Интерфейс, серверная логика, API, хранилище и эксплуатация образуют один продукт; на примере lifecycle messaging platform показаны границы Digital Twin и путь от серверного runtime к пулам GSM-модемов.
 
-#### Что изменилось
+#### Что связывает слои
 
-Четыре статьи Pulse описывали одни и те же направления практики с одной точки во времени. Теперь это постоянные разделы портфолио: направление — не публикация, а накопленный ответ на вопрос «какие задачи вы решаете», с периодами проектов, личным вкладом и границей между работающим и планируемым.
+Full-stack работа начинается с того, что интерфейс, серверная логика, API, хранилище и эксплуатация описываются как один продукт. Ошибка одного слоя видна на остальных: правка интерфейса не закрывает сбой доставки, и браузерный таймаут не лечит медленный запрос. Основной рабочий стек — JavaScript и Node.js, остальные компоненты выбираются под требования системы.
 
-#### Куда переехали тексты
+#### Путь запроса
 
-- **Системная инженерия и интеграция** — [читать направление](../directions/systems-engineering/). Источник: статья о full-stack и системной интеграции.
-- **Прикладная ИИ-инфраструктура и делегирование задач** — [читать направление](../directions/applied-ai/). Источники: статьи об управлении ИИ-развёртыванием и о делегировании до проверенного действия.
-- **Автоматизация процессов и проверка результата** — [читать направление](../directions/process-automation/). Источник: статья об автоматизации веб-форм с проверяемым маршрутом заявки.
+Запрос проходит по цепочке: веб-интерфейс → HTTP/API → прикладные сервисы → база данных и очереди → исполнительные узлы. Мониторинг и восстановление после ошибок живут отдельными контурами поверх этой цепочки: очередь удерживает работу, повторяемое выполнение сохраняет управляемость доставки, а наблюдаемость показывает, на каком шаге процесс остановился.
 
-#### Что происходит со старыми адресами
+#### Правило выбора
 
-Прежние адреса Pulse продолжают работать. Каждый из них ведёт в постоянный раздел, который его заменил, помечен `noindex, follow` и указывает canonical на этот раздел, поэтому текст статьи не дублируется как конкурирующая страница.
+Набор инструментов не фиксируется заранее — он следует за требованиями системы. Понятные контракты и управляемое состояние процесса позволяют менять компоненты, не переписывая продукт.
 
-#### Почему запись датирована сегодня
+#### Пример: lifecycle messaging platform
 
-Дата этой записи — дата reorganзации портфолио, а не дата начала практики. У проектов сохраняются свои периоды, а на каждой странице направления указано, когда был опубликован её исходный текст.
+Конфиденциальная платформа, разработанная как коммерческий R&D-проект. Продуктовый уровень — API-сервисы на JavaScript и Node.js, PostgreSQL, runtime-синхронизация через WebSocket, RabbitMQ-совместимый intake, Swagger-документация и административные интерфейсы. Кампании, аудитории, согласия и аналитика живут здесь же.
+
+С физическими устройствами продукт не общается напрямую. Граница проходит по инстансам доставки: ими управляют через serialport/COM-соединения и AT-команды, а модемный runtime выполняет SMS inbox и USSD-операции. Серверный runtime связывается с удалёнными инстансами через SSH/WebSocket-туннели, поэтому команды устройств остаются внутри подсистемы доставки.
+
+Для воспроизводимых проверок без постоянного доступа к физическим устройствам я разработал локальный Digital Twin с виртуальными модемами и повторяемыми сценариями трафика. Twin двусторонне отражал GSM-модемный пул: поведение устройств воспроизводилось локально, и тот же операционный поток — очередь, повторяемое выполнение, мониторинг — оставался применимым к физическому контуру. Проверялась логика доставки на виртуальных устройствах.
+
+Клиент и детали конкретного внедрения в публичном описании не раскрываются: остаются категории функций, профиль стека и границы подсистем. Проверки идут на локальном twin, рабочая доставка остаётся на физических пулах, а продуктовый уровень не меняется при замене аппаратного контура.
+
+#### AI-инфраструктура под контролем ограничений
+
+URL: https://makerdrive.github.io/cv/pulse/ai-infrastructure-deployment-control/?lang=ru
+
+Date: 2026-11-11T12:00:00Z
+
+Локальная машина, облако и гибридный контур различаются передачей данных, эксплуатацией и лимитами; группы ресурсов Agent Portal показывают измеримый выбор между быстрыми и сильными моделями.
+
+#### Три схемы размещения
+
+AI-контур размещают одним из трёх способов: локальная машина, облачная инфраструктура, гибридный контур. Переход между ними постепенный — локальный контур расширяют внешними ресурсами по мере роста нагрузки.
+
+**Локальная машина.** Модель и необходимые данные работают внутри управляемого окружения. Передача сведений наружу сокращается, а вместе с ней приходят собственная эксплуатация, обновления и контроль производительности.
+
+**Облако.** Подходит для изменчивой нагрузки, готовых моделей и внешних сервисов. Стоимость и доступность зависят от провайдера, лимитов и сетевого соединения, а передача данных описывается отдельной политикой.
+
+**Гибридный контур.** Локальное исполнение сочетается с внешними ресурсами, а исполнителя выбирают по правилам задачи, требованиям к данным, стоимости и доступной мощности.
+
+#### Подтверждённый пример выбора
+
+В Agent Portal модели и подписки объединены в группы ресурсов, поэтому этап получает исполнителя с подходящими возможностями и доступным лимитом. Простую и разведочную работу выполняют быстрые модели, сложные решения принимают сильные модели на основе сжатого проектного контекста.
+
+Исполнение при этом остаётся локальным: делегация запускает CLI-воркер и сразу возвращает идентификатор задачи, а решение о приёмке принадлежит оркестратору. Ограничение выбора измеримое — лимит подписки группы ресурсов и бюджет сжатого контекста. Внешний API остаётся частью контура: локальный runtime продолжает работу, а приёмку результата делает оркестратор.
+
+#### Граница данных
+
+Для конфиденциальных документов задаётся граница разрешённой передачи данных. Система определяет, что остаётся внутри, а какие сведения допускается направлять внешнему API. Эта граница требует технической реализации и проверки; схема сама по себе не гарантирует приватность.
+
+#### Управление
+
+Управление включает роли и доступы, хранение секретов, наблюдаемость, очереди, резервирование, журналирование и контроль затрат. Конфигурации развиваются по мере роста нагрузки: локальная машина, облако и гибридный контур остаются доступными вариантами одного и того же процесса.
+
+##### Материалы проекта
+
+- [rnd-pro.com](https://rnd-pro.com/projects/agent-portal/)
+
+#### Автоматизация веб-форм с проверяемым маршрутом заявки
+
+URL: https://makerdrive.github.io/cv/pulse/web-form-application-automation/?lang=ru
+
+Date: 2026-11-11T12:00:00Z
+
+Обезличенная многоэтапная заявка показывает проверку допустимости, валидацию на каждом шаге, статус, возвращённый сервисом как подтверждение отправки, и проверку дубля перед повтором.
+
+#### Маршрут заявки
+
+Схема процесса: появление подходящего варианта → проверка условий → начало заявки → последовательные этапы заполнения → проверка → подтверждение результата. У каждого этапа есть входные условия и критерий завершения.
+
+#### Точка старта
+
+Первый шаг — появление подходящего варианта или события. Система сравнивает его с заданными правилами и только после этого начинает работу. Скорость реакции важна, но она не отменяет проверки допустимости операции.
+
+#### Проверка на каждом шаге
+
+На каждом этапе выполняется валидация: выбранный вариант, заполненные поля, документы, ответы сервера и фактический статус заявки. Ошибка проверки останавливает дальнейшее выполнение до выяснения причины.
+
+#### Пример маршрута заявки
+
+Для многоэтапной формы маршрут можно описать так; конкретный сервис и данные остаются обезличенными.
+
+1. Событие появляется в ленте, правила отбирают подходящий вариант, и до старта сверяются выбранный сервис, набор данных и требуемые документы.
+2. Сценарий проходит экраны последовательно: выбор варианта, данные, документы.
+3. Каждый переход попадает в журнал: выбранный вариант, заполненные поля, приложенные документы, ответы сервера.
+4. Завершение отправки фиксируется только после получения и проверки статуса заявки от сервиса; до этого в журнале остаётся незавершённая попытка.
+5. Перед повтором сверяются текущий статус и журнал. Повтор допустим при поддержке сервисом безопасной идемпотентной операции; при неоднозначном результате задача передаётся человеку.
+
+В браузерном контуре это выглядит как работа MCP-сервера на Playwright: навигация, структурное извлечение страницы, ввод в формы, атомарные и пакетные действия, screenshots как отдельный источник evidence. Beta-версия Browser X MCP живёт в локальном процессе, а действия требуют активной страницы; современный Agent Portal рассматривает браузерный доступ как настраиваемую границу инструментов.
+
+В Android-контуре те же правила заданы в JSON-сценарии с проверками, записями согласования и безопасной остановкой при изменении структуры экрана. Публичная демонстрация ограничена локальным черновиком, тестовой целью и свидетельством approval или dry-run; завершённую внешнюю отправку она не показывает. Учётные данные устройств и производственных аккаунтов остаются вне публичного кейса.
+
+#### Восстановление
+
+Изменение интерфейса, обрыв соединения, разрыв сессии и отказ сервера считаются нормальными случаями, к которым нужно готовить процесс: сохраняется состояние, а решение о повторе принимается после сверки с журналом.
+
+#### Согласование человеком
+
+Неопределённые решения, действия с юридическими последствиями и запрошенные сервисом подтверждения передаются человеку, который должен дать согласие.
+
+#### Журнал
+
+В журнале фиксируются переходы, проверки, события и причины остановки. Безопасный режим не пытается обходить капчи, запреты сервиса или ограничения доступа.
+
+##### Материалы проекта
+
+- [github.com](https://github.com/rnd-pro/browser-x-mcp)
+
+#### Цифровой сотрудник: от поручения к проверенному действию
+
+URL: https://makerdrive.github.io/cv/pulse/digital-employee-delegation-to-action/?lang=ru
+
+Date: 2026-11-11T12:00:00Z
+
+Чат, исполняемая Kanban-доска и сценарии на Android-устройствах реализованы и проверены; телефонный канал, агент на самом устройстве и общий пул устройств остаются направлением развития.
+
+#### Что такое цифровой сотрудник
+
+Цифровой сотрудник — исполнитель с собственным контуром поручений: роль, задача, инструменты, состояние работы и проверка результата. Исполнители живут на серверах и на подключённых устройствах, а управляющий контур связывает их между собой.
+
+#### Три уровня зрелости
+
+Реализовано и проверено:
+
+- Чат портала: создание и возобновление чатов через MCP-шлюз, маршрутизация моделей и доступ к инструментам.
+- Kanban-доска: колонка запускает часть процесса и получает свои действия, роли и пул специализированных агентов; конфликт возвращает карточку к решению человека.
+- Сценарий на Android-устройстве: проверенный JSON-сценарий выполняет стабильный путь на подключённом тестовом устройстве и записывает результат; при изменении структуры экрана выполнение останавливается в безопасной точке, а предложенная ревизия сценария уходит человеку на проверку.
+- PhotoPizza: экосистема включает нативный Android-клиент управления поворотным столом. Отдельный проект PhotoPizza Remote — браузерный интерфейс, который управляет устройством по локальной Wi-Fi сети через WebSocket. Эти клиенты показывают управление оборудованием; размещение цифрового сотрудника на смартфоне остаётся открытым направлением.
+
+Проверенный прототип:
+
+- Browser X MCP 1.0.0-beta.1: MCP-сервер на Playwright со stdio-транспортом — запуск браузера, навигация, структурное извлечение страницы, ввод в формы, scroll, инспекция элементов, атомарные и пакетные действия, screenshots и выполнение кода в контексте страницы. Бета-релиз фиксирует границы: браузер живёт в локальном процессе, действия требуют активной страницы, а репозиторий не гарантирует строгого соответствия стандартам W3C, изоляции процессов отдельных браузерных инстансов и политики отключения CDP.
+
+Направление развития, в публичном портфеле без подтверждённой реализации:
+
+- Телефонный канал: позвонить цифровому сотруднику и поставить задачу голосом — такого канала в подтверждённом контуре нет.
+- Размещение агента на самом смартфоне: сегодня устройство — подключённый инструмент серверного исполнителя; собственный агент, размещённый на телефоне, остаётся отдельной задачей.
+- Общий пул устройств: несколько исполнителей с общим пулом устройств возможны, если координация разграничивает их задачи и доступы; такой режим в публичном портфеле не показан.
+- Индивидуальный голос сотрудника: на уровне персонажа голоса реализованы в озвученных турах Symbiote UI — у каждого персонажа свой канал `speechSynthesis` в скрытом iframe, а профиль хранит язык, голос, темп, высоту тона и громкость. Тембр под конкретного цифрового сотрудника — задача, доступность способов создания зависит от применяемых сервисов и прав на исходные записи.
+
+#### Путь поручения
+
+Поручение проходит через регистрацию задачи, сбор контекста, выбор исполнителя, выполнение действий, проверку результата и отчёт. На каждом этапе сохраняется состояние — это позволяет разбираться в сбоях и безопасно продолжать работу после остановки.
+
+Пример разделения работы: один агент собирает материалы для публикации, другой готовит текст и оформление, исполнитель взаимодействует с нужным приложением. Перед публичным действием результат можно передать человеку на согласование.
+
+#### Команда цифровых сотрудников
+
+Управляющий контур распределяет задачи и передаёт контекст между исполнителями. Смартфоны, серверы и другие подключённые инструменты образуют исполнительные ресурсы. Пул специализированных агентов на колонке Kanban позволяет расширять состав исполнителей под нагрузку; общий пул устройств между исполнителями пока остаётся направлением развития.
+
+#### Каналы общения и права доступа
+
+У каждого цифрового сотрудника могут быть свои аккаунты, чаты и допустимые операции. Роли определяют, с какими данными и приложениями он работает, какие решения принимает сам и какие передаёт человеку.
+
+#### Контроль и подтверждения
+
+Для каждого инструмента задаются допустимые операции, условия подтверждения и правила завершения. Если интерфейс изменился, соединение оборвалось или результат не удалось проверить, система фиксирует состояние и причину остановки. Пользователь видит ход выполнения и принимает решение о продолжении.
+
+#### Мой инженерный фокус
+
+В этом направлении я объединяю AI-агентов, серверную автоматизацию, смартфоны, интерфейсы и проектирование рабочих процессов. Архитектура связывает разрозненные инструменты и помогает человеку управлять исполнением и результатом.
+
+##### Материалы проекта
+
+- [rnd-pro.com](https://rnd-pro.com/projects/agent-portal/)
 
 ## Locale: Spanish
 
@@ -4231,11 +4519,11 @@ Tareas típicas: llevar un proceso existente a un runtime mantenible; separar la
 
 | Proyecto | Período | Qué demostró el proyecto |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | Una plataforma de producto confidencial: servicios API, PostgreSQL, sincronización de runtime por WebSocket, una cola y un contorno de dispositivos tras una frontera explícita. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | 2018–2019 | Control de un dispositivo físico desde el navegador por red local, usado en campo y no en laboratorio. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | 2016 | Experimentos de movimiento controlado de cámara y el primer contorno de presentación de medios alrededor de la toma automatizada. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Fecha pendiente | Un contorno de demostración para operaciones de mantenimiento que declara qué acciones existen y qué capas de integración pertenecen al host. |
-| [Symbiote Node](../../projects/symbiote-node/) | 2026 | Capa de empaquetado y migración entre primitivas de UI y prototipos del motor de ejecución. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | Una plataforma de producto confidencial: servicios API, PostgreSQL, sincronización de runtime por WebSocket, una cola y un contorno de dispositivos tras una frontera explícita. |
+| [PhotoPizza Remote](projects/photopizza-remote/) | 2018–2019 | Control de un dispositivo físico desde el navegador por red local, usado en campo y no en laboratorio. |
+| [PhotoSnail Public](projects/photosnail-public/) | 2016 | Experimentos de movimiento controlado de cámara y el primer contorno de presentación de medios alrededor de la toma automatizada. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | Fecha pendiente | Un contorno de demostración para operaciones de mantenimiento que declara qué acciones existen y qué capas de integración pertenecen al host. |
+| [Symbiote Node](projects/symbiote-node/) | 2026 | Capa de empaquetado y migración entre primitivas de UI y prototipos del motor de ejecución. |
 
 Las fechas describen cuándo se ejecutaron los proyectos. No son la fecha en que se escribió esta página ni la fecha en que empezó la competencia.
 
@@ -4283,7 +4571,7 @@ Dónde se ejecuta la IA, cómo se elige un modelo o un grupo de recursos, qué d
 
 #### Qué problemas resuelve esta dirección
 
-El trabajo aplicado de IA aquí no es un envoltorio de un modelo: es un contorno que decide dónde se ejecuta el cómputo, qué ejecutor recibe una tarea, qué datos pueden salir de la frontera y cómo se verifica el resultado. El mismo contorno decide cómo se delega el trabajo: a un agente en un servidor, a una sesión de navegador o a un teléfono conectado como herramienta.
+El trabajo aplicado de IA reúne la elección del entorno de ejecución, el enrutamiento de tareas entre ejecutores, las reglas de transferencia de datos y la verificación de resultados. El trabajo se puede delegar a un agente en un servidor, a una sesión de navegador o a un teléfono conectado como herramienta.
 
 Tareas típicas: una función de IA debe funcionar sin enviar documentos confidenciales fuera de una frontera controlada; varios ejecutores deben compartir una cola sin perder la propiedad; un navegador o dispositivo debe ser conducido por un agente sin inventar confirmaciones; un resultado se acepta solo cuando el entorno informa realmente de éxito.
 
@@ -4291,11 +4579,11 @@ Tareas típicas: una función de IA debe funcionar sin enviar documentos confide
 
 | Proyecto | Período | Qué demostró el proyecto |
 | --- | --- | --- |
-| [Agent Portal](../../projects/agent-portal/) | 2025–2026 | Grupos de recursos, enrutamiento de modelos y suscripciones, tablero kanban ejecutable y decisión humana en conflicto. |
-| [Agent Pool MCP](../../projects/agent-pool-mcp/) | 2026 | Delegación entre agentes CLI con propiedad visible, traspasos y estado de ejecución estructurado. |
-| [Project Graph MCP](../../projects/project-graph-mcp/) | 2026 | Inteligencia de código basada en grafos como herramienta para agentes. |
-| [Symbiote Workspace](../../projects/symbiote-workspace/) | 2026 | Espacios de trabajo adaptables a la tarea, ensamblados desde configuraciones portátiles. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | 2025 | Evidencia de navegador y operaciones de UI controladas como herramienta de agente. |
+| [Agent Portal](projects/agent-portal/) | 2025–2026 | Grupos de recursos, enrutamiento de modelos y suscripciones, tablero kanban ejecutable y decisión humana en conflicto. |
+| [Agent Pool MCP](projects/agent-pool-mcp/) | 2026 | Delegación entre agentes CLI con propiedad visible, traspasos y estado de ejecución estructurado. |
+| [Project Graph MCP](projects/project-graph-mcp/) | 2026 | Inteligencia de código basada en grafos como herramienta para agentes. |
+| [Symbiote Workspace](projects/symbiote-workspace/) | 2026 | Espacios de trabajo adaptables a la tarea, ensamblados desde configuraciones portátiles. |
+| [Browser X MCP](projects/browser-x-mcp/) | 2025 | Evidencia de navegador y operaciones de UI controladas como herramienta de agente. |
 
 Tengo más de 15 años de experiencia en desarrollo de software e I+D de ingeniería. Los proyectos que documentan mi trabajo con herramientas de IA y sistemas de agentes comienzan en 2025.
 
@@ -4305,28 +4593,26 @@ Diseñé la regla de ubicación en Agent Portal: los modelos y las suscripciones
 
 También diseñé la ruta de delegación: una delegación inicia un worker CLI y devuelve de inmediato un identificador de tarea, mientras que la decisión de aceptación queda en el orquestador. La restricción es medible —el límite del grupo de recursos y el presupuesto de contexto comprimido—, así que «ejecutor más barato» no se convierte en silencio en «resultado sin verificar».
 
-En el lado de los dispositivos construí el contorno que conecta ejecutores con recursos de ejecución: un escenario JSON verificado en un dispositivo Android conectado, una herramienta de navegador con evidencia estructurada y una aplicación nativa que maneja una mesa giratoria por la red local. Cada una registra el estado y se detiene en un punto seguro en lugar de adivinar.
+Para trabajar con dispositivos preparé un escenario JSON con comprobaciones y una herramienta de navegador que conserva evidencia estructurada. PhotoPizza es un proyecto separado de control de equipos; ejecutar un agente directamente en un smartphone sigue siendo una línea de trabajo abierta.
 
 #### Cómo trabajo
 
-- **Tres modos de despliegue, un solo proceso.** Un contorno se ejecuta en una máquina local, en infraestructura de nube o en una combinación híbrida; el paso de uno a otro es gradual y no cambia el modelo de tarea.
-- **La ubicación es una decisión, no un valor por defecto.** Los modelos rápidos toman trabajo simple y exploratorio; los modelos fuertes toman decisiones complejas sobre contexto comprimido; deciden las reglas de la tarea, los requisitos de datos, el coste y la capacidad disponible.
-- **Una frontera de datos implementada.** Para documentos confidenciales, el sistema define qué se queda dentro y qué puede enviarse a una API externa; la frontera exige implementación técnica y verificación, porque el esquema por sí solo no garantiza privacidad.
+- **La tarea determina el despliegue.** El contorno se ejecuta en una máquina local, en infraestructura de nube o en una combinación híbrida. Los modelos rápidos toman trabajo simple y exploratorio; los modelos fuertes toman decisiones complejas sobre contexto comprimido. La elección considera las reglas de la tarea, los requisitos de datos, el coste y la capacidad disponible.
+- **Límite de transferencia de datos.** Para documentos confidenciales, las reglas especifican qué permanece dentro y qué puede enviarse a una API externa. La aplicación técnica y la verificación hacen efectiva la frontera documentada.
 - **Delegación con propiedad visible.** Una asignación pasa por registro, recogida de contexto, selección de ejecutor, acción, verificación del resultado y reporte; el estado se conserva en cada etapa para que un fallo se pueda investigar y el trabajo pueda continuar tras una parada.
-- **Roles, no cuentas compartidas.** Cada empleado digital puede tener sus propias cuentas, chats y operaciones permitidas; los roles deciden con qué datos y aplicaciones trabaja y qué decisiones pasa a una persona.
+- **Acceso por roles.** Cada empleado digital puede tener sus propias cuentas, chats y operaciones permitidas; los roles deciden con qué datos y aplicaciones trabaja y qué decisiones pasa a una persona.
 - **El motivo de parada es parte del contrato.** Cuando la interfaz cambió, la conexión se perdió o el resultado no se pudo verificar, el sistema registra el estado y el motivo de la parada.
 
 #### Resultados confirmados
 
 - **Chat del portal:** creación y reanudación de chat mediante la pasarela MCP, enrutamiento de modelos y acceso a herramientas: implementado y verificado.
 - **Tablero kanban ejecutable:** una columna ejecuta parte del proceso con sus propias acciones, roles y pool de agentes especializados; un conflicto devuelve la tarjeta a una decisión humana: implementado y verificado.
-- **Escenario en Android:** un escenario JSON verificado ejecuta una ruta estable en un dispositivo de prueba conectado y registra el resultado; cuando cambia la estructura de la pantalla, la ejecución se detiene en un punto seguro y la revisión de escenario propuesta pasa a una persona: implementado y verificado.
-- **PhotoPizza Remote:** una aplicación Android nativa maneja una mesa giratoria por la red Wi-Fi local y WebSocket —dirección, número de fotogramas, velocidad, pausa, retardo, inicio y parada del movimiento—: implementado y verificado.
+- **Escenario en Android:** un escenario JSON define una ruta con comprobaciones y una parada segura si cambia la estructura de la pantalla. La demo pública disponible cubre un borrador local, un objetivo de prueba y evidencia de aprobación o dry-run; no demuestra un envío externo completado.
 - **Browser X MCP 1.0.0-beta.1:** un servidor MCP sobre Playwright con transporte stdio —arranque del navegador, navegación, extracción estructurada de página, entrada en formularios, scroll, inspección de elementos, acciones atómicas y por lotes, capturas y ejecución de código en el contexto de la página—: prototipo verificado.
 
 #### Implementado, prototipo y trabajo abierto
 
-- **Implementado y verificado:** los cuatro contornos anteriores.
+- **Implementados y verificados:** el chat del portal y el tablero kanban. El escenario Android se describe por separado de la evidencia de la demo pública anterior.
 - **Prototipo verificado:** Browser X MCP 1.0.0-beta.1. Su versión beta declara los límites: el navegador vive en un proceso local, las acciones requieren una página activa y el repositorio no garantiza conformidad estricta con W3C, aislamiento de procesos entre instancias separadas del navegador ni una política de desactivación de CDP.
 - **Dirección de desarrollo, sin implementación confirmada en el portafolio público:** un canal telefónico para llamar a un empleado digital y asignar trabajo por voz; ejecutar el agente en el propio smartphone (hoy el dispositivo es una herramienta conectada de un ejecutor de servidor); un pool de dispositivos compartido entre varios ejecutores; una voz personal por empleado. A nivel de persona, las voces están implementadas en los tours narrados de Symbiote UI: cada persona obtiene su propio canal `speechSynthesis` en un iframe oculto y el perfil guarda locale, voice, rate, pitch y volume; un timbre para un empleado digital concreto sigue siendo una tarea abierta y depende de los servicios en uso y de los derechos sobre las grabaciones originales.
 
@@ -4346,16 +4632,16 @@ Operaciones repetibles que se ejecutan sin una persona en cada paso y aun así d
 
 La automatización de procesos es la parte de mi trabajo en la que una operación repetible debe ejecutarse sin una persona vigilando cada paso, y en la que cada paso debe seguir siendo demostrable después. El objeto suele ser un formulario, una aplicación web o Android, una rutina de publicación o una operación de campaña: algo que una persona recorría a clics y que ahora debe sobrevivir a una interfaz cambiada, a una sesión perdida y a una ejecución repetida.
 
-Tareas típicas: preparar, rellenar, comprobar y enviar una solicitud con una máquina; hacer imposible un envío duplicado; permitir que un agente trabaje en un navegador o en un dispositivo sin imitar el consentimiento de otra persona; conseguir que una ejecución sea reanudable y que sus paradas estén explicadas.
+Tareas típicas: una máquina prepara, rellena y comprueba una solicitud; la idempotencia admitida por el servicio limita los envíos repetidos; un agente trabaja en un navegador o dispositivo con los permisos concedidos; la ejecución se puede reanudar y sus paradas se pueden explicar.
 
 #### De dónde viene la experiencia
 
 | Proyecto | Período | Qué demostró el proyecto |
 | --- | --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | 2022–2026 | Orquestación de campañas, segmentación de audiencias, colas y flujos operativos repetibles alrededor de un runtime de módems. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | 2025 | Inspección de página, flujos de formularios, registros estructurados de operaciones y evidencia de navegador utilizable por un agente. |
-| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | Fecha pendiente | Un caso controlado de publicación multi-perfil con aprobaciones, límites, deduplicación y registro de acciones. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Fecha pendiente | Un contorno de demostración que declara qué acciones existen en el estado actual y deja fuera las operaciones externas. |
+| [Lifecycle Messaging Platform](projects/lifecycle-messaging-platform/) | 2022–2026 | Orquestación de campañas, segmentación de audiencias, colas y flujos operativos repetibles alrededor de un runtime de módems. |
+| [Browser X MCP](projects/browser-x-mcp/) | 2025 | Inspección de página, flujos de formularios, registros estructurados de operaciones y evidencia de navegador utilizable por un agente. |
+| [Mobile SMM Operations Platform](projects/mobile-smm-platform/) | Fecha pendiente | Un caso controlado de publicación multi-perfil con aprobaciones, límites, deduplicación y registro de acciones. |
+| [Adaptive Maximo Workbench](projects/adaptive-maximo-workbench/) | Fecha pendiente | Un contorno de demostración que declara qué acciones existen en el estado actual y deja fuera las operaciones externas. |
 
 La automatización de SMM y presencia digital es una capacidad relacionada: planificación y adaptación de contenido, publicación por canal, sincronización de perfiles, monitorización y analítica. La evidencia de ingeniería es el caso de la plataforma anterior; el detalle de nivel de canal está en la página de capacidades.
 
@@ -4365,24 +4651,22 @@ Diseño el proceso como una ruta con condiciones de entrada y un criterio de fin
 
 Construí el contorno de navegador como un servidor MCP sobre Playwright —navegación, extracción estructurada de página, entrada en formularios, acciones atómicas y por lotes, capturas como fuente de evidencia separada— y lo dejé honesto sobre sus límites: funciona en un proceso local, sus acciones requieren una página activa y no declara conformidad con W3C ni aislamiento de procesos.
 
-En el lado de Android construí el contorno de escenarios: un escenario JSON verificado recorre una ruta estable en un dispositivo de prueba conectado, registra el resultado y se detiene en un punto seguro cuando cambia la estructura de la pantalla. La demostración pública termina con un borrador local, un objetivo de prueba y evidencia de aprobación o dry-run; no envía contenido a un servicio externo.
+En el lado de Android preparé un escenario JSON con comprobaciones y una parada segura si cambia la estructura de la pantalla. La demo pública se limita a un borrador local, un objetivo de prueba y evidencia de aprobación o dry-run; no muestra un envío externo completado.
 
 #### Cómo trabajo
 
 - **La velocidad de reacción no cancela la comprobación de admisibilidad.** Una opción que coincide inicia el trabajo solo después de que las reglas configuradas la acepten.
 - **Verificación en cada paso.** Se comprueban la opción elegida, los campos rellenados, los documentos, las respuestas del servidor y el estado real de la solicitud. Una comprobación fallida detiene la ejecución hasta conocer la causa.
-- **Un clic no es una confirmación.** El envío se confirma con el estado que devuelve el servicio; hasta que el servidor responde, la operación sigue sin confirmar.
+- **El estado recibido confirma el envío.** Después de una acción en la interfaz, el sistema espera el estado del servicio y registra la finalización solo después de comprobar esa respuesta.
 - **Los duplicados se limitan por diseño.** Límites y deduplicación durable impiden que una ejecución repetida se convierta en una serie de envíos idénticos, y un paso repetido se ejecuta solo tras comprobar que no generará un duplicado.
-- **Aprobación humana donde corresponde.** Las preguntas sin resolver, las acciones con consecuencias legales y las confirmaciones solicitadas por un servicio pasan a una persona; el agente no imita el consentimiento de otro.
+- **El consentimiento lo da la persona correspondiente.** Las preguntas sin resolver, las acciones con consecuencias legales y las confirmaciones solicitadas por un servicio pasan a quien debe otorgar el consentimiento.
 - **La recuperación es un caso normal.** Una interfaz cambiada, una conexión caída, una sesión perdida y un rechazo del servidor son esperables: el estado se conserva y la decisión de repetir se toma tras comparar con el registro.
 - **El registro es la evidencia.** Transiciones, comprobaciones, eventos y motivos de parada quedan registrados, y el modo seguro no intenta eludir captchas, prohibiciones del servicio ni restricciones de acceso.
 
 #### Resultados confirmados
 
-- Una ruta de formulario multietapa se ejecutó en un contorno de prueba anonimizado: el evento llegó al feed, las reglas eligieron una opción coincidente, el servicio elegido, el conjunto de datos y los documentos requeridos se verificaron antes del inicio, el escenario recorrió las pantallas en orden, cada transición quedó en el registro y el envío se confirmó con el estado real de la solicitud devuelto por el servicio.
-- Una comprobación de duplicados se ejecutó antes de cualquier paso repetido, con límites y deduplicación durable restringiendo las operaciones salientes.
 - El contorno de navegador realizó navegación, extracción estructurada, entrada en formularios, acciones atómicas y por lotes, y capturas como fuente de evidencia separada.
-- El contorno de Android ejecutó una ruta estable en un dispositivo de prueba conectado, registró el resultado y se detuvo en un punto seguro cuando cambió la estructura de la pantalla, con la revisión propuesta pasando a una persona.
+- El escenario Android describe comprobaciones y una parada segura ante cambios en la pantalla; la demo pública disponible muestra un borrador local y evidencia de aprobación o dry-run, no un envío externo completado.
 - El caso de la plataforma SMM mantiene perfiles, cuentas, medios, programaciones, colas, dispositivos Android, aprobaciones, límites, deduplicación y un registro de acciones en un solo modelo operativo.
 
 #### Implementado, prototipo y trabajo abierto
@@ -6109,29 +6393,177 @@ El experimento implementó contratos de herramientas y cableado del servidor std
 
 - [github.com](https://github.com/rnd-pro/terminal-x-mcp)
 
-#### Tres direcciones permanentes sustituyen al conjunto de artículos
+#### Full-stack e integración de sistemas
 
-URL: https://makerdrive.github.io/cv/pulse/directions-section/?lang=es
+URL: https://makerdrive.github.io/cv/pulse/fullstack-systems-integration/?lang=es
 
-Date: 2026-11-12T12:00:00Z
+Date: 2026-11-11T12:00:00Z
 
-La ingeniería de sistemas, la infraestructura de IA aplicada con delegación y la automatización de procesos son ahora secciones permanentes; los cuatro artículos se trasladaron a ellas y sus antiguas direcciones de Pulse apuntan a las páginas nuevas.
+Interfaz, lógica de servidor, API, almacenamiento y operación forman un solo producto; el caso de lifecycle messaging platform muestra los límites del Digital Twin y el camino del runtime de servidor hasta los pools de módems GSM.
 
-#### Qué cambió
+#### Qué une las capas
 
-Cuatro artículos de Pulse describían las mismas áreas de práctica desde un único momento. Ahora son secciones permanentes del portafolio, porque una dirección no es una publicación: es la respuesta acumulada a «qué problemas resuelves», con los períodos de los proyectos, el aporte personal y la frontera entre lo que funciona y lo que sigue siendo un plan.
+El trabajo full-stack empieza tratando la interfaz, la lógica de servidor, la API, el almacenamiento y la operación como un solo producto. Una avería de entrega no se cierra con un ajuste de interfaz, y una petición lenta no se cura con un timeout mayor en el navegador: el fallo de una capa se ve en las demás. JavaScript y Node.js sostienen la mayor parte de mi trabajo, y el resto de componentes se elige según los requisitos del sistema.
 
-#### A dónde fueron los textos
+#### El camino de la petición
 
-- **Ingeniería de sistemas e integración** — [leer la dirección](../directions/systems-engineering/). Origen: el artículo sobre full-stack e integración de sistemas.
-- **Infraestructura de IA aplicada y delegación a agentes** — [leer la dirección](../directions/applied-ai/). Orígenes: los artículos sobre control de despliegue de IA y sobre delegación hasta la acción verificada.
-- **Automatización de procesos y verificación** — [leer la dirección](../directions/process-automation/). Origen: el artículo sobre automatización de formularios web con una ruta de solicitud verificable.
+Una petición recorre una cadena: interfaz web → HTTP/API → servicios de aplicación → base de datos y colas → nodos de ejecución. El monitoreo y la recuperación viven como contornos aparte sobre esa cadena: una cola retiene el trabajo, la ejecución repetible mantiene manejable la entrega, y la observabilidad muestra en qué paso se detuvo el proceso.
 
-#### Qué pasa con las direcciones antiguas
+#### Cómo se elige el conjunto de herramientas
 
-Las direcciones antiguas de Pulse siguen funcionando. Cada una lleva a la sección permanente que la reemplazó, está marcada como `noindex, follow` y apunta su canonical a esa sección, así que el texto del artículo no se duplica como página competidora.
+El conjunto de herramientas no se fija de antemano: sigue los requisitos del sistema. Los contratos claros y un estado de proceso manejable permiten cambiar componentes sin reescribir el producto.
 
-#### Por qué esta nota está fechada hoy
+#### Ejemplo: lifecycle messaging platform
 
-La fecha de esta nota es la fecha en que se reorganizó el portafolio, no la fecha en que empezó la práctica. Los proyectos conservan sus propios períodos y cada página de dirección indica cuándo se publicó su texto original.
+Una plataforma confidencial desarrollador como proyecto comercial de I+D. El nivel de producto reúne servicios API sobre JavaScript y Node.js, PostgreSQL, sincronización de runtime por WebSocket, intake compatible con RabbitMQ, documentación Swagger e interfaces administrativas. Las campañas, las audiencias, los consentimientos y la analítica permanecen en ese nivel.
+
+El producto no habla directamente con los dispositivos físicos. El límite pasa por las instancias de entrega: se gestionan mediante conexiones serialport/COM con comandos AT, y el runtime de módems ejecuta el inbox de SMS y las operaciones USSD. El runtime de servidor llega a las instancias remotas por túneles SSH/WebSocket, de modo que los comandos de dispositivo quedan dentro del subsistema de entrega.
+
+Para pruebas reproducibles sin acceso continuo a los dispositivos físicos, construí un Digital Twin local con módems virtuales y escenarios de tráfico repetibles. El twin reflejaba el pool de módems GSM en ambos sentidos: el comportamiento de los dispositivos se reproducía localmente, mientras el mismo flujo operativo —cola, ejecución repetible, monitoreo— seguía siendo aplicable al runtime físico. El twin ejercitaba la lógica de entrega sobre dispositivos virtuales.
+
+El cliente y los detalles del despliegue concreto quedan fuera de la descripción pública: permanecen las categorías de funciones, el perfil del stack y los límites de los subsistemas. Las pruebas se ejecutan sobre el twin local, la entrega de producción sigue en los pools físicos, y el nivel de producto no cambia al sustituir el contorno de hardware.
+
+#### Infraestructura de IA bajo control de restricciones
+
+URL: https://makerdrive.github.io/cv/pulse/ai-infrastructure-deployment-control/?lang=es
+
+Date: 2026-11-11T12:00:00Z
+
+La máquina local, la nube y el contorno híbrido se diferencian en exposición de datos, operación y cuotas; los grupos de recursos de Agent Portal muestran una elección medible entre modelos rápidos y fuertes.
+
+#### Tres modos de despliegue
+
+Un contorno de IA se despliega de una de tres formas: una máquina local, infraestructura en la nube o un contorno híbrido. El paso entre ellos es gradual: un contorno local incorpora recursos externos a medida que crece la carga.
+
+**Máquina local.** El modelo y los datos que necesita trabajan dentro de un entorno gestionado. Sale menos información del perímetro, y esa misma decisión trae operación propia, actualizaciones y control del rendimiento.
+
+**Nube.** Encaja con cargas variables, modelos listos y servicios externos. El coste y la disponibilidad dependen del proveedor, de las cuotas y de la conexión de red, mientras la transferencia de datos se describe en una política aparte.
+
+**Contorno híbrido.** La ejecución local se combina con recursos externos, y el ejecutor se elige por las reglas de la tarea, los requisitos de datos, el coste y la capacidad disponible.
+
+#### Una decisión de despliegue confirmada
+
+En Agent Portal, los modelos y las suscripciones se agrupan en grupos de recursos, de modo que una etapa recibe un ejecutor con capacidades Adequadas y una cuota disponible. Los modelos rápidos se ocupan del trabajo simple y exploratorio; los modelos fuertes toman las decisiones complejas sobre contexto de proyecto comprimido.
+
+La ejecución sigue siendo local: una delegación arranca un worker CLI y devuelve de inmediato un identificador de tarea, mientras la decisión de aceptación pertenece al orquestador. La restricción es medible: la cuota del grupo de recursos y el presupuesto de contexto comprimido. La API externa forma parte del contorno: el runtime local sigue en marcha, y el orquestador acepta el resultado.
+
+#### El límite de los datos
+
+Para documentos confidenciales se define un límite de transferencia permitida. El sistema decide qué queda dentro y qué información puede dirigirse a una API externa. Ese límite exige implementación técnica y verificación; el esquema por sí solo no garantiza privacidad.
+
+#### Operación
+
+La operación cubre roles y acceso, almacenamiento de secretos, observabilidad, colas, redundancia, registro y control de costes. Las configuraciones crecen con la carga: la máquina local, la nube y el contorno híbrido siguen siendo opciones disponibles de un mismo proceso.
+
+##### Recursos del proyecto
+
+- [rnd-pro.com](https://rnd-pro.com/projects/agent-portal/)
+
+#### Automatización de formularios web con una ruta de solicitud verificable
+
+URL: https://makerdrive.github.io/cv/pulse/web-form-application-automation/?lang=es
+
+Date: 2026-11-11T12:00:00Z
+
+Una solicitud de varias etapas anonimizada muestra la comprobación de admisibilidad, la validación en cada paso, el estado devuelto por el servicio como confirmación de envío, y la comprobación de duplicados antes de repetir.
+
+#### La ruta de la solicitud
+
+El esquema del proceso: aparece una opción adecuada → se comprueban las condiciones → arranca la solicitud → las etapas de relleno se ejecutan en orden → verificación → resultado confirmado. Cada etapa tiene condiciones de entrada y un criterio de finalización.
+
+#### El punto de partida
+
+El primer paso es que aparezca una opción adecuada o un evento. El sistema lo compara con las reglas configuradas y solo entonces empieza a trabajar. La velocidad de reacción importa, y no cancela la comprobación de admisibilidad.
+
+#### Verificación en cada paso
+
+Cada etapa se valida: la opción elegida, los campos rellenados, los documentos, las respuestas del servidor y el estado real de la solicitud. Una comprobación fallida detiene la ejecución hasta que se conozca la causa.
+
+#### Ejemplo de ruta de solicitud
+
+Para un formulario de varias etapas, la ruta se puede describir así; el servicio y los datos permanecen anonimizados.
+
+1. Un evento llega al feed, las reglas seleccionan una opción adecuada y antes de arrancar se verifican el servicio elegido, el conjunto de datos y los documentos requeridos.
+2. El escenario recorre las pantallas en orden: elección de opción, datos, documentos.
+3. Cada transición queda en el registro: la opción elegida, los campos rellenados, los documentos adjuntos, las respuestas del servidor.
+4. La finalización se registra solo después de recibir y comprobar el estado de la solicitud enviado por el servicio; hasta entonces, el registro mantiene el intento pendiente.
+5. Antes de repetir, se comparan el estado actual y el registro. Solo se repite cuando el servicio admite una operación idempotente segura; un resultado ambiguo se deriva a revisión humana.
+
+En el contorno de navegador esto parece un servidor MCP construido sobre Playwright: navegación, extracción estructurada de la página, introducción en formularios, acciones atómicas y por lotes, capturas como fuente de evidencia aparte. La beta de Browser X MCP vive en un proceso local y sus acciones requieren una página activa; el Agent Portal actual trata el acceso al navegador como un límite de herramienta configurable.
+
+En el contorno de automatización Android, las mismas reglas se expresan en un escenario JSON con comprobaciones, registros de aprobación y una parada segura si cambia la estructura de la pantalla. La demo pública se limita a un borrador local, un objetivo de prueba y evidencia de aprobación o dry-run; no muestra un envío externo completado. Las credenciales del dispositivo y los datos de cuentas de producción quedan fuera del caso público.
+
+#### Recuperación
+
+Una interfaz cambiada, una conexión cortada, una sesión perdida y un rechazo del servidor son casos normales para los que se prepara el proceso: se conserva el estado, y la decisión de repetir se toma tras contrastar con el registro.
+
+#### Aprobación humana
+
+Las decisiones indeterminadas, las acciones con consecuencias legales y las confirmaciones solicitadas por el servicio pasan a la persona que debe otorgar el consentimiento.
+
+#### El registro
+
+El registro anota transiciones, comprobaciones, eventos y motivos de parada. El modo seguro no intenta sortear captchas, prohibiciones del servicio o restricciones de acceso.
+
+##### Recursos del proyecto
+
+- [github.com](https://github.com/rnd-pro/browser-x-mcp)
+
+#### Empleado digital: del encargo a la acción verificada
+
+URL: https://makerdrive.github.io/cv/pulse/digital-employee-delegation-to-action/?lang=es
+
+Date: 2026-11-11T12:00:00Z
+
+El chat, el tablero Kanban ejecutable y los escenarios sobre dispositivos Android están implementados y verificados; el canal telefónico, el agente alojado en el propio dispositivo y el pool de dispositivos compartido siguen siendo dirección de desarrollo.
+
+#### Qué es un empleado digital
+
+Un empleado digital es un ejecutor con su propio contorno de encargos: un rol, una tarea, herramientas, estado del trabajo y verificación del resultado. Los ejecutores viven en servidores y en dispositivos conectados, y el contorno de control los enlaza.
+
+#### Tres niveles de madurez
+
+Implementado y verificado:
+
+- Chat del portal: creación y reanudación de chats a través del gateway MCP, enrutamiento de modelos y acceso a herramientas.
+- Tablero Kanban: una columna ejecuta una parte del proceso y recibe sus propias acciones, roles y grupo de agentes especializados; un conflicto devuelve la tarjeta a una decisión humana.
+- Escenario sobre un dispositivo Android: un escenario JSON verificado ejecuta una ruta estable sobre un dispositivo de prueba conectado y registra el resultado; cuando cambia la estructura de la pantalla, la ejecución se detiene en un punto seguro y la revisión propuesta del escenario pasa a una persona.
+- PhotoPizza: el ecosistema incluye un cliente Android nativo para controlar el plato giratorio. El proyecto separado PhotoPizza Remote es una interfaz de navegador que controla el dispositivo por Wi-Fi local y WebSocket. Estos clientes muestran control de equipos; alojar un empleado digital en un smartphone sigue siendo una línea abierta.
+
+Prototipo verificado:
+
+- Browser X MCP 1.0.0-beta.1: un servidor MCP sobre Playwright con transporte stdio — arranque del navegador, navegación, extracción estructurada de la página, introducción en formularios, scroll, inspección de elementos, acciones atómicas y por lotes, capturas y ejecución de código en el contexto de la página. La beta declara sus límites: el navegador vive en un proceso local, las acciones requieren una página activa, y el repositorio no garantiza conformidad estricta con W3C, aislamiento de procesos entre instancias de navegador separadas ni una política de desactivación de CDP.
+
+Dirección de desarrollo, sin implementación confirmada en el portafolio público:
+
+- Canal telefónico: llamar a un empleado digital y encargar trabajo por voz — ese canal no existe en el contorno verificado.
+- Ejecutar el agente en el propio teléfono: hoy el dispositivo es una herramienta conectada de un ejecutor en servidor; un agente alojado en el teléfono sigue siendo una tarea aparte.
+- Pool de dispositivos compartido: varios ejecutores sobre un mismo pool de dispositivos son posibles cuando la coordinación separa sus tareas y sus permisos; ese modo no aparece en el portafolio público.
+- Una voz propia por empleado: en el nivel de persona, las voces están implementadas en los Tours narrados de Symbiote UI — cada personaje recibe su propio canal `speechSynthesis` en un iframe oculto, y el perfil guarda idioma, voz, velocidad, tono y volumen. El timbre para un empleado digital concreto es una tarea abierta, y las vías disponibles para crearlo dependen de los servicios usados y de los derechos sobre las grabaciones de origen.
+
+#### El camino de un encargo
+
+Un encargo pasa por el registro de la tarea, la recogida de contexto, la selección del ejecutor, la acción, la verificación del resultado y el informe. El estado se conserva en cada etapa, lo que permite investigar los fallos y continuar el trabajo de forma segura tras una parada.
+
+Un ejemplo de reparto del trabajo: un agente reúne material para publicar, otro prepara el texto y la maquetación, y un ejecutor trabaja con la aplicación necesaria. Antes de una acción pública, el resultado puede entregarse a una persona para su aprobación.
+
+#### Un equipo de empleados digitales
+
+El contorno de control reparte tareas y transmite contexto entre ejecutores. Los teléfonos, los servidores y las demás herramientas conectadas forman los recursos de ejecución. El grupo de agentes especializados de una columna Kanban permite ampliar el número de ejecutores para una carga dada; el pool de dispositivos compartido entre ejecutores sigue siendo dirección de desarrollo.
+
+#### Canales y permisos
+
+Cada empleado digital puede tener sus propias cuentas, chats y operaciones permitidas. Los roles deciden con qué datos y aplicaciones trabaja, qué decisiones toma por su cuenta y cuáles pasa a una persona.
+
+#### Control y confirmaciones
+
+Cada herramienta recibe operaciones permitidas, condiciones de confirmación y reglas de finalización. Si la interfaz cambió, se cortó la conexión o no se pudo verificar el resultado, el sistema registra el estado y el motivo de la parada. El usuario ve el avance y decide si continúa.
+
+#### Mi foco de ingeniería
+
+En esta dirección combino agentes de IA, automatización de servidor, teléfonos, interfaces y diseño de procesos. La arquitectura conecta herramientas dispersas y ayuda a una persona a gestionar la ejecución y el resultado.
+
+##### Recursos del proyecto
+
+- [rnd-pro.com](https://rnd-pro.com/projects/agent-portal/)
 
