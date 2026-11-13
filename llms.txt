@@ -150,9 +150,9 @@ R&D is the shared method across these areas, spanning domain research and protot
 - [Digital Employee: From Delegation to Verified Action undefined](https://makerdrive.github.io/cv/pulse/digital-employee-delegation-to-action/?lang=en): Chat, the executable Kanban board, and Android scenarios are implemented and verified; the phone channel, an agent hosted on the device itself, and a shared device pool remain development direction.
 
 ## Directions
-- [Systems Engineering and Integration](https://makerdrive.github.io/cv/directions/systems-engineering/?lang=en): Product systems kept working as one system: request path, contracts, state, a device contour behind an explicit boundary, and the operations contour above it.
-- [Applied AI Infrastructure and Agent Delegation](https://makerdrive.github.io/cv/directions/applied-ai/?lang=en): Where AI execution runs, how a model or resource group is chosen, what data may leave the boundary, and how an assignment is delegated, verified, and reported.
-- [Process Automation and Verification](https://makerdrive.github.io/cv/directions/process-automation/?lang=en): Repeatable operations that run without a person at every step and still prove each step: entry conditions, per-stage checks, deduplication, recovery, and the log.
+- [Systems Engineering](https://makerdrive.github.io/cv/directions/systems-engineering/?lang=en): Product systems kept working as one system: request path, contracts, state, a device contour behind an explicit boundary, and the operations contour above it.
+- [Applied AI Systems](https://makerdrive.github.io/cv/directions/applied-ai/?lang=en): Where AI execution runs, how a model or resource group is chosen, what data may leave the boundary, and how an assignment is delegated, verified, and reported.
+- [Process Automation](https://makerdrive.github.io/cv/directions/process-automation/?lang=en): Repeatable operations that run without a person at every step and still prove each step: entry conditions, per-stage checks, deduplication, recovery, and the log.
 
 ## Skill pages
 - [R&D Engineering](https://makerdrive.github.io/cv/skills/rnd-engineering/?lang=en): Full-stack research, prototyping, constraint discovery, and practical delivery across AI, software, media, operations, and physical systems when useful.

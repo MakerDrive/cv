@@ -129,7 +129,7 @@ Led R&D for capture technology and equipment, photo-360 field workflows, the Gat
 
 ### Directions
 
-#### Systems Engineering and Integration
+#### Systems Engineering
 
 URL: https://makerdrive.github.io/cv/directions/systems-engineering/?lang=en
 
@@ -189,7 +189,7 @@ The most useful first message contains the process or system to be put in order,
 
 Contact: [Telegram](https://t.me/text2code) · [LinkedIn](https://www.linkedin.com/in/v-matiasevich/) · [GitHub](https://github.com/MakerDrive).
 
-#### Applied AI Infrastructure and Agent Delegation
+#### Applied AI Systems
 
 URL: https://makerdrive.github.io/cv/directions/applied-ai/?lang=en
 
@@ -248,7 +248,7 @@ The most useful first message names the process to be automated, the data that m
 
 Contact: [Telegram](https://t.me/text2code) · [LinkedIn](https://www.linkedin.com/in/v-matiasevich/) · [GitHub](https://github.com/MakerDrive).
 
-#### Process Automation and Verification
+#### Process Automation
 
 URL: https://makerdrive.github.io/cv/directions/process-automation/?lang=en
 
@@ -2314,7 +2314,7 @@ Open-source-проект: автоматический поворотный ст
 
 ### Directions
 
-#### Системная инженерия и интеграция
+#### Системная инженерия
 
 URL: https://makerdrive.github.io/cv/directions/systems-engineering/?lang=ru
 
@@ -2374,7 +2374,7 @@ URL: https://makerdrive.github.io/cv/directions/systems-engineering/?lang=ru
 
 Контакты: [Telegram](https://t.me/text2code) · [LinkedIn](https://www.linkedin.com/in/v-matiasevich/) · [GitHub](https://github.com/MakerDrive).
 
-#### Прикладная ИИ-инфраструктура и делегирование задач
+#### Прикладной ИИ
 
 URL: https://makerdrive.github.io/cv/directions/applied-ai/?lang=ru
 
@@ -2433,7 +2433,7 @@ URL: https://makerdrive.github.io/cv/directions/applied-ai/?lang=ru
 
 Контакты: [Telegram](https://t.me/text2code) · [LinkedIn](https://www.linkedin.com/in/v-matiasevich/) · [GitHub](https://github.com/MakerDrive).
 
-#### Автоматизация процессов и проверка результата
+#### Автоматизация процессов
 
 URL: https://makerdrive.github.io/cv/directions/process-automation/?lang=ru
 
@@ -4503,7 +4503,7 @@ Lideré I+D de tecnologías y equipos de captura, flujos foto-360 en campo, el e
 
 ### Directions
 
-#### Ingeniería de sistemas e integración
+#### Ingeniería de sistemas
 
 URL: https://makerdrive.github.io/cv/directions/systems-engineering/?lang=es
 
@@ -4563,7 +4563,7 @@ En el primer mensaje es más útil indicar el proceso o sistema que hay que orde
 
 Contacto: [Telegram](https://t.me/text2code) · [LinkedIn](https://www.linkedin.com/in/v-matiasevich/) · [GitHub](https://github.com/MakerDrive).
 
-#### Infraestructura de IA aplicada y delegación a agentes
+#### Sistemas de IA aplicada
 
 URL: https://makerdrive.github.io/cv/directions/applied-ai/?lang=es
 
@@ -4622,7 +4622,7 @@ En el primer mensaje es más útil nombrar el proceso que hay que automatizar, l
 
 Contacto: [Telegram](https://t.me/text2code) · [LinkedIn](https://www.linkedin.com/in/v-matiasevich/) · [GitHub](https://github.com/MakerDrive).
 
-#### Automatización de procesos y verificación
+#### Automatización de procesos
 
 URL: https://makerdrive.github.io/cv/directions/process-automation/?lang=es
 
