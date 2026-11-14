@@ -10,7 +10,7 @@ alt: Lifecycle Messaging Platform product surfaces
 
 # Lifecycle Messaging Platform
 
-Confidential product platform developed as a large commercial R&D project. The public description stays at the level of function, stack profile, architecture boundaries, and delivery scope.
+Commercial platform for consent-based customer messaging, campaign operations, and SMS delivery through GSM modem pools.
 
 :::article-block product-scope
 The work sits in consent-based customer communications: lifecycle messaging, opt-in SMS scenarios, campaign orchestration, audience segmentation, analytics dashboards, internal roles, content/workflow control, and server/delivery operations around modem-backed infrastructure.
@@ -37,7 +37,5 @@ Because links and devices can change state, a queue, repeatable execution, and m
 
 :::article-block digital-twin
 For reproducible testing without continuous access to physical devices, I built a local Digital Twin with virtual modems and repeatable traffic scenarios. It mirrored the GSM modem pool in both directions: device behavior could be replayed locally, while the same operational flow remained applicable to the physical runtime.
-
-Implementation details stay category-level because the project is confidential.
 
 My R&D contribution was the platform shape itself: turning communication, audience, hardware-runtime, and operations requirements into product architecture, data flows, modem-side execution, server infrastructure, automation surfaces, admin interfaces, and practical tools for repeatable business workflows.

@@ -1,9 +1,15 @@
 ## El trabajo que realizo
 
-Diseño y desarrollo sistemas que hacen trabajo real: reciben encargos, interactúan con servicios y dispositivos, conservan el estado y verifican los resultados. Esto resulta útil cuando hay que unir herramientas separadas en un proceso operativo y controlar los reintentos o los fallos.
+Como Product Engineer, desarrollo sistemas de automatización para procesos que conectan servicios de software, datos y dispositivos. Algunos proyectos reúnen componentes separados en un producto fiable; otros asignan tareas repetibles a agentes y verifican el resultado.
 
-El portafolio reúne páginas permanentes sobre mi práctica y artículos separados sobre soluciones concretas. Las páginas de cada área llevan a proyectos que describen el problema, mi papel y el resultado. Las fechas indican cuándo se realizó el proyecto, no cuándo empezó la experiencia.
+## Áreas de trabajo
 
-Elige el tipo de problema que te interesa en la lista de áreas. Si llegaste por un artículo o proyecto concreto, sus enlaces relacionados muestran el contexto y otros ejemplos.
+- **[Ingeniería de sistemas e integración](/cv/directions/systems-engineering/)** — diseñar un producto como un todo: interfaz, API, servicios, almacenamiento, colas y conexiones con dispositivos.
+- **[IA aplicada y sistemas de agentes](/cv/directions/applied-ai/)** — herramientas y procesos que proporcionan a modelos y agentes el contexto, las tareas y los recursos necesarios.
+- **[Automatización de procesos](/cv/directions/process-automation/)** — operaciones en navegador y móvil con comprobaciones, estado persistente y reintentos controlados.
 
-La lista muestra los focos de trabajo actuales y cambia junto con ellos. Los proyectos y artículos anteriores siguen disponibles en sus propias páginas y mediante sus enlaces relacionados.
+## Proyectos y ejemplos
+
+[Proyectos](/cv/projects/) describen el problema, mi papel y el resultado. [Pulse](/cv/pulse/) reúne artículos sobre soluciones concretas y enfoques de ingeniería.
+
+Contacto: [Telegram](https://t.me/text2code) · [LinkedIn](https://www.linkedin.com/in/v-matiasevich/) · [GitHub](https://github.com/MakerDrive).

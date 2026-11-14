@@ -1,7 +1,6 @@
 ---
 title: Adaptive Maximo Workbench
 order: 2.5
-period: Date pending
 kicker: Demo / Alpha
 summary: A Symbiote Workspace demonstration for maintenance operations, combining work orders, assets, locations, crews, and declared actions in one shared human-and-agent context.
 image: https://rnd-pro.com/svg/logo/index.svg

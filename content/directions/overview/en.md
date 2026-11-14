@@ -1,9 +1,15 @@
-## Work I take on
+## The work I do
 
-I design and build systems that do real work: accept assignments, interact with services and devices, preserve state, and verify outcomes. This is useful when separate tools need to become one working process and retries or failures must stay controlled.
+As a Product Engineer, I build automation systems for processes that connect software services, data, and devices. Some projects bring separate components together into a dependable product; others assign repeatable work to agents and verify the result.
 
-The portfolio has permanent practice pages and separate articles about specific solutions. Direction pages lead to projects describing the problem, my role, and the result. Project dates describe when the work happened, not when the practice began.
+## Areas of work
 
-Choose a problem area from the directions list. If you arrived through a specific article or project, its related links show the context and nearby examples.
+- **[Systems engineering and integration](/cv/directions/systems-engineering/)** — designing a product as a whole: its interface, APIs, services, data stores, queues, and device connections.
+- **[Applied AI and agent systems](/cv/directions/applied-ai/)** — tools and workflows that give models and agents the context, tasks, and resources they need.
+- **[Process automation](/cv/directions/process-automation/)** — browser and mobile operations with condition checks, saved state, and controlled retries.
 
-This list shows the current areas of focus and can change with them. Earlier projects and articles remain available through their own pages and links.
+## Projects and examples
+
+[Projects](/cv/projects/) describe the problem, my role, and the result. [Pulse](/cv/pulse/) collects articles about specific solutions and engineering approaches.
+
+Contact: [Telegram](https://t.me/text2code) · [LinkedIn](https://www.linkedin.com/in/v-matiasevich/) · [GitHub](https://github.com/MakerDrive).

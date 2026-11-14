@@ -2,4 +2,4 @@ The Browser X beta keeps its Playwright browser and page in process-local state.
 
 Browser actions require an active page. Navigation, extraction, input, clicks, and evaluation return an explicit error instructing the caller to start the browser when the page is absent. This is the implemented recovery boundary: detect a dead instance, discard it, and require the caller to establish browser state again.
 
-The repository defines no exact `Context Lost` response, automatic death-signal handler, OOM-specific evidence, or cookie and local-storage restoration system. Page state is not reconstructed after process loss. An agent must reopen the target and reacquire the current DOM before continuing.
+If the browser process is lost, the page state is not reconstructed. The caller must reopen the target and read the current DOM before continuing; cookies and local storage are not restored by this recovery path.
