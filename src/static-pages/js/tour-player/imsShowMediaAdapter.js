@@ -496,13 +496,26 @@ export function createImsShowMediaTarget(root, {
         ? Number(options.finalFrame)
         : frames.at(-1) || lastGalleryFrame;
       const controls = resolveGalleryControls(player);
+      const overlayScope = () => player.closest?.('ims-viewer') || player;
       const readOverlayState = () => {
-        const scope = player.closest?.('ims-viewer') || player;
+        const scope = overlayScope();
         try {
           return scope?.hasAttribute?.('fullscreen') === true;
         } catch {
           return false;
         }
+      };
+      // Leaving native fullscreen throws on a document that is not active, and
+      // the failure happens before the CSS overlay attribute is removed. The
+      // overlay is therefore restored directly, so a failed teardown never
+      // leaves the audience with a stuck expanded gallery.
+      const documentCanLeaveFullscreen = () => (
+        typeof document === 'undefined' || document.visibilityState !== 'hidden'
+      );
+      const restoreOverlayScope = () => {
+        try {
+          overlayScope()?.removeAttribute?.('fullscreen');
+        } catch {}
       };
       const readImageIndex = () => {
         try {
@@ -682,28 +695,37 @@ export function createImsShowMediaTarget(root, {
           // the state is still open. A user who reclaimed it keeps it.
           if (overlayOwnedByShow && readOverlayState()) {
             let restored = false;
-            try {
-              const collapsed = await clickControl(controls.fullscreen, 'media-collapse');
-              restored = collapsed && readOverlayState() === false;
+            if (!documentCanLeaveFullscreen()) {
               emitEvidence(Object.freeze({
                 kind: 'overlay-close',
-                via: restored === true ? 'control-click' : 'click-unverified',
-                verified: restored === true,
-              }));
-            } catch (error) {
-              emitEvidence(Object.freeze({
-                kind: 'overlay-close',
-                via: 'control-click-rejected',
+                via: 'document-inactive',
                 verified: false,
-                reason: error?.name || String(error),
+                reason: 'document-not-active',
               }));
+            } else {
+              try {
+                const collapsed = await clickControl(controls.fullscreen, 'media-collapse');
+                restored = collapsed && readOverlayState() === false;
+                emitEvidence(Object.freeze({
+                  kind: 'overlay-close',
+                  via: restored === true ? 'control-click' : 'click-unverified',
+                  verified: restored === true,
+                }));
+              } catch (error) {
+                emitEvidence(Object.freeze({
+                  kind: 'overlay-close',
+                  via: 'control-click-rejected',
+                  verified: false,
+                  reason: error?.name || String(error),
+                }));
+              }
             }
             if (!restored && readOverlayState()) {
-              // Presenter abandon or host race after stop: still restore
-              // silently — no delayed presented click after a cancel.
-              try {
-                controls.fullscreen?.click?.();
-              } catch {}
+              // The presenter's collapse did not take effect (a failed native
+              // fullscreen exit, an abandoned gesture or a host race). The
+              // overlay state is restored directly — a second control click
+              // would toggle the gallery open again.
+              restoreOverlayScope();
               emitEvidence(Object.freeze({
                 kind: 'overlay-close',
                 via: 'direct-state-restore',

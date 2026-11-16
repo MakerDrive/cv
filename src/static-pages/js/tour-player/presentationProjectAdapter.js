@@ -799,7 +799,12 @@ function createEntrySelection(
     .filter(([, value]) => (
       allowedGroups === null || allowedGroups.has(value.id) || heldGroups.has(value.id)
     ));
-  let selectedCells = [narration, setup];
+  // The narration transport is not a directive: it belongs to the entry even
+  // when a presentation directive is filtered out. Without the audio-clip cell
+  // the entry has no media transport, so a paused checkpoint cannot map into
+  // the clip and the scene can never resume.
+  let narrationClips = source.filter(({ kind }) => kind === 'audio-clip');
+  let selectedCells = [narration, setup, ...narrationClips.map(clone)];
   let previousCellId = setup.id;
   for (let [attentionCellId] of groups) {
     let scrollCellId = `${attentionCellId}:scroll`;
@@ -821,15 +826,18 @@ function createEntrySelection(
       previousCellId = attention.id;
     }
   }
-  let selected = new Set(selectedCells.map(({ id }) => id));
-  let sourceCellIds = project.cells
-    .filter(({ id }) => selected.has(id))
-    .map(({ id }) => id);
   selectedCells = projectContinuousSpeechCells(
     project,
     selectedCells,
     setupCellId,
   );
+  // The continuous narration is one cell in the slice, so the source cell ids
+  // are read from the merged selection — the same contract the unfiltered
+  // entry slice keeps.
+  let selected = new Set(selectedCells.map(({ id }) => id));
+  let sourceCellIds = project.cells
+    .filter(({ id }) => selected.has(id))
+    .map(({ id }) => id);
   let narrationCell = clone(selectedCells[0]);
   delete narrationCell.turn.replyTo;
   selectedCells[0] = narrationCell;

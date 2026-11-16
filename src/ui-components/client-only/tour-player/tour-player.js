@@ -2249,6 +2249,10 @@ export class PortfolioShowChat extends HTMLElement {
     this.#pendingSeekPositionMs = null;
     if (requestId !== this.#requestId) return receipt;
     this.#lastAlignedGenerationReceipt = receipt;
+    // The restored coordinate is the position the audience is actually at.
+    // Publishing it here keeps the shareable route coordinate truthful instead
+    // of leaving the pre-restore position in the URL.
+    this.#syncPlayer();
     // A completed generation means the entry preroll ran: the scene content
     // is physically presented, so it becomes the confirmed presented scene.
     // With deferred presentation the preroll waits for playback, so the scene

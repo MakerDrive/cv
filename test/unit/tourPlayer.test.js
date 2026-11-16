@@ -3982,6 +3982,25 @@ function createInstalledProviderHarness({
     alignedSequence: tuple.alignedSequence,
     schedule: tuple.schedule,
     adapter: {
+      // The entry slice always owns the narration transport, so the runtime
+      // adapter acknowledges the clip like the real transport does.
+      playAudioClip: (operation) => {
+        operation.reportReceipt(Object.freeze({
+          status: 'ended',
+          observedAt: Object.freeze({
+            domain: 'performance',
+            timeOriginMs: globalThis.performance.timeOrigin,
+            monotonicTimeMs: globalThis.performance.now(),
+          }),
+          providerReceipt: Object.freeze({
+            clipId: operation.projectCell.id,
+            assetId: operation.projectCell.audio.assetId,
+            sourceContentHash: operation.sourceAsset.contentHash,
+            sourceInMs: operation.projectCell.audio.sourceInMs,
+            sourceOutMs: operation.projectCell.audio.sourceOutMs,
+          }),
+        }));
+      },
       runInteraction: (operation) => adapterMethod(operation, 'interaction'),
       runAttention: (operation) => adapterMethod(operation, 'attention'),
       waitForState: (operation) => adapterMethod(operation, 'state'),
@@ -4173,7 +4192,9 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
       let barriers = harness.execution.snapshot.barriers
         .find(({ cellId }) => cellId === harness.targetCellId)?.barriers;
       assert.deepEqual(barriers, ['first-frame', 'settled']);
-      assert.equal(harness.execution.snapshot.maxInFlight, 1);
+      // The narration transport is an effect of its own, so the execution owns
+      // the audio cell and one visual effect at the same time.
+      assert.equal(harness.execution.snapshot.maxInFlight, 2);
       assert.equal(harness.execution.snapshot.activeCount, 0);
       assert.equal(harness.execution.snapshot.pendingCount, 0);
       assert.equal(harness.rafHost.pendingCount, 0);
@@ -4226,7 +4247,9 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
       let barriers = harness.execution.snapshot.barriers
         .find(({ cellId }) => cellId === harness.targetCellId)?.barriers;
       assert.deepEqual(barriers, ['acted', 'settled']);
-      assert.equal(harness.execution.snapshot.maxInFlight, 1);
+      // The narration transport is an effect of its own, so the execution owns
+      // the audio cell and one visual effect at the same time.
+      assert.equal(harness.execution.snapshot.maxInFlight, 2);
       assert.equal(harness.execution.snapshot.pendingCount, 0);
     },
   }, {
@@ -4356,7 +4379,9 @@ test('installed UI, CV and Workspace preserve the provider-v2 execution contract
       assert.ok(harness.events.includes(`dom:dispatch:${harness.effectTarget.id}`));
       assert.equal(harness.execution.snapshot.activeCount, 0);
       assert.equal(harness.execution.snapshot.pendingCount, 0);
-      assert.equal(harness.execution.snapshot.maxInFlight, 1);
+      // The narration transport is an effect of its own, so the execution owns
+      // the audio cell and one visual effect at the same time.
+      assert.equal(harness.execution.snapshot.maxInFlight, 2);
     },
   }];
 

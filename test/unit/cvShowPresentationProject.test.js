@@ -1065,6 +1065,60 @@ test('the structural fixture joins all 30 Project entries without media authorit
   });
 });
 
+test('a filtered presentation directive keeps the narration transport in the entry slice', () => {
+  const release = structuralWebManifest();
+  const clip = release.clips.find(({ id }) => id === 'finale');
+  const sequence = structuralSequence(clip.id);
+  const full = createCvShowEntryTuple(
+    STRUCTURAL_PROJECT,
+    clip.id,
+    sequence,
+    { adapter: immediateAdapter() },
+  );
+  const fullClip = full.playbackPlan.clips[0];
+  assert.ok(fullClip, 'the finale owns a narration transport');
+  const speechDirectiveId = full.includedSpeechDirectiveIds[0];
+  // A deferred directive (the closed map panel) filters one directive out of
+  // the entry, exactly as the runtime filter does in the browser.
+  const filtered = createCvShowEntryTuple(
+    STRUCTURAL_PROJECT,
+    clip.id,
+    sequence,
+    { adapter: immediateAdapter(), speechDirectiveIds: [speechDirectiveId] },
+  );
+  assert.equal(
+    filtered.playbackPlan.clips.length,
+    1,
+    'the filtered entry still owns its narration transport',
+  );
+  const checkpointMs = fullClip.span.startMs + 1_000;
+  const checkpointed = createCvShowEntryTuple(
+    STRUCTURAL_PROJECT,
+    clip.id,
+    sequence,
+    {
+      adapter: immediateAdapter(),
+      speechDirectiveIds: [speechDirectiveId],
+      checkpointMs,
+    },
+  );
+  assert.equal(
+    checkpointed.playbackCheckpoint.phase,
+    'clip',
+    'a paused checkpoint maps into the narration clip',
+  );
+  assert.equal(checkpointed.playbackCheckpoint.projectTimeMs, checkpointMs);
+  assert.ok(
+    checkpointed.playbackCheckpoint.sourceTimeMs > 0,
+    'the checkpoint restores a position inside the delivered clip',
+  );
+  assert.equal(
+    checkpointed.playbackPlan.clips.length,
+    1,
+    'the checkpointed entry keeps the transport that has to play the rest',
+  );
+});
+
 test('runtime admission joins Project master ancestry without treating delivery bytes as WAV', () => {
   const release = structuralWebManifest();
   const audioClip = release.clips[0];
