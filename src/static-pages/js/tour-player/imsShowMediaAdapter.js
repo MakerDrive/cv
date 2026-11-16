@@ -309,7 +309,6 @@ function resolveGalleryControls(player) {
     next: at(hosts[1]),
     prev: at(hosts[0]),
     autoplay: at(hosts[2]),
-    fullscreen: at(hosts[3]),
   };
 }
 
@@ -496,27 +495,6 @@ export function createImsShowMediaTarget(root, {
         ? Number(options.finalFrame)
         : frames.at(-1) || lastGalleryFrame;
       const controls = resolveGalleryControls(player);
-      const overlayScope = () => player.closest?.('ims-viewer') || player;
-      const readOverlayState = () => {
-        const scope = overlayScope();
-        try {
-          return scope?.hasAttribute?.('fullscreen') === true;
-        } catch {
-          return false;
-        }
-      };
-      // Leaving native fullscreen throws on a document that is not active, and
-      // the failure happens before the CSS overlay attribute is removed. The
-      // overlay is therefore restored directly, so a failed teardown never
-      // leaves the audience with a stuck expanded gallery.
-      const documentCanLeaveFullscreen = () => (
-        typeof document === 'undefined' || document.visibilityState !== 'hidden'
-      );
-      const restoreOverlayScope = () => {
-        try {
-          overlayScope()?.removeAttribute?.('fullscreen');
-        } catch {}
-      };
       const readImageIndex = () => {
         try {
           const value = Number(player.hotspotState?.image);
@@ -542,10 +520,11 @@ export function createImsShowMediaTarget(root, {
         }
         return { ok: false, reason: 'unpresented' };
       };
-      // Visible accent: the montage begins by presenting the gallery's own
-      // expand control and ends by collapsing it again; each frame advances
-      // through a click on the gallery's next control. A control the show
-      // cannot present (offscreen, unavailable) fell back to the
+      // Visible accent: the montage presents the gallery's own slideshow
+      // navigation — each frame advances through a click on the next control.
+      // The gallery's fullscreen control is never pressed and never released,
+      // so the overlay stays exactly as the audience found it. A control the
+      // show cannot present (offscreen, unavailable) fell back to the
       // programmatic player API — narration is never blocked by decoration.
       // Per-frame evidence: one entry per authored frame with the channel
       // that actually advanced it. Receipts and the acceptance matrix draw
@@ -564,8 +543,6 @@ export function createImsShowMediaTarget(root, {
         } catch {}
       };
       const completion = (async () => {
-        let presentedOverlay = false;
-        let overlayOwnedByShow = false;
         // The montage has to be the only thing that moves the gallery: its own
         // autoplay loop would keep flipping frames while the sequence presents
         // them, and it would keep flipping them under a pause. The loop is
@@ -583,168 +560,87 @@ export function createImsShowMediaTarget(root, {
             verified: !galleryAutoplayRunning(player, controls),
           }));
         }
-        try {
-          const initiallyExpanded = readOverlayState();
-          // The overlay opens only if the user did not already open it.
-          if (!initiallyExpanded) {
-            const openGesture = await clickControl(controls.fullscreen, 'media-expand');
-            presentedOverlay = openGesture.ok;
-            overlayOwnedByShow = presentedOverlay && readOverlayState() === true;
+        for (const frame of frames) {
+          throwIfAborted(signal);
+          const before = readImageIndex();
+          let advanced = false;
+          // If the user already moved the gallery to exactly this frame,
+          // do not fight them: count the frame observed as held.
+          if (before === frame - 1) {
             emitEvidence(Object.freeze({
-              kind: 'overlay-open',
-              via: presentedOverlay ? 'control-click' : `unpresented(${openGesture.reason})`,
-              verified: overlayOwnedByShow,
-            }));
-          } else {
-            emitEvidence(Object.freeze({
-              kind: 'overlay-open',
-              via: 'pre-expanded-by-user',
+              frame,
+              via: before === lastGalleryFrame - 1 ? 'state-observed' : 'user-advanced',
               verified: true,
             }));
-          }
-          for (const frame of frames) {
-            throwIfAborted(signal);
-            // A user who collapsed our overlay now owns it — release our
-            // ownership so later user re-opens stay theirs.
-            if (overlayOwnedByShow && !readOverlayState()) overlayOwnedByShow = false;
-            const before = readImageIndex();
-            let advanced = false;
-            // If the user already moved the gallery to exactly this frame,
-            // do not fight them: count the frame observed as held.
-            if (before === frame - 1) {
-              emitEvidence(Object.freeze({
-                frame,
-                via: before === lastGalleryFrame - 1 ? 'state-observed' : 'user-advanced',
-                verified: true,
-              }));
-              lastGalleryFrame = frame;
-            } else {
-              let clickGestureReason = '';
-              if (frame === lastGalleryFrame + 1 && controls.next) {
-                const gesture = await clickControl(controls.next, 'gallery-next');
-                advanced = gesture.ok;
-                clickGestureReason = gesture.reason;
-                // If the gesture itself failed to bear (control not shown
-                // or presenter couldn't click) it is recorded explicitly —
-                // not as "we clicked".
-                if (!gesture.ok) {
+            lastGalleryFrame = frame;
+          } else {
+            if (frame === lastGalleryFrame + 1 && controls.next) {
+              const gesture = await clickControl(controls.next, 'gallery-next');
+              advanced = gesture.ok;
+              // If the gesture itself failed to bear (control not shown
+              // or presenter couldn't click) it is recorded explicitly —
+              // not as "we clicked".
+              if (!gesture.ok) {
+                emitEvidence(Object.freeze({
+                  frame,
+                  via: `control-untruth(${gesture.reason})`,
+                  verified: false,
+                }));
+              } else {
+                // Verify the click landed as a real index advance against
+                // the AUTHORED target, not just "one forward step".
+                const after = readImageIndex();
+                advanced = after === frame - 1;
+                if (!advanced) {
                   emitEvidence(Object.freeze({
                     frame,
-                    via: `control-untruth(${gesture.reason})`,
+                    via: 'control-click-unverified',
                     verified: false,
+                    observed: after,
                   }));
-                } else {
-                  // Verify the click landed as a real index advance against
-                  // the AUTHORED target, not just "one forward step".
-                  const after = readImageIndex();
-                  advanced = after === frame - 1;
-                  if (!advanced) {
-                    emitEvidence(Object.freeze({
-                      frame,
-                      via: 'control-click-unverified',
-                      verified: false,
-                      observed: after,
-                    }));
-                  }
                 }
               }
-              if (!advanced) {
-                player.goTo?.(frame - 1);
-                const after = readImageIndex();
-                emitEvidence(Object.freeze({
-                  frame,
-                  via: 'api-fallback',
-                  verified: after === frame - 1,
-                  observed: after,
-                }));
-                // Trust the API when the player has no observable state at
-                // all; but whenever an index was read and disagrees, never
-                // rename reality to the planned frame.
-                lastGalleryFrame = after === null
-                  ? frame
-                  : after + 1;
-              } else {
-                emitEvidence(Object.freeze({
-                  frame,
-                  via: 'control-click',
-                  verified: true,
-                  observed: frame - 1,
-                }));
-                lastGalleryFrame = frame;
-              }
             }
-            // Full authored hold after the control gesture; the gesture
-            // itself is priced into the cue's gestureDurationMs (verified by
-            // the montage window check in the authoring test).
-            await galleryClock.wait(frameHoldMs, { signal });
-          }
-          if (lastGalleryFrame !== finalFrame) {
-            player.goTo?.(finalFrame - 1);
-            const finalAfter = readImageIndex();
-            emitEvidence(Object.freeze({
-              frame: finalFrame,
-              via: 'api-final',
-              verified: finalAfter === finalFrame - 1,
-              observed: finalAfter,
-            }));
-            lastGalleryFrame = finalAfter === null ? finalFrame : finalAfter + 1;
-          }
-        } finally {
-          // Restore the layout to the state the show found it in — never
-          // toggle blindly: collapse only if the show opened the overlay AND
-          // the state is still open. A user who reclaimed it keeps it.
-          if (overlayOwnedByShow && readOverlayState()) {
-            let restored = false;
-            if (!documentCanLeaveFullscreen()) {
+            if (!advanced) {
+              player.goTo?.(frame - 1);
+              const after = readImageIndex();
               emitEvidence(Object.freeze({
-                kind: 'overlay-close',
-                via: 'document-inactive',
-                verified: false,
-                reason: 'document-not-active',
+                frame,
+                via: 'api-fallback',
+                verified: after === frame - 1,
+                observed: after,
               }));
+              // Trust the API when the player has no observable state at
+              // all; but whenever an index was read and disagrees, never
+              // rename reality to the planned frame.
+              lastGalleryFrame = after === null
+                ? frame
+                : after + 1;
             } else {
-              try {
-                const collapsed = await clickControl(controls.fullscreen, 'media-collapse');
-                restored = collapsed && readOverlayState() === false;
-                emitEvidence(Object.freeze({
-                  kind: 'overlay-close',
-                  via: restored === true ? 'control-click' : 'click-unverified',
-                  verified: restored === true,
-                }));
-              } catch (error) {
-                emitEvidence(Object.freeze({
-                  kind: 'overlay-close',
-                  via: 'control-click-rejected',
-                  verified: false,
-                  reason: error?.name || String(error),
-                }));
-              }
-            }
-            if (!restored && readOverlayState()) {
-              // The presenter's collapse did not take effect (a failed native
-              // fullscreen exit, an abandoned gesture or a host race). The
-              // overlay state is restored directly — a second control click
-              // would toggle the gallery open again.
-              restoreOverlayScope();
               emitEvidence(Object.freeze({
-                kind: 'overlay-close',
-                via: 'direct-state-restore',
-                verified: readOverlayState() === false,
+                frame,
+                via: 'control-click',
+                verified: true,
+                observed: frame - 1,
               }));
+              lastGalleryFrame = frame;
             }
-          } else if (overlayOwnedByShow && !readOverlayState()) {
-            emitEvidence(Object.freeze({
-              kind: 'overlay-close',
-              via: 'already-collapsed-by-user',
-              verified: true,
-            }));
-          } else if (presentedOverlay && !overlayOwnedByShow) {
-            emitEvidence(Object.freeze({
-              kind: 'overlay-close',
-              via: 'left-open-not-owned',
-              verified: readOverlayState() === true,
-            }));
           }
+          // Full authored hold after the control gesture; the gesture
+          // itself is priced into the cue's gestureDurationMs (verified by
+          // the montage window check in the authoring test).
+          await galleryClock.wait(frameHoldMs, { signal });
+        }
+        if (lastGalleryFrame !== finalFrame) {
+          player.goTo?.(finalFrame - 1);
+          const finalAfter = readImageIndex();
+          emitEvidence(Object.freeze({
+            frame: finalFrame,
+            via: 'api-final',
+            verified: finalAfter === finalFrame - 1,
+            observed: finalAfter,
+          }));
+          lastGalleryFrame = finalAfter === null ? finalFrame : finalAfter + 1;
         }
       })();
       void completion.catch((error) => {

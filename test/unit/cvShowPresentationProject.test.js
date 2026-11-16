@@ -1405,8 +1405,8 @@ test('Short media choreography frames video and 360 blocks while preserving the 
     mode: 'short-muted-montage',
     frames: [1, 2, 3, 4, 5],
     // One calm second per frame: five authored holds plus the presented
-    // control clicks (expand overlay, next per frame, collapse) fit the
-    // 9500ms gesture budget instead of starving the montage.
+    // next-control clicks fit the 9500ms gesture budget instead of starving
+    // the montage.
     frameHoldMs: 1_000,
     finalFrame: 5,
   });

@@ -930,17 +930,26 @@ test('IMS Show gallery accent presents each frame through the real next control'
   }, { signal: new AbortController().signal });
   await result.completion;
 
-  // Expand overlay → first frame is already current (a state-observed
-  // hold, not a new jump) → next frames advance through visible
-  // next-control clicks → collapse back through the same control.
+  // The first frame is already current (a state-observed hold, not a new
+  // jump) → the next frames advance through visible next-control clicks.
+  // The gallery's fullscreen control is never pressed and never released.
   assert.deepEqual(events, [
-    ['present', 'media-expand'], ['click', 'fs'],
     ['wait', 1000],
     ['present', 'gallery-next'], ['click', 'next'], ['wait', 1000],
     ['present', 'gallery-next'], ['click', 'next'], ['wait', 1000],
-    ['present', 'media-collapse'], ['click', 'fs'],
   ]);
   assert.deepEqual(result.frames, [1, 2, 3]);
+  assert.equal(fsOn, false, 'the montage leaves the overlay exactly as it found it');
+  const evidence = await result.completion;
+  assert.deepEqual(
+    evidence.filter(({ kind }) => String(kind || '').startsWith('overlay')),
+    [],
+    'the montage reports no overlay gesture at all',
+  );
+  assert.deepEqual(
+    evidence.filter(({ frame }) => Number.isInteger(frame)).map(({ frame, via }) => ({ frame, via })),
+    [{ frame: 1, via: 'state-observed' }, { frame: 2, via: 'control-click' }, { frame: 3, via: 'control-click' }],
+  );
 });
 
 test('IMS Show gallery falls back to programmatic goTo when controls cannot be presented', async () => {
@@ -974,7 +983,7 @@ test('IMS Show gallery falls back to programmatic goTo when controls cannot be p
   ]);
 });
 
-test('IMS Show gallery collapse restores the layout directly when the tour is stopped mid-way', async () => {
+test('IMS Show gallery never presses the fullscreen control, even when the tour stops mid-way', async () => {
   const events = [];
   const clicks = [];
   let fsOn = false;
@@ -1029,10 +1038,10 @@ test('IMS Show gallery collapse restores the layout directly when the tour is st
   }, { signal: controller.signal });
   await assert.rejects(result.completion, (error) => error?.name === 'AbortError');
 
-  // The expand click was presented once; after the abort the overlay is
-  // collapsed via the physical control again, with NO additional presented
-  // click (no delayed gesture after stop).
-  assert.deepEqual(clicks, ['fs', 'fs']);
+  // The montage presents no fullscreen gesture at all: neither the expand
+  // click nor a collapse after the stop, and the overlay stays as found.
+  assert.deepEqual(clicks, []);
+  assert.equal(fsOn, false, 'an aborted montage leaves the overlay untouched');
 });
 
 test('a paused gallery montage holds its frame and does not spend the frame hold', async () => {
