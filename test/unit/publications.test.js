@@ -62,6 +62,11 @@ const DIRECT_RETIREMENT_TARGETS = new Map([
   ['ai-infrastructure-deployment-control', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
   ['web-form-application-automation', 'https://MakerDrive.github.io/cv/directions/process-automation/'],
   ['digital-employee-delegation-to-action', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
+  // 2026-11-16: the remaining internal-process notes are retired as technical
+  // documentation that belongs in Team Memory, not in public site material.
+  ['workspace-vs-global-team-memory', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
+  ['cross-model-peer-review', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
+  ['atomic-cron-scheduling-local-agents', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
 ]);
 
 const MERGE_RETIREMENT_TARGETS = new Map([
@@ -139,9 +144,6 @@ const SECOND_DEPLOYMENT_SLUGS = new Set([
   'dual-mode-transport-stdio-http',
   'dynamic-workspace-registration-deduplication',
   'distributed-master-client-mcp-orchestration',
-  'cross-model-peer-review',
-  'atomic-cron-scheduling-local-agents',
-  'workspace-vs-global-team-memory',
   'path-traversal-process-isolation',
   'ast-codebase-analysis-acorn',
   'multi-language-regex-parsers',
@@ -362,18 +364,18 @@ test('Production PUBLICATIONS registry integrity', () => {
   assert.doesNotThrow(() => validateRetirementTargets(PUBLICATIONS));
 });
 
-test('Production editorial classification matches the current 6/60/23/15 matrix', () => {
+test('Production editorial classification matches the current retirement matrix', () => {
   let retired = getRetiredPublications(PUBLICATIONS);
   let published = getPublicPublications(PUBLICATIONS);
   let bySlug = new Map(PUBLICATIONS.map(publication => [publication.slug, publication]));
 
   assert.equal(PUBLICATIONS.length, 105);
   assert.equal(KEEP_PUBLICATION_SLUGS.size, 6);
-  assert.equal(DIRECT_RETIREMENT_TARGETS.size, 19);
+  assert.equal(DIRECT_RETIREMENT_TARGETS.size, 22);
   assert.equal(MERGE_RETIREMENT_TARGETS.size, 23);
-  assert.equal(RETIREMENT_TARGETS.size, 42);
-  assert.equal(retired.length, 42);
-  assert.equal(published.length, 63);
+  assert.equal(RETIREMENT_TARGETS.size, 45);
+  assert.equal(retired.length, 45);
+  assert.equal(published.length, 60);
 
   for (let slug of KEEP_PUBLICATION_SLUGS) {
     assert.equal(bySlug.get(slug)?.status, 'published', `${slug} must remain published`);
@@ -388,7 +390,7 @@ test('Production editorial classification matches the current 6/60/23/15 matrix'
   let rewriteSlugs = published
     .map(publication => publication.slug)
     .filter(slug => !KEEP_PUBLICATION_SLUGS.has(slug));
-  assert.equal(rewriteSlugs.length, 57);
+  assert.equal(rewriteSlugs.length, 54);
   assert.deepEqual(
     retired.map(publication => publication.slug).sort(),
     [...RETIREMENT_TARGETS.keys()].sort(),
@@ -920,7 +922,6 @@ test('Published metadata uses article-backed claims in every locale', () => {
     ['mcp-agent-portal-agent-browser-context-lost', ['probes the stored Playwright page', 'проверку и перезапуск', 'comprobación y reinicio']],
     ['photosnail-public-arduino-interrupt-limitations', ['require separate evidence', 'требуют отдельных свидетельств', 'requieren evidencias separadas']],
     ['photosnail-public-motion-control-object-tracking', ['implements carriage movement and capture settings', 'реализует движение каретки и настройки съёмки', 'implementa movimiento y ajustes de captura']],
-    ['cross-model-peer-review', ['orchestrator retains acceptance authority', 'решение о приёмке остаётся у оркестратора', 'orquestador conserva la aceptación']],
   ]);
 
   for (const [slug, localeFragments] of expected) {
