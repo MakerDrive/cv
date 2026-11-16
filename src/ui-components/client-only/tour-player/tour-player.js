@@ -293,6 +293,10 @@ export class PortfolioShowChat extends HTMLElement {
   // (and then snaps forward again on the next `timeupdate`). This is the
   // double-jump the user flagged.
   #pendingSeekPositionMs = null;
+  // The coordinate a paused route is restoring to. The runtime reports the
+  // restored position only when the restore settles, so the route coordinate
+  // would otherwise show the segment start until then.
+  #restoringPositionMs = 0;
   #pendingTrustedPlay = false;
   #messages = [];
   #currentMessageId = '';
@@ -625,7 +629,10 @@ export class PortfolioShowChat extends HTMLElement {
     const fallbackPosition = this.#pendingTransportIntent?.positionMs
       ?? this.#session.snapshot.playback.positionMs;
     const localMs = this.$.isRunning
-      ? Math.round(this.#presentationPositionMs())
+      ? Math.round(Math.max(
+        this.#presentationPositionMs(),
+        this.#restoringPositionMs,
+      ))
       : Math.max(0, Math.round(Number(fallbackPosition) || 0));
     const routeEntryId = branch?.sceneId || currentEntry?.id || '';
     const timeSegmentId = branch?.id || currentEntry?.id || '';
@@ -803,6 +810,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.#pendingTrustedPlay = false;
     this.#showCompleted = completed;
     this.#pendingTransportIntent = null;
+    this.#restoringPositionMs = 0;
     this.#mode = '';
     this.#playbackEntries = [];
     this.#sceneIndex = -1;
@@ -2238,12 +2246,18 @@ export class PortfolioShowChat extends HTMLElement {
       this.#showPlayer?.bind?.(this.#showConfig());
       this.#syncPlayer();
     }
-    const receipt = await aligned.runtime.loadAndRestorePlayback({
-      source: clip.audioUrl,
-      positionMs,
-      paused: true,
-      preload: 'auto',
-    }, { reason });
+    this.#restoringPositionMs = Math.max(0, Math.round(Number(positionMs) || 0));
+    let receipt;
+    try {
+      receipt = await aligned.runtime.loadAndRestorePlayback({
+        source: clip.audioUrl,
+        positionMs,
+        paused: true,
+        preload: 'auto',
+      }, { reason });
+    } finally {
+      this.#restoringPositionMs = 0;
+    }
     // The runtime now reports the restored position — drop the pending seek
     // marker so future `#presentationPositionMs` reads come from the runtime.
     this.#pendingSeekPositionMs = null;
