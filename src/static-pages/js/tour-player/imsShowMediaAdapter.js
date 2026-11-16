@@ -8,6 +8,21 @@ const IMS_ERROR_EVENT = 'ims-error';
  * montage can never outrun the narration that describes it.
  */
 export const MIN_GALLERY_FRAME_HOLD_MS = 1000;
+/**
+ * Expected wall-clock cost of one presented slideshow click (cursor travel to
+ * the gallery's next control, press, release and settle) measured on the
+ * compact article layout. The montage measures the real cost of every click and
+ * budgets the next one by it, so the authored cell budget decides when a click
+ * still fits.
+ */
+const MONTOURGE_CLICK_COST_MS = 1400;
+/**
+ * The presentation engine grants a visual effect a short completion grace
+ * beyond its authored budget. The montage may spend part of that grace — a
+ * healthy montage that finishes slightly late is not a failed one — but never
+ * the whole of it, so the cell deadline stays out of reach.
+ */
+const MONTOURGE_BUDGET_MARGIN_MS = 600;
 const IMS_READY_PLAYERS = new WeakSet();
 
 function abortError(signal) {
@@ -337,6 +352,11 @@ export function createImsShowMediaTarget(root, {
   // player; the ticket lets the abandoned restore recognise that it lost.
   let restoreGeneration = 0;
   let lastSpinnerPlaying = false;
+  // The authored cell budget of the montage cue. The montage spends it on the
+  // authored frame holds and on the presented slideshow clicks; when the
+  // remaining budget can no longer carry a click, the montage advances the
+  // frame through the gallery API instead of overrunning the cell deadline.
+  let montageBudgetMs = 0;
   const activateHost = () => {
     if (hostActivationRequested || typeof root.activate !== 'function') return;
     hostActivationRequested = true;
@@ -413,6 +433,18 @@ export function createImsShowMediaTarget(root, {
 
   return Object.freeze({
     element: root,
+
+    /**
+     * Publishes the authored cell budget of the montage cue. The montage uses
+     * it to decide whether the next slideshow click still fits; without it a
+     * slow host would overrun the cell deadline and stop the show.
+     * @param {{ budgetMs?: number } | number} [budget]
+     */
+    setShowMediaBudget(budget) {
+      const value = typeof budget === 'number' ? budget : Number(budget?.budgetMs) || 0;
+      if (Number.isFinite(value) && value > 0) montageBudgetMs = value;
+      return montageBudgetMs;
+    },
 
     async prepareShowMedia(
       { signal } = /** @type {{ signal?: AbortSignal }} */ ({}),
@@ -560,7 +592,27 @@ export function createImsShowMediaTarget(root, {
             verified: !galleryAutoplayRunning(player, controls),
           }));
         }
-        for (const frame of frames) {
+        // The montage's wall-clock cost is the authored frame holds plus the
+        // presented slideshow clicks. Both are measured against the authored
+        // cell budget: a click is only presented while the remaining budget can
+        // still carry it, so a slow host degrades to the gallery API instead of
+        // overrunning the cell deadline and stopping the show.
+        const startedAtMs = globalThis.performance?.now?.() ?? Date.now();
+        const elapsedMs = () => Math.max(
+          0,
+          (globalThis.performance?.now?.() ?? Date.now()) - startedAtMs,
+        );
+        let expectedClickCostMs = MONTOURGE_CLICK_COST_MS;
+        const remainingHoldsMs = (fromIndex) => frames
+          .slice(fromIndex)
+          .reduce((total, frame) => total + frameHoldMs, 0);
+        const clickFitsBudget = (frameIndex) => {
+          if (montageBudgetMs <= 0) return true;
+          const reservedMs = elapsedMs() + remainingHoldsMs(frameIndex) + expectedClickCostMs;
+          const ceilingMs = montageBudgetMs + MONTOURGE_BUDGET_MARGIN_MS;
+          return reservedMs <= ceilingMs;
+        };
+        for (const [frameIndex, frame] of frames.entries()) {
           throwIfAborted(signal);
           const before = readImageIndex();
           let advanced = false;
@@ -574,8 +626,12 @@ export function createImsShowMediaTarget(root, {
             }));
             lastGalleryFrame = frame;
           } else {
-            if (frame === lastGalleryFrame + 1 && controls.next) {
+            if (frame === lastGalleryFrame + 1 && controls.next && clickFitsBudget(frameIndex)) {
+              const clickStartedAtMs = elapsedMs();
               const gesture = await clickControl(controls.next, 'gallery-next');
+              const clickCostMs = Math.max(1, elapsedMs() - clickStartedAtMs);
+              // The next click is budgeted by what this one actually cost.
+              expectedClickCostMs = Math.max(MONTOURGE_CLICK_COST_MS, clickCostMs);
               advanced = gesture.ok;
               // If the gesture itself failed to bear (control not shown
               // or presenter couldn't click) it is recorded explicitly —
@@ -600,6 +656,12 @@ export function createImsShowMediaTarget(root, {
                   }));
                 }
               }
+            } else if (frame === lastGalleryFrame + 1 && controls.next) {
+              emitEvidence(Object.freeze({
+                frame,
+                via: 'budget-exhausted',
+                verified: false,
+              }));
             }
             if (!advanced) {
               player.goTo?.(frame - 1);

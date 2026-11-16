@@ -1422,6 +1422,10 @@ export function createCvShowDirectiveRunner(options = {}) {
             await waitUntilResumed(controller.signal);
             throwIfAborted(controller.signal);
             reportInteractionActed();
+            // The montage spends the authored cell budget on its frame holds and
+            // its presented slideshow clicks; it needs that budget to know when
+            // a click still fits.
+            mediaTarget.setShowMediaBudget?.(presentation?.budgetMs ?? 0);
             let result = await media.play(mediaTarget, adapted.directive);
             if (result?.completion) await result.completion;
             throwIfAborted(controller.signal);

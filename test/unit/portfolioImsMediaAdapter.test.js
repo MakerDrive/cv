@@ -952,6 +952,47 @@ test('IMS Show gallery accent presents each frame through the real next control'
   );
 });
 
+test('IMS Show gallery montage stops presenting clicks when the cell budget cannot carry them', async () => {
+  const events = [];
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    goTo(index) {
+      events.push(['goTo', index]);
+      this.hotspotState = { image: index };
+    },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    presentMediaControl: async () => {
+      events.push(['present']);
+      return true;
+    },
+    clock: {
+      wait: async (durationMs) => { events.push(['wait', durationMs]); },
+    },
+  });
+  // A cell budget that can carry the authored holds but no click at all.
+  target.setShowMediaBudget({ budgetMs: 5_000 });
+
+  const result = await target.playShowMedia({
+    frames: [1, 2, 3],
+    frameHoldMs: 1_000,
+    finalFrame: 3,
+  }, { signal: new AbortController().signal });
+  const evidence = await result.completion;
+
+  assert.deepEqual(events, [
+    ['wait', 1000],
+    ['goTo', 1], ['wait', 1000],
+    ['goTo', 2], ['wait', 1000],
+  ], 'the montage advances through the gallery API instead of overrunning the cell');
+  assert.deepEqual(
+    evidence.filter(({ frame }) => Number.isInteger(frame)).map(({ frame, via }) => ({ frame, via })),
+    [{ frame: 1, via: 'state-observed' }, { frame: 2, via: 'api-fallback' }, { frame: 3, via: 'api-fallback' }],
+  );
+});
+
 test('IMS Show gallery falls back to programmatic goTo when controls cannot be presented', async () => {
   const events = [];
   const gallery = {
