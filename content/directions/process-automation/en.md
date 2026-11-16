@@ -6,10 +6,10 @@ I automate repeatable operations in browsers, mobile applications, and service s
 
 | Project | Example |
 | --- | --- |
-| [Lifecycle Messaging Platform](/cv/projects/lifecycle-messaging-platform/) | Queues and campaign execution through a distributed runtime and GSM modems. |
-| [Browser X MCP](/cv/projects/browser-x-mcp/) | A Playwright tool for navigation, page inspection, and controlled browser actions. |
-| [Mobile SMM Operations Platform](/cv/projects/mobile-smm-platform/) | Android scenarios, queues, limits, deduplication, and operation logs. |
-| [Adaptive Maximo Workbench](/cv/projects/adaptive-maximo-workbench/) | A read-only maintenance demo that shows the actions available in the current state. |
+| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | Queues and campaign execution through a distributed runtime and GSM modems. |
+| [Browser X MCP](../../projects/browser-x-mcp/) | A Playwright tool for navigation, page inspection, and controlled browser actions. |
+| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | Android scenarios, queues, limits, deduplication, and operation logs. |
+| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | A read-only maintenance demo that shows the actions available in the current state. |
 
 ## My contribution
 

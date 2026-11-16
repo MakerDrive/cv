@@ -6,11 +6,11 @@ Desarrollo herramientas y procesos en los que los agentes de IA trabajan con con
 
 | Proyecto | Ejemplo |
 | --- | --- |
-| [Agent Portal](/cv/projects/agent-portal/) | Entorno de ingeniería con grupos de recursos, enrutamiento de modelos y un tablero Kanban ejecutable. |
-| [Agent Pool MCP](/cv/projects/agent-pool-mcp/) | Delegación a agentes CLI con responsabilidad y estado de ejecución visibles. |
-| [Project Graph MCP](/cv/projects/project-graph-mcp/) | Herramientas que ofrecen a los agentes una vista estructurada del código y sus dependencias. |
-| [Symbiote Workspace](/cv/projects/symbiote-workspace/) | Un espacio de trabajo para una tarea concreta, ensamblado desde una configuración portátil. |
-| [Browser X MCP](/cv/projects/browser-x-mcp/) | Una primera herramienta de navegador con Playwright para operaciones de UI controladas. |
+| [Agent Portal](../../projects/agent-portal/) | Entorno de ingeniería con grupos de recursos, enrutamiento de modelos y un tablero Kanban ejecutable. |
+| [Agent Pool MCP](../../projects/agent-pool-mcp/) | Delegación a agentes CLI con responsabilidad y estado de ejecución visibles. |
+| [Project Graph MCP](../../projects/project-graph-mcp/) | Herramientas que ofrecen a los agentes una vista estructurada del código y sus dependencias. |
+| [Symbiote Workspace](../../projects/symbiote-workspace/) | Un espacio de trabajo para una tarea concreta, ensamblado desde una configuración portátil. |
+| [Browser X MCP](../../projects/browser-x-mcp/) | Una primera herramienta de navegador con Playwright para operaciones de UI controladas. |
 
 ## Mi contribución
 

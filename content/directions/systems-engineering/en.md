@@ -6,11 +6,11 @@ I design software products in which the interface, APIs, data stores, queues, an
 
 | Project | Example |
 | --- | --- |
-| [Lifecycle Messaging Platform](/cv/projects/lifecycle-messaging-platform/) | A messaging platform with APIs, PostgreSQL, queues, and a separate GSM modem runtime. |
-| [PhotoPizza Remote](/cv/projects/photopizza-remote/) | Browser control of a turntable over a local network. |
-| [PhotoSnail Public](/cv/projects/photosnail-public/) | Early experiments in camera motion control and presenting captured media. |
-| [Adaptive Maximo Workbench](/cv/projects/adaptive-maximo-workbench/) | A maintenance demo interface whose available path is read-only. |
-| [Symbiote Node](/cv/projects/symbiote-node/) | A package and migration layer for UI components and an execution engine. |
+| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | A messaging platform with APIs, PostgreSQL, queues, and a separate GSM modem runtime. |
+| [PhotoPizza Remote](../../projects/photopizza-remote/) | Browser control of a turntable over a local network. |
+| [PhotoSnail Public](../../projects/photosnail-public/) | Early experiments in camera motion control and presenting captured media. |
+| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | A maintenance demo interface whose available path is read-only. |
+| [Symbiote Node](../../projects/symbiote-node/) | A package and migration layer for UI components and an execution engine. |
 
 ## My contribution
 
