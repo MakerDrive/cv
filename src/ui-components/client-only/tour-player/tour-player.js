@@ -12,6 +12,9 @@ import {
   partitionCvShowAlignedDirectives,
   requireCvShowSceneSetupSuccess,
 } from '../../../static-pages/js/tour-player/showAlignmentAdapter.js';
+import {
+  cvShowOperationRole,
+} from '../../../static-pages/js/tour-player/showAlignmentAdapter.js';
 import { createCvShowNarrationController } from '../../../static-pages/js/tour-player/localNarration.js';
 import {
   createCvShowPlaybackEntries,
@@ -2044,9 +2047,7 @@ export class PortfolioShowChat extends HTMLElement {
         .find(({ id }) => id === cellId);
       if (projectCell) {
         if (!layerId) layerId = cvShowCellLayerId(projectCell);
-        operationRole = String(
-          projectCell.cue?.interaction?.type || projectCell.cue?.kind || '',
-        );
+        operationRole = cvShowOperationRole(projectCell, this.#alignedEntry.project);
         if (!kind) {
           kind = projectCell.kind === 'audio-clip' ? 'audio' : projectCell.kind || '';
           if (!kind && projectCell.cue?.kind === 'focus') kind = 'attention';

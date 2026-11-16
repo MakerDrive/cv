@@ -119,8 +119,10 @@ export function resolveCvShowFailureSemantics({
   ) {
     const role = String(operationRole || '');
     // Only pure visual preparation/decoration gestures are soft. Real state
-    // transitions (navigate) and unknown operation roles stay hard.
-    if (role === 'scroll' || role === 'select-native' || role === 'select') {
+    // transitions (navigate) and unknown operation roles stay hard. A media
+    // montage is a visual effect as well: the gallery advances or it does not,
+    // and the narration continues either way.
+    if (role === 'scroll' || role === 'select-native' || role === 'select' || role === 'media') {
       return CV_SHOW_FAILURE_SEMANTICS.SOFT;
     }
     return CV_SHOW_FAILURE_SEMANTICS.GATE;

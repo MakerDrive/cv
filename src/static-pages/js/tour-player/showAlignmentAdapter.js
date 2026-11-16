@@ -191,6 +191,20 @@ export function resolveCvShowAudioAnchor(directive, index, total) {
  *
  * @param {Array<Record<string, any>>} [directives]
  */
+/**
+ * The failure policy needs to know what an authored cell DOES, not only how
+ * it is shaped. A media montage is a visual effect (the gallery advances or it
+ * does not), while a plain click may be a real user-facing action.
+ * @param {any} projectCell
+ * @param {any} project
+ * @returns {string}
+ */
+export function cvShowOperationRole(projectCell, project) {
+  if (!projectCell) return '';
+  if (projectCvShowDirective(projectCell, project)?.type === 'media') return 'media';
+  return String(projectCell.cue?.interaction?.type || projectCell.cue?.kind || '');
+}
+
 export function partitionCvShowAlignedDirectives(directives = []) {
   const sceneSetup = [];
   const scheduled = [];
@@ -418,9 +432,7 @@ export function createCvShowAlignmentController({
           policy,
           code: terminalReasonCode(receipt.reason),
           narrationStarted: physicalPlaybackStarted === true,
-          operationRole: String(
-            projectCell?.cue?.interaction?.type || projectCell?.cue?.kind || '',
-          ),
+          operationRole: cvShowOperationRole(projectCell, tuple.project),
         });
         if (recovery !== 'degrade' && recovery !== 'skip') return false;
         toleratedFailedCells.add(receipt.cellId);
@@ -525,11 +537,7 @@ export function createCvShowAlignmentController({
             const softSemantics = resolveCvShowFailureSemantics({
               kind: String(operation.projectCell?.cue?.kind || kind || ''),
               layerId: cvShowCellLayerId(operation.projectCell),
-              operationRole: String(
-                operation.projectCell?.cue?.interaction?.type
-                || operation.projectCell?.cue?.kind
-                || '',
-              ),
+              operationRole: cvShowOperationRole(operation.projectCell, tuple.project),
             });
             if (softSemantics === CV_SHOW_FAILURE_SEMANTICS.SOFT) {
               degradedCellOutcomes.set(operation.projectCell.id, Object.freeze({

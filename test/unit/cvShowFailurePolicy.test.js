@@ -106,6 +106,32 @@ test('.optional policy always skips', () => {
   );
 });
 
+test('a failed media montage degrades instead of stopping the show', () => {
+  // The gallery montage is a visual effect: a missed or overrunning montage
+  // must never pause the narration. A plain click stays a real action.
+  assert.equal(
+    resolveFailureRecovery({
+      kind: 'interaction',
+      layerId: 'cv-show:layer:interaction',
+      operationRole: 'media',
+      code: 'PRESENTATION_EFFECT_DEADLINE_MISSED',
+      narrationStarted: true,
+    }),
+    CV_SHOW_RECOVERY.DEGRADE,
+  );
+  assert.equal(
+    resolveFailureRecovery({
+      kind: 'interaction',
+      layerId: 'cv-show:layer:interaction',
+      operationRole: 'click',
+      code: 'PRESENTATION_EFFECT_DEADLINE_MISSED',
+      narrationStarted: true,
+    }),
+    CV_SHOW_RECOVERY.PAUSE_REPORT,
+    'a real click action still reports instead of degrading silently',
+  );
+});
+
 test('interaction failures pause-retry only before narration started', () => {
   assert.equal(
     resolveFailureRecovery({
