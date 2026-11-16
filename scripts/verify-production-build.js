@@ -51,7 +51,11 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // entries with their localized registry copy, the section index, the
   // navigation/graph wiring and the retired article targets; measured
   // 1954659 raw.
-  raw: 1_960_000,
+  // 2026-11-16: +10 KB for the retired-article metadata and the mobile rail
+  // integration; measured 1960602 raw. Publication summaries stay in the
+  // bundled registry so the feed and the retirement stubs render without an
+  // extra request.
+  raw: 1_970_000,
   // 2026-09-25: +5 KB gzip for the completed drawer gesture contract —
   // deferred pointer capture, touch tree-disclosure column, click-vs-swipe
   // separation; measured 452330 gzip against the 450000 cap. Re-measured at
@@ -61,7 +65,9 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // 2026-11-04: +14 KB for the same theme/show work; measured 469363 gzip.
   // 2026-11-11: +5 KB for the same four Pulse publications; measured 471249 gzip.
   // 2026-11-12: +7 KB for the same direction sections; measured 480388 gzip.
-  gzip: 482_000,
+  // 2026-11-16: +2 KB for the same retirement metadata and mobile rail work;
+  // measured 481406 gzip.
+  gzip: 484_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);
