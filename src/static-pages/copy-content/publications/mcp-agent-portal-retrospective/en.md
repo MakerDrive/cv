@@ -2,4 +2,4 @@
 
 The gateway publishes tool schemas through MCP discovery and validates calls against the same registry. Its public surface includes chat creation and resumption, task-result inspection, orchestration status, and the development map. Sub-agents can use the Streamable HTTP endpoint, while IDE clients keep the stdio entry point and the singleton backend bridge.
 
-Tool calls have named parameters, declared result shapes, and a stable context boundary. The implementation expresses that contract through JavaScript tool definitions, MCP request handlers, and a clear distinction between public gateway tools and internal execution tools. There is no separate Python `Agent` abstraction in this repository.
+Tool calls have named parameters, declared result shapes, and a stable context boundary. The implementation expresses that contract through JavaScript tool definitions, MCP request handlers, and a clear distinction between public gateway tools and internal execution tools.

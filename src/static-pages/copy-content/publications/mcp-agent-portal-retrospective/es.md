@@ -2,4 +2,4 @@
 
 El gateway publica esquemas mediante el descubrimiento de MCP y valida las llamadas contra el mismo registro. La superficie pública incluye creación y reanudación de chats, consulta de resultados, estado de orquestación y el development map. Los subagentes pueden usar el endpoint Streamable HTTP; los clientes de IDE conservan la entrada stdio y el puente hacia el backend singleton.
 
-Las llamadas a herramientas tienen parámetros con nombre, una forma de resultado declarada y un límite estable de contexto. La implementación expresa ese contrato mediante definiciones JavaScript, handlers MCP y una separación clara entre las herramientas públicas del gateway y el execution layer interno. El repositorio no contiene una abstracción `Agent` separada en Python.
+Las llamadas a herramientas tienen parámetros con nombre, una forma de resultado declarada y un límite estable de contexto. La implementación expresa ese contrato mediante definiciones JavaScript, handlers MCP y una separación clara entre las herramientas públicas del gateway y el execution layer interno.

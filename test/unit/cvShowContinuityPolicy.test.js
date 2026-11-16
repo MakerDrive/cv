@@ -9,7 +9,7 @@ import {
   resolveFailureRecovery,
 } from '../../src/static-pages/js/tour-player/failurePolicy.js';
 import {
-  completeDegradedInteractionSettlement,
+  completeDegradedVisualSettlement,
 } from '../../src/static-pages/js/tour-player/showAdapter.js';
 import { CV_SHOW_PRESENTATION_PROJECT } from '../../src/static-pages/data/cvShowPresentationProject.js';
 
@@ -105,7 +105,7 @@ test('degraded interaction settlement reports exactly the missing settled receip
       return receipt;
     },
   };
-  assert.equal(completeDegradedInteractionSettlement(operation, {
+  assert.equal(completeDegradedVisualSettlement(operation, {
     outcome: 'PRESENTATION_EFFECT_OPERATION_FAILED',
     fallback: 'none-skipped',
   }), true);
@@ -117,7 +117,7 @@ test('degraded interaction settlement reports exactly the missing settled receip
   // Already settled or aborted operations are left untouched.
   const settled = { ...operation, reportedReceipts: [{ status: 'acted' }, { status: 'settled' }] };
   const aborted = { ...operation, signal: { aborted: true } };
-  assert.equal(completeDegradedInteractionSettlement(settled), false);
-  assert.equal(completeDegradedInteractionSettlement(aborted), false);
+  assert.equal(completeDegradedVisualSettlement(settled), false);
+  assert.equal(completeDegradedVisualSettlement(aborted), false);
   assert.equal(receipts.length, 1);
 });

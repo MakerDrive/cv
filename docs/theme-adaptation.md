@@ -78,6 +78,12 @@ Its consumer skin uses source palette tokens below that protected boundary,
 including the flat frame, readable text, neutral actions and Archivo title.
 The native preview still demonstrates the imported Cascade parameters; cancelling
 restores the previous theme. Embedded third-party media retains its own controls.
+Opening Appearance on mobile reveals its rail panel through the public
+`scrollToPanel()` API after popover closure commits and the new panel is collected; reopening reuses the
+same editor and retained state.
+Mobile rail navigation replaces panel fullscreen controls. Entering the rail
+ends a retained desktop fullscreen session so its tab bar does not duplicate
+the mobile navigation. Desktop fullscreen remains available.
 On narrow screens the 56px header and workspace height use the same geometry,
 so the Show transport and composer remain within the viewport.
 

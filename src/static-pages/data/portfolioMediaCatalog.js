@@ -81,6 +81,9 @@ function image(slug, name, { src, label, projectPage, targetIds }) {
     kind: 'image',
     label,
     poster: src,
+    ...(src.startsWith('illustrations/')
+      ? { localSource: `src/static-pages/copy-illustrations/${src.slice('illustrations/'.length)}` }
+      : {}),
     alt: label,
     fit: 'contain',
     href: projectPage,
@@ -90,6 +93,87 @@ function image(slug, name, { src, label, projectPage, targetIds }) {
 }
 
 export const PORTFOLIO_MEDIA_CATALOG = Object.freeze([
+  image('symbiote-workspace', 'configuration-illustration', {
+    src: 'illustrations/workspace-configuration.webp',
+    label: 'Conceptual illustration: composing and reopening a portable workspace',
+    projectPage: 'https://makerdrive.github.io/cv/projects/symbiote-workspace/',
+  }),
+  image('symbiote-ui', 'process-illustration', {
+    src: 'illustrations/symbiote-ui.webp',
+    label: 'Conceptual illustration: reusable UI components and discoverable action metadata',
+    projectPage: 'https://makerdrive.github.io/cv/projects/symbiote-ui/',
+  }),
+  image('symbiote-engine', 'process-illustration', {
+    src: 'illustrations/symbiote-engine.webp',
+    label: 'Conceptual illustration: composable backend execution with parallel paths and a validation gate',
+    projectPage: 'https://makerdrive.github.io/cv/projects/symbiote-engine/',
+  }),
+  image('agent-portal', 'process-illustration', {
+    src: 'illustrations/agent-portal.webp',
+    label: 'Conceptual illustration: executable kanban stages with review and a human decision route',
+    projectPage: 'https://makerdrive.github.io/cv/projects/agent-portal/',
+  }),
+  image('symbiote-video-studio', 'process-illustration', {
+    src: 'illustrations/symbiote-video-studio.webp',
+    label: 'Conceptual illustration: one video description expressed as graph, timeline, preview and export',
+    projectPage: 'https://makerdrive.github.io/cv/projects/symbiote-video-studio/',
+  }),
+  image('adaptive-maximo-workbench', 'process-illustration', {
+    src: 'illustrations/adaptive-maximo-workbench.webp',
+    label: 'Conceptual illustration: read-only work-order inspection linked to asset and location context',
+    projectPage: 'https://makerdrive.github.io/cv/projects/adaptive-maximo-workbench/',
+  }),
+  image('agent-pool-mcp', 'process-illustration', {
+    src: 'illustrations/agent-pool-mcp.webp',
+    label: 'Conceptual illustration: task dispatch, ownership, session handoff and independent review',
+    projectPage: 'https://makerdrive.github.io/cv/projects/agent-pool-mcp/',
+  }),
+  image('project-graph-mcp', 'process-illustration', {
+    src: 'illustrations/project-graph-mcp.webp',
+    label: 'Conceptual illustration: source files distilled into a relevant dependency map and context',
+    projectPage: 'https://makerdrive.github.io/cv/projects/project-graph-mcp/',
+  }),
+  image('lifecycle-messaging-platform', 'process-illustration', {
+    src: 'illustrations/lifecycle-messaging-platform.webp',
+    label: 'Conceptual illustration: consent, queues, modem delivery and a repeatable virtual test bench',
+    projectPage: 'https://makerdrive.github.io/cv/projects/lifecycle-messaging-platform/',
+  }),
+  image('mobile-smm-platform', 'process-illustration', {
+    src: 'illustrations/mobile-smm-platform.webp',
+    label: 'Conceptual illustration: media drafts, scheduling, Android test execution and reviewed recovery',
+    projectPage: 'https://makerdrive.github.io/cv/projects/mobile-smm-platform/',
+  }),
+  image('f360-studio', 'process-illustration', {
+    src: 'illustrations/f360-studio.webp',
+    label: 'Conceptual illustration: photographic capture, geometry and texture processing, and model presentation',
+    projectPage: 'https://makerdrive.github.io/cv/projects/f360-studio/',
+  }),
+  image('autobox-v1', 'process-illustration', {
+    src: 'illustrations/autobox-v1.webp',
+    label: 'Conceptual illustration: controlled museum-object photography, source selection and photogrammetry',
+    projectPage: 'https://makerdrive.github.io/cv/projects/autobox-v1/',
+    targetIds: ['projects/autobox-v1', 'pulse/autobox-v1-retrospective'],
+  }),
+  image('complexscan', 'process-illustration', {
+    src: 'illustrations/complexscan.webp',
+    label: 'Conceptual illustration: transparent-disc capture and controlled light for clean source images',
+    projectPage: 'https://makerdrive.github.io/cv/projects/complexscan/',
+  }),
+  image('boothbot', 'process-illustration', {
+    src: 'illustrations/boothbot.webp',
+    label: 'Conceptual illustration: repeatable warehouse bottle photography and consistent catalog images',
+    projectPage: 'https://makerdrive.github.io/cv/projects/boothbot/',
+  }),
+  image('megavisor', 'process-illustration', {
+    src: 'illustrations/megavisor.webp',
+    label: 'Conceptual illustration: capture, a panorama hotspot, object photo rotation and related media',
+    projectPage: 'https://makerdrive.github.io/cv/projects/megavisor/',
+  }),
+  image('photopizza', 'process-illustration', {
+    src: 'illustrations/photopizza.webp',
+    label: 'Conceptual illustration: one controller for a turntable, camera slider and panoramic head',
+    projectPage: 'https://makerdrive.github.io/cv/projects/photopizza/',
+  }),
   youtube('qsXmS4mFvYc', 'adaptive-maximo-workbench', 'Agentic EAM Demo 1'),
   youtube('DUzUnbO2VVs', 'adaptive-maximo-workbench', 'XR EAM Example'),
 
@@ -121,7 +205,7 @@ export const PORTFOLIO_MEDIA_CATALOG = Object.freeze([
     label: 'AUTOBOX 360 scan result',
     projectPage: 'https://rnd-pro.com/pulse/autobox-v1/',
     autoplay: true,
-    targetIds: ['pulse/autobox-v1-retrospective', 'projects/autobox-v1'],
+    targetIds: ['projects/autobox-v1', 'pulse/autobox-v1-retrospective'],
   }),
   youtube('IPEY0yiVb-I', 'autobox-v1', 'AUTOBOX capture equipment'),
   youtube('NWpMtNZjrzI', 'autobox-v1', 'AUTOBOX capture technology'),

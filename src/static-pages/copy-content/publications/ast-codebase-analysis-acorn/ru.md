@@ -2,4 +2,4 @@ Project Graph MCP использует vendored-парсер Acorn для стр
 
 Parser - один этап общего pipeline. File walker определяет набор исходников, language-specific parsers формируют структурные записи, а graph builder создаёт nodes и dependency relationships. Разделение ответственностей даёт MCP-слою один граф для skeleton, focus zones, usages и call paths.
 
-Acorn также используется в проверках, основанных на структурном разборе JavaScript (JavaScript syntax): cyclomatic complexity, JSDoc consistency, structural comparison похожих функций и часть dead-code analysis. TypeScript в этом пакете обрабатывается отдельным структурным parser. В репозитории нет speed benchmark для этого пути; проверяемое evidence находится в parser dependency и реализованных analysis operations.
+Acorn также используется для проверок, которым нужен разбор синтаксиса JavaScript: оценки цикломатической сложности, согласованности JSDoc, структурного сравнения похожих функций и части анализа неиспользуемого кода. TypeScript в этом пакете обрабатывается отдельным структурным парсером.

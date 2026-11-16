@@ -11,6 +11,10 @@ const PAGE_KEYS = {
   'skills/product-ui': ['skill.productUi.label', 'skill.productUi.summary'],
   'skills/digital-presence': ['skill.digitalPresence.label', 'skill.digitalPresence.summary'],
   'skills/hardware-capture': ['skill.hardwareCapture.label', 'skill.hardwareCapture.summary'],
+  'directions/index': ['directions.label', 'directions.summary'],
+  'directions/systems-engineering': ['direction.systemsEngineering.label', 'direction.systemsEngineering.summary'],
+  'directions/applied-ai': ['direction.appliedAi.label', 'direction.appliedAi.summary'],
+  'directions/process-automation': ['direction.processAutomation.label', 'direction.processAutomation.summary'],
 };
 
 export const PORTFOLIO_PAGE_METADATA = Object.freeze(Object.fromEntries(

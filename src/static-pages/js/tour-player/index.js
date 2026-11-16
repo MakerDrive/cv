@@ -63,6 +63,7 @@ import { createImsShowMediaTarget } from './imsShowMediaAdapter.js';
 import { createCvShowPauseGate } from './pauseGate.js';
 import { createYouTubeNoCookieEmbedUrl } from './youtubeEmbedUrl.js';
 import { resolveVisibleShowPlayer } from '../showPlayerResolver.js';
+import { resolvePortfolioTreeHighlightId } from '../portfolioPulseRuntime.js';
 
 export const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
 
@@ -81,13 +82,9 @@ function getLocaleMessage(key) {
 }
 
 function findTreeRow(workspace, entryId, runtime) {
+  let treeId = resolvePortfolioTreeHighlightId(entryId, [], runtime?.treeDirectorySelection);
   let rows = Array.from(workspace.querySelectorAll('.sn-tree-row'));
-  let exact = rows.find((row) => row.dataset.treeId === entryId);
-  if (exact) return exact;
-  let label = runtime?.entries?.get?.(entryId)?.label;
-  return label
-    ? rows.find((row) => row.textContent?.includes(label)) || null
-    : null;
+  return rows.find((row) => row.dataset.treeId === treeId) || null;
 }
 
 function firstVisibleSibling(anchor) {
@@ -372,7 +369,7 @@ function findPortfolioTreeView(workspace) {
  * expansion naturally persists with the tree (selection does as well) —
  * the gesture shows exactly the action a visitor would take.
  */
-function expandTreeBranchTo(workspace, entryId) {
+function expandTreeBranchTo(workspace, treeId) {
   const tree = findPortfolioTreeView(workspace);
   if (!tree || typeof tree !== 'object') return false;
   const items = Array.isArray(tree.items) ? tree.items : [];
@@ -380,7 +377,7 @@ function expandTreeBranchTo(workspace, entryId) {
   const visit = (nodes, ancestors) => {
     for (const item of nodes || []) {
       const id = String(item?.id || item?.path || '');
-      if (id === entryId) {
+      if (id === treeId) {
         chain.push(...ancestors);
         return true;
       }
@@ -412,7 +409,10 @@ async function presentNavigationGesture(workspace, runtime, entryId, {
   // Expanding only helps when the row was hidden by a collapsed branch; rows
   // already rendered stay untouched.
   const existing = visibleElement(findTreeRow(workspace, entryId, runtime));
-  if (!existing) expandTreeBranchTo(workspace, entryId);
+  if (!existing) {
+    let treeId = resolvePortfolioTreeHighlightId(entryId, [], runtime?.treeDirectorySelection);
+    expandTreeBranchTo(workspace, treeId);
+  }
   const ready = await waitForShowDomReadiness({
     document,
     target: () => visibleElement(findTreeRow(workspace, entryId, runtime)),
@@ -754,16 +754,34 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
         }),
       });
     }
-    const visualSettlement = await waitForShowVisualSettlement(ready.target, {
-      document,
-      signal,
-      inactivityMs: 2_500,
-      start: () => animateCvShowScrollIntoView(ready.target, {
+    // The authored scroll animation is bounded (`animateCvShowScrollIntoView`
+    // caps its own duration), so late platform evidence must not eat the
+    // authored hard deadline. Cap the stability wait by the remaining budget
+    // and settle truthfully when only the evidence is late.
+    const scrollBudgetMs = Number(context?.presentationBudgetMs) || 0;
+    const settleInactivityMs = Number.isFinite(scrollBudgetMs) && scrollBudgetMs > 0
+      ? Math.max(150, Math.min(2_500, scrollBudgetMs - 1_000))
+      : 2_500;
+    let visualSettlement;
+    try {
+      visualSettlement = await waitForShowVisualSettlement(ready.target, {
         document,
         signal,
-        durationMs: scrollDurationMs,
-      }),
-    });
+        inactivityMs: settleInactivityMs,
+        start: () => animateCvShowScrollIntoView(ready.target, {
+          document,
+          signal,
+          durationMs: scrollDurationMs,
+        }),
+      });
+    } catch (evidenceError) {
+      visualSettlement = Object.freeze({
+        status: 'settled',
+        motion: 'scroll',
+        reason: 'budget-bound-evidence',
+        evidenceError: String(evidenceError?.code || evidenceError?.message || evidenceError),
+      });
+    }
     return Object.freeze({ ...ready, visualSettlement });
   };
   const restore = ({ action, context, inspected, reveal: revealReceipt }) => {
@@ -1030,7 +1048,26 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const createPresenterSession = () => {
     const gestureSeed = globalThis.crypto?.randomUUID?.()
       || `${Date.now()}:${Math.random()}`;
-    const cursor = createPresenterCursor();
+    const cursor = createPresenterCursor(document, {
+      resolveHoseAnchor: () => {
+        const dock = getDock();
+        const player = dock?.getChat?.()?.getShowPlayer?.()
+          || getChat()?.getShowPlayer?.() || null;
+        if (!player) return null;
+        const host = player.parentElement;
+        if (!isMobileDock() || !host?.classList?.contains('portfolio-show-static-region')) {
+          return player;
+        }
+        let anchor = host.querySelector('.portfolio-show-hose-anchor');
+        if (!anchor) {
+          anchor = document.createElement('span');
+          anchor.className = 'portfolio-show-hose-anchor';
+          anchor.setAttribute('aria-hidden', 'true');
+          host.append(anchor);
+        }
+        return anchor;
+      },
+    });
     const attention = new ShowAttentionController({
       cursor,
       resolveTarget: (target) => target,
@@ -1073,6 +1110,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const syncHeaderShowButton = (active = running || getChat()?.$?.isRunning === true) => {
     let button = document.querySelector('.pulse-tour-button');
     if (!button) return;
+    let locale = document.documentElement.lang || 'en';
+    let showAvailable = locale === 'ru';
+    button.hidden = !showAvailable;
+    if (!showAvailable) return;
     let icon = button.querySelector('.material-symbols-outlined');
     let paused = active && getChat()?.$?.isPaused === true;
     if (icon) icon.textContent = active && !paused ? 'stop' : 'play_circle';
@@ -1119,6 +1160,13 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     if (event.target !== getChat()) return;
     showPauseGate.pause();
     presenter?.runner.pause();
+    void presenter?.cursor.returnHome();
+  };
+
+  const onMobilePanelNavigation = (event) => {
+    if (!(event.target instanceof Element)) return;
+    if (!event.target.closest('.portfolio-mobile-navigation .mobile-panel-rail > button')) return;
+    if (getChat()?.$?.isPaused === true) void presenter?.cursor.returnHome();
   };
 
   const resumePresenter = (event) => {
@@ -1283,7 +1331,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       return await routeRequests.run(async () => {
         const chat = ensureTourOpen();
         if (!chat) return false;
-        return await chat.applyShowRoute?.(state) || false;
+        const applied = await chat.applyShowRoute?.(state) || false;
+        if (chat.$?.isPaused === true) void presenter?.cursor.returnHome();
+        return applied;
       });
     } finally {
       reconcilePendingRouteState();
@@ -1493,6 +1543,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     }
     try {
       const result = await runner.run(directives, { continuePhase: true });
+      if (getChat()?.$.isPaused === true) {
+        void presenter?.cursor.returnHome();
+      }
       dispatchResult(chat, requestId, result);
       complete?.(result);
     } catch (error) {
@@ -1519,9 +1572,16 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     if (
       reason === 'initial'
       || reason === 'alignment-ready'
-      || reason === 'paused-checkpoint'
       || reason === 'presentation-preroll-normalization'
     ) return;
+    if (reason === 'paused-checkpoint') {
+      void Promise.allSettled([...activePresentationOperations]).then(() => {
+        requestAnimationFrame(() => {
+          if (getChat()?.$?.isPaused === true) void presenter?.cursor.returnHome();
+        });
+      });
+      return;
+    }
     if (reason === 'branch-return') ensurePresenterLifecycle().runner.branchReturn();
     else if (reason.includes('seek')) ensurePresenterLifecycle().runner.seek();
     else ensurePresenterLifecycle().runner.beginPhase();
@@ -1645,6 +1705,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       : [event.target]
     ).some((node) => node?.matches?.('chat-workspace, chat-show-player')),
     pause: () => {
+      let chat = getChat();
+      // A show that has not started yet has nothing to pause; pausing it here
+      // would cancel the pending play intent of the click that opened it.
+      if (!chat?.$?.isRunning || chat.$.isPaused) return;
       getChat()?.pauseShow?.('meaningful-interaction');
     },
   });
@@ -1763,6 +1827,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   globalThis.addEventListener?.('pagehide', flushRouteNow);
 
   workspace.addEventListener('portfolio-show-start', onStart);
+  workspace.addEventListener('click', onMobilePanelNavigation, { capture: true });
   workspace.addEventListener('chat-show-close-request', onPlayerCloseRequest, { capture: true });
   const onHeaderPlaybackChange = () => queueMicrotask(() => syncHeaderShowButton());
   workspace.addEventListener('portfolio-show-pause', onHeaderPlaybackChange);
@@ -1786,6 +1851,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   getDock()?.addEventListener('agent-dock-change', onDockChange);
   getDock()?.addEventListener('agent-dock-responsive-change', onDockResponsiveChange);
   getDock()?.addEventListener('agent-show-layout-change', onShowLayoutChange);
+  syncHeaderShowButton();
   queueMicrotask(() => { void applyLocationRoute({ source: 'load' }); });
 
   return () => {
@@ -1795,6 +1861,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     document.removeEventListener('visibilitychange', onVisibilityFlush);
     globalThis.removeEventListener?.('pagehide', flushRouteNow);
     workspace.removeEventListener('portfolio-show-start', onStart);
+    workspace.removeEventListener('click', onMobilePanelNavigation, { capture: true });
     workspace.removeEventListener('chat-show-close-request', onPlayerCloseRequest, { capture: true });
     workspace.removeEventListener('portfolio-show-pause', onHeaderPlaybackChange);
     workspace.removeEventListener('portfolio-show-resume', onHeaderPlaybackChange);

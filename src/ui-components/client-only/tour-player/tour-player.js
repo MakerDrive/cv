@@ -2602,6 +2602,13 @@ export class PortfolioShowChat extends HTMLElement {
       this.$.inBranch = false;
       this.$.isPaused = true;
       this.$.resumeRequired = true;
+      // The show returns to the checkpoint paused, so the transcript must offer
+      // the explicit resume action that continues it.
+      this.$.statusText = this.#message('tour.status.branchReturned');
+      this.#appendSystemMessage(this.$.statusText, {
+        actions: [{ id: 'resume', label: this.$.lblResume, icon: 'play_arrow' }],
+        actionId: 'show-resume-after-branch',
+      });
       this.#branchReturnPlayback = null;
       this.#showPlayer?.bind?.(this.#showConfig());
       void this.#restoreAfterHistoricalDetails(restore, this.#requestId);

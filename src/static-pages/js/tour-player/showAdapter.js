@@ -370,6 +370,20 @@ async function selectMediaArticleProject(
   return runtime.selectedId === projectId ? projectId : '';
 }
 
+/**
+ * Highlight visuals mark content for the narration. Navigation rows are a
+ * transport surface, not content: the scene transition clicks the row with
+ * the cursor, so an authored frame on the same link would emphasize the
+ * section just before its own click.
+ */
+function isCvShowHighlightDirective(mode) {
+  return mode === 'frame' || mode === 'native-selection';
+}
+
+function isNavigationTreeRowElement(element) {
+  return Boolean(element?.closest?.('.sn-tree-row'));
+}
+
 function missingReceipt(adapted, reason, details = null) {  return Object.freeze({
     id: adapted.source.id,
     ...(adapted.source.target ? { target: adapted.source.target } : {}),
@@ -537,11 +551,20 @@ function createPresentationReporter(operation) {
     throw presentationProviderFailure(operation, 'operation callbacks');
   }
 
+  // The provider and the degraded-completion path build separate reporter
+  // instances for the same operation. The shared provider state keeps the
+  // admission contract single-shot: an admission the engine already accepted
+  // is never reported a second time.
+  const providerState = operation.providerState ?? null;
+  let admissionReported = Boolean(providerState?.admissionReported);
   const reportAdmission = (providerAdmission) => {
     if (!admissionRequired) {
       throw presentationProviderFailure(operation, 'unexpected admission');
     }
-    return operation.reportAdmission(Object.freeze({ providerAdmission }));
+    const admission = operation.reportAdmission(Object.freeze({ providerAdmission }));
+    admissionReported = true;
+    if (providerState) providerState.admissionReported = true;
+    return admission;
   };
 
   const reportMilestone = (providerReceipt) => {
@@ -614,7 +637,7 @@ function createPresentationReporter(operation) {
         id: operation.projectCell.cue?.targetId ?? operation.source?.target ?? null,
       }),
     });
-    if (admissionRequired && !operation.admission) {
+    if (admissionRequired && !admissionReported) {
       reportAdmission(Object.freeze({
         version: 'show-attention-admission-v2',
         status: 'admitted',
@@ -716,21 +739,24 @@ export function degradePresentationOperation(operation, { outcome, fallback }) {
 }
 
 /**
- * Completes a failed soft interaction whose `acted` milestone was already
+ * Completes a failed soft visual operation whose first milestone was already
  * accepted by the engine but whose `settled` milestone never arrived (for
- * example a scroll-for-attention whose provider timed out). Reports exactly
- * the one missing terminal receipt with explicit degraded evidence; never
- * fabricates duplicate milestones and never touches an aborted operation.
- * Returns false when the operation state does not allow a safe completion.
+ * example a focus frame or a scroll-for-attention whose provider timed out
+ * mid-gesture). Reports exactly the one missing terminal receipt with explicit
+ * degraded evidence; never fabricates duplicate milestones and never touches an
+ * aborted operation. Returns false when the operation state does not allow a
+ * safe completion.
  */
-export function completeDegradedInteractionSettlement(
+export function completeDegradedVisualSettlement(
   operation,
   /** @type {{ outcome?: string, fallback?: string }} */ { outcome, fallback } = {},
 ) {
   if (operation.signal?.aborted) return false;
+  if (!['interaction', 'attention'].includes(operation.kind)) return false;
   const reported = (operation.reportedReceipts || []).map(({ status }) => status);
   if (reported.includes('settled')) return false;
-  if (!reported.includes('acted')) return false;
+  const firstMilestone = operation.kind === 'interaction' ? 'acted' : 'first-frame';
+  if (!reported.includes(firstMilestone)) return false;
   const presentation = createPresentationReporter(operation);
   const providerReceipt = Object.freeze({
     version: CV_SHOW_DEGRADED_RECEIPT_VERSION,
@@ -763,6 +789,7 @@ export async function runCvShowPresentationOperation(runner, operation) {
         continuePhase: true,
         signal: operation.signal,
         presentation,
+        turnId: operation.projectCell?.turnId,
       });
   throwIfAborted(operation.signal);
   if (!['success', 'optional-missing'].includes(result?.status)) {
@@ -797,6 +824,11 @@ export function createCvShowDirectiveRunner(options = {}) {
   let activeController = null;
   let markerSeries = '';
   let paused = false;
+  // Highlight emphasis is a per-turn visual: the same target is framed or
+  // selected at most once while its narration runs, so the story never marks
+  // one place twice in a row. Reset whenever the presenter surface changes.
+  let highlightTurnId = '';
+  let highlightedTargets = new Set();
   const resumeWaiters = new Set();
   const runtimeCleanup = createCvShowRuntimeCleanup({
     media,
@@ -858,6 +890,11 @@ export function createCvShowDirectiveRunner(options = {}) {
     else void actionLifecycle.cancel(reason || 'replacement');
   };
 
+  const resetHighlightHistory = () => {
+    highlightTurnId = '';
+    highlightedTargets = new Set();
+  };
+
   const clearAttention = (reason = 'pause') => {
     activeController?.abort(new DOMException('CV Show phase cancelled', 'AbortError'));
     activeController = null;
@@ -877,6 +914,7 @@ export function createCvShowDirectiveRunner(options = {}) {
 
   const cancel = (reason = 'stop') => {
     clearAttention(reason);
+    resetHighlightHistory();
     void runtimeCleanup.stop('phase-changed', {
       operation: `media-stop:${reason}`,
     });
@@ -884,9 +922,10 @@ export function createCvShowDirectiveRunner(options = {}) {
 
   const run = async (
     directives = [],
-    { continuePhase = false, signal = null, presentation = null } = {},
+    { continuePhase = false, signal = null, presentation = null, turnId = '' } = {},
   ) => {
     if (!continuePhase) cancel('replacement');
+    const activeTurnId = String(turnId || '');
     let controller = new AbortController();
     const abortFromSignal = () => controller.abort(
       signal.reason || new DOMException('CV Show phase cancelled', 'AbortError'),
@@ -982,6 +1021,33 @@ export function createCvShowDirectiveRunner(options = {}) {
                   throwIfAborted(controller.signal);
                   if (!presentationTarget) {
                     presentationTarget = resolveMedia(source.target)?.element ?? null;
+                  }
+                }
+                if (isCvShowHighlightDirective(adapted.directive.mode) && presentationTarget) {
+                  // A navigation row is a transport surface: the scene
+                  // transition clicks it with the cursor, so an authored frame
+                  // on that link would emphasize the section just before its
+                  // own click. And within one turn the same place is marked at
+                  // most once — a repeated frame or selection would only
+                  // repaint what is already marked.
+                  if (isNavigationTreeRowElement(presentationTarget)) {
+                    satisfyAdmissionSilently(presentation, source, observePerformance);
+                    reportInteractionActed();
+                    reportInteractionSettled();
+                    return { status: 'success', skipped: 'navigation-row-highlight' };
+                  }
+                  if (activeTurnId) {
+                    if (highlightTurnId !== activeTurnId) {
+                      highlightTurnId = activeTurnId;
+                      highlightedTargets = new Set();
+                    }
+                    if (highlightedTargets.has(presentationTarget)) {
+                      satisfyAdmissionSilently(presentation, source, observePerformance);
+                      reportInteractionActed();
+                      reportInteractionSettled();
+                      return { status: 'success', skipped: 'repeat-highlight' };
+                    }
+                    highlightedTargets.add(presentationTarget);
                   }
                 }
                 if (source.type === 'navigate' && runtime?.entries?.has(source.target)) {
@@ -1199,7 +1265,12 @@ export function createCvShowDirectiveRunner(options = {}) {
                         budgetMs: presentation.budgetMs,
                         onAdmission: reportAdmissionWithDegrade,
                         onMilestone: presentation.reportMilestone,
-                      } : {}),
+                      } : {
+                        // A gesture without provider admission still has an
+                        // authored slot; the provider needs it to fit the hold
+                        // so the gesture window stays inside the hard deadline.
+                        holdBudgetMs: presentation?.budgetMs,
+                      }),
                       annotation: {
                         marker: adapted.directive.marker,
                         ...(adapted.directive.mode === 'marker' ? { intent: 'emphasize' } : {}),
@@ -1447,10 +1518,13 @@ export function createCvShowDirectiveRunner(options = {}) {
     pause: pauseAttention,
     resume: resumeAttention,
     stop: () => cancel('stop'),
-    seek: () => clearAttention('seek'),
-    branchChange: () => clearAttention('branch-change'),
-    branchReturn: () => clearAttention('branch-return'),
-    meaningfulInteraction: () => clearAttention('meaningful-interaction'),
+    seek: () => { resetHighlightHistory(); return clearAttention('seek'); },
+    branchChange: () => { resetHighlightHistory(); return clearAttention('branch-change'); },
+    branchReturn: () => { resetHighlightHistory(); return clearAttention('branch-return'); },
+    meaningfulInteraction: () => {
+      resetHighlightHistory();
+      return clearAttention('meaningful-interaction');
+    },
     beginPhase: () => cancel('replacement'),
   });
 }

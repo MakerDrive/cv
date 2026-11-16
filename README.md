@@ -54,15 +54,29 @@ JSDA entrypoint `dist/js/markdown-viewer/index.js` and loaded through its runtim
 URL only when a page contains `<markdown-viewer>`; it is not part of the primary
 `dist/js/index.js` bundle.
 
-Portfolio project articles and Pulse publication bodies follow the same static
-runtime model. Their localized sources live under
-`src/static-pages/copy-content/{projects,publications}/<slug>/<locale>.md`.
+Portfolio project articles, Pulse publication bodies, and the permanent
+direction sections follow the same static runtime model. Their localized sources
+live under
+`src/static-pages/copy-content/{projects,publications,directions}/<slug>/<locale>.md`.
 JSDA copies that directory to `dist/content/` without bundling it. The portfolio
 bundle contains only navigation, localization, relation, and SEO metadata; it
 fetches the selected Markdown asset on demand, cancels stale navigation
 requests, and passes the loaded source to the Symbiote source viewer. The
 viewer keeps rendered/source modes and composes media and feed content slots
 after the requested article arrives.
+
+## Permanent directions
+
+The practice areas (systems engineering and integration, applied AI
+infrastructure and agent delegation, process automation and verification) are
+permanent sections under `/cv/directions/`, not Pulse publications. They are
+registered in `src/static-pages/data/portfolioDirections.js` and reuse the
+existing entry registry: the same navigation tree, graph, search exports, and
+social-card manifest that serve projects and skills. Each direction links to the
+projects it is evidenced by and to the Skills pages that carry the tooling
+detail. Pulse keeps the dated stream; the four 2026-11-11 articles became the
+source text of these sections and their permalinks are retired into the new
+addresses.
 
 For local static development with a watcher:
 

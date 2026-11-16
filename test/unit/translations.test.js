@@ -4,6 +4,7 @@ import test from 'node:test';
 
 import * as ts from 'typescript';
 
+import { PORTFOLIO_DIRECTIONS } from '../../src/static-pages/data/portfolioDirections.js';
 import { socialLinks } from '../../src/static-pages/data/socialLinks.js';
 import { PORTFOLIO_LOCALE_MESSAGES } from '../../src/static-pages/data/portfolioTranslations.js';
 
@@ -111,7 +112,9 @@ async function getPortfolioTranslationUsages() {
       && ts.isIdentifier(node.expression)
       && node.expression.text === 'tPortfolio') {
       const [keyNode] = node.arguments;
-      if (keyNode && ts.isPropertyAccessExpression(keyNode) && keyNode.name.text === 'summaryKey') {
+      if (keyNode && ts.isPropertyAccessExpression(keyNode)
+        && (keyNode.name.text === 'summaryKey' || keyNode.name.text === 'labelKey')) {
+        // Registry-owned keys are registered below from the direction source.
         ts.forEachChild(node, visit);
         return;
       }
@@ -171,6 +174,10 @@ async function getPortfolioTranslationUsages() {
   visitFeed(sharingSourceFile);
   for (const item of socialLinks) {
     usedKeys.add(`portfolio.${item.summaryKey}`);
+  }
+  for (const direction of PORTFOLIO_DIRECTIONS) {
+    usedKeys.add(`portfolio.${direction.labelKey}`);
+    usedKeys.add(`portfolio.${direction.summaryKey}`);
   }
   return usedKeys;
 }

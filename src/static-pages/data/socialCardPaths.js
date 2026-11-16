@@ -1,7 +1,7 @@
 export const SOCIAL_CARD_WIDTH = 1200;
 export const SOCIAL_CARD_HEIGHT = 630;
 
-const SOCIAL_CARD_ID_PATTERN = /^(?:site|profile|skills|projects|pulse)\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const SOCIAL_CARD_ID_PATTERN = /^(?:site|profile|skills|directions|projects|pulse)\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SOCIAL_CARD_SITE_BASE_URL = 'https://MakerDrive.github.io/cv/social-cards/';
 
 /**

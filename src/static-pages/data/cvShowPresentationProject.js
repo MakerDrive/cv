@@ -1005,6 +1005,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
+        "targetId": "media/symbiote-workspace/image/configuration-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:workspace.open"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-workspace.illustration-task:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "В Workspace я иду от конкретной задачи человека"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-workspace"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/symbiote-workspace/image/configuration-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:symbiote-workspace.illustration-task:scroll"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-workspace.illustration-task",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "В Workspace я иду от конкретной задачи человека"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-workspace"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
         "targetId": "article.symbiote-workspace.portable-config"
       },
       "dependsOn": [
@@ -1214,6 +1279,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-ui"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/symbiote-ui/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:symbiote-ui.open"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-ui.illustration-components:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Вместе с интерфейсом он формирует машиночитаемый контекст"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-ui"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/symbiote-ui/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:symbiote-ui.illustration-components:scroll"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-ui.illustration-components",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Вместе с интерфейсом он формирует машиночитаемый контекст"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
         "settleBy": "none",
         "until": null
       },
@@ -1512,6 +1642,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
+        "targetId": "media/symbiote-engine/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:symbiote-engine.open"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-engine.illustration-execution:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Если Symbiote UI даёт визуальные блоки"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-engine"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/symbiote-engine/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:symbiote-engine.illustration-execution:scroll"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-engine.illustration-execution",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Если Symbiote UI даёт визуальные блоки"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-engine"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
         "targetId": "article.symbiote-engine.intro"
       },
       "dependsOn": [
@@ -1721,6 +1916,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "occurrence": 1,
           "offsetMs": 0,
           "quote": "собственный управляющий слой"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "agent-portal"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/agent-portal/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:agent-portal.open"
+        }
+      ],
+      "id": "cv-show:cue:agent-portal.illustration-process:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "По сути это единый процесс поверх разных агентов"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "agent-portal"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/agent-portal/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:agent-portal.illustration-process:scroll"
+        }
+      ],
+      "id": "cv-show:cue:agent-portal.illustration-process",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "По сути это единый процесс поверх разных агентов"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -2024,6 +2284,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
+        "targetId": "media/symbiote-video-studio/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:video-studio.open"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-video-studio.illustration-composition:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Сейчас этот проект постепенно оформляется как конфигурация Workspace"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-video-studio"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/symbiote-video-studio/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:symbiote-video-studio.illustration-composition:scroll"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-video-studio.illustration-composition",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Сейчас этот проект постепенно оформляется как конфигурация Workspace"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-video-studio"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
         "targetId": "article.symbiote-video-studio.semantic-flow"
       },
       "dependsOn": [
@@ -2181,6 +2506,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
+        "targetId": "media/adaptive-maximo-workbench/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo.open"
+        }
+      ],
+      "id": "cv-show:cue:adaptive-maximo-workbench.illustration-context:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Это хороший пример проблемы, которую я пытаюсь решить"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/adaptive-maximo-workbench/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-context:scroll"
+        }
+      ],
+      "id": "cv-show:cue:adaptive-maximo-workbench.illustration-context",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Это хороший пример проблемы, которую я пытаюсь решить"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
         "targetId": "article.adaptive-maximo-workbench.work-orders"
       },
       "dependsOn": [
@@ -2234,6 +2624,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/adaptive-maximo-workbench/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo.open"
+        }
+      ],
+      "id": "cv-show:cue:adaptive-maximo-workbench.illustration-asset:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Workspace позволяет строить процесс вокруг самой задачи"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 4100,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/adaptive-maximo-workbench/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-asset:scroll"
+        }
+      ],
+      "id": "cv-show:cue:adaptive-maximo-workbench.illustration-asset",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Workspace позволяет строить процесс вокруг самой задачи"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 2900,
         "settleBy": "none",
         "until": null
       },
@@ -2308,6 +2763,201 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "cue": {
         "interaction": {
           "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:adaptive-maximo-workbench:03"
+        }
+      ],
+      "id": "cv-show:cue:maximo.agentic-demo:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "В этом демонстраторе я показываю следующий шаг"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo.agentic-demo:scroll"
+        }
+      ],
+      "id": "cv-show:cue:maximo.agentic-demo",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "В этом демонстраторе я показываю следующий шаг"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:adaptive-maximo-workbench:04"
+        }
+      ],
+      "id": "cv-show:cue:maximo.xr-demo:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "А здесь я развиваю ту же идею в икс ар пространстве"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo.xr-demo:scroll"
+        }
+      ],
+      "id": "cv-show:cue:maximo.xr-demo",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "А здесь я развиваю ту же идею в икс ар пространстве"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/adaptive-maximo-workbench/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo.open"
+        }
+      ],
+      "id": "cv-show:cue:adaptive-maximo-workbench.illustration-inspection:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "При этом объект остаётся связанным с контекстом рабочей задачи"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/adaptive-maximo-workbench/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-inspection:scroll"
+        }
+      ],
+      "id": "cv-show:cue:adaptive-maximo-workbench.illustration-inspection",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "При этом объект остаётся связанным с контекстом рабочей задачи"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "adaptive-maximo-workbench"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
           "type": "navigate"
         },
         "kind": "interaction",
@@ -2325,6 +2975,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "gestureDurationMs": 5800,
         "leadMs": 6400,
         "settleBy": "anchor",
+        "until": null
+      },
+      "turnId": "agent-pool-mcp"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/agent-pool-mcp/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:agent-pool.open"
+        }
+      ],
+      "id": "cv-show:cue:agent-pool-mcp.illustration-dispatch:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Его можно подключить непосредственно к агенту"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "agent-pool-mcp"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/agent-pool-mcp/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:agent-pool-mcp.illustration-dispatch:scroll"
+        }
+      ],
+      "id": "cv-show:cue:agent-pool-mcp.illustration-dispatch",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Его можно подключить непосредственно к агенту"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
         "until": null
       },
       "turnId": "agent-pool-mcp"
@@ -2430,6 +3145,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
+        "targetId": "media/project-graph-mcp/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:project-graph.open"
+        }
+      ],
+      "id": "cv-show:cue:project-graph-mcp.illustration-repository:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Project Graph MCP это опенсорс эм си пи сервер"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "project-graph-mcp"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/project-graph-mcp/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-repository:scroll"
+        }
+      ],
+      "id": "cv-show:cue:project-graph-mcp.illustration-repository",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Project Graph MCP это опенсорс эм си пи сервер"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "project-graph-mcp"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
         "targetId": "article.project-graph-mcp.graph-example"
       },
       "dependsOn": [
@@ -2483,6 +3263,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "project-graph-mcp"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/project-graph-mcp/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:project-graph.open"
+        }
+      ],
+      "id": "cv-show:cue:project-graph-mcp.illustration-retrieval:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "А агент может раскрыть для неё зависимости"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 4100,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "project-graph-mcp"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/project-graph-mcp/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-retrieval:scroll"
+        }
+      ],
+      "id": "cv-show:cue:project-graph-mcp.illustration-retrieval",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "А агент может раскрыть для неё зависимости"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 2900,
         "settleBy": "none",
         "until": null
       },
@@ -2771,6 +3616,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "occurrence": 1,
           "offsetMs": 0,
           "quote": "сегментацию аудитории, управление кампаниями"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "lifecycle-messaging-platform"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/lifecycle-messaging-platform/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:lifecycle.open"
+        }
+      ],
+      "id": "cv-show:cue:lifecycle-messaging-platform.illustration-delivery:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Я проектировал эй пи ай, распределение заданий"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "lifecycle-messaging-platform"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/lifecycle-messaging-platform/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:lifecycle-messaging-platform.illustration-delivery:scroll"
+        }
+      ],
+      "id": "cv-show:cue:lifecycle-messaging-platform.illustration-delivery",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Я проектировал эй пи ай, распределение заданий"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -3144,6 +4054,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       "cue": {
         "interaction": {
           "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/mobile-smm-platform/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:mobile-smm.open"
+        }
+      ],
+      "id": "cv-show:cue:mobile-smm-platform.illustration-review:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Управляемость обеспечивали лимиты, дедупликация"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 4100,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "mobile-smm-platform"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/mobile-smm-platform/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:mobile-smm-platform.illustration-review:scroll"
+        }
+      ],
+      "id": "cv-show:cue:mobile-smm-platform.illustration-review",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Управляемость обеспечивали лимиты, дедупликация"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 2900,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "mobile-smm-platform"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
           "type": "navigate"
         },
         "kind": "interaction",
@@ -3161,6 +4136,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "gestureDurationMs": 5800,
         "leadMs": 6400,
         "settleBy": "anchor",
+        "until": null
+      },
+      "turnId": "f360-studio"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/f360-studio/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:f360.open"
+        }
+      ],
+      "id": "cv-show:cue:f360-studio.illustration-capture:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Это была коммерческая студия высокоточного три дэ сканирования"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "f360-studio"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/f360-studio/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:f360-studio.illustration-capture:scroll"
+        }
+      ],
+      "id": "cv-show:cue:f360-studio.illustration-capture",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Это была коммерческая студия высокоточного три дэ сканирования"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
         "until": null
       },
       "turnId": "f360-studio"
@@ -3317,6 +4357,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "gestureDurationMs": 5800,
         "leadMs": 6400,
         "settleBy": "anchor",
+        "until": null
+      },
+      "turnId": "autobox"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/autobox-v1/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:autobox.open"
+        }
+      ],
+      "id": "cv-show:cue:autobox.illustration-object:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Здесь почти каждый новый предмет создавал новую задачу"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 2500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "autobox"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/autobox-v1/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:autobox.illustration-object:scroll"
+        }
+      ],
+      "id": "cv-show:cue:autobox.illustration-object",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Здесь почти каждый новый предмет создавал новую задачу"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
         "until": null
       },
       "turnId": "autobox"
@@ -4003,6 +5108,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
+        "targetId": "media/complexscan/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:complexscan.open"
+        }
+      ],
+      "id": "cv-show:cue:complexscan.illustration-lighting:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Основой стали профессиональные поворотные платформы"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 2500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "complexscan"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/complexscan/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:complexscan.illustration-lighting:scroll"
+        }
+      ],
+      "id": "cv-show:cue:complexscan.illustration-lighting",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Основой стали профессиональные поворотные платформы"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "complexscan"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
         "targetId": "media/complexscan/youtube/MHfWHxVSgn4"
       },
       "dependsOn": [
@@ -4265,6 +5435,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
+        "targetId": "media/boothbot/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:complexscan.open"
+        }
+      ],
+      "id": "cv-show:cue:complexscan.illustration-warehouse:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Не перевозить товар в фотостудию"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 2500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "complexscan"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/boothbot/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:complexscan.illustration-warehouse:scroll"
+        }
+      ],
+      "id": "cv-show:cue:complexscan.illustration-warehouse",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Не перевозить товар в фотостудию"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "complexscan"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
         "targetId": "media/boothbot/ims/gallery"
       },
       "dependsOn": [
@@ -4400,7 +5635,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "navigate"
         },
         "kind": "interaction",
-        "targetId": "projects/photopizza"
+        "targetId": "projects/megavisor"
       },
       "dependsOn": [],
       "id": "cv-show:cue:photopizza.open",
@@ -4425,7 +5660,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "article.photopizza.megavisor-origin"
+        "targetId": "article.megavisor.capture-rnd"
       },
       "dependsOn": [
         {
@@ -4458,7 +5693,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "select"
         },
         "kind": "interaction",
-        "targetId": "article.photopizza.megavisor-origin"
+        "targetId": "article.megavisor.capture-rnd"
       },
       "dependsOn": [
         {
@@ -4479,6 +5714,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         },
         "gestureDurationMs": 1600,
         "leadMs": 1050,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/megavisor/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.open"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.illustration-panorama:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Например, из панорамы помещения можно было открыть находящийся внутри объект"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 2500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/megavisor/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.illustration-panorama:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.illustration-panorama",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Например, из панорамы помещения можно было открыть находящийся внутри объект"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
         "settleBy": "none",
         "until": null
       },
@@ -4544,6 +5844,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/megavisor/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.open"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.illustration-capture-team:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Я организовывал съёмки, координировал фотографов и ретушёров"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 2500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/megavisor/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.illustration-capture-team:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.illustration-capture-team",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Я организовывал съёмки, координировал фотографов и ретушёров"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
         "settleBy": "none",
         "until": null
       },
@@ -4752,6 +6117,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
+        "targetId": "media/photopizza/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.open"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.illustration-portable-hardware:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 2500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/photopizza/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.illustration-portable-hardware:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.illustration-portable-hardware",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
         "targetId": "article.photopizza.mechanics"
       },
       "dependsOn": [
@@ -4805,6 +6235,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/photopizza/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.open"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.illustration-controller:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Система оставалась модульной"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 3900,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "photopizza"
+    },
+    {
+      "cue": {
+        "kind": "focus",
+        "focus": {
+          "mode": "frame"
+        },
+        "targetId": "media/photopizza/image/process-illustration"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:photopizza.illustration-controller:scroll"
+        }
+      ],
+      "id": "cv-show:cue:photopizza.illustration-controller",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Система оставалась модульной"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 2900,
         "settleBy": "none",
         "until": null
       },
@@ -6688,6 +8183,136 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "occurrence": 1,
           "offsetMs": 0,
           "quote": "Интерфейс объявляет, что можно сделать"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "maximo-workbench-details"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:maximo-workbench-details:03"
+        }
+      ],
+      "id": "cv-show:cue:maximo-details.demo-1:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Поэтому это демо для меня не только пример интерфейса"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "maximo-workbench-details"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo-details.demo-1:scroll"
+        }
+      ],
+      "id": "cv-show:cue:maximo-details.demo-1",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Поэтому это демо для меня не только пример интерфейса"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1450,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "maximo-workbench-details"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
+      },
+      "dependsOn": [
+        {
+          "barrier": "ended",
+          "cellId": "cv-show:audio-clip:maximo-workbench-details:04"
+        }
+      ],
+      "id": "cv-show:cue:maximo-details.demo-xr:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Икс ар версия проверяет тот же принцип"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2650,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "maximo-workbench-details"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:maximo-details.demo-xr:scroll"
+        }
+      ],
+      "id": "cv-show:cue:maximo-details.demo-xr",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Икс ар версия проверяет тот же принцип"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1450,
@@ -8621,266 +10246,6 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "until": null
       },
       "turnId": "photopizza-details"
-    },
-    {
-      "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "scroll"
-        },
-        "kind": "interaction",
-        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
-      },
-      "dependsOn": [
-        {
-          "barrier": "ended",
-          "cellId": "cv-show:audio-clip:adaptive-maximo-workbench:03"
-        }
-      ],
-      "id": "cv-show:cue:maximo.agentic-demo:scroll",
-      "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "В этом демонстраторе я показываю следующий шаг"
-        },
-        "gestureDurationMs": 1000,
-        "leadMs": 2650,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "adaptive-maximo-workbench"
-    },
-    {
-      "cue": {
-        "focus": {
-          "mode": "frame"
-        },
-        "kind": "focus",
-        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
-      },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:maximo.agentic-demo:scroll"
-        }
-      ],
-      "id": "cv-show:cue:maximo.agentic-demo",
-      "kind": "cue",
-      "layerId": "cv-show:layer:focus",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "В этом демонстраторе я показываю следующий шаг"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 1450,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "adaptive-maximo-workbench"
-    },
-    {
-      "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "scroll"
-        },
-        "kind": "interaction",
-        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
-      },
-      "dependsOn": [
-        {
-          "barrier": "ended",
-          "cellId": "cv-show:audio-clip:adaptive-maximo-workbench:04"
-        }
-      ],
-      "id": "cv-show:cue:maximo.xr-demo:scroll",
-      "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "А здесь я развиваю ту же идею в икс ар пространстве"
-        },
-        "gestureDurationMs": 1000,
-        "leadMs": 2650,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "adaptive-maximo-workbench"
-    },
-    {
-      "cue": {
-        "focus": {
-          "mode": "frame"
-        },
-        "kind": "focus",
-        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
-      },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:maximo.xr-demo:scroll"
-        }
-      ],
-      "id": "cv-show:cue:maximo.xr-demo",
-      "kind": "cue",
-      "layerId": "cv-show:layer:focus",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "А здесь я развиваю ту же идею в икс ар пространстве"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 1450,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "adaptive-maximo-workbench"
-    },
-    {
-      "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "scroll"
-        },
-        "kind": "interaction",
-        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
-      },
-      "dependsOn": [
-        {
-          "barrier": "ended",
-          "cellId": "cv-show:audio-clip:maximo-workbench-details:03"
-        }
-      ],
-      "id": "cv-show:cue:maximo-details.demo-1:scroll",
-      "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Поэтому это демо для меня не только пример интерфейса"
-        },
-        "gestureDurationMs": 1000,
-        "leadMs": 2650,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "maximo-workbench-details"
-    },
-    {
-      "cue": {
-        "focus": {
-          "mode": "frame"
-        },
-        "kind": "focus",
-        "targetId": "media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc"
-      },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:maximo-details.demo-1:scroll"
-        }
-      ],
-      "id": "cv-show:cue:maximo-details.demo-1",
-      "kind": "cue",
-      "layerId": "cv-show:layer:focus",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Поэтому это демо для меня не только пример интерфейса"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 1450,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "maximo-workbench-details"
-    },
-    {
-      "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "scroll"
-        },
-        "kind": "interaction",
-        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
-      },
-      "dependsOn": [
-        {
-          "barrier": "ended",
-          "cellId": "cv-show:audio-clip:maximo-workbench-details:04"
-        }
-      ],
-      "id": "cv-show:cue:maximo-details.demo-xr:scroll",
-      "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Икс ар версия проверяет тот же принцип"
-        },
-        "gestureDurationMs": 1000,
-        "leadMs": 2650,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "maximo-workbench-details"
-    },
-    {
-      "cue": {
-        "focus": {
-          "mode": "frame"
-        },
-        "kind": "focus",
-        "targetId": "media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs"
-      },
-      "dependsOn": [
-        {
-          "barrier": "settled",
-          "cellId": "cv-show:cue:maximo-details.demo-xr:scroll"
-        }
-      ],
-      "id": "cv-show:cue:maximo-details.demo-xr",
-      "kind": "cue",
-      "layerId": "cv-show:layer:focus",
-      "timing": {
-        "at": {
-          "anchor": "speech",
-          "edge": "start",
-          "occurrence": 1,
-          "offsetMs": 0,
-          "quote": "Икс ар версия проверяет тот же принцип"
-        },
-        "gestureDurationMs": 1200,
-        "leadMs": 1450,
-        "settleBy": "none",
-        "until": null
-      },
-      "turnId": "maximo-workbench-details"
     },
     {
       "audio": {
@@ -12204,7 +13569,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 106,
+  "revision": 109,
   "schemaVersion": "workspace-presentation-authoring-project-v2",
   "script": {
     "grounding": {
@@ -12216,6 +13581,18 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
         "contractRevision": "34c3d40c1c53cd320362aff9888c1727c977b9b3c7dcfb0d3cc73683bcf29af9",
         "conversationRevision": "cv-show-agent-context-v1",
         "directives": {
+          "cv-show:cue:adaptive-maximo-workbench.illustration-asset": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:adaptive-maximo-workbench.illustration-context": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:adaptive-maximo-workbench.illustration-inspection": {
+            "policy": "required",
+            "refinements": {}
+          },
           "cv-show:cue:agent-pool-details.result": {
             "policy": "required",
             "refinements": {}
@@ -12229,6 +13606,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "refinements": {}
           },
           "cv-show:cue:agent-pool-details.work": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:agent-pool-mcp.illustration-dispatch": {
             "policy": "required",
             "refinements": {}
           },
@@ -12276,6 +13657,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "policy": "required",
             "refinements": {}
           },
+          "cv-show:cue:agent-portal.illustration-process": {
+            "policy": "required",
+            "refinements": {}
+          },
           "cv-show:cue:agent-portal.open": {
             "policy": "required",
             "refinements": {}
@@ -12303,6 +13688,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "refinements": {}
           },
           "cv-show:cue:autobox-details.working-system": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:autobox.illustration-object": {
             "policy": "required",
             "refinements": {}
           },
@@ -12395,6 +13784,14 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "quote": "доставки клиентам в разные страны"
             }
           },
+          "cv-show:cue:complexscan.illustration-lighting": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:complexscan.illustration-warehouse": {
+            "policy": "required",
+            "refinements": {}
+          },
           "cv-show:cue:complexscan.line": {
             "policy": "required",
             "refinements": {}
@@ -12427,6 +13824,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "refinements": {
               "safePath": "open-source-backed-result"
             }
+          },
+          "cv-show:cue:f360-studio.illustration-capture": {
+            "policy": "required",
+            "refinements": {}
           },
           "cv-show:cue:f360.open": {
             "policy": "required",
@@ -12490,6 +13891,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "refinements": {}
           },
           "cv-show:cue:lifecycle-details.twin": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:lifecycle-messaging-platform.illustration-delivery": {
             "policy": "required",
             "refinements": {}
           },
@@ -12586,6 +13991,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
               "safePath": "stop-analyze-propose-for-review"
             }
           },
+          "cv-show:cue:mobile-smm-platform.illustration-review": {
+            "policy": "required",
+            "refinements": {}
+          },
           "cv-show:cue:mobile-smm.agent-update": {
             "policy": "required",
             "refinements": {}
@@ -12627,6 +14036,22 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "policy": "required",
             "refinements": {}
           },
+          "cv-show:cue:photopizza.illustration-capture-team": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:photopizza.illustration-controller": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:photopizza.illustration-panorama": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:photopizza.illustration-portable-hardware": {
+            "policy": "required",
+            "refinements": {}
+          },
           "cv-show:cue:photopizza.mechanics": {
             "policy": "required",
             "refinements": {}
@@ -12643,7 +14068,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "policy": "required",
             "refinements": {
               "occurrence": 1,
-              "quote": "внутри проекта MEGAVISOR"
+              "quote": "разрабатывал технологию и оборудование"
             }
           },
           "cv-show:cue:photopizza.page-open": {
@@ -12707,6 +14132,14 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "policy": "required",
             "refinements": {}
           },
+          "cv-show:cue:project-graph-mcp.illustration-repository": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:project-graph-mcp.illustration-retrieval": {
+            "policy": "required",
+            "refinements": {}
+          },
           "cv-show:cue:project-graph.context": {
             "policy": "required",
             "refinements": {
@@ -12742,6 +14175,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             }
           },
           "cv-show:cue:symbiote-engine-details.layers": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:symbiote-engine.illustration-execution": {
             "policy": "required",
             "refinements": {}
           },
@@ -12794,11 +14231,23 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "policy": "required",
             "refinements": {}
           },
+          "cv-show:cue:symbiote-ui.illustration-components": {
+            "policy": "required",
+            "refinements": {}
+          },
           "cv-show:cue:symbiote-ui.open": {
             "policy": "required",
             "refinements": {}
           },
           "cv-show:cue:symbiote-ui.show-player-pointer": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:symbiote-video-studio.illustration-composition": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:symbiote-workspace.illustration-task": {
             "policy": "required",
             "refinements": {}
           },
@@ -14264,12 +15713,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-+4pf1DzzPzQKqTcrwNiH11pb56eDOKFHORPttR35Ci8=",
-    "revision": 106
+    "revision": 109,
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-TBHV5dxhlIE5qASnsh2JcMd6EzlKnbyHY2aLShWwJNo="
   },
-  "releaseId": "cv-show-audio-release-v1:6105dbd4783637fe785d7255311cae4c99c78c54610f66430060416ebd430c7b",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:cf067a86896cf33eb6e711e6a45e72d4e48f043977782512340a636eb3e74bf0"
+  "verificationHash": "cv-show-audio-release-verification-v1:cf067a86896cf33eb6e711e6a45e72d4e48f043977782512340a636eb3e74bf0",
+  "releaseId": "cv-show-audio-release-v1:af972411ab178fb39f500e1efb5f1833980ac749efb0ece6e4f64cd6af570d38"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );

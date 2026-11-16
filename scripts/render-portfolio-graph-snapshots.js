@@ -307,15 +307,18 @@ async function captureVariant(cdp, origin, locale, viewportName, themeName) {
     ))) throw new Error('Graph preview requires visible rendered node cards');
     return {
       ...capture,
+      expectedNodes: panel._structuredEditor.getNodes().length,
+      expectedRoutes: panel._structuredEditor.getConnections().length,
       rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
       previewNodeIds: visibleNodes.map((node) => node.getAttribute('node-id')),
     };
   })()`);
-  if (result.snapshot?.routes?.length !== 191 || result.snapshot?.nodeRects?.length !== 125) {
+  if (result.snapshot?.routes?.length !== result.expectedRoutes
+    || result.snapshot?.nodeRects?.length !== result.expectedNodes) {
     throw new Error(
       `${locale}/${viewportName}/${themeName} captured `
-      + `${result.snapshot?.routes?.length || 0}/191 routes and `
-      + `${result.snapshot?.nodeRects?.length || 0}/125 nodes.`,
+      + `${result.snapshot?.routes?.length || 0}/${result.expectedRoutes} routes and `
+      + `${result.snapshot?.nodeRects?.length || 0}/${result.expectedNodes} nodes.`,
     );
   }
   let screenshot = await cdp.send('Page.captureScreenshot', {

@@ -15,7 +15,7 @@ import {
 import { playPresentationAudioClip } from './presentationAudioTransport.js';
 import { createPresentationPlaybackPump } from './presentationPlaybackPump.js';
 import {
-  completeDegradedInteractionSettlement,
+  completeDegradedVisualSettlement,
   degradePresentationOperation,
 } from './showAdapter.js';
 import { CV_SHOW_GATE_QUEUE } from './gateQueue.js';
@@ -388,6 +388,10 @@ export function createCvShowAlignmentController({
       // the entry.
       const toleratedFailedCells = new Set();
       const degradedCellOutcomes = new Map();
+      // Milestone receipts the engine already accepted, per cell: the
+      // degraded-completion path must not fabricate a milestone the engine
+      // has already seen.
+      const acceptedMilestones = new Map();
       let cascadeTracker = null;
       const terminalReasonCode = (reason) => (
         typeof reason === 'string' ? reason : String(reason?.code || '')
@@ -459,6 +463,14 @@ export function createCvShowAlignmentController({
       };
       const receiveAcceptedReceipt = (receipt) => {
         if (
+          receipt?.cellId
+          && ['acted', 'ready', 'first-frame', 'settled'].includes(receipt?.status)
+        ) {
+          const milestones = acceptedMilestones.get(receipt.cellId) || [];
+          milestones.push(receipt);
+          acceptedMilestones.set(receipt.cellId, milestones);
+        }
+        if (
           ['failed', 'rejected', 'cancelled', 'stale', 'skipped'].includes(receipt?.status)
           && receipt?.cellId
         ) {
@@ -474,12 +486,19 @@ export function createCvShowAlignmentController({
       };
       const adapterMethod = async (operation, kind) => {
         const source = projectCvShowDirective(operation.projectCell, tuple.project);
+        // The engine input omits the operation kind (it is implied by the
+        // adapter method that was selected) and the receipts the engine has
+        // already accepted for the cell. Provider validation and degraded
+        // completion read both, so the catch path works on the same enriched
+        // operation the provider received.
+        const providerOperation = Object.freeze({
+          ...operation,
+          kind,
+          source,
+          providerState: { admissionReported: false },
+        });
         try {
-          return await runPresentationOperation(Object.freeze({
-            ...operation,
-            kind,
-            source,
-          }));
+          return await runPresentationOperation(providerOperation);
         } catch (error) {
           const missing = (error?.result?.receipts || [])
             .filter(({ status }) => status === 'missing')
@@ -504,7 +523,7 @@ export function createCvShowAlignmentController({
           // tolerated by the playback pump policy instead.
           if (!operation.signal?.aborted && error?.code !== 'PRESENTATION_EFFECT_DEADLINE_MISSED') {
             const softSemantics = resolveCvShowFailureSemantics({
-              kind: String(operation.projectCell?.cue?.kind || operation.kind || ''),
+              kind: String(operation.projectCell?.cue?.kind || kind || ''),
               layerId: cvShowCellLayerId(operation.projectCell),
               operationRole: String(
                 operation.projectCell?.cue?.interaction?.type
@@ -517,18 +536,26 @@ export function createCvShowAlignmentController({
                 outcome: String(error?.code || 'operation-failed'),
                 fallback: 'none-skipped',
               }));
-              const reported = Array.isArray(operation.reportedReceipts)
-                ? operation.reportedReceipts.length
-                : 0;
-              if (operation.kind === 'interaction' && reported > 0) {
-                if (completeDegradedInteractionSettlement(operation, {
+              const cellId = String(
+                operation.scheduleCell?.cellId || operation.projectCell?.id || '',
+              );
+              const reportedReceipts = acceptedMilestones.get(cellId) || [];
+              const failedOperation = Object.freeze({
+                ...providerOperation,
+                reportedReceipts,
+              });
+              const firstMilestone = kind === 'interaction' ? 'acted' : 'first-frame';
+              if (
+                reportedReceipts.some(({ status }) => status === firstMilestone)
+                && completeDegradedVisualSettlement(failedOperation, {
                   outcome: String(error?.code || 'operation-failed'),
                   fallback: 'none-skipped',
-                })) {
-                  return undefined;
-                }
-              } else if (reported === 0) {
-                return degradePresentationOperation(operation, {
+                })
+              ) {
+                return undefined;
+              }
+              if (reportedReceipts.length === 0) {
+                return degradePresentationOperation(failedOperation, {
                   outcome: String(error?.code || 'operation-failed'),
                   fallback: 'none-skipped',
                 });
@@ -710,49 +737,48 @@ export function createCvShowAlignmentController({
           detail: Object.freeze({ target: checkpoint.target, frame: checkpoint.frame }),
         }));
       };
-      // The setup replay restores state the audience already reached at the
-      // target position (page load, seek, paused deep link): no decorative
-      // gestures may appear for those cells.
-      const runSetup = (checkpointMs = tuple.schedule.presentationStartMs) => runCvShowQuietRestore(async () => {
-        const prerollCells = tuple.schedule.cells.filter((cell) => (
-          cell.kind !== 'narration'
-          && cell.startMs < tuple.schedule.presentationStartMs
-          && Number.isFinite(cell.plannedBarriers?.settled)
-          && cell.plannedBarriers.settled <= tuple.schedule.presentationStartMs
-        ));
-        const replayed = new Map();
-        for (const cell of [...prerollCells, ...checkpointStateCells(checkpointMs)]) {
-          replayed.set(cell.cellId, cell);
-        }
-        let snapshot = tuple.execution.snapshot;
-        for (const cell of [...replayed.values()].sort((left, right) => left.startMs - right.startMs)) {
-          tuple.execution.sample({
-            mediaTimeMs: cell.startMs,
-            reason: cell.startMs === 0 ? 'entry-setup' : 'entry-preroll',
-          });
-          snapshot = await tuple.execution.whenIdle();
-          const terminal = snapshot.terminal.find(({ cellId }) => cellId === cell.cellId);
-          // An expired cue is reported `skipped` (not `failed`): the authored
-          // start is already behind the checkpoint clock. Restoring a paused
-          // mid-segment position must not treat that as a setup failure and
-          // re-trigger a scene retry loop.
-          if (terminal?.status === 'failed' || !terminal) {
-            const reason = terminalReasons.get(cell.cellId);
-            throw Object.assign(
-              new Error(`CV Show presentation setup failed: ${entry.id}/${cell.cellId}`),
-              {
-                code: 'CV_SHOW_SCENE_SETUP_FAILED',
-                snapshot,
-                details: Object.freeze({
-                  terminalStatus: terminal?.status || 'missing',
-                  ...(reason?.code ? { cause: reason.code } : {}),
-                }),
-              },
-            );
+      const runSetup = (
+        positionMs = tuple.schedule.presentationStartMs,
+        { quiet = false } = {},
+      ) => {
+        let replay = async () => {
+          let prerollCells = tuple.schedule.cells.filter((cell) => (
+            cell.kind !== 'narration'
+            && cell.startMs < tuple.schedule.presentationStartMs
+            && Number.isFinite(cell.plannedBarriers?.settled)
+            && cell.plannedBarriers.settled <= tuple.schedule.presentationStartMs
+          ));
+          let replayed = new Map();
+          for (let cell of [...prerollCells, ...checkpointStateCells(positionMs)]) {
+            replayed.set(cell.cellId, cell);
           }
-        }
-        return snapshot;
-      });
+          let snapshot = tuple.execution.snapshot;
+          for (let cell of [...replayed.values()].sort((left, right) => left.startMs - right.startMs)) {
+            tuple.execution.sample({
+              mediaTimeMs: cell.startMs,
+              reason: cell.startMs === 0 ? 'entry-setup' : 'entry-preroll',
+            });
+            snapshot = await tuple.execution.whenIdle();
+            let terminal = snapshot.terminal.find(({ cellId }) => cellId === cell.cellId);
+            if (terminal?.status === 'failed' || !terminal) {
+              let reason = terminalReasons.get(cell.cellId);
+              throw Object.assign(
+                new Error(`CV Show presentation setup failed: ${entry.id}/${cell.cellId}`),
+                {
+                  code: 'CV_SHOW_SCENE_SETUP_FAILED',
+                  snapshot,
+                  details: Object.freeze({
+                    terminalStatus: terminal?.status || 'missing',
+                    ...(reason?.code ? { cause: reason.code } : {}),
+                  }),
+                },
+              );
+            }
+          }
+          return snapshot;
+        };
+        return quiet ? runCvShowQuietRestore(replay) : replay();
+      };
       const crossBoundaryAttentionCells = tuple.schedule.cells.filter((cell) => {
         const projectCell = projectCellById.get(cell.cellId);
         return cell.kind !== 'narration'
@@ -909,7 +935,7 @@ export function createCvShowAlignmentController({
           await beforeDeferredPresentation?.();
           if (disposed) return tuple.execution.snapshot;
           if (tuple.execution.snapshot.state === 'paused') tuple.execution.resume();
-          await runSetup();
+          await runSetup(undefined, { quiet: checkpointMs !== null });
           await runCrossBoundaryAttentionGate();
           await runHeldCheckpointAttention();
           deferredPresentationCompleted = true;
@@ -964,7 +990,9 @@ export function createCvShowAlignmentController({
           deferredMediaStartSeconds = checkpoint.sourceTimeMs / 1_000;
           if (!deferPresentation) {
             await beforeDeferredPresentation?.();
-            await runSetup(checkpoint.projectTimeMs);
+            await runSetup(checkpoint.projectTimeMs, {
+              quiet: restorePausedCheckpoint || checkpointMs !== null || requestedProjectTimeMs > 0,
+            });
             await runHeldCheckpointAttention();
             restoreGalleryCheckpoint(galleryCheckpoint(checkpoint.projectTimeMs));
           }

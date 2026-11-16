@@ -1,5 +1,3 @@
-Browser X MCP `1.0.0-beta.1` packaged the first public browser server in this tool line. It uses Playwright to own a Chromium page and exposes its operations through an MCP stdio server.
+Browser X MCP `1.0.0-beta.1` introduced a Playwright-based browser server over MCP stdio. The server launches Chromium and exposes navigation, page inspection, interaction, and screenshot tools.
 
-The beta tool surface includes browser startup, navigation, structured virtual-canvas extraction, text input, scrolling, element listing, target details, atomic actions, batch actions, screenshots, and page-context evaluation. The virtual canvas derives interactive element data from the current DOM and assigns identifiers plus coordinates that later actions can consume.
-
-The package version, Playwright dependency, registered MCP tools, and implemented handlers define this experimental beta. The repository does not establish strict W3C conformance, process isolation from a separate browser instance, or a policy of disabling CDP. Those properties should not be inferred from the release label.
+Its virtual canvas reads interactive elements from the active page’s DOM and gives them identifiers and coordinates for later actions. The beta also supports text entry, scrolling, element details, single and batch actions, and evaluation in the page context.

@@ -140,7 +140,7 @@ export const PUBLICATIONS = [
         "summary": "AUTOBOX v1 combines equipment, light, capture protocol, and production process for cultural-heritage digitization."
       },
       "ru": {
-        "title": "AUTOBOX v1: повторяемый процесс музейного сканирования",
+        "title": "AUTOBOX v1: роботизированное музейное сканирование",
         "summary": "AUTOBOX v1 объединяет оборудование, свет, протокол съёмки и рабочий процесс для оцифровки культурного наследия."
       },
       "es": {
@@ -1167,9 +1167,9 @@ export const PUBLICATIONS = [
     "primaryProjectId": "projects/photosnail-public",
     "tags": [],
     "locales": {
-      "en": { "title": "PhotoSnail Controller Timing: An Evidence Boundary", "summary": "The public project supports early camera-motion and media-presentation research; controller architecture and timing require separate evidence." },
-      "ru": { "title": "Тайминги контроллера PhotoSnail: граница доказательств", "summary": "Публичный проект подтверждает раннее исследование движения камеры и медиа-презентации; архитектура контроллера и тайминги требуют отдельных свидетельств." },
-      "es": { "title": "Temporización del controlador PhotoSnail: límite de evidencia", "summary": "El proyecto público respalda la investigación temprana sobre movimiento de cámara y medios; arquitectura y tiempos requieren evidencias separadas." }
+      "en": { "title": "PhotoSnail: Arduino-Controlled Camera Slider", "summary": "The public project describes an Arduino controller that moves a camera along a slider and coordinates capture through configurable distance, speed, frame count, direction, and pause settings; controller architecture and timing require separate evidence." },
+      "ru": { "title": "PhotoSnail: управление слайдером камеры на Arduino", "summary": "Публичный проект описывает управление слайдером камеры на Arduino: задаются расстояние, скорость, число кадров, направление и пауза между кадрами; архитектура контроллера и тайминги требуют отдельных свидетельств." },
+      "es": { "title": "PhotoSnail: control de un slider de cámara con Arduino", "summary": "El proyecto público describe un controlador Arduino que mueve la cámara por un slider y coordina la captura con distancia, velocidad, número de fotogramas, dirección y pausa configurables; la arquitectura del controlador y los tiempos requieren evidencias separadas." }
     },
     "sourceLinks": [
       { "href": "https://github.com/PhotoSnail/public", "label": "github.com" }
@@ -1770,9 +1770,9 @@ export const PUBLICATIONS = [
     "primaryProjectId": "projects/agent-pool-mcp",
     "tags": [],
     "locales": {
-      "en": { "title": "Cross-Model Peer Review: Evidence Before Acceptance", "summary": "`delegate_task_readonly` routes a bounded review through Agent Pool; the worker returns evidence while the orchestrator retains acceptance authority, with Claude Sonnet 5 and GPT-5.6 Sol as an illustrative pairing." },
-      "ru": { "title": "Кросс-модельный peer review: evidence до приёмки", "summary": "`delegate_task_readonly` направляет ограниченный review через Agent Pool; worker возвращает evidence, а решение о приёмке остаётся у оркестратора. Claude Sonnet 5 и GPT-5.6 Sol служат иллюстративной парой." },
-      "es": { "title": "Peer review entre modelos: evidencia antes de aceptar", "summary": "`delegate_task_readonly` dirige una revisión acotada mediante Agent Pool; el worker aporta evidencia y el orquestador conserva la aceptación. Claude Sonnet 5 y GPT-5.6 Sol son una pareja ilustrativa." }
+      "en": { "title": "Cross-Model Peer Review: Evidence Before Acceptance", "summary": "`delegate_task_readonly` routes a bounded review through Agent Pool; the worker returns findings while the orchestrator retains acceptance authority and checks the evidence." },
+      "ru": { "title": "Кросс-модельная проверка перед приёмкой", "summary": "`delegate_task_readonly` направляет ограниченную проверку через Agent Pool; проверяющий возвращает замечания, а решение о приёмке остаётся у оркестратора, который сверяет доказательства." },
+      "es": { "title": "Revisión entre modelos antes de aceptar", "summary": "`delegate_task_readonly` canaliza una revisión acotada mediante Agent Pool; el agente devuelve hallazgos y el orquestador conserva la aceptación tras contrastar la evidencia." }
     },
     "sourceLinks": [
       { "href": "https://github.com/rnd-pro/agent-pool-mcp", "label": "github.com" }
@@ -2270,7 +2270,7 @@ export const PUBLICATIONS = [
     "id": "pulse/fullstack-systems-integration",
     "slug": "fullstack-systems-integration",
     "kind": "article",
-    "status": "published",
+    "status": "retired",
     "publishedAt": "2026-11-11T12:00:00Z",
     "updatedAt": null,
     "subjectPeriod": null,
@@ -2282,13 +2282,14 @@ export const PUBLICATIONS = [
       "ru": { "title": "Full-stack и системная интеграция", "summary": "Интерфейс, серверная логика, API, хранилище и эксплуатация образуют один продукт; на примере lifecycle messaging platform показаны границы Digital Twin и путь от серверного runtime к пулам GSM-модемов." },
       "es": { "title": "Full-stack e integración de sistemas", "summary": "Interfaz, lógica de servidor, API, almacenamiento y operación forman un solo producto; el caso de lifecycle messaging platform muestra los límites del Digital Twin y el camino del runtime de servidor hasta los pools de módems GSM." }
     },
-    "sourceLinks": []
+    "sourceLinks": [],
+    "retirementTarget": "https://MakerDrive.github.io/cv/directions/systems-engineering/"
   },
   {
     "id": "pulse/ai-infrastructure-deployment-control",
     "slug": "ai-infrastructure-deployment-control",
     "kind": "article",
-    "status": "published",
+    "status": "retired",
     "publishedAt": "2026-11-11T12:00:00Z",
     "updatedAt": null,
     "subjectPeriod": null,
@@ -2302,13 +2303,14 @@ export const PUBLICATIONS = [
     },
     "sourceLinks": [
       { "href": "https://rnd-pro.com/projects/agent-portal/", "label": "rnd-pro.com" }
-    ]
+    ],
+    "retirementTarget": "https://MakerDrive.github.io/cv/directions/applied-ai/"
   },
   {
     "id": "pulse/web-form-application-automation",
     "slug": "web-form-application-automation",
     "kind": "article",
-    "status": "published",
+    "status": "retired",
     "publishedAt": "2026-11-11T12:00:00Z",
     "updatedAt": null,
     "subjectPeriod": null,
@@ -2322,13 +2324,14 @@ export const PUBLICATIONS = [
     },
     "sourceLinks": [
       { "href": "https://github.com/rnd-pro/browser-x-mcp", "label": "github.com" }
-    ]
+    ],
+    "retirementTarget": "https://MakerDrive.github.io/cv/directions/process-automation/"
   },
   {
     "id": "pulse/digital-employee-delegation-to-action",
     "slug": "digital-employee-delegation-to-action",
     "kind": "article",
-    "status": "published",
+    "status": "retired",
     "publishedAt": "2026-11-11T12:00:00Z",
     "updatedAt": null,
     "subjectPeriod": null,
@@ -2348,8 +2351,28 @@ export const PUBLICATIONS = [
     },
     "sourceLinks": [
       { "href": "https://rnd-pro.com/projects/agent-portal/", "label": "rnd-pro.com" }
-    ]
+    ],
+    "retirementTarget": "https://MakerDrive.github.io/cv/directions/applied-ai/"
+  },
+  {
+    "id": "pulse/directions-section",
+    "slug": "directions-section",
+    "kind": "update",
+    "status": "published",
+    "publishedAt": "2026-11-12T12:00:00Z",
+    "updatedAt": null,
+    "subjectPeriod": null,
+    "relatedProjectIds": [],
+    "primaryProjectId": null,
+    "tags": [],
+    "locales": {
+      "en": { "title": "Three permanent directions replace the article set", "summary": "Systems engineering, applied AI infrastructure and delegation, and process automation are now permanent sections; the four articles moved into them and their old Pulse addresses point at the new pages." },
+      "ru": { "title": "Три постоянных направления вместо статей", "summary": "Системная инженерия, прикладная ИИ-инфраструктура с делегированием и автоматизация процессов стали постоянными разделами; четыре статьи переехали в них, а прежние адреса Pulse ведут на новые страницы." },
+      "es": { "title": "Tres direcciones permanentes sustituyen al conjunto de artículos", "summary": "La ingeniería de sistemas, la infraestructura de IA aplicada con delegación y la automatización de procesos son ahora secciones permanentes; los cuatro artículos se trasladaron a ellas y sus antiguas direcciones de Pulse apuntan a las páginas nuevas." }
+    },
+    "sourceLinks": []
   }
+
 ];
 
 export function validatePublication(pub) {

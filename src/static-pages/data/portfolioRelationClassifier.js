@@ -67,6 +67,9 @@ export function classifyPortfolioRelation(from, to, legacyType = '') {
   if (source.startsWith('skills/') && target.startsWith('projects/')) {
     return relation('uses');
   }
+  if (source.startsWith('directions/') && target.startsWith('projects/')) {
+    return relation('link');
+  }
 
   return relation(SAFE_FALLBACK_KINDS.has(type) ? type : 'link');
 }
@@ -87,7 +90,13 @@ export function createPortfolioRelationEdge(from, to, legacyType = '') {
   };
 }
 
-export function createPortfolioRelationPlan({ mode, skillIds = [], projects = [], publications = PUBLICATIONS }) {
+export function createPortfolioRelationPlan({
+  mode,
+  skillIds = [],
+  projects = [],
+  publications = PUBLICATIONS,
+  directions = [],
+}) {
   const edges = [];
   const keys = new Set();
   const add = (from, to, type) => {
@@ -106,6 +115,11 @@ export function createPortfolioRelationPlan({ mode, skillIds = [], projects = []
     add('profile/photo', 'group/projects', 'branch');
     add('profile/photo', 'group/pulse', 'branch');
     add('profile/photo', 'group/skills', 'branch');
+    add('profile/photo', 'group/directions', 'branch');
+    for (const direction of directions) {
+      add('group/directions', direction.id, 'containment');
+      for (const projectId of direction.projectIds || []) add(direction.id, projectId, 'link');
+    }
     for (const skillId of skillIds) {
       add('group/skills', skillId, 'skill');
       add('profile/photo', skillId, 'skill');
@@ -138,6 +152,11 @@ export function createPortfolioRelationPlan({ mode, skillIds = [], projects = []
   add('profile/photo', 'pulse/index', 'containment');
   add('profile/photo', 'skills/index', 'containment');
   for (const skillId of skillIds) add('skills/index', skillId, 'containment');
+  add('profile/photo', 'directions/index', 'containment');
+  for (const direction of directions) {
+    add('directions/index', direction.id, 'containment');
+    for (const projectId of direction.projectIds || []) add(direction.id, projectId, 'link');
+  }
   for (const project of projects) {
     add('projects/index', project.projectId, 'containment');
     for (const skillId of project.skillIds || []) add(skillId, project.projectId, 'uses');

@@ -1,4 +1,11 @@
 export default /*css*/ `
+html[data-portfolio-theme-mode] chat-show-player {
+  filter: invert(1) hue-rotate(180deg);
+}
+html[data-portfolio-theme-mode] .symbiote-presenter-cursor {
+  --presenter-hose-outline: var(--notchset-background);
+}
+
 html[data-portfolio-theme-mode] code-block :is(.cb-gutter, .cb-pre, .cb-pre code) {
   font-family: var(--sn-font-mono);
 }

@@ -248,6 +248,10 @@ body:has(.pulse-screen) .pulse-tour-button {
   box-shadow: var(--notchset-shadow-plate);
 }
 
+body:has(.pulse-screen) .pulse-tour-button[hidden] {
+  display: none;
+}
+
 body:has(.pulse-screen) .pulse-tour-button:is(:hover, :focus-visible) {
   background: var(--sn-portfolio-signal-hover);
   border-color: var(--sn-portfolio-signal-hover);
@@ -528,17 +532,28 @@ body:has(.pulse-screen)
     container: cv-show / size;
     box-sizing: border-box;
     display: block;
-    flex: 0 0 var(--cv-show-height, min(34%, 260px));
+    flex: 0 0 var(--cv-show-height, 120px);
     min-block-size: 120px;
     overflow: hidden;
+    position: relative;
     border-block-start: 0;
     background: var(--pulse-surface-panel);
+  }
+
+  .portfolio-show-hose-anchor {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 1px;
+    block-size: 1px;
+    pointer-events: none;
+    visibility: hidden;
   }
 
   .pulse-workspace .portfolio-mobile-navigation {
     display: block;
     flex: 0 0 auto;
-    background: var(--sn-layout-border);
+    background: var(--pulse-surface-panel);
   }
 
   .pulse-workspace:has(> .portfolio-show-static-region:not(:empty)) > .portfolio-show-resizer {
@@ -567,6 +582,7 @@ body:has(.pulse-screen)
     display: flex;
     flex-direction: column;
     min-block-size: 0;
+    block-size: 100%;
   }
 
   .pulse-workspace > .portfolio-show-static-region .chat-show-progress {
@@ -579,11 +595,25 @@ body:has(.pulse-screen)
   }
 
   .pulse-workspace .portfolio-mobile-navigation > .mobile-panel-rail {
+    position: relative;
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
     gap: var(--notchset-rule-width);
     min-inline-size: 0;
+  }
+
+  .pulse-workspace .portfolio-mobile-navigation > .mobile-panel-rail::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: var(--cv-mobile-active-left, 0px);
+    inline-size: var(--cv-mobile-active-width, 33.333%);
+    background: var(--sn-button-primary-bg);
+    pointer-events: none;
+    transition:
+      inset-inline-start var(--notchset-fade) ease,
+      inline-size var(--notchset-fade) ease;
   }
 
   /* The grid above is an author rule, so it would beat the user-agent's
@@ -598,16 +628,18 @@ body:has(.pulse-screen)
     padding-inline: var(--sn-step-2);
     border: 0;
     border-radius: 0;
-    background: var(--pulse-surface-panel);
+    background: transparent;
     color: var(--pulse-text);
     font-size: var(--notchset-control-size);
     line-height: 1.1;
     overflow-wrap: anywhere;
-    transition: background-color var(--notchset-fade), color var(--notchset-fade);
+    position: relative;
+    z-index: 1;
+    transition: color var(--notchset-fade);
   }
 
   .pulse-workspace .portfolio-mobile-navigation > .mobile-panel-rail > button[aria-current='page'] {
-    background: var(--sn-button-primary-bg);
+    background: transparent;
     color: var(--sn-button-primary-color);
   }
 

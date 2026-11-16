@@ -90,7 +90,7 @@ export function resolvePortfolioEntryIdFromHref(href, options = {}) {
       if (entrySet.has(pubId)) return pubId;
     }
   } else {
-    if (/^(projects|pulse|skills|bio|profile)\//.test(cleanPath)) {
+    if (/^(projects|pulse|skills|directions|bio|profile)\//.test(cleanPath)) {
       return cleanPath;
     }
   }
@@ -165,6 +165,7 @@ export function resolvePortfolioTreeHighlightId(
     return 'pulse/index';
   }
   if (id.startsWith('skills/')) return id;
+  if (id.startsWith('directions/')) return id;
   for (let [directoryId, targetId] of directorySelections) {
     if (targetId === id) return directoryId;
   }
@@ -332,6 +333,7 @@ export function buildPortfolioTreeProjection({
   getProjectTreeGroupLabel = (g) => '',
   profileEntries = [],
   skillEntries = [],
+  directionEntries = [],
 }) {
   let resourceEntries = [];
   let projectDirectorySelections = [];
@@ -388,6 +390,8 @@ export function buildPortfolioTreeProjection({
   });
 
   resourceEntries.push(...skillEntries);
+
+  resourceEntries.push(...directionEntries);
 
   return {
     resourceEntries,

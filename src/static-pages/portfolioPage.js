@@ -17,19 +17,19 @@ const projects = loadProjectEntries();
 const PAGE_TITLE = PORTFOLIO_LOCALE_MESSAGES.en['portfolio.page.title'];
 const RETIREMENT_COPY = Object.freeze({
   en: {
-    title: 'Publication retired',
-    description: 'This permalink is preserved for references to the former Pulse publication.',
-    link: 'Open the canonical publication',
+    title: 'Continue reading',
+    description: 'This article is now part of a permanent portfolio direction.',
+    link: 'Open the direction',
   },
   ru: {
-    title: 'Публикация снята',
-    description: 'Адрес сохранён для переходов к прежней публикации раздела Pulse.',
-    link: 'Открыть каноническую публикацию',
+    title: 'Продолжить чтение',
+    description: 'Эта статья теперь входит в постоянный раздел портфолио.',
+    link: 'Перейти к направлению',
   },
   es: {
-    title: 'Publicación retirada',
-    description: 'Esta dirección se conserva para referencias a la publicación anterior del Pulso.',
-    link: 'Abrir la publicación canónica',
+    title: 'Seguir leyendo',
+    description: 'Este artículo forma parte de una sección permanente del portafolio.',
+    link: 'Ver el área de trabajo',
   },
 });
 const PORTFOLIO_HEADER_CONTROLS = /*html*/ `
@@ -70,7 +70,7 @@ function renderRetirementContent(targetUrl) {
     <section lang="${locale}" data-retirement-locale="${locale}">
       <h1>${copy.title}</h1>
       <p>${copy.description}</p>
-      <p><a href="${escapeHtml(targetUrl)}">${copy.link}</a></p>
+      <p><a data-retirement-link href="${escapeHtml(targetUrl)}">${copy.link}</a></p>
     </section>
   `).join('');
 

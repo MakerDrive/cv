@@ -17,9 +17,9 @@ test('retired internal publication routes render a localized tombstone', async (
   assert.match(page, /data-retirement-locale="en"/);
   assert.match(page, /data-retirement-locale="ru"/);
   assert.match(page, /data-retirement-locale="es"/);
-  assert.match(page, />Open the canonical publication<\/a>/);
-  assert.match(page, />Открыть каноническую публикацию<\/a>/);
-  assert.match(page, />Abrir la publicación canónica<\/a>/);
+  assert.match(page, />Open the direction<\/a>/);
+  assert.match(page, />Перейти к направлению<\/a>/);
+  assert.match(page, />Ver el área de trabajo<\/a>/);
   assert.doesNotMatch(page, /<script>(?!\s*<\/script>)/);
   assert.doesNotMatch(page, /<portfolio-workspace/);
   assert.doesNotMatch(page, /pulse-projects-data/);

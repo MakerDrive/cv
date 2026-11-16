@@ -2284,6 +2284,92 @@ test('CV finale contact cue remains optional when the profile target is not moun
   );
 });
 
+test('CV show never frames a navigation row before the transition clicks it', async () => {
+  const row = {
+    id: 'tree-row',
+    matches: () => false,
+    closest: (selector) => (selector === '.sn-tree-row' ? row : null),
+  };
+  const presented = [];
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime: { entries: new Map(), selectedId: 'profile/photo' },
+    attention: {
+      present({ target }) { presented.push(target); return { presented: true }; },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    resolveTarget: () => row,
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => (typeof target === 'function' ? target() : target),
+  });
+
+  const result = await runner.run([
+    {
+      id: 'positioning.workspace-transition',
+      type: 'frame',
+      target: 'project-card.symbiote-workspace',
+      policy: 'required',
+    },
+  ], { turnId: 'positioning' });
+
+  assert.equal(result.status, 'success');
+  assert.deepEqual(presented, [], 'the section link is never framed before its own click');
+  assert.equal(
+    result.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.skipped,
+    'navigation-row-highlight',
+  );
+});
+
+test('CV show marks the same place at most once per turn', async () => {
+  const stage = { id: 'show-stage', matches: () => false, closest: () => null };
+  const presented = [];
+  const runner = createCvShowDirectiveRunner({
+    document: {},
+    runtime: { entries: new Map() },
+    attention: {
+      present({ target }) { presented.push(target); return { presented: true }; },
+      clearMarkers() {},
+      clearTransient() {},
+    },
+    resolveTarget: () => stage,
+    resolveText: (key) => key,
+    waitForReadiness: async ({ target }) => (typeof target === 'function' ? target() : target),
+  });
+  const frame = (id) => ({
+    id,
+    type: 'frame',
+    target: 'portfolio.show-stage',
+    policy: 'required',
+  });
+
+  const first = await runner.run([frame('current-show')], {
+    continuePhase: true,
+    turnId: 'symbiote-ui',
+  });
+  const repeated = await runner.run([frame('show-player-pointer')], {
+    continuePhase: true,
+    turnId: 'symbiote-ui',
+  });
+  const nextTurn = await runner.run([frame('engine-open')], {
+    continuePhase: true,
+    turnId: 'symbiote-engine-details',
+  });
+
+  assert.deepEqual(presented, [stage, stage], 'only the first frame of a turn is painted');
+  assert.equal(first.receipts[0].status, 'success');
+  assert.equal(repeated.receipts[0].status, 'success');
+  assert.equal(
+    repeated.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.skipped,
+    'repeat-highlight',
+  );
+  assert.equal(nextTurn.receipts[0].status, 'success');
+  assert.equal(
+    nextTurn.receipts[0].result.phases.find(({ phase }) => phase === 'act').result.skipped,
+    undefined,
+  );
+});
+
 test('CV runner keeps a bounded media Project cell active until its completion barrier settles', async () => {
   let releaseCompletion;
   const completion = new Promise((resolve) => { releaseCompletion = resolve; });
@@ -5247,6 +5333,7 @@ test('deferred aligned startup loads paused media without presentation admission
   );
   assert.deepEqual(restored.heldAttentionDirectiveIds, []);
   assert.deepEqual(restored.includedSpeechDirectiveIds, [
+    'symbiote-workspace.illustration-task',
     'workspace.portable-config',
     'workspace.agent-portal-card',
   ]);
@@ -5257,6 +5344,8 @@ test('deferred aligned startup loads paused media without presentation admission
     [
       'cv-show:cue:workspace.open',
       'cv-show:audio-clip:symbiote-workspace:01',
+      'cv-show:cue:symbiote-workspace.illustration-task:scroll',
+      'cv-show:cue:symbiote-workspace.illustration-task',
       'cv-show:cue:workspace.portable-config:scroll',
       'cv-show:cue:workspace.portable-config',
       'cv-show:cue:workspace.agent-portal-card:scroll',
@@ -5687,6 +5776,7 @@ test('fresh scene turn-start navigation is the one Project setup cell', () => {
   assert.deepEqual(partition.sceneSetup.map(({ id }) => id), ['workspace.open']);
   assert.deepEqual(partition.scheduled.map(({ source }) => source.id), [
     'workspace.intro-frame',
+    'symbiote-workspace.illustration-task',
     'workspace.portable-config',
     'workspace.agent-portal-card',
   ]);
@@ -6451,7 +6541,7 @@ test('Show integration is lazy, semantic, provider-backed, and chat-owned', asyn
   );
   assert.match(
     runtime,
-    /if \(\s*reason === 'initial'\s*\|\| reason === 'alignment-ready'\s*\|\| reason === 'paused-checkpoint'\s*\|\| reason === 'presentation-preroll-normalization'\s*\) return;[\s\S]*?reason === 'branch-return'[\s\S]*?reason\.includes\('seek'\)/u,
+    /if \(\s*reason === 'initial'\s*\|\| reason === 'alignment-ready'\s*\|\| reason === 'presentation-preroll-normalization'\s*\) return;[\s\S]*?reason === 'paused-checkpoint'[\s\S]*?return;[\s\S]*?reason === 'branch-return'[\s\S]*?reason\.includes\('seek'\)/u,
     'caption-clock initialization must not cancel an active admitted setup operation',
   );
   assert.match(logic, /portfolio-show-presentation-receipt/);

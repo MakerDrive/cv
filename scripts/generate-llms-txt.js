@@ -19,6 +19,10 @@ import {
   PORTFOLIO_PROFILE_ITEM_ROUTES,
   PORTFOLIO_RND_PRO_PRODUCT_KEYS,
 } from '../src/static-pages/data/portfolioRelations.js';
+import {
+  PORTFOLIO_DIRECTIONS,
+  getDirectionContentPath,
+} from '../src/static-pages/data/portfolioDirections.js';
 import { socialLinks } from '../src/static-pages/data/socialLinks.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -298,6 +302,16 @@ export function writeLlmsTxt(projects, publications = PUBLICATIONS) {
     appendListItem(lines, `${pub.locales.en.title} ${labelSuffix}`, urlFor(`pulse/${pub.slug}`, 'en'), pub.locales.en.summary);
   }
 
+  lines.push('', '## Directions');
+  for (const direction of PORTFOLIO_DIRECTIONS) {
+    appendListItem(
+      lines,
+      t('en', direction.labelKey),
+      urlFor(`directions/${direction.slug}`, 'en'),
+      t('en', direction.summaryKey),
+    );
+  }
+
   lines.push('', '## Skill pages');
   appendListItem(lines, t('en', 'skill.rnd.label'), urlFor('skills/rnd-engineering', 'en'), t('en', 'skill.rnd.summary'));
   appendListItem(lines, t('en', 'skill.agenticAi.label'), urlFor('skills/agentic-ai', 'en'), t('en', 'skill.agenticAi.summary'));
@@ -342,6 +356,16 @@ function writeFullLocale(lines, projects, publications, locale) {
 
   lines.push(`### ${t(locale, 'profile.experienceTitle')}`, '');
   appendFullExperience(lines, locale);
+
+  lines.push('### Directions', '');
+  for (const direction of PORTFOLIO_DIRECTIONS) {
+    lines.push(`#### ${t(locale, direction.labelKey)}`, '');
+    lines.push(`URL: ${urlFor(`directions/${direction.slug}`, locale)}`, '');
+    lines.push(t(locale, direction.summaryKey), '');
+    lines.push(shiftHeadings(loadPortfolioMarkdownContent(
+      getDirectionContentPath(direction.slug, locale),
+    )), '');
+  }
 
   lines.push('### Project case studies', '');
   for (const project of projects) {

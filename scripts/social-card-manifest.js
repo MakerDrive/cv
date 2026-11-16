@@ -16,8 +16,13 @@ function uniqueSources(sources) {
 function getMediaSources(targetId, mediaCatalog) {
   return mediaCatalog
     .filter((descriptor) => descriptor.targetIds?.includes(targetId))
-    .map((descriptor) => descriptor.poster || descriptor.activation?.src)
-    .filter(Boolean);
+    .flatMap((descriptor) => {
+      let publicSource = descriptor.poster || descriptor.activation?.src;
+      let fallbackSource = descriptor.localSource && publicSource
+        ? new URL(publicSource, 'https://MakerDrive.github.io/cv/').href
+        : publicSource;
+      return uniqueSources([descriptor.localSource, fallbackSource]);
+    });
 }
 
 function createCard(id, kind, title, sources) {

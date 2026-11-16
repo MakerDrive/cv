@@ -3,7 +3,7 @@
  * directive runner.
  *
  * Loading a page with a deep link, resuming a paused checkpoint and replaying
- * the authored setup cells before narration all re-establish an already
+ * the authored setup cells at a checkpoint all re-establish an already
  * reached application state. Those replays must never emit decorative user
  * gestures (cursor travel, synthetic clicks): the click visual is reserved
  * for a genuine authored action the audience can watch happen.

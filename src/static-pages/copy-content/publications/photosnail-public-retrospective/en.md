@@ -1,3 +1,3 @@
-The public PhotoSnail repository preserves an early web project from my media-automation R&D. Its documented scope covers motion-control camera systems, object-tracking ideas, and experiments in presenting media produced by automated capture.
+PhotoSnail is an open project for moving a camera along a motorized slider during video and time-lapse shoots. The early design also explored object tracking and using the slider to capture a partial 360-degree view.
 
-This retrospective keeps the source-backed scope at that early point in the camera-motion and media-presentation line. Controller architecture, timing behavior, and production results require separate evidence.
+The project page describes a camera carriage with configurable movement and capture settings. Its Arduino-based controller builds on the PhotoPizza design and connects to a camera through a wired shutter release.

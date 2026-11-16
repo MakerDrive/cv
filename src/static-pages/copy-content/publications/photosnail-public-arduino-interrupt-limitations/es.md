@@ -1,3 +1,3 @@
-El proyecto público PhotoSnail documenta un experimento web temprano sobre sistemas de movimiento controlado de cámara, ideas de seguimiento de objetos y presentación multimedia para captura automatizada.
+El controlador Arduino de PhotoSnail coordina el movimiento de la cámara y el disparo. El programa permite configurar la distancia, la velocidad, el número de fotogramas, la dirección, la pausa después de cada disparo y la aceleración para arrancar y detenerse con suavidad.
 
-El alcance respaldado por la fuente es la investigación sobre movimiento de cámara y presentación multimedia. La arquitectura del controlador y la temporización requieren evidencias separadas de implementación.
+Se pueden guardar distintos ajustes de captura en cuatro programas editables. El mando inicia o detiene el movimiento, cambia la dirección y ajusta la velocidad mientras funciona el slider. Al poner la pausa en `none`, la cámara se mueve continuamente durante la captura por intervalos.

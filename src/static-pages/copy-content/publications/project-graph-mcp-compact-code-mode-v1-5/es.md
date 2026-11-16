@@ -2,4 +2,4 @@ Compact Code Mode separa el código ejecutable de la documentación necesaria pa
 
 El paquete expone operaciones para compactar o embellecer archivos, generar documentos de contexto, inyectar o retirar JSDoc, consultar el modo activo y validar el pipeline. La validación compara funciones exportadas y firmas con el contrato de contexto, e informa de entradas ausentes u obsoletas. La migración también revisa el estado del repositorio antes de reescribir un proyecto.
 
-El modelo implementado combina código compacto, documentos externos, herramientas JSDoc bidireccionales y validación contra el AST. El type checking sigue como operación separada. El repositorio no registra un benchmark reproducible de tokens, CPU o runtime para este modo.
+El modelo implementado combina código compacto, documentos de contexto externos, herramientas JSDoc bidireccionales y validación contra el AST. La comprobación estática de tipos se realiza por separado.

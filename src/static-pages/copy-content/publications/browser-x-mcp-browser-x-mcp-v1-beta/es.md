@@ -1,5 +1,3 @@
-Browser X MCP `1.0.0-beta.1` empaquetó el primer servidor público de navegador de esta línea. Usa Playwright para mantener una página Chromium y expone sus operaciones mediante un servidor MCP sobre stdio.
+Browser X MCP `1.0.0-beta.1` presentó un servidor de navegador basado en Playwright a través de MCP stdio. El servidor inicia Chromium y ofrece herramientas para navegar, inspeccionar e interactuar con la página y tomar capturas.
 
-La superficie beta incluye inicio del navegador, navegación, extracción de virtual canvas estructurado, entrada de texto, scroll, listado de elementos, detalle de un objetivo, acciones atómicas y por lotes, capturas y evaluación en el contexto de la página. El virtual canvas deriva los elementos interactivos del DOM activo y asigna identificadores con coordenadas que consumen las acciones posteriores.
-
-La versión del paquete, la dependencia de Playwright, las herramientas MCP registradas y sus handlers definen esta beta experimental. El repositorio no demuestra conformidad estricta con W3C, aislamiento de proceso respecto de una instancia separada ni una política de desactivar CDP. Esas propiedades no deben inferirse de la etiqueta de la versión.
+Su virtual canvas lee los elementos interactivos del DOM de la página activa y les asigna identificadores y coordenadas para acciones posteriores. La beta también permite introducir texto, desplazarse, consultar detalles de elementos, ejecutar acciones individuales o por lotes y evaluar código en el contexto de la página.

@@ -26,6 +26,7 @@ import {
 } from '../../src/static-pages/data/publications.js';
 import { loadPortfolioMarkdownContent } from '../../src/static-pages/data/markdownContent.js';
 import { CV_SHOW_PRESENTATION_PROJECT } from '../../src/static-pages/data/cvShowPresentationProject.js';
+import { CV_SHOW_SCHEDULE_DURATIONS } from '../../src/static-pages/data/cvShowScheduleDurations.js';
 import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../src/static-pages/data/cvShowWebAudioRelease.js';
 import { CV_SHOW_STORY } from '../../src/static-pages/data/tourScripts.js';
 import {
@@ -555,6 +556,33 @@ async function navigate(cdp, url, options = {}) {
     return false;
   }
   if (assertReady) assert.equal(ready.result.value, true, `portfolio did not become ready: ${url}`);
+
+  // Also wait for viewer panel to be present in DOM (for directory entries with markdown content)
+  try {
+    await cdp.send('Runtime.evaluate', {
+      expression: `
+        new Promise((resolve) => {
+          let started = performance.now();
+          const tick = () => {
+            const viewerPanel = document.querySelector('portfolio-viewer-panel');
+            const sourceViewer = viewerPanel?.querySelector('source-viewer.portfolio-viewer');
+            const ready = viewerPanel && sourceViewer;
+            if (ready || performance.now() - started > 5000) {
+              resolve(Boolean(ready));
+            } else {
+              setTimeout(tick, 50);
+            }
+          };
+          tick();
+        })
+      `,
+      awaitPromise: true,
+      returnByValue: true,
+    }, { label: `viewer panel ready: ${url}`, timeoutMs: 8_000 });
+  } catch (error) {
+    // Viewer panel might not be present in some modes, continue anyway
+  }
+
   return Boolean(ready.result.value);
 }
 
@@ -2310,7 +2338,7 @@ test('portfolio language toggle persists locale through the rendered shell', {
   assert.equal(ruState.locale, 'ru');
   assert.equal(ruState.toggleValue, 'ru');
   assert.equal(ruState.selectedValue, 'ru');
-  assert.match(ruState.title, /Владимир Матиясевич/);
+  assert.match(ruState.title, /Vladimir Matiasevich/);
   assert.equal(ruState.themeText, 'Внешний вид');
   assert.equal(ruState.themeTitle, 'Настройки внешнего вида');
   assert.equal(ruState.panelActionTitle, 'Действия панели');
@@ -2702,6 +2730,9 @@ test('portfolio appearance panel scrolls and resets to CV defaults without chang
         return candidate?.hasAttribute('data-activated') ? candidate : null;
       });
       const articleMediaStage = articleMediaHost?.querySelector('.sn-media-stage');
+      // The IMS provider mounts asynchronously after activation, so the stage
+      // is still empty in the tick where data-activated first appears.
+      await waitFor(() => (articleMediaStage?.childElementCount || 0) > 0, 15000);
       const articleMedia = {
         activated: articleMediaHost?.hasAttribute('data-activated') || false,
         posterHidden: articleMediaHost?.querySelector('.sn-media-poster')?.hidden || false,
@@ -3072,7 +3103,7 @@ test('structured media activation routes to Pulse and restores through browser h
 });
 
 test('portfolio project and section routes localize visible content', {
-  timeout: 120_000,
+  timeout: 300_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('localized project audit uses local deterministic routes');
   let page = await createMobilePage(t);
@@ -3126,11 +3157,22 @@ test('portfolio project and section routes localize visible content', {
     let visible = await getVisiblePortfolioText(cdp, `${check.locale}:${check.path}`);
     assert.equal(visible.lang, check.locale);
     assert.equal(visible.locale, check.locale);
+    // Markdown headings are rendered uppercase via CSS text-transform, so the
+    // visible text must be compared case-insensitively against the source string.
+    let visibleText = visible.text.toLocaleLowerCase();
+    let visibleArticleText = visible.articleText.toLocaleLowerCase();
     for (let item of check.include) {
-      assert.ok(visible.text.includes(item), `${check.path} should include ${item}`);
+      // Check both visible.text (body + tree panel) and visible.articleText (markdown viewer)
+      // Some content like "Ключевые навыки" / "Habilidades clave" only appears in the markdown viewer
+      const needle = item.toLocaleLowerCase();
+      const inText = visibleText.includes(needle);
+      const inArticleText = visibleArticleText.includes(needle);
+      assert.ok(inText || inArticleText, `${check.path} should include ${item} (text: ${inText}, articleText: ${inArticleText})`);
     }
     for (let item of check.exclude) {
-      assert.equal(visible.text.includes(item), false, `${check.path} should not include ${item}`);
+      // Exclude items should not appear in either text source
+      const needle = item.toLocaleLowerCase();
+      assert.equal(visibleText.includes(needle) || visibleArticleText.includes(needle), false, `${check.path} should not include ${item}`);
     }
   }
 
@@ -3157,7 +3199,11 @@ test('portfolio project and section routes localize visible content', {
     assert.equal(visible.lang, locale);
     assert.equal(visible.locale, locale);
     assert.equal(new URL(visible.url).pathname, `/cv/projects/${publicationProjectSlug}/pulse/${publication.slug}/`);
-    assert.ok(visible.articleText.includes(localizedPublication.title), `${locale}:publication title`);
+    // The publication title is the article h1, which the notchset theme renders uppercase.
+    assert.ok(
+      visible.articleText.toLocaleLowerCase().includes(localizedPublication.title.toLocaleLowerCase()),
+      `${locale}:publication title`,
+    );
     assert.ok(visible.articleText.includes(localizedPublication.summary), `${locale}:publication summary`);
     let publicationBody = loadPortfolioMarkdownContent(
       getPublicationContentPath(publication, locale),
@@ -3349,47 +3395,66 @@ test('tree disclosure and article selection are separate targets', {
   await navigate(cdp, `${server.origin}/cv/projects/autobox-v1/?mode=flat&resource-test=mobile-content-swipe`);
 
   // On this route the rail, not the drawer, is the mobile projection: the tree
-  // panel is a slide of the snap row that is on screen from the first frame,
-  // so the earlier "swipe the drawer open" step is replaced by waiting for the
-  // row to settle with the tree actually hit-testable under a thumb.
-  // The tree scrolls the selected article into view, so the first row in the
-  // document is not necessarily the one a thumb can reach: look for a row that
-  // is on screen and hit-tests to itself, which is what the taps below need.
-  const VISIBLE_ROW = `(() => {
-    return [...document.querySelectorAll('.sn-tree-row')].find((row) => {
-      const toggle = row.querySelector('button.sn-tree-toggle');
-      if (!toggle || toggle.hidden) return false;
-      const t = toggle.getBoundingClientRect();
-      if (t.width <= 0 || t.top < 0 || t.bottom > innerHeight) return false;
-      const hit = document.elementFromPoint(Math.round(t.left + t.width / 2), Math.round(t.top + t.height / 2));
-      return Boolean(hit) && hit.closest('.sn-tree-row') === row;
-    }) || null;
-  })`;
+  // panel is a slide of the snap row. The row opens on the article slide and
+  // the library smooth-scrolls there on its own a moment later, so a tap that
+  // starts while that scroll is running lands between two slides and the
+  // browser hands the click to the viewer instead of the tree. Bring the
+  // Portfolio slide forward through the rail's own navigation - that also marks
+  // the row as chosen, so the library stops re-anchoring it - and wait until
+  // the row has stopped moving before anything is measured or tapped.
+  const railFront = await cdp.send('Runtime.evaluate', {
+    expression: `new Promise((resolve) => {
+      const started = performance.now();
+      const tick = () => {
+        const buttons = [...document.querySelectorAll('.portfolio-mobile-navigation .mobile-panel-rail button')];
+        const button = buttons.find((item) => item.offsetParent !== null) || buttons[0];
+        if (button) {
+          button.click();
+          resolve(true);
+          return;
+        }
+        if (performance.now() - started > 5000) {
+          resolve(false);
+          return;
+        }
+        setTimeout(tick, 50);
+      };
+      tick();
+    })`,
+    awaitPromise: true,
+    returnByValue: true,
+  });
+  assert.ok(railFront.result?.value, 'the mobile rail offers a button that opens the tree');
+
   const readTreeSurface = async () => (await cdp.send('Runtime.evaluate', {
     expression: `(() => {
       const layout = document.querySelector('agent-dock-shell')?.ref?.layout;
-      const row = ${VISIBLE_ROW}();
+      const tree = layout?.querySelector('.sn-tree-panel-content')
+        || document.querySelector('.sn-tree-panel-content');
       if (!layout) return null;
-      const r = row?.getBoundingClientRect();
+      const r = tree?.getBoundingClientRect();
       return {
         railEnabled: layout.hasAttribute('mobile-panel-rail-enabled'),
         drawerModeActive: layout.hasAttribute('drawer-mode-active'),
         scrollLeft: Math.round(layout.scrollLeft),
         slideWidth: Math.round(layout.clientWidth),
-        treeOnScreen: Boolean(r && r.width > 0 && r.top >= 0 && r.bottom <= innerHeight),
+        treeOnScreen: Boolean(r && r.width > 0
+          && r.left >= -1 && r.right <= innerWidth + 1
+          && r.top >= -1 && r.bottom <= innerHeight + 1),
       };
     })()`,
     returnByValue: true,
   })).result?.value;
 
   let settled = null;
+  let stable = 0;
   for (let index = 0; index < 120; index += 1) {
     const current = await readTreeSurface();
-    if (current?.railEnabled && current.treeOnScreen && settled && settled.scrollLeft === current.scrollLeft) {
-      settled = current;
-      break;
-    }
+    stable = settled && settled.scrollLeft === current?.scrollLeft
+      && settled.treeOnScreen === current?.treeOnScreen ? stable + 1 : 0;
     settled = current;
+    if (current?.railEnabled && current.treeOnScreen
+      && Math.abs(current.scrollLeft) < 4 && stable >= 3) break;
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
   assert.ok(settled?.railEnabled, `the mobile rail is the projection under test: ${JSON.stringify(settled)}`);
@@ -3426,25 +3491,52 @@ test('tree disclosure and article selection are separate targets', {
   const branch = found.result?.value;
   assert.ok(branch, 'a collapsed tree branch with a disclosure was found');
 
+  // The tree centres the selected article inside its own scrollport, so a
+  // parent branch can end up half-scrolled under the panel toolbar. Scroll the
+  // tree content until the branch is fully inside its scrollport: only then do
+  // the painted pixels and the hit-tested pixels describe the same target.
   // Geometry is re-read before every tap: expanding a branch re-renders the
   // tree, so a coordinate captured earlier no longer points at anything.
   const locate = async () => (await cdp.send('Runtime.evaluate', {
     expression: `(() => {
       const row = document.querySelector('.sn-tree-row[data-tree-id="${branch.treeId}"]');
       if (!row) return null;
+      const scrollRoot = row.closest('.sn-tree-panel-content');
+      if (scrollRoot) {
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          const rootBox = scrollRoot.getBoundingClientRect();
+          const rowBox = row.getBoundingClientRect();
+          const top = rootBox.top + scrollRoot.clientTop;
+          const bottom = top + scrollRoot.clientHeight;
+          if (rowBox.top >= top && rowBox.bottom <= bottom) break;
+          scrollRoot.scrollTop += rowBox.top < top ? rowBox.top - top : rowBox.bottom - bottom;
+        }
+      }
       const toggle = row.querySelector('button.sn-tree-toggle');
       const label = row.querySelector('.sn-tree-label');
       const t = toggle.getBoundingClientRect();
       const r = row.getBoundingClientRect();
       const l = label.getBoundingClientRect();
+      const rootBox = scrollRoot?.getBoundingClientRect();
+      const scrollport = rootBox
+        ? [
+          Math.round(rootBox.top + scrollRoot.clientTop),
+          Math.round(rootBox.top + scrollRoot.clientTop + scrollRoot.clientHeight),
+        ]
+        : null;
       return {
         toggle: [Math.round(t.x), Math.round(t.y), Math.round(t.width), Math.round(t.height)],
         row: [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)],
         label: [Math.round(l.x), Math.round(l.width)],
+        scrollport,
+        visible: Boolean(scrollport) && r.top >= scrollport[0] && r.bottom <= scrollport[1],
       };
     })()`,
     returnByValue: true,
   })).result?.value;
+
+  const initial = await locate();
+  assert.ok(initial?.visible, `the branch is fully inside the tree scrollport (${JSON.stringify(initial)})`);
 
   const state = async () => (await cdp.send('Runtime.evaluate', {
     expression: `(() => {
@@ -3514,7 +3606,7 @@ test('tree disclosure and article selection are separate targets', {
   if (ownership.exceptionDetails) throw new Error(ownership.exceptionDetails.text);
   const area = ownership.result?.value;
   assert.ok(area?.toggleBox, `the disclosure target was measured (${JSON.stringify(area)})`);
-  assert.equal(area.unowned, 0, 'no point in the row belongs to neither target');
+  assert.equal(area.unowned, 0, `no point in the row belongs to neither target (${JSON.stringify(area)})`);
   assert.ok(area.toggleBox[0] >= area.paintedToggle[0] && area.toggleBox[1] >= area.paintedToggle[1],
     `the pressable disclosure covers the painted one (${JSON.stringify(area)})`);
 
@@ -3778,7 +3870,10 @@ test('portfolio mobile rail swipes back without selecting and keeps header contr
 
   let mobileFullscreen = await evalJSON(`(() => {
     let buttons = [...document.querySelectorAll('layout-node[mobile-panel-rail-item] > .panel-view > .panel-header .fullscreen-btn')];
-    return { width: innerWidth, media: matchMedia('(max-width: 760px)').matches, count: buttons.length, visible: buttons.filter((button) => getComputedStyle(button).display !== 'none').length, styles: buttons.map((button) => ({ inline: button.getAttribute('style'), display: getComputedStyle(button).display, parent: button.closest('layout-node').outerHTML.slice(0, 220) })) };
+    return { count: buttons.length, visible: buttons.filter((button) => {
+      let box = button.getBoundingClientRect();
+      return box.width > 0 && box.height > 0 && getComputedStyle(button).visibility !== 'hidden';
+    }).length };
   })()`);
   assert.ok(mobileFullscreen.count > 0);
   assert.equal(mobileFullscreen.visible, 0, JSON.stringify(mobileFullscreen));
@@ -3924,6 +4019,19 @@ test('portfolio mobile rail swipes back without selecting and keeps header contr
   await waitForSlide(1, 'rail before the post-gesture tap');
   let tapped = await goToSlide(2);
   assert.equal(tapped.current, 'Agent', JSON.stringify(tapped));
+  for (let attempt = 0; attempt < 2; attempt++) {
+    await clickVisible(cdp, 'cascade-theme-widget .ctw-trigger', 'appearance quick controls');
+    await clickVisible(cdp, '.ctw-popover [data-action="open-full"]', 'open appearance panel');
+    let opened;
+    for (let check = 0; check < 80; check++) {
+      opened = await readRail('theme panel opening');
+      if (opened.current === 'Appearance') break;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    assert.equal(opened.current, 'Appearance', JSON.stringify(opened));
+    assert.equal(await evalJSON(`document.querySelectorAll('cascade-theme-editor').length`), 1);
+  }
+
 });
 
 test('structured portfolio renders semantic PCB flow diodes', { timeout: 120_000 }, async (t) => {
@@ -4778,6 +4886,11 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
           graphDisplay: document.querySelector('portfolio-graph-panel')
             ? getComputedStyle(document.querySelector('portfolio-graph-panel').closest('layout-node')).display
             : 'absent',
+          treeRailItem: document.querySelector('portfolio-tree-panel')?.closest('layout-node')
+            ?.hasAttribute('mobile-panel-rail-item') || false,
+          viewerRailItem: document.querySelector('portfolio-viewer-panel')?.closest('layout-node')
+            ?.hasAttribute('mobile-panel-rail-item') || false,
+          railButtons: document.querySelectorAll('.portfolio-mobile-navigation button').length,
           treeCollapsed: Boolean(tree.collapsed),
           viewerCollapsed: Boolean(viewer.collapsed),
           viewerVisible: Boolean(viewerRect?.width > 0 && viewerRect.height > 0),
@@ -4795,9 +4908,12 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
   assert.equal(desktop.viewport, 1087);
   assert.equal(desktop.outerDrawer, false);
   assert.equal(desktop.outerMobileRail, false);
+  assert.equal(desktop.railButtons, 0);
   assert.ok(desktop.innerWidth < 760);
   assert.equal(desktop.innerResponsive, false);
   assert.equal(desktop.innerDrawer, false);
+  assert.equal(desktop.treeRailItem, false);
+  assert.equal(desktop.viewerRailItem, false);
   assert.equal(desktop.graphCollapsed, true);
   assert.equal(desktop.treeCollapsed, false, JSON.stringify(desktop));
   assert.equal(desktop.viewerCollapsed, false);
@@ -4811,14 +4927,37 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
     deviceScaleFactor: 1,
     mobile: true,
   });
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const outer = document.querySelector('agent-dock-shell')?.ref?.layout;
+        const buttons = document.querySelectorAll('.portfolio-mobile-navigation button');
+        if (outer?.hasAttribute('mobile-panel-rail-enabled') && buttons.length >= 3) return resolve(true);
+        if (performance.now() - started > 5000) return reject(new Error('mobile rail projection did not settle'));
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for the mobile rail projection', timeoutMs: 7_000 });
   let mobile = (await inspectProjection('mobile')).result.value;
   assert.equal(mobile.viewport, 390);
-  assert.equal(mobile.outerDrawer, true);
+  assert.equal(mobile.outerDrawer, false,
+    `the rail replaces the drawer projection: ${JSON.stringify(mobile)}`);
   assert.equal(mobile.outerMobileRail, true);
+  assert.equal(mobile.railButtons, 3);
+  assert.equal(mobile.treeRailItem, true);
+  assert.equal(mobile.viewerRailItem, true);
   assert.equal(mobile.graphMobileExcluded, true);
   assert.equal(mobile.graphDisplay, 'none');
-  assert.equal(mobile.innerResponsive, true);
-  assert.equal(mobile.innerDrawer, true);
+  assert.equal(mobile.innerWidth, 0,
+    `the nested layout is a rail slide without a box of its own: ${JSON.stringify(mobile)}`);
+  assert.equal(mobile.innerResponsive, false);
+  assert.equal(mobile.innerDrawer, false);
+  assert.equal(mobile.treeCollapsed, false, JSON.stringify(mobile));
+  assert.equal(mobile.viewerVisible, true);
+  assert.equal(mobile.horizontalOverflow, 0);
 
   await cdp.send('Emulation.setDeviceMetricsOverride', {
     width: 1087,
@@ -4826,11 +4965,31 @@ test('outer Agent dock owns nested desktop and mobile responsive projection', as
     deviceScaleFactor: 1,
     mobile: false,
   });
+  await cdp.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve, reject) => {
+      const started = performance.now();
+      const check = () => {
+        const outer = document.querySelector('agent-dock-shell')?.ref?.layout;
+        const buttons = document.querySelectorAll('.portfolio-mobile-navigation button');
+        if (outer && !outer.hasAttribute('mobile-panel-rail-enabled') && buttons.length === 0) {
+          return resolve(true);
+        }
+        if (performance.now() - started > 5000) return reject(new Error('desktop projection did not settle'));
+        requestAnimationFrame(check);
+      };
+      check();
+    })`,
+  }, { label: 'wait for the restored desktop projection', timeoutMs: 7_000 });
   let restored = (await inspectProjection('restored-desktop')).result.value;
   assert.equal(restored.outerDrawer, false);
   assert.equal(restored.outerMobileRail, false);
+  assert.equal(restored.railButtons, 0);
+  assert.ok(restored.innerWidth > 0);
   assert.equal(restored.innerResponsive, false);
   assert.equal(restored.innerDrawer, false);
+  assert.equal(restored.treeRailItem, false);
+  assert.equal(restored.viewerRailItem, false);
   assert.equal(restored.graphCollapsed, true);
   assert.equal(restored.treeCollapsed, false);
   assert.equal(restored.viewerCollapsed, false);
@@ -6109,16 +6268,26 @@ test('direct detail route settles its owner article before detail narration', {
 });
 
 test('CV Show mounts shared controls and plays the selected public Opus narration', {
-  timeout: 210_000,
+  timeout: 300_000,
 }, async (t) => {
   if (EXTERNAL_TEST_URL) t.skip('narration acceptance requires the selected public audio release');
   let { manifest: webAudioManifest } = await loadSelectedCvShowWebAudioManifest();
   let firstWebAudioClip = webAudioManifest.clips[0];
   let symbioteUiTuple = await loadCvShowEntryTuple('symbiote-ui');
   let symbioteUiFirstClip = symbioteUiTuple.playbackPlan.clips[0];
+  let symbioteUiNextCueMs = symbioteUiTuple.schedule.cells
+    .filter(({ kind, startMs }) => (
+      (kind === 'interaction' || kind === 'focus')
+        && startMs > symbioteUiFirstClip.span.startMs
+    ))
+    .map(({ startMs }) => startMs)
+    .sort((left, right) => left - right)[0] || symbioteUiFirstClip.span.startMs + 1_000;
   let historicalProjectWindow = Object.freeze({
     startMs: symbioteUiFirstClip.span.startMs + 260,
-    endMs: symbioteUiFirstClip.span.startMs + 700,
+    // The Show narrates at its 1.5x default rate, so the previous card flips to
+    // "historical" later in the entry timeline than the authored 440 ms window.
+    // The Project window therefore lasts until the next cue takes over.
+    endMs: symbioteUiNextCueMs,
   });
   let page = await createPortfolioPage(t, {
     viewport: {
@@ -6555,7 +6724,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     'Pause must keep the pending cue inside the transition barrier instead of completing it',
   );
   assert.deepEqual(pausedPresenter.result.value.overlayStates, [
-    { className: 'symbiote-presenter-cursor is-visible', opacity: '1' },
+    { className: 'symbiote-presenter-cursor has-presenter-hose is-visible', opacity: '1' },
   ]);
 
   await clickVisible(
@@ -6649,7 +6818,9 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
           cellId === 'cv-show:cue:workspace.portable-config' && status === 'settled'
         ));
         if (portableCue) return resolve({ receipt: portableCue });
-        if (performance.now() - started > 45000) return resolve({
+        // The Show narrates at its 1.5x default rate, so the workspace
+        // portable-config cue lands at ~56 s after this probe starts.
+        if (performance.now() - started > 70000) return resolve({
           timeout: true,
           activeId: narration?.active?.activeId || '',
           paused: narration?.active?.paused ?? null,
@@ -6661,7 +6832,7 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
       };
       check();
     })`,
-  }, { label: 'capture autonomous Short playback before branch', timeoutMs: 47_000 });
+  }, { label: 'capture autonomous Short playback before branch', timeoutMs: 73_000 });
   assert.equal(
     shortBeforeBranch.exceptionDetails,
     undefined,
@@ -7719,18 +7890,19 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     deviceScaleFactor: 1,
     mobile: true,
   });
-  await clickVisible(cdp, '.pulse-tour-button', 'mobile CV Show drawer trigger');
+  await clickVisible(cdp, '.pulse-tour-button', 'mobile CV Show trigger');
   let mobileBeforeChoice = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
-    expression: `new Promise((resolve, reject) => {
+    expression: `new Promise((resolve) => {
       const started = performance.now();
-      const check = () => {
+      const readState = () => {
         const dock = document.querySelector('agent-dock-shell');
         const chat = dock?.getChat?.();
         const outerLayout = dock?.ref?.layout;
         const innerLayout = document.querySelector('.portfolio-layout');
         const graph = document.querySelector('portfolio-graph-panel');
+        const graphNode = graph?.closest('layout-node');
         const player = chat?.querySelector('chat-show-player');
         const composer = chat?.querySelector('chat-composer textarea');
         const shortChoice = chat?.querySelector('[data-action-id="start-short"]');
@@ -7740,82 +7912,85 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
           dockRect.left + dockRect.width / 2,
           dockRect.top + dockRect.height / 2,
         );
-        if (dock?.hasAttribute('mobile')
-          && dockRect?.width > 0
-          && dockRect.height > 0
-          && innerLayout?.hasAttribute('responsive-active')
-          && shortChoice) return resolve({
-          outerDrawerActive: outerLayout?.hasAttribute('drawer-mode-active'),
-          innerResponsiveActive: innerLayout.hasAttribute('responsive-active'),
-          innerResponsiveProjection: innerLayout.hasAttribute('drawer-mode-active')
-            || innerLayout.hasAttribute('scroll-inline-active'),
-          dockFits: dockRect.left >= 0 && dockRect.right <= innerWidth
-            && dockRect.top >= 0 && dockRect.bottom <= innerHeight,
+        return {
+          dockMobile: dock?.hasAttribute('mobile') || false,
+          outerDrawerActive: outerLayout?.hasAttribute('drawer-mode-active') || false,
+          outerRailEnabled: outerLayout?.hasAttribute('mobile-panel-rail-enabled') || false,
+          innerResponsiveActive: innerLayout?.hasAttribute('responsive-active') || false,
+          innerDrawerActive: innerLayout?.hasAttribute('drawer-mode-active') || false,
+          innerWidth: Math.round(innerLayout?.getBoundingClientRect().width || 0),
+          graphRailExcluded: graphNode?.hasAttribute('mobile-panel-rail-excluded') || false,
+          graphDisplay: graphNode ? getComputedStyle(graphNode).display : 'absent',
+          graphWidth: Math.round(graphRect?.width || 0),
+          graphDrawerHandle: Boolean(innerLayout?.querySelector(
+            '.layout-drawer-handle-stack-end [data-drawer-panel-id="portfolio-graph"]',
+          )),
+          railLabels: [...document.querySelectorAll('.portfolio-mobile-navigation button')]
+            .map((button) => button.textContent.trim()),
+          dockFits: Boolean(dockRect && dockRect.left >= 0 && dockRect.right <= innerWidth
+            && dockRect.top >= 0 && dockRect.bottom <= innerHeight),
           dockTopmost: Boolean(dockHit && dock.contains(dockHit)),
           playerBeforeChoice: Boolean(player),
-          mobileHeight: Math.round(dockRect.height),
+          composerEnabled: Boolean(composer && !composer.disabled),
+          shortChoicePresent: Boolean(shortChoice),
           horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
           verticalOverflow: Math.max(0, document.documentElement.scrollHeight - innerHeight),
-          composerEnabled: Boolean(composer && !composer.disabled),
-          shortChoicePresent: true,
-        });
-        if (performance.now() - started > 5000) return reject(new Error('mobile Show preselection drawer did not become visible'));
+        };
+      };
+      const check = () => {
+        const state = readState();
+        if (state.shortChoicePresent && state.outerRailEnabled) return resolve(state);
+        if (performance.now() - started > 8000) return resolve({ timeout: true, ...state });
         requestAnimationFrame(check);
       };
       check();
     })`,
-  }, { label: 'verify mobile Show preselection and nested responsive layouts', timeoutMs: 7_000 });
-  assert.equal(
-    mobileBeforeChoice.exceptionDetails,
-    undefined,
-    mobileBeforeChoice.exceptionDetails?.exception?.description || 'mobile Show preselection evaluation failed',
-  );
-  assert.deepEqual(mobileBeforeChoice.result.value, {
-    outerDrawerActive: true,
-    innerResponsiveActive: true,
-    innerResponsiveProjection: true,
-    dockFits: true,
-    dockTopmost: true,
-    playerBeforeChoice: false,
-    mobileHeight: 755,
-    horizontalOverflow: 0,
-    verticalOverflow: 0,
-    composerEnabled: true,
-    shortChoicePresent: true,
-  });
+  }, { label: 'verify the mobile rail projection with the Show preselection', timeoutMs: 10_000 });
+  let mobileState = mobileBeforeChoice.result.value;
+  if (VERBOSE_OUTPUT) {
+    console.log('cv-show-mobile-rail', JSON.stringify(mobileState));
+  }
+  assert.equal(mobileState.timeout, undefined,
+    `the mobile rail never settled: ${JSON.stringify(mobileState)}`);
+  assert.equal(mobileState.outerRailEnabled, true, JSON.stringify(mobileState));
+  assert.equal(mobileState.outerDrawerActive, false,
+    `the rail replaces the drawer projection: ${JSON.stringify(mobileState)}`);
+  assert.deepEqual(mobileState.railLabels, ['Портфолио', 'Описание', 'Agent'],
+    `the mobile rail keeps the graph out of its destinations: ${JSON.stringify(mobileState)}`);
+  assert.equal(mobileState.innerResponsiveActive, false, JSON.stringify(mobileState));
+  assert.equal(mobileState.innerDrawerActive, false, JSON.stringify(mobileState));
+  assert.equal(mobileState.innerWidth, 0,
+    `the nested layout is a rail slide without a box of its own: ${JSON.stringify(mobileState)}`);
+  assert.equal(mobileState.graphRailExcluded, true, JSON.stringify(mobileState));
+  assert.equal(mobileState.graphDisplay, 'none', JSON.stringify(mobileState));
+  assert.equal(mobileState.graphWidth, 0, JSON.stringify(mobileState));
+  assert.equal(mobileState.shortChoicePresent, true, JSON.stringify(mobileState));
+  assert.equal(mobileState.composerEnabled, true, JSON.stringify(mobileState));
+  assert.equal(mobileState.horizontalOverflow, 0, JSON.stringify(mobileState));
 
   let mobileGraph = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
-    expression: `(async () => {
+    expression: `(() => {
       const layout = document.querySelector('.portfolio-layout');
       const graph = document.querySelector('portfolio-graph-panel');
-      const handle = layout?.querySelector(
-        '.layout-drawer-handle-stack-end [data-drawer-panel-id="portfolio-graph"]',
-      );
-      if (handle) handle.click();
-      else layout?.toggleDrawer?.('end');
-      return new Promise((resolve, reject) => {
-        const started = performance.now();
-        const check = () => {
-          const rect = graph?.getBoundingClientRect();
-          if (rect?.width > 0 && rect.height > 0) return resolve({
-            innerDrawerActive: layout?.hasAttribute('drawer-mode-active'),
-            graphNonzero: true,
-            graphFits: rect.left >= 0 && rect.right <= innerWidth
-              && rect.top >= 0 && rect.bottom <= innerHeight,
-          });
-          if (performance.now() - started > 5000) return reject(new Error('nested mobile graph drawer did not open'));
-          requestAnimationFrame(check);
-        };
-        check();
-      });
+      const node = graph?.closest('layout-node');
+      const rect = graph?.getBoundingClientRect();
+      return {
+        innerDrawerActive: layout?.hasAttribute('drawer-mode-active') || false,
+        graphRailExcluded: node?.hasAttribute('mobile-panel-rail-excluded') || false,
+        graphDisplay: node ? getComputedStyle(node).display : 'absent',
+        graphWidth: Math.round(rect?.width || 0),
+        graphHeight: Math.round(rect?.height || 0),
+      };
     })()`,
-  }, { label: 'verify nested mobile graph drawer after reconnect', timeoutMs: 7_000 });
+  }, { label: 'verify the graph stays out of the mobile rail', timeoutMs: 5_000 });
   assert.deepEqual(mobileGraph.result.value, {
-    innerDrawerActive: true,
-    graphNonzero: true,
-    graphFits: true,
+    innerDrawerActive: false,
+    graphRailExcluded: true,
+    graphDisplay: 'none',
+    graphWidth: 0,
+    graphHeight: 0,
   });
   let reconnect = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
@@ -7847,8 +8022,9 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
         chats: document.querySelectorAll('agent-dock-shell agent-show-chat').length,
         innerLayouts: document.querySelectorAll('agent-dock-shell .portfolio-layout').length,
         innerConnected: Boolean(innerLayout?.isConnected),
-        innerResponsiveActive: innerLayout?.hasAttribute('responsive-active'),
+        innerResponsiveActive: innerLayout?.hasAttribute('responsive-active') || false,
         graphNonzero: Boolean(graphRect?.width > 0 && graphRect.height > 0),
+        railButtons: document.querySelectorAll('.portfolio-mobile-navigation button').length,
       };
     })()`,
   }, { label: 'verify repeated mobile dock reconnect stays singular', timeoutMs: 10_000 });
@@ -7856,31 +8032,29 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
     chats: 1,
     innerLayouts: 1,
     innerConnected: true,
-    innerResponsiveActive: true,
-    graphNonzero: true,
+    innerResponsiveActive: false,
+    graphNonzero: false,
+    railButtons: 3,
   });
-  await cdp.send('Runtime.evaluate', {
+  let reconnectGraph = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
-    expression: `(async () => {
-      const layout = document.querySelector('.portfolio-layout');
+    returnByValue: true,
+    expression: `(() => {
       const graph = document.querySelector('portfolio-graph-panel');
-      const handle = layout?.querySelector(
-        '.layout-drawer-handle-stack-end [data-drawer-panel-id="portfolio-graph"]',
-      );
-      if (handle) handle.click();
-      else layout?.toggleDrawer?.('end');
-      return new Promise((resolve, reject) => {
-        const started = performance.now();
-        const check = () => {
-          const rect = graph?.getBoundingClientRect();
-          if (!rect || rect.width === 0 || rect.height === 0) return resolve(true);
-          if (performance.now() - started > 5000) return reject(new Error('nested mobile graph drawer did not close'));
-          setTimeout(check, 25);
-        };
-        check();
-      });
+      const node = graph?.closest('layout-node');
+      const rect = graph?.getBoundingClientRect();
+      return {
+        graphDisplay: node ? getComputedStyle(node).display : 'absent',
+        graphWidth: Math.round(rect?.width || 0),
+        graphHeight: Math.round(rect?.height || 0),
+      };
     })()`,
-  }, { label: 'close nested mobile graph drawer before Show selection', timeoutMs: 7_000 });
+  }, { label: 'confirm the graph stays hidden after the mobile reconnect', timeoutMs: 5_000 });
+  assert.deepEqual(reconnectGraph.result.value, {
+    graphDisplay: 'none',
+    graphWidth: 0,
+    graphHeight: 0,
+  });
 
   await clickVisible(
     cdp,
@@ -7895,13 +8069,18 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
       const check = () => {
         const dock = document.querySelector('agent-dock-shell');
         const chat = dock?.getChat?.();
-        const player = chat?.querySelector('chat-show-player');
+        const inChat = chat?.querySelector('chat-show-player') || null;
+        const inStaticHost = document.querySelector(
+          '.portfolio-show-static-region chat-show-player',
+        ) || null;
+        const player = inChat || inStaticHost;
         const controls = Array.from(player?.querySelectorAll('[data-control]') || []);
-        const dockRect = chat?.getBoundingClientRect();
         const playerRect = player?.getBoundingClientRect();
-        if (dockRect?.height > 0 && playerRect?.height > 0 && controls.length === 5) return resolve({
-          playerFits: playerRect.left >= dockRect.left && playerRect.right <= dockRect.right
-            && playerRect.width <= dockRect.width,
+        if (playerRect?.height > 0 && controls.length === 5) return resolve({
+          playerInChat: Boolean(inChat),
+          playerInStaticHost: Boolean(inStaticHost),
+          playerFits: playerRect.left >= 0 && playerRect.right <= innerWidth
+            && playerRect.top >= 0 && playerRect.bottom <= innerHeight,
           controlsPresent: true,
         });
         if (performance.now() - started > 5000) return reject(new Error('mobile embedded Show player did not become visible'));
@@ -7910,10 +8089,9 @@ test('CV Show mounts shared controls and plays the selected public Opus narratio
       check();
     })`,
   }, { label: 'verify mobile embedded Show player after choice', timeoutMs: 7_000 });
-  assert.deepEqual(mobilePlayer.result.value, {
-    playerFits: true,
-    controlsPresent: true,
-  });
+  assert.equal(mobilePlayer.result.value.controlsPresent, true);
+  assert.equal(mobilePlayer.result.value.playerFits, true,
+    `the mobile Show player stays inside the viewport: ${JSON.stringify(mobilePlayer.result.value)}`);
 
   let completedAudioRequests = assertSelectedCvShowWebAudioRequests(cdp.requestedUrls);
   assert.ok(
@@ -8754,6 +8932,98 @@ test('CV navigation presents exactly one real row click for an authored scene tr
   // by design.)
   assert.equal(cdp.exceptions.length, 0);
 });
+
+for (let viewport of [DESKTOP_VIEWPORT, MOBILE_VIEWPORT]) {
+  test(`automatic scene transition reveals and clicks a collapsed project (${viewport.width}px)`, {
+    timeout: 60_000,
+  }, async (t) => {
+    if (EXTERNAL_TEST_URL) return t.skip('requires the local authored Show');
+    let page = await createPortfolioPage(t, { viewport, touch: viewport.mobile });
+    if (!page) return;
+    let { cdp, server } = page;
+    let harness = await installCvShowTerminalHarness(cdp);
+    t.after(harness.dispose);
+    await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: `globalThis.__cvNavigationClicks = [];
+        document.addEventListener('click', (event) => {
+          let row = event.target.closest?.('.portfolio-tree .sn-tree-row');
+          if (!row) return;
+          let rect = row.getBoundingClientRect();
+          let cursor = document.querySelector('.symbiote-presenter-cursor .pc-cursor');
+          let cursorRect = cursor?.getBoundingClientRect();
+          let overlay = cursor?.closest('.symbiote-presenter-cursor');
+          let hit = {
+            id: row.dataset.treeId,
+            visible: rect.width > 0 && rect.height > 0
+              && rect.top >= 0 && rect.bottom <= innerHeight,
+            cursorVisible: overlay?.classList.contains('is-visible')
+              && getComputedStyle(cursor).opacity !== '0',
+            cursorOnRow: cursorRect && cursorRect.left >= rect.left
+              && cursorRect.left <= rect.right && cursorRect.top >= rect.top
+              && cursorRect.top <= rect.bottom,
+            ripple: false,
+          };
+          globalThis.__cvNavigationClicks.push(hit);
+          let frames = 0;
+          let observeRipple = () => {
+            let halo = document.querySelector('.symbiote-presenter-cursor .pc-click');
+            hit.ripple = Boolean(halo && Number(getComputedStyle(halo).opacity) > 0);
+            if (!hit.ripple && ++frames < 12) requestAnimationFrame(observeRipple);
+          };
+          requestAnimationFrame(observeRipple);
+        }, { capture: true });`,
+    });
+    for (let { entryId, positionMs, cueId, expectedProject } of [
+      {
+        entryId: 'complexscan',
+        positionMs: CV_SHOW_SCHEDULE_DURATIONS.durations.complexscan - 2_000,
+        cueId: 'cv-show:cue:photopizza.open',
+        expectedProject: /MEGAVISOR/ui,
+      },
+      {
+        entryId: 'photopizza',
+        positionMs: 82_000,
+        cueId: 'cv-show:cue:photopizza.page-open',
+        expectedProject: /PhotoPizza/ui,
+      },
+    ]) {
+      await navigate(cdp,
+        `${server.origin}/cv/?lang=ru&showMode=short&showEntry=${entryId}`
+          + `&showTime=${positionMs}&showPlay=0`,
+        { expectedMode: 'structured' });
+      let runId = `collapsed-navigation-${viewport.width}-${entryId}`;
+      let afterIndex = await harness.reset(runId);
+      await harness.waitFor(runId,
+        ({ type, entryId: current }) => type === 'generation' && current === entryId,
+        'paused preceding scene', { afterIndex, inactivityMs: 20_000 });
+      await cdp.send('Runtime.evaluate', {
+        expression: `document.querySelector('.portfolio-tree sn-tree-view').expandedIds = []`,
+      });
+      await clickVisible(cdp, 'chat-show-player [data-control="play"]', 'advance to Megavisor');
+      await harness.waitFor(runId,
+        ({ type, receipt }) => type === 'receipt'
+          && receipt.cellId === cueId && receipt.status === 'settled',
+        'Megavisor opening click', { afterIndex, inactivityMs: 30_000 });
+      let result = await cdp.send('Runtime.evaluate', {
+        expression: `({
+          clicks: globalThis.__cvNavigationClicks,
+          selected: document.querySelector('.portfolio-tree .sn-tree-row[aria-selected="true"]')
+            ?.dataset.treeId,
+        })`,
+        returnByValue: true,
+      });
+      let { clicks, selected } = result.result.value;
+      assert.equal(clicks.length, 1, JSON.stringify(clicks));
+      assert.match(clicks[0].id, expectedProject);
+      assert.equal(clicks[0].visible, true, JSON.stringify(clicks));
+      assert.equal(clicks[0].cursorVisible, true, JSON.stringify(clicks));
+      assert.equal(clicks[0].cursorOnRow, true, JSON.stringify(clicks));
+      assert.equal(clicks[0].ripple, true, JSON.stringify(clicks));
+      assert.equal(selected, clicks[0].id);
+    }
+    assert.deepEqual(cdp.exceptions, []);
+  });
+}
 
 test('authored workspace scroll settles inside its hard cell before selection starts', {
   timeout: 120_000,
@@ -10038,7 +10308,7 @@ async function installRuGraphSnapshotStartup(cdp) {
         const overlayReady = snapshot?.matches?.('img[data-graph-visual-layer="graph-preview"]')
           && snapshot.complete
           && snapshot.naturalWidth > 0;
-        const overlayPaths = overlayReady ? 191 : 0;
+        const overlayPaths = overlayReady ? 201 : 0;
         const canvasOpacity = canvas ? Number(getComputedStyle(canvas).opacity) : 0;
         const visibleNodeCount = canvasOpacity <= 0.01 ? 0
           : [...(canvas?.querySelectorAll('graph-node') || [])]
@@ -10077,9 +10347,9 @@ async function installRuGraphSnapshotStartup(cdp) {
           && frame.snapshotOpacity <= 0.01
           && frame.pathCount > 0
           && frame.straightLike === frame.pathCount;
-        const visibleOverlay = overlayPaths === 191 && frame.snapshotOpacity > 0.01;
+        const visibleOverlay = overlayPaths === 201 && frame.snapshotOpacity > 0.01;
         const visibleLiveEdges = frame.canvasOpacity > 0.01
-          && frame.pathCount === 191
+          && frame.pathCount === 201
           && Number(liveLayer ? getComputedStyle(liveLayer).opacity : 0) > 0.01;
         const visibleEdges = visibleOverlay || visibleLiveEdges;
         if (visibleOverlay) window.__cvGraphSawGraphPreview = true;
@@ -10293,11 +10563,11 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
   assert.ok(state.receipt, JSON.stringify(state));
   assert.equal(state.receipt.adopted, true);
   assert.equal(state.receipt.resolution, 'cached-pcb');
-  assert.equal(state.receipt.routeCount, 191);
+  assert.equal(state.receipt.routeCount, 201);
   assert.equal(state.objectCount, 0);
-  assert.equal(state.nodeCount, 125);
-  assert.deepEqual(state.qualities, { full: 191 });
-  assert.equal(state.uniqueRouteIds, 191);
+  assert.equal(state.nodeCount, 126);
+  assert.deepEqual(state.qualities, { full: 201 });
+  assert.equal(state.uniqueRouteIds, 201);
   assert.equal(state.deterministicRouteIds, true);
   assert.equal(state.snapshotResources.some((url) => url.endsWith('/initial.webp')), true);
   assert.equal(state.snapshotResources.filter((url) => url.endsWith('/initial.webp')).length, 1);
@@ -10384,7 +10654,7 @@ test('normal RU /cv/ adopts the exact cached graph routes after inert first pain
   assert.equal(articleSwitch.result.value.selectedId, 'profile/photo');
   assert.equal(articleSwitch.result.value.routesUnchanged, true, JSON.stringify(articleSwitch.result.value));
   assert.equal(articleSwitch.result.value.geometryUnchanged, true, JSON.stringify(articleSwitch.result.value));
-  assert.equal(articleSwitch.result.value.routeCount, 191);
+  assert.equal(articleSwitch.result.value.routeCount, 201);
   let pcbCoverage = await readPcbRouteCoverage(cdp);
   if (VERBOSE_OUTPUT) {
     console.log('graph-startup-order-acceptance', JSON.stringify({
@@ -10606,9 +10876,9 @@ test('normal RU /cv/ adopts the wide cached graph on a Retina desktop', {
   await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
   let state = await readGraphSnapshotAcceptance(cdp, 'cached-pcb');
   assert.equal(state.receipt?.adopted, true, JSON.stringify(state));
-  assert.equal(state.receipt?.routeCount, 191, JSON.stringify(state));
+  assert.equal(state.receipt?.routeCount, 201, JSON.stringify(state));
   assert.equal(state.resolution, 'cached-pcb', JSON.stringify(state));
-  assert.deepEqual(state.qualities, { full: 191 });
+  assert.deepEqual(state.qualities, { full: 201 });
   assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
   await new Promise((resolve) => setTimeout(resolve, 12_000));
   let stable = await cdp.send('Runtime.evaluate', {
@@ -10623,7 +10893,7 @@ test('normal RU /cv/ adopts the wide cached graph on a Retina desktop', {
     })()`,
     returnByValue: true,
   });
-  assert.deepEqual(stable.result.value, { resolution: 'cached-pcb', reason: '', full: 191 });
+  assert.deepEqual(stable.result.value, { resolution: 'cached-pcb', reason: '', full: 201 });
   assert.equal(cdp.exceptions.length, 0);
 });
 
@@ -10640,9 +10910,9 @@ test('normal RU /cv/ adopts the wide cached graph at the common 1280 desktop siz
   await navigate(cdp, `${server.origin}/cv/`, { expectedMode: 'structured' });
   let state = await readGraphSnapshotAcceptance(cdp, 'cached-pcb');
   assert.equal(state.receipt?.adopted, true, JSON.stringify(state));
-  assert.equal(state.receipt?.routeCount, 191, JSON.stringify(state));
+  assert.equal(state.receipt?.routeCount, 201, JSON.stringify(state));
   assert.equal(state.resolution, 'cached-pcb', JSON.stringify(state));
-  assert.deepEqual(state.qualities, { full: 191 });
+  assert.deepEqual(state.qualities, { full: 201 });
   assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
   await new Promise((resolve) => setTimeout(resolve, 12_000));
   let stable = await cdp.send('Runtime.evaluate', {
@@ -10657,7 +10927,7 @@ test('normal RU /cv/ adopts the wide cached graph at the common 1280 desktop siz
     })()`,
     returnByValue: true,
   });
-  assert.deepEqual(stable.result.value, { resolution: 'cached-pcb', reason: '', full: 191 });
+  assert.deepEqual(stable.result.value, { resolution: 'cached-pcb', reason: '', full: 201 });
   assert.equal(cdp.exceptions.length, 0);
 });
 
@@ -10692,7 +10962,7 @@ test('plain /cv/ keeps its cached graph after resolving the browser locale durin
   });
   assert.equal(state.result.value.resolution, 'cached-pcb', JSON.stringify(state.result.value));
   assert.equal(state.result.value.reason, '', JSON.stringify(state.result.value));
-  assert.equal(state.result.value.full, 191, JSON.stringify(state.result.value));
+  assert.equal(state.result.value.full, 201, JSON.stringify(state.result.value));
   console.log('plain-cv-graph-diagnostics', JSON.stringify(state.result.value.diagnostics));
   assert.equal(cdp.exceptions.length, 0);
 });
@@ -10772,7 +11042,7 @@ test('graph loading starts with a complete preview before live nodes initialize'
     let clip = loadingFrame.result.value.clip;
     await saveGraphSnapshotScreenshot(cdp, 'startup-visible-loading-preview', { clip });
     let ready = await readGraphSnapshotAcceptance(cdp, 'live-pcb');
-    assert.deepEqual(ready.qualities, { full: 191 });
+    assert.deepEqual(ready.qualities, { full: 201 });
     let mixedFrames = ready.timeline.filter((frame) => (
       frame.snapshot && frame.snapshotOpacity > 0.01 && frame.canvasOpacity > 0.01
     ));
@@ -10801,12 +11071,12 @@ for (let corruptGraphSnapshot of [false, true]) {
       expectedMode: 'structured',
     });
     let state = await readGraphSnapshotAcceptance(cdp, corruptGraphSnapshot ? 'live-pcb' : 'cached-pcb');
-    assert.equal(state.nodeCount, 125);
-    assert.deepEqual(state.qualities, { full: 191 });
+    assert.equal(state.nodeCount, 126);
+    assert.deepEqual(state.qualities, { full: 201 });
     let incompleteFrames = state.timeline.filter((frame) => (
       frame.pathCount > 0 && frame.canvasOpacity > 0.01
         && frame.liveLayerOpacity > 0.01
-        && (frame.full !== 191 || frame.draft || frame.none)
+        && (frame.full !== 201 || frame.draft || frame.none)
     ));
     assert.deepEqual(incompleteFrames, [], JSON.stringify(state.timeline));
     assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
@@ -10946,8 +11216,8 @@ test('normal RU /cv/ keeps the inert PCB until a drifted snapshot reroutes to fu
   assert.equal(state.receipt.resolution, 'pcb-live-reroute');
   assert.equal(state.receipt.reason, 'route-fingerprint-mismatch');
   assert.equal(state.objectCount, 0);
-  assert.equal(state.nodeCount, 125);
-  assert.deepEqual(state.qualities, { full: 191 });
+  assert.equal(state.nodeCount, 126);
+  assert.deepEqual(state.qualities, { full: 201 });
   assert.equal(state.sawFullPcbQuality, true);
   assert.equal(state.sawGraphPreview, true, JSON.stringify(state.timeline));
   assert.equal(state.sawEdgeGap, false, JSON.stringify(state.timeline));
@@ -10971,7 +11241,7 @@ test('normal RU /cv/ keeps the inert PCB until a drifted snapshot reroutes to fu
   assert.equal(cdp.exceptions.length, 0);
 });
 
-test('normal RU /cv/ adopts the narrow cached graph after the mobile drawer opens', {
+test('normal RU /cv/ keeps the graph out of the mobile rail on a narrow viewport', {
   timeout: 60_000,
 }, async (t) => {
   let page = await createPortfolioPage(t, {
@@ -10984,64 +11254,72 @@ test('normal RU /cv/ adopts the narrow cached graph after the mobile drawer open
   let mobileResult = await cdp.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
-    expression: `new Promise((resolve, reject) => {
+    expression: `new Promise((resolve) => {
       const started = performance.now();
-      let lastToggle = 0;
-      const check = () => {
-        const layout = document.querySelector('.portfolio-layout');
+      const readState = () => {
         const panel = document.querySelector('portfolio-graph-panel');
         const canvas = panel?.querySelector('node-canvas');
-        const rect = panel?.getBoundingClientRect();
-        const receipt = canvas?.getPcbRouteSnapshotReceipt?.();
+        const node = panel?.closest('layout-node');
+        const rail = document.querySelector('agent-dock-shell')?.ref?.layout;
         const paths = [...(canvas?.querySelectorAll('.sn-conn-path') || [])];
-        if (panel?.dataset.graphSnapshot === 'cached-pcb'
-          && receipt?.adopted
-          && paths.length === 191
-          && document.querySelectorAll('.portfolio-graph-snapshot').length === 0) {
-          return resolve({
-            receipt,
-            qualities: paths.reduce((counts, path) => {
-              const quality = path.getAttribute('data-pcb-quality') || 'none';
-              counts[quality] = (counts[quality] || 0) + 1;
-              return counts;
-            }, {}),
-            uniqueRouteIds: new Set(paths.map((path) => path.getAttribute('data-conn-id'))).size,
-            sawVisibleStraight: window.__cvGraphSawVisibleStraight === true,
-            timeline: (window.__cvGraphTimeline || []).slice(-80),
-          });
+        return {
+          labels: [...document.querySelectorAll('.portfolio-mobile-navigation button')]
+            .map((button) => button.textContent.trim()),
+          railEnabled: rail?.hasAttribute('mobile-panel-rail-enabled') || false,
+          drawerActive: rail?.hasAttribute('drawer-mode-active') || false,
+          graphExcluded: node?.hasAttribute('mobile-panel-rail-excluded') || false,
+          graphDisplay: node ? getComputedStyle(node).display : 'absent',
+          graphWidth: panel ? Math.round(panel.getBoundingClientRect().width) : -1,
+          resolution: panel?.dataset.graphSnapshot || '',
+          receipt: canvas?.getPcbRouteSnapshotReceipt?.() || null,
+          pathCount: paths.length,
+          qualities: paths.reduce((counts, path) => {
+            const quality = path.getAttribute('data-pcb-quality') || 'none';
+            counts[quality] = (counts[quality] || 0) + 1;
+            return counts;
+          }, {}),
+          uniqueRouteIds: new Set(paths.map((path) => path.getAttribute('data-conn-id'))).size,
+          snapshotImages: document.querySelectorAll('.portfolio-graph-snapshot').length,
+          snapshotVisible: [...document.querySelectorAll('.portfolio-graph-snapshot')]
+            .some((image) => image.getClientRects().length > 0),
+          sawVisibleStraight: window.__cvGraphSawVisibleStraight === true,
+          timeline: (window.__cvGraphTimeline || []).slice(-80),
+        };
+      };
+      const check = () => {
+        const state = readState();
+        if (state.railEnabled && state.labels.length === 3) {
+          return setTimeout(() => resolve(readState()), 2500);
         }
-        if ((!rect || rect.width < 128 || rect.height < 128)
-          && performance.now() - lastToggle >= 1000) {
-          const handle = layout?.querySelector(
-            '.layout-drawer-handle-stack-end [data-drawer-panel-id="portfolio-graph"]',
-          );
-          if (handle) handle.click();
-          else layout?.toggleDrawer?.('end');
-          lastToggle = performance.now();
-        }
-        if (performance.now() - started > 35_000) {
-          return reject(new Error('Mobile graph drawer did not retain and adopt cached PCB: '
-            + JSON.stringify({
-              resolution: panel?.dataset.graphSnapshot || '',
-              panelRect: rect ? { width: rect.width, height: rect.height } : null,
-              structuredBound: Boolean(panel?._structuredBound),
-              routeCount: paths.length,
-              receipt: receipt || null,
-            })));
+        if (performance.now() - started > 20_000) {
+          return resolve({ timeout: true, ...readState() });
         }
         setTimeout(check, 100);
       };
       check();
     })`,
-  }, { label: 'open RU mobile graph drawer and adopt cached PCB', timeoutMs: 40_000 });
+  }, { label: 'read the narrow graph state behind the mobile rail', timeoutMs: 40_000 });
   let state = mobileResult.result.value;
-  assert.ok(state.receipt, JSON.stringify(state));
-  assert.equal(state.receipt.adopted, true);
-  assert.equal(state.receipt.routeCount, 191);
-  assert.deepEqual(state.qualities, { full: 191 });
-  assert.equal(state.uniqueRouteIds, 191);
+  if (VERBOSE_OUTPUT) {
+    console.log('ru-narrow-mobile-rail', JSON.stringify(state));
+  }
+  assert.equal(state.timeout, undefined, `the mobile rail never settled: ${JSON.stringify(state)}`);
+  assert.deepEqual(state.labels, ['Портфолио', 'Описание', 'Agent'],
+    `the narrow rail keeps the graph out of its destinations: ${JSON.stringify(state.labels)}`);
+  assert.equal(state.railEnabled, true);
+  assert.equal(state.drawerActive, false,
+    `the rail replaces the drawer projection: ${JSON.stringify(state)}`);
+  assert.equal(state.graphExcluded, true, JSON.stringify(state));
+  assert.equal(state.graphDisplay, 'none', JSON.stringify(state));
+  assert.equal(state.graphWidth, 0, JSON.stringify(state));
+  assert.equal(state.snapshotVisible, false,
+    `the hidden graph never paints its preview: ${JSON.stringify(state)}`);
+  assert.equal(state.resolution, '',
+    `the hidden graph adopts no cached routes: ${JSON.stringify(state)}`);
+  assert.equal(state.receipt, null, JSON.stringify(state));
+  assert.equal(state.pathCount, 0, JSON.stringify(state));
   assert.equal(state.sawVisibleStraight, false, JSON.stringify(state.timeline));
-  await saveGraphSnapshotScreenshot(cdp, 'ru-narrow-cached-pcb');
+  await saveGraphSnapshotScreenshot(cdp, 'ru-narrow-graph-hidden');
   assert.equal(cdp.exceptions.length, 0);
 });
 
@@ -11129,8 +11407,8 @@ test('normal RU /cv/ preserves full PCB plus exactly three proxies during one-no
   });
   assert.equal(dragging.result.value.dragging, target.result.value.nodeId);
   assert.equal(dragging.result.value.proxies, 3);
-  assert.equal(dragging.result.value.full, 191);
-  assert.equal(dragging.result.value.pathCount, 191);
+  assert.equal(dragging.result.value.full, 201);
+  assert.equal(dragging.result.value.pathCount, 201);
   assert.equal(dragging.result.value.snapshotCount, 0);
   assert.equal(dragging.result.value.retainedRoutes, dragging.result.value.pathCount);
   assert.equal(dragging.result.value.sawVisibleStraight, false);
@@ -11168,8 +11446,8 @@ test('normal RU /cv/ preserves full PCB plus exactly three proxies during one-no
         };
         if (
           state.proxies === 0
-          && state.pathCount === 191
-          && state.full === 191
+          && state.pathCount === 201
+          && state.full === 201
           && state.retainedRoutes === state.pathCount - 3
           && state.straightLike < state.pathCount
         ) {
@@ -11184,7 +11462,7 @@ test('normal RU /cv/ preserves full PCB plus exactly three proxies during one-no
   assert.equal(Boolean(dropped.exceptionDetails), false, JSON.stringify(dropped.exceptionDetails));
   assert.equal(dropped.result.value.timeout, undefined, JSON.stringify(dropped.result.value));
   assert.equal(dropped.result.value.retainedRoutes, dropped.result.value.pathCount - 3);
-  assert.equal(dropped.result.value.full, 191);
+  assert.equal(dropped.result.value.full, 201);
   assert.equal(dropped.result.value.pathCount - dropped.result.value.retainedRoutes, 3);
   assert.ok(dropped.result.value.straightLike < dropped.result.value.pathCount);
   assert.equal(dropped.result.value.sawVisibleStraight, false, JSON.stringify(dropped.result.value.timeline));

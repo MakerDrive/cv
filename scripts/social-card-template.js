@@ -56,7 +56,8 @@ export default function createSocialCardTemplate(card, hasMedia) {
     .map((line, index) => text(line.toUpperCase(), TITLE.left, 430 + index * 24, 18)).join('') : '';
   let kind = card.kind === 'publication' || card.id.startsWith('pulse/') ? 'PUBLICATION'
     : card.id.startsWith('projects/') ? 'PROJECT'
-      : card.id.startsWith('skills/') ? 'SKILL' : 'PROFILE';
+      : card.id.startsWith('skills/') ? 'SKILL'
+        : card.id.startsWith('directions/') ? 'DIRECTION' : 'PROFILE';
   let pathSize = Math.min(15, 1072 / measureCardText(card.id.toUpperCase(), 1, 'mono'));
   let hatching = Array.from({ length: 26 }, (_, index) => {
     let x = 782 + index * 16;

@@ -140,6 +140,11 @@ import {
   PORTFOLIO_SKILL_PROJECT_RELATIONS,
 } from '../data/portfolioRelations.js';
 import {
+  PORTFOLIO_DIRECTION_INDEX_CONTENT_PATHS,
+  PORTFOLIO_DIRECTION_INDEX_ID,
+  PORTFOLIO_DIRECTIONS,
+} from '../data/portfolioDirections.js';
+import {
   createPortfolioRelationEdge,
   createPortfolioRelationPlan,
 } from '../data/portfolioRelationClassifier.js';
@@ -367,6 +372,15 @@ function getProfileSections() {
     {
       title: tPortfolio('profile.collaborationTitle'),
       body: tPortfolio('profile.workFormatDetails'),
+    },
+    {
+      title: tPortfolio('profile.directionsTitle'),
+      body: tPortfolio('profile.directionsDetails'),
+      items: directionEntries.map((direction) => ({
+        label: direction.label,
+        details: direction.summary,
+        href: getPortfolioEntryHref(direction.id),
+      })),
     },
     {
       title: tPortfolio('profile.expertiseTitle'),
@@ -750,6 +764,15 @@ localeToggle?.addEventListener('sn-segmented-change', (event) => {
 });
 document.addEventListener('click', (event) => {
   let target = event.target;
+  if (target instanceof Element) {
+    let retiredArticleLink = target.closest('[data-retirement-link]');
+    if (retiredArticleLink instanceof HTMLAnchorElement) {
+      let destination = new URL(retiredArticleLink.href);
+      destination.searchParams.set('lang', portfolioLocalization.locale);
+      retiredArticleLink.href = destination.href;
+      return;
+    }
+  }
   if (target instanceof Element && target.closest('.pulse-header-menu-button')) {
     event.preventDefault();
     openMaterialsDrawerFromHeader();
@@ -861,6 +884,16 @@ const skillEntries = [
     details: tPortfolio('skill.hardwareCapture.details'),
   },
 ];
+
+const directionEntries = PORTFOLIO_DIRECTIONS.map((direction) => ({
+  id: direction.id,
+  label: tPortfolio(direction.labelKey),
+  icon: direction.icon,
+  summary: tPortfolio(direction.summaryKey),
+  projectSlugs: [...direction.projectSlugs],
+  skillIds: [...direction.skillIds],
+  bodyPath: direction.contentPaths[portfolioLocalization.locale] || direction.contentPaths.en,
+}));
 
 const PROJECT_TREE_GROUPS = [
   {
@@ -1297,7 +1330,40 @@ function createPortfolioEntries() {
       icon: 'hub',
       summary: tPortfolio('skills.summary'),
       details: tPortfolio('skills.details'),
-      focusIds: ['profile/photo', 'skills/index', ...skillEntries.map((item) => item.id)],
+      relatedTitle: tPortfolio('directions.label'),
+      relatedLinks: directionEntries.map((direction) => ({
+        label: direction.label,
+        href: getPortfolioEntryHref(direction.id),
+      })),
+      focusIds: [
+        'profile/photo',
+        'skills/index',
+        ...skillEntries.map((item) => item.id),
+        ...directionEntries.map((item) => item.id),
+      ],
+      params: { hideContent: true, tone: 'inverse' },
+    }),
+    makeEntry({
+      id: PORTFOLIO_DIRECTION_INDEX_ID,
+      label: tPortfolio('directions.label'),
+      type: 'directory',
+      displayType: tPortfolio('entry.type.directions'),
+      category: 'module',
+      shape: 'circle',
+      icon: 'explore',
+      summary: tPortfolio('directions.summary'),
+      bodyPath: PORTFOLIO_DIRECTION_INDEX_CONTENT_PATHS[portfolioLocalization.locale]
+        || PORTFOLIO_DIRECTION_INDEX_CONTENT_PATHS.en,
+      relatedTitle: tPortfolio('skills.label'),
+      relatedLinks: skillEntries.map((skill) => ({
+        label: skill.label,
+        href: getPortfolioEntryHref(skill.id),
+      })),
+      focusIds: [
+        'profile/photo',
+        PORTFOLIO_DIRECTION_INDEX_ID,
+        ...directionEntries.map((item) => item.id),
+      ],
       params: { hideContent: true, tone: 'inverse' },
     }),
   ];
@@ -1317,6 +1383,36 @@ function createPortfolioEntries() {
       relatedTitle: tPortfolio('markdown.representativeProjects'),
       relatedLinks,
       focusIds: ['skills/index', skill.id, ...relatedProjectSlugs.map((slug) => `projects/${slug}`)],
+    }));
+  }
+
+  for (let [index, direction] of PORTFOLIO_DIRECTIONS.entries()) {
+    let entry = directionEntries[index];
+    const relatedProjectSlugs = direction.projectSlugs.filter((slug) => projectTitleBySlug.has(slug));
+    const relatedSkillSlugs = direction.skillIds
+      .map((skillId) => skillId.replace(/^skills\//, ''))
+      .filter((slug) => skillEntries.some((skill) => skill.id === `skills/${slug}`));
+    const relatedLinks = [
+      ...relatedSkillSlugs.map((slug) => {
+        let skill = skillEntries.find((candidate) => candidate.id === `skills/${slug}`);
+        return { label: skill.label, href: getPortfolioEntryHref(skill.id) };
+      }),
+      ...relatedProjectSlugs.map((slug) => ({
+        label: projectTitleBySlug.get(slug),
+        href: projectHrefBySlug.get(slug),
+      })),
+    ];
+    entries.push(makeEntry({
+      ...entry,
+      type: 'direction',
+      displayType: tPortfolio('entry.type.direction'),
+      relatedTitle: tPortfolio('markdown.related'),
+      relatedLinks,
+      focusIds: [
+        PORTFOLIO_DIRECTION_INDEX_ID,
+        direction.id,
+        ...relatedProjectSlugs.map((slug) => `projects/${slug}`),
+      ],
     }));
   }
 
@@ -1365,6 +1461,12 @@ function createPortfolioEntries() {
           .map((slug) => ({
             label: `${tPortfolio('entry.type.project')}: ${projectTitleBySlug.get(slug)}`,
             href: projectHrefBySlug.get(slug),
+          })),
+        ...PORTFOLIO_DIRECTIONS
+          .filter((direction) => direction.projectSlugs.includes(project.slug))
+          .map((direction) => ({
+            label: `${tPortfolio('entry.type.direction')}: ${directionEntries.find((item) => item.id === direction.id)?.label || direction.id}`,
+            href: getPortfolioEntryHref(direction.id),
           })),
       ],
       focusIds: projectFocusIds,
@@ -1473,6 +1575,25 @@ function createTreeItems(projectItems) {
     }))
   ];
 
+  let directionEntriesForTree = [
+    {
+      id: PORTFOLIO_DIRECTION_INDEX_ID,
+      path: `${tPortfolio('directions.label')}/${tPortfolio('directions.overview')}.md`,
+      label: tPortfolio('directions.overview'),
+      icon: 'explore',
+      kind: String(directionEntries.length),
+      draggable: false,
+    },
+    ...directionEntries.map((direction) => ({
+      id: direction.id,
+      path: `${tPortfolio('directions.label')}/${resourcePathSegment(direction.label)}.md`,
+      label: direction.label,
+      icon: direction.icon,
+      kind: 'direction',
+      draggable: false,
+    })),
+  ];
+
   let projectIndexEntry = {
     id: 'projects/index',
     path: `${tPortfolio('projects.label')}/${tPortfolio('projects.overview')}.md`,
@@ -1491,6 +1612,7 @@ function createTreeItems(projectItems) {
     getProjectTreeGroupLabel,
     profileEntries,
     skillEntries: skillEntriesForTree,
+    directionEntries: directionEntriesForTree,
   });
 
   let resourceEntries = [
@@ -1541,6 +1663,7 @@ const treeDirectorySelection = new Map([
   [tPortfolio('projects.label'), 'projects/index'],
   [tPortfolio('pulse.label'), 'pulse/index'],
   [tPortfolio('skills.label'), 'skills/index'],
+  [tPortfolio('directions.label'), PORTFOLIO_DIRECTION_INDEX_ID],
 ]);
 for (let group of PROJECT_TREE_GROUPS) {
   treeDirectorySelection.set(
@@ -1561,12 +1684,14 @@ const defaultExpandedTreeIds = [
   ...projectTreeGroupDirectoryIds,
   tPortfolio('pulse.label'),
   tPortfolio('skills.label'),
+  tPortfolio('directions.label'),
 ];
 const flatGroupSelection = new Map([
   ['group/biography', 'profile/photo'],
   ['group/projects', 'projects/index'],
   ['group/pulse', 'pulse/index'],
   ['group/skills', 'skills/index'],
+  ['group/directions', PORTFOLIO_DIRECTION_INDEX_ID],
 ]);
 const portfolioRouteById = new Map(
   [...portfolioEntries.keys()].map((id) => {
@@ -1596,12 +1721,19 @@ const directoryEntryIds = new Set([
   'projects/index',
   'pulse/index',
   'skills/index',
+  PORTFOLIO_DIRECTION_INDEX_ID,
 ]);
 const flatGraphGroups = [
   { id: 'group/biography', label: tPortfolio('bio.label'), type: 'data', children: ['profile/photo'] },
   { id: 'group/projects', label: tPortfolio('projects.label'), type: 'asset', children: orderedPortfolioProjects.map((project) => `projects/${project.slug}`) },
   { id: 'group/pulse', label: tPortfolio('pulse.label'), type: 'docs', children: getGlobalPulseArticleIds(getPublicPublications()) },
   { id: 'group/skills', label: tPortfolio('skills.label'), type: 'action', children: skillEntries.map((skill) => skill.id) },
+  {
+    id: 'group/directions',
+    label: tPortfolio('directions.label'),
+    type: 'docs',
+    children: [PORTFOLIO_DIRECTION_INDEX_ID, ...directionEntries.map((direction) => direction.id)],
+  },
 ];
 
 const GRAPH_PATH_STYLE_ICON_NAMES = Object.freeze(
@@ -1919,6 +2051,9 @@ function getFlatGraphFocusIds(entry) {
   if (entry.id === 'skills/index') {
     return ['group/skills', ...skillEntries.slice(0, 5).map((skill) => skill.id)];
   }
+  if (entry.id === PORTFOLIO_DIRECTION_INDEX_ID) {
+    return ['group/directions', ...directionEntries.map((direction) => direction.id)];
+  }
   if (entry.id.startsWith('projects/')) {
     let project = projects.find((item) => `projects/${item.slug}` === entry.id);
     let ids = ['group/projects', entry.id];
@@ -1942,13 +2077,21 @@ function getFlatGraphFocusIds(entry) {
       .map((project) => `projects/${project.slug}`);
     return ['group/skills', entry.id, ...linkedProjects];
   }
+  if (entry.id.startsWith('directions/')) {
+    let direction = PORTFOLIO_DIRECTIONS.find((item) => item.id === entry.id);
+    let linkedProjects = (direction?.projectSlugs || [])
+      .slice(0, 3)
+      .map((slug) => `projects/${slug}`)
+      .filter((id) => portfolioEntries.has(id));
+    return ['group/directions', entry.id, ...linkedProjects];
+  }
   return [focusId];
 }
 
 function getCanvasGraphNodeType(entry) {
   if (entry.type === 'project') return 'asset';
   if (entry.type === 'pulse') return 'docs';
-  if (entry.type === 'skill') return 'action';
+  if (entry.type === 'skill' || entry.type === 'direction') return 'action';
   return 'data';
 }
 
@@ -1958,12 +2101,24 @@ function getPortfolioRelationProjects({ includeMedia = false } = {}) {
     return {
       projectId,
       skillIds: getSkillIdsForProject(project),
+      directionIds: directionEntries
+        .filter((direction) => direction.projectSlugs.includes(project.slug))
+        .map((direction) => direction.id),
       mediaIds: includeMedia
         ? getProjectMediaDescriptors(project, PORTFOLIO_MEDIA_CATALOG)
             .map((descriptor) => descriptor.id)
         : [],
     };
   });
+}
+
+function getPortfolioRelationDirections() {
+  return PORTFOLIO_DIRECTIONS.map((direction) => ({
+    id: direction.id,
+    projectIds: direction.projectSlugs
+      .filter((slug) => projects.some((project) => project.slug === slug))
+      .map((slug) => `projects/${slug}`),
+  }));
 }
 
 function createPortfolioFlatGraphModel() {
@@ -1995,6 +2150,7 @@ function createPortfolioFlatGraphModel() {
     mode: 'flat',
     skillIds: skillEntries.map((skill) => skill.id),
     projects: getPortfolioRelationProjects(),
+    directions: getPortfolioRelationDirections(),
   });
   for (let edge of relationPlan) {
     if (flatNodeIds.has(edge.from) && flatNodeIds.has(edge.to)) edges.push(edge);
@@ -2736,6 +2892,7 @@ function createPortfolioEditor() {
     mode: 'structured',
     skillIds: skillEntries.map((skill) => skill.id),
     projects: getPortfolioRelationProjects({ includeMedia: true }),
+    directions: getPortfolioRelationDirections(),
   });
   let relationKeys = new Set(relationPlan.map((edge) => `${edge.from}\u001f${edge.to}`));
   for (let { descriptor } of portfolioArticleMediaAssignments) {
@@ -3726,6 +3883,8 @@ class PortfolioWorkspace extends HTMLElement {
   #disposeShowResize = null;
   #captureTrustedAgentContactClick = null;
   #onAgentShowAction = null;
+  #onDockReady = null;
+  #disposeMobileRailObservers = null;
 
   connectedCallback() {
     if (this._ready) return;
@@ -3764,6 +3923,10 @@ class PortfolioWorkspace extends HTMLElement {
     this._layout = layout;
     this.#captureTrustedAgentContactClick = (event) => {
       if (!event.isTrusted) return;
+      // The CV Show owns contact navigation while its chat is mounted: the
+      // Show gates the same trusted click and opens the URL from the action
+      // event, so opening here as well would navigate twice for one click.
+      if (this.querySelector('portfolio-show-chat')) return;
       let path = typeof event.composedPath === 'function' ? event.composedPath() : [event.target];
       let button = path.find((element) => element instanceof Element
         && element.matches('button[data-action-id]'));
@@ -3797,6 +3960,35 @@ class PortfolioWorkspace extends HTMLElement {
         initialPanelType: 'portfolio-viewer',
         animateInitialPanel: true,
       });
+      let rail = mobileNavigation.querySelector('.mobile-panel-rail');
+      if (rail) {
+        let updateActiveSlide = () => {
+          let activeButton = rail.querySelector('[aria-current="page"]');
+          let railRect = rail.getBoundingClientRect();
+          let buttonRect = activeButton?.getBoundingClientRect();
+          if (!buttonRect || !railRect.width) return;
+          rail.style.setProperty('--cv-mobile-active-left', `${buttonRect.left - railRect.left}px`);
+          rail.style.setProperty('--cv-mobile-active-width', `${buttonRect.width}px`);
+        };
+        updateActiveSlide();
+        if (!rail.hasAttribute('data-cv-active-observer')) {
+          rail.setAttribute('data-cv-active-observer', '');
+          let observer = new MutationObserver(updateActiveSlide);
+          let resizeObserver = new ResizeObserver(updateActiveSlide);
+          observer.observe(rail, {
+            subtree: true,
+            childList: true,
+            attributes: true,
+            attributeFilter: ['aria-current'],
+          });
+          resizeObserver.observe(rail);
+          this.#disposeMobileRailObservers = () => {
+            observer.disconnect();
+            resizeObserver.disconnect();
+            rail.removeAttribute('data-cv-active-observer');
+          };
+        }
+      }
       dock.setStaticShowHost?.(mobile ? staticShowHost : null);
     };
     this._onDockResponsiveChange = () => this._applyMobilePanelRail?.();
@@ -3819,9 +4011,19 @@ class PortfolioWorkspace extends HTMLElement {
     // panel mounts.
     customElements.whenDefined('agent-dock-shell').then(() => {
       this._applyMobilePanelRail?.();
+      this.#onDockReady = (event) => {
+        let chatWorkspace = event.detail?.workspace
+          || this._dock?.getChat?.()?.getWorkspace?.();
+        chatWorkspace?.setVoiceControls?.({
+          input: { visible: true, enabled: true, state: 'idle' },
+          language: { mode: document.documentElement.lang || 'en' },
+        });
+      };
+      this._dock?.addEventListener?.('agent-dock-ready', this.#onDockReady);
       this._dock?.setAgentProvider?.(
         createCvShowMockAgentProvider({ locale: document.documentElement.lang || 'en' }),
       );
+      queueMicrotask(() => this.#onDockReady?.({ detail: {} }));
     });
     // The dock may have entered its responsive state before this listener is
     // attached. Configure the embedded workspace from the actual viewport
@@ -3877,14 +4079,24 @@ class PortfolioWorkspace extends HTMLElement {
       runtime: portfolioRuntime,
       title: tPortfolio('panel.tour'),
     });
-    this._onThemeOpenFull = () => {
-      layout.openPanel('portfolio-theme', {
+    let themeOpenRequest = 0;
+    this._onThemeOpenFull = async () => {
+      let request = ++themeOpenRequest;
+      let panelId = layout.openPanel('portfolio-theme', {
         direction: 'horizontal',
         ratio: 0.72,
         behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end', swipeControl: 'rail' },
         source: 'cascade-theme-widget',
         uiInvoked: true,
       });
+      if (!panelId || window.innerWidth > PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT) return;
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      for (let frame = 0; frame < 30; frame++) {
+        if (!this.isConnected || request !== themeOpenRequest) return;
+        let dockLayout = this._dock?.ref?.layout;
+        if (dockLayout?.scrollToPanel?.(panelId, { layout })) return;
+        await new Promise(requestAnimationFrame);
+      }
     };
     this._onOpenMaterials = () => {
       let dockLayout = this._dock?.ref?.layout;
@@ -3921,6 +4133,12 @@ class PortfolioWorkspace extends HTMLElement {
 
   disconnectedCallback() {
     this.#disposeShowResize?.();
+    this.#disposeMobileRailObservers?.();
+    this.#disposeMobileRailObservers = null;
+    if (this.#onDockReady) {
+      this._dock?.removeEventListener('agent-dock-ready', this.#onDockReady);
+      this.#onDockReady = null;
+    }
     if (this._onViewportResize) window.removeEventListener('resize', this._onViewportResize);
     if (this._onDockResponsiveChange) {
       this._dock?.removeEventListener('agent-dock-responsive-change', this._onDockResponsiveChange);

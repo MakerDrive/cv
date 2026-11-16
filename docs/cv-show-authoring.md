@@ -136,7 +136,29 @@ state stay outside Git under the configured durable absolute base. The
 repository contains only the immutable Ogg/Opus web projection and its minimal
 aligned sequences.
 
+## Article illustrations
+
+The existing Show project articles use original conceptual illustrations from
+`src/static-pages/copy-illustrations/`. These explain the published process;
+they are neither product screenshots nor equipment evidence. Generation prompts
+and tool attribution live in `docs/portfolio-illustration-prompts.json`.
+
+Register each image once in `portfolioMediaCatalog.js` and place it explicitly
+at its semantic block in `portfolioArticleMedia.js`. The article and graph share
+that descriptor. Show actions use the same media ID, an exact narration anchor,
+and a scroll-to-attention dependency. Attention frames surround the whole illustration, just as for video targets;
+do not draw markers or highlight regions inside the artwork. Purposeful reading
+holds remain still. The current
+illustration cues reuse all accepted narration, audio and scene durations.
+
 ## Runtime budget rules learned from failure traces
+
+Fresh scene navigation reveals the section list, expands the target branch,
+and presents one cursor click on the matching row before narration. Project
+folders resolve through the same directory mapping as normal tree selection.
+Paused checkpoints and seeks restore the reached state quietly. The combined
+Megavisor/PhotoPizza scene opens Megavisor and switches to PhotoPizza at its
+authored introduction; narration and accepted audio remain unchanged.
 
 Two production loops (2026-09-15) traced a repeated `PRESENTATION_EFFECT_…`
 failure → entry retry pattern back to authoring data, not to runtime code:

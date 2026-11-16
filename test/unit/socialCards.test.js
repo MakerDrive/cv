@@ -88,6 +88,26 @@ test('social card sources prefer direct media, then project media and project co
   ]);
 });
 
+test('social card manifest prefers available local illustration files and retains the public URL fallback', async () => {
+  let manifest = createSocialCardManifest();
+  let illustrationSources = new Set(
+    manifest.flatMap((card) => card.sources)
+      .filter((source) => source.startsWith('src/static-pages/copy-illustrations/')),
+  );
+
+  assert.ok(illustrationSources.size > 0, 'expected local illustration sources in the manifest');
+  for (let source of illustrationSources) {
+    await fs.access(path.resolve(source));
+  }
+
+  let projectCard = manifest.find((card) => card.id === 'projects/agent-portal');
+  assert.equal(projectCard.sources[0], 'src/static-pages/copy-illustrations/agent-portal.webp');
+  assert.equal(
+    projectCard.sources[1],
+    'https://makerdrive.github.io/cv/illustrations/agent-portal.webp',
+  );
+});
+
 test('social card path contract is stable and rejects invalid public IDs', () => {
   assert.equal(SOCIAL_CARD_WIDTH, 1200);
   assert.equal(SOCIAL_CARD_HEIGHT, 630);

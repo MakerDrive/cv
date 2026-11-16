@@ -68,7 +68,7 @@ export function resolvePublicationMetadata(publicationId, baseTitle = '') {
 
   if (publication.status === 'retired') {
     let targetUrl = resolveRetirementTargetUrl(publication);
-    let title = baseTitle ? `Publication retired | ${baseTitle}` : 'Publication retired';
+    let title = baseTitle ? `Continue reading | ${baseTitle}` : 'Continue reading';
     return {
       title,
       description: 'This Pulse publication has been retired. '

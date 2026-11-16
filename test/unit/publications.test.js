@@ -56,6 +56,12 @@ const DIRECT_RETIREMENT_TARGETS = new Map([
   ['browser-x-mcp-browser-automation-context-bridge', 'pulse/browser-x-mcp-retrospective'],
   ['f360-studio-studio-automation-state-machine', 'pulse/f360-studio-retrospective'],
   ['symbiote-video-studio-ai-video-editing-structures', 'pulse/symbiote-video-studio-retrospective'],
+  // 2026-11-12: the four Pulse articles became the source text of the permanent
+  // direction sections; their permalinks point at those sections now.
+  ['fullstack-systems-integration', 'https://MakerDrive.github.io/cv/directions/systems-engineering/'],
+  ['ai-infrastructure-deployment-control', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
+  ['web-form-application-automation', 'https://MakerDrive.github.io/cv/directions/process-automation/'],
+  ['digital-employee-delegation-to-action', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
 ]);
 
 const MERGE_RETIREMENT_TARGETS = new Map([
@@ -153,11 +159,14 @@ const SOURCE_FREE_PROJECT_IDS = new Set([
   'projects/mobile-smm-platform',
 ]);
 
-const CV_SHOW_ARTICLE_SLUGS = new Set([
-  'fullstack-systems-integration',
-  'ai-infrastructure-deployment-control',
-  'web-form-application-automation',
-  'digital-employee-delegation-to-action',
+// The four Pulse articles of 2026-11-11 became the source text of the permanent
+// direction sections. They stay retired instead of feeding the dated stream, so
+// the publication date is no longer read as the start of the practice.
+const DIRECTION_SOURCE_SLUGS = new Map([
+  ['fullstack-systems-integration', 'https://MakerDrive.github.io/cv/directions/systems-engineering/'],
+  ['ai-infrastructure-deployment-control', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
+  ['web-form-application-automation', 'https://MakerDrive.github.io/cv/directions/process-automation/'],
+  ['digital-employee-delegation-to-action', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
 ]);
 
 const UNDATED_PUBLICATION_SLUGS = new Set([
@@ -329,9 +338,11 @@ function getPublicationBody(publication, locale) {
 }
 
 test('Production PUBLICATIONS registry integrity', () => {
-  assert.equal(PUBLICATIONS.length, 104, 'Production registry must contain exactly 104 portfolio publications');
+  assert.equal(PUBLICATIONS.length, 105, 'Production registry must contain exactly 105 portfolio publications');
   for (const pub of PUBLICATIONS) {
-    assert.ok(['retrospective', 'article', 'release', 'field-note', 'research-note'].includes(pub.kind), `Publication ${pub.id} must be a retrospective, article, release, field-note or research-note`);
+    // 'update' records portfolio-level changes such as the 2026-11-12 section
+    // reorganization; it is a supported publication kind in the runtime feed.
+    assert.ok(['retrospective', 'article', 'update', 'release', 'field-note', 'research-note'].includes(pub.kind), `Publication ${pub.id} must be a retrospective, article, update, release, field-note or research-note`);
     assert.ok(['published', 'retired'].includes(pub.status), `Publication ${pub.id} must be published or retired`);
     if ((pub.kind === 'retrospective' || pub.kind === 'field-note') && pub.publishedAt === null) {
       assert.ok(pub.subjectPeriod, `Publication ${pub.id} must have a subjectPeriod`);
@@ -356,13 +367,13 @@ test('Production editorial classification matches the current 6/60/23/15 matrix'
   let published = getPublicPublications(PUBLICATIONS);
   let bySlug = new Map(PUBLICATIONS.map(publication => [publication.slug, publication]));
 
-  assert.equal(PUBLICATIONS.length, 104);
+  assert.equal(PUBLICATIONS.length, 105);
   assert.equal(KEEP_PUBLICATION_SLUGS.size, 6);
-  assert.equal(DIRECT_RETIREMENT_TARGETS.size, 15);
+  assert.equal(DIRECT_RETIREMENT_TARGETS.size, 19);
   assert.equal(MERGE_RETIREMENT_TARGETS.size, 23);
-  assert.equal(RETIREMENT_TARGETS.size, 38);
-  assert.equal(retired.length, 38);
-  assert.equal(published.length, 66);
+  assert.equal(RETIREMENT_TARGETS.size, 42);
+  assert.equal(retired.length, 42);
+  assert.equal(published.length, 63);
 
   for (let slug of KEEP_PUBLICATION_SLUGS) {
     assert.equal(bySlug.get(slug)?.status, 'published', `${slug} must remain published`);
@@ -377,7 +388,7 @@ test('Production editorial classification matches the current 6/60/23/15 matrix'
   let rewriteSlugs = published
     .map(publication => publication.slug)
     .filter(slug => !KEEP_PUBLICATION_SLUGS.has(slug));
-  assert.equal(rewriteSlugs.length, 60);
+  assert.equal(rewriteSlugs.length, 57);
   assert.deepEqual(
     retired.map(publication => publication.slug).sort(),
     [...RETIREMENT_TARGETS.keys()].sort(),
@@ -582,7 +593,6 @@ test('CV-native dated publications use the exact deployment cohorts', () => {
   let expectedSlugs = new Set([
     ...FIRST_DEPLOYMENT_SLUGS,
     ...SECOND_DEPLOYMENT_SLUGS,
-    ...CV_SHOW_ARTICLE_SLUGS,
   ]);
 
   assert.deepEqual(
@@ -592,11 +602,32 @@ test('CV-native dated publications use the exact deployment cohorts', () => {
   for (let publication of datedProjectPublications) {
     let expectedDate = FIRST_DEPLOYMENT_SLUGS.has(publication.slug)
       ? '2026-07-31T18:50:57Z'
-      : (SECOND_DEPLOYMENT_SLUGS.has(publication.slug)
-        ? '2026-07-31T22:20:44Z'
-        : '2026-11-11T12:00:00Z');
+      : '2026-07-31T22:20:44Z';
     assert.equal(publication.publishedAt, expectedDate, publication.slug);
   }
+});
+
+test('Direction source articles retire into their permanent section', () => {
+  const retired = PUBLICATIONS.filter(publication => publication.status === 'retired');
+
+  for (const [slug, target] of DIRECTION_SOURCE_SLUGS) {
+    const publication = retired.find(candidate => candidate.slug === slug);
+    assert.ok(publication, `${slug} must be retired`);
+    assert.equal(publication.kind, 'article', slug);
+    assert.equal(publication.publishedAt, '2026-11-11T12:00:00Z', slug);
+    assert.equal(publication.retirementTarget, target, slug);
+  }
+
+  assert.deepEqual(
+    retired.filter(publication => DIRECTION_SOURCE_SLUGS.has(publication.slug))
+      .map(publication => publication.slug)
+      .sort(),
+    [...DIRECTION_SOURCE_SLUGS.keys()].sort(),
+  );
+  assert.equal(
+    getPublicPublications(PUBLICATIONS).some(publication => DIRECTION_SOURCE_SLUGS.has(publication.slug)),
+    false,
+  );
 });
 
 test('Undated retrospectives and historical field notes remain undated', () => {

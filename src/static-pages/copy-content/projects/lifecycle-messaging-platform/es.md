@@ -1,4 +1,4 @@
-Plataforma de producto confidencial desarrollada como un proyecto comercial grande de I+D. La descripción pública se mantiene en nivel de función, perfil de stack, límites arquitectónicos y alcance de entrega.
+Plataforma comercial para comunicaciones con consentimiento, gestión de campañas y envío de SMS mediante pools de módems GSM.
 
 :::article-block product-scope
 El trabajo pertenece a comunicaciones con consentimiento del cliente: lifecycle messaging, escenarios opt-in SMS, orquestación de campañas, segmentación de audiencias, dashboards analíticos, roles internos, control de contenido/flujo y operaciones de servidor/entrega alrededor de infraestructura con módems.
@@ -25,7 +25,5 @@ Como los enlaces y los dispositivos pueden cambiar de estado, una cola, la ejecu
 
 :::article-block digital-twin
 Para realizar pruebas reproducibles sin acceso continuo a dispositivos físicos, creé un Digital Twin local con módems virtuales y escenarios de tráfico repetibles. Reflejaba el pool de módems GSM en ambas direcciones: el comportamiento de los dispositivos podía reproducirse localmente manteniendo el mismo flujo operativo para el runtime físico.
-
-Los detalles de implementación quedan en categorías porque el proyecto es confidencial.
 
 Mi contribución de I+D fue la forma de la plataforma: convertir requisitos de comunicación, audiencias, hardware-runtime y operaciones en arquitectura de producto, flujos de datos, ejecución del lado de módems, infraestructura de servidor, superficies de automatización, interfaces de administración y herramientas prácticas para procesos de negocio repetibles.

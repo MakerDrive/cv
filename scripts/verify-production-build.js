@@ -1,3 +1,4 @@
+import { PORTFOLIO_MEDIA_CATALOG } from '../src/static-pages/data/portfolioMediaCatalog.js';
 import { PORTFOLIO_PAGE_METADATA } from '../src/static-pages/data/portfolioPageMetadata.js';
 import { resolveSocialCardUrl } from '../src/static-pages/data/socialCards.js';
 import fs from 'node:fs/promises';
@@ -8,6 +9,7 @@ import esbuild from 'esbuild';
 import sharp from 'sharp';
 
 import { PORTFOLIO_PROJECT_IDS } from '../src/static-pages/data/portfolioProjectIds.js';
+import { PORTFOLIO_DIRECTION_DOCUMENT_COUNT } from '../src/static-pages/data/portfolioDirections.js';
 import { getPublicPublications } from '../src/static-pages/data/publications.js';
 import { createSocialCardManifest } from './social-card-manifest.js';
 import {
@@ -45,7 +47,11 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // resize/compact-progress modules; measured 1925846 raw.
   // 2026-11-11: +10 KB for the four CV Show V4.1 Pulse publications registered
   // in the bundled publication registry; measured 1934466 raw.
-  raw: 1_940_000,
+  // 2026-11-12: +20 KB for the permanent direction sections — three direction
+  // entries with their localized registry copy, the section index, the
+  // navigation/graph wiring and the retired article targets; measured
+  // 1954659 raw.
+  raw: 1_960_000,
   // 2026-09-25: +5 KB gzip for the completed drawer gesture contract —
   // deferred pointer capture, touch tree-disclosure column, click-vs-swipe
   // separation; measured 452330 gzip against the 450000 cap. Re-measured at
@@ -54,13 +60,16 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // 2026-11-03: +1 KB for the same mobile panel navigation; measured 455315 gzip.
   // 2026-11-04: +14 KB for the same theme/show work; measured 469363 gzip.
   // 2026-11-11: +5 KB for the same four Pulse publications; measured 471249 gzip.
-  gzip: 475_000,
+  // 2026-11-12: +7 KB for the same direction sections; measured 480388 gzip.
+  gzip: 482_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);
 
 export function getExpectedMarkdownContentCount() {
-  return (getPublicPublications().length + PORTFOLIO_PROJECT_IDS.length)
+  return (getPublicPublications().length
+    + PORTFOLIO_PROJECT_IDS.length
+    + PORTFOLIO_DIRECTION_DOCUMENT_COUNT)
     * PORTFOLIO_LOCALES.length;
 }
 
@@ -465,8 +474,13 @@ export async function verifyPortfolioGraphSnapshots(distDir) {
         if (!binding.valid) {
           throw new Error(`Portfolio graph route snapshot is invalid: ${snapshotName}: ${binding.reason}.`);
         }
-        if (binding.snapshot.nodeRects.length !== 125 || binding.snapshot.routes.length !== 191) {
-          throw new Error(`Portfolio graph route snapshot must contain 125 nodes and 191 routes: ${snapshotName}.`);
+        let nodeIds = new Set(binding.snapshot.nodeRects.map(({ id }) => id));
+        let missingMedia = PORTFOLIO_MEDIA_CATALOG.filter(({ id }) => !nodeIds.has(id));
+        if (!binding.snapshot.routes.length || missingMedia.length) {
+          throw new Error(
+            `Portfolio graph snapshot is missing routes or catalog media: ${snapshotName}: `
+            + missingMedia.map(({ id }) => id).join(', '),
+          );
         }
       }
     }
@@ -549,7 +563,7 @@ export async function runVerification(distDir) {
     }
     for (const filePath of markdownContentFiles) {
       const relativePath = path.relative(distDir, filePath).replace(/\\/g, '/');
-      if (!/^content\/(?:projects|publications)\/[^/]+\/(?:en|ru|es)\.md$/.test(relativePath)) {
+      if (!/^content\/(?:projects|publications|directions)\/[^/]+\/(?:en|ru|es)\.md$/.test(relativePath)) {
         throw new Error(`Verification failed: invalid runtime Markdown asset path "${relativePath}".`);
       }
       if (!(await fs.readFile(filePath, 'utf8')).trim()) {

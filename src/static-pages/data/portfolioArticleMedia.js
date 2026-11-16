@@ -2,17 +2,45 @@ const MEDIA_FRAGMENT_PREFIX = 'media-';
 const ARTICLE_BLOCK_MARKER = /^:::article-block ([a-z0-9][a-z0-9-]*)$/;
 
 export const PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS = Object.freeze({
+  'symbiote-ui': Object.freeze({
+    'media/symbiote-ui/image/process-illustration': 'manifest-demo',
+  }),
+  'symbiote-engine': Object.freeze({
+    'media/symbiote-engine/image/process-illustration': 'layer-diagram',
+  }),
+  'agent-pool-mcp': Object.freeze({
+    'media/agent-pool-mcp/image/process-illustration': 'execution-flow',
+  }),
+  'project-graph-mcp': Object.freeze({
+    'media/project-graph-mcp/image/process-illustration': 'graph-example',
+  }),
+  'lifecycle-messaging-platform': Object.freeze({
+    'media/lifecycle-messaging-platform/image/process-illustration': 'delivery-flow',
+  }),
+  'mobile-smm-platform': Object.freeze({
+    'media/mobile-smm-platform/image/process-illustration': 'system-map',
+  }),
+  'f360-studio': Object.freeze({
+    'media/f360-studio/image/process-illustration': 'production-path',
+    'media/f360-studio/youtube/G32wNSEzl8s': 'gallery-result',
+  }),
+  'symbiote-workspace': Object.freeze({
+    'media/symbiote-workspace/image/configuration-illustration': 'config-flow',
+  }),
   'adaptive-maximo-workbench': Object.freeze({
+    'media/adaptive-maximo-workbench/image/process-illustration': 'asset-context',
     'media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc': 'agentic-eam-demo',
     'media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs': 'xr-eam-example',
   }),
   megavisor: Object.freeze({
+    'media/megavisor/image/process-illustration': 'player-concept',
     'media/megavisor/youtube/c3cCmDqO04c': 'lead',
     'media/megavisor/youtube/f1cB4X1wI50': 'photopizza-origin',
     'media/megavisor/youtube/cFPJqtcWNSU': 'photopizza-origin',
     'media/megavisor/youtube/6CpdVcjtZoU': 'media-production',
   }),
   photopizza: Object.freeze({
+    'media/photopizza/image/process-illustration': 'controller',
     'media/photopizza/youtube/2lO2VsZFAz0': 'lead',
     'media/photopizza/youtube/6CpdVcjtZoU': 'origin',
     'media/photopizza/youtube/f1cB4X1wI50': 'origin',
@@ -21,11 +49,13 @@ export const PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS = Object.freeze({
     'media/photopizza/ims/spinner': 'scope',
   }),
   complexscan: Object.freeze({
+    'media/complexscan/image/process-illustration': 'integrated-method',
     'media/complexscan/youtube/MHfWHxVSgn4': 'transparent-system',
     'media/complexscan/youtube/PFPoitVEWcE': 'integrated-method',
   }),
   'autobox-v1': Object.freeze({
-    'media/autobox-v1/ims/spinner': 'project-scope',
+    'media/autobox-v1/image/process-illustration': 'lead',
+    'media/autobox-v1/ims/spinner': 'lead',
     'media/autobox-v1/youtube/IPEY0yiVb-I': 'capture-technology',
     'media/autobox-v1/youtube/NWpMtNZjrzI': 'capture-technology',
     'media/autobox-v1/youtube/8XsSHyQFtV8': 'capture-technology',
@@ -37,12 +67,15 @@ export const PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS = Object.freeze({
     'media/autobox-v1/youtube/o4XzMKW8a2E': 'visualization',
   }),
   'agent-portal': Object.freeze({
+    'media/agent-portal/image/process-illustration': 'process-diagram',
     'media/agent-portal/ims/gallery': 'workspace',
   }),
   boothbot: Object.freeze({
+    'media/boothbot/image/process-illustration': 'solution',
     'media/boothbot/ims/gallery': 'solution',
   }),
   'symbiote-video-studio': Object.freeze({
+    'media/symbiote-video-studio/image/process-illustration': 'semantic-flow',
     'media/symbiote-video-studio/image/interface': 'overview',
   }),
 });
