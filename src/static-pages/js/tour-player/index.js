@@ -1108,7 +1108,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let originTargetId = '';
   let running = false;
   const syncHeaderShowButton = (active = running || getChat()?.$?.isRunning === true) => {
-    let button = document.querySelector('.pulse-tour-button');
+    let button = /** @type {HTMLElement | null} */ (document.querySelector('.pulse-tour-button'));
     if (!button) return;
     let locale = document.documentElement.lang || 'en';
     let showAvailable = locale === 'ru';

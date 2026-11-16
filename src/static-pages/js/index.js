@@ -3960,7 +3960,7 @@ class PortfolioWorkspace extends HTMLElement {
         initialPanelType: 'portfolio-viewer',
         animateInitialPanel: true,
       });
-      let rail = mobileNavigation.querySelector('.mobile-panel-rail');
+      let rail = /** @type {HTMLElement | null} */ (mobileNavigation.querySelector('.mobile-panel-rail'));
       if (rail) {
         let updateActiveSlide = () => {
           let activeButton = rail.querySelector('[aria-current="page"]');
