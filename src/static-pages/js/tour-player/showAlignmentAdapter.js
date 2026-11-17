@@ -201,7 +201,15 @@ export function resolveCvShowAudioAnchor(directive, index, total) {
  */
 export function cvShowOperationRole(projectCell, project) {
   if (!projectCell) return '';
-  if (projectCvShowDirective(projectCell, project)?.type === 'media') return 'media';
+  // Audio and narration cells are not directive cells: projectCvShowDirective
+  // throws for them, and they have no media role to resolve.
+  let directive = null;
+  try {
+    directive = projectCvShowDirective(projectCell, project);
+  } catch {
+    directive = null;
+  }
+  if (directive?.type === 'media') return 'media';
   return String(projectCell.cue?.interaction?.type || projectCell.cue?.kind || '');
 }
 

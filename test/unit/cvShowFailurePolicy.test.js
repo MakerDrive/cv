@@ -132,6 +132,25 @@ test('a failed media montage degrades instead of stopping the show', () => {
   );
 });
 
+test('operation role resolves for audio and narration cells without throwing', async () => {
+  const { cvShowOperationRole } = await import(
+    '../../src/static-pages/js/tour-player/showAlignmentAdapter.js'
+  );
+  // These cells are not directive cells; resolving their role must not throw
+  // inside the failure handler that classifies their own failures.
+  for (const kind of ['audio-clip', 'narration']) {
+    const cells = CV_SHOW_PRESENTATION_PROJECT.cells.filter((cell) => cell.kind === kind);
+    assert.ok(cells.length > 0, `the CV Show project has ${kind} cells`);
+    for (const cell of cells) {
+      assert.doesNotThrow(
+        () => cvShowOperationRole(cell, CV_SHOW_PRESENTATION_PROJECT),
+        `${cell.id} resolves an operation role`,
+      );
+      assert.notEqual(cvShowOperationRole(cell, CV_SHOW_PRESENTATION_PROJECT), 'media');
+    }
+  }
+});
+
 test('interaction failures pause-retry only before narration started', () => {
   assert.equal(
     resolveFailureRecovery({
