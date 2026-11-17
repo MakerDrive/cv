@@ -954,9 +954,28 @@ test('IMS Show gallery accent presents each frame through the real next control'
 
 test('IMS Show gallery montage stops presenting clicks when the cell budget cannot carry them', async () => {
   const events = [];
+  // The gallery exposes its toolbar, so the next control exists and the
+  // budget check is what decides whether a click is presented.
+  const button = (name) => ({
+    localName: 'ims-button',
+    click() {
+      events.push(['click', name]);
+      gallery.hotspotState = { image: gallery.hotspotState.image + 1 };
+    },
+  });
+  const toolbar = {
+    localName: 'ims-gallery-toolbar',
+    shadowRoot: null,
+    querySelectorAll: (selector) => (selector === 'ims-button'
+      ? [button('prev'), button('next'), button('autoplay')]
+      : []),
+  };
   const gallery = {
     localName: 'ims-gallery',
     hotspotState: { image: 0 },
+    shadowRoot: {
+      querySelector: (selector) => (selector === 'ims-gallery-toolbar' ? toolbar : null),
+    },
     goTo(index) {
       events.push(['goTo', index]);
       this.hotspotState = { image: index };
@@ -972,8 +991,8 @@ test('IMS Show gallery montage stops presenting clicks when the cell budget cann
       wait: async (durationMs) => { events.push(['wait', durationMs]); },
     },
   });
-  // A cell budget that can carry the authored holds but no click at all.
-  target.setShowMediaBudget({ budgetMs: 5_000 });
+  // A cell budget too small for any click: even the last frame (1000ms hold + 1400ms click) overruns it.
+  target.setShowMediaBudget({ budgetMs: 500 });
 
   const result = await target.playShowMedia({
     frames: [1, 2, 3],
@@ -989,7 +1008,12 @@ test('IMS Show gallery montage stops presenting clicks when the cell budget cann
   ], 'the montage advances through the gallery API instead of overrunning the cell');
   assert.deepEqual(
     evidence.filter(({ frame }) => Number.isInteger(frame)).map(({ frame, via }) => ({ frame, via })),
-    [{ frame: 1, via: 'state-observed' }, { frame: 2, via: 'api-fallback' }, { frame: 3, via: 'api-fallback' }],
+    [
+      { frame: 1, via: 'state-observed' },
+      { frame: 2, via: 'budget-exhausted' }, { frame: 2, via: 'api-fallback' },
+      { frame: 3, via: 'budget-exhausted' }, { frame: 3, via: 'api-fallback' },
+    ],
+    'no click is presented: each frame records the exhausted budget before the API fallback',
   );
 });
 
