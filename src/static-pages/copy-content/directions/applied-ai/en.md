@@ -4,19 +4,19 @@ I build tools and workflows in which AI agents work with project context and pas
 
 ## Projects
 
-![Agent Portal](../../illustrations/agent-portal.webp)
+![Agent Portal](illustrations/agent-portal.webp)
 
 **[Agent Portal](../../projects/agent-portal/)** — An engineering workspace with resource groups, model routing, and an executable Kanban board.
 
-![Agent Pool MCP](../../illustrations/agent-pool-mcp.webp)
+![Agent Pool MCP](illustrations/agent-pool-mcp.webp)
 
 **[Agent Pool MCP](../../projects/agent-pool-mcp/)** — Delegation to CLI agents with visible ownership and execution state.
 
-![Project Graph MCP](../../illustrations/project-graph-mcp.webp)
+![Project Graph MCP](illustrations/project-graph-mcp.webp)
 
 **[Project Graph MCP](../../projects/project-graph-mcp/)** — Tools that give agents a structured view of a codebase and its dependencies.
 
-![Symbiote Workspace](../../illustrations/workspace-configuration.webp)
+![Symbiote Workspace](illustrations/workspace-configuration.webp)
 
 **[Symbiote Workspace](../../projects/symbiote-workspace/)** — A task-specific workspace assembled from a portable configuration.
 

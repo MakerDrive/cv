@@ -5,19 +5,19 @@ Desarrollo herramientas y procesos en los que los agentes de IA trabajan con con
 ## Proyectos
 
 | Proyecto | Ejemplo |
-![Agent Portal](../../illustrations/agent-portal.webp)
+![Agent Portal](illustrations/agent-portal.webp)
 
 **[Agent Portal](../../projects/agent-portal/)** — Entorno de ingeniería con grupos de recursos, enrutamiento de modelos y un tablero Kanban ejecutable.
 
-![Agent Pool MCP](../../illustrations/agent-pool-mcp.webp)
+![Agent Pool MCP](illustrations/agent-pool-mcp.webp)
 
 **[Agent Pool MCP](../../projects/agent-pool-mcp/)** — Delegación a agentes CLI con responsabilidad y estado de ejecución visibles.
 
-![Project Graph MCP](../../illustrations/project-graph-mcp.webp)
+![Project Graph MCP](illustrations/project-graph-mcp.webp)
 
 **[Project Graph MCP](../../projects/project-graph-mcp/)** — Herramientas que ofrecen a los agentes una vista estructurada del código y sus dependencias.
 
-![Symbiote Workspace](../../illustrations/workspace-configuration.webp)
+![Symbiote Workspace](illustrations/workspace-configuration.webp)
 
 **[Symbiote Workspace](../../projects/symbiote-workspace/)** — Un espacio de trabajo para una tarea concreta, ensamblado desde una configuración portátil.
 

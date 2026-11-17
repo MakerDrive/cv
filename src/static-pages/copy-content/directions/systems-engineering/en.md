@@ -4,7 +4,7 @@ I design software products in which the interface, APIs, data stores, queues, an
 
 ## Projects
 
-![Lifecycle Messaging Platform](../../illustrations/lifecycle-messaging-platform.webp)
+![Lifecycle Messaging Platform](illustrations/lifecycle-messaging-platform.webp)
 
 **[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — A messaging platform with APIs, PostgreSQL, queues, and a separate GSM modem runtime.
 
@@ -12,7 +12,7 @@ I design software products in which the interface, APIs, data stores, queues, an
 
 **[PhotoSnail Public](../../projects/photosnail-public/)** — Early experiments in camera motion control and presenting captured media.
 
-![Adaptive Maximo Workbench](../../illustrations/adaptive-maximo-workbench.webp)
+![Adaptive Maximo Workbench](illustrations/adaptive-maximo-workbench.webp)
 
 **[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — A maintenance demo interface whose available path is read-only.
 

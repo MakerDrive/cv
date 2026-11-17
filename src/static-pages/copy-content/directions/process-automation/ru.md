@@ -4,17 +4,17 @@
 
 ## Примеры проектов
 
-![Lifecycle Messaging Platform](../../illustrations/lifecycle-messaging-platform.webp)
+![Lifecycle Messaging Platform](illustrations/lifecycle-messaging-platform.webp)
 
 **[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — Очереди и выполнение кампаний через распределённый runtime и GSM-модемы.
 
 **[Browser X MCP](../../projects/browser-x-mcp/)** — Инструмент на Playwright для навигации, осмотра страницы и управляемых действий в браузере.
 
-![Mobile SMM Operations Platform](../../illustrations/mobile-smm-platform.webp)
+![Mobile SMM Operations Platform](illustrations/mobile-smm-platform.webp)
 
 **[Mobile SMM Operations Platform](../../projects/mobile-smm-platform/)** — Сценарии Android, очереди, лимиты, дедупликация и журнал операций.
 
-![Adaptive Maximo Workbench](../../illustrations/adaptive-maximo-workbench.webp)
+![Adaptive Maximo Workbench](illustrations/adaptive-maximo-workbench.webp)
 
 **[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — Демонстрационный интерфейс обслуживания оборудования с доступными действиями в режиме read-only.
 
