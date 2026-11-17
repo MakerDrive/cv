@@ -141,13 +141,20 @@ I design software products in which the interface, APIs, data stores, queues, an
 
 #### Projects
 
-| Project | Example |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | A messaging platform with APIs, PostgreSQL, queues, and a separate GSM modem runtime. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | Browser control of a turntable over a local network. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | Early experiments in camera motion control and presenting captured media. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | A maintenance demo interface whose available path is read-only. |
-| [Symbiote Node](../../projects/symbiote-node/) | A package and migration layer for UI components and an execution engine. |
+![Lifecycle Messaging Platform](illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — A messaging platform with APIs, PostgreSQL, queues, and a separate GSM modem runtime.
+
+**[PhotoPizza Remote](../../projects/photopizza-remote/)** — Browser control of a turntable over a local network.
+
+**[PhotoSnail Public](../../projects/photosnail-public/)** — Early experiments in camera motion control and presenting captured media.
+
+![Adaptive Maximo Workbench](illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — A maintenance demo interface whose available path is read-only.
+
+**[Symbiote Node](../../projects/symbiote-node/)** — A package and migration layer for UI components and an execution engine.
+
 
 #### My contribution
 
@@ -179,13 +186,24 @@ I build tools and workflows in which AI agents work with project context and pas
 
 #### Projects
 
-| Project | Example |
-| --- | --- |
-| [Agent Portal](../../projects/agent-portal/) | An engineering workspace with resource groups, model routing, and an executable Kanban board. |
-| [Agent Pool MCP](../../projects/agent-pool-mcp/) | Delegation to CLI agents with visible ownership and execution state. |
-| [Project Graph MCP](../../projects/project-graph-mcp/) | Tools that give agents a structured view of a codebase and its dependencies. |
-| [Symbiote Workspace](../../projects/symbiote-workspace/) | A task-specific workspace assembled from a portable configuration. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | An early Playwright browser tool for controlled UI operations. |
+![Agent Portal](illustrations/agent-portal.webp)
+
+**[Agent Portal](../../projects/agent-portal/)** — An engineering workspace with resource groups, model routing, and an executable Kanban board.
+
+![Agent Pool MCP](illustrations/agent-pool-mcp.webp)
+
+**[Agent Pool MCP](../../projects/agent-pool-mcp/)** — Delegation to CLI agents with visible ownership and execution state.
+
+![Project Graph MCP](illustrations/project-graph-mcp.webp)
+
+**[Project Graph MCP](../../projects/project-graph-mcp/)** — Tools that give agents a structured view of a codebase and its dependencies.
+
+![Symbiote Workspace](illustrations/workspace-configuration.webp)
+
+**[Symbiote Workspace](../../projects/symbiote-workspace/)** — A task-specific workspace assembled from a portable configuration.
+
+**[Browser X MCP](../../projects/browser-x-mcp/)** — An early Playwright browser tool for controlled UI operations.
+
 
 #### My contribution
 
@@ -215,12 +233,20 @@ I automate repeatable operations in browsers, mobile applications, and service s
 
 #### Project examples
 
-| Project | Example |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | Queues and campaign execution through a distributed runtime and GSM modems. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | A Playwright tool for navigation, page inspection, and controlled browser actions. |
-| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | Android scenarios, queues, limits, deduplication, and operation logs. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | A read-only maintenance demo that shows the actions available in the current state. |
+![Lifecycle Messaging Platform](illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — Queues and campaign execution through a distributed runtime and GSM modems.
+
+**[Browser X MCP](../../projects/browser-x-mcp/)** — A Playwright tool for navigation, page inspection, and controlled browser actions.
+
+![Mobile SMM Operations Platform](illustrations/mobile-smm-platform.webp)
+
+**[Mobile SMM Operations Platform](../../projects/mobile-smm-platform/)** — Android scenarios, queues, limits, deduplication, and operation logs.
+
+![Adaptive Maximo Workbench](illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — A read-only maintenance demo that shows the actions available in the current state.
+
 
 #### My contribution
 
@@ -1882,32 +1908,6 @@ The experiment implemented tool contracts and stdio server wiring. Terminal exec
 
 - [github.com](https://github.com/rnd-pro/terminal-x-mcp)
 
-#### Three permanent directions replace the article set
-
-URL: https://makerdrive.github.io/cv/pulse/directions-section/?lang=en
-
-Date: 2026-11-12T12:00:00Z
-
-Systems engineering, applied AI infrastructure and delegation, and process automation are now permanent sections; the four articles moved into them and their old Pulse addresses point at the new pages.
-
-#### What changed
-
-Four Pulse articles described the same practice areas from a single moment in time. They are now permanent sections of the portfolio, because a direction is not a publication: it is the accumulated answer to "what do you solve", with the project periods, the personal contribution, and the line between what runs and what is still a plan.
-
-#### Where the texts went
-
-- **Systems Engineering and Integration** — [read the direction](../directions/systems-engineering/). Source: the article on full-stack and systems integration.
-- **Applied AI Infrastructure and Agent Delegation** — [read the direction](../directions/applied-ai/). Sources: the articles on AI deployment control and on delegation to verified action.
-- **Process Automation and Verification** — [read the direction](../directions/process-automation/). Source: the article on web form automation with a verified request route.
-
-#### What happens to the old addresses
-
-The old Pulse addresses keep working. Each of them now leads to the permanent section that replaced it, is marked `noindex, follow`, and points its canonical tag at that section, so the article text is not duplicated as a competing page.
-
-#### Why this is dated today
-
-The date on this note is the date the portfolio was reorganised, not the date the practice started. The projects keep their own periods, and each direction page states when its source text was published.
-
 ## Locale: Russian
 
 ### Профиль
@@ -2039,13 +2039,20 @@ URL: https://makerdrive.github.io/cv/directions/systems-engineering/?lang=ru
 
 #### Проекты
 
-| Проект | Пример работы |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | Платформа сообщений с API, PostgreSQL, очередями и отдельным runtime для GSM-модемов. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | Управление поворотным столом из браузера по локальной сети. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | Ранние эксперименты с управляемым движением камеры и показом результатов съёмки. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Демо-интерфейс для ремонтных операций; доступный путь работает только для чтения. |
-| [Symbiote Node](../../projects/symbiote-node/) | Пакетный и миграционный слой для UI-компонентов и execution-engine. |
+![Lifecycle Messaging Platform](illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — Платформа сообщений с API, PostgreSQL, очередями и отдельным runtime для GSM-модемов.
+
+**[PhotoPizza Remote](../../projects/photopizza-remote/)** — Управление поворотным столом из браузера по локальной сети.
+
+**[PhotoSnail Public](../../projects/photosnail-public/)** — Ранние эксперименты с управляемым движением камеры и показом результатов съёмки.
+
+![Adaptive Maximo Workbench](illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — Демо-интерфейс для ремонтных операций; доступный путь работает только для чтения.
+
+**[Symbiote Node](../../projects/symbiote-node/)** — Пакетный и миграционный слой для UI-компонентов и execution-engine.
+
 
 #### Мой вклад
 
@@ -2077,13 +2084,24 @@ URL: https://makerdrive.github.io/cv/directions/applied-ai/?lang=ru
 
 #### Проекты
 
-| Проект | Пример работы |
-| --- | --- |
-| [Agent Portal](../../projects/agent-portal/) | Рабочая среда с группами ресурсов, маршрутизацией моделей и исполняемой Kanban-доской. |
-| [Agent Pool MCP](../../projects/agent-pool-mcp/) | Делегирование задач CLI-агентам с видимым владением и состоянием выполнения. |
-| [Project Graph MCP](../../projects/project-graph-mcp/) | Инструменты, которые дают агентам структуру кодовой базы и её зависимостей. |
-| [Symbiote Workspace](../../projects/symbiote-workspace/) | Сборка рабочего пространства под задачу из переносимой конфигурации. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | Ранний браузерный инструмент на Playwright для управляемых UI-операций. |
+![Agent Portal](illustrations/agent-portal.webp)
+
+**[Agent Portal](../../projects/agent-portal/)** — Рабочая среда с группами ресурсов, маршрутизацией моделей и исполняемой Kanban-доской.
+
+![Agent Pool MCP](illustrations/agent-pool-mcp.webp)
+
+**[Agent Pool MCP](../../projects/agent-pool-mcp/)** — Делегирование задач CLI-агентам с видимым владением и состоянием выполнения.
+
+![Project Graph MCP](illustrations/project-graph-mcp.webp)
+
+**[Project Graph MCP](../../projects/project-graph-mcp/)** — Инструменты, которые дают агентам структуру кодовой базы и её зависимостей.
+
+![Symbiote Workspace](illustrations/workspace-configuration.webp)
+
+**[Symbiote Workspace](../../projects/symbiote-workspace/)** — Сборка рабочего пространства под задачу из переносимой конфигурации.
+
+**[Browser X MCP](../../projects/browser-x-mcp/)** — Ранний браузерный инструмент на Playwright для управляемых UI-операций.
+
 
 #### Мой вклад
 
@@ -2113,12 +2131,20 @@ URL: https://makerdrive.github.io/cv/directions/process-automation/?lang=ru
 
 #### Примеры проектов
 
-| Проект | Пример работы |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | Очереди и выполнение кампаний через распределённый runtime и GSM-модемы. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | Инструмент на Playwright для навигации, осмотра страницы и управляемых действий в браузере. |
-| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | Сценарии Android, очереди, лимиты, дедупликация и журнал операций. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Демонстрационный интерфейс обслуживания оборудования с доступными действиями в режиме read-only. |
+![Lifecycle Messaging Platform](illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — Очереди и выполнение кампаний через распределённый runtime и GSM-модемы.
+
+**[Browser X MCP](../../projects/browser-x-mcp/)** — Инструмент на Playwright для навигации, осмотра страницы и управляемых действий в браузере.
+
+![Mobile SMM Operations Platform](illustrations/mobile-smm-platform.webp)
+
+**[Mobile SMM Operations Platform](../../projects/mobile-smm-platform/)** — Сценарии Android, очереди, лимиты, дедупликация и журнал операций.
+
+![Adaptive Maximo Workbench](illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — Демонстрационный интерфейс обслуживания оборудования с доступными действиями в режиме read-only.
+
 
 #### Мой вклад
 
@@ -3784,32 +3810,6 @@ Period: 2025
 
 - [github.com](https://github.com/rnd-pro/terminal-x-mcp)
 
-#### Три постоянных направления вместо статей
-
-URL: https://makerdrive.github.io/cv/pulse/directions-section/?lang=ru
-
-Date: 2026-11-12T12:00:00Z
-
-Системная инженерия, прикладная ИИ-инфраструктура с делегированием и автоматизация процессов стали постоянными разделами; четыре статьи переехали в них, а прежние адреса Pulse ведут на новые страницы.
-
-#### Что изменилось
-
-Четыре статьи Pulse описывали одни и те же направления практики с одной точки во времени. Теперь это постоянные разделы портфолио: направление — не публикация, а накопленный ответ на вопрос «какие задачи вы решаете», с периодами проектов, личным вкладом и границей между работающим и планируемым.
-
-#### Куда переехали тексты
-
-- **Системная инженерия и интеграция** — [читать направление](../directions/systems-engineering/). Источник: статья о full-stack и системной интеграции.
-- **Прикладная ИИ-инфраструктура и делегирование задач** — [читать направление](../directions/applied-ai/). Источники: статьи об управлении ИИ-развёртыванием и о делегировании до проверенного действия.
-- **Автоматизация процессов и проверка результата** — [читать направление](../directions/process-automation/). Источник: статья об автоматизации веб-форм с проверяемым маршрутом заявки.
-
-#### Что происходит со старыми адресами
-
-Прежние адреса Pulse продолжают работать. Каждый из них ведёт в постоянный раздел, который его заменил, помечен `noindex, follow` и указывает canonical на этот раздел, поэтому текст статьи не дублируется как конкурирующая страница.
-
-#### Почему запись датирована сегодня
-
-Дата этой записи — дата reorganзации портфолио, а не дата начала практики. У проектов сохраняются свои периоды, а на каждой странице направления указано, когда был опубликован её исходный текст.
-
 ## Locale: Spanish
 
 ### Perfil profesional
@@ -3942,12 +3942,20 @@ Diseño productos de software en los que la interfaz, las API, el almacenamiento
 #### Proyectos
 
 | Proyecto | Ejemplo |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | Plataforma de mensajería con API, PostgreSQL, colas y un runtime separado para módems GSM. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | Control de una mesa giratoria desde el navegador por una red local. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | Primeros experimentos con movimiento controlado de cámara y presentación de las capturas. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Interfaz demo para mantenimiento cuyo recorrido disponible es de solo lectura. |
-| [Symbiote Node](../../projects/symbiote-node/) | Capa de empaquetado y migración para componentes de UI y un motor de ejecución. |
+![Lifecycle Messaging Platform](illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — Plataforma de mensajería con API, PostgreSQL, colas y un runtime separado para módems GSM.
+
+**[PhotoPizza Remote](../../projects/photopizza-remote/)** — Control de una mesa giratoria desde el navegador por una red local.
+
+**[PhotoSnail Public](../../projects/photosnail-public/)** — Primeros experimentos con movimiento controlado de cámara y presentación de las capturas.
+
+![Adaptive Maximo Workbench](illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — Interfaz demo para mantenimiento cuyo recorrido disponible es de solo lectura.
+
+**[Symbiote Node](../../projects/symbiote-node/)** — Capa de empaquetado y migración para componentes de UI y un motor de ejecución.
+
 
 #### Mi contribución
 
@@ -3980,12 +3988,24 @@ Desarrollo herramientas y procesos en los que los agentes de IA trabajan con con
 #### Proyectos
 
 | Proyecto | Ejemplo |
-| --- | --- |
-| [Agent Portal](../../projects/agent-portal/) | Entorno de ingeniería con grupos de recursos, enrutamiento de modelos y un tablero Kanban ejecutable. |
-| [Agent Pool MCP](../../projects/agent-pool-mcp/) | Delegación a agentes CLI con responsabilidad y estado de ejecución visibles. |
-| [Project Graph MCP](../../projects/project-graph-mcp/) | Herramientas que ofrecen a los agentes una vista estructurada del código y sus dependencias. |
-| [Symbiote Workspace](../../projects/symbiote-workspace/) | Un espacio de trabajo para una tarea concreta, ensamblado desde una configuración portátil. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | Una primera herramienta de navegador con Playwright para operaciones de UI controladas. |
+![Agent Portal](illustrations/agent-portal.webp)
+
+**[Agent Portal](../../projects/agent-portal/)** — Entorno de ingeniería con grupos de recursos, enrutamiento de modelos y un tablero Kanban ejecutable.
+
+![Agent Pool MCP](illustrations/agent-pool-mcp.webp)
+
+**[Agent Pool MCP](../../projects/agent-pool-mcp/)** — Delegación a agentes CLI con responsabilidad y estado de ejecución visibles.
+
+![Project Graph MCP](illustrations/project-graph-mcp.webp)
+
+**[Project Graph MCP](../../projects/project-graph-mcp/)** — Herramientas que ofrecen a los agentes una vista estructurada del código y sus dependencias.
+
+![Symbiote Workspace](illustrations/workspace-configuration.webp)
+
+**[Symbiote Workspace](../../projects/symbiote-workspace/)** — Un espacio de trabajo para una tarea concreta, ensamblado desde una configuración portátil.
+
+**[Browser X MCP](../../projects/browser-x-mcp/)** — Una primera herramienta de navegador con Playwright para operaciones de UI controladas.
+
 
 #### Mi contribución
 
@@ -4016,11 +4036,20 @@ Automatizo operaciones repetibles en navegadores, aplicaciones móviles y sistem
 #### Ejemplos de proyectos
 
 | Proyecto | Ejemplo |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | Colas y ejecución de campañas mediante un runtime distribuido y módems GSM. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | Herramienta con Playwright para navegar, inspeccionar páginas y realizar acciones controladas. |
-| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | Escenarios Android, colas, límites, deduplicación y registros de operaciones. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Demo de mantenimiento en modo de solo lectura, con las acciones disponibles según el estado actual. |
+![Lifecycle Messaging Platform](illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — Colas y ejecución de campañas mediante un runtime distribuido y módems GSM.
+
+**[Browser X MCP](../../projects/browser-x-mcp/)** — Herramienta con Playwright para navegar, inspeccionar páginas y realizar acciones controladas.
+
+![Mobile SMM Operations Platform](illustrations/mobile-smm-platform.webp)
+
+**[Mobile SMM Operations Platform](../../projects/mobile-smm-platform/)** — Escenarios Android, colas, límites, deduplicación y registros de operaciones.
+
+![Adaptive Maximo Workbench](illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — Demo de mantenimiento en modo de solo lectura, con las acciones disponibles según el estado actual.
+
 
 #### Mi contribución
 
@@ -5679,30 +5708,4 @@ El experimento implementó contratos de herramientas y cableado del servidor std
 ##### Recursos del proyecto
 
 - [github.com](https://github.com/rnd-pro/terminal-x-mcp)
-
-#### Tres direcciones permanentes sustituyen al conjunto de artículos
-
-URL: https://makerdrive.github.io/cv/pulse/directions-section/?lang=es
-
-Date: 2026-11-12T12:00:00Z
-
-La ingeniería de sistemas, la infraestructura de IA aplicada con delegación y la automatización de procesos son ahora secciones permanentes; los cuatro artículos se trasladaron a ellas y sus antiguas direcciones de Pulse apuntan a las páginas nuevas.
-
-#### Qué cambió
-
-Cuatro artículos de Pulse describían las mismas áreas de práctica desde un único momento. Ahora son secciones permanentes del portafolio, porque una dirección no es una publicación: es la respuesta acumulada a «qué problemas resuelves», con los períodos de los proyectos, el aporte personal y la frontera entre lo que funciona y lo que sigue siendo un plan.
-
-#### A dónde fueron los textos
-
-- **Ingeniería de sistemas e integración** — [leer la dirección](../directions/systems-engineering/). Origen: el artículo sobre full-stack e integración de sistemas.
-- **Infraestructura de IA aplicada y delegación a agentes** — [leer la dirección](../directions/applied-ai/). Orígenes: los artículos sobre control de despliegue de IA y sobre delegación hasta la acción verificada.
-- **Automatización de procesos y verificación** — [leer la dirección](../directions/process-automation/). Origen: el artículo sobre automatización de formularios web con una ruta de solicitud verificable.
-
-#### Qué pasa con las direcciones antiguas
-
-Las direcciones antiguas de Pulse siguen funcionando. Cada una lleva a la sección permanente que la reemplazó, está marcada como `noindex, follow` y apunta su canonical a esa sección, así que el texto del artículo no se duplica como página competidora.
-
-#### Por qué esta nota está fechada hoy
-
-La fecha de esta nota es la fecha en que se reorganizó el portafolio, no la fecha en que empezó la práctica. Los proyectos conservan sus propios períodos y cada página de dirección indica cuándo se publicó su texto original.
 

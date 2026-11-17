@@ -141,7 +141,6 @@ R&D is the shared method across these areas, spanning domain research and protot
 - [Browser Control for PhotoPizza Turntables release](https://makerdrive.github.io/cv/pulse/photopizza-remote-browser-hardware-control/?lang=en): The browser connects to a local controller over WebSocket to configure capture parameters, start or stop motion, and show remaining frames.
 - [PhotoSnail: Implemented Motion and Planned Object Tracking research note](https://makerdrive.github.io/cv/pulse/photosnail-public-motion-control-object-tracking/?lang=en): The open motorized slider implements carriage movement and capture settings; object tracking, CV, and ML remain unevidenced plans.
 - [Terminal X Execution-State Contracts field note](https://makerdrive.github.io/cv/pulse/terminal-x-mcp-terminal-execution-state/?lang=en): The prototype defines MCP schemas for command, monitoring, security, and workflow operations; its handlers remained placeholders.
-- [Three permanent directions replace the article set update](https://makerdrive.github.io/cv/pulse/directions-section/?lang=en): Systems engineering, applied AI infrastructure and delegation, and process automation are now permanent sections; the four articles moved into them and their old Pulse addresses point at the new pages.
 
 ## Directions
 - [Systems Engineering and Integration](https://makerdrive.github.io/cv/directions/systems-engineering/?lang=en): I connect software, data, queues, and devices into products that can be operated and recovered when something fails.

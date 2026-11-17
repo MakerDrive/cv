@@ -4,13 +4,24 @@
 
 ## Проекты
 
-| Проект | Пример работы |
-| --- | --- |
-| [Agent Portal](../../projects/agent-portal/) | Рабочая среда с группами ресурсов, маршрутизацией моделей и исполняемой Kanban-доской. |
-| [Agent Pool MCP](../../projects/agent-pool-mcp/) | Делегирование задач CLI-агентам с видимым владением и состоянием выполнения. |
-| [Project Graph MCP](../../projects/project-graph-mcp/) | Инструменты, которые дают агентам структуру кодовой базы и её зависимостей. |
-| [Symbiote Workspace](../../projects/symbiote-workspace/) | Сборка рабочего пространства под задачу из переносимой конфигурации. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | Ранний браузерный инструмент на Playwright для управляемых UI-операций. |
+![Agent Portal](illustrations/agent-portal.webp)
+
+**[Agent Portal](../../projects/agent-portal/)** — Рабочая среда с группами ресурсов, маршрутизацией моделей и исполняемой Kanban-доской.
+
+![Agent Pool MCP](illustrations/agent-pool-mcp.webp)
+
+**[Agent Pool MCP](../../projects/agent-pool-mcp/)** — Делегирование задач CLI-агентам с видимым владением и состоянием выполнения.
+
+![Project Graph MCP](illustrations/project-graph-mcp.webp)
+
+**[Project Graph MCP](../../projects/project-graph-mcp/)** — Инструменты, которые дают агентам структуру кодовой базы и её зависимостей.
+
+![Symbiote Workspace](illustrations/workspace-configuration.webp)
+
+**[Symbiote Workspace](../../projects/symbiote-workspace/)** — Сборка рабочего пространства под задачу из переносимой конфигурации.
+
+**[Browser X MCP](../../projects/browser-x-mcp/)** — Ранний браузерный инструмент на Playwright для управляемых UI-операций.
+
 
 ## Мой вклад
 
