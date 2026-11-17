@@ -107,13 +107,16 @@ test('retired direction articles keep their address and point at the section', (
   assert.equal(getPublicPublications().filter((publication) => DIRECTION_SOURCE_SLUGS.includes(publication.slug)).length, 0);
 });
 
-test('the reorganization note is a dated Pulse update, not a new practice start', () => {
+test('the reorganization note is retired into the permanent directions section', () => {
+  // 2026-11-17: the note itself was internal-process documentation ("what
+  // moved where"), so it follows the other internal notes into a noindex stub
+  // with the canonical on the permanent section.
   const note = PUBLICATIONS.find((publication) => publication.slug === 'directions-section');
   assert.ok(note);
   assert.equal(note.kind, 'update');
-  assert.equal(note.status, 'published');
+  assert.equal(note.status, 'retired');
   assert.equal(note.primaryProjectId, null);
-  assert.ok(Number.isFinite(Date.parse(note.publishedAt)));
+  assert.equal(note.retirementTarget, 'https://MakerDrive.github.io/cv/directions/');
   for (const locale of LOCALES) {
     assert.ok(note.locales[locale].title);
     assert.ok(note.locales[locale].summary);
