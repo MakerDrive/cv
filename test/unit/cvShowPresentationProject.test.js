@@ -709,6 +709,9 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:complexscan.delivery', { leadMs: 1_050, overlapMs: 1_550 }],
     ['cv-show:cue:complexscan.boothbot-gallery', { leadMs: 2_050, overlapMs: 7_450 }],
     ['cv-show:cue:photopizza.page-open', { leadMs: 1_150, overlapMs: 1_450 }],
+    // The contact arrow points at the chat buttons exactly while «связаться со
+    // мной» is spoken: the cue starts at its speech anchor on purpose.
+    ['cv-show:cue:finale.contacts', { leadMs: 600, overlapMs: 600 }],
   ]);
   const markerLeadOverrides = new Map([
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 3_300],
@@ -881,6 +884,7 @@ test('the structural fixture joins all 30 Project entries without media authorit
     // voiced, and the BoothBot montage plays across its five frames.
     ['cv-show:cue:complexscan.delivery', 1_550],
     ['cv-show:cue:complexscan.boothbot-gallery', 7_450],
+    ['cv-show:cue:finale.contacts', 600],
     ['cv-show:cue:photopizza.page-open', 1_450],
     ['cv-show:cue:photopizza.origin', 550],
     ['cv-show:cue:photopizza.video-01', 550],

@@ -1033,10 +1033,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/symbiote-workspace/image/configuration-illustration"
       },
       "dependsOn": [
@@ -1319,10 +1319,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/symbiote-ui/image/process-illustration"
       },
       "dependsOn": [
@@ -1670,10 +1670,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/symbiote-engine/image/process-illustration"
       },
       "dependsOn": [
@@ -1959,10 +1959,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/agent-portal/image/process-illustration"
       },
       "dependsOn": [
@@ -2312,10 +2312,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/symbiote-video-studio/image/process-illustration"
       },
       "dependsOn": [
@@ -2534,10 +2534,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/adaptive-maximo-workbench/image/process-illustration"
       },
       "dependsOn": [
@@ -2664,10 +2664,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/adaptive-maximo-workbench/image/process-illustration"
       },
       "dependsOn": [
@@ -2924,10 +2924,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/adaptive-maximo-workbench/image/process-illustration"
       },
       "dependsOn": [
@@ -3014,10 +3014,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/agent-pool-mcp/image/process-illustration"
       },
       "dependsOn": [
@@ -3173,10 +3173,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/project-graph-mcp/image/process-illustration"
       },
       "dependsOn": [
@@ -3303,10 +3303,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/project-graph-mcp/image/process-illustration"
       },
       "dependsOn": [
@@ -3659,10 +3659,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/lifecycle-messaging-platform/image/process-illustration"
       },
       "dependsOn": [
@@ -4085,10 +4085,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/mobile-smm-platform/image/process-illustration"
       },
       "dependsOn": [
@@ -4175,10 +4175,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/f360-studio/image/process-illustration"
       },
       "dependsOn": [
@@ -4396,10 +4396,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/autobox-v1/image/process-illustration"
       },
       "dependsOn": [
@@ -5136,10 +5136,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/complexscan/image/process-illustration"
       },
       "dependsOn": [
@@ -5463,10 +5463,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/boothbot/image/process-illustration"
       },
       "dependsOn": [
@@ -5754,10 +5754,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/megavisor/image/process-illustration"
       },
       "dependsOn": [
@@ -5884,10 +5884,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/megavisor/image/process-illustration"
       },
       "dependsOn": [
@@ -6145,10 +6145,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/photopizza/image/process-illustration"
       },
       "dependsOn": [
@@ -6275,10 +6275,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "kind": "focus",
         "focus": {
           "mode": "frame"
         },
+        "kind": "focus",
         "targetId": "media/photopizza/image/process-illustration"
       },
       "dependsOn": [
@@ -6637,7 +6637,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "navigate"
         },
         "kind": "interaction",
-        "targetId": "projects/index"
+        "targetId": "pulse/index"
       },
       "dependsOn": [],
       "id": "cv-show:cue:finale.map",
@@ -6662,7 +6662,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "portfolio.map.historical-branch"
+        "targetId": "media/symbiote-workspace/image/configuration-illustration"
       },
       "dependsOn": [
         {
@@ -6694,7 +6694,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "mode": "frame"
         },
         "kind": "focus",
-        "targetId": "portfolio.map.historical-branch"
+        "targetId": "media/symbiote-workspace/image/configuration-illustration"
       },
       "dependsOn": [
         {
@@ -6727,7 +6727,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "portfolio.map.engineering-scale-route"
+        "targetId": "article.symbiote-workspace.config-flow"
       },
       "dependsOn": [
         {
@@ -6761,7 +6761,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "series": "finale-scale"
         },
         "kind": "annotation",
-        "targetId": "portfolio.map.engineering-scale-route"
+        "targetId": "article.symbiote-workspace.config-flow"
       },
       "dependsOn": [
         {
@@ -6925,7 +6925,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "profile.contacts"
+        "targetId": "chat.actions.finale"
       },
       "dependsOn": [
         {
@@ -6945,7 +6945,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "quote": "связаться со мной"
         },
         "gestureDurationMs": 1000,
-        "leadMs": 2250,
+        "leadMs": 1800,
         "settleBy": "none",
         "until": null
       },
@@ -6953,12 +6953,11 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "interaction": {
-          "reversible": false,
-          "type": "click"
+        "focus": {
+          "mode": "frame"
         },
-        "kind": "interaction",
-        "targetId": "profile.contacts"
+        "kind": "focus",
+        "targetId": "chat.actions.finale"
       },
       "dependsOn": [
         {
@@ -6968,7 +6967,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       ],
       "id": "cv-show:cue:finale.contacts",
       "kind": "cue",
-      "layerId": "cv-show:layer:interaction",
+      "layerId": "cv-show:layer:focus",
       "timing": {
         "at": {
           "anchor": "speech",
@@ -6977,8 +6976,8 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "offsetMs": 0,
           "quote": "связаться со мной"
         },
-        "gestureDurationMs": 800,
-        "leadMs": 1050,
+        "gestureDurationMs": 1200,
+        "leadMs": 600,
         "settleBy": "none",
         "until": null
       },
@@ -13569,7 +13568,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 109,
+  "revision": 110,
   "schemaVersion": "workspace-presentation-authoring-project-v2",
   "script": {
     "grounding": {
@@ -15047,16 +15046,18 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-0KJ8QavG0byvlpzW983XXdS8BRTuJR5KcbzbMwh2FDE="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-r9OKtIAABu7lpI0bjSeR1vk8hqwxk3WGaHk3dPf9r/w=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-CSFYFEf1RRqJsQ6FnPDjgGrjYmxq12xslUw4JSK9oOE=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-+7XCthXBqFFjoCJIaowz92vYFjcniTQv5F23dBgfT3o=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-aJkawjy/VwVv8ONHvAvmz859emZ7DBs3m/BSFMux5Sw=",
         "entryId": "symbiote-workspace",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-LNZCXHOR0HMT7N4HBar295r7akWtkldh9A2rBtAg95o=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-m5lz+1c/aFpJ21vhLfYuRTkCEic48Q1sGTmoyyXCmU0=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-yMDwqWitxBGefF+kLgklF+hJeywZI/SK+2AYT7P7Ue0=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-workspace",
           "cv-show:cue:workspace.open",
           "cv-show:cue:workspace.intro-frame:scroll",
           "cv-show:cue:workspace.intro-frame",
+          "cv-show:cue:symbiote-workspace.illustration-task:scroll",
+          "cv-show:cue:symbiote-workspace.illustration-task",
           "cv-show:cue:workspace.portable-config:scroll",
           "cv-show:cue:workspace.portable-config",
           "cv-show:cue:workspace.agent-portal-card:scroll",
@@ -15066,16 +15067,18 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-TKG2nzqsScOKlp7PXJ4R5C5zcUyvfQG2EKzXTd9BGTo="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ZmNKnbBmixNRjiEe41jE2S4UAyj17jiZYUA2aJLUdZI=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-KL7gAQCEHCX6dZOWkmDjGvAwQ1Kp1u0CyF3D3TWqIyg=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-Ud8Kx6f/yKTsX+MvswrdfE+EckKQW6d5fF68SYYhHmU=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-/Pg7ZUViM5rlr1YD37hFRq/r2XeE7EW79tBUufsVxr8=",
         "entryId": "symbiote-ui",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-UM3u9BjwDxi006G9/34AjUqMwo7M9vz/viuU1T+Ip/Y=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-mUZmvguvQ357zcpboDz35Kge/oS37Xq5U4TIAIUX05E=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-MkVA2BloN9R/VlYGROLp1wB4CSngv7vmUNF7YDCiCJ8=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-ui",
           "cv-show:cue:symbiote-ui.open",
           "cv-show:cue:symbiote-ui.graph-tooling:scroll",
           "cv-show:cue:symbiote-ui.graph-tooling",
+          "cv-show:cue:symbiote-ui.illustration-components:scroll",
+          "cv-show:cue:symbiote-ui.illustration-components",
           "cv-show:cue:symbiote-ui.current-show:scroll",
           "cv-show:cue:symbiote-ui.current-show",
           "cv-show:cue:symbiote-ui.show-player-pointer:scroll",
@@ -15089,14 +15092,16 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-DmJ1PnXko6AY1TM0UQwYy6t4nqW5L6EOaYmxeoHWArQ="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-UVWTzVKYkA/LSou8+P7AMlUpiDS2ILkdalRA1NcsrSs=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-zPCnOmVWtP/N/5+Nv4RZYcM8oRcXs78N1ZaC/VGd+g8=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-AgMS9nVSLZ9A2d9mnvGgUrL2TrJLYTjEg9r/XnPioJw=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-Onl367u/5jLdn2pNOYvB2GdGlFy8jHbKMb7V745FnuM=",
         "entryId": "symbiote-engine",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-qo4U4OruoRqEbAlO37jVG3D/h5Bv+NxaMXLy2HgrZZo=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-RVdnAGKWtON3KxoHyZmm41mA+DYo7Kei5I+NjYaZano=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-dRQLaIUeoXkmV0EEH0g0D8MXc8oDRoUlm4seBmFI/q4=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-engine",
           "cv-show:cue:symbiote-engine.open",
+          "cv-show:cue:symbiote-engine.illustration-execution:scroll",
+          "cv-show:cue:symbiote-engine.illustration-execution",
           "cv-show:cue:symbiote-engine.intro:scroll",
           "cv-show:cue:symbiote-engine.intro",
           "cv-show:cue:symbiote-engine.workspace-join:scroll",
@@ -15106,16 +15111,18 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-ayF5G/HYSmfK2N3TuTQLR9lNUKc2k2Jyn/N+HGvxGuE="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-6m/OHVdKGNag494XUIeUWyZ8ztC9KjRWUkvvt6dTvyE=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-p2ZZKDkXJF+634zkIevLx0ytbU1ndDaCZzyz0hqMma8=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-RtBLzylgHDZKfmoYW+ka1vygtL8Ta5OFKdDEcff26bs=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-TmFuceZPZHBlQdyZ/LwhPiY4U1WUhmImTr2mb2HkYLU=",
         "entryId": "agent-portal",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-HQlJ3wLzMrYGfpFzP8SBK52sQrb5Vj50WH9+whXMMq4=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-rn8xrLo/9XENDf9+SwtVbuD5mftmsfnSAyzeAWvrhGg=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-U5xYPd6+RKhH3kn0pN0sJzHMJTi32vKUQ0WTnAvZ6GU=",
         "sourceCellIds": [
           "cv-show:narration:agent-portal",
           "cv-show:cue:agent-portal.open",
           "cv-show:cue:agent-portal.path:scroll",
           "cv-show:cue:agent-portal.path",
+          "cv-show:cue:agent-portal.illustration-process:scroll",
+          "cv-show:cue:agent-portal.illustration-process",
           "cv-show:cue:agent-portal.human-decision:scroll",
           "cv-show:cue:agent-portal.human-decision",
           "cv-show:cue:agent-portal.open-source:scroll",
@@ -15129,14 +15136,16 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-Ec51w0d021JETTpqHSSkay/WqAeac2D9jJP2i8jodJs="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-a/r8z/RkRINLLL/yzgEsDFNRFxQDqbJh2cazfltAFDs=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-a5hz8CB1wd9BvSe2pJBYSs6FZBQJI7N47WVQ1bvkr44=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-bqotYVDBbxkzMLwaC3GfR2pafgALr2OHT7HKuS9xP4I=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-tQAVN8aS83cCBnLT7HNIBiu7oycDjHguv4ZONW32+HU=",
         "entryId": "symbiote-video-studio",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-zS4S5h/4Ng0f1kciMFUQfa8vXldqfnvDyQzZE35SdDA=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-gJIxMWOE9qSU8shuuKEAyCg4zePrx8/UI+FicvMaKZA=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-A1CHbKPpHChO7RbFbgpGby+4A/grHEOoZc0TA24m3Rg=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-video-studio",
           "cv-show:cue:video-studio.open",
+          "cv-show:cue:symbiote-video-studio.illustration-composition:scroll",
+          "cv-show:cue:symbiote-video-studio.illustration-composition",
           "cv-show:cue:video-studio.visible-process:scroll",
           "cv-show:cue:video-studio.visible-process",
           "cv-show:cue:video-studio.demo:scroll",
@@ -15146,35 +15155,43 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-JC/dtWwy5bGGInorBUZ8A63ndsU3AZYRo0Y0SXIWfwg="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-H0+MlZFyt+4d89JzJJ0+241hldLgt/8ybMaHzfHTjbM=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-dz3x4A46f0XwbXw67NnVa9w15mvYpvniceVnK4P7/cU=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-83e5smty/m0ENfzF2FbcCVWNoxIcWRf6LeQ1jG3AVC4=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-K4Q5laePNUuvp0n3Wjg+zfons76VSvlishb71UxIHf4=",
         "entryId": "adaptive-maximo-workbench",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-IkAYzb73jJsRYwt0cd/SiEbqYz/9BbxO9V8cLKikeA0=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-nbgtTCAy2mG1tuFx4zYF/Ld9JzvF56p3UaQUEw3Va6c=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-7yUdHVBVXifkCLq2r/3qWsCvNQuphlTVQM1SVntZ/1g=",
         "sourceCellIds": [
           "cv-show:narration:adaptive-maximo-workbench",
           "cv-show:cue:maximo.open",
+          "cv-show:cue:adaptive-maximo-workbench.illustration-context:scroll",
+          "cv-show:cue:adaptive-maximo-workbench.illustration-context",
           "cv-show:cue:maximo.work-orders:scroll",
           "cv-show:cue:maximo.work-orders",
+          "cv-show:cue:adaptive-maximo-workbench.illustration-asset:scroll",
+          "cv-show:cue:adaptive-maximo-workbench.illustration-asset",
           "cv-show:cue:maximo.asset-context:scroll",
           "cv-show:cue:maximo.asset-context",
           "cv-show:cue:maximo.agentic-demo:scroll",
           "cv-show:cue:maximo.agentic-demo",
           "cv-show:cue:maximo.xr-demo:scroll",
           "cv-show:cue:maximo.xr-demo",
+          "cv-show:cue:adaptive-maximo-workbench.illustration-inspection:scroll",
+          "cv-show:cue:adaptive-maximo-workbench.illustration-inspection",
           "cv-show:audio-clip:adaptive-maximo-workbench:01"
         ],
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-lPbMPmrAQcFz/S2ax7udH2bWpD0aK1WDZoSdN37MAlI="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-pwD5Km+AGO3sJVeyUbXcVTEBhTezMBAYz8xuxaxa/wg=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-Og03ra0A8hmHTQ61GpHq8FKi+TEGMZo4PdiR7iOAplk=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PDtQy/hsBtKL5FFyWntuWs031mhC4sAy/QKTkzqRSgU=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-3MIc/Zsc+Zlw3WxX7StyS71at2t36810q9R7smvv4GY=",
         "entryId": "agent-pool-mcp",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-c8VnwOKVj5TVk8V/XTEPpwhIUdJkIFxuxVdb2Rl/zC0=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-iHMMpgoXmyWf/ythj2QRRDhT/b2BGNGGc80f8oaIzR8=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-C6G5YP4/VzBXQXs+xboagYm8ao3+0nuV3sm1poTWr74=",
         "sourceCellIds": [
           "cv-show:narration:agent-pool-mcp",
           "cv-show:cue:agent-pool.open",
+          "cv-show:cue:agent-pool-mcp.illustration-dispatch:scroll",
+          "cv-show:cue:agent-pool-mcp.illustration-dispatch",
           "cv-show:cue:agent-pool.flow:scroll",
           "cv-show:cue:agent-pool.flow",
           "cv-show:audio-clip:agent-pool-mcp:01"
@@ -15182,16 +15199,20 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-AoTIBM8mXBGXZDJmqp7ieUVsXl54JhoVCAEWIOj1Ikk="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-zYEtt4pCmFmtxm7QWDWTEUV+xW+vef/PSbLeH/gGFg0=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-3LA774V4jymZ1hLXZ8aljaI2pnYljZo+Gd3GgW3gZuc=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-Wc2bXWZucKaQGAkejMXFWH8X0JoHV+Q6rp6MgWAHruk=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-ULVUxA4W0aSqM+OSikN6ifvFiANMf4LM30RetHsmN/4=",
         "entryId": "project-graph-mcp",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Vg2GAEq+Z5Mgag6lh/KNshncCiLLT39H9I6fy6rMTuc=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-gWsetMW9DQAN4TU1FZA2o4H39js+RjcOLBb8PU5uaC8=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-+EC8nBmFju1m+frEr0dnj5HiwOCvRdpQCaHdpylgeGs=",
         "sourceCellIds": [
           "cv-show:narration:project-graph-mcp",
           "cv-show:cue:project-graph.open",
+          "cv-show:cue:project-graph-mcp.illustration-repository:scroll",
+          "cv-show:cue:project-graph-mcp.illustration-repository",
           "cv-show:cue:project-graph.example:scroll",
           "cv-show:cue:project-graph.example",
+          "cv-show:cue:project-graph-mcp.illustration-retrieval:scroll",
+          "cv-show:cue:project-graph-mcp.illustration-retrieval",
           "cv-show:cue:project-graph.context:scroll",
           "cv-show:cue:project-graph.context",
           "cv-show:cue:project-graph.node:scroll",
@@ -15201,10 +15222,10 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-dBz8MZ3vphUctIVP0wiTnETURnSe3GIqHcAYipAXzXE="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-kNg91O6Vlg8g7pFHv5spbaUABMLIOzuVN45S/Kc4aVk=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-0XJnRxCOFbWsu4Fslyrv7hzH4sAbhG0UBqFp3+YFvGo=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-8rLIX9rqi+AvPN70GW4ZRPTiUr+JWyXjAteUoj2Ftcs=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-8XJMAcof/S3VpB5hQn79mRaYMwHdvMF40OQlvwDw8h0=",
         "entryId": "lifecycle-messaging-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-sGjHmk1MUuSBsKJS9TTRlm4cC0O1oLpZvpUYKVzGRuI=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-W5E1pnzxoMr95Jb7mjfN2ceNiPCa7yaKnwZ6xhwyj4I=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-rd5XWahbXiMfsBFby0WhdeIdDSlev4fN7pto/tAG5jc=",
         "sourceCellIds": [
           "cv-show:narration:lifecycle-messaging-platform",
@@ -15213,6 +15234,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:lifecycle.scope",
           "cv-show:cue:lifecycle.product-number:scroll",
           "cv-show:cue:lifecycle.product-number",
+          "cv-show:cue:lifecycle-messaging-platform.illustration-delivery:scroll",
+          "cv-show:cue:lifecycle-messaging-platform.illustration-delivery",
           "cv-show:cue:lifecycle.runtime-number:scroll",
           "cv-show:cue:lifecycle.runtime-number",
           "cv-show:cue:lifecycle.digital-twin:scroll",
@@ -15222,10 +15245,10 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-4JfVyYJ09h2m3JHlptnILUMemtNCz0QWEDCYmgsRXmo="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-CLqSpctt2GZ4JXv4w2UuSPTpQTn2hU3nUwXlP5lQjRg=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-8i/HpJrVig+XzP0sIcKRiMx3ahNurfjL8JMYH1riVJs=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-YH/sLphFvWRVmfgyh3nsHfACP0r3A9QV7GrrSllAf/g=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-8uY8f7kEz+dsXZYPgPwEHMtZM+KwTk3ZdnKQzJ9cqbA=",
         "entryId": "mobile-smm-platform",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-zW7xEJRj/EsNIxA+LAnRJwE/qQ8f5URdICkDImgZ+BI=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-59tG6Rpx2AuQy5csJ4ID3KEGfmixa7vHIxP4QanYBlc=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-P2WmeWKJfAQnXps50oD3UDAWv75HHICC0MSl5PMwnxw=",
         "sourceCellIds": [
           "cv-show:narration:mobile-smm-platform",
@@ -15236,19 +15259,23 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:mobile-smm.stable-path",
           "cv-show:cue:mobile-smm.agent-update:scroll",
           "cv-show:cue:mobile-smm.agent-update",
+          "cv-show:cue:mobile-smm-platform.illustration-review:scroll",
+          "cv-show:cue:mobile-smm-platform.illustration-review",
           "cv-show:audio-clip:mobile-smm-platform:01"
         ],
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-Vvmgz+hNTyoF1WYXS4CV0JOYt8UAGiWUNUk7HJbz3z8="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-LrDv1gR268ZmyakdY+0AsgEn4PV3h0gGMfGllfa8gH0=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-VHll1CyMzQDJAyl/ZhAw6PP5nl19W2eo22usil4i7w8=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-yuQwkKSMqw6vZZ8qNNgXUjnerqRndY7HogehPkHOZvQ=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-gS/EGPL2s/ZI+OZYqJETaLfwS9fyk3X/TGT4tcIIUec=",
         "entryId": "f360-studio",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-oCmAXS5P1EJ7OqPktBfRzjeT0j2a9DOhp7PAYZ2UOeY=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-YzdrwgP+Z2oAP9po9ar7WuI2w3a0QESynw5q30HNMsw=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-U8EiRM/sIoPO05j/lKdnVrop5MrQKLh5VcqW/kyYaW8=",
         "sourceCellIds": [
           "cv-show:narration:f360-studio",
           "cv-show:cue:f360.open",
+          "cv-show:cue:f360-studio.illustration-capture:scroll",
+          "cv-show:cue:f360-studio.illustration-capture",
           "cv-show:cue:f360.process:scroll",
           "cv-show:cue:f360.process",
           "cv-show:cue:f360.result:scroll",
@@ -15258,14 +15285,16 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-0u9zLsQQnlhRnkiePQu5Ywr1vFHWgcQP0wjGCxDmveo="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-znuzWiTpOMuq2tdwRyjMRWMi9xWBVCP9bLzj6fRHgUA=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-DwzrR4+BRsQoAGgOTsXMyjePr01sErD2ZCajhsH41vk=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-28Rt8b5tPDGc7RioSYpLKLx5jMlhvkcFqbJcnfjHOm0=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-BQASD19i1+V4m19gE47cVdm50Nhj2KWmsSGdE1nmoyI=",
         "entryId": "autobox",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-iVfR9agQsrLMxL4ZrSTc/GDV9z5vZx1hyRnWc1Oafp4=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-01CnzpThd9Z2XU7p+Dq8xIU5fYONNYIX3Sxw+QN5dSE=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-zKo9rXu/DgjzJEak34ri0gwsr7cki8v1hLqyHx49Cv0=",
         "sourceCellIds": [
           "cv-show:narration:autobox",
           "cv-show:cue:autobox.open",
+          "cv-show:cue:autobox.illustration-object:scroll",
+          "cv-show:cue:autobox.illustration-object",
           "cv-show:cue:autobox.video-01:scroll",
           "cv-show:cue:autobox.video-01",
           "cv-show:cue:autobox.video-02:scroll",
@@ -15289,16 +15318,18 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-NS8/0C8QmQIF885ZC1pTOM6SjbZw/Z7yjKP0BFzb9D4="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PSlxWKHMtOSPDeDSAUej7TX+OUhBp8ab3RobdUqR/w8=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-NyCS0HXsJt0tW2HORKhUf9OJa6qGNfRne+7Gh5XNNns=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-ZYB8fDbZ7+XNyMSx/0UVh8FDKi4uJklaAt9Qhn+KuzE=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-i9Rmy10mUkogD3mB/vk5lXvVAYiedHGiwzWTSwS88qw=",
         "entryId": "complexscan",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-CccnZPXB1oA06RWb+22QCgrjvTKtkmAvzbztvWxkUIE=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-rM2M26CIvCoGC2yGEDxHImW5nYhdoYqu/gl0QnC+dRU=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-rhyJ4LVfNnvCNFNEKii6VVj7xw8suzlkPUb0BygA5Rc=",
         "sourceCellIds": [
           "cv-show:narration:complexscan",
           "cv-show:cue:complexscan.open",
           "cv-show:cue:complexscan.line:scroll",
           "cv-show:cue:complexscan.line",
+          "cv-show:cue:complexscan.illustration-lighting:scroll",
+          "cv-show:cue:complexscan.illustration-lighting",
           "cv-show:cue:complexscan.video-01:scroll",
           "cv-show:cue:complexscan.video-01",
           "cv-show:cue:complexscan.video-02:scroll",
@@ -15307,6 +15338,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:complexscan.delivery",
           "cv-show:cue:complexscan.boothbot-open:scroll",
           "cv-show:cue:complexscan.boothbot-open",
+          "cv-show:cue:complexscan.illustration-warehouse:scroll",
+          "cv-show:cue:complexscan.illustration-warehouse",
           "cv-show:cue:complexscan.boothbot-gallery:scroll",
           "cv-show:cue:complexscan.boothbot-gallery",
           "cv-show:cue:complexscan.boothbot-catalog-ready:scroll",
@@ -15316,26 +15349,34 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-dVSounSl836U/c5KphgeRHPpYedRo1TmO8r9VrOIS2A="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-PwhzgCCQi0AFF/znw6joZfpUI1GEzMirtJVE9dvHFeE=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-yfb0KR5ieVAGYv0AOUy80X5Wyy3pOD6M9QuZ2OVsk4Q=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-rdBk+tzKL0YGtRc+FEFvWXiw+NlVf4F5OfSZxxmaIcM=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-av7kaFwioVQDiXJAg0+d/auU0Huwg6cyUA4607mK70E=",
         "entryId": "photopizza",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-Q6OKVsPLdWmR8OD6qefDTXbjSM+DcQMOjyVyjM2BE8U=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-7JKoA4luKQPRVOIn1ZOl/ry0NIBubnyMlwL9kx2jDsE=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-q9rQV2coScSj990b6Lp1L4A7yuDd/OmXm0FH9b+zYE4=",
         "sourceCellIds": [
           "cv-show:narration:photopizza",
           "cv-show:cue:photopizza.open",
           "cv-show:cue:photopizza.origin:scroll",
           "cv-show:cue:photopizza.origin",
+          "cv-show:cue:photopizza.illustration-panorama:scroll",
+          "cv-show:cue:photopizza.illustration-panorama",
           "cv-show:cue:photopizza.megavisor-promo:scroll",
           "cv-show:cue:photopizza.megavisor-promo",
+          "cv-show:cue:photopizza.illustration-capture-team:scroll",
+          "cv-show:cue:photopizza.illustration-capture-team",
           "cv-show:cue:photopizza.page-open:scroll",
           "cv-show:cue:photopizza.page-open",
           "cv-show:cue:photopizza.video-01:scroll",
           "cv-show:cue:photopizza.video-01",
           "cv-show:cue:photopizza.video-02:scroll",
           "cv-show:cue:photopizza.video-02",
+          "cv-show:cue:photopizza.illustration-portable-hardware:scroll",
+          "cv-show:cue:photopizza.illustration-portable-hardware",
           "cv-show:cue:photopizza.mechanics:scroll",
           "cv-show:cue:photopizza.mechanics",
+          "cv-show:cue:photopizza.illustration-controller:scroll",
+          "cv-show:cue:photopizza.illustration-controller",
           "cv-show:cue:photopizza.controller:scroll",
           "cv-show:cue:photopizza.controller",
           "cv-show:cue:photopizza.video-03:scroll",
@@ -15352,9 +15393,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-hed0POh9/bQd0evkUsiV7b7Sjg0xoxx/D1MUqQBKRwk=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-NMK08ng0yJHm/sUqkZNGcXPKQ126y22LysMKz+wPURk=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-pD69RjH1QdF7NZ7yuXU0D2fT4Q46dxmHa95toLx9QIQ=",
         "entryId": "finale",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-j6a7KdH2e1jvjfu938gCG3clADKdC2mDCIjZB5PAJsI=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-lamaMYFOnMqnNlSF0rsME8ZF8YenB/X2fCj9uIfe5a4=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-2Q3zKvxa+VHQ5CGdCOG5QAhghQrurpEeHRV+45jGYTs=",
         "sourceCellIds": [
           "cv-show:narration:finale",
@@ -15644,7 +15685,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-iIeaM4QMx3ev9k5HLtQyzGTo9t2S58Vcdxuh3Jc/wig="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-xXMpUQ9UunBwVn2aNOaDKxH6Pw5T5WYboINE9qOft0s=",
+    "hash": "cv-show-audio-provenance-v1:sha256-5ryFUQbGLQozbRkav4OZqSLouGtNtWiOXF7YPq1HxLs=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
@@ -15704,8 +15745,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "manifestHash": "cv-show-media-manifest-v1:sha256-/kqDiyeUMuC/S32LalHRYOB8eJa8XhSIVTCQo8qE/Bc=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:f1d12377f64b4ea8cc9e0b624367a1562441d9b717522ee18007fe510cc5bdb0",
-  "predecessorReleaseId": "cv-show-audio-release-v1:fbe88e46c067b215b31d7266bb43893d33562bb908b927f20d22737f51501def",
+  "planId": "cv-show-audio-release-plan-v1:f05b8129299662c6437061861c451a9c2ca5060071c716944c6d45dd6e39e5cf",
+  "predecessorReleaseId": "cv-show-audio-release-v1:af972411ab178fb39f500e1efb5f1833980ac749efb0ece6e4f64cd6af570d38",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WqPoIYWG+cGu1rccIYRUR/xoDVPRH+5wau/SDrzOuwQ=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-LbWAitNz77QEwRGNo8QCR0FBI9KJw9bWz6jDOxDUsDw=",
@@ -15713,12 +15754,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
   },
   "project": {
-    "revision": 109,
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-TBHV5dxhlIE5qASnsh2JcMd6EzlKnbyHY2aLShWwJNo="
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-GrfXo0MRdbcpVTB753IDMCvz2FFlbKWnXCAaKeIq85k=",
+    "revision": 110
   },
+  "releaseId": "cv-show-audio-release-v1:3410bfe3938dc0553f3a97181069c191793fcf01038d8c5031203ae2c4941483",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:cf067a86896cf33eb6e711e6a45e72d4e48f043977782512340a636eb3e74bf0",
-  "releaseId": "cv-show-audio-release-v1:af972411ab178fb39f500e1efb5f1833980ac749efb0ece6e4f64cd6af570d38"
+  "verificationHash": "cv-show-audio-release-verification-v1:6e4d338dbe46a0f71494998e998baa164aee5093bca6d6725e2a0e9abb9b5933"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );
