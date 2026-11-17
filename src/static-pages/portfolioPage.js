@@ -143,6 +143,8 @@ export async function getPortfolioPage({
     pageDescription = page.summary;
   }
 
+  // Direction pages render markdown content, not Pulse workspace
+  let isDirectionPage = pageId.startsWith('directions/');
   let isRetired = Boolean(metadata?.retired);
   let headerMenuButton = isRetired ? '' : /*html*/ `
       <button
@@ -157,28 +159,30 @@ export async function getPortfolioPage({
   let headerContent = `${headerMenuButton}${PORTFOLIO_HEADER_CONTROLS}`;
   let content = isRetired
     ? renderRetirementContent(metadata.retirementTargetUrl)
-    : /*html*/ `
-      <script type="application/json" id="pulse-projects-data">
-        ${JSON.stringify(projects).replace(/</g, '\\u003c')}
-      </script>
-      <script type="application/json" id="pulse-tour-story">
-        ${JSON.stringify(CV_SHOW_STORY).replace(/</g, '\\u003c')}
-      </script>
-      <script type="application/json" id="pulse-show-config">
-        ${JSON.stringify(TOUR_LOCAL_AUDIO_CONFIG).replace(/</g, '\\u003c')}
-      </script>
-      <section class="pulse-screen" aria-label="Vladimir Matiasevich portfolio">
-        <img
-          class="portfolio-graph-snapshot"
-          src="portfolio-graph-snapshots/initial.webp"
-          alt=""
-          aria-hidden="true"
-          data-graph-visual-layer="graph-preview"
-          draggable="false"
-        >
-        <portfolio-workspace class="pulse-workspace"></portfolio-workspace>
-      </section>
-    `;
+    : isDirectionPage
+      ? await renderDirectionPageContent(pageId, basePath)
+      : /*html*/ `
+        <script type="application/json" id="pulse-projects-data">
+          ${JSON.stringify(projects).replace(/</g, '\\u003c')}
+        </script>
+        <script type="application/json" id="pulse-tour-story">
+          ${JSON.stringify(CV_SHOW_STORY).replace(/</g, '\\u003c')}
+        </script>
+        <script type="application/json" id="pulse-show-config">
+          ${JSON.stringify(TOUR_LOCAL_AUDIO_CONFIG).replace(/</g, '\\u003c')}
+        </script>
+        <section class="pulse-screen" aria-label="Vladimir Matiasevich portfolio">
+          <img
+            class="portfolio-graph-snapshot"
+            src="portfolio-graph-snapshots/initial.webp"
+            alt=""
+            aria-hidden="true"
+            data-graph-visual-layer="graph-preview"
+            draggable="false"
+          >
+          <portfolio-workspace class="pulse-workspace"></portfolio-workspace>
+        </section>
+      `;
   let socialCardId = publicationId
     ? (metadata && !isRetired ? publicationId : undefined)
     : projectId || pageId;
@@ -202,6 +206,34 @@ export async function getPortfolioPage({
     `,
     SIDE_PANEL_ATTRS: 'disabled hidden',
   });
+}
+
+import { loadPortfolioMarkdownContent } from './data/markdownContent.js';
+
+/**
+ * Renders a direction section page with its markdown content.
+ * @param {string} pageId
+ * @param {string} basePath
+ * @returns {Promise<string>}
+ */
+async function renderDirectionPageContent(pageId, basePath) {
+  const slug = pageId.replace('directions/', '');
+  const contentPaths = PORTFOLIO_DIRECTION_INDEX_CONTENT_PATHS;
+  const contentPath = contentPaths[slug] || `content/directions/${slug}/en.md`;
+  const fullPath = new URL(contentPath, new URL(basePath, import.meta.url)).href;
+  try {
+    const response = await fetch(fullPath);
+    if (!response.ok) throw new Error(`Failed to load ${fullPath}`);
+    const markdown = await response.text();
+    const { md2html } = await import('jsda-kit/iso/md2html.js');
+    const html = await md2html(markdown, {
+      externalLinks: { enabled: true, target: '_blank', rel: 'noopener noreferrer' },
+    });
+    return /*html*/ `<section class="direction-content">${sanitizeMarkdownHtml(html)}</section>`;
+  } catch (error) {
+    console.error('Failed to load direction content:', error);
+    return /*html*/ `<section class="direction-content"><p>Content unavailable</p></section>`;
+  }
 }
 
 export default await getPortfolioPage();
