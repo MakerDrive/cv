@@ -4,13 +4,20 @@
 
 ## Проекты
 
-| Проект | Пример работы |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | Платформа сообщений с API, PostgreSQL, очередями и отдельным runtime для GSM-модемов. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | Управление поворотным столом из браузера по локальной сети. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | Ранние эксперименты с управляемым движением камеры и показом результатов съёмки. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Демо-интерфейс для ремонтных операций; доступный путь работает только для чтения. |
-| [Symbiote Node](../../projects/symbiote-node/) | Пакетный и миграционный слой для UI-компонентов и execution-engine. |
+![Lifecycle Messaging Platform](../../illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — Платформа сообщений с API, PostgreSQL, очередями и отдельным runtime для GSM-модемов.
+
+**[PhotoPizza Remote](../../projects/photopizza-remote/)** — Управление поворотным столом из браузера по локальной сети.
+
+**[PhotoSnail Public](../../projects/photosnail-public/)** — Ранние эксперименты с управляемым движением камеры и показом результатов съёмки.
+
+![Adaptive Maximo Workbench](../../illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — Демо-интерфейс для ремонтных операций; доступный путь работает только для чтения.
+
+**[Symbiote Node](../../projects/symbiote-node/)** — Пакетный и миграционный слой для UI-компонентов и execution-engine.
+
 
 ## Мой вклад
 

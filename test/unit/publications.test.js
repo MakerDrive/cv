@@ -67,6 +67,10 @@ const DIRECT_RETIREMENT_TARGETS = new Map([
   ['workspace-vs-global-team-memory', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
   ['cross-model-peer-review', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
   ['atomic-cron-scheduling-local-agents', 'https://MakerDrive.github.io/cv/directions/applied-ai/'],
+  // 2026-11-17: the migration note that announced the directions was itself
+  // internal-process documentation; the permanent directions section is its
+  // canonical home.
+  ['directions-section', 'https://MakerDrive.github.io/cv/directions/'],
 ]);
 
 const MERGE_RETIREMENT_TARGETS = new Map([
@@ -371,11 +375,11 @@ test('Production editorial classification matches the current retirement matrix'
 
   assert.equal(PUBLICATIONS.length, 105);
   assert.equal(KEEP_PUBLICATION_SLUGS.size, 6);
-  assert.equal(DIRECT_RETIREMENT_TARGETS.size, 22);
+  assert.equal(DIRECT_RETIREMENT_TARGETS.size, 23);
   assert.equal(MERGE_RETIREMENT_TARGETS.size, 23);
-  assert.equal(RETIREMENT_TARGETS.size, 45);
-  assert.equal(retired.length, 45);
-  assert.equal(published.length, 60);
+  assert.equal(RETIREMENT_TARGETS.size, 46);
+  assert.equal(retired.length, 46);
+  assert.equal(published.length, 59);
 
   for (let slug of KEEP_PUBLICATION_SLUGS) {
     assert.equal(bySlug.get(slug)?.status, 'published', `${slug} must remain published`);
@@ -390,7 +394,7 @@ test('Production editorial classification matches the current retirement matrix'
   let rewriteSlugs = published
     .map(publication => publication.slug)
     .filter(slug => !KEEP_PUBLICATION_SLUGS.has(slug));
-  assert.equal(rewriteSlugs.length, 54);
+  assert.equal(rewriteSlugs.length, 53);
   assert.deepEqual(
     retired.map(publication => publication.slug).sort(),
     [...RETIREMENT_TARGETS.keys()].sort(),

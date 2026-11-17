@@ -4,13 +4,24 @@ I build tools and workflows in which AI agents work with project context and pas
 
 ## Projects
 
-| Project | Example |
-| --- | --- |
-| [Agent Portal](../../projects/agent-portal/) | An engineering workspace with resource groups, model routing, and an executable Kanban board. |
-| [Agent Pool MCP](../../projects/agent-pool-mcp/) | Delegation to CLI agents with visible ownership and execution state. |
-| [Project Graph MCP](../../projects/project-graph-mcp/) | Tools that give agents a structured view of a codebase and its dependencies. |
-| [Symbiote Workspace](../../projects/symbiote-workspace/) | A task-specific workspace assembled from a portable configuration. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | An early Playwright browser tool for controlled UI operations. |
+![Agent Portal](../../illustrations/agent-portal.webp)
+
+**[Agent Portal](../../projects/agent-portal/)** — An engineering workspace with resource groups, model routing, and an executable Kanban board.
+
+![Agent Pool MCP](../../illustrations/agent-pool-mcp.webp)
+
+**[Agent Pool MCP](../../projects/agent-pool-mcp/)** — Delegation to CLI agents with visible ownership and execution state.
+
+![Project Graph MCP](../../illustrations/project-graph-mcp.webp)
+
+**[Project Graph MCP](../../projects/project-graph-mcp/)** — Tools that give agents a structured view of a codebase and its dependencies.
+
+![Symbiote Workspace](../../illustrations/workspace-configuration.webp)
+
+**[Symbiote Workspace](../../projects/symbiote-workspace/)** — A task-specific workspace assembled from a portable configuration.
+
+**[Browser X MCP](../../projects/browser-x-mcp/)** — An early Playwright browser tool for controlled UI operations.
+
 
 ## My contribution
 

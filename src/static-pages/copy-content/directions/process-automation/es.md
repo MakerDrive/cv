@@ -5,11 +5,20 @@ Automatizo operaciones repetibles en navegadores, aplicaciones móviles y sistem
 ## Ejemplos de proyectos
 
 | Proyecto | Ejemplo |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | Colas y ejecución de campañas mediante un runtime distribuido y módems GSM. |
-| [Browser X MCP](../../projects/browser-x-mcp/) | Herramienta con Playwright para navegar, inspeccionar páginas y realizar acciones controladas. |
-| [Mobile SMM Operations Platform](../../projects/mobile-smm-platform/) | Escenarios Android, colas, límites, deduplicación y registros de operaciones. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Demo de mantenimiento en modo de solo lectura, con las acciones disponibles según el estado actual. |
+![Lifecycle Messaging Platform](../../illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — Colas y ejecución de campañas mediante un runtime distribuido y módems GSM.
+
+**[Browser X MCP](../../projects/browser-x-mcp/)** — Herramienta con Playwright para navegar, inspeccionar páginas y realizar acciones controladas.
+
+![Mobile SMM Operations Platform](../../illustrations/mobile-smm-platform.webp)
+
+**[Mobile SMM Operations Platform](../../projects/mobile-smm-platform/)** — Escenarios Android, colas, límites, deduplicación y registros de operaciones.
+
+![Adaptive Maximo Workbench](../../illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — Demo de mantenimiento en modo de solo lectura, con las acciones disponibles según el estado actual.
+
 
 ## Mi contribución
 

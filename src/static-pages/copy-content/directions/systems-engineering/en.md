@@ -4,13 +4,20 @@ I design software products in which the interface, APIs, data stores, queues, an
 
 ## Projects
 
-| Project | Example |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | A messaging platform with APIs, PostgreSQL, queues, and a separate GSM modem runtime. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | Browser control of a turntable over a local network. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | Early experiments in camera motion control and presenting captured media. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | A maintenance demo interface whose available path is read-only. |
-| [Symbiote Node](../../projects/symbiote-node/) | A package and migration layer for UI components and an execution engine. |
+![Lifecycle Messaging Platform](../../illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — A messaging platform with APIs, PostgreSQL, queues, and a separate GSM modem runtime.
+
+**[PhotoPizza Remote](../../projects/photopizza-remote/)** — Browser control of a turntable over a local network.
+
+**[PhotoSnail Public](../../projects/photosnail-public/)** — Early experiments in camera motion control and presenting captured media.
+
+![Adaptive Maximo Workbench](../../illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — A maintenance demo interface whose available path is read-only.
+
+**[Symbiote Node](../../projects/symbiote-node/)** — A package and migration layer for UI components and an execution engine.
+
 
 ## My contribution
 

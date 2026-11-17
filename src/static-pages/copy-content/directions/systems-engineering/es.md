@@ -5,12 +5,20 @@ Diseño productos de software en los que la interfaz, las API, el almacenamiento
 ## Proyectos
 
 | Proyecto | Ejemplo |
-| --- | --- |
-| [Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/) | Plataforma de mensajería con API, PostgreSQL, colas y un runtime separado para módems GSM. |
-| [PhotoPizza Remote](../../projects/photopizza-remote/) | Control de una mesa giratoria desde el navegador por una red local. |
-| [PhotoSnail Public](../../projects/photosnail-public/) | Primeros experimentos con movimiento controlado de cámara y presentación de las capturas. |
-| [Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/) | Interfaz demo para mantenimiento cuyo recorrido disponible es de solo lectura. |
-| [Symbiote Node](../../projects/symbiote-node/) | Capa de empaquetado y migración para componentes de UI y un motor de ejecución. |
+![Lifecycle Messaging Platform](../../illustrations/lifecycle-messaging-platform.webp)
+
+**[Lifecycle Messaging Platform](../../projects/lifecycle-messaging-platform/)** — Plataforma de mensajería con API, PostgreSQL, colas y un runtime separado para módems GSM.
+
+**[PhotoPizza Remote](../../projects/photopizza-remote/)** — Control de una mesa giratoria desde el navegador por una red local.
+
+**[PhotoSnail Public](../../projects/photosnail-public/)** — Primeros experimentos con movimiento controlado de cámara y presentación de las capturas.
+
+![Adaptive Maximo Workbench](../../illustrations/adaptive-maximo-workbench.webp)
+
+**[Adaptive Maximo Workbench](../../projects/adaptive-maximo-workbench/)** — Interfaz demo para mantenimiento cuyo recorrido disponible es de solo lectura.
+
+**[Symbiote Node](../../projects/symbiote-node/)** — Capa de empaquetado y migración para componentes de UI y un motor de ejecución.
+
 
 ## Mi contribución
 
