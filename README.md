@@ -1,389 +1,338 @@
-# CV
-
-Static CV, portfolio, and blog site built with JSDA-Kit and prepared for GitHub Pages deployment.
-
-## Stack
-
-- JSDA-Kit for static site generation and optional dynamic routes.
-- Symbiote.js web components with SSR support.
-- npm with `package-lock.json`.
-- Local production builds; GitHub Actions only uploads and deploys prepared files.
-
-## Development
-
-```bash
-npm ci
-npm test
-npm run build
-```
-
-The production build is written to `dist/`.
-
-The CV theme adapts the free Notchset source styles from Beautiful UI, including
-its light/dark palettes, Archivo display, Inter reading, and Martian Mono fonts, button plates, focus
-corners, link rules, and motion timings. Fonts are self-hosted. The source values
-are mapped through public Cascade token overrides: colour, contrast, geometry,
-typography, and motion controls continue to work. Reduced-motion preferences are
-respected. Layout frames and header/menu buttons use ink outlines, neutral hover
-and inverted active states. Composition uses a compact navigation column, a 2:1 content/graph
-split, a 64px header, 24px reading padding, numbered section captions, and
-frame corner marks. The implementation stays in CV; Workspace components are unchanged.
-
-Consumer presets live in `src/static-pages/data/portfolioThemeDefaults.js`, the
-palette/fonts/control styles in `src/static-pages/css/notchset*.css.js`, and the
-Cascade adapter in `src/static-pages/js/notchset-theme/index.js`. A previously
-saved theme takes precedence within the same build. Each new local JSDA build
-generates one shared UUID in the page metadata and asset URLs. On its first
-visit, the site clears the active Cascade parameters and geometry register
-before loading the theme controls. Language, layout state and named theme
-presets remain intact. Reloads and page navigation within that build preserve
-subsequent theme edits; Reset to defaults is also available manually.
-Source attribution and licences are in `docs/third-party-notices.md` and are
-included in the published site at `licenses/notchset.txt`.
-Component mappings, motion behavior and ownership are documented in
-[`docs/theme-adaptation.md`](docs/theme-adaptation.md).
-
-## Runtime Markdown pages
-
-Pages that provide `MD_URL` use the client-side `<markdown-viewer>` component. The
-page shell is generated during the build, while the Markdown source is fetched
-and converted in the browser with `jsda-kit/iso/md2html.js` after the page opens.
-This keeps the GitHub Pages deployment static and avoids embedding the remote
-Markdown document into the generated HTML. The renderer is built as the separate
-JSDA entrypoint `dist/js/markdown-viewer/index.js` and loaded through its runtime
-URL only when a page contains `<markdown-viewer>`; it is not part of the primary
-`dist/js/index.js` bundle.
-
-Portfolio project articles, Pulse publication bodies, and the permanent
-direction sections follow the same static runtime model. Their localized sources
-live under
-`src/static-pages/copy-content/{projects,publications,directions}/<slug>/<locale>.md`.
-JSDA copies that directory to `dist/content/` without bundling it. The portfolio
-bundle contains only navigation, localization, relation, and SEO metadata; it
-fetches the selected Markdown asset on demand, cancels stale navigation
-requests, and passes the loaded source to the Symbiote source viewer. The
-viewer keeps rendered/source modes and composes media and feed content slots
-after the requested article arrives.
-
-## Permanent directions
-
-The practice areas (systems engineering and integration, applied AI
-infrastructure and agent delegation, process automation and verification) are
-permanent sections under `/cv/directions/`, not Pulse publications. They are
-registered in `src/static-pages/data/portfolioDirections.js` and reuse the
-existing entry registry: the same navigation tree, graph, search exports, and
-social-card manifest that serve projects and skills. Each direction links to the
-projects it is evidenced by and to the Skills pages that carry the tooling
-detail. Pulse keeps the dated stream; the four 2026-11-11 articles became the
-source text of these sections and their permalinks are retired into the new
-addresses.
-
-For local static development with a watcher:
-
-```bash
-npx jsda ssg
-```
-
-For the dynamic JSDA server:
-
-```bash
-npx jsda serve
-```
-
-The default dynamic server port is `3000`.
-
-## CV Show audio workflow
-
-Scenario editing, the library-owned timeline contract, the local WebMCP tool
-surface, and the approval boundary are documented in
-[`docs/cv-show-authoring.md`](docs/cv-show-authoring.md). Edit the authored
-Project through that flow; do not edit the derived story or public audio
-projection directly.
-
-Master WAV files, voice references, Whisper recognition output, alignment, and
-durable runner state stay outside Git. Use an explicit absolute authoring base;
-do not use the worktree `TMP/` directory as the only copy because a reboot or
-worktree cleanup may remove it. The base contains immutable payloads at
-`<base>/<voice>/<artifact-tree-hash>/` and resumable workflow state under
-`<base>/.workflow/`.
-
-The production workflow composes the existing dirty planner, Qwen/Whisper model
-client, durable entry runner, aggregate release gate, private promotion, and
-Opus publisher. It does not infer either human decision:
-
-1. every newly synthesized exact WAV must be reviewed before Whisper can run;
-2. the exact aggregate release ID must be approved before staging or promotion.
-
-Review and release acceptance come in two explicit modes. The default `owner`
-mode keeps human listening review and owner approval. The opt-in `machine`
-mode (`review --mode machine`, `review-all-machine --mode machine --confirm
-machine`, and `approve-release --mode machine`) replaces the human decision
-with a deterministic ASR proof: the exact synthesized WAV is transcribed by the
-same Whisper service, the transcript is compared to the exact target narration
-with documented normalization (case, punctuation, whitespace, ё/е, digits vs
-number words, and the known brand spellings), and the clip is accepted only
-when WER ≤ 0.05, CER ≤ 0.03, coverage ≥ 0.98 pass and no critical mismatch
-(lost negation, different number, missing long token) is found. The decision is
-recorded in the pipeline review state as `mode: "machine-verified"` with the
-metrics, hashes, thresholds, and a private receipt path; the release approval
-records `acceptanceMode: "machine-verified"` and its phase is
-`machine-accepted`. `approve-release --mode machine` additionally requires
-every regenerated entry to carry a machine-verified review. A failed machine
-review rejects the clip exactly like an owner rejection; regenerate with
-`retry-synthesis` and review the new attempt.
-
-Create a private profile JSON outside Git. Its provenance fields must describe
-the desired voice and policies exactly; `readinessProfile` must equal `/readyz`
-from the model service for the entire run:
-
-```json
-{
-  "voice": {
-    "selectionId": "barzana-2",
-    "voiceRef": "qwen3:speaker:barzana2-review-20260827",
-    "model": "qwen3-clone",
-    "modelVersion": "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
-    "language": "ru",
-    "style": "warm natural product guide, continuous speech without long pauses",
-    "sampleRate": 24000,
-    "referenceSha256": "<normalized-reference-sha256>",
-    "referenceTranscriptSha256": "<reference-transcript-sha256>"
-  },
-  "synthesisPolicy": {
-    "format": "wav",
-    "normalize": true,
-    "normalization": {
-      "targetLufs": -19,
-      "truePeakLimitDbfs": -1,
-      "version": "bs1770-4-truepeak4x-v1"
-    },
-    "textPolicy": "English terms preserved in Latin script; digits expanded as context-aware Russian words"
-  },
-  "asr": {
-    "model": "large-v3-turbo",
-    "locale": "ru",
-    "recognitionVersion": "cv-show-whisper-recognition-v1"
-  },
-  "aligner": {
-    "alignedSequenceVersion": "workspace-aligned-sequence-v3",
-    "anchoringVersion": "workspace-transcript-word-anchoring-v1",
-    "contract": "workspace-observed-alignment"
-  },
-  "readinessProfile": {
-    "ready": true,
-    "status": "ready",
-    "model": "<exact-readyz-model>",
-    "modelVersion": "<exact-readyz-version>",
-    "accelerator": "cuda",
-    "capabilities": ["synthesize", "transcribe"]
-  }
-}
-```
-
-Plan and run a narration or voice revision with explicit absolute inputs:
-
-```bash
-export CV_SHOW_PRIVATE_ARTIFACT_BASE=/absolute/durable/cv-show-audio
-export CV_SHOW_MODEL_ENDPOINT=http://127.0.0.1:8000
-export CV_SHOW_AUDIO_PROFILE=/absolute/private/cv-show-audio-profile.json
-export CV_SHOW_AUDIO_PROJECT=/absolute/private/target-cv-show-project.json
-
-npm run cv-show:audio -- plan \
-  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
-  --project "$CV_SHOW_AUDIO_PROJECT" \
-  --profile "$CV_SHOW_AUDIO_PROFILE"
-
-npm run cv-show:audio -- advance \
-  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
-  --project "$CV_SHOW_AUDIO_PROJECT" \
-  --profile "$CV_SHOW_AUDIO_PROFILE" \
-  --endpoint "$CV_SHOW_MODEL_ENDPOINT"
-```
-
-`--project` is the absolute path to the target canonical Project projection
-produced by the scenario-authoring flow. Keep the selected source module at its
-accepted predecessor until `promote`; promotion atomically selects the target
-Project and its approved release together. For a voice-only revision, omit
-`--project` from every command and the workflow uses the selected Project. If an
-advancing command reports a missing model client, pass `--endpoint` or set
-`CV_SHOW_MODEL_ENDPOINT`.
-
-`advance` stops regenerated entries at `technical-verified`; it never invokes
-Whisper before review. Its `exactWav.path` is the immutable WAV artifact (the
-content-addressed file uses a `.bin` suffix); listen to that exact path, then bind
-the decision to the adjacent hashes printed by `advance`:
-
-```bash
-npm run cv-show:audio -- review \
-  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
-  --project "$CV_SHOW_AUDIO_PROJECT" \
-  --profile "$CV_SHOW_AUDIO_PROFILE" \
-  --endpoint "$CV_SHOW_MODEL_ENDPOINT" \
-  --entry positioning \
-  --wav-hash <exact-wav-sha256> \
-  --attempt-hash <exact-synthesis-attempt-sha256> \
-  --approve yes
-
-npm run cv-show:audio -- advance \
-  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
-  --project "$CV_SHOW_AUDIO_PROJECT" \
-  --profile "$CV_SHOW_AUDIO_PROFILE" \
-  --endpoint "$CV_SHOW_MODEL_ENDPOINT"
-```
-
-After all regenerated entries reach `entry-verified`, build the aggregate and
-review its printed `releaseId`. Approval must repeat that exact identity:
-
-```bash
-npm run cv-show:audio -- verify-release \
-  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
-  --project "$CV_SHOW_AUDIO_PROJECT" \
-  --profile "$CV_SHOW_AUDIO_PROFILE"
-
-npm run cv-show:audio -- approve-release \
-  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
-  --project "$CV_SHOW_AUDIO_PROJECT" \
-  --profile "$CV_SHOW_AUDIO_PROFILE" \
-  --release-id <exact-release-id> \
-  --approve yes
-
-npm run cv-show:audio -- stage \
-  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
-  --project "$CV_SHOW_AUDIO_PROJECT" \
-  --profile "$CV_SHOW_AUDIO_PROFILE"
-
-npm run cv-show:audio -- promote \
-  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
-  --project "$CV_SHOW_AUDIO_PROJECT" \
-  --profile "$CV_SHOW_AUDIO_PROFILE"
-
-npm run cv-show:audio -- publish \
-  --private-root "$CV_SHOW_PRIVATE_ARTIFACT_BASE" \
-  --project "$CV_SHOW_AUDIO_PROJECT" \
-  --profile "$CV_SHOW_AUDIO_PROFILE"
-npm run verify:cv-show-web-audio
-```
-
-After a reboot, run `status` with the same private base and profile. Immutable
-runner heads and generated cache files are resumed without synthesis or Whisper
-repetition. If the selected predecessor tree is missing, the command prints its
-exact expected path and stops; restore that content-addressed tree rather than
-silently regenerating accepted media.
-
-One narration-text change normally produces one `regenerate` disposition and 29
-byte-identical entry-release reuses. A voice-profile change produces 30
-regenerations. Timing-only Project changes reuse all 30 private media entries.
-Publish Opus only when the master artifact tree, audio/alignment manifests, or
-voice identity changes. When those media identities are unchanged, skip
-transcoding: `publish` first proves the accepted selector and exact manifest
-against the current private master with the production compatibility contract.
-An artifact-equivalent historical web projection produces a deterministic
-content-addressed reuse receipt under `<base>/.workflow/publication-receipts/`;
-the Opus publisher is not called. Changed media identity invokes the publisher.
-If the accepted proof was moved, pass both absolute `--public-selector` and
-`--public-manifest` paths. A missing or internally divergent selector/manifest
-proof fails actionably instead of guessing. This retains historical
-selector-to-manifest source linkage, so a timing-only successor does not
-transcode 30 unchanged WAV files.
-
-The publisher emits one immutable 61-file release under
-`src/static-pages/copy-cv-show-audio/`: 30 Ogg/Opus clips, 30 minimal aligned
-sequences, and one unified manifest. It also updates the generated public
-selector consumed by the player. A normal production build only copies that
-accepted projection verbatim; it never transcodes audio and must not contain
-WAV files or the private authoring tree. The production verifier checks the
-source/dist inventory, selector binding, hashes, MIME contract, and absence of
-private artifacts.
-
-## Social cards
-
-The build derives social cards from the project and publication registries. Each
-published Pulse article, project, profile, skill, and portfolio index page gets
-a 1200×630 PNG for `og:image` and `twitter:image`. The renderer tries catalog media associated with the page or
-its project; the project cover is the last source. If those sources are
-unavailable, it uses the same framed template with a geometric illustration.
-Every card uses the site's light Notchset palette, Archivo display type, Martian
-Mono labels, ink frames and orange accent. The renderer reads palette and type
-parameters from the shared theme and measures real glyph advances to keep
-titles complete. Fonts are rendered as paths, independent of system fonts.
-
-```bash
-npm run render-social-cards
-npm run publish-social-cards
-```
-
-`render-social-cards` writes the generated files under the ignored
-`cit/cit-store/social/` directory. Normal builds copy them to
-`dist/social-cards/`, so a card that has not been uploaded yet has a deployable
-local URL. Its content hash versions the image URL; an older CDN mapping is
-used only when it matches the generated bytes. A normal `npm run build`
-regenerates the entire registry automatically, without a CDN upload.
-`publish-social-cards` uploads content-addressed versions to CIT and rewrites the
-generated `cit/social-cards.json` map. Superseded objects remain available for
-30 days. A later sync deletes an expired object only when no current card map
-entry references it.
-
-## GitHub Pages
-
-All generation and production verification run locally. To build and publish:
-
-```bash
-npm ci
-npm run deploy:pages
-```
-
-`deploy:pages` runs the complete build, including social cards, and stops on any
-build or verification failure. It copies only `dist/` into a temporary Git
-checkout and pushes the prepared site to `gh-pages` without force. The temporary
-checkout is removed afterwards; the source checkout and its changes stay intact.
-The published files reflect the current local source, including uncommitted edits.
-Git authentication and commit identity must be configured locally.
-
-The workflow at `.github/workflows/deploy-pages.yml` runs when `gh-pages` changes
-(or on manual dispatch). It uploads the prepared files and deploys them to GitHub
-Pages; it never installs dependencies or builds the site. The workflow must be
-present on the default branch before the first local publication. GitHub Pages
-must use GitHub Actions as its deployment source.
-
-## Production Build Contract
-
-The production build runs as a self-contained, native bundle located in `dist/`. It enforces the following production invariants:
-
-- **Self-contained execution assets**: The executable asset inventory is defined in `scripts/verify-production-build.js`. The Markdown viewer, CV Show player, live-observation tools, and Notchset Cascade adapter are independent JSDA bundles; localized Markdown remains non-executable content under `dist/content/`.
-- **No Import Maps or external library CDNs**: The HTML files contain no `<script type="importmap">` or static jsDelivr/unpkg library mappings, and no raw package directories or copies (e.g. no `node_modules` inside `dist`).
-- **No static JS imports**: Emitted JavaScript files contain no statically resolvable import statements (e.g., zero parser-visible import records from packages like `@symbiotejs/symbiote`).
-- **Main bundle budget**: `dist/js/index.js` must satisfy the raw and gzip limits defined in `scripts/verify-production-build.js`.
-- **Local Font Assets**: Material Symbols, Archivo Variable, and Martian Mono Variable are served locally; the CSS does not request Google Fonts.
-- **Deliberate limits**: Provider-controlled media (like YouTube video players) or dynamic IMS media spots remain network-backed.
-
-## Build Verification
-
-A fail-closed verifier script validates all production invariants:
-
-```bash
-node scripts/verify-production-build.js
-```
-
-This verifier recursively inspects HTML pages, checks CSS files, validates all
-the localized runtime Markdown inventory derived from the project and publication registries, verifies the Markdown renderer/main-bundle
-boundary and size budget, and uses `esbuild` to verify that JS files contain zero
-parser-visible import records.
-
-Before publishing, create the GitHub repository and confirm that `homepage`, `repository.url`, and `project.cfg.js` sitemap `baseUrl` match the final GitHub Pages URL.
-
-## Project Layout
-
-- `src/static-pages/` - static pages used by the GitHub Pages build.
-- `src/dynamic-pages/` - optional dynamic routes for the JSDA server.
-- `src/ui-components/` - reusable web components.
-- `src/common-styles/` - shared CSS modules and design tokens.
-- `project.cfg.js` - JSDA build and routing configuration.
-- `cit-config.json` - Cloud Images Toolkit configuration.
-
-## Verification
-
-```bash
-npm test
-npm run build
-npm audit
-```
+# Vladimir Matiasevich
+
+**Product Engineer** · Full-Stack, R&D & Systems Engineering · Complex Process Automation Across Software, Media & Hardware · AI Agent Tooling
+
+15+ years in software development and engineering R&D across product platforms, media systems, hardware, and process automation. I design and develop automation loops for complex processes and systems across domains at the intersection of software, media, and hardware.
+
+**Interactive CV, portfolio and CV Show:** https://makerdrive.github.io/cv/
+
+[GitHub](https://github.com/MakerDrive) · [LinkedIn](https://www.linkedin.com/in/v-matiasevich/) · [YouTube](https://www.youtube.com/@VladimirMatiasevich) · [Facebook](https://www.facebook.com/v.matiasevich)
+
+## Contents
+
+- [Directions](#directions)
+- [Projects](#projects)
+- [Articles](#articles)
+- [About this repository](#about-this-repository)
+
+## Directions
+
+Practice areas, each with the projects that evidence it. Pages open on the site; the Markdown source of each text is linked next to it. Everything is available in English, Russian, and Spanish.
+
+- **[Overview — the work I do](https://makerdrive.github.io/cv/directions/)** — site: [EN](https://makerdrive.github.io/cv/directions/) · [RU](https://makerdrive.github.io/cv/directions/?lang=ru) · [ES](https://makerdrive.github.io/cv/directions/?lang=es) · Markdown: [EN](src/static-pages/copy-content/directions/overview/en.md) · [RU](src/static-pages/copy-content/directions/overview/ru.md) · [ES](src/static-pages/copy-content/directions/overview/es.md)
+- **[Systems engineering and integration](https://makerdrive.github.io/cv/directions/systems-engineering/)** — site: [EN](https://makerdrive.github.io/cv/directions/systems-engineering/) · [RU](https://makerdrive.github.io/cv/directions/systems-engineering/?lang=ru) · [ES](https://makerdrive.github.io/cv/directions/systems-engineering/?lang=es) · Markdown: [EN](src/static-pages/copy-content/directions/systems-engineering/en.md) · [RU](src/static-pages/copy-content/directions/systems-engineering/ru.md) · [ES](src/static-pages/copy-content/directions/systems-engineering/es.md)
+- **[Applied AI and agent systems](https://makerdrive.github.io/cv/directions/applied-ai/)** — site: [EN](https://makerdrive.github.io/cv/directions/applied-ai/) · [RU](https://makerdrive.github.io/cv/directions/applied-ai/?lang=ru) · [ES](https://makerdrive.github.io/cv/directions/applied-ai/?lang=es) · Markdown: [EN](src/static-pages/copy-content/directions/applied-ai/en.md) · [RU](src/static-pages/copy-content/directions/applied-ai/ru.md) · [ES](src/static-pages/copy-content/directions/applied-ai/es.md)
+- **[Process automation](https://makerdrive.github.io/cv/directions/process-automation/)** — site: [EN](https://makerdrive.github.io/cv/directions/process-automation/) · [RU](https://makerdrive.github.io/cv/directions/process-automation/?lang=ru) · [ES](https://makerdrive.github.io/cv/directions/process-automation/?lang=es) · Markdown: [EN](src/static-pages/copy-content/directions/process-automation/en.md) · [RU](src/static-pages/copy-content/directions/process-automation/ru.md) · [ES](src/static-pages/copy-content/directions/process-automation/es.md)
+
+## Projects
+
+Each project page describes the problem, my role, and the result. The title opens the page on the site; the Markdown source is linked below it. Articles for a project are listed under it.
+
+### [Agent Portal](https://makerdrive.github.io/cv/projects/agent-portal/) (2025-2026)
+
+R&D workspace for AI-assisted engineering and loop engineering: project memory, context engineering, RAG-style context retrieval, graph-based context, model/resource routing, task orchestration, evals/guardrails, and controlled delivery.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/agent-portal/) · [RU](https://makerdrive.github.io/cv/projects/agent-portal/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/agent-portal/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/agent-portal/en.md) · [RU](src/static-pages/copy-content/projects/agent-portal/ru.md) · [ES](src/static-pages/copy-content/projects/agent-portal/es.md)
+
+<details><summary>Articles (6)</summary>
+
+- [Agent Portal: Shared Runtime and Versioned Control Plane](https://makerdrive.github.io/cv/pulse/agent-portal-retrospective/) — [Markdown](src/static-pages/copy-content/publications/agent-portal-retrospective/en.md)
+- [MCP Agent Portal: Public Gateway for Portal Tools](https://makerdrive.github.io/cv/pulse/mcp-agent-portal-retrospective/) — [Markdown](src/static-pages/copy-content/publications/mcp-agent-portal-retrospective/en.md)
+- [Browser X Page-Liveness Recovery](https://makerdrive.github.io/cv/pulse/mcp-agent-portal-agent-browser-context-lost/) — [Markdown](src/static-pages/copy-content/publications/mcp-agent-portal-agent-browser-context-lost/en.md)
+- [One MCP Tool Registry Across stdio, WebSocket, and HTTP](https://makerdrive.github.io/cv/pulse/dual-mode-transport-stdio-http/) — [Markdown](src/static-pages/copy-content/publications/dual-mode-transport-stdio-http/en.md)
+- [Workspace Registration by Exact Path](https://makerdrive.github.io/cv/pulse/dynamic-workspace-registration-deduplication/) — [Markdown](src/static-pages/copy-content/publications/dynamic-workspace-registration-deduplication/en.md)
+- [Agent Portal Master-Client MCP Orchestration](https://makerdrive.github.io/cv/pulse/distributed-master-client-mcp-orchestration/) — [Markdown](src/static-pages/copy-content/publications/distributed-master-client-mcp-orchestration/en.md)
+
+</details>
+
+### [Symbiote Video Studio](https://makerdrive.github.io/cv/projects/symbiote-video-studio/) (2025-2026)
+
+R&D video workspace for testing how AI can assist editing, media structure, and production workflows.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/symbiote-video-studio/) · [RU](https://makerdrive.github.io/cv/projects/symbiote-video-studio/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/symbiote-video-studio/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/symbiote-video-studio/en.md) · [RU](src/static-pages/copy-content/projects/symbiote-video-studio/ru.md) · [ES](src/static-pages/copy-content/projects/symbiote-video-studio/es.md)
+
+<details><summary>Articles (2)</summary>
+
+- [Symbiote Video Studio: Graph-Based Media Workflows](https://makerdrive.github.io/cv/pulse/symbiote-video-studio-retrospective/) — [Markdown](src/static-pages/copy-content/publications/symbiote-video-studio-retrospective/en.md)
+- [Live Browser Capture in Symbiote Video Studio](https://makerdrive.github.io/cv/pulse/symbiote-video-studio-live-ui-render/) — [Markdown](src/static-pages/copy-content/publications/symbiote-video-studio-live-ui-render/en.md)
+
+</details>
+
+### [Adaptive Maximo Workbench](https://makerdrive.github.io/cv/projects/adaptive-maximo-workbench/)
+
+A Symbiote Workspace demonstration for maintenance operations, combining work orders, assets, locations, crews, and declared actions in one shared human-and-agent context.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/adaptive-maximo-workbench/) · [RU](https://makerdrive.github.io/cv/projects/adaptive-maximo-workbench/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/adaptive-maximo-workbench/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/adaptive-maximo-workbench/en.md) · [RU](src/static-pages/copy-content/projects/adaptive-maximo-workbench/ru.md) · [ES](src/static-pages/copy-content/projects/adaptive-maximo-workbench/es.md)
+
+<details><summary>Articles (1)</summary>
+
+- [Maintenance Workspace: Shared Context with a Safe Demo Boundary](https://makerdrive.github.io/cv/pulse/adaptive-maximo-workbench-retrospective/) — [Markdown](src/static-pages/copy-content/publications/adaptive-maximo-workbench-retrospective/en.md)
+
+</details>
+
+### [AUTOBOX v1](https://makerdrive.github.io/cv/projects/autobox-v1/) (2019-2021)
+
+Museum-grade 3D scanning equipment, capture technology, and artistic 3D visualization of Hermitage and Kunstkamera artifacts: photogrammetry, custom light matrices, field scanning, and production workflow.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/autobox-v1/) · [RU](https://makerdrive.github.io/cv/projects/autobox-v1/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/autobox-v1/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/autobox-v1/en.md) · [RU](src/static-pages/copy-content/projects/autobox-v1/ru.md) · [ES](src/static-pages/copy-content/projects/autobox-v1/es.md)
+
+<details><summary>Articles (4)</summary>
+
+- [AUTOBOX v1: A Repeatable Museum-Scanning Process](https://makerdrive.github.io/cv/pulse/autobox-v1-retrospective/) — [Markdown](src/static-pages/copy-content/publications/autobox-v1-retrospective/en.md)
+- [Coordinating Motion, Lighting, and Capture in AUTOBOX](https://makerdrive.github.io/cv/pulse/autobox-v1-hardware-lighting-sync-postmortem/) — [Markdown](src/static-pages/copy-content/publications/autobox-v1-hardware-lighting-sync-postmortem/en.md)
+- [Cross-Polarized AUTOBOX Lighting for Museum Scanning](https://makerdrive.github.io/cv/pulse/autobox-v1-hardware-cross-polarization-museum/) — [Markdown](src/static-pages/copy-content/publications/autobox-v1-hardware-cross-polarization-museum/en.md)
+- [Source-Data Handoff in Museum Scanning](https://makerdrive.github.io/cv/pulse/autobox-v1-photogrammetry-data-workflow/) — [Markdown](src/static-pages/copy-content/publications/autobox-v1-photogrammetry-data-workflow/en.md)
+
+</details>
+
+### [F360 Studio](https://makerdrive.github.io/cv/projects/f360-studio/) (2021-2022)
+
+High-precision 3D scanning studio I founded and ran after the museum-scanning work, bringing that experience into a commercial studio workflow.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/f360-studio/) · [RU](https://makerdrive.github.io/cv/projects/f360-studio/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/f360-studio/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/f360-studio/en.md) · [RU](src/static-pages/copy-content/projects/f360-studio/ru.md) · [ES](src/static-pages/copy-content/projects/f360-studio/es.md)
+
+<details><summary>Articles (2)</summary>
+
+- [F360 Studio: Museum Capture Discipline in Commercial Photogrammetry](https://makerdrive.github.io/cv/pulse/f360-studio-retrospective/) — [Markdown](src/static-pages/copy-content/publications/f360-studio-retrospective/en.md)
+- [Controlled Lighting in the F360 Photogrammetry Workflow](https://makerdrive.github.io/cv/pulse/f360-studio-photogrammetry-lighting-rig/) — [Markdown](src/static-pages/copy-content/publications/f360-studio-photogrammetry-lighting-rig/en.md)
+
+</details>
+
+### [ComplexScan](https://makerdrive.github.io/cv/projects/complexscan/) (2017-2022)
+
+Commercial hardware product I invented after PhotoPizza: professional transparent-disc equipment for 3D scanning, 360 capture, and product photography.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/complexscan/) · [RU](https://makerdrive.github.io/cv/projects/complexscan/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/complexscan/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/complexscan/en.md) · [RU](src/static-pages/copy-content/projects/complexscan/ru.md) · [ES](src/static-pages/copy-content/projects/complexscan/es.md)
+
+<details><summary>Articles (2)</summary>
+
+- [ComplexScan: From Open Hardware to a Commercial Capture System](https://makerdrive.github.io/cv/pulse/complexscan-retrospective/) — [Markdown](src/static-pages/copy-content/publications/complexscan-retrospective/en.md)
+- [Capture-System Trade-offs Before Mesh Processing](https://makerdrive.github.io/cv/pulse/complexscan-mesh-decimation-tradeoffs/) — [Markdown](src/static-pages/copy-content/publications/complexscan-mesh-decimation-tradeoffs/en.md)
+
+</details>
+
+### [BoothBot](https://makerdrive.github.io/cv/projects/boothbot/) (2018)
+
+Commercial capture-automation project for wine bottles: warehouse equipment, controlled lighting, motorized camera, and catalog photo processing.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/boothbot/) · [RU](https://makerdrive.github.io/cv/projects/boothbot/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/boothbot/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/boothbot/en.md) · [RU](src/static-pages/copy-content/projects/boothbot/ru.md) · [ES](src/static-pages/copy-content/projects/boothbot/es.md)
+
+<details><summary>Articles (1)</summary>
+
+- [BoothBot: Warehouse Capture as an Automated Process](https://makerdrive.github.io/cv/pulse/boothbot-retrospective/) — [Markdown](src/static-pages/copy-content/publications/boothbot-retrospective/en.md)
+
+</details>
+
+### [PhotoPizza](https://makerdrive.github.io/cv/projects/photopizza/) (2010-2022)
+
+Motorized 360 turntable invented inside MEGAVISOR, then developed as an open-source PhotoPizza project for photography, video, and photogrammetry.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/photopizza/) · [RU](https://makerdrive.github.io/cv/projects/photopizza/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/photopizza/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/photopizza/en.md) · [RU](src/static-pages/copy-content/projects/photopizza/ru.md) · [ES](src/static-pages/copy-content/projects/photopizza/es.md)
+
+<details><summary>Articles (3)</summary>
+
+- [PhotoPizza: From MEGAVISOR Prototype to Open-Source Platform](https://makerdrive.github.io/cv/pulse/photopizza-retrospective/) — [Markdown](src/static-pages/copy-content/publications/photopizza-retrospective/en.md)
+- [Buildable Open-Source PhotoPizza Turntables](https://makerdrive.github.io/cv/pulse/hardware-arch-opensource-turntables/) — [Markdown](src/static-pages/copy-content/publications/hardware-arch-opensource-turntables/en.md)
+- [PhotoPizza Control with Espruino, IR, Wi-Fi, and Android](https://makerdrive.github.io/cv/pulse/espruino-multi-platform-control/) — [Markdown](src/static-pages/copy-content/publications/espruino-multi-platform-control/en.md)
+
+</details>
+
+### [MEGAVISOR](https://makerdrive.github.io/cv/projects/megavisor/) (2010-2014)
+
+Co-founded product media platform combining cloud publishing, photo-360 sequences, spherical 3D panoramas, shooting automation, and custom lighting hardware.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/megavisor/) · [RU](https://makerdrive.github.io/cv/projects/megavisor/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/megavisor/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/megavisor/en.md) · [RU](src/static-pages/copy-content/projects/megavisor/ru.md) · [ES](src/static-pages/copy-content/projects/megavisor/es.md)
+
+<details><summary>Articles (2)</summary>
+
+- [MEGAVISOR: Capture R&D as a Product Line](https://makerdrive.github.io/cv/pulse/megavisor-retrospective/) — [Markdown](src/static-pages/copy-content/publications/megavisor-retrospective/en.md)
+- [Gate9 Field-Capture Logistics](https://makerdrive.github.io/cv/pulse/megavisor-gate9-logistics-bottleneck/) — [Markdown](src/static-pages/copy-content/publications/megavisor-gate9-logistics-bottleneck/en.md)
+
+</details>
+
+### [Project Graph MCP](https://makerdrive.github.io/cv/projects/project-graph-mcp/) (2026)
+
+Code-intelligence MCP server for RAG-style project retrieval: turning repositories into compact graphs, compressed project skeletons, structured context, and evidence agents can reason over.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/project-graph-mcp/) · [RU](https://makerdrive.github.io/cv/projects/project-graph-mcp/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/project-graph-mcp/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/project-graph-mcp/en.md) · [RU](src/static-pages/copy-content/projects/project-graph-mcp/ru.md) · [ES](src/static-pages/copy-content/projects/project-graph-mcp/es.md)
+
+<details><summary>Articles (6)</summary>
+
+- [Project Graph MCP: Compact Codebase Context for Agents](https://makerdrive.github.io/cv/pulse/project-graph-mcp-retrospective/) — [Markdown](src/static-pages/copy-content/publications/project-graph-mcp-retrospective/en.md)
+- [Compact Code Mode with External Context Contracts](https://makerdrive.github.io/cv/pulse/project-graph-mcp-compact-code-mode-v1-5/) — [Markdown](src/static-pages/copy-content/publications/project-graph-mcp-compact-code-mode-v1-5/en.md)
+- [JavaScript Structure Analysis with Vendored Acorn](https://makerdrive.github.io/cv/pulse/ast-codebase-analysis-acorn/) — [Markdown](src/static-pages/copy-content/publications/ast-codebase-analysis-acorn/en.md)
+- [Structural Parsers for TypeScript, Python, and Go](https://makerdrive.github.io/cv/pulse/multi-language-regex-parsers/) — [Markdown](src/static-pages/copy-content/publications/multi-language-regex-parsers/en.md)
+- [Two Cache Boundaries in Project Graph MCP](https://makerdrive.github.io/cv/pulse/incremental-analysis-caching/) — [Markdown](src/static-pages/copy-content/publications/incremental-analysis-caching/en.md)
+- [Code Quality Analysis in Project Graph MCP](https://makerdrive.github.io/cv/pulse/code-quality-analysis/) — [Markdown](src/static-pages/copy-content/publications/code-quality-analysis/en.md)
+
+</details>
+
+### [Agent Pool MCP](https://makerdrive.github.io/cv/projects/agent-pool-mcp/) (2026)
+
+Multi-agent orchestration runtime for delegating CLI work, assigning model/resource tiers, handling handoffs, tracking ownership, and returning structured execution state.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/agent-pool-mcp/) · [RU](https://makerdrive.github.io/cv/projects/agent-pool-mcp/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/agent-pool-mcp/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/agent-pool-mcp/en.md) · [RU](src/static-pages/copy-content/projects/agent-pool-mcp/ru.md) · [ES](src/static-pages/copy-content/projects/agent-pool-mcp/es.md)
+
+<details><summary>Articles (3)</summary>
+
+- [Agent Pool MCP: Delegation with Visible Ownership](https://makerdrive.github.io/cv/pulse/agent-pool-mcp-retrospective/) — [Markdown](src/static-pages/copy-content/publications/agent-pool-mcp-retrospective/en.md)
+- [Bounded Task Diagnostics in Agent Pool](https://makerdrive.github.io/cv/pulse/agent-pool-mcp-transparent-task-diagnostics/) — [Markdown](src/static-pages/copy-content/publications/agent-pool-mcp-transparent-task-diagnostics/en.md)
+- [Filesystem Boundary Validation in Agent Pool](https://makerdrive.github.io/cv/pulse/path-traversal-process-isolation/) — [Markdown](src/static-pages/copy-content/publications/path-traversal-process-isolation/en.md)
+
+</details>
+
+### [Browser X MCP](https://makerdrive.github.io/cv/projects/browser-x-mcp/) (2025)
+
+Browser automation R&D for agent observability: page inspection, form workflows, browser evidence, and UI evals usable by agents.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/browser-x-mcp/) · [RU](https://makerdrive.github.io/cv/projects/browser-x-mcp/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/browser-x-mcp/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/browser-x-mcp/en.md) · [RU](src/static-pages/copy-content/projects/browser-x-mcp/ru.md) · [ES](src/static-pages/copy-content/projects/browser-x-mcp/es.md)
+
+<details><summary>Articles (2)</summary>
+
+- [Browser X MCP: Browser Automation as Agent Evidence](https://makerdrive.github.io/cv/pulse/browser-x-mcp-retrospective/) — [Markdown](src/static-pages/copy-content/publications/browser-x-mcp-retrospective/en.md)
+- [Browser X MCP 1.0.0-beta.1](https://makerdrive.github.io/cv/pulse/browser-x-mcp-browser-x-mcp-v1-beta/) — [Markdown](src/static-pages/copy-content/publications/browser-x-mcp-browser-x-mcp-v1-beta/en.md)
+
+</details>
+
+### [Context X MCP](https://makerdrive.github.io/cv/projects/context-x-mcp/) (2025)
+
+Context engineering and RAG-style retrieval R&D for multi-agent work: detect task shape, collect relevant project memory, and choose tools.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/context-x-mcp/) · [RU](https://makerdrive.github.io/cv/projects/context-x-mcp/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/context-x-mcp/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/context-x-mcp/en.md) · [RU](src/static-pages/copy-content/projects/context-x-mcp/ru.md) · [ES](src/static-pages/copy-content/projects/context-x-mcp/es.md)
+
+<details><summary>Articles (1)</summary>
+
+- [Context X MCP: An Early Context-Preparation Prototype](https://makerdrive.github.io/cv/pulse/context-x-mcp-retrospective/) — [Markdown](src/static-pages/copy-content/publications/context-x-mcp-retrospective/en.md)
+
+</details>
+
+### [Terminal X MCP](https://makerdrive.github.io/cv/projects/terminal-x-mcp/) (2025)
+
+Terminal automation R&D for planned command execution, validation, monitoring, observability, and agent-safe feedback.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/terminal-x-mcp/) · [RU](https://makerdrive.github.io/cv/projects/terminal-x-mcp/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/terminal-x-mcp/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/terminal-x-mcp/en.md) · [RU](src/static-pages/copy-content/projects/terminal-x-mcp/ru.md) · [ES](src/static-pages/copy-content/projects/terminal-x-mcp/es.md)
+
+<details><summary>Articles (2)</summary>
+
+- [Terminal X MCP: An Early Tool-Contract Prototype](https://makerdrive.github.io/cv/pulse/terminal-x-mcp-retrospective/) — [Markdown](src/static-pages/copy-content/publications/terminal-x-mcp-retrospective/en.md)
+- [Terminal X Execution-State Contracts](https://makerdrive.github.io/cv/pulse/terminal-x-mcp-terminal-execution-state/) — [Markdown](src/static-pages/copy-content/publications/terminal-x-mcp-terminal-execution-state/en.md)
+
+</details>
+
+### [Symbiote Workspace](https://makerdrive.github.io/cv/projects/symbiote-workspace/) (2026)
+
+Agent-driven workspace R&D for turning intent into plans, graph state, builds, and shareable artifacts in the Symbiote Workspace / UI / Engine line.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/symbiote-workspace/) · [RU](https://makerdrive.github.io/cv/projects/symbiote-workspace/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/symbiote-workspace/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/symbiote-workspace/en.md) · [RU](src/static-pages/copy-content/projects/symbiote-workspace/ru.md) · [ES](src/static-pages/copy-content/projects/symbiote-workspace/es.md)
+
+<details><summary>Articles (5)</summary>
+
+- [Symbiote Workspace: Portable UI and Execution Configuration](https://makerdrive.github.io/cv/pulse/symbiote-workspace-retrospective/) — [Markdown](src/static-pages/copy-content/publications/symbiote-workspace-retrospective/en.md)
+- [Recorded Execution Timelines for Presentation](https://makerdrive.github.io/cv/pulse/symbiote-workspace-workspace-presentation-journey-v1/) — [Markdown](src/static-pages/copy-content/publications/symbiote-workspace-workspace-presentation-journey-v1/en.md)
+- [Chat-Led Workspace Construction Protocol](https://makerdrive.github.io/cv/pulse/chat-intent-driven-workspace-construction-protocol/) — [Markdown](src/static-pages/copy-content/publications/chat-intent-driven-workspace-construction-protocol/en.md)
+- [Strict Export and Import of Portable Workspace Configs](https://makerdrive.github.io/cv/pulse/strict-export-import-portable-workspace-configs/) — [Markdown](src/static-pages/copy-content/publications/strict-export-import-portable-workspace-configs/en.md)
+- [Workspace Patching Without a Browser Reload](https://makerdrive.github.io/cv/pulse/no-reload-browser-updates-workspace-patching/) — [Markdown](src/static-pages/copy-content/publications/no-reload-browser-updates-workspace-patching/en.md)
+
+</details>
+
+### [Symbiote UI](https://makerdrive.github.io/cv/projects/symbiote-ui/) (2026)
+
+Web Component system for agent-built interfaces: provider catalogs, layout contracts, resource trees, graph tooling, structured UI metadata, and WebMCP contracts.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/symbiote-ui/) · [RU](https://makerdrive.github.io/cv/projects/symbiote-ui/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/symbiote-ui/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/symbiote-ui/en.md) · [RU](src/static-pages/copy-content/projects/symbiote-ui/ru.md) · [ES](src/static-pages/copy-content/projects/symbiote-ui/es.md)
+
+<details><summary>Articles (4)</summary>
+
+- [Symbiote UI: Discoverable Interface Contracts](https://makerdrive.github.io/cv/pulse/symbiote-ui-retrospective/) — [Markdown](src/static-pages/copy-content/publications/symbiote-ui-retrospective/en.md)
+- [Tiered Cascade Theme Tokens](https://makerdrive.github.io/cv/pulse/symbiote-ui-tiered-cascade-token-architecture/) — [Markdown](src/static-pages/copy-content/publications/symbiote-ui-tiered-cascade-token-architecture/en.md)
+- [Renderer-Neutral Spatial Evidence for XR](https://makerdrive.github.io/cv/pulse/xr-spatial-evidence-and-projections/) — [Markdown](src/static-pages/copy-content/publications/xr-spatial-evidence-and-projections/en.md)
+- [Independent Speech Channels for Narrated Tours](https://makerdrive.github.io/cv/pulse/multi-voice-narrated-tour-architecture/) — [Markdown](src/static-pages/copy-content/publications/multi-voice-narrated-tour-architecture/en.md)
+
+</details>
+
+### [Symbiote Engine](https://makerdrive.github.io/cv/projects/symbiote-engine/) (2026)
+
+Server-side execution library for composable backend services, graph runtimes, and handler systems with zero coupling to UI products.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/symbiote-engine/) · [RU](https://makerdrive.github.io/cv/projects/symbiote-engine/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/symbiote-engine/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/symbiote-engine/en.md) · [RU](src/static-pages/copy-content/projects/symbiote-engine/ru.md) · [ES](src/static-pages/copy-content/projects/symbiote-engine/es.md)
+
+<details><summary>Articles (3)</summary>
+
+- [Symbiote Engine: Graph Execution Across Node and Browser](https://makerdrive.github.io/cv/pulse/symbiote-engine-retrospective/) — [Markdown](src/static-pages/copy-content/publications/symbiote-engine-retrospective/en.md)
+- [Deterministic Browser Capture for Offline Rendering](https://makerdrive.github.io/cv/pulse/deterministic-browser-capture-offline-rendering/) — [Markdown](src/static-pages/copy-content/publications/deterministic-browser-capture-offline-rendering/en.md)
+- [Composable Driver Packs for Symbiote Engine](https://makerdrive.github.io/cv/pulse/composable-automation-packs-node-types/) — [Markdown](src/static-pages/copy-content/publications/composable-automation-packs-node-types/en.md)
+
+</details>
+
+### [Symbiote Node](https://makerdrive.github.io/cv/projects/symbiote-node/) (2026)
+
+Early package workspace from the RND-PRO Symbiote line: integration, migration tooling, package organization, and links between UI primitives and execution-engine prototypes.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/symbiote-node/) · [RU](https://makerdrive.github.io/cv/projects/symbiote-node/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/symbiote-node/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/symbiote-node/en.md) · [RU](src/static-pages/copy-content/projects/symbiote-node/ru.md) · [ES](src/static-pages/copy-content/projects/symbiote-node/es.md)
+
+<details><summary>Articles (1)</summary>
+
+- [Symbiote Node: Migration Facade After the Package Split](https://makerdrive.github.io/cv/pulse/symbiote-node-retrospective/) — [Markdown](src/static-pages/copy-content/publications/symbiote-node-retrospective/en.md)
+
+</details>
+
+### [PhotoPizza Remote](https://makerdrive.github.io/cv/projects/photopizza-remote/) (2018-2019)
+
+Browser control interface for PhotoPizza capture workflows and field operation of the turntable.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/photopizza-remote/) · [RU](https://makerdrive.github.io/cv/projects/photopizza-remote/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/photopizza-remote/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/photopizza-remote/en.md) · [RU](src/static-pages/copy-content/projects/photopizza-remote/ru.md) · [ES](src/static-pages/copy-content/projects/photopizza-remote/es.md)
+
+<details><summary>Articles (2)</summary>
+
+- [Release of PhotoPizza Remote for Android](https://makerdrive.github.io/cv/pulse/photopizza-remote-photopizza-remote-android-release/) — [Markdown](src/static-pages/copy-content/publications/photopizza-remote-photopizza-remote-android-release/en.md)
+- [Browser Control for PhotoPizza Turntables](https://makerdrive.github.io/cv/pulse/photopizza-remote-browser-hardware-control/) — [Markdown](src/static-pages/copy-content/publications/photopizza-remote-browser-hardware-control/en.md)
+
+</details>
+
+### [PhotoSnail Public](https://makerdrive.github.io/cv/projects/photosnail-public/) (2016)
+
+Early PhotoSnail web project around motion-control camera systems and media presentation experiments.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/photosnail-public/) · [RU](https://makerdrive.github.io/cv/projects/photosnail-public/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/photosnail-public/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/photosnail-public/en.md) · [RU](src/static-pages/copy-content/projects/photosnail-public/ru.md) · [ES](src/static-pages/copy-content/projects/photosnail-public/es.md)
+
+<details><summary>Articles (3)</summary>
+
+- [PhotoSnail: Early Camera-Motion Experiments](https://makerdrive.github.io/cv/pulse/photosnail-public-retrospective/) — [Markdown](src/static-pages/copy-content/publications/photosnail-public-retrospective/en.md)
+- [PhotoSnail: Arduino-Controlled Camera Slider](https://makerdrive.github.io/cv/pulse/photosnail-public-arduino-interrupt-limitations/) — [Markdown](src/static-pages/copy-content/publications/photosnail-public-arduino-interrupt-limitations/en.md)
+- [PhotoSnail: Implemented Motion and Planned Object Tracking](https://makerdrive.github.io/cv/pulse/photosnail-public-motion-control-object-tracking/) — [Markdown](src/static-pages/copy-content/publications/photosnail-public-motion-control-object-tracking/en.md)
+
+</details>
+
+### [Lifecycle Messaging Platform](https://makerdrive.github.io/cv/projects/lifecycle-messaging-platform/) (2022-2026)
+
+Confidential lifecycle messaging platform for consent-based customer communications, opt-in SMS scenarios, campaign operations, modem-backed SMS runtime, audience segmentation, analytics, and internal workflow automation.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/lifecycle-messaging-platform/) · [RU](https://makerdrive.github.io/cv/projects/lifecycle-messaging-platform/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/lifecycle-messaging-platform/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/lifecycle-messaging-platform/en.md) · [RU](src/static-pages/copy-content/projects/lifecycle-messaging-platform/ru.md) · [ES](src/static-pages/copy-content/projects/lifecycle-messaging-platform/es.md)
+
+<details><summary>Articles (3)</summary>
+
+- [Lifecycle Messaging: Product Architecture and GSM Delivery](https://makerdrive.github.io/cv/pulse/lifecycle-messaging-platform-retrospective/) — [Markdown](src/static-pages/copy-content/publications/lifecycle-messaging-platform-retrospective/en.md)
+- [GSM Modem Control as a Delivery Subsystem](https://makerdrive.github.io/cv/pulse/lifecycle-messaging-platform-gsm-modem-pool-isolation/) — [Markdown](src/static-pages/copy-content/publications/lifecycle-messaging-platform-gsm-modem-pool-isolation/en.md)
+- [GSM Modem Pool Orchestration with Node.js](https://makerdrive.github.io/cv/pulse/lifecycle-messaging-platform-gsm-modem-pool-orchestration/) — [Markdown](src/static-pages/copy-content/publications/lifecycle-messaging-platform-gsm-modem-pool-orchestration/en.md)
+
+</details>
+
+### [Mobile SMM Operations Platform](https://makerdrive.github.io/cv/projects/mobile-smm-platform/)
+
+A controlled multi-profile SMM operations case combining media, publishing schedules, queues, Android execution, approvals, limits, deduplication, and an action log.
+
+Site: [EN](https://makerdrive.github.io/cv/projects/mobile-smm-platform/) · [RU](https://makerdrive.github.io/cv/projects/mobile-smm-platform/?lang=ru) · [ES](https://makerdrive.github.io/cv/projects/mobile-smm-platform/?lang=es) · Markdown: [EN](src/static-pages/copy-content/projects/mobile-smm-platform/en.md) · [RU](src/static-pages/copy-content/projects/mobile-smm-platform/ru.md) · [ES](src/static-pages/copy-content/projects/mobile-smm-platform/es.md)
+
+<details><summary>Articles (1)</summary>
+
+- [Controlled Mobile SMM Operations: Stable Paths and Reviewed Recovery](https://makerdrive.github.io/cv/pulse/mobile-smm-platform-retrospective/) — [Markdown](src/static-pages/copy-content/publications/mobile-smm-platform-retrospective/en.md)
+
+</details>
+
+## Articles
+
+Dated engineering notes live in Pulse: https://makerdrive.github.io/cv/pulse/. Articles are listed above under the project they belong to.
+
+## About this repository
+
+This repository is the source of the site above: a static CV, portfolio, and blog built with JSDA-Kit and Symbiote.js. The Markdown files linked here are the same texts the site renders. Build and development notes are in [docs/development.md](docs/development.md); licences are in [LICENSE](LICENSE) and [docs/third-party-notices.md](docs/third-party-notices.md).
