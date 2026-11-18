@@ -34,8 +34,9 @@ export function orderProjectsForPreview(projects, order = []) {
 /**
  * Renders the project preview grid shown on the Projects overview. Each card
  * is one link: the generated social card image (it already carries the
- * project title) opening the project. Cards expose a stable
- * `project-preview.<slug>` tour target so the CV Show can point at them.
+ * project title) opening the project. The grid is the
+ * `project-preview.grid` tour target and each card is `project-preview.<slug>`,
+ * so the CV Show can frame the whole set or point at one project.
  *
  * Temporary host-side implementation: the overview is a graph node whose
  * content the portfolio library does not let a page extend, so the grid is
@@ -56,5 +57,5 @@ export function renderProjectPreviewGrid(projects, options) {
     <a class="project-preview-card" href="${escapeHtml(hrefBuilder(project.slug))}" data-tour-target="project-preview.${escapeHtml(project.slug)}">
       <img src="${escapeHtml(imageUrlBuilder(project.slug))}" alt="${escapeHtml(project.title)}" loading="lazy" width="1200" height="630">
     </a>`.trim());
-  return `<div class="project-preview-grid">\n${cards.join('\n')}\n</div>`;
+  return `<div class="project-preview-grid" data-tour-target="project-preview.grid">\n${cards.join('\n')}\n</div>`;
 }

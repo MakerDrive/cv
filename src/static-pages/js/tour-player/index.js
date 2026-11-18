@@ -215,6 +215,7 @@ function panelTypeForTarget(targetId, runtime, actionId = '') {
   if (targetId.startsWith('portfolio.map.')) return 'portfolio-graph';
   if (
     targetId.startsWith('article.')
+    || targetId.startsWith('project-preview.')
     || targetId.startsWith('profile.')
     || targetId.startsWith('project-link.')
   ) {
