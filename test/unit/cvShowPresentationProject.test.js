@@ -676,6 +676,7 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:symbiote-ui.show-player-pointer', 800],
     ['cv-show:cue:finale.history', 1_500],
     ['cv-show:cue:finale.scale-route', 1_500],
+    ['cv-show:cue:finale.contacts', 1_000],
     ['cv-show:cue:photopizza.origin', 1_200],
     ['cv-show:cue:photopizza.video-01', 1_200],
     ['cv-show:cue:photopizza.video-02', 1_200],
@@ -771,9 +772,12 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
         // The engine marker legitimately keeps its underline shape: its long
         // arc over the whole "Workspace связывает" phrase needs a 2000ms
         // gesture budget, so the cue overlaps trailing speech explicitly.
-        const shape = cell.id === 'cv-show:cue:symbiote-engine.workspace-join'
-          ? 'underline'
-          : 'oval';
+        // The finale contacts marker is an arrow pointing at the contact
+        // buttons by design, so it overlaps the closing speech on purpose.
+        const shape = {
+          'cv-show:cue:symbiote-engine.workspace-join': 'underline',
+          'cv-show:cue:finale.contacts': 'arrow',
+        }[cell.id] ?? 'oval';
         assert.equal(runtimeMarker, shape, `${cell.id}: speech-overlapping marker`);
       } else {
         const expectedMarkerLeadMs = markerLeadOverrides.get(cell.id) ?? durationMs + 300;
