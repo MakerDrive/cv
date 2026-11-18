@@ -687,11 +687,12 @@ body > footer a {
   }
 }
 
-/* Project preview grid (Projects overview) */
+/* Project preview grid (Projects overview). Compact on purpose: the whole set
+   fits the viewer so the CV Show can frame it in one piece. */
 .project-preview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--sn-step-8);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--sn-step-4);
   margin: var(--sn-step-8) 0;
 }
 

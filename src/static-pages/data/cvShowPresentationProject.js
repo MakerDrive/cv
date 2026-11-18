@@ -6637,7 +6637,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "navigate"
         },
         "kind": "interaction",
-        "targetId": "pulse/index"
+        "targetId": "projects/index"
       },
       "dependsOn": [],
       "id": "cv-show:cue:finale.map",
@@ -6662,7 +6662,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "media/symbiote-workspace/image/configuration-illustration"
+        "targetId": "project-preview.grid"
       },
       "dependsOn": [
         {
@@ -6694,7 +6694,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "mode": "frame"
         },
         "kind": "focus",
-        "targetId": "media/symbiote-workspace/image/configuration-illustration"
+        "targetId": "project-preview.grid"
       },
       "dependsOn": [
         {
@@ -6727,7 +6727,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "article.symbiote-workspace.config-flow"
+        "targetId": "project-preview.grid"
       },
       "dependsOn": [
         {
@@ -6755,13 +6755,11 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     },
     {
       "cue": {
-        "annotation": {
-          "intent": "emphasize",
-          "marker": "route",
-          "series": "finale-scale"
+        "focus": {
+          "mode": "frame"
         },
-        "kind": "annotation",
-        "targetId": "article.symbiote-workspace.config-flow"
+        "kind": "focus",
+        "targetId": "project-preview.grid"
       },
       "dependsOn": [
         {
@@ -6771,7 +6769,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
       ],
       "id": "cv-show:cue:finale.scale-route",
       "kind": "cue",
-      "layerId": "cv-show:layer:annotation",
+      "layerId": "cv-show:layer:focus",
       "timing": {
         "at": {
           "anchor": "speech",
@@ -6794,7 +6792,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
-        "targetId": "project-card.symbiote-workspace"
+        "targetId": "project-preview.symbiote-workspace"
       },
       "dependsOn": [
         {
@@ -6826,7 +6824,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "mode": "frame"
         },
         "kind": "focus",
-        "targetId": "project-card.symbiote-workspace"
+        "targetId": "project-preview.symbiote-workspace"
       },
       "dependsOn": [
         {
@@ -13568,7 +13566,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 110,
+  "revision": 112,
   "schemaVersion": "workspace-presentation-authoring-project-v2",
   "script": {
     "grounding": {
@@ -15393,9 +15391,9 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
       },
       {
         "anchorContractHash": "cv-show-anchor-contract-v1:sha256-hed0POh9/bQd0evkUsiV7b7Sjg0xoxx/D1MUqQBKRwk=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-pD69RjH1QdF7NZ7yuXU0D2fT4Q46dxmHa95toLx9QIQ=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-1VjfeMvKeIv3aXa1iUhWlILtKZZAFm1sQsLtjGKLuDE=",
         "entryId": "finale",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-lamaMYFOnMqnNlSF0rsME8ZF8YenB/X2fCj9uIfe5a4=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-lLeDGoCjTQpGnIP5GYVdhEEP8q/eIox5d92r0XrMSho=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-2Q3zKvxa+VHQ5CGdCOG5QAhghQrurpEeHRV+45jGYTs=",
         "sourceCellIds": [
           "cv-show:narration:finale",
@@ -15685,7 +15683,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-iIeaM4QMx3ev9k5HLtQyzGTo9t2S58Vcdxuh3Jc/wig="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-5ryFUQbGLQozbRkav4OZqSLouGtNtWiOXF7YPq1HxLs=",
+    "hash": "cv-show-audio-provenance-v1:sha256-236mWpSMIaJzAWXWfMRWKHf2dyxH4ytmrE0wMabEBis=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
@@ -15745,8 +15743,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "manifestHash": "cv-show-media-manifest-v1:sha256-/kqDiyeUMuC/S32LalHRYOB8eJa8XhSIVTCQo8qE/Bc=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:f05b8129299662c6437061861c451a9c2ca5060071c716944c6d45dd6e39e5cf",
-  "predecessorReleaseId": "cv-show-audio-release-v1:af972411ab178fb39f500e1efb5f1833980ac749efb0ece6e4f64cd6af570d38",
+  "planId": "cv-show-audio-release-plan-v1:c725208cd1eca5883c37c89d63de74981866eeec7c1fe056aeac3822289ab21e",
+  "predecessorReleaseId": "cv-show-audio-release-v1:1dc8922f8a5370b0626b2865cd1a5929a0cb4603ecb2daf282f92adea481c244",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WqPoIYWG+cGu1rccIYRUR/xoDVPRH+5wau/SDrzOuwQ=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-LbWAitNz77QEwRGNo8QCR0FBI9KJw9bWz6jDOxDUsDw=",
@@ -15754,12 +15752,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-GrfXo0MRdbcpVTB753IDMCvz2FFlbKWnXCAaKeIq85k=",
-    "revision": 110
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-mRuJLKGccEMZmH816YhQ6rbxjdj/89SMODHHWyTfruk=",
+    "revision": 112
   },
-  "releaseId": "cv-show-audio-release-v1:3410bfe3938dc0553f3a97181069c191793fcf01038d8c5031203ae2c4941483",
+  "releaseId": "cv-show-audio-release-v1:0393d9229bf6f4b12351932f255625eb4f68371b06625d01c1ca12feec1d39bc",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:6e4d338dbe46a0f71494998e998baa164aee5093bca6d6725e2a0e9abb9b5933"
+  "verificationHash": "cv-show-audio-release-verification-v1:c7369ce36f925d56f54644ce4cc0dc1d511bb0af4226a40c5e4f4c1ca505c1f7"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );

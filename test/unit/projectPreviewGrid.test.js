@@ -35,6 +35,7 @@ test('every project becomes one linked social card with a tour target', () => {
   assert.equal(cards.length, 3);
   assert.ok(html.indexOf('projects/beta/') < html.indexOf('projects/alpha/'));
   assert.ok(html.includes('data-tour-target="project-preview.gamma"'));
+  assert.ok(html.includes('class="project-preview-grid" data-tour-target="project-preview.grid"'));
   assert.ok(html.includes('src="/cv/social-cards/projects-alpha.png"'));
   assert.ok(html.includes('href="/cv/projects/alpha/?lang=en"'));
 });
