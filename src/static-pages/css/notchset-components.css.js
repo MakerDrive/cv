@@ -4,6 +4,7 @@ html[data-portfolio-theme-mode] chat-show-player {
 }
 html[data-portfolio-theme-mode] .symbiote-presenter-cursor {
   --presenter-hose-outline: var(--notchset-background);
+  --presenter-hose-ink: var(--notchset-foreground);
 }
 
 html[data-portfolio-theme-mode] code-block :is(.cb-gutter, .cb-pre, .cb-pre code) {
