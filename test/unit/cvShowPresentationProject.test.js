@@ -654,6 +654,8 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:photopizza.page-open', 2_600],
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 3_000],
     ['cv-show:cue:photopizza.origin', 1_600],
+    // The contact arrow is drawn slowly so the viewer can follow it.
+    ['cv-show:cue:finale.contacts', 2_000],
   ]);
   const expectedSetupMarginOverrides = Object.freeze({
     'cv-show:cue:positioning.open': 2_900,
@@ -676,7 +678,6 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:symbiote-ui.show-player-pointer', 800],
     ['cv-show:cue:finale.history', 1_500],
     ['cv-show:cue:finale.scale-route', 1_500],
-    ['cv-show:cue:finale.contacts', 1_000],
     ['cv-show:cue:photopizza.origin', 1_200],
     ['cv-show:cue:photopizza.video-01', 1_200],
     ['cv-show:cue:photopizza.video-02', 1_200],
@@ -710,9 +711,10 @@ test('all 30 entries author hard visual budgets, margins, and exact text ranges'
     ['cv-show:cue:complexscan.delivery', { leadMs: 1_050, overlapMs: 1_550 }],
     ['cv-show:cue:complexscan.boothbot-gallery', { leadMs: 2_050, overlapMs: 7_450 }],
     ['cv-show:cue:photopizza.page-open', { leadMs: 1_150, overlapMs: 1_450 }],
-    // The contact arrow points at the chat buttons exactly while «связаться со
-    // мной» is spoken: the cue starts at its speech anchor on purpose.
-    ['cv-show:cue:finale.contacts', { leadMs: 600, overlapMs: 600 }],
+    // The contact arrow points at the chat buttons while the closing sentence
+    // «Здесь можно подробнее посмотреть мои проекты…» begins: it is already
+    // being drawn when «Здесь» is spoken and keeps drawing across the speech.
+    ['cv-show:cue:finale.contacts', { leadMs: 200, overlapMs: 1_800 }],
   ]);
   const markerLeadOverrides = new Map([
     ['cv-show:cue:complexscan.boothbot-catalog-ready', 3_300],
@@ -888,7 +890,7 @@ test('the structural fixture joins all 30 Project entries without media authorit
     // voiced, and the BoothBot montage plays across its five frames.
     ['cv-show:cue:complexscan.delivery', 1_550],
     ['cv-show:cue:complexscan.boothbot-gallery', 7_450],
-    ['cv-show:cue:finale.contacts', 600],
+    ['cv-show:cue:finale.contacts', 1_800],
     ['cv-show:cue:photopizza.page-open', 1_450],
     ['cv-show:cue:photopizza.origin', 550],
     ['cv-show:cue:photopizza.video-01', 550],
