@@ -1386,7 +1386,7 @@ test('Short media choreography frames video and 360 blocks while preserving the 
     sceneDirectives
   ));
   const youtube = directives.filter(({ target }) => /\/youtube\//u.test(String(target || '')));
-  assert.equal(youtube.length, 19);
+  assert.equal(youtube.length, 20);
   for (const directive of youtube) {
     assert.equal(directive.type, 'frame', directive.id);
     assert.equal(directive.mode, undefined, directive.id);
@@ -1582,7 +1582,7 @@ test('Show runtime policy keeps video blocks static in short and detail modes', 
   const passiveVideoDirectives = mediaDirectives.filter(({ target }) => (
     target.includes('/youtube/') || target.endsWith('/ims/spinner')
   ));
-  assert.equal(passiveVideoDirectives.length, 20);
+  assert.equal(passiveVideoDirectives.length, 22);
   assert.deepEqual(
     [...new Set(passiveVideoDirectives.map(({ type }) => type))],
     ['frame'],

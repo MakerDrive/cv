@@ -175,6 +175,7 @@ export const PORTFOLIO_MEDIA_CATALOG = Object.freeze([
     projectPage: 'https://makerdrive.github.io/cv/projects/photopizza/',
   }),
   youtube('qsXmS4mFvYc', 'adaptive-maximo-workbench', 'Agentic EAM Demo 1'),
+  youtube('qsXmS4mFvYc', 'symbiote-workspace', 'Agentic EAM Demo 1'),
   youtube('DUzUnbO2VVs', 'adaptive-maximo-workbench', 'XR EAM Example'),
 
   youtube('c3cCmDqO04c', 'megavisor', 'MEGAVISOR overview'),

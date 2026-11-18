@@ -26,6 +26,7 @@ export const PORTFOLIO_ARTICLE_MEDIA_PLACEMENTS = Object.freeze({
   }),
   'symbiote-workspace': Object.freeze({
     'media/symbiote-workspace/image/configuration-illustration': 'config-flow',
+    'media/symbiote-workspace/youtube/qsXmS4mFvYc': 'config-flow',
   }),
   'adaptive-maximo-workbench': Object.freeze({
     'media/adaptive-maximo-workbench/image/process-illustration': 'asset-context',

@@ -1070,6 +1070,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "type": "scroll"
         },
         "kind": "interaction",
+        "targetId": "media/symbiote-workspace/youtube/qsXmS4mFvYc"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:symbiote-workspace.illustration-task"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-workspace.video-agentic:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Интерфейс может объяснить, как он устроен"
+        },
+        "gestureDurationMs": 1000,
+        "leadMs": 2700,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-workspace"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/symbiote-workspace/youtube/qsXmS4mFvYc"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:symbiote-workspace.video-agentic:scroll"
+        }
+      ],
+      "id": "cv-show:cue:symbiote-workspace.video-agentic",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Интерфейс может объяснить, как он устроен"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "symbiote-workspace"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
         "targetId": "article.symbiote-workspace.portable-config"
       },
       "dependsOn": [
@@ -4418,6 +4483,71 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
           "occurrence": 1,
           "offsetMs": 0,
           "quote": "Здесь почти каждый новый предмет создавал новую задачу"
+        },
+        "gestureDurationMs": 1200,
+        "leadMs": 1500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "autobox"
+    },
+    {
+      "cue": {
+        "interaction": {
+          "reversible": false,
+          "type": "scroll"
+        },
+        "kind": "interaction",
+        "targetId": "media/autobox-v1/ims/spinner"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:autobox.illustration-object"
+        }
+      ],
+      "id": "cv-show:cue:autobox.spinner:scroll",
+      "kind": "cue",
+      "layerId": "cv-show:layer:interaction",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Поэтому целью было постепенно автоматизировать"
+        },
+        "gestureDurationMs": 800,
+        "leadMs": 2500,
+        "settleBy": "none",
+        "until": null
+      },
+      "turnId": "autobox"
+    },
+    {
+      "cue": {
+        "focus": {
+          "mode": "frame"
+        },
+        "kind": "focus",
+        "targetId": "media/autobox-v1/ims/spinner"
+      },
+      "dependsOn": [
+        {
+          "barrier": "settled",
+          "cellId": "cv-show:cue:autobox.spinner:scroll"
+        }
+      ],
+      "id": "cv-show:cue:autobox.spinner",
+      "kind": "cue",
+      "layerId": "cv-show:layer:focus",
+      "timing": {
+        "at": {
+          "anchor": "speech",
+          "edge": "start",
+          "occurrence": 1,
+          "offsetMs": 0,
+          "quote": "Поэтому целью было постепенно автоматизировать"
         },
         "gestureDurationMs": 1200,
         "leadMs": 1500,
@@ -13567,7 +13697,7 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
     ],
     "visualOwnerId": "cv-show:presenter"
   },
-  "revision": 116,
+  "revision": 120,
   "schemaVersion": "workspace-presentation-authoring-project-v2",
   "script": {
     "grounding": {
@@ -13694,6 +13824,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "refinements": {}
           },
           "cv-show:cue:autobox.open": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:autobox.spinner": {
             "policy": "required",
             "refinements": {}
           },
@@ -14246,6 +14380,10 @@ export const CV_SHOW_AUTHORING_PROJECT_INPUT = freezeDeep(
             "refinements": {}
           },
           "cv-show:cue:symbiote-workspace.illustration-task": {
+            "policy": "required",
+            "refinements": {}
+          },
+          "cv-show:cue:symbiote-workspace.video-agentic": {
             "policy": "required",
             "refinements": {}
           },
@@ -15045,10 +15183,10 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-0KJ8QavG0byvlpzW983XXdS8BRTuJR5KcbzbMwh2FDE="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-+7XCthXBqFFjoCJIaowz92vYFjcniTQv5F23dBgfT3o=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-aJkawjy/VwVv8ONHvAvmz859emZ7DBs3m/BSFMux5Sw=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-SgDJ9uz+swfDCA61KFTVO3CMV6/QRdIbJUgztXbac0A=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-D9MErhYpgv9PhRBkQ1nCH4GGZauH4NMR5BaJYuGMiac=",
         "entryId": "symbiote-workspace",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-m5lz+1c/aFpJ21vhLfYuRTkCEic48Q1sGTmoyyXCmU0=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-sg1ZamrUmVerjUmRnYccVOTekaszkuOhxinN1mi+cwg=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-yMDwqWitxBGefF+kLgklF+hJeywZI/SK+2AYT7P7Ue0=",
         "sourceCellIds": [
           "cv-show:narration:symbiote-workspace",
@@ -15057,6 +15195,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
           "cv-show:cue:workspace.intro-frame",
           "cv-show:cue:symbiote-workspace.illustration-task:scroll",
           "cv-show:cue:symbiote-workspace.illustration-task",
+          "cv-show:cue:symbiote-workspace.video-agentic:scroll",
+          "cv-show:cue:symbiote-workspace.video-agentic",
           "cv-show:cue:workspace.portable-config:scroll",
           "cv-show:cue:workspace.portable-config",
           "cv-show:cue:workspace.agent-portal-card:scroll",
@@ -15284,16 +15424,18 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-0u9zLsQQnlhRnkiePQu5Ywr1vFHWgcQP0wjGCxDmveo="
       },
       {
-        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-28Rt8b5tPDGc7RioSYpLKLx5jMlhvkcFqbJcnfjHOm0=",
-        "attentionContractHash": "cv-show-attention-contract-v1:sha256-BQASD19i1+V4m19gE47cVdm50Nhj2KWmsSGdE1nmoyI=",
+        "anchorContractHash": "cv-show-anchor-contract-v1:sha256-zD+sUaZI0otAlmwQg3KtkTWWK1d3tLpEzdmVfOdldfU=",
+        "attentionContractHash": "cv-show-attention-contract-v1:sha256-5naBexW6QmPQI4Zl91RS3nv0sHG72Lx0UUEIUUpw920=",
         "entryId": "autobox",
-        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-01CnzpThd9Z2XU7p+Dq8xIU5fYONNYIX3Sxw+QN5dSE=",
+        "entryProjectionHash": "cv-show-entry-projection-v1:sha256-lbN8ED+t+uLIEbxpSmlPy4CJPMj3Ho2lwm5CEnFUwPU=",
         "narrationInputHash": "cv-show-narration-input-v1:sha256-zKo9rXu/DgjzJEak34ri0gwsr7cki8v1hLqyHx49Cv0=",
         "sourceCellIds": [
           "cv-show:narration:autobox",
           "cv-show:cue:autobox.open",
           "cv-show:cue:autobox.illustration-object:scroll",
           "cv-show:cue:autobox.illustration-object",
+          "cv-show:cue:autobox.spinner:scroll",
+          "cv-show:cue:autobox.spinner",
           "cv-show:cue:autobox.video-01:scroll",
           "cv-show:cue:autobox.video-01",
           "cv-show:cue:autobox.video-02:scroll",
@@ -15684,7 +15826,7 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
         "synthesisInputHash": "cv-show-synthesis-input-v1:sha256-iIeaM4QMx3ev9k5HLtQyzGTo9t2S58Vcdxuh3Jc/wig="
       }
     ],
-    "hash": "cv-show-audio-provenance-v1:sha256-ys5SV4K1ygDOuhgwr608esTKaQ9uI7edURM2vjRUTVU=",
+    "hash": "cv-show-audio-provenance-v1:sha256-J5+GLCE+VeXiqaWa8xwuxTnF5emZ8nYO47+IRTLrudg=",
     "schemaVersion": "cv-show-audio-provenance-v1",
     "synthesisPolicyHash": "cv-show-synthesis-policy-v1:sha256-tmPYbXui+VSD22zqx0k1SGrZoagN9dmfs14QMmm/g2k=",
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
@@ -15744,8 +15886,8 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "manifestHash": "cv-show-media-manifest-v1:sha256-/kqDiyeUMuC/S32LalHRYOB8eJa8XhSIVTCQo8qE/Bc=",
     "schemaVersion": "workspace-presentation-media-collection-v1"
   },
-  "planId": "cv-show-audio-release-plan-v1:299abd1bd84ad6910bae625e1e660c81c5233a05032fa1a56405f5b8e7bf6df9",
-  "predecessorReleaseId": "cv-show-audio-release-v1:f693347a75f43eee05484047f045e62678a83cd91a24a92dfd7f3d428a2bbadb",
+  "planId": "cv-show-audio-release-plan-v1:7bd7e19149c45b64e605d9b9f8d4ccd532eeb6839d77b23b9b326bdb9e7011ec",
+  "predecessorReleaseId": "cv-show-audio-release-v1:81a1ef7a2dc2328b7c40e5aa420ac7628fe4040e45bcafc21d5a7b7e1a531cd6",
   "profiles": {
     "alignerContractHash": "cv-show-aligner-contract-v1:sha256-WqPoIYWG+cGu1rccIYRUR/xoDVPRH+5wau/SDrzOuwQ=",
     "asrProfileHash": "cv-show-asr-profile-v1:sha256-LbWAitNz77QEwRGNo8QCR0FBI9KJw9bWz6jDOxDUsDw=",
@@ -15753,12 +15895,12 @@ export const CV_SHOW_AUDIO_RELEASE = freezeDeep(
     "voiceIdentityHash": "cv-show-voice-identity-v1:sha256-hZR4zGbcS+1kKMC1Pado/SUj4i8PhLUSveMGP6Ox12E="
   },
   "project": {
-    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-dFgFD05OMSwQKr+cD/Ox8TqaoMsO3e9UZ5VYPgPzVas=",
-    "revision": 116
+    "authoringProjectHash": "workspace-presentation-authoring-project-v2:sha256-5IzlpesyhxkrUIYmr1bg98HWjYLTPoMSKTGDDfn30rI=",
+    "revision": 120
   },
-  "releaseId": "cv-show-audio-release-v1:f7e8016dfd2ba7f45ac297f9a204807b83116ea644c445b6e111ee5733d4d3fb",
+  "releaseId": "cv-show-audio-release-v1:f5d91565551ba2d587245155f2b3bbb340ece17c55e9f6386aae7300f4f607f4",
   "schemaVersion": "cv-show-audio-release-v1",
-  "verificationHash": "cv-show-audio-release-verification-v1:03af558e3c0eab3de4b0a9465021f2eb5da573f6bf9ce9f12bf9d155b710bc20"
+  "verificationHash": "cv-show-audio-release-verification-v1:76607055e716eee99433ac71f92752e8b4252b7e0170a45a45c61d202d17ef8c"
 }
 /* CV_SHOW_AUDIO_RELEASE_INPUT:END */
 );
