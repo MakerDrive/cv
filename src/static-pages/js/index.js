@@ -57,6 +57,9 @@ import {
   renderProjectUpdates,
 } from './feedPresentation.js';
 import {
+  renderProjectPreviewGrid,
+} from './projectPreviewGrid.js';
+import {
   createPortfolioEntryHref,
   createPortfolioNavigationEntries,
   createPortfolioTreeOccurrences,
@@ -823,6 +826,25 @@ let themeSharingController = initPortfolioThemeSharing();
 const TREE_STORAGE_KEY = createPortfolioTreeStorageKey(portfolioLocalization.locale);
 const projectsElement = document.getElementById('pulse-projects-data');
 const projects = projectsElement ? JSON.parse(projectsElement.textContent || '[]') : [];
+
+// The CV Show walks the projects in this order; the overview grid mirrors it so
+// the finale reads as a recap of the story. Other projects follow in catalog order.
+const PROJECT_PREVIEW_ORDER = Object.freeze([
+  'symbiote-workspace',
+  'symbiote-ui',
+  'symbiote-engine',
+  'agent-portal',
+  'symbiote-video-studio',
+  'adaptive-maximo-workbench',
+  'agent-pool-mcp',
+  'project-graph-mcp',
+  'lifecycle-messaging-platform',
+  'mobile-smm-platform',
+  'f360-studio',
+  'autobox-v1',
+  'complexscan',
+  'photopizza',
+]);
 const publicPublications = getPublicPublications();
 const publicArticleEntryIds = new Set([
   ...projects.map((project) => `projects/${project.slug}`),
@@ -1221,6 +1243,9 @@ function createMarkdown(entry, { interactive = true } = {}) {
   if (entry.projectUpdatesSlot) {
     lines.push(`:::content-slot ${entry.projectUpdatesSlot}`, '');
   }
+  if (entry.previewSlot) {
+    lines.push(`:::content-slot ${entry.previewSlot}`, '');
+  }
   if (entry.related?.length) {
     lines.push(`## ${entry.relatedTitle || tPortfolio('markdown.related')}`, '');
     for (let item of entry.relatedLinks || []) {
@@ -1302,6 +1327,7 @@ function createPortfolioEntries() {
       icon: 'folder',
       summary: tPortfolio('projects.summary'),
       details: tPortfolio('projects.details'),
+      previewSlot: 'project-previews',
       focusIds: ['profile/photo', 'projects/index', ...projects.slice(0, 2).map((item) => `projects/${item.slug}`)],
       params: { hideContent: true, tone: 'inverse' },
     }),
@@ -2611,6 +2637,13 @@ const portfolioRuntime = {
       } else if (slotKey === 'pulse-feed') {
         host.innerHTML = renderGlobalFeed(PUBLICATIONS, locale, {
           hrefBuilder: resolvePublicationHref,
+        });
+        host.onclick = handleInAppNavigation;
+      } else if (slotKey === 'project-previews') {
+        host.innerHTML = renderProjectPreviewGrid(projects, {
+          order: PROJECT_PREVIEW_ORDER,
+          hrefBuilder: (slug) => getPortfolioEntryHref(`projects/${slug}`),
+          imageUrlBuilder: (slug) => `${getPortfolioBasePath()}social-cards/projects-${slug}.png`,
         });
         host.onclick = handleInAppNavigation;
       } else if (slotKey === 'project-updates') {

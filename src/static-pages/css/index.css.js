@@ -687,6 +687,36 @@ body > footer a {
   }
 }
 
+/* Project preview grid (Projects overview) */
+.project-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--sn-step-8);
+  margin: var(--sn-step-8) 0;
+}
+
+.project-preview-card {
+  display: block;
+  border: var(--sn-node-border-width) solid var(--pulse-outline);
+  line-height: 0;
+  background: var(--pulse-surface, transparent);
+}
+
+.project-preview-card:hover,
+.project-preview-card:focus-visible {
+  outline: var(--sn-node-border-width) solid var(--pulse-text);
+  outline-offset: 2px;
+}
+
+.project-preview-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+}
+
 /* Pulse Feed & Card Styles */
 .pulse-feed {
   display: flex;
