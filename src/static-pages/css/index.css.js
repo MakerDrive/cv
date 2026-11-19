@@ -19,17 +19,6 @@ ${styles}
   --sn-sys-on-accent: var(--pulse-surface);
 }
 
-/* A visitor whose saved theme is dark gets the dark fallbacks instead
-   (data-boot-mode is set by the inline head script before first paint). */
-html[data-boot-mode='dark']:not([data-portfolio-theme-mode]) {
-  --pulse-surface: hsl(0 0% 8%);
-  --pulse-surface-panel: hsl(0 0% 11%);
-  --pulse-text: hsl(0 0% 94%);
-  --pulse-text-dim: hsl(0 0% 62%);
-  --pulse-outline: hsl(0 0% 62% / 0.28);
-  color-scheme: dark;
-}
-
 body {
   background: transparent;
   color: var(--pulse-text);
