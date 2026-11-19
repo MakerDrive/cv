@@ -113,6 +113,19 @@ html[data-portfolio-theme-mode] chat-show-player .chat-show-controls .chat-show-
   line-height: 1;
 }
 
+/* The player's settings menu only repeated the expand action, which has its
+   own header button, so the menu button is not shown. */
+html[data-portfolio-theme-mode] .chat-show-header-action[data-header-action='settings'] {
+  display: none;
+}
+
+/* A pressed header toggle (the flying presenter) reads as inverted. */
+html[data-portfolio-theme-mode] .chat-show-header-action[aria-pressed='true'],
+html[data-portfolio-theme-mode] .chat-show-header-action[aria-pressed='true']:hover {
+  background: var(--sn-sys-on-surface);
+  color: var(--sn-sys-surface-panel);
+}
+
 html[data-portfolio-theme-mode] :is(sn-button, .sn-btn, .sn-minimap-toggle, .insp-fire-btn, .insp-enter-btn, .composer-footer-btn,
   .chat-show-header-action, .chat-show-menu-action, .chat-show-video-control,
   .chat-show-controls button, .cte-mode button, .cte-icon-button,

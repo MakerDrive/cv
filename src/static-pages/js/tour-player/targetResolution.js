@@ -655,13 +655,15 @@ function easeInOutCubic(progress) {
 
 /**
  * Keeps authored scroll motion inside the presentation cell's hard deadline.
- * Readiness, native scrollend and stable-frame evidence retain a fixed 800 ms
- * reserve; calmer cells keep a 700 ms human-paced ramp instead of a snappy
- * 300 ms hop, and tight cells still shrink to fit the remaining budget.
+ * Readiness, native scrollend and stable-frame evidence retain a fixed 350 ms
+ * reserve (two stable frames plus the 150 ms inactivity window). The rest of
+ * the cell is visible motion, capped at a 700 ms human-paced ramp, so the
+ * common 800 ms cell still scrolls for 450 ms instead of jumping, and only a
+ * cell that cannot carry any motion at all stays instant.
  */
 export function resolveCvShowScrollDuration(budgetMs, {
   maxDurationMs = 700,
-  settlementReserveMs = 800,
+  settlementReserveMs = 350,
 } = {}) {
   const budget = Number(budgetMs);
   if (!Number.isFinite(budget) || budget <= 0) return maxDurationMs;
