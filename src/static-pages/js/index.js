@@ -105,6 +105,7 @@ import {
 } from '../data/portfolioMediaVisibility.js';
 
 import { showClickRipple } from 'symbiote-ui/ui/click-ripple.js';
+import { createYouTubeNoCookieEmbedUrl } from './tour-player/youtubeEmbedUrl.js';
 import { createPortfolioImsMediaAdapter } from './portfolioImsMediaAdapter.js';
 
 const PORTFOLIO_POINTER_RIPPLE_WINDOW_MS = 600;
@@ -232,16 +233,35 @@ await Promise.all([
   import('symbiote-ui/themes/CascadeThemeImportDialog/CascadeThemeImportDialog.js'),
 ]);
 
-if (document.querySelector('.pulse-tour-button')) {
-  try {
-    let moduleUrl = createRuntimeAssetUrl('js/tour-player/index.js');
-    tourModule = await import(moduleUrl.href);
-  } catch {
-    let trigger = document.querySelector('.pulse-tour-button');
-    trigger?.setAttribute('disabled', '');
-    trigger?.setAttribute('aria-disabled', 'true');
-  }
+// The CV Show runtime is the heaviest module of the site (about 1.7 MB and a
+// long synchronous start). Nothing on the first screen needs it, so it loads
+// off the critical path: immediately only for a Show deep link, otherwise when
+// the browser is idle or the visitor presses the tour button.
+const SHOW_ROUTE_PARAMS = ['showMode', 'showEntry', 'showTime', 'showDetail', 'showPlay', 'showCompleted'];
+let tourModulePromise = null;
+
+function loadTourModule() {
+  if (!document.querySelector('.pulse-tour-button')) return Promise.resolve(null);
+  tourModulePromise ||= import(createRuntimeAssetUrl('js/tour-player/index.js').href)
+    .then((module) => {
+      tourModule = module;
+      return module;
+    })
+    .catch(() => {
+      let trigger = document.querySelector('.pulse-tour-button');
+      trigger?.setAttribute('disabled', '');
+      trigger?.setAttribute('aria-disabled', 'true');
+      return null;
+    });
+  return tourModulePromise;
 }
+
+function isShowDeepLink() {
+  let params = new URLSearchParams(globalThis.location?.search || '');
+  return SHOW_ROUTE_PARAMS.some((name) => params.has(name));
+}
+
+if (isShowDeepLink()) await loadTourModule();
 
 registerMediaProvider('ims', createPortfolioImsMediaAdapter());
 
@@ -2013,9 +2033,8 @@ function createPortfolioYouTubeIframe(descriptor) {
   if (!/^[A-Za-z0-9_-]+$/.test(videoId)) return null;
   let iframe = document.createElement('iframe');
   iframe.className = 'portfolio-article-youtube';
-  if (!tourModule?.configurePortfolioYouTubeIframe?.(iframe, videoId)) {
-    iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?rel=0`;
-  }
+  iframe.dataset.youtubeVideoId = videoId;
+  iframe.src = createYouTubeNoCookieEmbedUrl(videoId, { origin: location.origin });
   iframe.title = String(descriptor.alt || descriptor.label || 'YouTube video');
   iframe.loading = 'lazy';
   iframe.referrerPolicy = 'strict-origin-when-cross-origin';
@@ -3441,12 +3460,23 @@ class PortfolioGraphPanel extends HTMLElement {
       this._structuredPathReadyStyle = '';
       portfolioRuntime.syncCanvas({ focus: true, focusScope: 'node-fit' });
       this.scheduleStructuredPathUpgrade();
-      void this._graphSnapshotRuntime.adopt();
+      // Binding is synchronous, but the live graph is only revealed once the
+      // route snapshot is adopted or the live routing finishes. The preloader
+      // stays up for that whole stretch instead of vanishing while the
+      // static preview is still the only thing on screen.
+      let adoption = (this._structuredAdoptionToken = (this._structuredAdoptionToken || 0) + 1);
+      this._structuredAdoptionPending = true;
+      void this._graphSnapshotRuntime.adopt().finally(() => {
+        if (adoption !== this._structuredAdoptionToken) return;
+        this._structuredAdoptionPending = false;
+        this.setStructuredGraphLoading(false);
+      });
     } catch (error) {
       this._graphSnapshotRuntime?.stop?.();
+      this._structuredAdoptionPending = false;
       throw error;
     } finally {
-      this.setStructuredGraphLoading(false);
+      if (!this._structuredAdoptionPending) this.setStructuredGraphLoading(false);
     }
   }
 
@@ -4107,11 +4137,52 @@ class PortfolioWorkspace extends HTMLElement {
       component: 'portfolio-theme-panel',
       behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end', swipeControl: 'rail' },
     });
-    this._disposeTour = tourModule?.installPortfolioTour({
-      workspace: this,
-      runtime: portfolioRuntime,
-      title: tPortfolio('panel.tour'),
-    });
+    // The tour installs once its module is loaded; a press on the tour button
+    // before that loads it right away and then repeats the press.
+    const installTour = (module) => {
+      if (!module || !this.isConnected || this._disposeTour) return false;
+      this._disposeTour = module.installPortfolioTour({
+        workspace: this,
+        runtime: portfolioRuntime,
+        title: tPortfolio('panel.tour'),
+      });
+      return true;
+    };
+    const tourButton = document.querySelector('.pulse-tour-button');
+    const onEarlyTourPress = (event) => {
+      if (this._disposeTour) return;
+      event.stopImmediatePropagation();
+      tourButton.setAttribute('aria-busy', 'true');
+      void loadTourModule().then((module) => {
+        tourButton.removeAttribute('aria-busy');
+        if (installTour(module)) tourButton.click();
+      });
+    };
+    // Hover or focus is the earliest sign of intent: start loading then, so the
+    // press itself usually finds the runtime ready.
+    const warmTour = () => { void loadTourModule().then((module) => installTour(module)); };
+    tourButton?.addEventListener('click', onEarlyTourPress, true);
+    tourButton?.addEventListener('pointerenter', warmTour, { once: true });
+    tourButton?.addEventListener('focus', warmTour, { once: true });
+    this._removeEarlyTourPress = () => {
+      tourButton?.removeEventListener('click', onEarlyTourPress, true);
+      tourButton?.removeEventListener('pointerenter', warmTour);
+      tourButton?.removeEventListener('focus', warmTour);
+    };
+    if (tourModule) installTour(tourModule);
+    else {
+      // Only download the Show runtime while the browser is idle; evaluating it
+      // starts a long synchronous task, so it waits for a real press.
+      const preloadTour = () => {
+        let link = document.createElement('link');
+        link.rel = 'modulepreload';
+        link.href = createRuntimeAssetUrl('js/tour-player/index.js').href;
+        document.head.append(link);
+      };
+      if (typeof globalThis.requestIdleCallback === 'function') {
+        globalThis.requestIdleCallback(preloadTour, { timeout: 6000 });
+      } else globalThis.setTimeout(preloadTour, 3000);
+    }
     let themeOpenRequest = 0;
     this._onThemeOpenFull = async () => {
       let request = ++themeOpenRequest;
@@ -4190,6 +4261,7 @@ class PortfolioWorkspace extends HTMLElement {
     }
     this._disposeLiveObservation?.();
     this._disposeLiveObservation = null;
+    this._removeEarlyTourPress?.();
     this._disposeTour?.();
   }
 }

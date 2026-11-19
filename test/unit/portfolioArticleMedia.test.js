@@ -484,8 +484,10 @@ test('portfolio routes selected media into article content instead of a graph pl
   assert.match(source, /globalThis\.requestAnimationFrame\(\(\) => \{\s*this\.canvasSyncFrame = globalThis\.requestAnimationFrame\(sync\)/);
   assert.match(source, /createElement\('sn-media-host'\)/);
   assert.match(source, /createElement\('iframe'\)/);
-  assert.match(source, /tourModule\?\.configurePortfolioYouTubeIframe\?\.\(iframe, videoId\)/);
-  assert.match(source, /youtube-nocookie\.com\/embed\/\$\{encodeURIComponent\(videoId\)\}\?rel=0/);
+  // The embed URL comes from the same helper the Show uses (it enables the
+  // player API), so iframes rendered before the lazy Show runtime loads are
+  // already controllable.
+  assert.match(source, /createYouTubeNoCookieEmbedUrl\(videoId, \{ origin: location\.origin \}\)/);
   const tourSource = await readFile(
     new URL('../../src/static-pages/js/tour-player/index.js', import.meta.url),
     'utf8',

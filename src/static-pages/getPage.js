@@ -48,7 +48,13 @@ function buildHeadMeta(pageData) {
         }
       })()
     : undefined;
+  // Runs before first paint: restore the visitor's language and theme mode so
+  // the static page does not flash English text rules or a dark/light page
+  // before the application bundle applies the saved settings.
+  const bootScript = `<script>(function(){try{var d=document.documentElement;var q=new URLSearchParams(location.search).get('lang');var l=q||localStorage.getItem('cv-portfolio-locale');if(l==='en'||l==='ru'||l==='es')d.lang=l;var t=JSON.parse(localStorage.getItem('symbiote-ui:cascade-theme-editor')||'null');if(t)if(t.mode==='dark')d.setAttribute('data-boot-mode','dark');}catch(e){}})();</script>`;
+  // Retired (noindex) tombstone pages stay free of inline scripts.
   let tags = [
+    ...(String(pageData.ROBOTS || '').includes('noindex') ? [] : [bootScript]),
     `<meta name="description" content="${escapeAttr(description)}">`,
     `<meta property="og:type" content="website">`,
     `<meta property="og:title" content="${escapeAttr(title)}">`,
