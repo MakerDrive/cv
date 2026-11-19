@@ -8,12 +8,34 @@ function primaryLocale(value) {
 }
 
 /**
+ * Touch-first browsers (mobile Safari, Android WebView, in-app browsers such as
+ * Threads or Instagram) unlock a media element only for a play() started by a
+ * user gesture, so a fresh element per clip is blocked at every section change.
+ */
+function prefersSharedAudioElement() {
+  try {
+    return globalThis.matchMedia?.('(pointer: coarse)')?.matches === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * @param {{ manifest?: any, createAudio?: () => HTMLAudioElement }} [options]
  */
 export function createLocalAudioSpeechController({
   manifest,
-  createAudio = () => new Audio(),
+  createAudio,
 } = {}) {
+  // On touch-first browsers one element, unlocked by the visitor's Play press,
+  // serves every clip; elsewhere each clip keeps its own element.
+  let sharedAudio = null;
+  const acquireAudio = () => {
+    if (createAudio) return createAudio();
+    if (!prefersSharedAudioElement()) return new Audio();
+    sharedAudio ||= new Audio();
+    return sharedAudio;
+  };
   let generation = 0;
   let active = null;
   let prefetchedId = '';
@@ -76,7 +98,7 @@ export function createLocalAudioSpeechController({
       if (primaryLocale(options.lang) !== manifest.locale) return false;
       generation += 1;
       clear({ releaseSource: true });
-      const audio = createAudio();
+      const audio = acquireAudio();
       clearPrefetch();
       lastError = '';
       let token = generation;
