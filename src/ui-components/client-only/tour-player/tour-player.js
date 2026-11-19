@@ -358,6 +358,7 @@ export class PortfolioShowChat extends HTMLElement {
   #completedDetailReviewPreparing = false;
   #presentationAdmitted = false;
   #transportPlaying = false;
+  #speechClockMemo = null;
   #playRequested = false;
   #resumePending = false;
   #pendingStartDetail = null;
@@ -580,6 +581,27 @@ export class PortfolioShowChat extends HTMLElement {
 
   get narrationSnapshot() {
     return this.#speech.snapshot;
+  }
+
+  /**
+   * The live speech clock for lip-sync: the timed words of the current caption and
+   * the narration position read now (not the coarse `timeupdate` snapshot that
+   * drives the caption highlight). Null while there is no timed narration.
+   *
+   * @returns {null | { words: ReadonlyArray<{ text: string, startMs: number, endMs: number }>, positionMs: number, playing: boolean }}
+   */
+  getSpeechClock() {
+    const track = this.#alignedEntry?.captionTrack;
+    if (!Array.isArray(track) || !track.length) return null;
+    const text = this.#playerEntry()?.subtitle || this.#currentScene()?.subtitle || '';
+    if (this.#speechClockMemo?.track !== track || this.#speechClockMemo.text !== text) {
+      this.#speechClockMemo = { track, text, words: createCvShowCanonicalCaption(text, track, 0).words };
+    }
+    return {
+      words: this.#speechClockMemo.words,
+      positionMs: this.#presentationPositionMs(),
+      playing: this.#transportPlaying,
+    };
   }
 
   #presentationPositionMs(fallbackMs = this.#session.snapshot.playback.positionMs) {
