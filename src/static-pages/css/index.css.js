@@ -5,15 +5,29 @@ export default /*css*/ `
 ${styles}
 
 :root {
-  --pulse-surface: var(--sn-sys-surface, hsl(0 0% 10%));
-  --pulse-surface-panel: var(--sn-sys-surface-panel, hsl(0 0% 13%));
+  /* Before symbiote-ui applies the theme these fall back to the Notchset
+     palette, so the first paint already matches the default light theme
+     instead of flashing a dark page. */
+  --pulse-surface: var(--sn-sys-surface, var(--notchset-background, hsl(0 0% 93%)));
+  --pulse-surface-panel: var(--sn-sys-surface-panel, var(--notchset-card, hsl(0 0% 96%)));
   --pulse-surface-raised: var(--sn-sys-surface-raised, var(--pulse-surface-panel));
-  --pulse-text: var(--sn-sys-on-surface, hsl(0 0% 94%));
-  --pulse-text-dim: var(--sn-sys-on-surface-dim, hsl(0 0% 60%));
-  --pulse-outline: var(--sn-sys-outline, hsl(0 0% 62% / 0.24));
-  --pulse-accent: var(--sn-sys-accent, hsl(205 74% 58%));
+  --pulse-text: var(--sn-sys-on-surface, var(--notchset-foreground, hsl(0 0% 7%)));
+  --pulse-text-dim: var(--sn-sys-on-surface-dim, var(--notchset-muted-foreground, hsl(0 0% 38%)));
+  --pulse-outline: var(--sn-sys-outline, var(--notchset-border, hsl(0 0% 62% / 0.4)));
+  --pulse-accent: var(--sn-sys-accent, var(--notchset-signal, hsl(205 74% 58%)));
   --pulse-hover-surface: color-mix(in oklab, var(--pulse-surface-raised) 86%, var(--pulse-accent) 14%);
   --sn-sys-on-accent: var(--pulse-surface);
+}
+
+/* A visitor whose saved theme is dark gets the dark fallbacks instead
+   (data-boot-mode is set by the inline head script before first paint). */
+html[data-boot-mode='dark']:not([data-portfolio-theme-mode]) {
+  --pulse-surface: hsl(0 0% 8%);
+  --pulse-surface-panel: hsl(0 0% 11%);
+  --pulse-text: hsl(0 0% 94%);
+  --pulse-text-dim: hsl(0 0% 62%);
+  --pulse-outline: hsl(0 0% 62% / 0.28);
+  color-scheme: dark;
 }
 
 body {
@@ -88,6 +102,35 @@ body:has(.pulse-screen) > header {
 
 .pulse-tour-button {
   display: inline-flex;
+}
+
+/* The Show is narrated in Russian only; keep the button out of other
+   locales from the first paint instead of hiding it after hydration. */
+html:not(:lang(ru)) .pulse-tour-button {
+  display: none;
+}
+
+/* Pressed before the Show runtime is ready: pulse until it starts. */
+.pulse-tour-button[aria-busy='true'] {
+  animation: portfolio-skeleton-breathe 0.6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* Header controls are custom elements: keep their space reserved and hide
+   the raw, unstyled buttons until the elements are upgraded. */
+sn-segmented-control:not(:defined),
+cascade-theme-widget:not(:defined) {
+  visibility: hidden;
+}
+
+sn-segmented-control.pulse-locale-toggle:not(:defined) {
+  min-inline-size: 96px;
+  min-block-size: 26px;
+}
+
+cascade-theme-widget.pulse-theme-widget:not(:defined) {
+  min-inline-size: 34px;
+  min-block-size: 26px;
 }
 
 .pulse-theme-widget {
@@ -277,6 +320,55 @@ portfolio-theme-panel {
 portfolio-graph-panel {
   display: block;
   position: relative;
+}
+
+/* First paint: a quiet skeleton of the tree and article columns stands in for
+   the workspace until it upgrades, so the page is not an empty gap next to the
+   graph preview. */
+portfolio-workspace:not(:defined) {
+  display: block;
+}
+
+portfolio-workspace:not(:defined)::before {
+  content: '';
+  position: absolute;
+  inset: 0 30.5% 0 0;
+  background:
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 0 0 / 1px 100% no-repeat,
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 29% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 0 44px / 29% 1px no-repeat,
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 29% 44px / 71% 1px no-repeat;
+  animation: portfolio-skeleton-breathe 1.6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+portfolio-workspace:not(:defined)::after {
+  content: '';
+  position: absolute;
+  inset: 44px 30.5% 0 0;
+  background:
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 6% 28px / 15% 12px no-repeat,
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 6% 56px / 19% 12px no-repeat,
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 6% 84px / 13% 12px no-repeat,
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 37% 36px / 34% 26px no-repeat,
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 37% 92px / 52% 10px no-repeat,
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 37% 116px / 48% 10px no-repeat,
+    linear-gradient(var(--pulse-outline), var(--pulse-outline)) 37% 140px / 50% 10px no-repeat;
+  opacity: 0.6;
+  animation: portfolio-skeleton-breathe 1.6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes portfolio-skeleton-breathe {
+  from { opacity: 0.35; }
+  to { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  portfolio-workspace:not(:defined)::before,
+  portfolio-workspace:not(:defined)::after {
+    animation: none;
+  }
 }
 
 .portfolio-graph-snapshot {

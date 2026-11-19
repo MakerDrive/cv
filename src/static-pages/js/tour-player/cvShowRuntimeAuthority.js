@@ -355,8 +355,18 @@ function validateSourceView(source, candidate) {
 export function createCvShowRuntimeAuthority({
   seedProject = CV_SHOW_PRESENTATION_PROJECT,
 } = {}) {
-  let seedView = createCvShowRuntimeView({ project: seedProject });
-  let view = seedView;
+  // Validating and hashing the whole seed project is the slowest step of the
+  // Show runtime, so the seed view is built on first use, not at import time.
+  let seedView = null;
+  let getSeedView = () => {
+    seedView ||= createCvShowRuntimeView({ project: seedProject });
+    return seedView;
+  };
+  let view = null;
+  let currentView = () => {
+    view ||= getSeedView();
+    return view;
+  };
   let activeSource = null;
   let unsubscribeSource = null;
   let subscribers = new Set();
@@ -375,7 +385,7 @@ export function createCvShowRuntimeAuthority({
 
   let authority = {
     getView() {
-      return view;
+      return currentView();
     },
     subscribe(listener) {
       if (typeof listener !== 'function') {
@@ -413,7 +423,7 @@ export function createCvShowRuntimeAuthority({
         unsubscribeSource();
         unsubscribeSource = null;
         activeSource = null;
-        view = seedView;
+        view = getSeedView();
         throw error;
       }
       return () => {
@@ -422,7 +432,7 @@ export function createCvShowRuntimeAuthority({
         unsubscribeSource?.();
         unsubscribeSource = null;
         activeSource = null;
-        view = seedView;
+        view = getSeedView();
         notify(view);
       };
     },
