@@ -9,6 +9,8 @@
  *  - claw-leaves-frame the claw stays outside the selection frame while it is shown
  *                      (the frame trails the claw while it grows: CLAW_OUT_MS of grace)
  *  - arm-short         the arm stays far shorter than the claw distance
+ *  - cloud-covers-focus the speech cloud covers the selection frame or the ink stroke
+ *                      for longer than CLOUD_COVER_MS
  *  - body-in-frame     the body centre stays inside the selection frame. Sitting in the
  *                      middle for a while and then flying away reads as natural, so
  *                      only a stay longer than BODY_IN_FRAME_MS counts
@@ -23,6 +25,7 @@ export const RIG_INVARIANTS = Object.freeze({
   SHORT_FOR_MS: 600,
   BODY_IN_FRAME_MS: 1200,
   CLAW_OUT_MS: 300,
+  CLOUD_COVER_MS: 500,
 });
 
 const inside = (point, rect, margin = 0) => point.x >= rect.left - margin && point.x <= rect.right + margin
@@ -44,6 +47,7 @@ export function checkRigTrace(entries, limits = RIG_INVARIANTS) {
   let retiredAt = null;
   let retiredArm = null;
   let clawOutSince = null;
+  let cloudSince = null;
   let rigState = null;
   let shortSince = null;
   let bodyInSince = null;
@@ -61,6 +65,18 @@ export function checkRigTrace(entries, limits = RIG_INVARIANTS) {
 
     const frame = data.marquee;
     const shown = Boolean(frame && frame.shown && frame.width >= limits.FRAME_MIN_PX);
+    const zones = [];
+    if (shown) zones.push({ left: frame.left, top: frame.top, right: frame.left + frame.width, bottom: frame.top + frame.height });
+    if (data.ink) zones.push({ left: data.ink.left, top: data.ink.top, right: data.ink.left + data.ink.width, bottom: data.ink.top + data.ink.height });
+    const cloud = rigState?.cloud;
+    const covered = cloud && zones.some((zone) => (
+      Math.min(cloud.x + cloud.w / 2, zone.right) - Math.max(cloud.x - cloud.w / 2, zone.left) > 0
+      && Math.min(cloud.y + cloud.h / 2, zone.bottom) - Math.max(cloud.y - cloud.h / 2, zone.top) > 0
+    ));
+    if (covered) {
+      if (cloudSince === null) cloudSince = entry.at;
+      if (entry.at - cloudSince >= limits.CLOUD_COVER_MS) report('cloud-covers-focus', entry.at, { cloud, zones });
+    } else cloudSince = null;
     if (!shown || !rigState) { shortSince = null; bodyInSince = null; clawOutSince = null; continue; }
     const rect = { left: frame.left, top: frame.top, right: frame.left + frame.width, bottom: frame.top + frame.height };
 

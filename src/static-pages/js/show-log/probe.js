@@ -22,6 +22,20 @@ export function startShowProbe(doc = document) {
     }
     return Math.round(longest);
   };
+  const inkBox = () => {
+    let left = Infinity;
+    let top = Infinity;
+    let right = -Infinity;
+    let bottom = -Infinity;
+    for (const path of doc.querySelectorAll('.pc-ink path')) {
+      if (!path.getAttribute('d')) continue;
+      const box = path.getBoundingClientRect();
+      if (!(box.width > 4 || box.height > 4)) continue;
+      left = Math.min(left, box.left); top = Math.min(top, box.top);
+      right = Math.max(right, box.right); bottom = Math.max(bottom, box.bottom);
+    }
+    return right > left ? { left: Math.round(left), top: Math.round(top), width: Math.round(right - left), height: Math.round(bottom - top) } : null;
+  };
   const timer = setInterval(() => {
     const marquee = doc.querySelector('.pc-marquee');
     const box = marquee?.getBoundingClientRect();
@@ -33,6 +47,7 @@ export function startShowProbe(doc = document) {
             width: Math.round(box.width), height: Math.round(box.height),
           }
         : null,
+      ink: inkBox(),
       hoseReach: hoseReach(),
     });
   }, SAMPLE_MS);

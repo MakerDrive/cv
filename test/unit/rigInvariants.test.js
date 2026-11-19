@@ -60,3 +60,16 @@ test('a hidden or tiny frame is not checked', () => {
   const trace = [state(0, { ...body, claw: { x: 1000, y: 600 } }), dom(100, { ...frame, shown: false }), dom(200, { ...frame, width: 30 })];
   assert.deepEqual(checkRigTrace(trace), []);
 });
+
+test('the speech cloud covering the frame or the ink for 500 ms is reported', () => {
+  const talking = state(0, { ...body, cloud: { x: 300, y: 360, w: 160, h: 60 } });
+  const over = [talking];
+  for (let at = 100; at <= 800; at += 100) over.push(dom(at, frame));
+  assert.equal(checkRigTrace(over).some((item) => item.rule === 'cloud-covers-focus'), true);
+  const clear = [state(0, { ...body, cloud: { x: 300, y: 120, w: 160, h: 60 } })];
+  for (let at = 100; at <= 800; at += 100) clear.push(dom(at, frame));
+  assert.equal(checkRigTrace(clear).some((item) => item.rule === 'cloud-covers-focus'), false);
+  const ink = [talking];
+  for (let at = 100; at <= 800; at += 100) ink.push({ at, source: 'probe', type: 'dom', data: { marquee: null, ink: { left: 250, top: 340, width: 300, height: 60 }, hoseReach: 300 } });
+  assert.equal(checkRigTrace(ink).some((item) => item.rule === 'cloud-covers-focus'), true);
+});
