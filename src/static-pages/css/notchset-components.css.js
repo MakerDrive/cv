@@ -306,6 +306,12 @@ html[data-portfolio-theme-mode] chat-show-player .chat-show-caption {
   white-space: normal;
 }
 
+/* With the flying presenter on (the robot button is pressed) the section title row
+   above the progress bar is not shown: the presenter's cloud carries the words. */
+html[data-portfolio-theme-mode] chat-show-player:has([data-cv-show-rig][aria-pressed='true']) .chat-show-timeline {
+  display: none;
+}
+
 html[data-portfolio-theme-mode] chat-show-player .chat-show-row {
   border: var(--notchset-rule-width) solid var(--sn-layout-border);
   border-radius: var(--sn-node-radius);

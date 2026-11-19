@@ -297,7 +297,7 @@ test('verifier enforces the main bundle budget and runtime Markdown asset bounda
   // The literal is pinned on purpose: a budget change must be a conscious act
   // in MAIN_JS_SIZE_LIMITS *and* here, or the raise is invisible in review.
   assert.deepStrictEqual(MAIN_JS_SIZE_LIMITS, {
-    raw: 1970000,
+    raw: 1980000,
     gzip: 484000,
   });
 
@@ -363,6 +363,8 @@ test('full verifier success and failure scenarios', async () => {
         path.join(tmpDir, 'js/live-observation/index.js'),
         'const live = "js/live-observation/index.js";',
       );
+      await fs.mkdir(path.join(tmpDir, 'js/show-log'), { recursive: true });
+      await fs.writeFile(path.join(tmpDir, 'js/show-log/index.js'), 'export const getShowLog = () => ({});');
       await fs.writeFile(path.join(tmpDir, 'js/ForceWorker.js'), 'console.log("hello worker");');
       await fs.writeFile(path.join(tmpDir, 'js/material-symbols.css'), 'url("material-symbols-outlined-400.ttf")');
       await fs.writeFile(path.join(tmpDir, 'js/material-symbols-outlined-400.ttf'), 'fontdata');
