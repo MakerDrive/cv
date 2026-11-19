@@ -534,6 +534,21 @@ export function shouldRestoreCvShowSetupAttentionTarget(action, context = {}) {
 }
 
 /**
+ * Article targets are empty slots placed just before the block they mark.
+ * Centering the slot puts the block's top at the middle of the viewport, so a
+ * long block's later text (where an annotation usually lands) falls off the
+ * bottom edge. Scroll to the block itself instead, which centers its middle.
+ * @param {any} target
+ */
+export function resolveCvShowScrollAnchor(target) {
+  if (!target?.classList?.contains?.('portfolio-tour-target')) return target;
+  if ((Number(target.offsetHeight) || 0) > 0) return target;
+  const block = target.nextElementSibling;
+  if (!block || block.classList?.contains?.('portfolio-tour-target')) return target;
+  return (Number(block.offsetHeight) || 0) > 0 ? block : target;
+}
+
+/**
  * A checkpoint can restore an attention cue whose paired scroll has already
  * elapsed. Recreate only that missing visual position, synchronously and
  * without spending the attention provider's hard gesture budget on a native
@@ -551,7 +566,7 @@ export function restoreCvShowHeldAttentionTarget(target, {
     status: 'unavailable',
     frames: 0,
   }));
-  target.scrollIntoView({
+  resolveCvShowScrollAnchor(target).scrollIntoView({
     block: 'center',
     inline: 'nearest',
     behavior: 'instant',
@@ -697,17 +712,18 @@ export function animateCvShowScrollIntoView(
 ) {
   if (!target?.scrollIntoView) return Promise.resolve();
   if (signal?.aborted) return Promise.reject(abortError(signal));
+  const anchor = resolveCvShowScrollAnchor(target);
   const view = document?.defaultView || globalThis;
   const requestFrame = view?.requestAnimationFrame?.bind(view);
   const cancelFrame = view?.cancelAnimationFrame?.bind(view) || (() => {});
   if (!requestFrame) {
-    target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+    anchor.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
     return Promise.resolve();
   }
 
-  const containers = scrollContainers(target, document);
+  const containers = scrollContainers(anchor, document);
   const before = offsets(containers);
-  target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+  anchor.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
   const after = offsets(containers);
   const rows = before.map((row, index) => ({
     element: row.element,
