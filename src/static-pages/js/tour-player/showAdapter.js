@@ -1023,6 +1023,18 @@ export function createCvShowDirectiveRunner(options = {}) {
                     presentationTarget = resolveMedia(source.target)?.element ?? null;
                   }
                 }
+                // A paused restore (deep link, reload, seek) lands on the scene state only:
+                // the presenter does not replay selections or ink; they start with the
+                // next event after Play.
+                if (
+                  (isQuietRestore() === true || source.checkpointMode === 'restore-held')
+                  && (source.type === 'marker' || (presentationTarget && isCvShowHighlightDirective(adapted.directive.mode)))
+                ) {
+                  satisfyAdmissionSilently(presentation, source, observePerformance);
+                  reportInteractionActed();
+                  reportInteractionSettled();
+                  return { status: 'success', skipped: 'quiet-restore' };
+                }
                 if (isCvShowHighlightDirective(adapted.directive.mode) && presentationTarget) {
                   // A navigation row is a transport surface: the scene
                   // transition clicks it with the cursor, so an authored frame

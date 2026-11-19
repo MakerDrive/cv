@@ -1049,11 +1049,11 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     }),
   });
 
-  // Experiment: `?showRig=robot` replaces the single hose with the flying
-  // avatar and two claw arms. The default stays the hose from the player;
-  // phones always keep the hose.
+  // The flying avatar with two claw arms is the default presenter; the single
+  // hose from the player stays available with `?showRig=hose` (the header
+  // toggle). Phones always keep the hose.
   const isPresenterRigOn = () => (
-    new URLSearchParams(globalThis.location?.search || '').get('showRig') === 'robot'
+    new URLSearchParams(globalThis.location?.search || '').get('showRig') !== 'hose'
   );
   const presenterRigOptions = () => (
     isPresenterRigOn() && !isMobileDock()
@@ -1062,8 +1062,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   );
   const setPresenterRigParam = (on) => {
     const url = new URL(location.href);
-    if (on) url.searchParams.set('showRig', 'robot');
-    else url.searchParams.delete('showRig');
+    if (on) url.searchParams.delete('showRig');
+    else url.searchParams.set('showRig', 'hose');
     if (url.href !== location.href) history.replaceState(history.state, '', url.href);
   };
 

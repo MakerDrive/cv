@@ -15,6 +15,8 @@ ${styles}
   --pulse-text-dim: var(--sn-sys-on-surface-dim, var(--notchset-muted-foreground, hsl(0 0% 38%)));
   --pulse-outline: var(--sn-sys-outline, var(--notchset-border, hsl(0 0% 62% / 0.4)));
   --pulse-accent: var(--sn-sys-accent, var(--notchset-signal, hsl(205 74% 58%)));
+  /* Accent as text on paper: the brand orange darkened toward the ink for contrast. */
+  --pulse-accent-text: color-mix(in oklab, var(--pulse-accent) 72%, var(--sn-sys-on-surface, #111110));
   --pulse-hover-surface: color-mix(in oklab, var(--pulse-surface-raised) 86%, var(--pulse-accent) 14%);
   --sn-sys-on-accent: var(--pulse-surface);
 }
@@ -683,7 +685,7 @@ body > footer a {
 
 .article-kicker {
   margin: 0 0 12px;
-  color: var(--pulse-accent) !important;
+  color: var(--pulse-accent-text) !important;
   font-size: 13px !important;
   font-weight: 800;
   line-height: 1.2 !important;
@@ -880,7 +882,7 @@ body > footer a {
 }
 
 .pulse-card-type {
-  color: var(--pulse-accent);
+  color: var(--pulse-accent-text);
   font-weight: var(--sn-card-title-weight);
 }
 
