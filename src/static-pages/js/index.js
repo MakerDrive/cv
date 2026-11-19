@@ -4137,6 +4137,35 @@ class PortfolioWorkspace extends HTMLElement {
       component: 'portfolio-theme-panel',
       behavior: { importance: 88, minInlineSize: 320, minBlockSize: 280, collapse: 'manual', mobileDock: 'end', swipeControl: 'rail' },
     });
+    // The Show console (history of player, pump and robot events) is a regular
+    // panel type: off by default, it appears when chosen in any panel menu.
+    void import('./show-log/ShowConsolePanel.js').then(() => {
+      layout.registerPanelType('portfolio-console', {
+        title: 'Console',
+        icon: 'terminal',
+        headerClose: true,
+        component: 'portfolio-console-panel',
+        behavior: { importance: 40, minBlockSize: 160, collapse: 'manual', mobileDock: 'end', swipeControl: 'rail' },
+      });
+      // Choosing the console in any panel menu opens it along the bottom edge
+      // instead of replacing the panel that owns the menu.
+      layout.addEventListener('panel-type-select', (event) => {
+        if (event.detail?.type !== 'portfolio-console') return;
+        event.stopImmediatePropagation();
+        layout.openPanel('portfolio-console', {
+          direction: 'vertical',
+          source: 'panel-menu',
+          uiInvoked: true,
+        });
+      }, true);
+      // An earlier build opened the console on its own; drop that leftover from
+      // a saved layout so it stays off until it is chosen.
+      const saved = LayoutTree.findPanelByType(layout.$.layoutTree, 'portfolio-console');
+      if (saved?.panelState?.source === 'show-console') {
+        const { root, removed } = LayoutTree.removeUiPanel(LayoutTree.clone(layout.$.layoutTree), 'portfolio-console');
+        if (removed && root) layout.$.layoutTree = root;
+      }
+    });
     // The tour installs once its module is loaded; a press on the tour button
     // before that loads it right away and then repeats the press.
     const installTour = (module) => {

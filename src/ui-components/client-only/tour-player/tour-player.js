@@ -32,6 +32,7 @@ import {
   resolveFailureRecovery,
 } from '../../../static-pages/js/tour-player/failurePolicy.js';
 import { describeCvShowMissingTarget, describeCvShowSpeechFailure } from '../../../static-pages/js/tour-player/speechFailure.js';
+import { getShowLog } from '../../../static-pages/js/show-log/index.js';
 import { CV_SHOW_WEB_AUDIO_RELEASE } from '../../../static-pages/data/cvShowWebAudioRelease.js';
 import {
   createCvShowCompositionTimeline,
@@ -666,6 +667,11 @@ export class PortfolioShowChat extends HTMLElement {
    * @param {{ mode?: 'short' | 'full', entryId?: string, detailId?: string, timeMs?: number, play?: boolean }} [route]
    */
   async applyShowRoute({ mode, timeMs = 0, play = true } = {}) {
+    getShowLog().info('player', 'route', { mode, timeMs, play });
+    getShowLog().setContext(() => ({
+      showMs: this.#presentationPositionMs(),
+      entry: this.#currentEntry()?.id || '',
+    }));
     if (!this.$.isReady || (mode !== 'short' && mode !== 'full')) return false;
     if (this.$.isRunning || this.#mode) this.stopShow({ reason: 'route-replace' });
     const timeline = this.#compositionTimeline();
@@ -712,6 +718,7 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   pauseShow(reason = 'explicit') {
+    getShowLog().info('player', 'pause', { reason });
     this.#cancelSceneRetry();
     const cancelledPendingPlay = this.#cancelPendingTrustedPlay();
     if (
@@ -1783,6 +1790,7 @@ export class PortfolioShowChat extends HTMLElement {
     this.#cancelSceneRetry();
     this.#requestId += 1;
     const requestId = this.#requestId;
+    getShowLog().info('player', 'present-entry', { entry: entry.id, startPaused, positionMs });
     this.#stopSpeech('scene-changed', { retainEntryId: entry.id });
     this.#transportPlaying = false;
     this.#playRequested = !startPaused;
@@ -1905,10 +1913,15 @@ export class PortfolioShowChat extends HTMLElement {
    */
   #speechFailureText({ error = null, receipt = null, entryId = '' } = {}) {
     const description = describeCvShowSpeechFailure({ error, receipt, entryId });
-    if (!description.detail) return this.#message('tour.error.speech');
-    return `${this.#message('tour.error.speech')} ${
-      this.#causeSuffix(description.causeKey, description.code)
-    } ${description.detail}`;
+    // The technical cause goes to the Show console; the chat only gets a plain
+    // note with the way out.
+    getShowLog().error('player', 'speech-failure', {
+      code: description.code,
+      cause: description.causeKey,
+      detail: description.detail,
+      entry: entryId,
+    });
+    return this.#message('tour.error.speech');
   }
 
   /**

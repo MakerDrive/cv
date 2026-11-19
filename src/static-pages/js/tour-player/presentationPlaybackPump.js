@@ -1,3 +1,5 @@
+import { getShowLog } from '../show-log/index.js';
+
 /**
  * @typedef {{
  *   cellId: string,
@@ -180,8 +182,10 @@ export function createPresentationPlaybackPump({
     );
   };
 
+  const log = getShowLog();
   const reportFailure = (error) => {
     requested = false;
+    log.error('pump', 'failure', { code: error?.code, message: error?.message, details: error?.details });
     onFailure?.(error);
     return error;
   };
@@ -343,6 +347,7 @@ export function createPresentationPlaybackPump({
       }
       const mediaTimeMs = resumedTimelinePosition(cell, snapshot, media);
       lastSampledCellId = cell.id;
+      log.debug('pump', 'cell-start', { cell: cell.id, kind: cell.kind, mediaTimeMs });
       snapshot = execution.sample({
         mediaTimeMs,
         reason: `project-playback:${reason}`,
@@ -356,6 +361,16 @@ export function createPresentationPlaybackPump({
       const idle = await execution.whenIdle();
       if (!requested || disposed) return idle;
       const terminal = idle.terminal.find(({ cellId }) => cellId === cell.id);
+      log.debug('pump', 'cell-end', { cell: cell.id, status: terminal?.status || 'missing' });
+      if (terminal?.status === 'cancelled') {
+        // A section switch cancels the running cell before it stops this pump:
+        // let the stop/dispose land, then a superseded pump ends quietly.
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
+        if (!requested || disposed) {
+          log.info('pump', 'cell-cancelled-by-navigation', { cell: cell.id });
+          return idle;
+        }
+      }
       if (terminal?.status !== 'completed') {
         throw Object.assign(new Error(`Presentation cell did not complete: ${cell.id}`), {
           code: 'PRESENTATION_PLAYBACK_CELL_INCOMPLETE',
@@ -388,17 +403,20 @@ export function createPresentationPlaybackPump({
     get positionMs() { return presentationPositionMs(); },
     resume(reason = 'resume') {
       if (disposed) return false;
+      log.info('pump', 'resume', { reason });
       requested = true;
       if (execution.snapshot.state === 'paused') execution.resume();
       return launch(reason);
     },
     async pause(reason = 'pause') {
+      log.info('pump', 'pause', { reason });
       requested = false;
       queuedResume = false;
       media.pause?.();
       return execution.pause(reason);
     },
     async stop(reason = 'stop') {
+      log.info('pump', 'stop', { reason });
       requested = false;
       queuedResume = false;
       media.pause?.();

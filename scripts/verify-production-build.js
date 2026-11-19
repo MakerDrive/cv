@@ -28,6 +28,9 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
   'js/markdown-viewer/index.js',
   'js/tour-player/index.js',
   'js/live-observation/index.js',
+  // Shared chunk of the Show log: the main bundle (console panel) and the lazy
+  // Show runtime write to one log.
+  'js/show-log/index.js',
   'js/ForceWorker.js'
 ]);
 
@@ -55,7 +58,9 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // integration; measured 1960602 raw. Publication summaries stay in the
   // bundled registry so the feed and the retirement stubs render without an
   // extra request.
-  raw: 1_970_000,
+  // 2026-11-19: +10 KB for the flying-presenter rig as the default presenter and
+  // the Show console panel; measured 1972213 raw.
+  raw: 1_980_000,
   // 2026-09-25: +5 KB gzip for the completed drawer gesture contract —
   // deferred pointer capture, touch tree-disclosure column, click-vs-swipe
   // separation; measured 452330 gzip against the 450000 cap. Re-measured at

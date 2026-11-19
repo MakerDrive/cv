@@ -1,3 +1,4 @@
+import { getShowLog } from '../show-log/index.js';
 import '../../../ui-components/client-only/tour-player/tour-player.js';
 import { createPresenterCursor } from 'symbiote-ui/chat/presenter-cursor.js';
 import {
@@ -1057,7 +1058,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   );
   const presenterRigOptions = () => (
     isPresenterRigOn() && !isMobileDock()
-      ? { avatarSrc: new URL('avatar/index.webp', document.baseURI).href }
+      ? {
+          avatarSrc: new URL('avatar/index.webp', document.baseURI).href,
+          onTrace: (type, data) => getShowLog()[type === 'state' ? 'debug' : 'info']('rig', type, data),
+        }
       : null
   );
   const setPresenterRigParam = (on) => {
