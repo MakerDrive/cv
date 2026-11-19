@@ -1053,6 +1053,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   // The flying avatar with two claw arms is the default presenter; the single
   // hose from the player stays available with `?showRig=hose` (the header
   // toggle). Phones always keep the hose.
+  const RIG_MASK_KEY = 'cvShowMask';
+  const readRigMask = () => {
+    const fromUrl = new URLSearchParams(globalThis.location?.search || '').get('showMask');
+    if (fromUrl) return fromUrl;
+    try { return globalThis.localStorage?.getItem(RIG_MASK_KEY) || undefined; } catch { return undefined; }
+  };
+  const saveRigMask = (name) => {
+    try { globalThis.localStorage?.setItem(RIG_MASK_KEY, name); } catch { /* optional */ }
+  };
   const isPresenterRigOn = () => (
     new URLSearchParams(globalThis.location?.search || '').get('showRig') !== 'hose'
   );
@@ -1061,6 +1070,12 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       ? {
           avatarSrc: new URL('avatar/index.webp', document.baseURI).href,
           onTrace: (type, data) => getShowLog()[type === 'state' ? 'debug' : 'info']('rig', type, data),
+          // The mouth follows the narration clock, not the coarse caption highlight.
+          speechClock: () => getChat()?.getSpeechClock?.() || null,
+          // The face mask: `?showMask=astro|walle|bot`, else the one picked last
+          // (a double click on the presenter tries the next face).
+          mask: readRigMask(),
+          onMaskChange: saveRigMask,
         }
       : null
   );
