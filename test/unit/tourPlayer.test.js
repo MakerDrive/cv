@@ -440,11 +440,13 @@ test('CV Show calm-scene scroll ramps over a human-like duration with eased inte
 });
 
 test('CV Show scroll motion reserves settlement time inside the authored hard deadline', () => {
-  assert.equal(resolveCvShowScrollDuration(800), 0);
-  assert.equal(resolveCvShowScrollDuration(1_000), 200);
+  // The common 800 ms authored cell must still scroll visibly, not jump.
+  assert.equal(resolveCvShowScrollDuration(800), 450);
+  assert.equal(resolveCvShowScrollDuration(1_000), 650);
   assert.equal(resolveCvShowScrollDuration(2_200), 700);
   assert.equal(resolveCvShowScrollDuration(null), 700);
-  assert.equal(shouldBypassCvShowScrollSettlement(800), true);
+  assert.equal(shouldBypassCvShowScrollSettlement(300), true);
+  assert.equal(shouldBypassCvShowScrollSettlement(800), false);
   assert.equal(shouldBypassCvShowScrollSettlement(1_000), false);
   // Media frames use the same scroll contract as every other target: only a
   // budget that cannot carry visible motion bypasses the animated scroll.

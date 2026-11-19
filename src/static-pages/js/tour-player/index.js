@@ -844,6 +844,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let showLayoutObserver = null;
   let showLayoutPlayer = null;
   let showLayoutButton = null;
+  let presenterRigButton = null;
 
   const isMobileDock = () => (
     typeof window !== 'undefined' && window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT
@@ -863,7 +864,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const clearMobileShowPlacement = () => {
     const chat = getDock()?.getChat?.();
     const player = chat?.getShowPlayer?.();
-    player?.setShowSettings?.(true);
+    // The settings menu only repeated the expand action, which has its own
+    // header button here, so the menu stays hidden on every layout.
+    player?.setShowSettings?.(false);
     player?.setShowClose?.(true);
     player?.setShowLayoutAction?.(false);
     player?.setResizable?.(false);
@@ -1046,10 +1049,29 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     }),
   });
 
+  // Experiment: `?showRig=robot` replaces the single hose with the flying
+  // avatar and two claw arms. The default stays the hose from the player;
+  // phones always keep the hose.
+  const isPresenterRigOn = () => (
+    new URLSearchParams(globalThis.location?.search || '').get('showRig') === 'robot'
+  );
+  const presenterRigOptions = () => (
+    isPresenterRigOn() && !isMobileDock()
+      ? { avatarSrc: new URL('avatar/index.webp', document.baseURI).href }
+      : null
+  );
+  const setPresenterRigParam = (on) => {
+    const url = new URL(location.href);
+    if (on) url.searchParams.set('showRig', 'robot');
+    else url.searchParams.delete('showRig');
+    if (url.href !== location.href) history.replaceState(history.state, '', url.href);
+  };
+
   const createPresenterSession = () => {
     const gestureSeed = globalThis.crypto?.randomUUID?.()
       || `${Date.now()}:${Math.random()}`;
     const cursor = createPresenterCursor(document, {
+      presenterRig: presenterRigOptions(),
       resolveHoseAnchor: () => {
         const dock = getDock();
         const player = dock?.getChat?.()?.getShowPlayer?.()
@@ -1460,6 +1482,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       if (showLayoutPlayer !== player) {
         showLayoutObserver?.disconnect();
         showLayoutButton?.remove();
+        presenterRigButton?.remove();
         showLayoutPlayer = player;
       }
       showLayoutButton = header.querySelector('[data-cv-show-expand]') || document.createElement('button');
@@ -1484,6 +1507,25 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       showLayoutObserver.observe(player, {
         attributes: true, attributeFilter: ['panel-layout'],
       });
+      // Toggle between the hose from the player and the flying presenter.
+      presenterRigButton = header.querySelector('[data-cv-show-rig]') || document.createElement('button');
+      presenterRigButton.type = 'button';
+      presenterRigButton.className = 'chat-show-header-action material-symbols-outlined';
+      presenterRigButton.dataset.cvShowRig = '';
+      presenterRigButton.textContent = 'smart_toy';
+      presenterRigButton.hidden = isMobileDock();
+      const rigLabel = getLocaleMessage('tour.rig');
+      presenterRigButton.setAttribute('aria-label', rigLabel);
+      presenterRigButton.title = rigLabel;
+      presenterRigButton.setAttribute('aria-pressed', String(isPresenterRigOn()));
+      presenterRigButton.onclick = () => {
+        const next = !isPresenterRigOn();
+        setPresenterRigParam(next);
+        presenterRigButton.setAttribute('aria-pressed', String(next));
+        presenter?.cursor.setPresenterRig?.(presenterRigOptions());
+      };
+      if (!presenterRigButton.isConnected) header.insertBefore(presenterRigButton,
+        header.querySelector('[data-header-action="settings"]'));
     });
   };
 
@@ -1869,6 +1911,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     workspace.removeEventListener('portfolio-show-player-mounted', onShowPlayerMounted);
     showLayoutObserver?.disconnect();
     showLayoutButton?.remove();
+    presenterRigButton?.remove();
     workspace.removeEventListener('portfolio-show-seek', onSeek);
     workspace.removeEventListener('portfolio-show-route-change', onRouteChange);
     workspace.removeEventListener('portfolio-show-route-change', onPlaybackEntryChange);
