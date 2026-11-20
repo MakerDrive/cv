@@ -74,7 +74,7 @@ export function createCvShowSound(source) {
     watchOverlay(overlay) {
       stopWatch?.();
       stopWatch = overlay ? watchPresenterCues(
-        overlay, (kind, detail) => sound.cue(kind, detail), (kind, value, detail) => sound.sustain(kind, value, detail),
+        overlay, (kind, detail) => sound.cue(kind, detail), (kind, value, detail) => sound.sustain(kind, value, detail), (kind, detail) => sound.release?.(kind, detail),
       ) : null;
     },
     isMusic: () => sound.isMusic(),
