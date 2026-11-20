@@ -486,11 +486,15 @@ export class PortfolioShowChat extends HTMLElement {
    * Hidden pages freeze rAF-driven effects while the shared engine's
    * wall-clock operation deadline keeps running. Pausing on hide cancels the
    * active cells honestly (cancelled, replayable) instead of letting them
-   * expire into PRESENTATION_EFFECT_DEADLINE_MISSED on return.
+   * expire into PRESENTATION_EFFECT_DEADLINE_MISSED on return. Only the recorded (aligned) show has
+   * those deadlines.
    */
   #onDocumentVisibility = () => {
     if (globalThis.document?.visibilityState !== 'hidden') return;
     if (!this.$.isRunning || this.$.isPaused) return;
+    // The browser voice has no engine deadlines to miss: it keeps speaking in a hidden tab and its
+    // cues simply run when the page paints again.
+    if (!this.#alignment.available) return;
     this.pauseShow('page-hidden');
   };
 
