@@ -1,5 +1,7 @@
 const HOST_OFFSET_MINUTES = -180; // Buenos Aires, GMT-3
-const WORK_START_HOUR = 9;
+const WORK_START_HOUR = 8;
+const FLEX_START_HOUR = 6; // before the start and after the end the host can shift on request:
+const FLEX_END_HOUR = 24; // from 06:00 up to the start, and from the end up to midnight (host time)
 const WORK_END_HOUR = 18;
 
 function escapeHtml(value) {
@@ -15,7 +17,7 @@ const pad = (value) => String(value).padStart(2, '0');
  * works then, which hour is the current one, and the host's wall-clock time.
  * @param {{ nowMs: number, viewerOffsetMinutes: number, hostOffsetMinutes?: number,
  *   startHour?: number, endHour?: number }} options offsets are minutes east of UTC
- * @returns {{ hours: Array<{ hour: number, working: boolean, now: boolean }>, overlap: number,
+ * @returns {{ hours: Array<{ hour: number, working: boolean, flex: boolean, now: boolean }>, overlap: number,
  *   hostTime: string, viewerHour: number }}
  */
 export function computeWorkingRuler({
@@ -24,13 +26,20 @@ export function computeWorkingRuler({
   hostOffsetMinutes = HOST_OFFSET_MINUTES,
   startHour = WORK_START_HOUR,
   endHour = WORK_END_HOUR,
+  flexStartHour = FLEX_START_HOUR,
+  flexEndHour = FLEX_END_HOUR,
 }) {
   const shift = hostOffsetMinutes - viewerOffsetMinutes;
   const viewerMinutes = ((Math.floor(nowMs / 60000) + viewerOffsetMinutes) % 1440 + 1440) % 1440;
   const viewerHour = Math.floor(viewerMinutes / 60);
   const hours = Array.from({ length: 24 }, (_, hour) => {
     const hostHour = ((((hour * 60 + shift) / 60) % 24) + 24) % 24;
-    return { hour, working: hostHour >= startHour && hostHour < endHour, now: hour === viewerHour };
+    return {
+      hour,
+      working: hostHour >= startHour && hostHour < endHour,
+      flex: (hostHour >= flexStartHour && hostHour < startHour) || (hostHour >= endHour && hostHour < flexEndHour),
+      now: hour === viewerHour,
+    };
   });
   const hostMinutes = ((viewerMinutes + shift) % 1440 + 1440) % 1440;
   return {
@@ -46,7 +55,7 @@ export function computeWorkingRuler({
  * host is working then.
  * @param {{ hour: number, viewerOffsetMinutes: number, hostOffsetMinutes?: number,
  *   startHour?: number, endHour?: number }} options
- * @returns {{ viewer: string, host: string, working: boolean }}
+ * @returns {{ viewer: string, host: string, working: boolean, flex: boolean }}
  */
 export function rulerReadout({
   hour,
@@ -54,6 +63,8 @@ export function rulerReadout({
   hostOffsetMinutes = HOST_OFFSET_MINUTES,
   startHour = WORK_START_HOUR,
   endHour = WORK_END_HOUR,
+  flexStartHour = FLEX_START_HOUR,
+  flexEndHour = FLEX_END_HOUR,
 }) {
   const hostMinutes = ((hour * 60 + hostOffsetMinutes - viewerOffsetMinutes) % 1440 + 1440) % 1440;
   const hostHour = Math.floor(hostMinutes / 60);
@@ -61,6 +72,7 @@ export function rulerReadout({
     viewer: `${pad(hour)}:00`,
     host: `${pad(hostHour)}:${pad(hostMinutes % 60)}`,
     working: hostHour >= startHour && hostHour < endHour,
+    flex: (hostHour >= flexStartHour && hostHour < startHour) || (hostHour >= endHour && hostHour < flexEndHour),
   };
 }
 
@@ -73,15 +85,12 @@ export function renderProfileStatus({ status, hostCity, hostTime }) {
 }
 
 /**
- * HTML of the profile dashboard: metric cells and the working-hours ruler. Labels come from the caller (already localized).
- * @param {{ metrics: Array<{ value: string, label: string }>,
- *   ruler: ReturnType<typeof computeWorkingRuler>, labels: { rulerTitle: string, overlap: string, hostTime: string } }} data
+ * HTML of the working-hours ruler of the profile page (the metrics are plain markdown). Labels come from the caller (already localized).
+ * @param {{ ruler: ReturnType<typeof computeWorkingRuler>, labels: { rulerTitle: string, overlap: string, hostTime: string } }} data
  */
-export function renderProfileDashboard({ metrics, ruler, labels }) {
-  const cells = metrics.map((metric) => `<div class="profile-metric"><span class="profile-metric-value">${escapeHtml(metric.value)}</span><span class="profile-metric-label">${escapeHtml(metric.label)}</span></div>`).join('');
-  const track = ruler.hours.map((item) => `<span class="profile-ruler-cell" data-hour="${item.hour}"${item.working ? ' data-working' : ''}${item.now ? ' data-now' : ''}></span>`).join('');
+export function renderProfileDashboard({ ruler, labels }) {
+  const track = ruler.hours.map((item) => `<span class="profile-ruler-cell" data-hour="${item.hour}"${item.working ? ' data-working' : ''}${item.flex ? ' data-flex' : ''}${item.now ? ' data-now' : ''}></span>`).join('');
   return `<div class="profile-dashboard">
-<div class="profile-metrics">${cells}</div>
 <div class="profile-ruler" data-overlap="${ruler.overlap} ${escapeHtml(labels.overlap)}">
 <div class="profile-ruler-head"><span>${escapeHtml(labels.rulerTitle)}</span><span class="profile-ruler-readout" aria-live="polite">${ruler.overlap} ${escapeHtml(labels.overlap)}</span></div>
 <div class="profile-ruler-track" role="slider" tabindex="0" aria-label="${escapeHtml(labels.rulerTitle)}" aria-valuemin="0" aria-valuemax="23" aria-valuenow="${ruler.viewerHour}">${track}</div>
