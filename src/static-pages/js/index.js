@@ -60,6 +60,7 @@ import {
   applyProjectPreviewFilter,
   renderProjectPreviewGrid,
 } from './projectPreviewGrid.js';
+import { computeWorkingRuler, renderProfileDashboard } from './profileDashboard.js';
 import {
   createPortfolioEntryHref,
   createPortfolioNavigationEntries,
@@ -358,6 +359,30 @@ function getProfileContactText() {
   if (PORTFOLIO_TELEGRAM_URL) links.push(`[Telegram](${PORTFOLIO_TELEGRAM_URL})`);
   links.push(`[LinkedIn](${PORTFOLIO_LINKEDIN_URL})`);
   return links.join(' · ');
+}
+
+const PROFILE_YEARS = '15+';
+
+/** Metric cells, availability status and the working-hours ruler of the profile page. */
+function mountProfileDashboard(host) {
+  const render = () => renderProfileDashboard({
+    metrics: [
+      { value: PROFILE_YEARS, label: tPortfolio('profile.metric.years') },
+      { value: String(projects.length), label: tPortfolio('profile.metric.projects') },
+      { value: String(directionEntries.length), label: tPortfolio('profile.metric.directions') },
+      { value: String(skillEntries.length), label: tPortfolio('profile.metric.skills') },
+    ],
+    status: tPortfolio('profile.statusDetails'),
+    hostCity: 'Buenos Aires',
+    ruler: computeWorkingRuler({ nowMs: Date.now(), viewerOffsetMinutes: -new Date().getTimezoneOffset() }),
+    labels: { rulerTitle: tPortfolio('profile.ruler.title'), overlap: tPortfolio('profile.ruler.overlap'), hostTime: '' },
+  });
+  host.innerHTML = render();
+  // The current hour and the host's clock move on while the page stays open.
+  const timer = setInterval(() => {
+    if (!host.isConnected) { clearInterval(timer); return; }
+    host.innerHTML = render();
+  }, 60_000);
 }
 
 function getProfileMetaText() {
@@ -1222,6 +1247,7 @@ function createMarkdown(entry, { interactive = true } = {}) {
   lines.push(article.summary || tPortfolio('node.fallback'), '');
   if (entry.id === 'profile/photo') {
     lines.push(`[${tPortfolio('show.openPresentation')}](${getCvShowStartHref()})`, '');
+    if (interactive) lines.push(':::content-slot profile-dashboard', '');
   }
   if (entry.meta) {
     lines.push(entry.meta, '');
@@ -1641,15 +1667,6 @@ function createTreeItems(projectItems) {
     })),
   ];
 
-  let projectIndexEntry = {
-    id: 'projects/index',
-    path: `${tPortfolio('projects.label')}/${tPortfolio('projects.overview')}.md`,
-    label: tPortfolio('projects.overview'),
-    icon: 'folder',
-    kind: String(projectItems.length),
-    draggable: false,
-  };
-
   let projection = buildPortfolioTreeProjection({
     projectItems,
     publications: PUBLICATIONS,
@@ -1662,11 +1679,9 @@ function createTreeItems(projectItems) {
     directionEntries: directionEntriesForTree,
   });
 
-  let resourceEntries = [
-    ...projection.resourceEntries.slice(0, profileEntries.length),
-    projectIndexEntry,
-    ...projection.resourceEntries.slice(profileEntries.length),
-  ];
+  // The Projects folder row itself opens the overview (`treeDirectorySelection`), so the overview is
+  // not listed again as a child of the folder.
+  let resourceEntries = projection.resourceEntries;
 
   const treeItems = buildResourceTreeFromEntries(resourceEntries, {
     directoryIcon: 'folder',
@@ -2659,6 +2674,8 @@ const portfolioRuntime = {
           hrefBuilder: resolvePublicationHref,
         });
         host.onclick = handleInAppNavigation;
+      } else if (slotKey === 'profile-dashboard') {
+        mountProfileDashboard(host);
       } else if (slotKey === 'project-previews') {
         host.innerHTML = renderProjectPreviewGrid(projects, {
           order: PROJECT_PREVIEW_ORDER,
@@ -4316,41 +4333,64 @@ customElements.define('portfolio-viewer-panel', PortfolioViewerPanel);
 customElements.define('portfolio-theme-panel', PortfolioThemePanel);
 customElements.define('portfolio-workspace', PortfolioWorkspace);
 
-// Markdown code blocks get a Notchset frame: a header with the language and a copy button.
+// Markdown blocks get Notchset design marks: tables, pictures and code sit in a figure with
+// corner crosses and a mono label (TBL 01, FIG 01, CODE 01), counted per document.
 {
-  const wrapCodeBlocks = () => {
-    for (const pre of document.querySelectorAll('pre.md-code-block:not([data-notchset-code])')) {
-      pre.dataset.notchsetCode = '';
-      const frame = document.createElement('div');
-      frame.className = 'notchset-code';
-      const head = document.createElement('div');
-      head.className = 'notchset-code-head';
-      const language = /language-([\w-]+)/.exec(pre.querySelector('code')?.className || '')?.[1] || 'code';
-      const label = document.createElement('span');
-      label.textContent = language;
-      const copy = document.createElement('button');
-      copy.type = 'button';
-      copy.className = 'notchset-code-copy material-symbols-outlined';
-      copy.textContent = 'content_copy';
-      copy.setAttribute('aria-label', 'Copy');
-      copy.title = 'Copy';
-      copy.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(pre.textContent || '');
-          copy.textContent = 'check';
-          setTimeout(() => { copy.textContent = 'content_copy'; }, 1400);
-        } catch { /* clipboard unavailable */ }
-      });
-      head.append(label, copy);
-      pre.replaceWith(frame);
-      frame.append(head, pre);
+  const KINDS = [
+    { selector: 'table.md-table:not([data-notchset-figure])', code: 'TBL' },
+    { selector: 'img.md-img:not([data-notchset-figure])', code: 'FIG' },
+    { selector: 'pre.md-code-block:not([data-notchset-figure])', code: 'CODE' },
+  ];
+  const indexOf = (element, code) => {
+    const flow = element.closest('.cb-md') || document;
+    const same = [...flow.querySelectorAll({ TBL: 'table.md-table', FIG: 'img.md-img', CODE: 'pre.md-code-block' }[code])];
+    return String(same.indexOf(element) + 1).padStart(2, '0');
+  };
+  const label = (text, extra) => {
+    const bar = document.createElement('div');
+    bar.className = 'notchset-figure-label';
+    const name = document.createElement('span');
+    name.textContent = text;
+    bar.append(name);
+    if (extra) bar.append(extra);
+    return bar;
+  };
+  const wrapMarkdownBlocks = () => {
+    for (const { selector, code } of KINDS) {
+      for (const element of document.querySelectorAll(`portfolio-workspace code-block ${selector}`)) {
+        element.dataset.notchsetFigure = '';
+        const figure = document.createElement('figure');
+        figure.className = `notchset-figure notchset-figure-${code.toLowerCase()}`;
+        const tag = `${code} ${indexOf(element, code)}`;
+        if (code === 'CODE') {
+          const language = /language-([\w-]+)/.exec(element.querySelector('code')?.className || '')?.[1] || 'text';
+          const copy = document.createElement('button');
+          copy.type = 'button';
+          copy.className = 'notchset-code-copy material-symbols-outlined';
+          copy.textContent = 'content_copy';
+          copy.setAttribute('aria-label', 'Copy');
+          copy.title = 'Copy';
+          copy.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(element.textContent || '');
+              copy.textContent = 'check';
+              setTimeout(() => { copy.textContent = 'content_copy'; }, 1400);
+            } catch { /* clipboard unavailable */ }
+          });
+          element.replaceWith(figure);
+          figure.append(label(`${tag} · ${language}`, copy), element);
+        } else {
+          element.replaceWith(figure);
+          figure.append(label(tag), element);
+        }
+      }
     }
   };
   let pending = false;
   new MutationObserver(() => {
     if (pending) return;
     pending = true;
-    requestAnimationFrame(() => { pending = false; wrapCodeBlocks(); });
+    requestAnimationFrame(() => { pending = false; wrapMarkdownBlocks(); });
   }).observe(document.body, { childList: true, subtree: true });
-  wrapCodeBlocks();
+  wrapMarkdownBlocks();
 }
