@@ -35,7 +35,7 @@ import {
 } from './compositionTime.js';
 import {
   animateCvShowScrollIntoView,
-  animateCvShowScrollWithHand,
+  scrollCvShowSpaceIntoView,
   createCvShowTextMarkerTarget,
   ensureCvShowArticleProject,
   ensureCvShowMediaProject,
@@ -447,9 +447,12 @@ async function presentNavigationGesture(workspace, runtime, entryId, {
   }).catch(() => null);
   const row = ready?.target;
   if (!row) return false;
-  await animateCvShowScrollIntoView(row, {
+  // The navigation tree scrolls like everything else: the claw pushes it when the row is off screen.
+  await scrollCvShowSpaceIntoView(row, {
     document,
     signal,
+    cursor,
+    budgetMs: 1_800,
     durationMs: 260,
   }).catch(() => {});
   await waitForShowVisualSettlement(row, {
@@ -767,13 +770,13 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     // The hand pushes the page when the cell has room for it (the browser voice has no hard deadline, and
     // a bare gesture is unbounded); a short recorded cell keeps the plain animated scroll.
     const handBudgetMs = Number(context?.presentationBudgetMs) > 0 ? Number(context.presentationBudgetMs) : 2_200;
-    const scrollMotion = (durationMs) => (
-      handBudgetMs >= 1_600 && !bypassScrollSettlement
-        ? animateCvShowScrollWithHand(ready.target, {
-            document, signal, durationMs: handBudgetMs - 300, cursor: getCursor(),
-          })
-        : animateCvShowScrollIntoView(ready.target, { document, signal, durationMs })
-    );
+    const scrollMotion = (durationMs) => scrollCvShowSpaceIntoView(ready.target, {
+      document,
+      signal,
+      cursor: bypassScrollSettlement ? null : getCursor(),
+      budgetMs: handBudgetMs,
+      durationMs,
+    });
     if (bypassScrollSettlement) {
       await animateCvShowScrollIntoView(ready.target, {
         document,
@@ -1716,13 +1719,20 @@ export function installPortfolioTour({ workspace, runtime, title }) {
           }
         : null;
       // A gesture brings its own target into view: whatever the authored scroll cues did or did not do, a
-      // frame, marker or selection is never drawn on something that is off screen.
+      // frame, marker or selection is never drawn on something hidden or off screen. The scroll operation
+      // runs the whole focus: it reveals what is collapsed (panel, branch, project) and then pushes the
+      // page to the target.
       if (!isScroll && event.detail?.continuation === true) {
         const subject = directives[0];
-        const element = subject?.target && ['frame', 'marker', 'native-selection', 'activate'].includes(subject.type)
-          ? resolveTargetElement(workspace, runtime, subject.target)
-          : null;
-        if (element && !isElementInView(element)) await runner.scroll(subject);
+        if (subject?.target && ['frame', 'marker', 'native-selection', 'activate'].includes(subject.type)) {
+          const element = resolveTargetElement(workspace, runtime, subject.target);
+          if (!element || !isElementInView(element)) {
+            // A target that cannot be focused must not hold the gesture back: it presents on its own.
+            await runner.scroll(subject).catch((error) => {
+              if (error?.name === 'AbortError') throw error;
+            });
+          }
+        }
       }
       const result = isScroll
         ? await runner.scroll(directives[0], slot ? { presentation: slot } : undefined)

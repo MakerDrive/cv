@@ -902,3 +902,24 @@ export function animateCvShowScrollWithHand(target, { document, signal, duration
     applyOffsets(rows, 1);
   });
 }
+
+
+/**
+ * The one way the show brings anything into view, whatever scrolls (article, navigation tree, panels):
+ * with room for it (a budget of 1.6 s or more) the claw pushes the page, otherwise the plain animation runs.
+ * @param {Element} target
+ * @param {{
+ *   document?: Document, signal?: AbortSignal, cursor?: any,
+ *   budgetMs?: number, durationMs?: number,
+ * }} [options] `budgetMs`: the room the gesture has; `durationMs`: the plain animation's length
+ * @returns {Promise<void>}
+ */
+export function scrollCvShowSpaceIntoView(target, {
+  document, signal, cursor = null, budgetMs = 0, durationMs = 300,
+} = {}) {
+  return Number(budgetMs) >= HAND_SCROLL_MIN_BUDGET_MS && cursor
+    ? animateCvShowScrollWithHand(target, { document, signal, cursor, durationMs: budgetMs - 300 })
+    : animateCvShowScrollIntoView(target, { document, signal, durationMs });
+}
+
+export const HAND_SCROLL_MIN_BUDGET_MS = 1_600;
