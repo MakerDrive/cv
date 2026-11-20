@@ -1,10 +1,49 @@
 export default /*css*/ `
-html[data-portfolio-theme-mode] chat-show-player {
-  filter: invert(1) hue-rotate(180deg);
+/* The player is an inverted surface of the active theme: dark ink on a light page and the
+   other way round. It is built from the theme's own tokens (not a colour filter), so every
+   cascade theme and variant, and its accent, stay intact. The page values are captured
+   first, because a token cannot be redefined from itself. */
+html[data-portfolio-theme-mode] {
+  --cv-surface: var(--sn-sys-surface-panel);
+  --cv-ink: var(--sn-sys-on-surface);
+  --cv-line: var(--sn-layout-border);
 }
+
+html[data-portfolio-theme-mode] chat-show-player {
+  --sn-sys-surface-panel: var(--cv-ink);
+  --sn-sys-surface: var(--cv-ink);
+  --sn-sys-on-surface: var(--cv-surface);
+  --sn-sys-on-surface-dim: color-mix(in srgb, var(--cv-surface) 60%, var(--cv-ink));
+  --sn-layout-border: var(--cv-surface);
+  --sn-node-border: var(--cv-surface);
+  --sn-node-selected: var(--cv-surface);
+  --sn-portfolio-tool-bg: var(--cv-ink);
+  --sn-button-color: var(--cv-surface);
+  --sn-button-border: var(--cv-surface);
+  --sn-button-hover-border: var(--cv-surface);
+  --sn-button-primary-border: var(--cv-surface);
+  /* The current row is a selected (light) bar here: its text is the dark ink. */
+  --sn-fullscreen-tab-active-color: var(--cv-ink);
+  --sn-node-bg: var(--cv-ink);
+  --sn-node-hover: color-mix(in srgb, var(--cv-surface) 14%, var(--cv-ink));
+  --sn-panel-bg: var(--cv-ink);
+  --sn-sys-surface-raised: color-mix(in srgb, var(--cv-surface) 8%, var(--cv-ink));
+  --sn-sys-outline: var(--cv-surface);
+  --sn-card-border: var(--cv-surface);
+  --sn-sys-focus-ring: var(--cv-surface);
+  --sn-text: var(--cv-surface);
+  --sn-text-dim: color-mix(in srgb, var(--cv-surface) 60%, var(--cv-ink));
+  --notchset-muted-foreground: color-mix(in srgb, var(--cv-surface) 60%, var(--cv-ink));
+  background: var(--cv-ink);
+  color: var(--cv-surface);
+  border-color: var(--cv-surface);
+}
+
+/* The presenter robot takes the same theme tokens: paper, ink and accent. */
 html[data-portfolio-theme-mode] .symbiote-presenter-cursor {
-  --presenter-hose-outline: var(--notchset-background);
-  --presenter-hose-ink: var(--notchset-foreground);
+  --presenter-hose-outline: var(--sn-sys-surface-panel);
+  --presenter-hose-ink: var(--sn-sys-on-surface);
+  --presenter-hose-accent: var(--sn-sys-accent);
 }
 
 html[data-portfolio-theme-mode] code-block :is(.cb-gutter, .cb-pre, .cb-pre code) {
@@ -111,6 +150,27 @@ html[data-portfolio-theme-mode] chat-show-player .chat-show-controls .chat-show-
   font-variation-settings: normal;
   letter-spacing: 0;
   line-height: 1;
+}
+
+/* The header holds many actions (link, expand, presenter, music, subtitles, sound,
+   close): in a narrow player they wrap onto a second row instead of being cut off. */
+html[data-portfolio-theme-mode] chat-show-player .chat-show-header {
+  flex-wrap: wrap;
+  row-gap: var(--sn-space-xs, 4px);
+}
+
+/* The icon and the "CV Show" title are not shown: the room goes to the actions, which push
+   to the end of the row. */
+html[data-portfolio-theme-mode] chat-show-player .chat-show-header > :is(.chat-show-icon, .chat-show-title) {
+  display: none;
+}
+
+html[data-portfolio-theme-mode] chat-show-player .chat-show-header {
+  justify-content: flex-end;
+}
+
+html[data-portfolio-theme-mode] chat-show-player .chat-show-header > .chat-show-header-action {
+  flex: 0 0 auto;
 }
 
 /* The player's settings menu only repeated the expand action, which has its
@@ -265,6 +325,12 @@ html[data-portfolio-theme-mode] chat-show-player .chat-show-progress-segment {
   margin-inline-start: 0;
 }
 
+/* The passed part of the bar is pale: only the unplayed track stays bright and the thumb
+   marks the position. */
+html[data-portfolio-theme-mode] chat-show-player .chat-show-progress-fill {
+  background: color-mix(in srgb, var(--sn-node-border, var(--sn-sys-outline)) 30%, var(--sn-portfolio-tool-bg));
+}
+
 html[data-portfolio-theme-mode] chat-show-player .chat-show-progress-thumb {
   inset-inline-start: calc(var(--cv-compact-progress, 0) * 100%);
 }
@@ -282,7 +348,13 @@ html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-timeli
   html[data-portfolio-theme-mode] chat-show-player .chat-show-row-speaker {
     display: none;
   }
-  html[data-portfolio-theme-mode] chat-show-player .chat-show-row {
+  /* Subtitles off (the header toggle): the player's own caption is hidden too;
+   the presenter's cloud is switched off by the rig itself. */
+html[data-cv-show-subtitles='off'] chat-show-player .chat-show-caption {
+  display: none !important;
+}
+
+html[data-portfolio-theme-mode] chat-show-player .chat-show-row {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -306,9 +378,9 @@ html[data-portfolio-theme-mode] chat-show-player .chat-show-caption {
   white-space: normal;
 }
 
-/* With the flying presenter on (the robot button is pressed) the section title row
-   above the progress bar is not shown: the presenter's cloud carries the words. */
-html[data-portfolio-theme-mode] chat-show-player:has([data-cv-show-rig][aria-pressed='true']) .chat-show-timeline {
+/* The section title row above the progress bar is not shown in any presenter mode: the
+   section is named by the counter under the bar and by the words on screen. */
+html[data-portfolio-theme-mode] chat-show-player .chat-show-timeline {
   display: none;
 }
 
