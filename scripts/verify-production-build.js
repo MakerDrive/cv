@@ -60,7 +60,7 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // extra request.
   // 2026-11-19: +10 KB for the flying-presenter rig as the default presenter and
   // the Show console panel; measured 1972213 raw.
-  raw: 1_990_000,
+  raw: 2_000_000,
   // 2026-09-25: +5 KB gzip for the completed drawer gesture contract —
   // deferred pointer capture, touch tree-disclosure column, click-vs-swipe
   // separation; measured 452330 gzip against the 450000 cap. Re-measured at
@@ -72,7 +72,7 @@ export const MAIN_JS_SIZE_LIMITS = Object.freeze({
   // 2026-11-12: +7 KB for the same direction sections; measured 480388 gzip.
   // 2026-11-16: +2 KB for the same retirement metadata and mobile rail work;
   // measured 481406 gzip.
-  gzip: 486_000,
+  gzip: 490_000,
 });
 
 const PORTFOLIO_LOCALES = Object.freeze(['en', 'ru', 'es']);

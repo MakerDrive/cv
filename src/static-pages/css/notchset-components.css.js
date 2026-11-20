@@ -582,6 +582,12 @@ html[data-portfolio-theme-mode] chat-message-item .status-card[data-status='runn
 /* Chat, in the manner of the reference: every message carries a small mono caption (who and
    its number), the user's messages are inverted and sit on the right, a status card shows its
    state as a dot, and the actions of one message are a single segmented group. */
+/* The Show player floats on the chat background: its band has no fill and no top rule of its own. */
+html[data-portfolio-theme-mode] agent-show-chat .agent-show-player-region {
+  background: transparent;
+  border-block-start: 0;
+}
+
 html[data-portfolio-theme-mode] chat-message-list,
 html[data-portfolio-theme-mode] .chat-message-list {
   counter-reset: notchset-msg;
@@ -645,6 +651,62 @@ html[data-portfolio-theme-mode] chat-message-item .actions-group {
 
 html[data-portfolio-theme-mode] chat-message-item .actions-group > .sn-btn + .sn-btn {
   margin-inline-start: calc(-1 * var(--notchset-rule-width));
+}
+
+/* Agent messages carry the same corner crosses as the figures, and the voice input preview is a
+   Notchset bar: a mono state label, square joined buttons, no round or coloured buttons. */
+html[data-portfolio-theme-mode] chat-message-item .message.agent .msg-content {
+  position: relative;
+  border: var(--notchset-rule-width) solid var(--sn-layout-border);
+}
+
+html[data-portfolio-theme-mode] chat-message-item .message.agent .msg-content::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  pointer-events: none;
+  color: var(--pulse-text-dim);
+  background:
+    linear-gradient(currentColor, currentColor) 0 4px / 9px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) 4px 0 / 1px 9px no-repeat,
+    linear-gradient(currentColor, currentColor) 100% 4px / 9px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) calc(100% - 4px) 0 / 1px 9px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 calc(100% - 4px) / 9px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) 4px 100% / 1px 9px no-repeat,
+    linear-gradient(currentColor, currentColor) 100% calc(100% - 4px) / 9px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) calc(100% - 4px) 100% / 1px 9px no-repeat;
+}
+
+html[data-portfolio-theme-mode] chat-composer .voice-preview-status {
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+  text-transform: uppercase;
+}
+
+html[data-portfolio-theme-mode] chat-composer .voice-preview-actions {
+  gap: 0;
+}
+
+html[data-portfolio-theme-mode] chat-composer .voice-preview-btn {
+  inline-size: var(--sn-button-icon-size);
+  block-size: var(--sn-button-icon-size);
+  min-inline-size: var(--sn-button-icon-size);
+  border: var(--notchset-rule-width) solid var(--sn-layout-border);
+  border-radius: 0;
+  background: var(--sn-sys-surface-panel);
+  color: var(--sn-sys-on-surface);
+  box-shadow: none;
+}
+
+html[data-portfolio-theme-mode] chat-composer .voice-preview-btn + .voice-preview-btn {
+  margin-inline-start: calc(-1 * var(--notchset-rule-width));
+}
+
+html[data-portfolio-theme-mode] chat-composer .voice-preview-btn:is(.send, .approve) {
+  background: var(--sn-sys-on-surface);
+  color: var(--sn-sys-surface-panel);
 }
 
 html[data-portfolio-theme-mode] chat-message-item :is(.card-title, .display-card-meta) {

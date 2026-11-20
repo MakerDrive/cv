@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { computeWorkingRuler, renderProfileDashboard } from '../../src/static-pages/js/profileDashboard.js';
+import { computeWorkingRuler, renderProfileDashboard, rulerReadout } from '../../src/static-pages/js/profileDashboard.js';
 
 test('the ruler shifts the host working hours into the visitor day', () => {
   // 15:00 UTC; the visitor is in Moscow (+180), the host in Buenos Aires (-180).
@@ -23,9 +23,16 @@ test('a visitor in the host time zone sees the plain 09:00-18:00 window', () => 
 test('the dashboard escapes text and renders one cell per hour', () => {
   const ruler = computeWorkingRuler({ nowMs: 0, viewerOffsetMinutes: 0 });
   const html = renderProfileDashboard({
-    metrics: [{ value: '15+', label: 'Years <b>' }], status: 'Open', hostCity: 'Buenos Aires', ruler,
+    metrics: [{ value: '15+', label: 'Years <b>' }], ruler,
     labels: { rulerTitle: 'Hours', overlap: 'h overlap', hostTime: 'time' },
   });
   assert.match(html, /Years &lt;b&gt;/);
   assert.equal((html.match(/profile-ruler-cell/g) || []).length, 24);
+});
+
+test('a picked hour maps to the host clock and says whether the host works then', () => {
+  // The visitor is in Moscow (+180): their 15:00 is 09:00 in Buenos Aires, their 14:00 is 08:00.
+  assert.deepEqual(rulerReadout({ hour: 15, viewerOffsetMinutes: 180 }), { viewer: '15:00', host: '09:00', working: true });
+  assert.deepEqual(rulerReadout({ hour: 14, viewerOffsetMinutes: 180 }), { viewer: '14:00', host: '08:00', working: false });
+  assert.equal(rulerReadout({ hour: 2, viewerOffsetMinutes: 180 }).host, '20:00');
 });

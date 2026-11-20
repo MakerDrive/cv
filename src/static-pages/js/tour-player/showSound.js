@@ -2,23 +2,15 @@ import { createShowSoundscape } from 'symbiote-ui/chat/show-soundscape.js';
 import { watchPresenterCues } from 'symbiote-ui/chat/show-soundscape-cues.js';
 import { getShowLog } from '../show-log/index.js';
 
-const SOUNDS_OFF_KEY = 'cvShowSoundOff';
-const MUSIC_ON_KEY = 'cvShowMusicOn';
 const POLL_MS = 250;
 
 const params = () => new URLSearchParams(globalThis.location?.search || '');
 
-const readFlag = (key, value, fallback) => {
+// The defaults hold at every load (music off, action sounds on); `?showMusic=1` and `?showSound=0` change
+// them for that load, and the header switches for the running show. Nothing is remembered between loads.
+const readFlag = (key, fallback) => {
   const fromUrl = params().get(key);
-  if (fromUrl !== null) return fromUrl !== '0';
-  try {
-    const stored = globalThis.localStorage?.getItem(value);
-    return stored === null || stored === undefined ? fallback : stored === '1';
-  } catch { return fallback; }
-};
-
-const saveFlag = (value, flag) => {
-  try { globalThis.localStorage?.setItem(value, flag ? '1' : '0'); } catch { /* optional */ }
+  return fromUrl === null ? fallback : fromUrl !== '0';
 };
 
 /**
@@ -54,8 +46,8 @@ export function createCvShowSound(source) {
     onTrace: (type, data) => getShowLog()[type === 'cue' ? 'debug' : 'info']('sound', type, data),
   });
   // The techno bed is off by default, the action sounds are on.
-  sound.setMusic(readFlag('showMusic', MUSIC_ON_KEY, false));
-  sound.setSounds(readFlag('showSound', SOUNDS_OFF_KEY, true));
+  sound.setMusic(readFlag('showMusic', false));
+  sound.setSounds(readFlag('showSound', true));
   let sections = 0;
   let stopWatch = null;
   const cue = (kind, detail) => sound.cue(kind, detail);
@@ -89,12 +81,10 @@ export function createCvShowSound(source) {
     isSounds: () => sound.isSounds(),
     toggleMusic() {
       sound.setMusic(!sound.isMusic());
-      saveFlag(MUSIC_ON_KEY, sound.isMusic());
       return sound.isMusic();
     },
     toggleSounds() {
       sound.setSounds(!sound.isSounds());
-      saveFlag(SOUNDS_OFF_KEY, !sound.isSounds());
       return sound.isSounds();
     },
     dispose() {
