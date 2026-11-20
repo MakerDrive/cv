@@ -45,6 +45,8 @@ async function request(
   let url = new URL(pathname, origin);
   return new Promise((resolve, reject) => {
     let request = http.request(url, {
+      // Each assertion exercises a fresh HTTP request, independent of idle sockets.
+      agent: false,
       method,
       headers: {
         ...headers,

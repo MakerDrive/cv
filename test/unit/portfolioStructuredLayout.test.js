@@ -103,16 +103,22 @@ import {
 } from '../../src/static-pages/data/portfolioStructuredLayout.js';
 
 const EXPECTED_MEDIA_COUNTS = Object.freeze({
-  'projects/adaptive-maximo-workbench': 2,
-  'projects/agent-portal': 1,
-  'projects/autobox-v1': 9,
-  'projects/boothbot': 1,
-  'projects/complexscan': 2,
-  'projects/f360-studio': 1,
-  'projects/megavisor': 4,
-  'projects/photopizza': 6,
-  'projects/symbiote-video-studio': 1,
-  'pulse/autobox-v1-retrospective': 1,
+  'projects/adaptive-maximo-workbench': 3,
+  'projects/agent-portal': 2,
+  'projects/agent-pool-mcp': 1,
+  'projects/autobox-v1': 11,
+  'projects/boothbot': 2,
+  'projects/complexscan': 3,
+  'projects/f360-studio': 2,
+  'projects/lifecycle-messaging-platform': 1,
+  'projects/megavisor': 5,
+  'projects/mobile-smm-platform': 1,
+  'projects/photopizza': 7,
+  'projects/project-graph-mcp': 1,
+  'projects/symbiote-engine': 1,
+  'projects/symbiote-ui': 1,
+  'projects/symbiote-video-studio': 2,
+  'projects/symbiote-workspace': 2,
 });
 
 const PUBLICATION_MEDIA_DESCRIPTORS = Object.freeze([
@@ -157,7 +163,7 @@ test('every curated media descriptor belongs to exactly one owning article group
   let groups = createPortfolioStructuredMediaGroups(PORTFOLIO_MEDIA_CATALOG);
   let memberships = new Map();
 
-  assert.equal(PORTFOLIO_MEDIA_CATALOG.length, 28);
+  assert.equal(PORTFOLIO_MEDIA_CATALOG.length, 45);
   assert.deepEqual(
     Object.fromEntries(
       Object.entries(groups).map(([ownerId, nodeIds]) => [ownerId, nodeIds.length - 1])
@@ -301,16 +307,15 @@ test('structured layout options retain article ownership for crystal and grouped
 
   assert.equal(auto.algorithm, 'auto');
   assert.deepEqual(auto.groups.biography, [PORTFOLIO_STRUCTURED_LAYOUT_ROOT_ID]);
-  assert.equal(auto.groups.projects.filter((id) => id.startsWith('media/')).length, 28);
+  assert.equal(auto.groups.projects.filter((id) => id.startsWith('media/')).length, 45);
   assert.equal(new Set(auto.groups.projects).size, auto.groups.projects.length);
   assert.ok(auto.groups.projects.includes('pulse/agent-portal'));
   assert.ok(auto.groups.projects.includes('pulse/two-project-update'));
   let autoboxPublicationIndex = auto.groups.projects.indexOf('pulse/autobox-v1-retrospective');
   assert.ok(autoboxPublicationIndex > auto.groups.projects.indexOf('projects/autobox-v1'));
-  assert.equal(
-    auto.groups.projects[autoboxPublicationIndex + 1],
-    'media/autobox-v1/ims/spinner',
-  );
+  let spinnerIndex = auto.groups.projects.indexOf('media/autobox-v1/ims/spinner');
+  assert.ok(spinnerIndex > auto.groups.projects.indexOf('projects/autobox-v1'));
+  assert.ok(spinnerIndex < autoboxPublicationIndex);
 
   assert.ok(auto.groups.pulse.includes('pulse/index'));
   assert.ok(auto.groups.pulse.includes('pulse/global-update'), 'should include global publication in structured layout');

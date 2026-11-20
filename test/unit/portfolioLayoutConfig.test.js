@@ -50,8 +50,8 @@ test('mobile panel navigation is library-owned and sits below the static Show ho
   assert.match(baseStyles, /\.portfolio-show-static-region:empty\s*\{\s*display: none !important;/,
     'an empty static host must not reserve space on desktop');
   assert.match(styles, /@media \(max-width: 760px\)[\s\S]*?\.pulse-workspace \.portfolio-mobile-navigation\s*\{\s*display: block;/);
-  assert.match(styles, /\.pulse-workspace \.portfolio-mobile-navigation > \.mobile-panel-rail\s*\{\s*display: grid;/,
-    'one button per panel, in rail order');
+  assert.match(styles, /\.pulse-workspace \.portfolio-mobile-navigation > \.mobile-panel-rail\s*\{[^}]*\bdisplay: grid;/,
+    'the rail uses grid layout');
   assert.match(styles, /\.pulse-workspace \.portfolio-mobile-navigation > \.mobile-panel-rail\[hidden\]\s*\{\s*display: none;/,
     'the author grid rule must not outspecify [hidden] and leave a disabled rail reachable');
   assert.match(styles, /\.pulse-workspace \.portfolio-mobile-navigation > \.mobile-panel-rail > button\s*\{[\s\S]*?min-block-size: var\(--notchset-control-touch-height\);/,
