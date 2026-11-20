@@ -509,6 +509,126 @@ portfolio-workspace code-block .md-quote {
   font-style: normal;
 }
 
+/* Patterns written in plain markdown (see js/markdownPatterns.js). */
+portfolio-workspace code-block .md-segments {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin-block: var(--sn-step-6);
+  border: var(--notchset-rule-width) solid var(--pulse-text);
+  border-inline-end: 0;
+  border-block-end: 0;
+}
+
+portfolio-workspace code-block .md-segment {
+  display: flex;
+  align-items: center;
+  padding: var(--sn-step-4) var(--sn-step-6);
+  border-inline-end: var(--notchset-rule-width) solid var(--pulse-text);
+  border-block-end: var(--notchset-rule-width) solid var(--pulse-text);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+portfolio-workspace code-block .md-segment:first-child {
+  background: var(--pulse-text);
+  color: var(--pulse-surface);
+}
+
+portfolio-workspace code-block .md-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  margin-block: var(--sn-step-8);
+  border: var(--notchset-rule-width) solid var(--pulse-text);
+  border-inline-end: 0;
+  border-block-end: 0;
+}
+
+portfolio-workspace code-block .md-metric {
+  display: grid;
+  gap: var(--sn-step-2);
+  padding: var(--sn-step-6) var(--sn-step-8);
+  border-inline-end: var(--notchset-rule-width) solid var(--pulse-text);
+  border-block-end: var(--notchset-rule-width) solid var(--pulse-text);
+}
+
+portfolio-workspace code-block .md-metric-value {
+  font-family: var(--sn-portfolio-font-display);
+  font-size: calc(var(--sn-markdown-h1-size) * 1.4);
+  font-weight: var(--notchset-heading-weight);
+  font-stretch: var(--notchset-heading-width);
+  line-height: 1;
+  letter-spacing: var(--notchset-heading-tracking);
+}
+
+portfolio-workspace code-block .md-metric-label {
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+  text-transform: uppercase;
+}
+
+portfolio-workspace code-block .md-callout {
+  margin-block: var(--sn-step-8);
+  border: var(--notchset-rule-width) solid var(--sn-layout-border);
+  border-inline-start: var(--notchset-focus-stroke) solid var(--pulse-text);
+}
+
+portfolio-workspace code-block .md-callout-kind {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: var(--sn-button-icon-size);
+  padding-inline: var(--sn-step-6);
+  border-block-end: var(--notchset-rule-width) solid var(--sn-layout-border);
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+}
+
+portfolio-workspace code-block .md-callout-kind::after {
+  content: '';
+  inline-size: 7px;
+  block-size: 7px;
+  border: var(--notchset-rule-width) solid currentColor;
+  border-radius: 50%;
+}
+
+portfolio-workspace code-block .md-callout[data-kind='warning'] .md-callout-kind::after,
+portfolio-workspace code-block .md-callout[data-kind='important'] .md-callout-kind::after {
+  background: var(--sn-portfolio-signal);
+  border-color: var(--sn-portfolio-signal);
+}
+
+portfolio-workspace code-block .md-callout-body {
+  padding: var(--sn-step-4) var(--sn-step-6);
+}
+
+portfolio-workspace code-block .md-tasks li {
+  padding-inline-start: var(--sn-step-14, 28px);
+}
+
+portfolio-workspace code-block .md-tasks li::before {
+  content: none;
+}
+
+portfolio-workspace code-block .md-check {
+  position: absolute;
+  inset: 0.28em auto auto 0;
+  inline-size: 14px;
+  block-size: 14px;
+  border: var(--notchset-rule-width) solid var(--pulse-text);
+}
+
+portfolio-workspace code-block .md-check[data-checked] {
+  background: var(--pulse-text);
+  box-shadow: inset 0 0 0 2px var(--pulse-surface);
+}
+
 /* Heading levels below the section title: a clear step down in size, then small mono labels. */
 portfolio-workspace code-block h3.md-h {
   margin-block: var(--sn-step-10) var(--sn-step-4);

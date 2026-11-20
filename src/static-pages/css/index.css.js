@@ -790,34 +790,6 @@ body > footer a {
   }
 }
 
-/* The profile headline as a row of segments in one frame, each segment one part of the line. */
-.profile-tagline {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  margin: var(--sn-step-6) 0;
-  border: var(--notchset-rule-width) solid var(--pulse-text);
-  border-inline-end: 0;
-  border-block-end: 0;
-}
-
-.profile-tagline-cell {
-  display: flex;
-  align-items: center;
-  padding: var(--sn-step-4) var(--sn-step-6);
-  border-inline-end: var(--notchset-rule-width) solid var(--pulse-text);
-  border-block-end: var(--notchset-rule-width) solid var(--pulse-text);
-  font-family: var(--sn-font-mono);
-  font-size: var(--notchset-legend-size);
-  letter-spacing: var(--notchset-legend-tracking);
-  line-height: 1.4;
-  text-transform: uppercase;
-}
-
-.profile-tagline-cell:first-child {
-  background: var(--pulse-text);
-  color: var(--pulse-surface);
-}
-
 /* Profile dashboard, in the Notchset manner: metric cells in one frame, the availability line with
    the host's clock, and the 24-hour ruler of the host's working hours in the visitor's day. */
 .profile-dashboard {
@@ -826,32 +798,6 @@ body > footer a {
   margin: var(--sn-step-8) 0 var(--sn-step-10);
 }
 
-.profile-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  border: var(--notchset-rule-width) solid var(--pulse-text);
-  border-inline-end: 0;
-  border-block-end: 0;
-}
-
-.profile-metric {
-  display: grid;
-  gap: var(--sn-step-2);
-  padding: var(--sn-step-6) var(--sn-step-8);
-  border-inline-end: var(--notchset-rule-width) solid var(--pulse-text);
-  border-block-end: var(--notchset-rule-width) solid var(--pulse-text);
-}
-
-.profile-metric-value {
-  font-family: var(--sn-portfolio-font-display);
-  font-size: calc(var(--sn-markdown-h1-size) * 1.4);
-  font-weight: var(--notchset-heading-weight);
-  font-stretch: var(--notchset-heading-width);
-  line-height: 1;
-  letter-spacing: var(--notchset-heading-tracking);
-}
-
-.profile-metric-label,
 .profile-status,
 .profile-ruler-head,
 .profile-ruler-scale {
@@ -934,6 +880,14 @@ body > footer a {
 .profile-ruler-readout {
   color: var(--pulse-text);
   font-variant-numeric: tabular-nums;
+}
+
+.profile-ruler-cell[data-flex] {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--pulse-text) 0 1px,
+    transparent 1px 5px
+  );
 }
 
 .profile-ruler-cell[data-now] {

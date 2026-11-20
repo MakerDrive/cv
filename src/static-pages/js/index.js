@@ -60,6 +60,7 @@ import {
   applyProjectPreviewFilter,
   renderProjectPreviewGrid,
 } from './projectPreviewGrid.js';
+import { startMarkdownPatterns } from './markdownPatterns.js';
 import { computeWorkingRuler, renderProfileDashboard, renderProfileStatus, rulerReadout } from './profileDashboard.js';
 import {
   createPortfolioEntryHref,
@@ -381,12 +382,6 @@ function mountProfileStatus(host) {
 function mountProfileDashboard(host) {
   const viewerOffsetMinutes = -new Date().getTimezoneOffset();
   const render = () => renderProfileDashboard({
-    metrics: [
-      { value: PROFILE_YEARS, label: tPortfolio('profile.metric.years') },
-      { value: String(projects.length), label: tPortfolio('profile.metric.projects') },
-      { value: String(directionEntries.length), label: tPortfolio('profile.metric.directions') },
-      { value: String(publicPublications.length), label: tPortfolio('profile.metric.publications') },
-    ],
     ruler: computeWorkingRuler({ nowMs: Date.now(), viewerOffsetMinutes }),
     labels: { rulerTitle: tPortfolio('profile.ruler.title'), overlap: tPortfolio('profile.ruler.overlap'), hostTime: '' },
   });
@@ -402,7 +397,7 @@ function mountProfileDashboard(host) {
     const readout = ruler.querySelector('.profile-ruler-readout');
     if (hour === null) { readout.textContent = ruler.dataset.overlap; return; }
     const info = rulerReadout({ hour, viewerOffsetMinutes });
-    readout.textContent = `${tPortfolio('profile.ruler.yours')} ${info.viewer} → ${tPortfolio('profile.ruler.mine')} ${info.host} · ${tPortfolio(info.working ? 'profile.ruler.on' : 'profile.ruler.off')}`;
+    readout.textContent = `${tPortfolio('profile.ruler.yours')} ${info.viewer} → ${tPortfolio('profile.ruler.mine')} ${info.host} · ${info.working ? tPortfolio('profile.ruler.on') : info.flex ? tPortfolio('profile.ruler.flex') : tPortfolio('profile.ruler.off')}`;
     ruler.querySelector('.profile-ruler-track').setAttribute('aria-valuenow', String(hour));
   };
   const hourAt = (event) => {
@@ -1288,9 +1283,17 @@ function createMarkdown(entry, { interactive = true } = {}) {
     lines.push(`**${entry.kicker}**`, '');
   }
   // The profile headline is drawn as a row of segments (see `profile-tagline`); other pages keep the text.
-  lines.push(entry.id === 'profile/photo' && interactive ? ':::content-slot profile-tagline' : (article.summary || tPortfolio('node.fallback')), '');
+  lines.push(article.summary || tPortfolio('node.fallback'), '');
   if (entry.id === 'profile/photo') {
     lines.push(`[${tPortfolio('show.openPresentation')}](${getCvShowStartHref()})`, '');
+    // Plain markdown: a list of `**value** label` becomes metric cells (see markdownPatterns.js).
+    lines.push(
+      `- **${PROFILE_YEARS}** ${tPortfolio('profile.metric.years')}`,
+      `- **${projects.length}** ${tPortfolio('profile.metric.projects')}`,
+      `- **${directionEntries.length}** ${tPortfolio('profile.metric.directions')}`,
+      `- **${publicPublications.length}** ${tPortfolio('profile.metric.publications')}`,
+      '',
+    );
     if (interactive) lines.push(':::content-slot profile-dashboard', '');
   }
   if (entry.meta) {
@@ -2718,9 +2721,6 @@ const portfolioRuntime = {
           hrefBuilder: resolvePublicationHref,
         });
         host.onclick = handleInAppNavigation;
-      } else if (slotKey === 'profile-tagline') {
-        const parts = String(tPortfolio('profile.summary')).split('|').map((part) => part.trim()).filter(Boolean);
-        host.innerHTML = `<p class="profile-tagline" aria-label="${parts.join(', ').replace(/"/g, '&quot;')}">${parts.map((part) => `<span class="profile-tagline-cell">${part.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join('')}</p>`;
       } else if (slotKey === 'profile-status') {
         mountProfileStatus(host);
       } else if (slotKey === 'profile-dashboard') {
@@ -4382,64 +4382,5 @@ customElements.define('portfolio-viewer-panel', PortfolioViewerPanel);
 customElements.define('portfolio-theme-panel', PortfolioThemePanel);
 customElements.define('portfolio-workspace', PortfolioWorkspace);
 
-// Markdown blocks get Notchset design marks: tables, pictures and code sit in a figure with
-// corner crosses and a mono label (TBL 01, FIG 01, CODE 01), counted per document.
-{
-  const KINDS = [
-    { selector: 'table.md-table:not([data-notchset-figure])', code: 'TBL' },
-    { selector: 'img.md-img:not([data-notchset-figure])', code: 'FIG' },
-    { selector: 'pre.md-code-block:not([data-notchset-figure])', code: 'CODE' },
-  ];
-  const indexOf = (element, code) => {
-    const flow = element.closest('.cb-md') || document;
-    const same = [...flow.querySelectorAll({ TBL: 'table.md-table', FIG: 'img.md-img', CODE: 'pre.md-code-block' }[code])];
-    return String(same.indexOf(element) + 1).padStart(2, '0');
-  };
-  const label = (text, extra) => {
-    const bar = document.createElement('div');
-    bar.className = 'notchset-figure-label';
-    const name = document.createElement('span');
-    name.textContent = text;
-    bar.append(name);
-    if (extra) bar.append(extra);
-    return bar;
-  };
-  const wrapMarkdownBlocks = () => {
-    for (const { selector, code } of KINDS) {
-      for (const element of document.querySelectorAll(`portfolio-workspace code-block ${selector}`)) {
-        element.dataset.notchsetFigure = '';
-        const figure = document.createElement('figure');
-        figure.className = `notchset-figure notchset-figure-${code.toLowerCase()}`;
-        const tag = `${code} ${indexOf(element, code)}`;
-        if (code === 'CODE') {
-          const language = /language-([\w-]+)/.exec(element.querySelector('code')?.className || '')?.[1] || 'text';
-          const copy = document.createElement('button');
-          copy.type = 'button';
-          copy.className = 'notchset-code-copy material-symbols-outlined';
-          copy.textContent = 'content_copy';
-          copy.setAttribute('aria-label', 'Copy');
-          copy.title = 'Copy';
-          copy.addEventListener('click', async () => {
-            try {
-              await navigator.clipboard.writeText(element.textContent || '');
-              copy.textContent = 'check';
-              setTimeout(() => { copy.textContent = 'content_copy'; }, 1400);
-            } catch { /* clipboard unavailable */ }
-          });
-          element.replaceWith(figure);
-          figure.append(label(`${tag} · ${language}`, copy), element);
-        } else {
-          element.replaceWith(figure);
-          figure.append(label(tag), element);
-        }
-      }
-    }
-  };
-  let pending = false;
-  new MutationObserver(() => {
-    if (pending) return;
-    pending = true;
-    requestAnimationFrame(() => { pending = false; wrapMarkdownBlocks(); });
-  }).observe(document.body, { childList: true, subtree: true });
-  wrapMarkdownBlocks();
-}
+// Plain markdown becomes designed elements (segments, metrics, callouts, tasks, figures).
+startMarkdownPatterns();
