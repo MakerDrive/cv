@@ -626,31 +626,48 @@ export class PortfolioShowChat extends HTMLElement {
   #lastRouteReportAt = 0;
 
   /** The browser voice has no media events: keep the caption highlight and the cloud moving on a timer. */
+  /**
+   * The words and the position the caption follows: the browser voice's own clock, or, for recorded
+   * narration, the exact narration position against its alignment track (the media element's coarse
+   * time updates trail the voice by up to a quarter of a second).
+   */
+  #captionSource() {
+    const voice = this.#browserVoiceClock();
+    if (voice) return { track: voice.words, positionMs: voice.positionMs, browser: true };
+    const track = this.#alignedEntry?.captionTrack;
+    if (Array.isArray(track) && track.length && this.#transportPlaying) {
+      return { track, positionMs: this.#presentationPositionMs(), browser: false };
+    }
+    return null;
+  }
+
+  /** Neither kind of narration emits per-word events: keep the caption highlight on a timer. */
   #startCaptionTicker() {
     if (this.#captionTicker) return;
     this.#captionTicker = globalThis.setInterval(() => {
-      if (!this.#browserVoiceClock()) {
+      if (!this.#captionSource()) {
         globalThis.clearInterval(this.#captionTicker);
         this.#captionTicker = 0;
         return;
       }
       this.#syncPlayerCaption();
-    }, 140);
+    }, 90);
   }
 
   #syncPlayerCaption() {
     const activeEntry = this.#playerEntry();
-    const clock = this.#browserVoiceClock();
-    if (!clock) return;
+    const source = this.#captionSource();
+    if (!source) return;
     const caption = createCvShowCanonicalCaption(
       activeEntry?.subtitle || this.#currentScene()?.subtitle || '',
-      clock.words,
-      clock.positionMs,
+      source.track,
+      source.positionMs,
     );
     this.#showPlayer?.setState?.({
       progress: { positionMs: this.#displayPositionMs() },
       caption: { speaker: this.$.inBranch ? this.#message('tour.details') : 'CV', ...caption },
     });
+    if (!source.browser) return;
     // The address carries the playhead: report the route about as often as recorded narration's time updates.
     const now = globalThis.performance.now();
     if (now - this.#lastRouteReportAt >= 250) {
@@ -2544,7 +2561,7 @@ export class PortfolioShowChat extends HTMLElement {
       onCue,
       startAtMs: cues.length ? positionMs : 0,
       onStart: () => {
-        if (cues.length) this.#startCaptionTicker();
+        this.#startCaptionTicker();
         if (!this.#publishPhysicalStart(entry, requestId)) return;
         if (typeof onPhysicalStart !== 'function') return;
         void onPhysicalStart().catch((error) => {

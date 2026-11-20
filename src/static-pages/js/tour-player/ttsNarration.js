@@ -95,6 +95,54 @@ export function createTtsSpeechController({
     if (state.physicallySpeaking) start();
   };
 
+  // Where the narration is now, in estimated-narration ms. Between two word boundaries the voice reports
+  // (when it reports any) the position runs from the last known word; without them it runs from the
+  // sentence start.
+  const positionOf = (state) => {
+    const { sentences, words } = state.plan.timing;
+    const span = sentences[Math.min(state.index, sentences.length - 1)];
+    if (!state.sentenceActive) return span.startMs;
+    const until = state.paused ? state.pausedAt : now();
+    const anchor = state.anchor;
+    if (anchor && anchor.sentence === state.index) {
+      const elapsed = Math.max(0, until - anchor.at - (state.heldMs - anchor.held));
+      const next = words[anchor.word + 1];
+      // Never run past the next word until the voice says it arrived (a little slack for a late event).
+      const cap = next && anchor.word + 1 <= sentences[state.index].lastWord ? next.startMs + 60 : span.endMs + 120;
+      return Math.min(cap, anchor.est + elapsed / state.pace.scale);
+    }
+    const elapsed = Math.max(0, until - state.sentenceStartedAt - state.heldMs);
+    return Math.min(span.endMs + 120, span.startMs + elapsed / state.pace.scale);
+  };
+
+  // A word boundary from the voice: re-anchor the position, refine the pace from the words just spoken, and
+  // pull every pending cue of this sentence to where the voice really is.
+  const onBoundary = (state, sentenceText, local, charIndex) => {
+    const { sentences, words } = state.plan.timing;
+    const span = sentences[state.index];
+    let k = local.findIndex((word) => charIndex < word.end);
+    if (k < 0) k = local.length - 1;
+    const word = span.firstWord + k;
+    if (word > span.lastWord) return;
+    const at = now();
+    const est = words[word].startMs;
+    if (state.paceMark && est - state.paceMark.est >= 700) {
+      state.pace.observe(est - state.paceMark.est, at - state.paceMark.at - (state.heldMs - state.paceMark.held));
+      state.paceMark = null;
+    }
+    if (!state.paceMark) state.paceMark = { est, at, held: state.heldMs };
+    state.anchor = { sentence: state.index, word, est, at, held: state.heldMs };
+    if (state.paused) return;
+    for (const timer of [...state.timers]) {
+      const due = (sentences[timer.item.sentence].startMs + timer.item.offsetMs - est) * state.pace.scale;
+      const left = timer.running ? timer.dueAt - at : timer.remaining;
+      if (Math.abs(due - left) < 90) continue;
+      if (timer.running) { clock.clear(timer.id); timer.running = false; }
+      timer.remaining = Math.max(0, due);
+      if (state.physicallySpeaking) timer.start();
+    }
+  };
+
   const scheduleFor = (state, sentenceIndex, startedAt) => {
     const { plan, pace } = state;
     const { sentences } = plan.timing;
@@ -169,6 +217,8 @@ export function createTtsSpeechController({
       }
       state.sentenceStartedAt = now();
       state.heldMs = 0;
+      state.anchor = null;
+      state.paceMark = null;
       state.pausedAt = null;
       state.sentenceActive = true;
       state.paused = false;
@@ -182,6 +232,11 @@ export function createTtsSpeechController({
     };
     // The player counts a resumed voice as physically started again.
     utterance.onresume = resumePhysicalSpeech;
+    const localWords = splitWords(text);
+    utterance.onboundary = (event) => {
+      if (!current() || (event?.name && event.name !== 'word')) return;
+      onBoundary(state, text, localWords, Number(event?.charIndex) || 0);
+    };
     utterance.onend = () => {
       if (!current()) return;
       state.sentenceActive = false;
@@ -255,7 +310,7 @@ export function createTtsSpeechController({
         paused: false, sentenceActive: false, pending: options.startPaused === true,
         physicallySpeaking: false, completing: false,
         retrying: false,
-        timers: new Set(), fired: new Set(), sentenceStartedAt: 0, heldMs: 0, pausedAt: null,
+        timers: new Set(), fired: new Set(), sentenceStartedAt: 0, heldMs: 0, pausedAt: null, anchor: null, paceMark: null,
       };
       if (!splitWords(source).length) { queueMicrotask(() => options.onEnd?.()); return true; }
       // Restoring a position (a link, a seek): start at the sentence holding it; the cues before it are skipped.
@@ -303,14 +358,7 @@ export function createTtsSpeechController({
       if (state.completing) {
         return { words, positionMs: state.plan.timing.durationMs, playing: false };
       }
-      const span = sentences[Math.min(state.index, sentences.length - 1)];
-      const until = state.paused ? state.pausedAt : now();
-      const elapsed = state.started && state.sentenceActive
-        ? Math.max(0, until - state.sentenceStartedAt - state.heldMs)
-        : 0;
-      const positionMs = state.sentenceActive
-        ? Math.min(span.endMs + 120, span.startMs + elapsed / state.pace.scale)
-        : span.startMs;
+      const positionMs = positionOf(state);
       return { words, positionMs, playing: state.physicallySpeaking && !state.paused };
     },
   });

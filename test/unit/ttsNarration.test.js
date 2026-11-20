@@ -426,3 +426,34 @@ test('hasVoice tells whether the browser has a voice for the language, or null w
   env.synth.getVoices = () => [];
   assert.equal(controller.hasVoice('en'), null, 'an empty list means the voices are not loaded yet');
 });
+
+const LONG = 'One two three four five six seven eight nine ten eleven twelve.';
+
+test('word boundaries from the voice re-anchor the clock', () => {
+  const env = fakeEnvironment();
+  const controller = createTtsSpeechController(env);
+  controller.speak(LONG, { cues: [{ id: 'x', quote: 'twelve' }] });
+  const utterance = env.spoken.at(-1);
+  utterance.onstart();
+  const timing = estimateTiming(LONG);
+  env.advance(400);
+  // The voice says it reached the 8th word although the estimate would put the clock far earlier.
+  utterance.onboundary({ name: 'word', charIndex: LONG.indexOf('eight') });
+  assert.ok(Math.abs(controller.clock().positionMs - timing.words[7].startMs) < 5, 'the position jumps to the reported word');
+  env.advance(100);
+  assert.ok(controller.clock().positionMs > timing.words[7].startMs, 'and then runs on from it');
+  assert.ok(controller.clock().positionMs <= timing.words[8].startMs + 60, 'but never past the next word before it is reported');
+});
+
+test('a boundary pulls pending cues to where the voice really is', () => {
+  const env = fakeEnvironment();
+  const controller = createTtsSpeechController(env);
+  const fired = [];
+  controller.speak(LONG, { cues: [{ id: 'late', quote: 'eleven' }], onCue: (cue) => fired.push(cue.id) });
+  const utterance = env.spoken.at(-1);
+  utterance.onstart();
+  env.advance(50);
+  utterance.onboundary({ name: 'word', charIndex: LONG.indexOf('ten') });
+  env.advance(500);
+  assert.deepEqual(fired, ['late'], 'it fires soon after the word before it, not after the long estimated wait');
+});
