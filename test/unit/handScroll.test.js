@@ -88,3 +88,28 @@ test('an abort lets go of the page and rejects', async () => {
   assert.equal(await outcome, 'AbortError');
   assert.ok(calls.some((c) => c[0] === 'grip' && c[1] === false) || calls.length === 0);
 });
+
+test('one scroll entry point: the hand with room for it, the plain animation without', async () => {
+  const { scrollCvShowSpaceIntoView } = await import('../../src/static-pages/js/tour-player/targetResolution.js');
+  const hand = fixture({ distance: 300 });
+  const promise = scrollCvShowSpaceIntoView(hand.target, { document: hand.document, cursor: hand.cursor, budgetMs: 2000 });
+  const view = hand.document.defaultView;
+  assert.ok(view.requestAnimationFrame);
+  // Drive the frames through the fixture runner of the first test by reusing its loop shape.
+  hand.calls.length = 0;
+  const frames = [];
+  view.requestAnimationFrame = (fn) => { frames.push(fn); return frames.length; };
+  const again = scrollCvShowSpaceIntoView(hand.target, { document: hand.document, cursor: hand.cursor, budgetMs: 2000 });
+  for (let now = 0, guard = 0; frames.length && guard < 4000; guard += 1) { now += 16; frames.shift()(now); await Promise.resolve(); }
+  await again;
+  assert.ok(hand.calls.some((c) => c[0] === 'grip' && c[1] === true), 'with room: the claw gripped the page');
+  void promise;
+  const plain = fixture({ distance: 300 });
+  const plainFrames = [];
+  plain.document.defaultView.requestAnimationFrame = (fn) => { plainFrames.push(fn); return plainFrames.length; };
+  const motion = scrollCvShowSpaceIntoView(plain.target, { document: plain.document, cursor: plain.cursor, budgetMs: 800, durationMs: 300 });
+  for (let now = 0, guard = 0; plainFrames.length && guard < 400; guard += 1) { now += 16; plainFrames.shift()(now); await Promise.resolve(); }
+  await motion;
+  assert.equal(plain.calls.length, 0, 'a short cell never touches the claw');
+  assert.equal(plain.panel.scrollTop, 300);
+});
