@@ -89,7 +89,7 @@ test('an abort lets go of the page and rejects', async () => {
   assert.ok(calls.some((c) => c[0] === 'grip' && c[1] === false) || calls.length === 0);
 });
 
-test('one scroll entry point: the hand with room for it, the plain animation without', async () => {
+test('one scroll entry point: the hand at any workable slot, the plain animation only without room', async () => {
   const { scrollCvShowSpaceIntoView } = await import('../../src/static-pages/js/tour-player/targetResolution.js');
   const hand = fixture({ distance: 300 });
   const promise = scrollCvShowSpaceIntoView(hand.target, { document: hand.document, cursor: hand.cursor, budgetMs: 2000 });
@@ -107,9 +107,25 @@ test('one scroll entry point: the hand with room for it, the plain animation wit
   const plain = fixture({ distance: 300 });
   const plainFrames = [];
   plain.document.defaultView.requestAnimationFrame = (fn) => { plainFrames.push(fn); return plainFrames.length; };
-  const motion = scrollCvShowSpaceIntoView(plain.target, { document: plain.document, cursor: plain.cursor, budgetMs: 800, durationMs: 300 });
+  const motion = scrollCvShowSpaceIntoView(plain.target, { document: plain.document, cursor: plain.cursor, budgetMs: 400, durationMs: 300 });
   for (let now = 0, guard = 0; plainFrames.length && guard < 400; guard += 1) { now += 16; plainFrames.shift()(now); await Promise.resolve(); }
   await motion;
-  assert.equal(plain.calls.length, 0, 'a short cell never touches the claw');
+  assert.equal(plain.calls.length, 0, 'a slot too short for any motion never touches the claw');
   assert.equal(plain.panel.scrollTop, 300);
+});
+
+test('a short recorded slot plays the same gesture, only faster', async () => {
+  const { scrollCvShowSpaceIntoView } = await import('../../src/static-pages/js/tour-player/targetResolution.js');
+  const short = fixture({ distance: 300 });
+  const frames = [];
+  short.document.defaultView.requestAnimationFrame = (fn) => { frames.push(fn); return frames.length; };
+  const started = Date.now();
+  let steps = 0;
+  const motion = scrollCvShowSpaceIntoView(short.target, { document: short.document, cursor: short.cursor, budgetMs: 800 });
+  for (let now = 0; frames.length && steps < 4000; steps += 1) { now += 16; frames.shift()(now); await Promise.resolve(); }
+  await motion;
+  void started;
+  assert.equal(short.panel.scrollTop, 300);
+  assert.deepEqual(short.calls.filter((c) => c[0] === 'grip').map((c) => c[1]), [true, false], 'the claw gripped and let go');
+  assert.ok(steps * 16 <= 800, `the gesture fits its 800 ms slot (took ${steps * 16} ms)`);
 });

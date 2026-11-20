@@ -827,12 +827,18 @@ export function animateCvShowScrollWithHand(target, { document, signal, duration
     : primary.element.getBoundingClientRect();
   const direction = Math.sign(delta);
   const handX = box.left + box.width * 0.5;
-  const handFrom = box.top + box.height * (direction > 0 ? 0.74 : 0.26);
-  const strokeMax = box.height * 0.58;
   const total = Math.abs(delta);
-  const pushes = Math.ceil(total / strokeMax);
+  // Comfortable pushes cover about 58% of the panel; a short slot takes fewer, longer ones (never frantic
+  // flailing: at least ~240 ms per push) as long as one push still fits inside the panel (90%).
+  const byReach = Math.ceil(total / (box.height * 0.9));
+  const comfortable = Math.ceil(total / (box.height * 0.58));
+  const byTime = Math.max(1, Math.floor((durationMs * 0.66) / 240));
+  const pushes = Math.max(byReach, Math.min(comfortable, byTime));
   // Equal pushes: no tiny leftover nudge at the end.
   const stroke = total / pushes;
+  const handFrom = direction > 0
+    ? Math.min(box.top + box.height * 0.96, box.top + box.height * 0.06 + stroke)
+    : Math.max(box.top + box.height * 0.04, box.bottom - box.height * 0.06 - stroke);
   const surface = isPage ? anchor : primary.element;
   const point = (y) => cursor.presentCursorFrame?.(surface, { point: { x: handX, y }, preserveInk: true });
 
@@ -851,14 +857,18 @@ export function animateCvShowScrollWithHand(target, { document, signal, duration
     signal?.addEventListener?.('abort', onAbort, { once: true });
 
     // Timeline in ms: approach, then per push: grip, push, release, lift back (not after the last one).
+    // A short slot does not change what the gesture is, only how fast it plays: the approach is
+    // compressed to at most a third of the slot and the pushes share what is left.
     const approach = cursor.planApproach(surface, { cursor: { x: handX, y: handFrom } });
-    const approachMs = Math.max(0, Number(approach?.durationMs) || 0);
-    const room = Math.max(600, durationMs - approachMs);
+    const naturalApproachMs = Math.max(0, Number(approach?.durationMs) || 0);
+    const approachMs = Math.min(naturalApproachMs, durationMs * 0.34);
+    const approachSpeed = approachMs > 0 ? naturalApproachMs / approachMs : 1;
+    const room = Math.max(160, durationMs - approachMs);
     const pushWeights = Array.from({ length: pushes }, () => 1);
-    const liftMs = 160;
+    const liftMs = Math.min(160, durationMs * 0.1);
     const weightSum = pushWeights.reduce((sum, weight) => sum + weight, 0);
-    const pushBudget = Math.max(300, room - (pushes - 1) * liftMs);
-    const pushMs = pushWeights.map((weight) => Math.max(260, (pushBudget * weight) / weightSum));
+    const pushBudget = Math.max(150, room - (pushes - 1) * liftMs);
+    const pushMs = pushWeights.map((weight) => Math.max(120, (pushBudget * weight) / weightSum));
 
     let phase = 'approach';
     let index = 0;
@@ -871,7 +881,7 @@ export function animateCvShowScrollWithHand(target, { document, signal, duration
       if (phaseStart === null) phaseStart = timestamp;
       const elapsed = timestamp - phaseStart;
       if (phase === 'approach') {
-        approach?.render?.(Math.min(elapsed, approachMs));
+        approach?.render?.(Math.min(elapsed, approachMs) * approachSpeed);
         if (elapsed >= approachMs) { phase = 'push'; phaseStart = timestamp; cursor.setGrip(true); }
       } else if (phase === 'push') {
         const distance = stroke;
@@ -906,7 +916,8 @@ export function animateCvShowScrollWithHand(target, { document, signal, duration
 
 /**
  * The one way the show brings anything into view, whatever scrolls (article, navigation tree, panels):
- * with room for it (a budget of 1.6 s or more) the claw pushes the page, otherwise the plain animation runs.
+ * the claw pushes the page, as fast as the slot allows (the plain animation only without a presenter or
+ * for a slot too short for any motion).
  * @param {Element} target
  * @param {{
  *   document?: Document, signal?: AbortSignal, cursor?: any,
@@ -918,8 +929,8 @@ export function scrollCvShowSpaceIntoView(target, {
   document, signal, cursor = null, budgetMs = 0, durationMs = 300,
 } = {}) {
   return Number(budgetMs) >= HAND_SCROLL_MIN_BUDGET_MS && cursor
-    ? animateCvShowScrollWithHand(target, { document, signal, cursor, durationMs: budgetMs - 300 })
+    ? animateCvShowScrollWithHand(target, { document, signal, cursor, durationMs: Math.max(360, budgetMs - 350) })
     : animateCvShowScrollIntoView(target, { document, signal, durationMs });
 }
 
-export const HAND_SCROLL_MIN_BUDGET_MS = 1_600;
+export const HAND_SCROLL_MIN_BUDGET_MS = 600;
