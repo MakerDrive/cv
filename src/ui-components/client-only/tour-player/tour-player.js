@@ -616,6 +616,7 @@ export class PortfolioShowChat extends HTMLElement {
 
   /** @type {any} */
   #captionTicker = 0;
+  #lastRouteReportAt = 0;
 
   /** The browser voice has no media events: keep the caption highlight and the cloud moving on a timer. */
   #startCaptionTicker() {
@@ -643,6 +644,16 @@ export class PortfolioShowChat extends HTMLElement {
       progress: { positionMs: this.#displayPositionMs() },
       caption: { speaker: this.$.inBranch ? this.#message('tour.details') : 'CV', ...caption },
     });
+    // The address carries the playhead: report the route about as often as recorded narration's time updates.
+    const now = globalThis.performance.now();
+    if (now - this.#lastRouteReportAt >= 250) {
+      this.#lastRouteReportAt = now;
+      this.dispatchEvent(new CustomEvent('portfolio-show-route-change', {
+        bubbles: true,
+        composed: true,
+        detail: { state: this.routeSnapshot, terminalState: null },
+      }));
+    }
   }
 
   #presentationPositionMs(fallbackMs = this.#session.snapshot.playback.positionMs) {
