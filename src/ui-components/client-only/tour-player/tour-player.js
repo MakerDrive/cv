@@ -23,7 +23,9 @@ import {
 import {
   projectCvShowScheduleDuration,
 } from '../../../static-pages/js/tour-player/presentationProjectAdapter.js';
-import { createBrowserSpeechController } from '../../../static-pages/js/tour-player/speech.js';
+import { createTtsSpeechController } from '../../../static-pages/js/tour-player/ttsNarration.js';
+import { localizeShowStory } from '../../../static-pages/js/tour-player/showLocale.js';
+import { CV_SHOW_LOCALES } from '../../../static-pages/data/cvShowLocales.js';
 import {
   CV_SHOW_RECOVERY,
   createPresentationReceiptSummary,
@@ -311,7 +313,7 @@ export class PortfolioShowChat extends HTMLElement {
   #configured = false;
   #trustedContactAction = '';
   #speech = createCvShowNarrationController({
-    browserSpeech: createBrowserSpeechController(),
+    browserSpeech: createTtsSpeechController(),
     url: globalThis.location?.href,
     baseUrl: globalThis.document?.baseURI,
   });
@@ -1223,9 +1225,12 @@ export class PortfolioShowChat extends HTMLElement {
       const branchesValid = Object.values(story?.branches || {}).every((branch) => (
         sceneIds.has(branch.sceneId) && branch.return?.resume === 'paused'
       ));
+      const lang = String(document.documentElement.lang || 'ru').split('-')[0];
+      const locale = CV_SHOW_LOCALES[lang];
+      if (story && lang !== 'ru' && locale) story = localizeShowStory(story, lang, locale);
       this.#story = story;
       this.$.isReady = story?.version === 1
-        && story?.narrationLocale === 'ru'
+        && Boolean(story?.narrationLocale)
         && story.short?.length === 16
         && Object.keys(story.branches || {}).length === 14
         && story.short.every((id) => sceneIds.has(id))
@@ -1845,7 +1850,35 @@ export class PortfolioShowChat extends HTMLElement {
     const beforeDeferredPresentation = runPrecedingSetup && !this.#presentationAdmitted
       ? runPrecedingSetup
       : null;
+    // Localized narration has no recorded audio to align to: every directive fires at the moment its
+    // quote is estimated to be spoken (see ttsNarration.js), one after another once setup is done.
+    // The Russian browser fallback keeps the older behaviour of running them all at the start.
+    let setupFinished = null;
+    let cueChain = Promise.resolve();
+    const timedCues = this.#alignment.available || this.#story.narrationLocale === 'ru' ? [] : visualDirectives.map((directive) => ({
+      id: directive.id,
+      quote: directive.timing?.quote || '',
+      occurrence: directive.timing?.occurrence || 1,
+      offsetMs: directive.timing?.offsetMs || 0,
+      directive,
+    }));
+    const onCue = (cue) => {
+      cueChain = cueChain.then(async () => {
+        await setupFinished;
+        if (requestId !== this.#requestId) return;
+        await new Promise((resolve) => {
+          const detail = {
+            directives: [cue.directive], aligned: false, requestId, continuation: true, handled: false, complete: resolve,
+          };
+          this.dispatchEvent(new CustomEvent('portfolio-show-phase', { bubbles: true, composed: true, detail }));
+          if (!detail.handled) resolve();
+        });
+      }).catch(() => {});
+    };
     const startUnalignedPresentation = this.#alignment.available ? null : async () => {
+      /** @type {(value?: any) => void} */
+      let finishSetup = () => {};
+      setupFinished = new Promise((resolve) => { finishSetup = resolve; });
       const receipt = precedingSetupEntry
         ? await this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
         : await this.#runSceneSetup(entry, requestId);
@@ -1856,8 +1889,9 @@ export class PortfolioShowChat extends HTMLElement {
       this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
         bubbles: true,
         composed: true,
-        detail: { directives: visualDirectives, aligned: false, requestId },
+        detail: { directives: timedCues.length ? [] : visualDirectives, aligned: false, requestId },
       }));
+      finishSetup();
     };
     this.#showPlayer?.bind?.(this.#showConfig());
     this.#syncPlayer();
@@ -1868,6 +1902,8 @@ export class PortfolioShowChat extends HTMLElement {
       beforeDeferredPresentation,
       restorePausedCheckpoint,
       onPhysicalStart: startUnalignedPresentation,
+      cues: timedCues,
+      onCue,
     });
   }
 
@@ -2325,6 +2361,8 @@ export class PortfolioShowChat extends HTMLElement {
     beforeDeferredPresentation = null,
     restorePausedCheckpoint = false,
     onPhysicalStart = null,
+    cues = [],
+    onCue = null,
   } = {}) {
     if (!this.#speech.available) {
       this.pauseShow('narration-unavailable');
@@ -2393,6 +2431,8 @@ export class PortfolioShowChat extends HTMLElement {
       lang: this.#story.narrationLocale,
       rate: this.#playbackRate,
       startPaused: effectiveStartPaused,
+      cues,
+      onCue,
       onStart: () => {
         if (!this.#publishPhysicalStart(entry, requestId)) return;
         if (typeof onPhysicalStart !== 'function') return;
