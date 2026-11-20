@@ -779,7 +779,7 @@ const easeInOutSine = (progress) => -(Math.cos(Math.PI * progress) - 1) / 2;
  * @param {Element} target
  * @param {{
  *   document?: Document, signal?: AbortSignal, durationMs?: number,
- *   cursor?: { planApproach?: Function, presentCursorFrame?: Function, setGrip?: Function, returnHome?: Function } | null,
+ *   cursor?: { planApproach?: Function, presentCursorFrame?: Function, setGrip?: Function } | null,
  * }} [options] `durationMs` is the whole gesture: approach, pushes and lifts
  * @returns {Promise<void>}
  */
@@ -896,7 +896,9 @@ export function animateCvShowScrollWithHand(target, { document, signal, duration
     };
     frameId = requestFrame(step);
   }).then(() => {
+    // The claw stays on the page: the gesture that follows (usually the frame on what was scrolled to)
+    // approaches from here. Sending it home first made the next gesture start while the arm was still
+    // retracting; an idle claw retracts on its own.
     applyOffsets(rows, 1);
-    try { void cursor.returnHome?.(); } catch { /* nothing to return */ }
   });
 }
