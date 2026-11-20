@@ -382,6 +382,15 @@ portfolio-graph-panel > .portfolio-graph-snapshot {
   pointer-events: none;
 }
 
+/* The picture of the graph is a stand-in: soft until the live graph has taken its place. */
+portfolio-graph-panel > .portfolio-graph-snapshot {
+  transition: filter var(--sn-transition-slow, 0.45s) ease-out;
+}
+
+portfolio-graph-panel[data-loading] > .portfolio-graph-snapshot {
+  filter: blur(calc(var(--notchset-rule-width, 1px) * 3)) saturate(0.85);
+}
+
 portfolio-graph-panel[data-loading]::after {
   content: '';
   position: absolute;

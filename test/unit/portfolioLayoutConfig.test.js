@@ -399,7 +399,7 @@ test('portfolio static pages version local CSS and JS assets with the shared bui
 
 test('portfolio structured graph applies layout only on binding, explicit selection, and URL change', async () => {
   let source = await readFile(new URL('../../src/static-pages/js/index.js', import.meta.url), 'utf8');
-  let bindingStart = source.indexOf('  bindStructuredGraphRenderer({ allowHidden = false } = {}) {');
+  let bindingStart = source.indexOf('  bindStructuredGraphRenderer({ allowHidden = false, staged = false } = {}) {');
   let bindingEnd = source.indexOf('  setStructuredGraphLoading(active) {', bindingStart);
   let bindingSource = source.slice(bindingStart, bindingEnd);
   let selectionStart = source.indexOf('  setGraphLayout(layoutAlgo) {');
