@@ -25,7 +25,7 @@ import {
 } from '../../../static-pages/js/tour-player/presentationProjectAdapter.js';
 import { createTtsSpeechController } from '../../../static-pages/js/tour-player/ttsNarration.js';
 import { localizeShowStory } from '../../../static-pages/js/tour-player/showLocale.js';
-import { buildTimedCues } from '../../../static-pages/js/tour-player/ttsCues.js';
+import { buildTimedCues, restoredScrollCue } from '../../../static-pages/js/tour-player/ttsCues.js';
 import { CV_SHOW_LOCALES } from '../../../static-pages/data/cvShowLocales.js';
 import {
   CV_SHOW_RECOVERY,
@@ -1975,6 +1975,21 @@ export class PortfolioShowChat extends HTMLElement {
         await this.#alignedEntry?.runtime?.whenIdle?.();
       } : undefined,
     });
+    // A restored position skips the earlier cues: bring the page to where the narration left it.
+    const restoreCue = restoredScrollCue(entry.speech, timedCues, positionMs);
+    if (restoreCue) {
+      setTimeout(() => {
+        if (requestId !== this.#requestId) return;
+        this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            directives: [restoreCue.directive], aligned: false, requestId, continuation: true,
+            scroll: true, budgetMs: restoreCue.budgetMs || 0, handled: false,
+          },
+        }));
+      }, 400);
+    }
   }
 
   #runSceneSetup(entry, requestId, { restorePausedCheckpoint = false } = {}) {
