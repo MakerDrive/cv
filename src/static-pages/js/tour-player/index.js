@@ -35,6 +35,7 @@ import {
 } from './compositionTime.js';
 import {
   animateCvShowScrollIntoView,
+  animateCvShowScrollWithHand,
   createCvShowTextMarkerTarget,
   ensureCvShowArticleProject,
   ensureCvShowMediaProject,
@@ -552,7 +553,7 @@ function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
   });
 }
 
-export function createPanelActionAdapter(workspace, runtime, { prepareMedia = null } = {}) {
+export function createPanelActionAdapter(workspace, runtime, { prepareMedia = null, getCursor = () => null } = {}) {
   const inspect = ({ action }) => inspectTargetPanel(workspace, runtime, action.target, action.id);
   const reveal = ({ action, inspected }) => {
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
@@ -763,6 +764,16 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     const scrollDurationMs = bypassScrollSettlement
       ? 0
       : resolveCvShowScrollDuration(context?.presentationBudgetMs);
+    // The hand pushes the page when the cell has room for it (the browser voice has no hard deadline, and
+    // a bare gesture is unbounded); a short recorded cell keeps the plain animated scroll.
+    const handBudgetMs = Number(context?.presentationBudgetMs) > 0 ? Number(context.presentationBudgetMs) : 2_200;
+    const scrollMotion = (durationMs) => (
+      handBudgetMs >= 1_600 && !bypassScrollSettlement
+        ? animateCvShowScrollWithHand(ready.target, {
+            document, signal, durationMs: handBudgetMs - 300, cursor: getCursor(),
+          })
+        : animateCvShowScrollIntoView(ready.target, { document, signal, durationMs })
+    );
     if (bypassScrollSettlement) {
       await animateCvShowScrollIntoView(ready.target, {
         document,
@@ -792,11 +803,7 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
         document,
         signal,
         inactivityMs: settleInactivityMs,
-        start: () => animateCvShowScrollIntoView(ready.target, {
-          document,
-          signal,
-          durationMs: scrollDurationMs,
-        }),
+        start: () => scrollMotion(scrollDurationMs),
       });
     } catch (evidenceError) {
       visualSettlement = Object.freeze({
@@ -1199,6 +1206,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         prepareMedia: (targetId, options) => (
           resolveShowMedia(targetId)?.prepareShowMedia?.(options)
         ),
+        getCursor: () => cursor,
       }),
       reportRuntimeError,
       gestureSeed,
