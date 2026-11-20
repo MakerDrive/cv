@@ -55,7 +55,7 @@ test('the hand pushes the page: content moves as far as the claw, upward for a d
   const last = hand.at(-1);
   assert.ok(Math.abs((first[1] - last[1]) - (last[2] - first[2])) < 40, 'claw travel equals page travel');
   assert.deepEqual(calls.filter((c) => c[0] === 'grip').map((c) => c[1]), [true, false]);
-  assert.equal(calls.at(-1)[0], 'home');
+  assert.ok(!calls.some((c) => c[0] === 'home'), 'the claw stays for the next gesture');
 });
 
 test('a long way takes several pushes with the claw letting go in between', async () => {
