@@ -269,7 +269,9 @@ function isShowDeepLink() {
   return SHOW_ROUTE_PARAMS.some((name) => params.has(name));
 }
 
-if (isShowDeepLink()) await loadTourModule();
+// A Show deep link starts fetching the runtime at once but no longer holds the whole page for it: the page
+// builds and paints meanwhile, and the Show installs the moment the module is there.
+if (isShowDeepLink()) void loadTourModule();
 
 registerMediaProvider('ims', createPortfolioImsMediaAdapter());
 
@@ -4316,7 +4318,9 @@ class PortfolioWorkspace extends HTMLElement {
       tourButton?.removeEventListener('focus', warmTour);
     };
     if (tourModule) installTour(tourModule);
-    else {
+    else if (isShowDeepLink()) {
+      void loadTourModule().then((module) => installTour(module));
+    } else {
       // Only download the Show runtime while the browser is idle; evaluating it
       // starts a long synchronous task, so it waits for a real press.
       const preloadTour = () => {
@@ -4375,6 +4379,10 @@ class PortfolioWorkspace extends HTMLElement {
     document.addEventListener('cascade-theme-open-full', this._onThemeOpenFull);
     document.addEventListener('portfolio-open-materials', this._onOpenMaterials);
     layout.setLayout(createPortfolioLayoutTree());
+    // The first screen is built: from here the loading placeholder (see index.css) gives way to it.
+    globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(() => {
+      document.documentElement.dataset.portfolioReady = '';
+    }));
     // Read-only live semantic observation (Slice A). Registration is a
     // no-op when the browser has no native WebMCP model context; the
     // handle stays reachable for tests via the workspace element.
