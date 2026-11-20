@@ -1601,6 +1601,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         presenterRigButton?.remove();
         soundButton?.remove();
         musicButton?.remove();
+        header.querySelectorAll('[data-cv-show-volume]').forEach((panel) => panel.remove());
         subtitlesButton?.remove();
         showLayoutPlayer = player;
       }
@@ -1663,13 +1664,52 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         if (!button.isConnected) header.insertBefore(button, header.querySelector('[data-header-action="settings"]'));
         return button;
       };
+      // Hovering (or focusing) a sound switch slides a volume panel up over it, as wide as the button.
+      const volumePanel = (button, key, labelKey, get, set) => {
+        header.querySelector(`[data-cv-show-volume="${key}"]`)?.remove();
+        const panel = document.createElement('div');
+        panel.className = 'cv-show-volume';
+        panel.dataset.cvShowVolume = key;
+        const range = document.createElement('input');
+        range.type = 'range';
+        range.min = '0';
+        range.max = '100';
+        range.step = '1';
+        range.className = 'cv-show-volume-range';
+        range.setAttribute('aria-label', getLocaleMessage(labelKey));
+        range.title = getLocaleMessage(labelKey);
+        range.value = String(Math.round(get() * 100));
+        range.addEventListener('input', () => set(Number(range.value) / 100));
+        panel.append(range);
+        header.append(panel);
+        /** @type {any} */
+        let hideTimer = 0;
+        const place = () => {
+          panel.style.left = `${button.offsetLeft}px`;
+          panel.style.width = `${button.offsetWidth}px`;
+        };
+        const show = () => { clearTimeout(hideTimer); place(); range.value = String(Math.round(get() * 100)); panel.dataset.open = ''; };
+        const hide = () => { clearTimeout(hideTimer); hideTimer = setTimeout(() => { delete panel.dataset.open; }, 220); };
+        for (const element of [button, panel]) {
+          element.addEventListener('pointerenter', show);
+          element.addEventListener('pointerleave', hide);
+          element.addEventListener('focusin', show);
+          element.addEventListener('focusout', hide);
+        }
+        return panel;
+      };
+      // Music and effects sit side by side, each with its own volume.
       musicButton = soundSwitch(musicButton, 'data-cv-show-music', 'tour.music', ['music_note', 'music_off'],
         () => showSound.isMusic(), () => showSound.toggleMusic());
+      soundButton = soundSwitch(soundButton, 'data-cv-show-sound', 'tour.sound', ['volume_up', 'volume_off'],
+        () => showSound.isSounds(), () => showSound.toggleSounds());
       subtitlesButton = soundSwitch(subtitlesButton, 'data-cv-show-subtitle-toggle', 'tour.subtitles', ['subtitles', 'subtitles_off'],
         () => readSubtitles(), () => applySubtitles(!readSubtitles()));
       document.documentElement.dataset.cvShowSubtitles = readSubtitles() ? 'on' : 'off';
-      soundButton = soundSwitch(soundButton, 'data-cv-show-sound', 'tour.sound', ['volume_up', 'volume_off'],
-        () => showSound.isSounds(), () => showSound.toggleSounds());
+      volumePanel(musicButton, 'music', 'tour.musicVolume',
+        () => showSound.getMusicVolume(), (value) => showSound.setMusicVolume(value));
+      volumePanel(soundButton, 'sound', 'tour.soundVolume',
+        () => showSound.getSoundsVolume(), (value) => showSound.setSoundsVolume(value));
     });
   };
 
@@ -2095,6 +2135,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     presenterRigButton?.remove();
     soundButton?.remove();
     musicButton?.remove();
+    document.querySelectorAll('[data-cv-show-volume]').forEach((panel) => panel.remove());
     subtitlesButton?.remove();
     showSound.dispose();
     workspace.removeEventListener('portfolio-show-seek', onSeek);

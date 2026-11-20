@@ -417,3 +417,12 @@ test('a lead longer than the sentence before it fires at that sentence start, in
   env.advance(60_000);
   assert.deepEqual(fired, ['scroll', 'frame']);
 });
+
+test('hasVoice tells whether the browser has a voice for the language, or null while unknown', () => {
+  const env = fakeEnvironment();
+  const controller = createTtsSpeechController(env);
+  assert.equal(controller.hasVoice('en-GB'), true, 'matches the language part');
+  assert.equal(controller.hasVoice('es'), false);
+  env.synth.getVoices = () => [];
+  assert.equal(controller.hasVoice('en'), null, 'an empty list means the voices are not loaded yet');
+});

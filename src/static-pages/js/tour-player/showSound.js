@@ -79,6 +79,10 @@ export function createCvShowSound(source) {
     },
     isMusic: () => sound.isMusic(),
     isSounds: () => sound.isSounds(),
+    getMusicVolume: () => sound.getMusicVolume(),
+    setMusicVolume: (value) => sound.setMusicVolume(value),
+    getSoundsVolume: () => sound.getSoundsVolume(),
+    setSoundsVolume: (value) => sound.setSoundsVolume(value),
     toggleMusic() {
       sound.setMusic(!sound.isMusic());
       return sound.isMusic();

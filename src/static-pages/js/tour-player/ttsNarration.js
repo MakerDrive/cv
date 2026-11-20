@@ -235,6 +235,15 @@ export function createTtsSpeechController({
 
   return Object.freeze({
     available,
+    /**
+     * Whether the browser has a voice for the language: true or false once its voice list is known, null
+     * while it is not (voices load asynchronously and some browsers never list them).
+     * @param {string} lang
+     */
+    hasVoice(lang) {
+      const voices = synth?.getVoices?.() || [];
+      return voices.length ? Boolean(pickVoice(lang)) : null;
+    },
     speak(text, options = {}) {
       if (!available) return false;
       cancel();
