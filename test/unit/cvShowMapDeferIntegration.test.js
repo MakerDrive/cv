@@ -111,7 +111,7 @@ test('rail mode keeps the swipe-excluded map deferred and reveals rail panels', 
     assert.equal(excludedInspected.railMode, true, 'the dock rail is the active mobile projection');
     assert.equal(excludedInspected.railRevealed, false, 'a swipeControl: none panel is not a rail slide');
     assert.equal(excludedInspected.open, false, 'the hidden map stays closed under the rail');
-    const excludedReveal = excludedAdapter.reveal({ action, inspected: excludedInspected });
+    const excludedReveal = await excludedAdapter.reveal({ action, inspected: excludedInspected });
     assert.equal(excludedReveal.mapDeferred, true, 'the map cue defers instead of forcing a reveal');
     assert.deepEqual(excluded.railLayout.scrollToPanelCalls, [], 'a deferred panel is never scrolled to');
     assert.equal(await excludedAdapter.awaitTarget({ action, context, signal: null }), null,
@@ -122,7 +122,7 @@ test('rail mode keeps the swipe-excluded map deferred and reveals rail panels', 
     const includedInspected = includedAdapter.inspect({ action });
     assert.equal(includedInspected.railRevealed, true);
     assert.equal(includedInspected.open, true, 'a rail slide is revealed by scrolling to it');
-    includedAdapter.reveal({ action, inspected: includedInspected });
+    await includedAdapter.reveal({ action, inspected: includedInspected });
     assert.deepEqual(included.railLayout.scrollToPanelCalls, ['g'],
       'the host Layout API owns the rail selection and snap position');
   } finally {
