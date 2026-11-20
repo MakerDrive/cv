@@ -6816,7 +6816,7 @@ test('terminal narration errors keep the player controllable: Play repeats the s
   player.stopShow();
 });
 
-test('hiding the page pauses the show instead of burning cell deadlines', async (t) => {
+test('hiding the page does not pause the browser voice, which has no cell deadlines', async (t) => {
   const { parseHTML } = await import('linkedom');
   const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
   const globalKeys = [
@@ -6840,6 +6840,7 @@ test('hiding the page pauses the show instead of burning cell deadlines', async 
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -6896,7 +6897,7 @@ test('hiding the page pauses the show instead of burning cell deadlines', async 
     get: () => 'hidden',
   });
   document.dispatchEvent(new Event('visibilitychange'));
-  assert.equal(player.$.isPaused, true, 'hiding the page pauses the show');
+  assert.equal(player.$.isPaused, false, 'the browser voice keeps playing in a hidden page');
   assert.equal(player.$.isRunning, true);
   assert.equal(player.$.isError, false);
   assert.equal(player.$.errorText, '');
@@ -6906,7 +6907,7 @@ test('hiding the page pauses the show instead of burning cell deadlines', async 
     get: () => 'visible',
   });
   document.dispatchEvent(new Event('visibilitychange'));
-  assert.equal(player.$.isPaused, true, 'becoming visible again keeps the paused state');
+  assert.equal(player.$.isPaused, false, 'becoming visible again leaves the show playing');
   player.stopShow();
 });
 
