@@ -812,9 +812,7 @@ body > footer a {
   display: flex;
   align-items: center;
   gap: var(--sn-step-4);
-  min-block-size: var(--notchset-field-height);
-  padding-inline: var(--sn-step-6);
-  border: var(--notchset-rule-width) solid var(--pulse-outline);
+  margin-block: var(--sn-step-4);
   color: var(--pulse-text);
 }
 
