@@ -1069,18 +1069,13 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     try { globalThis.localStorage?.setItem(RIG_MASK_KEY, name); } catch { /* optional */ }
   };
   // Subtitles: the speech cloud of the presenter and the player's own caption.
-  const SUBTITLES_KEY = 'cvShowSubtitlesOff';
-  const readInitialSubtitles = () => {
-    const fromUrl = new URLSearchParams(globalThis.location?.search || '').get('showSubtitles');
-    if (fromUrl !== null) return fromUrl !== '0';
-    try { return globalThis.localStorage?.getItem(SUBTITLES_KEY) !== '1'; } catch { return true; }
-  };
-  let subtitlesOn = readInitialSubtitles();
+  // Subtitles are on at every load (`?showSubtitles=0` turns them off for that load only);
+  // the header switch changes them for the running show.
+  let subtitlesOn = new URLSearchParams(globalThis.location?.search || '').get('showSubtitles') !== '0';
   const readSubtitles = () => subtitlesOn;
   const applySubtitles = (on) => {
     subtitlesOn = on;
     document.documentElement.dataset.cvShowSubtitles = on ? 'on' : 'off';
-    try { globalThis.localStorage?.setItem(SUBTITLES_KEY, on ? '0' : '1'); } catch { /* optional */ }
     presenter?.cursor.setSubtitles?.(on);
   };
   const isPresenterRigOn = () => (
@@ -1112,7 +1107,6 @@ export function installPortfolioTour({ workspace, runtime, title }) {
           // The cloud hides on pause and follows the subtitles switch.
           isPaused: () => getChat()?.$?.isPaused === true,
           subtitles: readSubtitles(),
-          onMaskChange: saveRigMask,
         }
       : null
   );

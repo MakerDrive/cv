@@ -61,7 +61,7 @@ function placeThumb(player, track, config, fill = null) {
   player.style.setProperty('--cv-compact-progress', String(position));
 }
 
-const FOLLOW_MS = 100;
+const FOLLOW_MS = 200;
 
 // The config is rebuilt only when the scene changes, so the thumb would stand
 // still while a scene plays. The segment's own fill moves with the playback:
@@ -72,6 +72,10 @@ function followProgress(player, track, binding) {
     if (!track.isConnected) { clearInterval(binding.timer); binding.timer = null; return; }
     let segment = track.querySelectorAll('.chat-show-progress-segment')[binding.config.state.index];
     let fill = Number.parseFloat(segment?.style.getPropertyValue('--chat-show-progress-fill'));
-    if (Number.isFinite(fill)) placeThumb(player, track, binding.config, fill);
+    // Only a moved fill needs a new thumb position (and a layout read).
+    if (Number.isFinite(fill) && fill !== binding.lastFill) {
+      binding.lastFill = fill;
+      placeThumb(player, track, binding.config, fill);
+    }
   }, FOLLOW_MS);
 }
