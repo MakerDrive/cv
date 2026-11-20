@@ -174,6 +174,37 @@ portfolio-workspace .sn-tree-panel-filter {
     var(--notchset-ease-travel);
 }
 
+/* The tree filter and its collapse-all button are one joined control, the same height as the panel
+   header buttons above it (the icon button size), with one shared edge between the two. */
+portfolio-workspace .portfolio-tree .sn-tree-panel-toolbar {
+  gap: 0;
+  align-items: stretch;
+}
+
+portfolio-workspace .portfolio-tree .sn-tree-panel-filter {
+  min-block-size: var(--sn-button-icon-size);
+  block-size: var(--sn-button-icon-size);
+  border-color: var(--sn-layout-border);
+  border-inline-end: 0;
+}
+
+portfolio-workspace .portfolio-tree .sn-tree-panel-collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--sn-button-icon-size);
+  min-inline-size: var(--sn-button-icon-size);
+  block-size: var(--sn-button-icon-size);
+  min-block-size: var(--sn-button-icon-size);
+  padding: 0;
+  border: var(--notchset-rule-width) solid var(--sn-layout-border);
+  border-radius: var(--notchset-square);
+}
+
+portfolio-workspace .portfolio-tree .sn-tree-panel-collapse .sn-tree-panel-toolbar-icon {
+  font-size: calc(var(--sn-button-icon-font-size) * 1.3);
+}
+
 portfolio-workspace .sn-tree-panel-filter:is(:focus, :focus-visible) {
   outline: none;
 }
@@ -337,7 +368,7 @@ portfolio-workspace code-block .md-link:is(:hover, :focus-visible, :active) {
    block with a header (language and copy), a framed quote instead of a tinted one, and small
    square markers on lists. */
 portfolio-workspace code-block .md-inline-code {
-  padding: 2px 6px;
+  padding: var(--sn-step-1) var(--sn-step-3);
   border: var(--notchset-rule-width) solid var(--pulse-outline);
   border-radius: var(--notchset-square);
   background: color-mix(in srgb, var(--pulse-text) 5%, transparent);
@@ -346,24 +377,93 @@ portfolio-workspace code-block .md-inline-code {
   color: var(--pulse-text);
 }
 
-portfolio-workspace code-block .notchset-code {
-  margin-block: var(--sn-step-8);
+/* Design marks of the Notchset reference: every table, picture and code block sits in a figure
+   with crosses at its four corners and a small mono label (TBL 01, FIG 01, CODE 01 · JSON). */
+portfolio-workspace code-block .notchset-figure {
+  position: relative;
+  margin: var(--sn-step-10) 0;
   border: var(--notchset-rule-width) solid var(--sn-layout-border);
-  border-radius: var(--notchset-square);
+  color: var(--pulse-text-dim);
 }
 
-portfolio-workspace code-block .notchset-code-head {
+portfolio-workspace code-block .notchset-figure::before,
+portfolio-workspace code-block .notchset-figure::after {
+  content: '';
+  position: absolute;
+  inset-inline: -5px;
+  block-size: 9px;
+  pointer-events: none;
+  background:
+    linear-gradient(currentColor, currentColor) 0 4px / 9px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) 4px 0 / 1px 9px no-repeat,
+    linear-gradient(currentColor, currentColor) 100% 4px / 9px 1px no-repeat,
+    linear-gradient(currentColor, currentColor) calc(100% - 4px) 0 / 1px 9px no-repeat;
+}
+
+portfolio-workspace code-block .notchset-figure::before {
+  inset-block-start: -5px;
+}
+
+portfolio-workspace code-block .notchset-figure::after {
+  inset-block-end: -5px;
+}
+
+portfolio-workspace code-block .notchset-figure-label {
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-block-size: var(--notchset-field-height);
   padding-inline: var(--sn-step-6) 0;
+  border: 0;
   border-block-end: var(--notchset-rule-width) solid var(--sn-layout-border);
   color: var(--pulse-text-dim);
   font-family: var(--sn-font-mono);
   font-size: var(--notchset-legend-size);
   letter-spacing: var(--notchset-legend-tracking);
   text-transform: uppercase;
+}
+
+/* A small ring at the end of the label of a figure without actions, as on the reference. */
+portfolio-workspace code-block .notchset-figure-label:not(:has(button))::after {
+  content: '';
+  inline-size: 7px;
+  block-size: 7px;
+  margin-inline-end: var(--sn-step-6);
+  border: var(--notchset-rule-width) solid currentColor;
+  border-radius: 50%;
+}
+
+portfolio-workspace code-block .notchset-figure > :is(table.md-table, img.md-img, pre.md-code-block) {
+  margin: 0;
+}
+
+/* One frame per figure: the figure draws the outer line in the strong colour, the picture, table
+   and code inside draw none, and the table keeps only its light inner dividers. */
+portfolio-workspace code-block .notchset-figure > table.md-table {
+  inline-size: 100%;
+  border: 0;
+}
+
+portfolio-workspace code-block .notchset-figure > table.md-table :is(td, th) {
+  border-inline-start-width: 0;
+  border-inline-end-width: 0;
+}
+
+portfolio-workspace code-block .notchset-figure > table.md-table td:not(:first-child) {
+  border-inline-start-width: var(--notchset-rule-width);
+}
+
+portfolio-workspace code-block .notchset-figure > table.md-table tr:first-child :is(td, th) {
+  border-block-start-width: 0;
+}
+
+portfolio-workspace code-block .notchset-figure > table.md-table tr:last-child :is(td, th) {
+  border-block-end-width: 0;
+}
+
+portfolio-workspace code-block .notchset-figure > img.md-img {
+  inline-size: 100%;
+  border: 0;
 }
 
 portfolio-workspace code-block .notchset-code-copy {
@@ -374,7 +474,7 @@ portfolio-workspace code-block .notchset-code-copy {
   background: transparent;
   color: inherit;
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--sn-button-icon-font-size);
 }
 
 portfolio-workspace code-block .notchset-code-copy:is(:hover, :focus-visible) {
@@ -382,13 +482,12 @@ portfolio-workspace code-block .notchset-code-copy:is(:hover, :focus-visible) {
   color: var(--pulse-surface);
 }
 
-portfolio-workspace code-block .notchset-code > .md-code-block {
-  margin: 0;
+portfolio-workspace code-block .notchset-figure > pre.md-code-block {
   border: 0;
   border-radius: 0;
   background: color-mix(in srgb, var(--pulse-text) 4%, transparent);
   font-family: var(--sn-font-mono);
-  font-size: 13px;
+  font-size: var(--sn-code-font-size);
 }
 
 portfolio-workspace code-block .md-code-block code {
@@ -397,7 +496,7 @@ portfolio-workspace code-block .md-code-block code {
   color: var(--pulse-text);
 }
 
-portfolio-workspace code-block .md-code-block:not(.notchset-code > .md-code-block) {
+portfolio-workspace code-block .md-code-block {
   border-radius: var(--notchset-square);
   font-family: var(--sn-font-mono);
 }
@@ -410,12 +509,111 @@ portfolio-workspace code-block .md-quote {
   font-style: normal;
 }
 
-portfolio-workspace code-block .md-list li::marker {
+/* Heading levels below the section title: a clear step down in size, then small mono labels. */
+portfolio-workspace code-block h3.md-h {
+  margin-block: var(--sn-step-10) var(--sn-step-4);
+  font-size: calc(var(--sn-markdown-h3-size) * 1.375);
+  line-height: 1.15;
+}
+
+portfolio-workspace code-block h4.md-h {
+  margin-block: var(--sn-step-8) var(--sn-step-4);
+  font-size: calc(var(--sn-markdown-h4-size) * 1.2);
+  line-height: 1.2;
+}
+
+portfolio-workspace code-block :is(h5, h6).md-h {
+  margin-block: var(--sn-step-8) var(--sn-step-3);
   color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  font-stretch: normal;
+  font-weight: var(--notchset-control-weight);
+  letter-spacing: var(--notchset-legend-tracking);
+  line-height: 1.4;
+}
+
+/* Lists: a small square marker, or a mono two-digit counter for numbered lists. The tree-like
+   branch lines the shared list style draws are not used inside prose. */
+portfolio-workspace code-block .md-list {
+  margin-block: var(--sn-step-6);
+  padding: 0;
+  list-style: none;
 }
 
 portfolio-workspace code-block .md-list li {
-  margin-block: var(--sn-step-2);
+  position: relative;
+  min-block-size: 0;
+  margin-block: var(--sn-step-3);
+  padding: 0 0 0 var(--sn-step-14, 28px);
+  border: 0;
+}
+
+portfolio-workspace code-block .md-list li::before {
+  content: '';
+  position: absolute;
+  inset: 0.62em auto auto 8px;
+  inline-size: 6px;
+  block-size: 6px;
+  border: 0;
+  background: var(--pulse-text);
+}
+
+portfolio-workspace code-block ol.md-list {
+  counter-reset: notchset-ol;
+}
+
+portfolio-workspace code-block ol.md-list li {
+  counter-increment: notchset-ol;
+}
+
+portfolio-workspace code-block ol.md-list li::before {
+  content: counter(notchset-ol, decimal-leading-zero);
+  inset: 0.28em auto auto 0;
+  inline-size: auto;
+  block-size: auto;
+  background: none;
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  font-weight: var(--notchset-control-weight);
+  letter-spacing: var(--notchset-legend-tracking);
+}
+
+/* Table header cells, the same mono label as the first column; no tinted fill. */
+portfolio-workspace code-block .md-table th {
+  background: transparent;
+  border-block-end: var(--notchset-rule-width) solid var(--pulse-text);
+  color: var(--pulse-text);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  font-weight: var(--notchset-control-weight);
+  letter-spacing: var(--notchset-legend-tracking);
+  text-align: start;
+  text-transform: uppercase;
+}
+
+portfolio-workspace code-block .md-table tr:hover td {
+  background: color-mix(in srgb, var(--pulse-text) 4%, transparent);
+}
+
+portfolio-workspace code-block .md-img {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  margin-block: var(--sn-step-8);
+  border: var(--notchset-rule-width) solid var(--pulse-outline);
+  border-radius: 0;
+}
+
+portfolio-workspace code-block .md-hr {
+  margin-block: var(--sn-step-12);
+  border: 0;
+  border-block-start: var(--notchset-rule-width) solid var(--pulse-outline);
+}
+
+portfolio-workspace code-block :is(.md-p, .md-list, .md-table) del {
+  color: var(--pulse-text-dim);
 }
 
 
@@ -478,8 +676,41 @@ body:has(.pulse-screen)
 }
 
 
+/* The panel menu: a group is one framed bar, a mono label over a row of joined cells with shared
+   dividers, and every gap is the same step (no padding inside the group, no spaces between cells). */
+.pulse-workspace layout-node .panel-menu-rows {
+  padding: var(--sn-space-sm, 8px);
+  gap: var(--sn-space-sm, 8px);
+}
+
 .pulse-workspace layout-node .panel-menu-row {
-  border-color: var(--sn-layout-border);
+  border: var(--notchset-rule-width) solid var(--sn-layout-border);
+  background: transparent;
+}
+
+.pulse-workspace layout-node .panel-menu-row-label {
+  min-block-size: var(--sn-button-icon-size);
+  padding: 0 var(--sn-space-sm, 8px);
+  border: 0;
+  border-block-end: var(--notchset-rule-width) solid var(--sn-layout-border);
+  background: transparent;
+}
+
+.pulse-workspace layout-node .panel-menu-actions {
+  gap: 0;
+  padding: 0;
+}
+
+.pulse-workspace layout-node .panel-menu-actions .panel-menu-action {
+  flex: 1 1 0;
+  justify-content: center;
+  min-block-size: var(--sn-button-icon-size);
+  padding-block: 0;
+  border: 0;
+}
+
+.pulse-workspace layout-node .panel-menu-actions > :not(:first-child) .panel-menu-action {
+  border-inline-start: var(--notchset-rule-width) solid var(--sn-layout-border);
 }
 
 .pulse-workspace layout-node .panel-menu-row-label {

@@ -462,9 +462,29 @@ portfolio-theme-panel,
   min-block-size: var(--notchset-field-height);
 }
 
+/* A narrow tree scrolls sideways instead of cutting the names to a few letters: the rows take the
+   width of their longest label (and at least the panel), the names are not truncated. */
+.portfolio-tree .sn-tree-panel-content {
+  overflow-x: auto;
+}
+
+.portfolio-tree .sn-tree-view {
+  inline-size: max-content;
+  min-inline-size: 100%;
+}
+
 .portfolio-tree .sn-tree-row {
-  grid-template-columns: var(--sn-tree-toggle-width) var(--sn-tree-icon-width) minmax(0, 1fr);
+  grid-template-columns: var(--sn-tree-toggle-width) var(--sn-tree-icon-width) max-content;
   column-gap: var(--sn-step-2);
+  inline-size: auto;
+  min-inline-size: 100%;
+}
+
+.portfolio-tree .sn-tree-label {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  padding-inline-end: var(--sn-step-4);
 }
 
 .portfolio-tree .sn-tree-toggle,
@@ -768,6 +788,110 @@ body > footer a {
   main > article {
     padding: 0;
   }
+}
+
+/* Profile dashboard, in the Notchset manner: metric cells in one frame, the availability line with
+   the host's clock, and the 24-hour ruler of the host's working hours in the visitor's day. */
+.profile-dashboard {
+  display: grid;
+  gap: var(--sn-step-6);
+  margin: var(--sn-step-8) 0 var(--sn-step-10);
+}
+
+.profile-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  border: var(--notchset-rule-width) solid var(--pulse-text);
+  border-inline-end: 0;
+  border-block-end: 0;
+}
+
+.profile-metric {
+  display: grid;
+  gap: var(--sn-step-2);
+  padding: var(--sn-step-6) var(--sn-step-8);
+  border-inline-end: var(--notchset-rule-width) solid var(--pulse-text);
+  border-block-end: var(--notchset-rule-width) solid var(--pulse-text);
+}
+
+.profile-metric-value {
+  font-family: var(--sn-portfolio-font-display);
+  font-size: calc(var(--sn-markdown-h1-size) * 1.4);
+  font-weight: var(--notchset-heading-weight);
+  font-stretch: var(--notchset-heading-width);
+  line-height: 1;
+  letter-spacing: var(--notchset-heading-tracking);
+}
+
+.profile-metric-label,
+.profile-status,
+.profile-ruler-head,
+.profile-ruler-scale {
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+  text-transform: uppercase;
+}
+
+.profile-status {
+  display: flex;
+  align-items: center;
+  gap: var(--sn-step-4);
+  min-block-size: var(--notchset-field-height);
+  padding-inline: var(--sn-step-6);
+  border: var(--notchset-rule-width) solid var(--pulse-outline);
+  color: var(--pulse-text);
+}
+
+.profile-status-dot {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: var(--sn-portfolio-signal);
+}
+
+.profile-status-time {
+  margin-inline-start: auto;
+  color: var(--pulse-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.profile-ruler {
+  display: grid;
+  gap: var(--sn-step-3);
+}
+
+.profile-ruler-head,
+.profile-ruler-scale {
+  display: flex;
+  justify-content: space-between;
+}
+
+.profile-ruler-track {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  block-size: 20px;
+  border: var(--notchset-rule-width) solid var(--pulse-text);
+}
+
+.profile-ruler-cell {
+  border-inline-end: var(--notchset-rule-width) solid var(--pulse-outline);
+}
+
+.profile-ruler-cell:last-child {
+  border-inline-end: 0;
+}
+
+.profile-ruler-cell[data-working] {
+  background: var(--pulse-text);
+  border-inline-end-color: var(--pulse-surface);
+}
+
+.profile-ruler-cell[data-now] {
+  outline: 2px solid var(--sn-portfolio-signal);
+  outline-offset: -2px;
+  position: relative;
 }
 
 /* Group filter above the preview grid, in the Notchset manner: cells in one frame with shared

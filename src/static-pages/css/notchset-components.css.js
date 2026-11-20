@@ -579,6 +579,74 @@ html[data-portfolio-theme-mode] chat-message-item .status-card[data-status='runn
   border-color: var(--sn-portfolio-signal);
 }
 
+/* Chat, in the manner of the reference: every message carries a small mono caption (who and
+   its number), the user's messages are inverted and sit on the right, a status card shows its
+   state as a dot, and the actions of one message are a single segmented group. */
+html[data-portfolio-theme-mode] chat-message-list,
+html[data-portfolio-theme-mode] .chat-message-list {
+  counter-reset: notchset-msg;
+}
+
+html[data-portfolio-theme-mode] chat-message-item .message {
+  counter-increment: notchset-msg;
+}
+
+html[data-portfolio-theme-mode] chat-message-item .message::before {
+  display: block;
+  margin-block-end: var(--sn-step-3);
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+  text-transform: uppercase;
+}
+
+html[data-portfolio-theme-mode] chat-message-item .message.agent::before {
+  content: 'CV · ' counter(notchset-msg, decimal-leading-zero);
+}
+
+html[data-portfolio-theme-mode] chat-message-item .message.system::before {
+  content: 'SYS · ' counter(notchset-msg, decimal-leading-zero);
+}
+
+html[data-portfolio-theme-mode] chat-message-item .message.user::before {
+  content: 'YOU · ' counter(notchset-msg, decimal-leading-zero);
+  text-align: end;
+}
+
+html[data-portfolio-theme-mode] chat-message-item .message.user .msg-content {
+  background: var(--pulse-text);
+  color: var(--pulse-surface);
+}
+
+html[data-portfolio-theme-mode] chat-message-item .status-card-header::after {
+  content: '';
+  margin-inline-start: auto;
+  inline-size: 8px;
+  block-size: 8px;
+  border: var(--notchset-rule-width) solid currentColor;
+  border-radius: 50%;
+}
+
+html[data-portfolio-theme-mode] chat-message-item .status-card[data-status='running'] .status-card-header::after {
+  background: var(--sn-portfolio-signal);
+  border-color: var(--sn-portfolio-signal);
+}
+
+html[data-portfolio-theme-mode] chat-message-item .status-card[data-status='error'] .status-card-header::after {
+  background: var(--sn-sys-danger);
+  border-color: var(--sn-sys-danger);
+}
+
+html[data-portfolio-theme-mode] chat-message-item .actions-group {
+  display: inline-flex;
+  gap: 0;
+}
+
+html[data-portfolio-theme-mode] chat-message-item .actions-group > .sn-btn + .sn-btn {
+  margin-inline-start: calc(-1 * var(--notchset-rule-width));
+}
+
 html[data-portfolio-theme-mode] chat-message-item :is(.card-title, .display-card-meta) {
   font-family: var(--sn-font-mono);
   letter-spacing: var(--notchset-label-tracking);
