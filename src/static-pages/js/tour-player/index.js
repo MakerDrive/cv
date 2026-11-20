@@ -1678,8 +1678,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         range.className = 'cv-show-volume-range';
         range.setAttribute('aria-label', getLocaleMessage(labelKey));
         range.title = getLocaleMessage(labelKey);
-        range.value = String(Math.round(get() * 100));
-        range.addEventListener('input', () => set(Number(range.value) / 100));
+        // The slider's middle (50%) is the designed level, so there is room to turn it up as well as down.
+        range.value = String(Math.round(get() * 50));
+        range.addEventListener('input', () => set(Number(range.value) / 50));
         panel.append(range);
         header.append(panel);
         /** @type {any} */
@@ -1688,7 +1689,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
           panel.style.left = `${button.offsetLeft}px`;
           panel.style.width = `${button.offsetWidth}px`;
         };
-        const show = () => { clearTimeout(hideTimer); place(); range.value = String(Math.round(get() * 100)); panel.dataset.open = ''; };
+        const show = () => { clearTimeout(hideTimer); place(); range.value = String(Math.round(get() * 50)); panel.dataset.open = ''; };
         const hide = () => { clearTimeout(hideTimer); hideTimer = setTimeout(() => { delete panel.dataset.open; }, 220); };
         for (const element of [button, panel]) {
           element.addEventListener('pointerenter', show);
