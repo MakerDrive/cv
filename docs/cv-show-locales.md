@@ -5,7 +5,7 @@ from texts registered in `src/static-pages/data/cvShowLocales.js`.
 
 - `node scripts/show-locale-template.js` prints every scene and branch (title, subtitle, speech,
   chat text, and the phrase each timed directive is anchored to) in the locale shape, to translate.
-- Register the result as `CV_SHOW_LOCALES.<lang>`; `node scripts/show-locale-template.js --check <lang>`
+- English and Spanish are registered (`data/showLocales/en.js`, `es.js`; translated from the Russian speech). Register another language as `CV_SHOW_LOCALES.<lang>`; `node scripts/show-locale-template.js --check <lang>`
   lists what is missing. A quote must occur in that entry's `speech` (case and punctuation ignored).
 - The story structure, targets and choreography stay those of the verified Russian story; only texts
   and quotes are swapped (`showLocale.js`).
