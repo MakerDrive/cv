@@ -6,7 +6,7 @@
  * Locale shape:
  *   { scenes: { [sceneId]: Entry }, branches: { [branchId]: Entry } }
  *   Entry = { title?, subtitle, speech?, chat?: { text?, actionLabel? }, quotes?: { [directiveId]: phrase } }
- * `speech` is what the voice reads (defaults to `subtitle`); a quote must occur in `speech`.
+ * `speech` is what the voice reads and what is shown as the caption unless `subtitle` differs (each defaults to the other); a quote must occur in `speech`.
  * A directive without a quote in the locale keeps no timing of its own and fires with the entry start.
  */
 import { findQuoteWord, splitWords } from './ttsTiming.js';
@@ -28,7 +28,7 @@ const localizeEntry = (entry, text) => {
   const localized = {
     ...entry,
     title: text.title ?? entry.title,
-    subtitle: text.subtitle ?? entry.subtitle,
+    subtitle: text.subtitle ?? text.speech ?? entry.subtitle,
     speech,
     directives: localizeDirectives(entry.directives, text.quotes),
   };
