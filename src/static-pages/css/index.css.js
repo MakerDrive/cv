@@ -26,7 +26,7 @@ body {
   color: var(--pulse-text);
 }
 
-body:has(.pulse-screen) {
+body.pulse-body {
   padding-left: 0;
   --calc-top-pan-height: var(--sn-app-topbar-height, 40px);
   --pulse-workspace-block-size: calc(100vh - var(--calc-top-pan-height));
@@ -35,7 +35,7 @@ body:has(.pulse-screen) {
 }
 
 @supports (height: 100dvh) {
-  body:has(.pulse-screen) {
+  body.pulse-body {
     --pulse-workspace-block-size: calc(100dvh - var(--calc-top-pan-height));
   }
 }
@@ -45,7 +45,7 @@ side-panel[hidden] {
   display: none;
 }
 
-body:has(.pulse-screen) > footer {
+body.pulse-body > footer {
   display: none;
 }
 
@@ -56,7 +56,7 @@ body > footer {
   border-color: var(--pulse-outline);
 }
 
-body:has(.pulse-screen) > header {
+body.pulse-body > header {
   position: relative;
   top: auto;
   min-width: 0;
@@ -730,11 +730,11 @@ body > footer a {
     font-size: 1rem;
   }
 
-  body:has(.pulse-screen) {
+  body.pulse-body {
     --calc-top-pan-height: var(--sn-app-topbar-mobile-height, 56px);
   }
 
-  body:has(.pulse-screen) > header {
+  body.pulse-body > header {
     block-size: var(--sn-app-topbar-mobile-height, 56px);
     min-block-size: var(--sn-app-topbar-mobile-height, 56px);
     box-sizing: border-box;
