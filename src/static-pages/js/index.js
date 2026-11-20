@@ -3498,7 +3498,7 @@ class PortfolioGraphPanel extends HTMLElement {
     let callback = () => {
       this._structuredBindingFrame = 0;
       this._structuredBindingIdleFrame = 0;
-      this.bindStructuredGraphRenderer({ allowHidden });
+      this.bindStructuredGraphRenderer({ allowHidden, staged: !immediate });
     };
     if (immediate) {
       callback();
@@ -3526,21 +3526,46 @@ class PortfolioGraphPanel extends HTMLElement {
     }
   }
 
-  bindStructuredGraphRenderer({ allowHidden = false } = {}) {
+  /**
+   * Binds the live graph to the structured canvas in three stages (editor and connections, node
+   * positions, fit and adoption). Staged, each one runs in its own task, so the page stays responsive between
+   * them; urgent callers run all remaining stages at once. A stage done is never repeated.
+   */
+  bindStructuredGraphRenderer({ allowHidden = false, staged = false } = {}) {
     if (this._structuredBound || !this.structuredMode || !this.canvas) return;
     if (!allowHidden && !this.isGraphPanelVisible()) {
       this.setStructuredGraphLoading(false);
       return;
     }
     this.setStructuredGraphLoading(true);
+    let yielded = false;
+    // Hands the next stage to a fresh task (staged mode only); true when the caller must stop here.
+    const yieldToNextStage = () => {
+      if (!staged) return false;
+      yielded = true;
+      this._structuredBindingFrame = globalThis.setTimeout(() => {
+        this._structuredBindingFrame = 0;
+        this.bindStructuredGraphRenderer({ allowHidden, staged: true });
+      }, 0);
+      return true;
+    };
     try {
-      let editor = this._structuredEditor || createPortfolioEditor();
-      this._structuredEditor = editor;
-      this._graphSnapshotRuntime ||= createPortfolioGraphSnapshotRuntime(this, this.canvas, editor);
-      this._graphSnapshotRuntime.prepare();
-      this.graphController?.setStructuredEditor?.(editor);
-      setNodePositions(this.canvas, orderedPortfolioProjects);
-      this.canvas._layoutReleasedDom = false;
+      if (!this._bindStage) {
+        let editor = this._structuredEditor || createPortfolioEditor();
+        this._structuredEditor = editor;
+        this._graphSnapshotRuntime ||= createPortfolioGraphSnapshotRuntime(this, this.canvas, editor);
+        this._graphSnapshotRuntime.prepare();
+        this.graphController?.setStructuredEditor?.(editor);
+        this._bindStage = 1;
+        if (yieldToNextStage()) return;
+      }
+      if (this._bindStage < 2) {
+        setNodePositions(this.canvas, orderedPortfolioProjects);
+        this.canvas._layoutReleasedDom = false;
+        this._bindStage = 2;
+        if (yieldToNextStage()) return;
+      }
+      this._bindStage = 0;
       this._structuredBound = true;
       this._structuredBindingUrgent = false;
       this._structuredBindingAllowHidden = false;
@@ -3562,9 +3587,10 @@ class PortfolioGraphPanel extends HTMLElement {
     } catch (error) {
       this._graphSnapshotRuntime?.stop?.();
       this._structuredAdoptionPending = false;
+      this._bindStage = 0;
       throw error;
     } finally {
-      if (!this._structuredAdoptionPending) this.setStructuredGraphLoading(false);
+      if (!yielded && !this._structuredAdoptionPending) this.setStructuredGraphLoading(false);
     }
   }
 
@@ -3849,6 +3875,7 @@ class PortfolioGraphPanel extends HTMLElement {
       this.setStructuredGraphLoading(false);
       if (this.canvas?._layoutReleasedDom) {
         this._structuredBound = false;
+        this._bindStage = 0;
       }
     }
     portfolioRuntime.syncCanvas({ focus: true, focusScope: 'group' });
