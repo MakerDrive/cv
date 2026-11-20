@@ -1190,10 +1190,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const syncHeaderShowButton = (active = running || getChat()?.$?.isRunning === true) => {
     let button = /** @type {HTMLElement | null} */ (document.querySelector('.pulse-tour-button'));
     if (!button) return;
-    let locale = document.documentElement.lang || 'en';
-    let showAvailable = locale === 'ru';
-    button.hidden = !showAvailable;
-    if (!showAvailable) return;
+    button.hidden = false;
     let icon = button.querySelector('.material-symbols-outlined');
     let paused = active && getChat()?.$?.isPaused === true;
     if (icon) icon.textContent = active && !paused ? 'stop' : 'play_circle';
@@ -1671,7 +1668,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       return;
     }
     try {
-      const result = await runner.run(directives, { continuePhase: true });
+      const result = event.detail?.scroll === true
+        ? await runner.scroll(directives[0])
+        : await runner.run(directives, { continuePhase: true });
       if (getChat()?.$.isPaused === true) {
         void presenter?.cursor.returnHome();
       }

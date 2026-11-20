@@ -95,12 +95,6 @@ body:has(.pulse-screen) > header {
   display: inline-flex;
 }
 
-/* The Show is narrated in Russian only; keep the button out of other
-   locales from the first paint instead of hiding it after hydration. */
-html:not(:lang(ru)) .pulse-tour-button {
-  display: none;
-}
-
 /* Pressed before the Show runtime is ready: pulse until it starts. */
 .pulse-tour-button[aria-busy='true'] {
   animation: portfolio-skeleton-breathe 0.6s ease-in-out infinite alternate;

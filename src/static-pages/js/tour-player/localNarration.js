@@ -337,6 +337,10 @@ export function createCvShowNarrationController({
       source = browserSpeech?.available ? 'browser' : 'none';
       return browserSpeech?.speak?.(text, options) || false;
     },
+    /** Speech clock of the browser voice (null for recorded audio, which has caption tracks). */
+    clock() {
+      return activeSpeech === browserSpeech ? browserSpeech?.clock?.() ?? null : null;
+    },
     pause() {
       activeSpeech?.pause?.();
     },

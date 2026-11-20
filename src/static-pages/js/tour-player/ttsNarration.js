@@ -109,6 +109,7 @@ export function createTtsSpeechController({
     utterance.onstart = () => {
       if (!current()) return;
       state.sentenceStartedAt = now();
+      state.heldMs = 0;
       if (!state.started) { state.started = true; state.options.onStart?.(); }
       scheduleFor(state, state.index, state.sentenceStartedAt);
     };
@@ -158,7 +159,7 @@ export function createTtsSpeechController({
         plan: planCues(source, options.cues || [], { whole: !options.cues?.length }),
         pace: createPaceTracker({ initial: 1 / (Number(options.rate) > 0 ? Number(options.rate) : 1) }), index: 0, utterance: null, started: false,
         paused: false, pending: options.startPaused === true,
-        timers: new Set(), fired: new Set(), sentenceStartedAt: 0,
+        timers: new Set(), fired: new Set(), sentenceStartedAt: 0, heldMs: 0, pausedAt: 0,
       };
       if (!splitWords(source).length) { queueMicrotask(() => options.onEnd?.()); return true; }
       run = state;
@@ -170,6 +171,7 @@ export function createTtsSpeechController({
       const state = run;
       if (!state || state.paused) return;
       state.paused = true;
+      state.pausedAt = now();
       for (const t of state.timers) {
         if (!t.running) continue;
         clock.clear(t.id);
@@ -182,10 +184,26 @@ export function createTtsSpeechController({
       if (!state) return false;
       if (state.pending) { state.pending = false; speakSentence(state); return true; }
       state.paused = false;
+      if (state.pausedAt) state.heldMs += now() - state.pausedAt;
+      state.pausedAt = 0;
       for (const t of state.timers) t.start();
       synth?.resume?.();
       return true;
     },
     cancel,
+    /**
+     * The speech clock the presenter reads (words and position in estimated narration time), or null
+     * while nothing is being narrated. The position follows the real start of the current sentence.
+     */
+    clock() {
+      const state = run;
+      if (!state || state.plan.timing.sentences.length < 2) return null;
+      const { words, sentences } = state.plan.timing;
+      const span = sentences[Math.min(state.index, sentences.length - 1)];
+      const until = state.paused ? state.pausedAt : now();
+      const elapsed = state.started ? Math.max(0, until - state.sentenceStartedAt - state.heldMs) : 0;
+      const positionMs = Math.min(span.endMs + 120, span.startMs + elapsed / state.pace.scale);
+      return { words, positionMs, playing: !state.paused };
+    },
   });
 }
