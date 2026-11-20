@@ -162,6 +162,14 @@ export function createTtsSpeechController({
         timers: new Set(), fired: new Set(), sentenceStartedAt: 0, heldMs: 0, pausedAt: 0,
       };
       if (!splitWords(source).length) { queueMicrotask(() => options.onEnd?.()); return true; }
+      // Restoring a position (a link, a seek): start at the sentence holding it; the cues before it are skipped.
+      const startAt = Number(options.startAtMs) || 0;
+      if (startAt > 0) {
+        const { sentences } = state.plan.timing;
+        const index = sentences.findIndex((span) => startAt < span.endMs);
+        state.index = index < 0 ? sentences.length - 1 : index;
+        for (const item of state.plan.planned) if (item.sentence < state.index) state.fired.add(item);
+      }
       run = state;
       if (!state.pending) speakSentence(state);
       return true;

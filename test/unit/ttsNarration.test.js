@@ -166,3 +166,32 @@ test('without cues the text is spoken as one utterance', () => {
   assert.equal(env.spoken.length, 1);
   assert.equal(env.spoken[0].text, TEXT);
 });
+
+test('startAtMs resumes at the sentence holding the position and skips earlier cues', () => {
+  const env = fakeEnvironment();
+  const controller = createTtsSpeechController(env);
+  const fired = [];
+  const timing = estimateTiming(TEXT);
+  controller.speak(TEXT, {
+    startAtMs: timing.sentences[1].startMs + 10,
+    cues: [{ id: 'early', quote: 'hello there' }, { id: 'late', quote: 'third one' }],
+    onCue: (cue) => fired.push(cue.id),
+  });
+  assert.match(env.spoken.at(-1).text, /^This is the second sentence/);
+  assert.equal(controller.clock().positionMs, timing.sentences[1].startMs);
+  env.spoken.at(-1).onstart();
+  env.spoken.at(-1).onend();
+  env.spoken.at(-1).onstart();
+  env.advance(60_000);
+  assert.deepEqual(fired, ['late']);
+});
+
+test('a localized story carries estimated durations for the composition clock', async () => {
+  const { CV_SHOW_STORY } = await import('../../src/static-pages/data/cvShowPresentationProject.js');
+  const { CV_SHOW_LOCALE_EN } = await import('../../src/static-pages/data/showLocales/en.js');
+  const { createCvShowCompositionTimeline } = await import('../../src/static-pages/js/tour-player/compositionTime.js');
+  const story = localizeShowStory(CV_SHOW_STORY, 'en', CV_SHOW_LOCALE_EN);
+  const timeline = createCvShowCompositionTimeline(story);
+  assert.equal(timeline.segments.length, 30);
+  assert.ok(timeline.totalMs > 600_000 && timeline.totalMs < 4_000_000);
+});
