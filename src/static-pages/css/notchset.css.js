@@ -552,16 +552,46 @@ portfolio-workspace code-block .md-lead {
 
 /* Name — description lines in a row: the name is a bold mono label, the description follows it. */
 portfolio-workspace code-block .md-defs {
+  display: grid;
+  grid-template-columns: minmax(10ch, 30%) minmax(0, 1fr);
+  column-gap: var(--sn-step-8);
   margin-block: var(--sn-step-6);
   border-block-start: var(--notchset-rule-width) solid var(--pulse-text);
 }
 
-portfolio-workspace code-block .md-def {
-  display: grid;
-  grid-template-columns: minmax(10ch, 30%) minmax(0, 1fr);
-  gap: var(--sn-step-4) var(--sn-step-8);
+portfolio-workspace code-block .md-defs dt.md-def-name {
+  grid-column: 1;
+}
+
+portfolio-workspace code-block .md-defs dd.md-def-text {
+  grid-column: 2;
+}
+
+portfolio-workspace code-block .md-def-name,
+portfolio-workspace code-block .md-def-text {
   padding-block: var(--sn-step-4);
   border-block-end: var(--notchset-rule-width) solid var(--pulse-outline);
+}
+
+portfolio-workspace code-block dd.md-def-text {
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  portfolio-workspace code-block .md-defs {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+
+  portfolio-workspace code-block .md-defs dt.md-def-name,
+  portfolio-workspace code-block .md-defs dd.md-def-text {
+    grid-column: 1;
+  }
+
+  portfolio-workspace code-block .md-defs dt.md-def-name:not(:first-child) {
+    border-block-start: var(--notchset-rule-width) solid var(--pulse-outline);
+    padding-block-start: var(--sn-step-6);
+  }
 }
 
 portfolio-workspace code-block .md-def-name {

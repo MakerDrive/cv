@@ -67,12 +67,12 @@ export class ShowConsolePanel extends HTMLElement {
         <div class="sc-rows" data-sc="rows" role="log" aria-live="off"></div>
       </div>`;
     const q = (name) => this.querySelector(`[data-sc="${name}"]`);
-    this.$level = q('level');
-    this.$source = q('source');
-    this.$text = q('text');
+    this.$level = /** @type {HTMLSelectElement} */ (q('level'));
+    this.$source = /** @type {HTMLSelectElement} */ (q('source'));
+    this.$text = /** @type {HTMLInputElement} */ (q('text'));
     this.$rows = q('rows');
     this.$count = q('count');
-    this.$checks = q('checks');
+    this.$checks = /** @type {HTMLElement} */ (q('checks'));
     this.$level.value = 'info';
     for (const control of [this.$level, this.$source, this.$text]) {
       control.addEventListener('input', () => this.#schedule());

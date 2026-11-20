@@ -121,7 +121,7 @@ function legalBoundary(anchorMs, words, priorBoundaryMs, durationMs, entryId, ce
     startMs < boundaryMs && boundaryMs < endMs
   ));
   if (containingWord) boundaryMs = containingWord.startMs;
-  if (boundaryMs <= priorBoundaryMs || boundaryMs >= durationMs) {
+  if (boundaryMs < priorBoundaryMs || boundaryMs === 0 || boundaryMs >= durationMs) {
     fail(`non-increasing audio boundary for ${cellId}`, {
       entryId,
       cellId,
@@ -262,16 +262,23 @@ export function createCvShowAudioClipProject({
 
     let sourceInMs = 0;
     let priorDependency = [{ cellId: setup.id, barrier: 'settled' }];
-    for (const [index, group] of groups.entries()) {
+    let clipIndex = 0;
+    for (const group of groups) {
+      if (group.boundaryMs === sourceInMs) {
+        dependencyOverrides.set(group.scroll.id, priorDependency);
+        priorDependency = [{ cellId: group.attention.id, barrier: 'settled' }];
+        continue;
+      }
       const priorClip = audioClip(
         entryId,
         asset.id,
-        index,
+        clipIndex,
         sourceInMs,
         group.boundaryMs,
         priorDependency,
       );
       clips.push(priorClip);
+      clipIndex += 1;
       dependencyOverrides.set(group.scroll.id, [{ cellId: priorClip.id, barrier: 'ended' }]);
       priorDependency = [{ cellId: group.attention.id, barrier: 'settled' }];
       sourceInMs = group.boundaryMs;
@@ -279,7 +286,7 @@ export function createCvShowAudioClipProject({
     clips.push(audioClip(
       entryId,
       asset.id,
-      groups.length,
+      clipIndex,
       sourceInMs,
       asset.durationMs,
       priorDependency,

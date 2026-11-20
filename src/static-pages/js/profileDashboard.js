@@ -16,7 +16,7 @@ const pad = (value) => String(value).padStart(2, '0');
  * The visitor's day against the host's working hours: for each local hour 0..23 whether the host
  * works then, which hour is the current one, and the host's wall-clock time.
  * @param {{ nowMs: number, viewerOffsetMinutes: number, hostOffsetMinutes?: number,
- *   startHour?: number, endHour?: number }} options offsets are minutes east of UTC
+ *   startHour?: number, endHour?: number, flexStartHour?: number, flexEndHour?: number }} options offsets are minutes east of UTC
  * @returns {{ hours: Array<{ hour: number, working: boolean, flex: boolean, now: boolean }>, overlap: number,
  *   hostTime: string, viewerHour: number }}
  */
@@ -54,7 +54,7 @@ export function computeWorkingRuler({
  * What one picked hour of the visitor's day means for the host: both clock times and whether the
  * host is working then.
  * @param {{ hour: number, viewerOffsetMinutes: number, hostOffsetMinutes?: number,
- *   startHour?: number, endHour?: number }} options
+ *   startHour?: number, endHour?: number, flexStartHour?: number, flexEndHour?: number }} options
  * @returns {{ viewer: string, host: string, working: boolean, flex: boolean }}
  */
 export function rulerReadout({

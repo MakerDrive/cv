@@ -4257,7 +4257,9 @@ class PortfolioWorkspace extends HTMLElement {
       });
       return true;
     };
-    const tourButton = document.querySelector('.pulse-tour-button');
+    const tourButton = /** @type {HTMLButtonElement | null} */ (
+      document.querySelector('.pulse-tour-button')
+    );
     const onEarlyTourPress = (event) => {
       if (this._disposeTour) return;
       event.stopImmediatePropagation();

@@ -18,7 +18,7 @@ function cleanValue(value, depth = 0) {
   if (typeof value === 'string') return value.length > 240 ? `${value.slice(0, 240)}…` : value;
   if (depth >= 3) return String(value).slice(0, 80);
   if (Array.isArray(value)) return value.slice(0, 12).map((item) => cleanValue(item, depth + 1));
-  if (value instanceof Error) return { name: value.name, message: String(value.message).slice(0, 240), code: value.code };
+  if (value instanceof Error) return { name: value.name, message: String(value.message).slice(0, 240), code: 'code' in value ? value.code : undefined };
   if (typeof value === 'object') {
     const out = {};
     for (const key of Object.keys(value).slice(0, 24)) out[key] = cleanValue(value[key], depth + 1);
