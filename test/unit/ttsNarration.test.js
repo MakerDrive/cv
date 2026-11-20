@@ -373,3 +373,26 @@ test('a localized story carries estimated durations for the composition clock', 
   assert.equal(timeline.segments.length, 30);
   assert.ok(timeline.totalMs > 600_000 && timeline.totalMs < 4_000_000);
 });
+
+test('a restored position scrolls to where the last skipped cue left the page', async () => {
+  const { restoredScrollCue } = await import('../../src/static-pages/js/tour-player/ttsCues.js');
+  const cues = [
+    { id: 'a:scroll', quote: 'hello there', scroll: true, offsetMs: -500 },
+    { id: 'a', quote: 'hello there', offsetMs: -100 },
+    { id: 'b:scroll', quote: 'second sentence', scroll: true, offsetMs: -500 },
+    { id: 'c:scroll', quote: 'third one', scroll: true, offsetMs: -500 },
+  ];
+  const timing = estimateTiming(TEXT);
+  assert.equal(restoredScrollCue(TEXT, cues, 0), null);
+  assert.equal(restoredScrollCue(TEXT, cues, timing.sentences[1].startMs + 5)?.id, 'a:scroll');
+  assert.equal(restoredScrollCue(TEXT, cues, timing.sentences[2].startMs + 5)?.id, 'c:scroll');
+});
+
+test('a scroll whose lead reaches into the restart sentence is restored too', async () => {
+  const { restoredScrollCue } = await import('../../src/static-pages/js/tour-player/ttsCues.js');
+  const timing = estimateTiming(TEXT);
+  const cues = [{ id: 'near:scroll', quote: 'second sentence', scroll: true, offsetMs: -2500 }];
+  // The quote sits in sentence 1 (a few words in); with a 2.5 s lead it is due before sentence 1 starts.
+  assert.equal(restoredScrollCue(TEXT, cues, timing.sentences[1].startMs + 5)?.id, 'near:scroll');
+  assert.equal(restoredScrollCue(TEXT, cues, 10)?.id, undefined);
+});

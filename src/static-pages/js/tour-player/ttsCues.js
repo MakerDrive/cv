@@ -1,3 +1,4 @@
+import { planCues } from './ttsNarration.js';
 import { CV_SHOW_PRESENTATION_PROJECT, projectCvShowDirective } from '../../data/cvShowPresentationProject.js';
 
 const cueCells = new Map(CV_SHOW_PRESENTATION_PROJECT.cells
@@ -36,4 +37,25 @@ export function buildTimedCues(directives) {
     });
     return cues;
   });
+}
+
+/**
+ * Restoring a position skips the cues before it; the page must still stand where the narration left it.
+ * That is the scroll of the last skipped cue that has one.
+ * @param {string} speech narration of the entry
+ * @param {Array<any>} cues from buildTimedCues
+ * @param {number} positionMs restored position (estimated narration time)
+ */
+export function restoredScrollCue(speech, cues, positionMs) {
+  if (!(positionMs > 0)) return null;
+  const { timing, planned } = planCues(speech, cues);
+  const index = timing.sentences.findIndex((span) => positionMs < span.endMs);
+  const startSentence = index < 0 ? timing.sentences.length - 1 : index;
+  // The voice restarts at the sentence start; every scroll due by then (leads reach back from the quote) counts.
+  const restartMs = timing.sentences[startSentence].startMs;
+  const due = planned
+    .map((item) => ({ item, at: timing.sentences[item.sentence].startMs + item.offsetMs }))
+    .filter(({ item, at }) => /** @type {any} */ (item.cue).scroll && at <= restartMs + 50)
+    .sort((a, b) => a.at - b.at);
+  return due.length ? /** @type {any} */ (due.at(-1).item.cue) : null;
 }
