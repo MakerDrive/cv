@@ -9,7 +9,7 @@
  * `speech` is what the voice reads and what is shown as the caption unless `subtitle` differs (each defaults to the other); a quote must occur in `speech`.
  * A directive without a quote in the locale keeps no timing of its own and fires with the entry start.
  */
-import { findQuoteWord, splitWords } from './ttsTiming.js';
+import { estimateTiming, findQuoteWord, splitWords } from './ttsTiming.js';
 
 const directiveQuote = (directive) => String(directive?.timing?.quote || '');
 
@@ -42,13 +42,13 @@ const localizeEntry = (entry, text) => {
  * @param {{ scenes?: Record<string, any>, branches?: Record<string, any> }} locale
  */
 export function localizeShowStory(story, lang, locale) {
-  return {
-    ...story,
-    narrationLocale: lang,
-    scenes: story.scenes.map((scene) => localizeEntry(scene, locale.scenes?.[scene.id])),
-    branches: Object.fromEntries(Object.entries(story.branches || {})
-      .map(([id, branch]) => [id, localizeEntry(branch, locale.branches?.[id])])),
-  };
+  const scenes = story.scenes.map((scene) => localizeEntry(scene, locale.scenes?.[scene.id]));
+  const branches = Object.fromEntries(Object.entries(story.branches || {})
+    .map(([id, branch]) => [id, localizeEntry(branch, locale.branches?.[id])]));
+  // Without recorded audio the composition clock runs on the estimated length of each narration.
+  const durations = Object.fromEntries([...scenes, ...Object.entries(branches).map(([id, b]) => ({ ...b, id }))]
+    .map((entry) => [entry.id, Math.max(1_000, Math.round(estimateTiming(entry.speech).durationMs) + 600)]));
+  return { ...story, narrationLocale: lang, scenes, branches, durations };
 }
 
 /**

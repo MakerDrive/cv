@@ -640,11 +640,14 @@ export class PortfolioShowChat extends HTMLElement {
       clock.positionMs,
     );
     this.#showPlayer?.setState?.({
+      progress: { positionMs: this.#displayPositionMs() },
       caption: { speaker: this.$.inBranch ? this.#message('tour.details') : 'CV', ...caption },
     });
   }
 
   #presentationPositionMs(fallbackMs = this.#session.snapshot.playback.positionMs) {
+    const voiceClock = this.#browserVoiceClock();
+    if (voiceClock) return Math.max(0, voiceClock.positionMs);
     const projectPositionMs = Number(this.#alignedEntry?.runtime?.presentationPositionMs);
     if (Number.isFinite(projectPositionMs)) return Math.max(0, projectPositionMs);
     const legacyMediaPosition = Number(
@@ -2465,6 +2468,7 @@ export class PortfolioShowChat extends HTMLElement {
       startPaused: effectiveStartPaused,
       cues,
       onCue,
+      startAtMs: cues.length ? positionMs : 0,
       onStart: () => {
         if (cues.length) this.#startCaptionTicker();
         if (!this.#publishPhysicalStart(entry, requestId)) return;

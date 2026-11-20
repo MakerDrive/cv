@@ -30,9 +30,10 @@ export function playerTimeline(
 ) {
   // Generated durations are only the generated schedule's claim when the audio
   // release they were derived from is still the release the page plays.
-  const knownDurations = String(CV_SHOW_SCHEDULE_DURATIONS.releaseId) === String(CV_SHOW_WEB_AUDIO_RELEASE.releaseId)
+  const recordedDurations = String(CV_SHOW_SCHEDULE_DURATIONS.releaseId) === String(CV_SHOW_WEB_AUDIO_RELEASE.releaseId)
     ? CV_SHOW_SCHEDULE_DURATIONS.durations
     : {};
+  const knownDurations = story?.durations || recordedDurations;
   const entries = createCvShowPlaybackEntries(story, mode);
   const composition = createCvShowCompositionTimeline(story);
   const compositionStartMs = new Map(
