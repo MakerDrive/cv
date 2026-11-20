@@ -494,6 +494,33 @@ async function presentNavigationGesture(workspace, runtime, entryId, {
   return false;
 }
 
+/**
+ * Opens a collapsed desktop panel the way a person would: the claw clicks its expand button. Resolves to
+ * whether the panel is open afterwards; false lets the caller expand it programmatically instead.
+ * @param {any} layout
+ * @param {string} panelId
+ * @param {string} panelType
+ * @param {any} cursor presenter cursor
+ * @param {AbortSignal} [signal]
+ */
+async function expandPanelWithClaw(layout, panelId, panelType, cursor, signal) {
+  if (typeof cursor?.clickElement !== 'function' || isCvShowQuietRestoreActive()) return false;
+  const node = findPanelElement(layout, panelId, panelType);
+  const button = visibleElement(node?.querySelector?.('.collapse-btn'));
+  if (!node || !button || !node.hasAttribute('collapsed')) return false;
+  try {
+    await cursor.clickElement(button, { gestureId: `cv-show-expand:${panelId}` });
+  } catch (error) {
+    if (signal?.aborted || error?.name === 'AbortError') throw error;
+    return false;
+  }
+  const deadline = Date.now() + 700;
+  while (node.hasAttribute('collapsed') && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 40));
+  }
+  return !node.hasAttribute('collapsed');
+}
+
 function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
   const panelType = panelTypeForTarget(targetId, runtime, actionId);
   const surface = panelActionSurfaceForTarget(targetId);
@@ -558,7 +585,7 @@ function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
 
 export function createPanelActionAdapter(workspace, runtime, { prepareMedia = null, getCursor = () => null } = {}) {
   const inspect = ({ action }) => inspectTargetPanel(workspace, runtime, action.target, action.id);
-  const reveal = ({ action, inspected }) => {
+  const reveal = async ({ action, inspected, signal }) => {
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
     const agentDock = /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
     const railLayout = agentDock?.ref?.layout;
@@ -596,7 +623,10 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     if (innerChanged && inspected.mobile) {
       layout?.openDrawer?.(inspected.dock, inspected.panelId);
     } else if (innerChanged) {
-      setDesktopPanelCollapsed(layout, inspected.panelId, inspected.panelType, false);
+      // A person clicks the collapsed panel open; the claw does the same, and only if that cannot be
+      // done (no claw, quiet restore, no button) is the panel opened programmatically.
+      const opened = await expandPanelWithClaw(layout, inspected.panelId, inspected.panelType, getCursor(), signal);
+      if (!opened) setDesktopPanelCollapsed(layout, inspected.panelId, inspected.panelType, false);
     }
     // An authored navigation reveal opens (or keeps open) the start drawer:
     // cancel any stale deferred close so the reveal intent is never lost,
