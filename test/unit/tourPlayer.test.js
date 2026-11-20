@@ -1469,6 +1469,7 @@ test('detail admission rejects stale live media before branch or presentation mu
   )));
   let dock = null;
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -1614,7 +1615,7 @@ test('detail admission rejects stale live media before branch or presentation mu
 
   assert.equal(player.$.inBranch, false);
   assert.equal(player.$.isError, true);
-  assert.equal(player.$.errorText, 'The CV Show data could not be loaded.');
+  assert.equal(player.$.errorText, 'Не удалось загрузить данные CV Show.');
   assert.equal(player.$.statusText, player.$.errorText);
   assert.deepEqual(sessionCalls, beforeStaleDetail.sessionCalls);
   assert.equal(mountCalls, beforeStaleDetail.mountCalls);
@@ -7686,6 +7687,7 @@ test('the Show transport starts a three-rate speed toggle that narration and the
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -7752,7 +7754,7 @@ test('the Show transport starts a three-rate speed toggle that narration and the
   assert.equal(spoken.at(-1)?.rate, 1.5, 'narration starts at 1.5x');
   assert.equal(
     speedButton.getAttribute('aria-label'),
-    'Playback speed 1.5×',
+    'Скорость воспроизведения 1,5×',
     'the toggle announces the speed it plays at',
   );
   assert.equal(
@@ -7768,7 +7770,7 @@ test('the Show transport starts a three-rate speed toggle that narration and the
   // rescales immediately so the total shown time shrinks with the speed.
   speedButton.dispatchEvent(new window.Event('click'));
   assert.equal(speedButton.textContent, '2x');
-  assert.equal(speedButton.getAttribute('aria-label'), 'Playback speed 2×');
+  assert.equal(speedButton.getAttribute('aria-label'), 'Скорость воспроизведения 2×');
   const fastConfig = showPlayer.configs.at(-1);
   assert.equal(
     fastConfig.timeline.totalMs,
@@ -7785,7 +7787,7 @@ test('the Show transport starts a three-rate speed toggle that narration and the
   // displayed clock reads composition time again.
   speedButton.dispatchEvent(new window.Event('click'));
   assert.equal(speedButton.textContent, '1x');
-  assert.equal(speedButton.getAttribute('aria-label'), 'Playback speed 1×');
+  assert.equal(speedButton.getAttribute('aria-label'), 'Скорость воспроизведения 1×');
   showPlayer.configs.at(-1).controller.seek(1, 0);
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(spoken.at(-1)?.rate, 1, 'narration after the toggle plays at 1x');
