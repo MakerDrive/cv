@@ -255,6 +255,19 @@ html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header
   margin-inline-end: 0;
 }
 
+/* Subtitles break between words only: never inside a word, and never at a hyphen (a hyphenated word stays
+   whole and moves to the next line together). */
+html[data-portfolio-theme-mode] chat-show-player :is(.chat-show-caption-words, .chat-show-caption-text,
+  chat-show-caption-word-item, .chat-show-caption-word) {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+html[data-portfolio-theme-mode] chat-show-player :is(chat-show-caption-word-item, .chat-show-caption-word) {
+  white-space: nowrap;
+}
+
 /* Volume panels: hovering or focusing the music or effects switch slides a panel up over it, as wide
    as the button, with a vertical slider in the inverted player colours. */
 html[data-portfolio-theme-mode] chat-show-player .chat-show-header {
