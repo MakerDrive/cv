@@ -509,49 +509,120 @@ portfolio-workspace code-block .md-quote {
   font-style: normal;
 }
 
-/* Patterns written in plain markdown (see js/markdownPatterns.js). */
-portfolio-workspace code-block .md-segments {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  margin-block: var(--sn-step-6);
-  border: var(--notchset-rule-width) solid var(--pulse-text);
-  border-inline-end: 0;
-  border-block-end: 0;
+/* Update lists on project pages: the section title and subtitle follow the document headings, the
+   updates are plain rows with hairlines (no box per item, no tree-branch marker). */
+portfolio-workspace code-block .pulse-project-updates {
+  margin-block-start: var(--sn-step-12);
+  padding-block-start: 0;
+  border-block-start: 0;
 }
 
-portfolio-workspace code-block .md-segment {
-  display: flex;
-  align-items: center;
-  padding: var(--sn-step-4) var(--sn-step-6);
-  border-inline-end: var(--notchset-rule-width) solid var(--pulse-text);
-  border-block-end: var(--notchset-rule-width) solid var(--pulse-text);
+portfolio-workspace code-block h2.pulse-project-updates-heading {
+  counter-increment: notchset-section;
+  margin-block: var(--sn-step-12) var(--sn-step-8);
+  font-family: var(--sn-portfolio-font-display);
+  font-weight: var(--notchset-heading-weight);
+  font-stretch: var(--notchset-heading-width);
+  letter-spacing: var(--notchset-heading-tracking);
+  text-transform: uppercase;
+}
+
+portfolio-workspace code-block h2.pulse-project-updates-heading::before {
+  content: counter(notchset-section, decimal-leading-zero) ' /';
+  display: block;
+  margin-block-end: var(--sn-step-4);
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  font-stretch: normal;
+  font-weight: var(--notchset-control-weight);
+  letter-spacing: var(--notchset-legend-tracking);
+}
+
+portfolio-workspace code-block .pulse-project-updates-subheading {
+  margin-block: var(--sn-step-8) var(--sn-step-3);
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  font-weight: var(--notchset-control-weight);
+  letter-spacing: var(--notchset-legend-tracking);
+}
+
+portfolio-workspace code-block .pulse-project-updates-list {
+  gap: 0;
+  border-block-start: var(--notchset-rule-width) solid var(--pulse-text);
+}
+
+portfolio-workspace code-block .pulse-project-updates-item {
+  min-block-size: 0;
+  padding: 0;
+  border: 0;
+  border-block-end: var(--notchset-rule-width) solid var(--pulse-outline);
+  border-radius: 0;
+  background: transparent;
+}
+
+portfolio-workspace code-block .pulse-project-updates-item::before {
+  content: none;
+}
+
+portfolio-workspace code-block .pulse-project-updates-item:is(:hover, :focus-within) {
+  border-color: var(--pulse-outline);
+  background: color-mix(in srgb, var(--pulse-text) 4%, transparent);
+}
+
+portfolio-workspace code-block .pulse-project-update-link {
+  padding-block: var(--sn-step-5, var(--sn-step-4));
+  padding-inline: var(--sn-step-2);
+}
+
+portfolio-workspace code-block .pulse-project-update-meta {
   font-family: var(--sn-font-mono);
   font-size: var(--notchset-legend-size);
   letter-spacing: var(--notchset-legend-tracking);
-  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+/* Patterns written in plain markdown (see js/markdownPatterns.js). */
+portfolio-workspace code-block .md-segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sn-step-2) 0;
+  margin-block: var(--sn-step-6);
+  padding-block: var(--sn-step-4);
+  border-block: var(--notchset-rule-width) solid var(--pulse-text);
+}
+
+portfolio-workspace code-block .md-segment {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--sn-step-6);
+  border-inline-start: var(--notchset-rule-width) solid var(--pulse-outline);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+  line-height: 1.5;
   text-transform: uppercase;
 }
 
 portfolio-workspace code-block .md-segment:first-child {
-  background: var(--pulse-text);
-  color: var(--pulse-surface);
+  padding-inline-start: 0;
+  border-inline-start: 0;
+  font-weight: var(--notchset-heading-weight);
 }
 
 portfolio-workspace code-block .md-metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: var(--sn-step-6) var(--sn-step-8);
   margin-block: var(--sn-step-8);
-  border: var(--notchset-rule-width) solid var(--pulse-text);
-  border-inline-end: 0;
-  border-block-end: 0;
 }
 
 portfolio-workspace code-block .md-metric {
   display: grid;
   gap: var(--sn-step-2);
-  padding: var(--sn-step-6) var(--sn-step-8);
-  border-inline-end: var(--notchset-rule-width) solid var(--pulse-text);
-  border-block-end: var(--notchset-rule-width) solid var(--pulse-text);
+  padding-block-start: var(--sn-step-4);
+  border-block-start: var(--notchset-rule-width) solid var(--pulse-text);
 }
 
 portfolio-workspace code-block .md-metric-value {
