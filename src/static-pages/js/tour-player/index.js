@@ -1,6 +1,7 @@
 import { getShowLog } from '../show-log/index.js';
 import '../../../ui-components/client-only/tour-player/tour-player.js';
 import { createPresenterCursor } from 'symbiote-ui/chat/presenter-cursor.js';
+import { createCvShowSound } from './showSound.js';
 import {
   ShowAttentionController,
   ShowAudioArbiter,
@@ -846,6 +847,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   let showLayoutPlayer = null;
   let showLayoutButton = null;
   let presenterRigButton = null;
+  let soundButton = null;
+  let musicButton = null;
+  let subtitlesButton = null;
 
   const isMobileDock = () => (
     typeof window !== 'undefined' && window.innerWidth <= PORTFOLIO_LAYOUT_RESPONSIVE_BREAKPOINT
@@ -941,6 +945,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     })) return;
     layout?.closeDrawer?.('start');
   };
+
+  const onSceneSound = () => { showSound.cue('scene'); showSound.nextSection(); };
 
   const onPlaybackEntryChange = (event) => {
     if (event.target !== getChat()) return;
@@ -1062,19 +1068,50 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const saveRigMask = (name) => {
     try { globalThis.localStorage?.setItem(RIG_MASK_KEY, name); } catch { /* optional */ }
   };
+  // Subtitles: the speech cloud of the presenter and the player's own caption.
+  const SUBTITLES_KEY = 'cvShowSubtitlesOff';
+  const readInitialSubtitles = () => {
+    const fromUrl = new URLSearchParams(globalThis.location?.search || '').get('showSubtitles');
+    if (fromUrl !== null) return fromUrl !== '0';
+    try { return globalThis.localStorage?.getItem(SUBTITLES_KEY) !== '1'; } catch { return true; }
+  };
+  let subtitlesOn = readInitialSubtitles();
+  const readSubtitles = () => subtitlesOn;
+  const applySubtitles = (on) => {
+    subtitlesOn = on;
+    document.documentElement.dataset.cvShowSubtitles = on ? 'on' : 'off';
+    try { globalThis.localStorage?.setItem(SUBTITLES_KEY, on ? '0' : '1'); } catch { /* optional */ }
+    presenter?.cursor.setSubtitles?.(on);
+  };
   const isPresenterRigOn = () => (
     new URLSearchParams(globalThis.location?.search || '').get('showRig') !== 'hose'
   );
+  // Techno bed and accent sounds; they play while the narration clock runs.
+  const showSound = createCvShowSound({
+    // The bed follows the show, not the narration clock: the clock stops for a
+    // moment between sections, and the music must not drop out there.
+    isPlaying: () => {
+      const state = getChat()?.$;
+      return state?.isRunning === true && state.isPaused !== true;
+    },
+  });
+  const RIG_CUES = { 'start-event': 'arm-out', 'retire-arm': 'arm-in' };
   const presenterRigOptions = () => (
     isPresenterRigOn() && !isMobileDock()
       ? {
           avatarSrc: new URL('avatar/index.webp', document.baseURI).href,
-          onTrace: (type, data) => getShowLog()[type === 'state' ? 'debug' : 'info']('rig', type, data),
+          onTrace: (type, data) => {
+            getShowLog()[type === 'state' ? 'debug' : 'info']('rig', type, data);
+            if (RIG_CUES[type]) showSound.cue(RIG_CUES[type], { pan: data?.arm === 0 ? -0.6 : 0.6 });
+          },
           // The mouth follows the narration clock, not the coarse caption highlight.
           speechClock: () => getChat()?.getSpeechClock?.() || null,
           // The face mask: `?showMask=astro|walle|bot`, else the one picked last
           // (a double click on the presenter tries the next face).
           mask: readRigMask(),
+          // The cloud hides on pause and follows the subtitles switch.
+          isPaused: () => getChat()?.$?.isPaused === true,
+          subtitles: readSubtitles(),
           onMaskChange: saveRigMask,
         }
       : null
@@ -1110,6 +1147,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         return anchor;
       },
     });
+    // The newest overlay is this session's cursor (an older one may still be fading out).
+    showSound.watchOverlay([...document.querySelectorAll('.symbiote-presenter-cursor')].pop() || null);
     const attention = new ShowAttentionController({
       cursor,
       resolveTarget: (target) => target,
@@ -1135,7 +1174,10 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         { cursor, signal },
       ),
       isQuietRestore: isCvShowQuietRestoreActive,
-      emit: (directive) => getChat()?.emitShowDirective?.(directive),
+      emit: (directive) => {
+        showSound.directive(directive);
+        getChat()?.emitShowDirective?.(directive);
+      },
       actionAdapter: createPanelActionAdapter(workspace, runtime, {
         prepareMedia: (targetId, options) => (
           resolveShowMedia(targetId)?.prepareShowMedia?.(options)
@@ -1502,6 +1544,9 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         showLayoutObserver?.disconnect();
         showLayoutButton?.remove();
         presenterRigButton?.remove();
+        soundButton?.remove();
+        musicButton?.remove();
+        subtitlesButton?.remove();
         showLayoutPlayer = player;
       }
       showLayoutButton = header.querySelector('[data-cv-show-expand]') || document.createElement('button');
@@ -1545,6 +1590,31 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       };
       if (!presenterRigButton.isConnected) header.insertBefore(presenterRigButton,
         header.querySelector('[data-header-action="settings"]'));
+      // Two switches, remembered: the techno bed (off by default) and the action sounds.
+      const soundSwitch = (current, attr, key, icons, isOn, toggle) => {
+        const button = current || header.querySelector(`[${attr}]`) || document.createElement('button');
+        button.type = 'button';
+        button.className = 'chat-show-header-action material-symbols-outlined';
+        button.setAttribute(attr, '');
+        const sync = () => {
+          const label = getLocaleMessage(key);
+          button.textContent = isOn() ? icons[0] : icons[1];
+          button.setAttribute('aria-label', label);
+          button.title = label;
+          button.setAttribute('aria-pressed', String(isOn()));
+        };
+        button.onclick = () => { toggle(); sync(); };
+        sync();
+        if (!button.isConnected) header.insertBefore(button, header.querySelector('[data-header-action="settings"]'));
+        return button;
+      };
+      musicButton = soundSwitch(musicButton, 'data-cv-show-music', 'tour.music', ['music_note', 'music_off'],
+        () => showSound.isMusic(), () => showSound.toggleMusic());
+      subtitlesButton = soundSwitch(subtitlesButton, 'data-cv-show-subtitle-toggle', 'tour.subtitles', ['subtitles', 'subtitles_off'],
+        () => readSubtitles(), () => applySubtitles(!readSubtitles()));
+      document.documentElement.dataset.cvShowSubtitles = readSubtitles() ? 'on' : 'off';
+      soundButton = soundSwitch(soundButton, 'data-cv-show-sound', 'tour.sound', ['volume_up', 'volume_off'],
+        () => showSound.isSounds(), () => showSound.toggleSounds());
     });
   };
 
@@ -1931,9 +2001,14 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     showLayoutObserver?.disconnect();
     showLayoutButton?.remove();
     presenterRigButton?.remove();
+    soundButton?.remove();
+    musicButton?.remove();
+    subtitlesButton?.remove();
+    showSound.dispose();
     workspace.removeEventListener('portfolio-show-seek', onSeek);
     workspace.removeEventListener('portfolio-show-route-change', onRouteChange);
     workspace.removeEventListener('portfolio-show-route-change', onPlaybackEntryChange);
+    workspace.removeEventListener('portfolio-show-route-change', onSceneSound);
     workspace.removeEventListener('portfolio-show-section-link-request', onSectionLinkRequest);
     document.removeEventListener('portfolio-show-pause', pausePresenter, { capture: true });
     document.removeEventListener('portfolio-show-resume', resumePresenter, { capture: true });
