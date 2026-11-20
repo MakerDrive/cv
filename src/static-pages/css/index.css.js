@@ -770,6 +770,63 @@ body > footer a {
   }
 }
 
+/* Group filter above the preview grid, in the Notchset manner: cells in one frame with shared
+   dividers, a count after each label, the pressed cell inverted. */
+.project-preview-filters {
+  display: flex;
+  flex-wrap: wrap;
+  margin: var(--sn-step-8) 0 0;
+  border: var(--notchset-rule-width) solid var(--pulse-outline);
+  border-inline-end: 0;
+  border-block-end: 0;
+}
+
+.project-preview-filter {
+  flex: 1 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sn-step-4);
+  min-block-size: var(--notchset-field-height);
+  padding-inline: var(--sn-step-8);
+  border: 0;
+  border-inline-end: var(--notchset-rule-width) solid var(--pulse-outline);
+  border-block-end: var(--notchset-rule-width) solid var(--pulse-outline);
+  border-radius: 0;
+  background: transparent;
+  color: var(--pulse-text-dim);
+  cursor: pointer;
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  font-weight: var(--notchset-control-weight);
+  letter-spacing: var(--notchset-legend-tracking);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.project-preview-filter:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, var(--pulse-text) 6%, transparent);
+  color: var(--pulse-text);
+}
+
+.project-preview-filter[aria-pressed='true'] {
+  background: var(--pulse-text);
+  color: var(--pulse-surface);
+}
+
+.project-preview-filter-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.project-preview-filters + .project-preview-grid {
+  margin-block-start: var(--sn-step-8);
+}
+
+.project-preview-card[hidden] {
+  display: none;
+}
+
 /* Project preview grid (Projects overview). Compact on purpose: the whole set
    fits the viewer so the CV Show can frame it in one piece. */
 .project-preview-grid {

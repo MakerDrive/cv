@@ -333,6 +333,91 @@ portfolio-workspace code-block .md-link:is(:hover, :focus-visible, :active) {
   background-size: 100% var(--notchset-rule-width), 100% var(--notchset-rule-width);
 }
 
+/* Markdown, in the manner of the Notchset reference: a quiet chip for inline code, a framed code
+   block with a header (language and copy), a framed quote instead of a tinted one, and small
+   square markers on lists. */
+portfolio-workspace code-block .md-inline-code {
+  padding: 2px 6px;
+  border: var(--notchset-rule-width) solid var(--pulse-outline);
+  border-radius: var(--notchset-square);
+  background: color-mix(in srgb, var(--pulse-text) 5%, transparent);
+  font-family: var(--sn-font-mono);
+  font-size: 0.86em;
+  color: var(--pulse-text);
+}
+
+portfolio-workspace code-block .notchset-code {
+  margin-block: var(--sn-step-8);
+  border: var(--notchset-rule-width) solid var(--sn-layout-border);
+  border-radius: var(--notchset-square);
+}
+
+portfolio-workspace code-block .notchset-code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: var(--notchset-field-height);
+  padding-inline: var(--sn-step-6) 0;
+  border-block-end: var(--notchset-rule-width) solid var(--sn-layout-border);
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+  text-transform: uppercase;
+}
+
+portfolio-workspace code-block .notchset-code-copy {
+  align-self: stretch;
+  inline-size: var(--notchset-field-height);
+  border: 0;
+  border-inline-start: var(--notchset-rule-width) solid var(--sn-layout-border);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+portfolio-workspace code-block .notchset-code-copy:is(:hover, :focus-visible) {
+  background: var(--pulse-text);
+  color: var(--pulse-surface);
+}
+
+portfolio-workspace code-block .notchset-code > .md-code-block {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--pulse-text) 4%, transparent);
+  font-family: var(--sn-font-mono);
+  font-size: 13px;
+}
+
+portfolio-workspace code-block .md-code-block code {
+  padding: 0;
+  background: transparent;
+  color: var(--pulse-text);
+}
+
+portfolio-workspace code-block .md-code-block:not(.notchset-code > .md-code-block) {
+  border-radius: var(--notchset-square);
+  font-family: var(--sn-font-mono);
+}
+
+portfolio-workspace code-block .md-quote {
+  border: var(--notchset-rule-width) solid var(--sn-layout-border);
+  border-inline-start: var(--notchset-focus-stroke) solid var(--pulse-text);
+  border-radius: 0;
+  background: transparent;
+  font-style: normal;
+}
+
+portfolio-workspace code-block .md-list li::marker {
+  color: var(--pulse-text-dim);
+}
+
+portfolio-workspace code-block .md-list li {
+  margin-block: var(--sn-step-2);
+}
+
 
 .pulse-locale-toggle {
   position: relative;

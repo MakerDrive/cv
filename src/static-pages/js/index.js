@@ -57,6 +57,7 @@ import {
   renderProjectUpdates,
 } from './feedPresentation.js';
 import {
+  applyProjectPreviewFilter,
   renderProjectPreviewGrid,
 } from './projectPreviewGrid.js';
 import {
@@ -2663,8 +2664,21 @@ const portfolioRuntime = {
           order: PROJECT_PREVIEW_ORDER,
           hrefBuilder: (slug) => getPortfolioEntryHref(`projects/${slug}`),
           imageUrlBuilder: (slug) => `${getPortfolioBasePath()}social-cards/projects-${slug}.png`,
+          allLabel: tPortfolio('direction.filterAll'),
+          filters: PORTFOLIO_DIRECTIONS.map((direction) => ({
+            id: direction.slug,
+            label: tPortfolio(direction.labelKey),
+            slugs: [...direction.projectSlugs],
+          })),
         });
-        host.onclick = handleInAppNavigation;
+        host.onclick = (event) => {
+          const filter = event.target.closest?.('[data-preview-filter]');
+          if (filter) {
+            applyProjectPreviewFilter(host, filter.dataset.previewFilter);
+            return;
+          }
+          handleInAppNavigation(event);
+        };
       } else if (slotKey === 'project-updates') {
         host.innerHTML = renderProjectUpdates(PUBLICATIONS, entry.id, locale, {
           hrefBuilder: resolvePublicationHref,
@@ -4301,3 +4315,42 @@ customElements.define('portfolio-graph-panel', PortfolioGraphPanel);
 customElements.define('portfolio-viewer-panel', PortfolioViewerPanel);
 customElements.define('portfolio-theme-panel', PortfolioThemePanel);
 customElements.define('portfolio-workspace', PortfolioWorkspace);
+
+// Markdown code blocks get a Notchset frame: a header with the language and a copy button.
+{
+  const wrapCodeBlocks = () => {
+    for (const pre of document.querySelectorAll('pre.md-code-block:not([data-notchset-code])')) {
+      pre.dataset.notchsetCode = '';
+      const frame = document.createElement('div');
+      frame.className = 'notchset-code';
+      const head = document.createElement('div');
+      head.className = 'notchset-code-head';
+      const language = /language-([\w-]+)/.exec(pre.querySelector('code')?.className || '')?.[1] || 'code';
+      const label = document.createElement('span');
+      label.textContent = language;
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'notchset-code-copy material-symbols-outlined';
+      copy.textContent = 'content_copy';
+      copy.setAttribute('aria-label', 'Copy');
+      copy.title = 'Copy';
+      copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(pre.textContent || '');
+          copy.textContent = 'check';
+          setTimeout(() => { copy.textContent = 'content_copy'; }, 1400);
+        } catch { /* clipboard unavailable */ }
+      });
+      head.append(label, copy);
+      pre.replaceWith(frame);
+      frame.append(head, pre);
+    }
+  };
+  let pending = false;
+  new MutationObserver(() => {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => { pending = false; wrapCodeBlocks(); });
+  }).observe(document.body, { childList: true, subtree: true });
+  wrapCodeBlocks();
+}

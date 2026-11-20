@@ -165,12 +165,99 @@ html[data-portfolio-theme-mode] chat-show-player .chat-show-header > :is(.chat-s
   display: none;
 }
 
-html[data-portfolio-theme-mode] chat-show-player .chat-show-header {
-  justify-content: flex-end;
+/* One spacing for the player in every layout (narrow dock and wide panel): the same padding and
+   row gap, rows of progress, words and transport, with the transport pinned to the bottom edge
+   and the words taking the spare height in between. Hidden panels leave no tracks behind. */
+html[data-portfolio-theme-mode] chat-show-player,
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] {
+  padding: var(--sn-space-sm, 8px);
+  gap: var(--sn-space-sm, 8px);
+  grid-template-rows: auto auto 1fr auto;
+  grid-auto-rows: auto;
 }
 
-html[data-portfolio-theme-mode] chat-show-player .chat-show-header > .chat-show-header-action {
+html[data-portfolio-theme-mode] chat-show-player .chat-show-header {
+  grid-row: 1;
+}
+
+html[data-portfolio-theme-mode] chat-show-player .chat-show-progress {
+  grid-row: 2;
+}
+
+html[data-portfolio-theme-mode] chat-show-player .chat-show-caption {
+  grid-row: 3;
+  grid-column: 1 / -1;
+}
+
+html[data-portfolio-theme-mode] chat-show-player .chat-show-controls {
+  grid-row: 4;
+}
+
+/* Narrow dock: the header actions are one Notchset toolbar, icon buttons joined in a single
+   frame with shared dividers, as wide as the progress bar below. */
+html[data-portfolio-theme-mode] chat-show-player:not([panel-layout]) .chat-show-header {
+  gap: 0;
+  border: var(--notchset-rule-width) solid var(--sn-layout-border);
+}
+
+html[data-portfolio-theme-mode] chat-show-player:not([panel-layout]) .chat-show-header > .chat-show-header-action {
+  flex: 1 1 0;
+  inline-size: auto;
+  min-inline-size: 0;
+  border: 0;
+  border-inline-start: var(--notchset-rule-width) solid var(--sn-layout-border);
+  border-radius: 0;
+}
+
+html[data-portfolio-theme-mode] chat-show-player:not([panel-layout]) .chat-show-header > .chat-show-header-action[data-cv-show-action] {
+  border-inline-start: 0;
+}
+
+/* Wide panel: the library hides the player's header, which left the toggles unreachable. They
+   come back in the transport row as three groups: what is shown on the left (link, presenter,
+   subtitles), the transport in the centre, the sound on the right (music, effects). Expand and
+   close are already in the panel header. */
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header {
+  display: flex;
+  grid-row: 4;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 0;
+  pointer-events: none;
+}
+
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header > :is(
+  .chat-show-icon, .chat-show-title, .chat-show-header-action[data-cv-show-expand],
+  .chat-show-header-action[data-header-action]) {
+  display: none;
+}
+
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header > .chat-show-header-action {
   flex: 0 0 auto;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+  margin-inline-end: calc(-1 * var(--notchset-rule-width));
+}
+
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header > [data-cv-show-action] { order: 1; }
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header > [data-cv-show-rig] { order: 2; }
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header > [data-cv-show-subtitle-toggle] {
+  order: 3;
+  margin-inline-end: 0;
+}
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header > [data-cv-show-music] {
+  order: 4;
+  margin-inline-start: auto;
+}
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header > [data-cv-show-sound] {
+  order: 5;
+  margin-inline-end: 0;
+}
+
+html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-controls {
+  grid-row: 4;
+  grid-column: 1 / -1;
 }
 
 /* The player's settings menu only repeated the expand action, which has its
