@@ -391,6 +391,9 @@ export class PortfolioShowChat extends HTMLElement {
   /** @type {ReturnType<typeof globalThis.setTimeout> | null} */
   #sectionLinkFeedbackTimer = null;
   #playbackRate = CV_SHOW_DEFAULT_PLAYBACK_RATE;
+  // Set once the listener picks a speed themselves: from then on no default overrides it.
+  #playbackRateChosen = false;
+  #noVoiceReported = false;
 
   constructor() {
     super();
@@ -1207,6 +1210,7 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   #togglePlaybackRate() {
+    this.#playbackRateChosen = true;
     const rates = CV_SHOW_PLAYBACK_RATE_CYCLE;
     const at = rates.indexOf(this.#playbackRate);
     this.#setPlaybackRate(rates[(at + 1) % rates.length] ?? CV_SHOW_DEFAULT_PLAYBACK_RATE);
@@ -1523,6 +1527,14 @@ export class PortfolioShowChat extends HTMLElement {
   async #prepareNarrationResources() {
     this.#narrationReady = this.#speech.prepare(this.#story).then((snapshot) => {
       this.dataset.narrationSource = snapshot.source;
+      // The generative (browser) voice of the languages without recorded audio is already quick and natural
+      // at its own pace: it starts at 1x, while the recorded narration keeps its 1.5x. A speed the listener
+      // picked is never overridden. (The Russian browser fallback keeps the recorded default.)
+      if (!this.#playbackRateChosen) {
+        const generative = snapshot.source === 'browser' && this.#story?.narrationLocale !== 'ru';
+        const wanted = generative ? CV_SHOW_PLAYBACK_RATE_NORMAL : CV_SHOW_DEFAULT_PLAYBACK_RATE;
+        if (wanted !== this.#playbackRate) this.#setPlaybackRate(wanted);
+      }
       return snapshot;
     });
     this.#alignmentReady = this.#narrationReady.then(async (snapshot) => {
@@ -2450,7 +2462,10 @@ export class PortfolioShowChat extends HTMLElement {
   } = {}) {
     if (!this.#speech.available) {
       this.pauseShow('narration-unavailable');
-      this.#appendSystemMessage(this.#message('tour.unavailable'));
+      // Only Russian has recorded narration: for another language the way out is to switch to it.
+      this.#appendSystemMessage(this.#message(
+        this.#story?.narrationLocale === 'ru' ? 'tour.unavailable' : 'tour.unavailable.switch',
+      ));
       return;
     }
     // Clear any previous seek failure so a retry attempt doesn't see stale state.
@@ -2509,6 +2524,16 @@ export class PortfolioShowChat extends HTMLElement {
       this.#activeSpeechEntry = null;
       if (activeToken) this.#audioArbiter?.release?.(activeToken);
     };
+    // A browser without a voice for the language is told once, in the chat, with the way out.
+    if (
+      !this.#noVoiceReported
+      && this.#story?.narrationLocale !== 'ru'
+      && this.#speech.snapshot.source === 'browser'
+      && this.#speech.hasVoice?.(this.#story.narrationLocale) === false
+    ) {
+      this.#noVoiceReported = true;
+      this.#appendSystemMessage(this.#message('tour.noVoice'));
+    }
     const startedInBranch = this.$.inBranch;
     const started = this.#speech.speak(entry.speech, {
       id: entry.id,
