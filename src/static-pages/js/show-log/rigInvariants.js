@@ -33,7 +33,7 @@ const inside = (point, rect, margin = 0) => point.x >= rect.left - margin && poi
 
 /**
  * @param {Array<{ at: number, source: string, type: string, data: any }>} entries
- * @returns {Array<{ rule: string, at: number, detail: Record<string, unknown> }>}
+ * @returns {Array<{ rule: string, at: number, until?: number, detail: Record<string, unknown> }>}
  */
 export function checkRigTrace(entries, limits = RIG_INVARIANTS) {
   const violations = [];

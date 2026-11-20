@@ -20,9 +20,10 @@ function requireBuilder(options, name) {
  * first, in that order (the CV Show story order), followed by every other
  * project in its catalog order. A slug in `order` that has no project is
  * ignored rather than rendered as a broken card.
- * @param {Array<{ slug: string }>} projects
- * @param {string[]} order
- * @returns {Array<{ slug: string }>}
+ * @template {{ slug: string }} T
+ * @param {T[]} projects
+ * @param {readonly string[]} order
+ * @returns {T[]}
  */
 export function orderProjectsForPreview(projects, order = []) {
   const bySlug = new Map(projects.map((project) => [project.slug, project]));
@@ -45,7 +46,7 @@ export function orderProjectsForPreview(projects, order = []) {
  * @param {{
  *   hrefBuilder: (slug: string) => string,
  *   imageUrlBuilder: (slug: string) => string,
- *   order?: string[],
+ *   order?: readonly string[],
  *   filters?: Array<{ id: string, label: string, slugs: string[] }>,
  *   allLabel?: string,
  * }} options
@@ -78,10 +79,10 @@ export function renderProjectPreviewGrid(projects, options) {
  * @param {string} id group id, or '' for every project
  */
 export function applyProjectPreviewFilter(host, id) {
-  for (const button of host.querySelectorAll('[data-preview-filter]')) {
+  for (const button of /** @type {NodeListOf<HTMLElement>} */ (host.querySelectorAll('[data-preview-filter]'))) {
     button.setAttribute('aria-pressed', String(button.dataset.previewFilter === id));
   }
-  for (const card of host.querySelectorAll('.project-preview-card')) {
+  for (const card of /** @type {NodeListOf<HTMLElement>} */ (host.querySelectorAll('.project-preview-card'))) {
     const groups = (card.dataset.groups || '').split(' ');
     card.hidden = Boolean(id) && !groups.includes(id);
   }

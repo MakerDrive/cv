@@ -26,6 +26,19 @@ test('a list of **value** label items becomes metric cells, a mixed list stays a
   assert.equal(root.querySelectorAll('ul.md-list').length, 1);
 });
 
+test('metric labels preserve links and inline formatting', () => {
+  const root = render([
+    '<ul class="md-list"><li><strong>15+</strong> ',
+    '<a href="/projects/">projects</a> in <em>production</em></li></ul>',
+  ].join(''));
+  const label = root.querySelector('.md-metric-label');
+  const link = root.querySelector('.md-metric-label a');
+  assert.equal(label?.textContent, 'projects in production');
+  assert.equal(link?.getAttribute('href'), '/projects/');
+  assert.equal(link?.textContent, 'projects');
+  assert.equal(label?.querySelector('em')?.textContent, 'production');
+});
+
 test('GitHub alert syntax becomes a callout with the marker removed', () => {
   const root = render('<blockquote class="md-quote">[!WARNING] Back up <strong>first</strong>.</blockquote><blockquote class="md-quote">plain quote</blockquote>');
   const callout = root.querySelector('.md-callout');
@@ -79,8 +92,25 @@ test('a list of links becomes link rows, a paragraph of one link becomes a call 
 
 test('consecutive "Name — description" paragraphs become definition rows, a single one stays prose', () => {
   const root = render('<p class="md-p">Lifecycle Messaging Platform — Платформа сообщений с API и очередями.</p><p class="md-p">PhotoPizza Remote — Управление поворотным столом из браузера.</p><p class="md-p">A sentence without the pattern.</p><p class="md-p">Alone — one line of prose that happens to have a dash in it here.</p>');
-  const rows = [...root.querySelectorAll('.md-def')].map((row) => [row.querySelector('.md-def-name').textContent, row.querySelector('.md-def-text').textContent]);
+  const rows = [...root.querySelectorAll('.md-defs dt')].map((term) => [
+    term.textContent,
+    term.nextElementSibling.textContent,
+  ]);
   assert.equal(rows.length, 2);
   assert.equal(rows[0][0], 'Lifecycle Messaging Platform');
   assert.equal(root.querySelectorAll('p.md-p').length, 2);
+  assert.equal(root.querySelectorAll('.md-defs dt').length, 2);
+  assert.equal(root.querySelectorAll('.md-defs dd').length, 2);
+});
+
+test('definition rows after a title stay grouped and are not marked as a lead', () => {
+  const root = render([
+    '<h1 class="md-h">Projects</h1>',
+    '<p class="md-p">First project — A sufficiently long project description '
+      + 'that exceeds the minimum lead length.</p>',
+    '<p class="md-p">Second project — Another sufficiently long project '
+      + 'description for the definition list.</p>',
+  ].join(''));
+  assert.equal(root.querySelectorAll('.md-lead').length, 0);
+  assert.equal(root.querySelectorAll('.md-defs dt').length, 2);
 });

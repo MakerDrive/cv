@@ -22,6 +22,7 @@ const MAX_SEGMENT_CHARS = 90;
 const MAX_SEGMENT_PARAGRAPH_CHARS = 280;
 const METRIC_VALUE = /^[~≈<>+\-]?\d[\d\s.,]*[+%×xхkKмМ]?\p{L}{0,3}[+%]?$/u;
 const PERIOD = /^(?:\d{4}(?:\s?[–—-]\s?(?:\d{4}|\p{L}+\.?))?|\d{1,2}\s+\p{L}+\s+\d{4}(?:\s*г\.)?|\p{L}+\s+\d{4})$/u;
+const DEFINITION = /^([^—\n]{3,70}?) — (.{10,})$/;
 const LEAD_MIN_CHARS = 60;
 const CALLOUT = /^\[!(NOTE|TIP|WARNING|IMPORTANT|STATUS)\]\s*/i;
 const TASK = /^\[( |x|X)\]\s+/;
@@ -60,15 +61,26 @@ function transformMetrics(root) {
       if (!first || first.tagName !== 'STRONG' || item.firstChild !== first) return null;
       const value = (first.textContent || '').trim();
       if (!METRIC_VALUE.test(value)) return null;
-      const label = (item.textContent || '').slice((first.textContent || '').length).replace(/^[\s:—–-]+/, '').trim();
-      return label ? { value, label } : null;
+      const label = [...item.childNodes].filter((node) => node !== first);
+      const labelText = label.map((node) => node.textContent || '').join('')
+        .replace(/^[\s:—–-]+/, '').trim();
+      return labelText ? { value, label, labelText } : null;
     });
     if (!items.length || cells.some((cell) => !cell)) continue;
     const grid = create(doc, 'div', 'md-metrics');
     grid.dataset.mdPattern = 'metrics';
     for (const cell of cells) {
       const metric = create(doc, 'div', 'md-metric');
-      metric.append(create(doc, 'span', 'md-metric-value', cell.value), create(doc, 'span', 'md-metric-label', cell.label));
+      const label = create(doc, 'span', 'md-metric-label');
+      label.append(...cell.label);
+      label.normalize();
+      if (label.firstChild?.nodeType === 3) {
+        label.firstChild.textContent = label.firstChild.textContent.replace(/^[\s:—–-]+/, '');
+      }
+      if (label.lastChild?.nodeType === 3) {
+        label.lastChild.textContent = label.lastChild.textContent.replace(/\s+$/, '');
+      }
+      metric.append(create(doc, 'span', 'md-metric-value', cell.value), label);
       grid.append(metric);
     }
     list.replaceWith(grid);
@@ -145,6 +157,9 @@ function transformHeader(root) {
   }
   let lead = (cells.length ? root.querySelector('.md-meta') : title).nextElementSibling;
   while (lead && lead.classList.contains('cb-content-slot')) lead = lead.nextElementSibling;
+  if (lead?.matches('p.md-p:not([data-md-pattern])')
+    && lead.nextElementSibling?.matches('p.md-p:not([data-md-pattern])')
+    && splitDefinition(lead) && splitDefinition(lead.nextElementSibling)) return;
   if (lead?.matches('p.md-p') && !lead.hasAttribute('data-md-pattern') && (lead.textContent || '').trim().length >= LEAD_MIN_CHARS) {
     lead.classList.add('md-lead');
     lead.dataset.mdPattern = 'lead';
@@ -161,55 +176,51 @@ function transformLinkLists(root) {
   }
 }
 
-const DEFINITION = /^([^—\n]{3,70}?) — (.{10,})$/;
+function splitDefinition(paragraph) {
+  const doc = paragraph.ownerDocument;
+  if (!DEFINITION.test((paragraph.textContent || '').trim())) return null;
+  const name = [];
+  const rest = [];
+  let seen = false;
+  for (const node of [...paragraph.childNodes]) {
+    if (seen) { rest.push(node); continue; }
+    const at = node.nodeType === 3 ? node.textContent.indexOf(' — ') : -1;
+    if (at === -1) { name.push(node); continue; }
+    seen = true;
+    if (node.textContent.slice(0, at)) name.push(doc.createTextNode(node.textContent.slice(0, at)));
+    rest.push(doc.createTextNode(node.textContent.slice(at + 3)));
+  }
+  if (!seen || !name.length) return null;
+  return { name, rest };
+}
 
 /**
  * Two or more consecutive paragraphs written as `Name — description` become definition rows: the name
  * in the first column, the description beside it. A single such line stays prose.
  */
 function transformDefinitions(root) {
-  const doc = root.ownerDocument;
-  // The name may carry inline formatting (a bold link): the nodes before the dash move into the name.
-  const split = (paragraph) => {
-    const text = (paragraph.textContent || '').trim();
-    if (!DEFINITION.test(text)) return null;
-    const name = [];
-    const rest = [];
-    let seen = false;
-    for (const node of [...paragraph.childNodes]) {
-      if (seen) { rest.push(node); continue; }
-      const at = node.nodeType === 3 ? node.textContent.indexOf(' — ') : -1;
-      if (at === -1) { name.push(node); continue; }
-      seen = true;
-      if (node.textContent.slice(0, at)) name.push(doc.createTextNode(node.textContent.slice(0, at)));
-      rest.push(doc.createTextNode(node.textContent.slice(at + 3)));
-    }
-    if (!seen || !name.length) return null;
-    return { name, rest };
-  };
+  let doc = root.ownerDocument;
   for (const paragraph of root.querySelectorAll('p.md-p:not([data-md-pattern])')) {
     if (paragraph.parentElement?.classList?.contains('md-defs')) continue;
-    if (!split(paragraph)) continue;
+    if (!splitDefinition(paragraph)) continue;
     const run = [paragraph];
     let next = paragraph.nextElementSibling;
-    while (next && next.matches('p.md-p') && !next.hasAttribute('data-md-pattern') && split(next)) {
+    while (next && next.matches('p.md-p') && !next.hasAttribute('data-md-pattern') && splitDefinition(next)) {
       run.push(next);
       next = next.nextElementSibling;
     }
     if (run.length < 2) continue;
-    const list = create(doc, 'div', 'md-defs');
-    list.dataset.mdPattern = 'definitions';
+    const definitions = create(doc, 'dl', 'md-defs');
+    definitions.dataset.mdPattern = 'definitions';
     for (const item of run) {
-      const { name, rest } = split(item);
-      const row = create(doc, 'div', 'md-def');
-      const nameCell = create(doc, 'span', 'md-def-name');
+      const { name, rest } = splitDefinition(item);
+      const nameCell = create(doc, 'dt', 'md-def-name');
       nameCell.append(...name);
-      const textCell = create(doc, 'span', 'md-def-text');
+      const textCell = create(doc, 'dd', 'md-def-text');
       textCell.append(...rest);
-      row.append(nameCell, textCell);
-      list.append(row);
+      definitions.append(nameCell, textCell);
     }
-    run[0].replaceWith(list);
+    run[0].replaceWith(definitions);
     for (const item of run.slice(1)) item.remove();
   }
 }
@@ -231,6 +242,7 @@ const FIGURE_KINDS = [
 ];
 
 /** A table, picture or code block sits in a figure with corner crosses and a label. */
+/** @param {Element} root @param {{ copyText?: (text: string) => Promise<unknown> }} [options] */
 function transformFigures(root, { copyText } = {}) {
   const doc = root.ownerDocument;
   for (const { selector, code } of FIGURE_KINDS) {
