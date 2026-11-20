@@ -203,15 +203,15 @@ test('older project entries expose visible work periods', () => {
   assert.equal(bySlug.get('f360-studio')?.order, 3.5);
 });
 
-test('CV Show case cards expose honest pending dates and maturity boundaries', () => {
+test('CV Show case cards omit unconfirmed periods and expose maturity boundaries', () => {
   const bySlug = new Map(loadProjectEntries().map((project) => [project.slug, project]));
   const maximo = bySlug.get('adaptive-maximo-workbench');
   const mobileSmm = bySlug.get('mobile-smm-platform');
 
-  assert.equal(maximo?.period, 'Date pending');
+  assert.equal(maximo?.period, '');
   assert.equal(maximo?.kicker, 'Demo / Alpha');
   assert.match(maximo?.details || '', /production Maximo system is separate integration work/);
-  assert.equal(mobileSmm?.period, 'Date pending');
+  assert.equal(mobileSmm?.period, '');
   assert.equal(mobileSmm?.kicker, 'Selected project');
   assert.match(mobileSmm?.details || '', /does not send content to an external service/);
   for (let locale of ['ru', 'es']) {

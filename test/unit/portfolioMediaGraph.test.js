@@ -98,16 +98,19 @@ const WEIGHTS = Object.freeze({
 
 const EXPECTED_CATALOG_IDS = Object.freeze({
   'adaptive-maximo-workbench': Object.freeze([
+    'media/adaptive-maximo-workbench/image/process-illustration',
     'media/adaptive-maximo-workbench/youtube/qsXmS4mFvYc',
     'media/adaptive-maximo-workbench/youtube/DUzUnbO2VVs',
   ]),
   megavisor: Object.freeze([
+    'media/megavisor/image/process-illustration',
     'media/megavisor/youtube/c3cCmDqO04c',
     'media/megavisor/youtube/f1cB4X1wI50',
     'media/megavisor/youtube/cFPJqtcWNSU',
     'media/megavisor/youtube/6CpdVcjtZoU',
   ]),
   photopizza: Object.freeze([
+    'media/photopizza/image/process-illustration',
     'media/photopizza/youtube/2lO2VsZFAz0',
     'media/photopizza/youtube/6CpdVcjtZoU',
     'media/photopizza/youtube/f1cB4X1wI50',
@@ -116,11 +119,14 @@ const EXPECTED_CATALOG_IDS = Object.freeze({
     'media/photopizza/ims/spinner',
   ]),
   complexscan: Object.freeze([
+    'media/complexscan/image/process-illustration',
     'media/complexscan/youtube/MHfWHxVSgn4',
     'media/complexscan/youtube/PFPoitVEWcE',
   ]),
-  'f360-studio': Object.freeze(['media/f360-studio/youtube/G32wNSEzl8s']),
+  'f360-studio': Object.freeze([
+    'media/f360-studio/image/process-illustration', 'media/f360-studio/youtube/G32wNSEzl8s']),
   'autobox-v1': Object.freeze([
+    'media/autobox-v1/image/process-illustration',
     'media/autobox-v1/ims/spinner',
     'media/autobox-v1/youtube/IPEY0yiVb-I',
     'media/autobox-v1/youtube/NWpMtNZjrzI',
@@ -132,9 +138,22 @@ const EXPECTED_CATALOG_IDS = Object.freeze({
     'media/autobox-v1/youtube/M0cHqy3cScc',
     'media/autobox-v1/youtube/o4XzMKW8a2E',
   ]),
-  'agent-portal': Object.freeze(['media/agent-portal/ims/gallery']),
-  boothbot: Object.freeze(['media/boothbot/ims/gallery']),
-  'symbiote-video-studio': Object.freeze(['media/symbiote-video-studio/image/interface']),
+  'agent-portal': Object.freeze([
+    'media/agent-portal/image/process-illustration', 'media/agent-portal/ims/gallery']),
+  boothbot: Object.freeze([
+    'media/boothbot/image/process-illustration', 'media/boothbot/ims/gallery']),
+  'symbiote-video-studio': Object.freeze([
+    'media/symbiote-video-studio/image/process-illustration', 'media/symbiote-video-studio/image/interface']),
+  'symbiote-ui': Object.freeze(['media/symbiote-ui/image/process-illustration']),
+  'symbiote-engine': Object.freeze(['media/symbiote-engine/image/process-illustration']),
+  'agent-pool-mcp': Object.freeze(['media/agent-pool-mcp/image/process-illustration']),
+  'project-graph-mcp': Object.freeze(['media/project-graph-mcp/image/process-illustration']),
+  'lifecycle-messaging-platform': Object.freeze(['media/lifecycle-messaging-platform/image/process-illustration']),
+  'mobile-smm-platform': Object.freeze(['media/mobile-smm-platform/image/process-illustration']),
+  'symbiote-workspace': Object.freeze([
+    'media/symbiote-workspace/image/configuration-illustration',
+    'media/symbiote-workspace/youtube/qsXmS4mFvYc',
+  ]),
 });
 
 function createBaseModel(slug = 'demo') {
@@ -235,12 +254,15 @@ test('catalog includes media owned by a canonical published Pulse article', () =
   assert.ok(publicationTargets.length > 0);
   assert.ok(publicationTargets.every(({ targetId }) => publishedPublicationIds.has(targetId)));
   assert.deepEqual(publicationTargets, [{
+    mediaId: 'media/autobox-v1/image/process-illustration',
+    targetId: 'pulse/autobox-v1-retrospective',
+  }, {
     mediaId: 'media/autobox-v1/ims/spinner',
     targetId: 'pulse/autobox-v1-retrospective',
   }]);
   assert.deepEqual(
     PORTFOLIO_MEDIA_CATALOG.find((item) => item.id === 'media/autobox-v1/ims/spinner')?.targetIds,
-    ['pulse/autobox-v1-retrospective', 'projects/autobox-v1'],
+    ['projects/autobox-v1', 'pulse/autobox-v1-retrospective'],
   );
 });
 
@@ -502,7 +524,7 @@ test('only the AUTOBOX spinner opts in to autoplay', () => {
   assert.deepEqual(autoplayIds, ['media/autobox-v1/ims/spinner']);
 });
 
-test('one AUTOBOX IMS node keeps publication ownership and both explicit article relations', () => {
+test('one AUTOBOX IMS node keeps project ownership and both explicit article relations', () => {
   let nodes = ['projects/autobox-v1', 'pulse/autobox-v1-retrospective']
     .map((id) => ({ id, label: id, params: {} }));
   let projects = [
@@ -525,8 +547,8 @@ test('one AUTOBOX IMS node keeps publication ownership and both explicit article
   let spinner = model.nodes.find((node) => node.id === 'media/autobox-v1/ims/spinner');
   let spinnerEdges = model.edges.filter((edge) => edge.to === 'media/autobox-v1/ims/spinner');
 
-  assert.equal(spinner.targetId, 'pulse/autobox-v1-retrospective');
-  assert.deepEqual(spinner.params.targetIds, ['pulse/autobox-v1-retrospective', 'projects/autobox-v1']);
+  assert.equal(spinner.targetId, 'projects/autobox-v1');
+  assert.deepEqual(spinner.params.targetIds, ['projects/autobox-v1', 'pulse/autobox-v1-retrospective']);
   assert.deepEqual(
     new Set(spinnerEdges.map((edge) => edge.from)),
     new Set(['pulse/autobox-v1-retrospective', 'projects/autobox-v1'])

@@ -915,7 +915,12 @@ test('all narrated entries expose one pre-audio subject setup and explicit led s
       assert.equal(at.quote, expected.quote, `${source.id}: recognized phrase`);
       assert.equal(at.offsetMs < 0, true, `${source.id}: lead`);
       assert.equal(-at.offsetMs, expected.leadMs, `${source.id}: explicit lead`);
-      assert.equal(expected.leadMs >= 600, true, `${source.id}: settlement margin`);
+      if (source.id === 'finale.contacts') {
+        // The authored contact pointer appears as the narrator names the action.
+        assert.equal(expected.leadMs, 200, 'contact pointer lead');
+      } else {
+        assert.ok(expected.leadMs >= 600, `${source.id}: settlement margin`);
+      }
       assert.equal(absentTargets.has(source.target), false, `${source.id}: target`);
     }
   }
@@ -3295,36 +3300,11 @@ test('admitted semantic select maps exact v2 first-frame evidence to acted', asy
   });
 });
 
-test('checkpoint-held attention seeks the admitted provider to its settled visual frame', async () => {
-  let admission = providerAdmissionFixture({ mode: 'frame', plannedDurationMs: 650 });
-  let firstFrame = providerMilestoneFixture(admission, 'first-frame', 100);
-  let settled = providerMilestoneFixture(admission, 'settled', 100);
-  let terminal = providerTerminalFixture(
-    admission,
-    'completed',
-    100,
-    settled.providerReceipt,
-    'settled',
-  );
-  let request;
-  let seekCalls = [];
-  let terminalGate;
+test('checkpoint-held attention restores silently without repainting or seeking', async () => {
   let attention = {
     clearMarkers() {},
-    present(input) {
-      request = input;
-      input.onAdmission(admission);
-      terminalGate = new Promise((resolve) => { this.resolveTerminal = resolve; });
-      return { presented: true, admission };
-    },
-    seek(elapsedMs) {
-      seekCalls.push(elapsedMs);
-      request.onMilestone(firstFrame);
-      request.onMilestone(settled);
-      this.resolveTerminal(terminal);
-      return settled.providerReceipt;
-    },
-    whenSettled() { return terminalGate; },
+    present() { assert.fail('paused restore must not present attention'); },
+    seek() { assert.fail('paused restore must not seek attention'); },
     cancel() { return false; },
   };
   let fixture = workspaceOperationFixture({
@@ -3340,7 +3320,6 @@ test('checkpoint-held attention seeks the admitted provider to its settled visua
     await runCvShowPresentationOperation(providerScenarioRunner(attention), fixture.operation),
     undefined,
   );
-  assert.deepEqual(seekCalls, [650]);
   assert.deepEqual(fixture.receipts.map(({ status }) => status), ['first-frame', 'settled']);
 });
 
@@ -5361,6 +5340,7 @@ test('deferred aligned startup loads paused media without presentation admission
   assert.deepEqual(restored.heldAttentionDirectiveIds, []);
   assert.deepEqual(restored.includedSpeechDirectiveIds, [
     'symbiote-workspace.illustration-task',
+    'symbiote-workspace.video-agentic',
     'workspace.portable-config',
     'workspace.agent-portal-card',
   ]);
@@ -5373,6 +5353,8 @@ test('deferred aligned startup loads paused media without presentation admission
       'cv-show:audio-clip:symbiote-workspace:01',
       'cv-show:cue:symbiote-workspace.illustration-task:scroll',
       'cv-show:cue:symbiote-workspace.illustration-task',
+      'cv-show:cue:symbiote-workspace.video-agentic:scroll',
+      'cv-show:cue:symbiote-workspace.video-agentic',
       'cv-show:cue:workspace.portable-config:scroll',
       'cv-show:cue:workspace.portable-config',
       'cv-show:cue:workspace.agent-portal-card:scroll',
@@ -5804,6 +5786,7 @@ test('fresh scene turn-start navigation is the one Project setup cell', () => {
   assert.deepEqual(partition.scheduled.map(({ source }) => source.id), [
     'workspace.intro-frame',
     'symbiote-workspace.illustration-task',
+    'symbiote-workspace.video-agentic',
     'workspace.portable-config',
     'workspace.agent-portal-card',
   ]);
