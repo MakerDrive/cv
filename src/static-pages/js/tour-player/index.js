@@ -1668,9 +1668,27 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       return;
     }
     try {
-      const result = event.detail?.scroll === true
-        ? await runner.scroll(directives[0])
-        : await runner.run(directives, { continuePhase: true });
+      // A timed cue of the browser voice carries its authored gesture slot like a recorded-show cell: the
+      // presenter plans the whole gesture inside it (planned admission), so the claw starts where it rests.
+      const budgetMs = Number(event.detail?.budgetMs) || 0;
+      const isScroll = event.detail?.scroll === true;
+      const slot = budgetMs > 0
+        ? {
+            kind: 'attention',
+            budgetMs,
+            requiresProviderAdmission: !isScroll,
+            decorative: false,
+            reportStatus() {},
+            reportAdmission() {},
+            reportMilestone() {},
+            reportDegraded() {},
+            acceptTerminal: (settlement) => settlement,
+            providerFailure: (reason) => new Error(`cue provider failure: ${reason}`),
+          }
+        : null;
+      const result = isScroll
+        ? await runner.scroll(directives[0], slot ? { presentation: slot } : undefined)
+        : await runner.run(directives, { continuePhase: true, ...(slot ? { presentation: slot } : {}) });
       if (getChat()?.$.isPaused === true) {
         void presenter?.cursor.returnHome();
       }

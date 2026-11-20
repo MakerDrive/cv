@@ -56,10 +56,25 @@ export function createTtsSpeechController({
   };
 
   const clearTimers = (state) => { for (const t of state.timers) clock.clear(t.id); state.timers.clear(); };
+  const freezeTimers = (state) => {
+    for (const timer of state.timers) {
+      if (!timer.running) continue;
+      clock.clear(timer.id);
+      timer.running = false;
+      timer.remaining = Math.max(0, timer.remaining - (now() - timer.since));
+    }
+  };
+  const resumeTimers = (state) => {
+    for (const timer of state.timers) if (!timer.running) timer.start();
+  };
   const fire = (state, item) => {
     if (state.fired.has(item) || run !== state) return;
     state.fired.add(item);
-    state.options.onCue?.(item.cue);
+    // Speech has priority over actions: a cue never holds the voice; the player sequences its own actions.
+    try {
+      const result = state.options.onCue?.(item.cue);
+      if (result && typeof result.catch === 'function') result.catch(() => {});
+    } catch { /* a failing cue must not stop the narration */ }
   };
   // A timer runs only while the voice is speaking: it counts down a delay that pause/resume freeze.
   const arm = (state, item, delay) => {
@@ -68,11 +83,16 @@ export function createTtsSpeechController({
     const start = () => {
       entry.since = now();
       entry.running = true;
-      entry.id = clock.set(() => { entry.running = false; state.timers.delete(entry); fire(state, item); }, entry.remaining);
+      entry.id = clock.set(() => {
+        entry.running = false;
+        state.timers.delete(entry);
+        fire(state, item);
+      }, entry.remaining);
+      entry.dueAt = now() + entry.remaining;
     };
     entry.start = start;
     state.timers.add(entry);
-    if (!state.paused) start();
+    if (state.physicallySpeaking) start();
   };
 
   const scheduleFor = (state, sentenceIndex, startedAt) => {
@@ -93,9 +113,33 @@ export function createTtsSpeechController({
     if (run !== state) return;
     const { sentences, words } = state.plan.timing;
     if (state.index >= sentences.length) {
+      if (state.completing) return;
+      state.completing = true;
+      state.physicallySpeaking = false;
       for (const item of state.plan.planned) fire(state, item);
-      run = null;
-      state.options.onEnd?.();
+      let finish = () => {
+        if (run !== state) return;
+        run = null;
+        state.options.onEnd?.();
+      };
+      let completion;
+      try {
+        completion = state.options.beforeEnd?.();
+      } catch (error) {
+        if (run !== state) return;
+        run = null;
+        state.options.onError?.(error?.message || 'speech-error', error);
+        return;
+      }
+      if (!completion || typeof completion.then !== 'function') {
+        finish();
+        return;
+      }
+      Promise.resolve(completion).then(finish).catch((error) => {
+        if (run !== state) return;
+        run = null;
+        state.options.onError?.(error?.message || 'speech-error', error);
+      });
       return;
     }
     const span = sentences[state.index];
@@ -106,18 +150,45 @@ export function createTtsSpeechController({
     if (voice) utterance.voice = voice;
     utterance.rate = Number(state.options.rate) > 0 ? Number(state.options.rate) : 1;
     const current = () => run === state && state.utterance === utterance;
+    let resumePhysicalSpeech = () => {
+      if (!current()) return;
+      if (state.pausedAt !== null) state.heldMs += Math.max(0, now() - state.pausedAt);
+      state.pausedAt = null;
+      state.paused = false;
+      state.physicallySpeaking = true;
+      for (const timer of state.timers) if (!timer.running) timer.start();
+      state.options.onStart?.();
+    };
     utterance.onstart = () => {
       if (!current()) return;
+      if (state.sentenceActive) {
+        resumePhysicalSpeech();
+        return;
+      }
       state.sentenceStartedAt = now();
       state.heldMs = 0;
-      if (!state.started) { state.started = true; state.options.onStart?.(); }
+      state.pausedAt = null;
+      state.sentenceActive = true;
+      state.paused = false;
+      state.physicallySpeaking = true;
+      if (!state.started || state.retrying) {
+        state.started = true;
+        state.retrying = false;
+        state.options.onStart?.();
+      }
       scheduleFor(state, state.index, state.sentenceStartedAt);
     };
     // The player counts a resumed voice as physically started again.
-    utterance.onresume = () => { if (current()) state.options.onStart?.(); };
+    utterance.onresume = resumePhysicalSpeech;
     utterance.onend = () => {
       if (!current()) return;
-      state.pace.observe(span.endMs - span.startMs, now() - state.sentenceStartedAt);
+      state.sentenceActive = false;
+      state.physicallySpeaking = false;
+      let pausedDuration = state.pausedAt === null ? 0 : Math.max(0, now() - state.pausedAt);
+      state.pace.observe(
+        span.endMs - span.startMs,
+        now() - state.sentenceStartedAt - state.heldMs - pausedDuration,
+      );
       for (const item of state.plan.planned) if (item.sentence <= state.index) fire(state, item);
       clearTimers(state);
       state.index += 1;
@@ -126,7 +197,15 @@ export function createTtsSpeechController({
     utterance.onerror = (event) => {
       if (!current()) return;
       state.utterance = null;
-      if (event?.error === 'not-allowed') { state.pending = true; state.options.onBlocked?.('autoplay-blocked', event); return; }
+      state.physicallySpeaking = false;
+      if (event?.error === 'not-allowed') {
+        state.sentenceActive = false;
+        state.retrying = state.started;
+        clearTimers(state);
+        state.pending = true;
+        state.options.onBlocked?.('autoplay-blocked', event);
+        return;
+      }
       if (event?.error === 'interrupted' || event?.error === 'canceled') return;
       run = null;
       state.options.onError?.(event?.error || 'speech-error');
@@ -135,7 +214,11 @@ export function createTtsSpeechController({
     state.pending = false;
     try { synth.speak(utterance); } catch (error) {
       state.utterance = null;
-      if (error?.name === 'NotAllowedError') { state.pending = true; state.options.onBlocked?.('autoplay-blocked', error); }
+      if (error?.name === 'NotAllowedError') {
+        state.retrying = state.started;
+        state.pending = true;
+        state.options.onBlocked?.('autoplay-blocked', error);
+      }
       else { run = null; state.options.onError?.(error?.message || 'speech-error'); }
     }
   };
@@ -158,8 +241,10 @@ export function createTtsSpeechController({
         text: source, options: { ...options, lang: options.lang || 'en' },
         plan: planCues(source, options.cues || [], { whole: !options.cues?.length }),
         pace: createPaceTracker({ initial: 1 / (Number(options.rate) > 0 ? Number(options.rate) : 1) }), index: 0, utterance: null, started: false,
-        paused: false, pending: options.startPaused === true,
-        timers: new Set(), fired: new Set(), sentenceStartedAt: 0, heldMs: 0, pausedAt: 0,
+        paused: false, sentenceActive: false, pending: options.startPaused === true,
+        physicallySpeaking: false, completing: false,
+        retrying: false,
+        timers: new Set(), fired: new Set(), sentenceStartedAt: 0, heldMs: 0, pausedAt: null,
       };
       if (!splitWords(source).length) { queueMicrotask(() => options.onEnd?.()); return true; }
       // Restoring a position (a link, a seek): start at the sentence holding it; the cues before it are skipped.
@@ -175,27 +260,21 @@ export function createTtsSpeechController({
       return true;
     },
     pause() {
-      synth?.pause?.();
       const state = run;
       if (!state || state.paused) return;
       state.paused = true;
       state.pausedAt = now();
-      for (const t of state.timers) {
-        if (!t.running) continue;
-        clock.clear(t.id);
-        t.running = false;
-        t.remaining = Math.max(0, t.remaining - (now() - t.since));
-      }
+      state.physicallySpeaking = false;
+      synth?.pause?.();
+      freezeTimers(state);
     },
     resume() {
       const state = run;
       if (!state) return false;
-      if (state.pending) { state.pending = false; speakSentence(state); return true; }
+      if (state.pending) { state.pending = false; state.paused = false; speakSentence(state); return true; }
       state.paused = false;
-      if (state.pausedAt) state.heldMs += now() - state.pausedAt;
-      state.pausedAt = 0;
-      for (const t of state.timers) t.start();
       synth?.resume?.();
+      resumeTimers(state);
       return true;
     },
     cancel,
@@ -205,13 +284,23 @@ export function createTtsSpeechController({
      */
     clock() {
       const state = run;
-      if (!state || state.plan.timing.sentences.length < 2) return null;
+      if (
+        !state
+        || (state.plan.timing.sentences.length < 2 && !state.options.cues?.length)
+      ) return null;
       const { words, sentences } = state.plan.timing;
+      if (state.completing) {
+        return { words, positionMs: state.plan.timing.durationMs, playing: false };
+      }
       const span = sentences[Math.min(state.index, sentences.length - 1)];
       const until = state.paused ? state.pausedAt : now();
-      const elapsed = state.started ? Math.max(0, until - state.sentenceStartedAt - state.heldMs) : 0;
-      const positionMs = Math.min(span.endMs + 120, span.startMs + elapsed / state.pace.scale);
-      return { words, positionMs, playing: !state.paused };
+      const elapsed = state.started && state.sentenceActive
+        ? Math.max(0, until - state.sentenceStartedAt - state.heldMs)
+        : 0;
+      const positionMs = state.sentenceActive
+        ? Math.min(span.endMs + 120, span.startMs + elapsed / state.pace.scale)
+        : span.startMs;
+      return { words, positionMs, playing: state.physicallySpeaking && !state.paused };
     },
   });
 }

@@ -1895,38 +1895,54 @@ export class PortfolioShowChat extends HTMLElement {
     // quote is estimated to be spoken (see ttsNarration.js), one after another once setup is done.
     // The Russian browser fallback keeps the older behaviour of running them all at the start.
     let setupFinished = null;
+    let rejectSetup = null;
     let cueChain = Promise.resolve();
     const timedCues = this.#alignment.available || this.#story.narrationLocale === 'ru' ? [] : buildTimedCues(visualDirectives);
     const onCue = (cue) => {
-      cueChain = cueChain.then(async () => {
+      let completion = cueChain.then(async () => {
         await setupFinished;
         if (requestId !== this.#requestId) return;
         await new Promise((resolve) => {
           const detail = {
-            directives: [cue.directive], aligned: false, requestId, continuation: true, scroll: cue.scroll === true, handled: false, complete: resolve,
+            directives: [cue.directive], aligned: false, requestId, continuation: true, scroll: cue.scroll === true, budgetMs: cue.budgetMs || 0, handled: false, complete: resolve,
           };
           this.dispatchEvent(new CustomEvent('portfolio-show-phase', { bubbles: true, composed: true, detail }));
           if (!detail.handled) resolve();
         });
-      }).catch(() => {});
+      });
+      cueChain = completion.catch(() => {});
+      return completion;
     };
     const startUnalignedPresentation = this.#alignment.available ? null : async () => {
       /** @type {(value?: any) => void} */
       let finishSetup = () => {};
-      setupFinished = new Promise((resolve) => { finishSetup = resolve; });
-      const receipt = precedingSetupEntry
-        ? await this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
-        : await this.#runSceneSetup(entry, requestId);
-      requireCvShowSceneSetupSuccess(receipt, entry.id);
-      if (requestId !== this.#requestId) return;
-      // The scene setup completed, so its content is physically presented.
-      this.#presentedSceneId = entry.sceneId || entry.id;
-      this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
-        bubbles: true,
-        composed: true,
-        detail: { directives: timedCues.length ? [] : visualDirectives, aligned: false, requestId },
-      }));
-      finishSetup();
+      setupFinished = new Promise((resolve, reject) => {
+        finishSetup = resolve;
+        rejectSetup = reject;
+      });
+      // Cue continuations observe setup failure when timed cues exist; the Russian
+      // browser fallback has no continuation and is handled by the start callback.
+      setupFinished.catch(() => {});
+      try {
+        const receipt = precedingSetupEntry
+          ? await this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
+          : await this.#runSceneSetup(entry, requestId);
+        requireCvShowSceneSetupSuccess(receipt, entry.id);
+        if (requestId !== this.#requestId) {
+          finishSetup();
+          return;
+        }
+        this.#presentedSceneId = entry.sceneId || entry.id;
+        this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
+          bubbles: true,
+          composed: true,
+          detail: { directives: timedCues.length ? [] : visualDirectives, aligned: false, requestId },
+        }));
+        finishSetup();
+      } catch (error) {
+        rejectSetup?.(error);
+        throw error;
+      }
     };
     this.#showPlayer?.bind?.(this.#showConfig());
     this.#syncPlayer();
@@ -1939,6 +1955,10 @@ export class PortfolioShowChat extends HTMLElement {
       onPhysicalStart: startUnalignedPresentation,
       cues: timedCues,
       onCue,
+      beforeEnd: timedCues.length ? async () => {
+        await cueChain;
+        await this.#alignedEntry?.runtime?.whenIdle?.();
+      } : undefined,
     });
   }
 
@@ -2398,6 +2418,7 @@ export class PortfolioShowChat extends HTMLElement {
     onPhysicalStart = null,
     cues = [],
     onCue = null,
+    beforeEnd = null,
   } = {}) {
     if (!this.#speech.available) {
       this.pauseShow('narration-unavailable');
@@ -2491,7 +2512,7 @@ export class PortfolioShowChat extends HTMLElement {
         beforeDeferredPresentation,
         restorePausedCheckpoint,
       }),
-      beforeEnd: () => this.#alignedEntry?.runtime?.whenIdle?.(),
+      beforeEnd: beforeEnd || (() => this.#alignedEntry?.runtime?.whenIdle?.()),
       onEnd: () => {
         if (requestId !== this.#requestId) return;
         if (this.#lastAlignedSeekFailure) {
