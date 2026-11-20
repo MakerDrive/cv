@@ -60,7 +60,7 @@ import {
   applyProjectPreviewFilter,
   renderProjectPreviewGrid,
 } from './projectPreviewGrid.js';
-import { computeWorkingRuler, renderProfileDashboard } from './profileDashboard.js';
+import { computeWorkingRuler, renderProfileDashboard, renderProfileStatus, rulerReadout } from './profileDashboard.js';
 import {
   createPortfolioEntryHref,
   createPortfolioNavigationEntries,
@@ -364,21 +364,63 @@ function getProfileContactText() {
 const PROFILE_YEARS = '15+';
 
 /** Metric cells, availability status and the working-hours ruler of the profile page. */
+/** The availability line under the name, with the host's clock kept current. */
+function mountProfileStatus(host) {
+  const render = () => renderProfileStatus({
+    status: tPortfolio('profile.statusDetails'),
+    hostCity: 'Buenos Aires',
+    hostTime: computeWorkingRuler({ nowMs: Date.now(), viewerOffsetMinutes: -new Date().getTimezoneOffset() }).hostTime,
+  });
+  host.innerHTML = render();
+  const timer = setInterval(() => {
+    if (!host.isConnected) { clearInterval(timer); return; }
+    host.innerHTML = render();
+  }, 30_000);
+}
+
 function mountProfileDashboard(host) {
+  const viewerOffsetMinutes = -new Date().getTimezoneOffset();
   const render = () => renderProfileDashboard({
     metrics: [
       { value: PROFILE_YEARS, label: tPortfolio('profile.metric.years') },
       { value: String(projects.length), label: tPortfolio('profile.metric.projects') },
       { value: String(directionEntries.length), label: tPortfolio('profile.metric.directions') },
-      { value: String(skillEntries.length), label: tPortfolio('profile.metric.skills') },
+      { value: String(publicPublications.length), label: tPortfolio('profile.metric.publications') },
     ],
-    status: tPortfolio('profile.statusDetails'),
-    hostCity: 'Buenos Aires',
-    ruler: computeWorkingRuler({ nowMs: Date.now(), viewerOffsetMinutes: -new Date().getTimezoneOffset() }),
+    ruler: computeWorkingRuler({ nowMs: Date.now(), viewerOffsetMinutes }),
     labels: { rulerTitle: tPortfolio('profile.ruler.title'), overlap: tPortfolio('profile.ruler.overlap'), hostTime: '' },
   });
   host.innerHTML = render();
-  // The current hour and the host's clock move on while the page stays open.
+  // The ruler can be scrubbed: move the pointer (or the arrow keys) over a visitor hour to see what
+  // time it is for the host then and whether the host works.
+  const pick = (hour) => {
+    const ruler = host.querySelector('.profile-ruler');
+    if (!ruler) return;
+    for (const cell of ruler.querySelectorAll('.profile-ruler-cell')) {
+      if (Number(cell.dataset.hour) === hour) cell.setAttribute('data-pick', ''); else cell.removeAttribute('data-pick');
+    }
+    const readout = ruler.querySelector('.profile-ruler-readout');
+    if (hour === null) { readout.textContent = ruler.dataset.overlap; return; }
+    const info = rulerReadout({ hour, viewerOffsetMinutes });
+    readout.textContent = `${tPortfolio('profile.ruler.yours')} ${info.viewer} → ${tPortfolio('profile.ruler.mine')} ${info.host} · ${tPortfolio(info.working ? 'profile.ruler.on' : 'profile.ruler.off')}`;
+    ruler.querySelector('.profile-ruler-track').setAttribute('aria-valuenow', String(hour));
+  };
+  const hourAt = (event) => {
+    const box = host.querySelector('.profile-ruler-track').getBoundingClientRect();
+    return Math.max(0, Math.min(23, Math.floor(((event.clientX - box.left) / box.width) * 24)));
+  };
+  host.onpointermove = (event) => { if (event.target.closest?.('.profile-ruler-track')) pick(hourAt(event)); };
+  host.onpointerdown = host.onpointermove;
+  host.onpointerleave = () => pick(null);
+  host.onkeydown = (event) => {
+    const track = event.target.closest?.('.profile-ruler-track');
+    if (!track || !['ArrowLeft', 'ArrowRight', 'Home', 'End', 'Escape'].includes(event.key)) return;
+    event.preventDefault();
+    const current = Number(track.getAttribute('aria-valuenow'));
+    const next = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: 23 }[event.key];
+    pick(event.key === 'Escape' ? null : Math.max(0, Math.min(23, next)));
+  };
+  // The current hour and the host's clock move on while the page stays open (a pick is dropped).
   const timer = setInterval(() => {
     if (!host.isConnected) { clearInterval(timer); return; }
     host.innerHTML = render();
@@ -1238,13 +1280,15 @@ function createMarkdown(entry, { interactive = true } = {}) {
           details: stripPortfolioArticleBlockMarkers(entry.details),
         };
   let lines = [`# ${entry.label}`, ''];
+  if (entry.id === 'profile/photo' && interactive) lines.push(':::content-slot profile-status', '');
   if (entry.period) {
     lines.push(entry.period, '');
   }
   if (entry.kicker) {
     lines.push(`**${entry.kicker}**`, '');
   }
-  lines.push(article.summary || tPortfolio('node.fallback'), '');
+  // The profile headline is drawn as a row of segments (see `profile-tagline`); other pages keep the text.
+  lines.push(entry.id === 'profile/photo' && interactive ? ':::content-slot profile-tagline' : (article.summary || tPortfolio('node.fallback')), '');
   if (entry.id === 'profile/photo') {
     lines.push(`[${tPortfolio('show.openPresentation')}](${getCvShowStartHref()})`, '');
     if (interactive) lines.push(':::content-slot profile-dashboard', '');
@@ -2674,6 +2718,11 @@ const portfolioRuntime = {
           hrefBuilder: resolvePublicationHref,
         });
         host.onclick = handleInAppNavigation;
+      } else if (slotKey === 'profile-tagline') {
+        const parts = String(tPortfolio('profile.summary')).split('|').map((part) => part.trim()).filter(Boolean);
+        host.innerHTML = `<p class="profile-tagline" aria-label="${parts.join(', ').replace(/"/g, '&quot;')}">${parts.map((part) => `<span class="profile-tagline-cell">${part.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join('')}</p>`;
+      } else if (slotKey === 'profile-status') {
+        mountProfileStatus(host);
       } else if (slotKey === 'profile-dashboard') {
         mountProfileDashboard(host);
       } else if (slotKey === 'project-previews') {

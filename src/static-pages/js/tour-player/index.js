@@ -1142,6 +1142,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       },
     });
     // The newest overlay is this session's cursor (an older one may still be fading out).
+    // The presenter is on stage from the moment the show session exists, paused or playing.
+    requestAnimationFrame(() => cursor.present?.());
     showSound.watchOverlay([...document.querySelectorAll('.symbiote-presenter-cursor')].pop() || null);
     const attention = new ShowAttentionController({
       cursor,
@@ -1634,7 +1636,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     }
     running = true;
     syncHeaderShowButton(true);
-    ensurePresenterLifecycle();
+    ensurePresenterLifecycle().cursor.present?.();
   };
 
   const onSeek = () => {
