@@ -12,6 +12,7 @@
  *   first long paragraph              after title and meta        -> the lead paragraph
  *   - [Label](url)                    a list of links             -> link rows with an arrow
  *   [Open the demo](url)              a paragraph that is one link -> a call-to-action line
+ *   Name — description (2+ lines)     consecutive paragraphs in that form -> definition rows
  *   table, picture, code block      -> a figure with corner crosses and a label (TBL 01, FIG 01, CODE 01 · JSON)
  */
 
@@ -160,6 +161,59 @@ function transformLinkLists(root) {
   }
 }
 
+const DEFINITION = /^([^—\n]{3,70}?) — (.{10,})$/;
+
+/**
+ * Two or more consecutive paragraphs written as `Name — description` become definition rows: the name
+ * in the first column, the description beside it. A single such line stays prose.
+ */
+function transformDefinitions(root) {
+  const doc = root.ownerDocument;
+  // The name may carry inline formatting (a bold link): the nodes before the dash move into the name.
+  const split = (paragraph) => {
+    const text = (paragraph.textContent || '').trim();
+    if (!DEFINITION.test(text)) return null;
+    const name = [];
+    const rest = [];
+    let seen = false;
+    for (const node of [...paragraph.childNodes]) {
+      if (seen) { rest.push(node); continue; }
+      const at = node.nodeType === 3 ? node.textContent.indexOf(' — ') : -1;
+      if (at === -1) { name.push(node); continue; }
+      seen = true;
+      if (node.textContent.slice(0, at)) name.push(doc.createTextNode(node.textContent.slice(0, at)));
+      rest.push(doc.createTextNode(node.textContent.slice(at + 3)));
+    }
+    if (!seen || !name.length) return null;
+    return { name, rest };
+  };
+  for (const paragraph of root.querySelectorAll('p.md-p:not([data-md-pattern])')) {
+    if (paragraph.parentElement?.classList?.contains('md-defs')) continue;
+    if (!split(paragraph)) continue;
+    const run = [paragraph];
+    let next = paragraph.nextElementSibling;
+    while (next && next.matches('p.md-p') && !next.hasAttribute('data-md-pattern') && split(next)) {
+      run.push(next);
+      next = next.nextElementSibling;
+    }
+    if (run.length < 2) continue;
+    const list = create(doc, 'div', 'md-defs');
+    list.dataset.mdPattern = 'definitions';
+    for (const item of run) {
+      const { name, rest } = split(item);
+      const row = create(doc, 'div', 'md-def');
+      const nameCell = create(doc, 'span', 'md-def-name');
+      nameCell.append(...name);
+      const textCell = create(doc, 'span', 'md-def-text');
+      textCell.append(...rest);
+      row.append(nameCell, textCell);
+      list.append(row);
+    }
+    run[0].replaceWith(list);
+    for (const item of run.slice(1)) item.remove();
+  }
+}
+
 /** A paragraph that is exactly one link reads as a call to action. */
 function transformCalls(root) {
   for (const paragraph of root.querySelectorAll('p.md-p:not([data-md-pattern])')) {
@@ -217,6 +271,7 @@ export function transformMarkdownPatterns(root, options = {}) {
   transformSegments(root);
   transformMetrics(root);
   transformLinkLists(root);
+  transformDefinitions(root);
   transformCalls(root);
   transformCallouts(root);
   transformTasks(root);

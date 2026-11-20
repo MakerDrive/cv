@@ -76,3 +76,11 @@ test('a list of links becomes link rows, a paragraph of one link becomes a call 
   assert.equal(root.querySelectorAll('ul.md-list').length, 2);
   assert.equal(root.querySelectorAll('p.md-cta').length, 1);
 });
+
+test('consecutive "Name — description" paragraphs become definition rows, a single one stays prose', () => {
+  const root = render('<p class="md-p">Lifecycle Messaging Platform — Платформа сообщений с API и очередями.</p><p class="md-p">PhotoPizza Remote — Управление поворотным столом из браузера.</p><p class="md-p">A sentence without the pattern.</p><p class="md-p">Alone — one line of prose that happens to have a dash in it here.</p>');
+  const rows = [...root.querySelectorAll('.md-def')].map((row) => [row.querySelector('.md-def-name').textContent, row.querySelector('.md-def-text').textContent]);
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0][0], 'Lifecycle Messaging Platform');
+  assert.equal(root.querySelectorAll('p.md-p').length, 2);
+});
