@@ -94,21 +94,142 @@ test('controller speaks sentence by sentence and fires cues around their quotes'
 });
 
 test('pause freezes cue timers and resume continues the remainder', () => {
-  const env = fakeEnvironment();
-  const controller = createTtsSpeechController(env);
-  const fired = [];
+  let env = fakeEnvironment();
+  let controller = createTtsSpeechController(env);
+  let fired = [];
   controller.speak('One two three four five six seven eight nine ten.', {
     cues: [{ id: 'late', quote: 'nine ten' }],
     onCue: (cue) => fired.push(cue.id),
   });
   env.spoken.at(-1).onstart();
   env.advance(1000);
+  let positionBeforePause = controller.clock().positionMs;
   controller.pause();
+  assert.equal(controller.clock().playing, false);
   env.advance(60_000);
   assert.deepEqual(fired, []);
+  assert.equal(controller.clock().positionMs, positionBeforePause);
   controller.resume();
+  assert.equal(controller.clock().playing, false, 'resume waits for the browser resume event');
+  env.spoken.at(-1).onresume();
+  assert.equal(controller.clock().playing, true);
   env.advance(60_000);
   assert.deepEqual(fired, ['late']);
+});
+
+test('browser speech reports playing only after the physical start', () => {
+  let env = fakeEnvironment();
+  let controller = createTtsSpeechController(env);
+  controller.speak('Wait for the voice.', {
+    startPaused: true,
+    cues: [{ id: 'voice', quote: 'voice' }],
+  });
+  assert.equal(env.spoken.length, 0);
+  assert.equal(controller.clock().playing, false);
+  controller.resume();
+  assert.equal(env.spoken.length, 1);
+  assert.equal(controller.clock().playing, false);
+  env.spoken.at(-1).onstart();
+  assert.equal(controller.clock().playing, true);
+});
+
+test('browser speech retry after an autoplay block republishes the physical start', () => {
+  let env = fakeEnvironment();
+  let controller = createTtsSpeechController(env);
+  let starts = [];
+  let blocked = [];
+  controller.speak('First sentence. Second sentence.', {
+    cues: [{ id: 'second', quote: 'Second sentence' }],
+    onStart: () => starts.push(env.now()),
+    onBlocked: (reason) => blocked.push(reason),
+  });
+  env.spoken.at(-1).onstart();
+  env.spoken.at(-1).onend();
+  env.spoken.at(-1).onerror({ error: 'not-allowed' });
+  assert.deepEqual(blocked, ['autoplay-blocked']);
+  assert.equal(controller.clock().playing, false);
+  controller.resume();
+  env.spoken.at(-1).onstart();
+  assert.equal(starts.length, 2);
+  assert.equal(controller.clock().playing, true);
+});
+
+test('synchronous autoplay block retries with a physical-start event', () => {
+  let env = fakeEnvironment();
+  env.synth.speak = () => { throw Object.assign(new Error('gesture required'), { name: 'NotAllowedError' }); };
+  let controller = createTtsSpeechController(env);
+  let starts = 0;
+  let blocked = 0;
+  controller.speak('First sentence.', {
+    onStart: () => { starts += 1; },
+    onBlocked: () => { blocked += 1; },
+  });
+  assert.equal(blocked, 1);
+  env.synth.speak = (utterance) => env.spoken.push(utterance);
+  controller.resume();
+  env.spoken.at(-1).onstart();
+  assert.equal(starts, 1);
+});
+
+test('beforeEnd waits for the final asynchronous cue chain before onEnd', async () => {
+  let env = fakeEnvironment();
+  let controller = createTtsSpeechController(env);
+  let events = [];
+  let release;
+  let barrier = new Promise((resolve) => { release = resolve; });
+  controller.speak('The final cue.', {
+    cues: [{ id: 'final', quote: 'final cue' }],
+    beforeEnd: () => { events.push('beforeEnd'); return barrier; },
+    onEnd: () => events.push('end'),
+  });
+  let utterance = env.spoken.at(-1);
+  utterance.onstart();
+  utterance.onend();
+  assert.deepEqual(events, ['beforeEnd']);
+  assert.equal(controller.clock().playing, false);
+  release();
+  await barrier;
+  await Promise.resolve();
+  assert.deepEqual(events, ['beforeEnd', 'end']);
+});
+
+test('speech has priority: a running cue never pauses the voice or delays later cues', () => {
+  const env = fakeEnvironment();
+  const controller = createTtsSpeechController(env);
+  const fired = [];
+  controller.speak('First cue, then another later cue.', {
+    cues: [
+      { id: 'first', quote: 'First cue' },
+      { id: 'later', quote: 'another later cue' },
+    ],
+    // A gesture that never finishes: the voice must not wait for it.
+    onCue: (cue) => { fired.push(cue.id); return new Promise(() => {}); },
+  });
+  env.spoken.at(-1).onstart();
+  env.advance(1_000);
+  assert.deepEqual(fired, ['first']);
+  assert.equal(env.synth.paused, false);
+  assert.equal(controller.clock().playing, true);
+  env.advance(20_000);
+  assert.deepEqual(fired, ['first', 'later']);
+});
+
+test('a throwing or rejecting cue does not stop the narration', async () => {
+  const env = fakeEnvironment();
+  const controller = createTtsSpeechController(env);
+  const errors = [];
+  controller.speak('One two. Three four.', {
+    cues: [{ id: 'a', quote: 'one two' }, { id: 'b', quote: 'three four' }],
+    onCue: (cue) => { if (cue.id === 'a') throw new Error('x'); return Promise.reject(new Error('y')); },
+    onError: (e) => errors.push(e),
+  });
+  env.spoken.at(-1).onstart();
+  env.advance(100);
+  env.spoken.at(-1).onend();
+  env.spoken.at(-1).onstart();
+  env.advance(1_000);
+  await Promise.resolve();
+  assert.deepEqual(errors, []);
 });
 
 test('cancel silences the narration', () => {
@@ -147,8 +268,52 @@ test('localizeShowStory swaps texts and quotes but keeps choreography', () => {
   assert.equal(STORY.scenes[0].subtitle, 'Привет мир.');
 });
 
+test('native selections and speech timing quotes are localized independently', () => {
+  let story = {
+    scenes: [{
+      id: 's1', title: 'T', subtitle: 'Texto anterior.', speech: 'Spoken phrase here.',
+      directives: [{
+        id: 'select', type: 'native-selection', quote: 'frase antigua',
+        timing: { quote: 'frase antigua', occurrence: 2, offsetMs: -100 },
+      }],
+    }],
+    branches: {},
+  };
+  let locale = {
+    scenes: {
+      s1: {
+        speech: 'A spoken phrase here.',
+        selections: { select: 'una frase del artículo' },
+        quotes: { select: 'spoken phrase' },
+      },
+    },
+  };
+  let localized = localizeShowStory(story, 'en', locale).scenes[0].directives[0];
+  assert.equal(localized.quote, 'una frase del artículo');
+  assert.equal(localized.timing.quote, 'spoken phrase');
+  assert.equal(localized.timing.occurrence, 1);
+  assert.equal(localized.timing.offsetMs, -100);
+  assert.deepEqual(validateShowLocale(story, locale), []);
+});
+
 test('showLocaleTemplate lists the quotes to translate', () => {
   assert.deepEqual(showLocaleTemplate(STORY).scenes.s1.quotes, { d1: 'мир' });
+});
+
+test('showLocaleTemplate lists native-selection text separately from timing quotes', () => {
+  let story = {
+    scenes: [{
+      ...STORY.scenes[0],
+      directives: [{
+        id: 'selection', type: 'native-selection', quote: 'фраза статьи',
+        timing: { quote: 'мир' },
+      }],
+    }],
+    branches: {},
+  };
+  let entry = showLocaleTemplate(story).scenes.s1;
+  assert.deepEqual(entry.quotes, { selection: 'мир' });
+  assert.deepEqual(entry.selections, { selection: 'фраза статьи' });
 });
 
 test('every registered show locale is complete', async () => {
@@ -156,6 +321,18 @@ test('every registered show locale is complete', async () => {
   const { CV_SHOW_STORY } = await import('../../src/static-pages/data/cvShowPresentationProject.js');
   for (const [lang, locale] of Object.entries(CV_SHOW_LOCALES)) {
     assert.deepEqual(validateShowLocale(CV_SHOW_STORY, locale), [], lang);
+    const story = localizeShowStory(CV_SHOW_STORY, lang, locale);
+    for (const entry of [...story.scenes, ...Object.values(story.branches || {})]) {
+      for (const directive of entry.directives || []) {
+        if (directive.type !== 'native-selection') continue;
+        assert.ok(directive.quote, `${lang} ${entry.id} ${directive.id} selection`);
+        assert.doesNotMatch(
+          directive.quote,
+          /\p{Script=Cyrillic}/u,
+          `${lang} ${entry.id} ${directive.id} selection`,
+        );
+      }
+    }
   }
 });
 
@@ -165,6 +342,7 @@ test('without cues the text is spoken as one utterance', () => {
   controller.speak(TEXT, { lang: 'en' });
   assert.equal(env.spoken.length, 1);
   assert.equal(env.spoken[0].text, TEXT);
+  assert.equal(controller.clock(), null, 'the composition clock remains authoritative without timed cues');
 });
 
 test('startAtMs resumes at the sentence holding the position and skips earlier cues', () => {

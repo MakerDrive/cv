@@ -4,11 +4,12 @@ Only Russian has recorded and aligned audio. Other languages are narrated by the
 from texts registered in `src/static-pages/data/cvShowLocales.js`.
 
 - `node scripts/show-locale-template.js` prints every scene and branch (title, subtitle, speech,
-  chat text, and the phrase each timed directive is anchored to) in the locale shape, to translate.
+  chat text, timed speech quotes, and native-selection target phrases) in the locale shape, to translate.
 - English and Spanish are registered (`data/showLocales/en.js`, `es.js`; translated from the Russian speech). Register another language as `CV_SHOW_LOCALES.<lang>`; `node scripts/show-locale-template.js --check <lang>`
-  lists what is missing. A quote must occur in that entry's `speech` (case and punctuation ignored).
-- The story structure, targets and choreography stay those of the verified Russian story; only texts
-  and quotes are swapped (`showLocale.js`).
+  lists what is missing. Each timed `quote` must occur in that entry's `speech` (case and punctuation ignored).
+  Each `selection` is a localized target phrase from that language's article block.
+- The story structure, targets and choreography stay those of the verified Russian story; localized
+  speech quotes and native-selection phrases are applied independently (`showLocale.js`).
 - The voice is read sentence by sentence (`ttsNarration.js`). A directive fires at the real start of
   the sentence holding its quote plus the estimated offset inside it (`ttsTiming.js`), shifted by its
   authored lead; the measured pace of the voice rescales the rest of the entry. Pause freezes the

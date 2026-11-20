@@ -5,22 +5,31 @@
  *
  * Locale shape:
  *   { scenes: { [sceneId]: Entry }, branches: { [branchId]: Entry } }
- *   Entry = { title?, subtitle, speech?, chat?: { text?, actionLabel? }, quotes?: { [directiveId]: phrase } }
- * `speech` is what the voice reads and what is shown as the caption unless `subtitle` differs (each defaults to the other); a quote must occur in `speech`.
+ *   Entry = { title?, subtitle, speech?, chat?: { text?, actionLabel? },
+ *     quotes?: { [directiveId]: phrase }, selections?: { [directiveId]: phrase } }
+ * `speech` is read aloud and shown as the caption unless `subtitle` differs; timed quotes must
+ * occur in `speech`.
+ * `selections` contains translated phrases used to locate native-selection targets in localized article text.
  * A directive without a quote in the locale keeps no timing of its own and fires with the entry start.
  */
 import { estimateTiming, findQuoteWord, splitWords } from './ttsTiming.js';
 
 const directiveQuote = (directive) => String(directive?.timing?.quote || '');
 
-const localizeDirectives = (directives, quotes = {}) => (directives || []).map((directive) => {
-  if (!directiveQuote(directive)) return directive;
-  const quote = quotes[directive.id];
-  const { quote: _own, occurrence: _occurrence, ...timing } = directive.timing;
-  return quote
-    ? { ...directive, timing: { ...timing, quote, occurrence: 1 } }
-    : { ...directive, timing };
-});
+const localizeDirectives = (directives, quotes = {}, selections = {}) => (
+  (directives || []).map((directive) => {
+    let localized = directive.type === 'native-selection' && selections[directive.id]
+      ? { ...directive, quote: selections[directive.id] }
+      : directive;
+    if (!directiveQuote(directive)) return localized;
+    let timingQuote = quotes[directive.id];
+    let { quote: _own, occurrence: _occurrence, ...timing } = directive.timing;
+    localized = timingQuote
+      ? { ...localized, timing: { ...timing, quote: timingQuote, occurrence: 1 } }
+      : { ...localized, timing };
+    return localized;
+  })
+);
 
 const localizeEntry = (entry, text) => {
   if (!text) return entry;
@@ -30,7 +39,7 @@ const localizeEntry = (entry, text) => {
     title: text.title ?? entry.title,
     subtitle: text.subtitle ?? text.speech ?? entry.subtitle,
     speech,
-    directives: localizeDirectives(entry.directives, text.quotes),
+    directives: localizeDirectives(entry.directives, text.quotes, text.selections),
   };
   if (entry.chat) localized.chat = { ...entry.chat, ...(text.chat || {}) };
   return localized;
@@ -65,6 +74,9 @@ export function validateShowLocale(story, locale) {
     if (!String(speech || '').trim()) { problems.push(`${where}: no speech`); return; }
     const words = splitWords(speech);
     for (const directive of entry.directives || []) {
+      if (directive.type === 'native-selection') {
+        if (!text.selections?.[directive.id]) problems.push(`${where}: no selection for ${directive.id}`);
+      }
       if (!directiveQuote(directive)) continue;
       const quote = text.quotes?.[directive.id];
       if (!quote) problems.push(`${where}: no quote for ${directive.id}`);
@@ -84,6 +96,11 @@ export function showLocaleTemplate(story) {
     ...(entry.speech !== entry.subtitle ? { speech: entry.speech } : {}),
     ...(entry.chat ? { chat: { ...(entry.chat.text ? { text: entry.chat.text } : {}), ...(entry.chat.actionLabel ? { actionLabel: entry.chat.actionLabel } : {}) } } : {}),
     quotes: Object.fromEntries((entry.directives || []).filter(directiveQuote).map((d) => [d.id, directiveQuote(d)])),
+    selections: Object.fromEntries(
+      (entry.directives || [])
+        .filter((directive) => directive.type === 'native-selection')
+        .map((directive) => [directive.id, directive.quote || '']),
+    ),
   });
   return {
     scenes: Object.fromEntries(story.scenes.map((scene) => [scene.id, entryTemplate(scene)])),
