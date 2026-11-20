@@ -97,14 +97,16 @@ export function createTtsSpeechController({
 
   const scheduleFor = (state, sentenceIndex, startedAt) => {
     const { plan, pace } = state;
-    const span = plan.timing.sentences[sentenceIndex];
+    const { sentences } = plan.timing;
+    const span = sentences[sentenceIndex];
     const length = (span.endMs - span.startMs) * pace.scale;
     for (const item of plan.planned) {
       if (state.fired.has(item) || [...state.timers].some((t) => t.item === item)) continue;
-      const delay = item.offsetMs * pace.scale;
-      if (item.sentence === sentenceIndex) arm(state, item, delay);
-      else if (item.sentence === sentenceIndex + 1 && delay < 0 && length + delay > 0) arm(state, item, length + delay);
-      else if (item.sentence < sentenceIndex) fire(state, item);
+      if (item.sentence < sentenceIndex) { fire(state, item); continue; }
+      // When the cue is due, counted from this sentence's start. A lead longer than the sentences before its
+      // quote makes this negative: it fires now, in the same order as the cues around it, never after them.
+      const due = (sentences[item.sentence].startMs - span.startMs + item.offsetMs) * pace.scale;
+      if (item.sentence === sentenceIndex || due < length) arm(state, item, due);
     }
     state.sentenceStartedAt = startedAt;
   };

@@ -149,6 +149,27 @@ function resolveSpinnerMediaTarget(targetId) {
   }
 }
 
+/**
+ * Whether most of an element is visible: inside the viewport and inside every scrolling ancestor.
+ * @param {Element} element
+ */
+function isElementInView(element) {
+  const rect = element.getBoundingClientRect();
+  if (!(rect.width > 0 || rect.height > 0)) return false;
+  let top = Math.max(0, rect.top);
+  let bottom = Math.min(globalThis.innerHeight, rect.bottom);
+  for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+    const overflowY = globalThis.getComputedStyle(parent).overflowY;
+    if (overflowY !== 'auto' && overflowY !== 'scroll') continue;
+    const box = parent.getBoundingClientRect();
+    top = Math.max(top, box.top);
+    bottom = Math.min(bottom, box.bottom);
+  }
+  const visible = Math.max(0, bottom - top);
+  // A block taller than the view only needs its top part showing.
+  return visible >= Math.min(rect.height, globalThis.innerHeight * 0.5) * 0.9;
+}
+
 function resolveTargetElement(workspace, runtime, targetId) {
   if (!targetId) return null;
   const spinnerMedia = resolveSpinnerMediaTarget(targetId);
@@ -1686,6 +1707,15 @@ export function installPortfolioTour({ workspace, runtime, title }) {
             providerFailure: (reason) => new Error(`cue provider failure: ${reason}`),
           }
         : null;
+      // A gesture brings its own target into view: whatever the authored scroll cues did or did not do, a
+      // frame, marker or selection is never drawn on something that is off screen.
+      if (!isScroll && event.detail?.continuation === true) {
+        const subject = directives[0];
+        const element = subject?.target && ['frame', 'marker', 'native-selection', 'activate'].includes(subject.type)
+          ? resolveTargetElement(workspace, runtime, subject.target)
+          : null;
+        if (element && !isElementInView(element)) await runner.scroll(subject);
+      }
       const result = isScroll
         ? await runner.scroll(directives[0], slot ? { presentation: slot } : undefined)
         : await runner.run(directives, { continuePhase: true, ...(slot ? { presentation: slot } : {}) });
