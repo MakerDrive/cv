@@ -584,31 +584,34 @@ portfolio-workspace code-block .pulse-project-update-meta {
 }
 
 /* Patterns written in plain markdown (see js/markdownPatterns.js). */
+/* The headline row is the one strong block at the top: framed cells, the first one inverted. The
+   blocks after it (metrics, status) stay light, so framed pieces alternate with open ones instead
+   of piling up in one place. */
 portfolio-workspace code-block .md-segments {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sn-step-2) 0;
-  margin-block: var(--sn-step-6);
-  padding-block: var(--sn-step-4);
-  border-block: var(--notchset-rule-width) solid var(--pulse-text);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin-block: var(--sn-step-8) var(--sn-step-10);
+  border: var(--notchset-rule-width) solid var(--pulse-text);
+  border-inline-end: 0;
+  border-block-end: 0;
 }
 
 portfolio-workspace code-block .md-segment {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  padding-inline: var(--sn-step-6);
-  border-inline-start: var(--notchset-rule-width) solid var(--pulse-outline);
+  padding: var(--sn-step-4) var(--sn-step-6);
+  border-inline-end: var(--notchset-rule-width) solid var(--pulse-text);
+  border-block-end: var(--notchset-rule-width) solid var(--pulse-text);
   font-family: var(--sn-font-mono);
   font-size: var(--notchset-legend-size);
   letter-spacing: var(--notchset-legend-tracking);
-  line-height: 1.5;
+  line-height: 1.4;
   text-transform: uppercase;
 }
 
 portfolio-workspace code-block .md-segment:first-child {
-  padding-inline-start: 0;
-  border-inline-start: 0;
-  font-weight: var(--notchset-heading-weight);
+  background: var(--pulse-text);
+  color: var(--pulse-surface);
 }
 
 portfolio-workspace code-block .md-metrics {
