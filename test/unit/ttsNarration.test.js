@@ -396,3 +396,24 @@ test('a scroll whose lead reaches into the restart sentence is restored too', as
   assert.equal(restoredScrollCue(TEXT, cues, timing.sentences[1].startMs + 5)?.id, 'near:scroll');
   assert.equal(restoredScrollCue(TEXT, cues, 10)?.id, undefined);
 });
+
+test('a lead longer than the sentence before it fires at that sentence start, in cue order', () => {
+  const env = fakeEnvironment();
+  const controller = createTtsSpeechController(env);
+  const fired = [];
+  controller.speak('Short one. Then the quote begins here and goes on.', {
+    cues: [
+      { id: 'scroll', quote: 'the quote begins', offsetMs: -5000 },
+      { id: 'frame', quote: 'the quote begins', offsetMs: -100 },
+    ],
+    onCue: (cue) => fired.push(cue.id),
+  });
+  env.spoken.at(-1).onstart();
+  env.advance(1);
+  assert.deepEqual(fired, ['scroll'], 'the long lead is due at once');
+  env.advance(300);
+  env.spoken.at(-1).onend();
+  env.spoken.at(-1).onstart();
+  env.advance(60_000);
+  assert.deepEqual(fired, ['scroll', 'frame']);
+});
