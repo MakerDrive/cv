@@ -240,6 +240,11 @@ await Promise.all([
 // long synchronous start). Nothing on the first screen needs it, so it loads
 // off the critical path: immediately only for a Show deep link, otherwise when
 // the browser is idle or the visitor presses the tour button.
+// How long after the structured canvas appears the live graph waits before it is computed, so the first
+// screen, its data and the first interactions are not competing with it.
+const GRAPH_BINDING_DELAY_MS = 2_200;
+const TOUR_PRELOAD_DELAY_MS = 5_000;
+const GRAPH_BINDING_IDLE_TIMEOUT_MS = 3_000;
 const SHOW_ROUTE_PARAMS = ['showMode', 'showEntry', 'showTime', 'showDetail', 'showPlay', 'showCompleted'];
 let tourModulePromise = null;
 
@@ -3476,11 +3481,14 @@ class PortfolioGraphPanel extends HTMLElement {
       this.queueStructuredGraphBinding({ immediate: true, allowHidden });
       return;
     }
+    // The live graph is computed only after the page itself is up: it is a multi-second synchronous task on
+    // a modest CPU, the static snapshot stands in for it meanwhile, and any real need (a Show target,
+    // a press on the graph) escalates it through the urgent paths above.
     this._structuredBindingTimer = globalThis.setTimeout(() => {
       this._structuredBindingTimer = 0;
       if (!this.structuredMode || !this.canvas || this._structuredBound) return;
       this.queueStructuredGraphBinding({ allowHidden });
-    }, 450);
+    }, GRAPH_BINDING_DELAY_MS);
   }
 
   queueStructuredGraphBinding({ immediate = false, allowHidden = false } = {}) {
@@ -3497,7 +3505,7 @@ class PortfolioGraphPanel extends HTMLElement {
       return;
     }
     if (typeof globalThis.requestIdleCallback === 'function') {
-      this._structuredBindingIdleFrame = globalThis.requestIdleCallback(callback, { timeout: 600 });
+      this._structuredBindingIdleFrame = globalThis.requestIdleCallback(callback, { timeout: GRAPH_BINDING_IDLE_TIMEOUT_MS });
       return;
     }
     this._structuredBindingFrame = globalThis.setTimeout(callback, 0);
@@ -4290,9 +4298,16 @@ class PortfolioWorkspace extends HTMLElement {
         link.href = createRuntimeAssetUrl('js/tour-player/index.js').href;
         document.head.append(link);
       };
-      if (typeof globalThis.requestIdleCallback === 'function') {
-        globalThis.requestIdleCallback(preloadTour, { timeout: 6000 });
-      } else globalThis.setTimeout(preloadTour, 3000);
+      // The 1.9 MB Show runtime is not needed to read the page: it is fetched a few seconds after load and
+      // only when the visitor is not saving data (a press or hover still loads it at once).
+      const saveData = globalThis.navigator?.connection?.saveData === true;
+      if (!saveData) {
+        globalThis.setTimeout(() => {
+          if (typeof globalThis.requestIdleCallback === 'function') {
+            globalThis.requestIdleCallback(preloadTour, { timeout: 6000 });
+          } else preloadTour();
+        }, TOUR_PRELOAD_DELAY_MS);
+      }
     }
     let themeOpenRequest = 0;
     this._onThemeOpenFull = async () => {

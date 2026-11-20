@@ -48,7 +48,7 @@ ${palette}
 
 @scope (:root[data-portfolio-theme-mode]) {
 
-body:has(.pulse-screen) > header {
+body.pulse-body > header {
   min-block-size: var(--sn-app-topbar-height);
   padding-inline: var(--sn-step-10);
   background: var(--pulse-surface-panel);
@@ -70,7 +70,7 @@ body:has(.pulse-screen) > header {
   outline-offset: var(--sn-step-2);
 }
 
-body:has(.pulse-screen) button:where(:not(.material-symbols-outlined)) {
+body.pulse-body button:where(:not(.material-symbols-outlined)) {
   font-family: var(--sn-font-mono);
   letter-spacing: var(--notchset-label-tracking);
   font-weight: var(--notchset-control-weight);
@@ -230,11 +230,11 @@ portfolio-workspace .sn-tree-row[aria-selected='true'] {
   .pulse-workspace { padding: 0; }
   .pulse-workspace::before,
   .pulse-workspace::after { display: none; }
-  body:has(.pulse-screen) > header { padding-inline: var(--sn-step-4); }
+  body.pulse-body > header { padding-inline: var(--sn-step-4); }
 }
 
 @media (max-width: 520px) {
-  body:has(.pulse-screen) > header {
+  body.pulse-body > header {
     min-block-size: var(--sn-app-topbar-mobile-height, 56px);
   }
 }
@@ -246,7 +246,7 @@ portfolio-workspace .sn-tree-row[aria-selected='true'] {
   }
 }
 
-body:has(.pulse-screen) :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger) {
+body.pulse-body :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger) {
   position: relative;
   isolation: isolate;
   border-radius: var(--notchset-square);
@@ -266,34 +266,34 @@ body:has(.pulse-screen) :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-
     border-color calc(var(--notchset-fade) * var(--sn-theme-motion-scale)) var(--notchset-ease-fade);
 }
 
-body:has(.pulse-screen) :is(.pulse-header-menu-button, .ctw-trigger):is(:hover, :focus-visible, [active]) {
+body.pulse-body :is(.pulse-header-menu-button, .ctw-trigger):is(:hover, :focus-visible, [active]) {
   color: var(--pulse-text);
   border-color: var(--sn-button-border);
   background: var(--sn-button-hover-bg);
 }
 
-body:has(.pulse-screen) .pulse-tour-button {
+body.pulse-body .pulse-tour-button {
   color: var(--sn-portfolio-on-signal);
   border-color: var(--sn-portfolio-signal);
   background: var(--sn-portfolio-signal);
   box-shadow: var(--notchset-shadow-plate);
 }
 
-body:has(.pulse-screen) .pulse-tour-button[hidden] {
+body.pulse-body .pulse-tour-button[hidden] {
   display: none;
 }
 
-body:has(.pulse-screen) .pulse-tour-button:is(:hover, :focus-visible) {
+body.pulse-body .pulse-tour-button:is(:hover, :focus-visible) {
   background: var(--sn-portfolio-signal-hover);
   border-color: var(--sn-portfolio-signal-hover);
 }
 
-body:has(.pulse-screen) :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger)
+body.pulse-body :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger)
   :is(.material-symbols-outlined) {
   pointer-events: none;
 }
 
-body:has(.pulse-screen)
+body.pulse-body
   :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger):not(:disabled):active {
   translate: var(--notchset-plate-offset) var(--notchset-plate-offset);
   transition-duration: calc(var(--notchset-key-down) * var(--sn-theme-motion-scale));
@@ -301,7 +301,7 @@ body:has(.pulse-screen)
   box-shadow: none;
 }
 
-body:has(.pulse-screen) :is(.pulse-tour-button, .ctw-trigger)::before {
+body.pulse-body :is(.pulse-tour-button, .ctw-trigger)::before {
   content: '';
   position: absolute;
   inset: auto var(--notchset-ruler-inset) var(--notchset-rule-width);
@@ -314,7 +314,7 @@ body:has(.pulse-screen) :is(.pulse-tour-button, .ctw-trigger)::before {
   transition: opacity calc(var(--notchset-fade) * var(--sn-theme-motion-scale)) var(--notchset-ease-fade);
 }
 
-body:has(.pulse-screen) :is(.pulse-tour-button, .ctw-trigger):is(:hover, :focus-visible)::before {
+body.pulse-body :is(.pulse-tour-button, .ctw-trigger):is(:hover, :focus-visible)::before {
   opacity: 0.4;
 }
 
@@ -989,7 +989,7 @@ portfolio-workspace code-block :is(.md-p, .md-list, .md-table) del {
   box-shadow: none;
 }
 
-body:has(.pulse-screen)
+body.pulse-body
   :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger):focus-visible::after {
   content: '';
   position: absolute;
@@ -1301,7 +1301,7 @@ body:has(.pulse-screen)
 }
 
 @media (pointer: coarse) {
-  body:has(.pulse-screen) :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger) {
+  body.pulse-body :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger) {
     min-block-size: var(--notchset-control-touch-height);
   }
 }
@@ -1318,7 +1318,7 @@ body:has(.pulse-screen)
     --notchset-travel: 0ms;
     --notchset-unfold: 0ms;
   }
-  body:has(.pulse-screen)
+  body.pulse-body
     :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger):not(:disabled):active {
     translate: none;
   }
@@ -1328,7 +1328,7 @@ body:has(.pulse-screen)
   }
 }
 
-:root[data-portfolio-motion='off'] body:has(.pulse-screen)
+:root[data-portfolio-motion='off'] body.pulse-body
   :is(.pulse-tour-button, .pulse-header-menu-button, .ctw-trigger):not(:disabled):active {
   translate: none;
 }
