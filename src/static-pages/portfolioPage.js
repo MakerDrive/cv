@@ -159,13 +159,13 @@ export async function getPortfolioPage({
     ? renderRetirementContent(metadata.retirementTargetUrl)
     : /*html*/ `
       <script type="application/json" id="pulse-projects-data">
-        ${JSON.stringify(projects).replace(/</g, '\\u003c')}
+        ${JSON.stringify(projects).replace(/</g, '\\u003c').replace(/&/g, '\\u0026')}
       </script>
       <script type="application/json" id="pulse-tour-story">
-        ${JSON.stringify(CV_SHOW_STORY).replace(/</g, '\\u003c')}
+        ${JSON.stringify(CV_SHOW_STORY).replace(/</g, '\\u003c').replace(/&/g, '\\u0026')}
       </script>
       <script type="application/json" id="pulse-show-config">
-        ${JSON.stringify(TOUR_LOCAL_AUDIO_CONFIG).replace(/</g, '\\u003c')}
+        ${JSON.stringify(TOUR_LOCAL_AUDIO_CONFIG).replace(/</g, '\\u003c').replace(/&/g, '\\u0026')}
       </script>
       <section class="pulse-screen" aria-label="Vladimir Matiasevich portfolio">
         <img
