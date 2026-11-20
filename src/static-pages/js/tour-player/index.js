@@ -1663,7 +1663,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     const complete = event.detail?.complete;
     if (typeof complete === 'function') event.detail.handled = true;
     const { runner } = ensurePresenterLifecycle();
-    runner.beginPhase();
+    // A timed cue continues the phase its entry opened; only the opening event starts a new one.
+    if (event.detail?.continuation !== true) runner.beginPhase();
     const directives = event.detail?.directives || [];
     if (event.detail?.aligned && !directives.length) {
       complete?.(Object.freeze({ status: 'success', receipts: Object.freeze([]) }));
