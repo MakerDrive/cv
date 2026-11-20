@@ -550,6 +550,32 @@ portfolio-workspace code-block .md-lead {
   line-height: 1.5;
 }
 
+/* Name — description lines in a row: the name is a bold mono label, the description follows it. */
+portfolio-workspace code-block .md-defs {
+  margin-block: var(--sn-step-6);
+  border-block-start: var(--notchset-rule-width) solid var(--pulse-text);
+}
+
+portfolio-workspace code-block .md-def {
+  display: grid;
+  grid-template-columns: minmax(10ch, 30%) minmax(0, 1fr);
+  gap: var(--sn-step-4) var(--sn-step-8);
+  padding-block: var(--sn-step-4);
+  border-block-end: var(--notchset-rule-width) solid var(--pulse-outline);
+}
+
+portfolio-workspace code-block .md-def-name {
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+  text-transform: uppercase;
+  color: var(--pulse-text);
+}
+
+portfolio-workspace code-block .md-def-text {
+  color: var(--pulse-text-dim);
+}
+
 /* A list of links reads as rows with a hairline and an arrow, a lone link as a call to action. */
 portfolio-workspace code-block ul.md-links {
   margin-block: var(--sn-step-6);
