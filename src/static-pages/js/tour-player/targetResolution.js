@@ -767,3 +767,136 @@ export function animateCvShowScrollIntoView(
     frameId = requestFrame(step);
   });
 }
+
+
+const easeInOutSine = (progress) => -(Math.cos(Math.PI * progress) - 1) / 2;
+
+/**
+ * Scrolls a target into view the way a hand would: the claw lands on the page, closes, and pushes the
+ * content, so the page moves exactly as far as the hand does. A long way is covered in several pushes
+ * (push, let go, lift back, push again). Anything the hand cannot do (no presenter, reduced motion, a
+ * tiny distance) falls back to the plain animated scroll.
+ * @param {Element} target
+ * @param {{
+ *   document?: Document, signal?: AbortSignal, durationMs?: number,
+ *   cursor?: { planApproach?: Function, presentCursorFrame?: Function, setGrip?: Function, returnHome?: Function } | null,
+ * }} [options] `durationMs` is the whole gesture: approach, pushes and lifts
+ * @returns {Promise<void>}
+ */
+export function animateCvShowScrollWithHand(target, { document, signal, durationMs = 1800, cursor = null } = {}) {
+  const plain = () => animateCvShowScrollIntoView(target, { document, signal, durationMs: Math.min(700, durationMs) });
+  if (!target?.scrollIntoView) return Promise.resolve();
+  if (signal?.aborted) return Promise.reject(abortError(signal));
+  const view = document?.defaultView || globalThis;
+  const requestFrame = view?.requestAnimationFrame?.bind(view);
+  const cancelFrame = view?.cancelAnimationFrame?.bind(view) || (() => {});
+  const reducedMotion = view?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+  if (
+    !requestFrame || reducedMotion
+    || typeof cursor?.planApproach !== 'function'
+    || typeof cursor?.presentCursorFrame !== 'function'
+    || typeof cursor?.setGrip !== 'function'
+  ) return plain();
+
+  const anchor = resolveCvShowScrollAnchor(target);
+  const containers = scrollContainers(anchor, document);
+  const before = offsets(containers);
+  anchor.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+  const after = offsets(containers);
+  const rows = before.map((row, index) => ({
+    element: row.element,
+    startLeft: row.left,
+    startTop: row.top,
+    endLeft: after[index]?.left ?? row.left,
+    endTop: after[index]?.top ?? row.top,
+  }));
+  applyOffsets(rows, 0);
+  const primary = rows.reduce((best, row) => (
+    Math.abs(row.endTop - row.startTop) > Math.abs(best.endTop - best.startTop) ? row : best
+  ), rows[0]);
+  const delta = primary ? primary.endTop - primary.startTop : 0;
+  if (!primary || Math.abs(delta) < 48) {
+    applyOffsets(rows, 1);
+    return Promise.resolve();
+  }
+
+  const root = document?.scrollingElement || document?.documentElement;
+  const isPage = primary.element === root;
+  const box = isPage
+    ? { left: 0, top: 0, width: view.innerWidth, height: view.innerHeight }
+    : primary.element.getBoundingClientRect();
+  const direction = Math.sign(delta);
+  const handX = box.left + box.width * 0.5;
+  const handFrom = box.top + box.height * (direction > 0 ? 0.74 : 0.26);
+  const strokeMax = box.height * 0.58;
+  const total = Math.abs(delta);
+  const pushes = Math.ceil(total / strokeMax);
+  // Equal pushes: no tiny leftover nudge at the end.
+  const stroke = total / pushes;
+  const surface = isPage ? anchor : primary.element;
+  const point = (y) => cursor.presentCursorFrame?.(surface, { point: { x: handX, y }, preserveInk: true });
+
+  return new Promise((resolve, reject) => {
+    let frameId = null;
+    let finished = false;
+    const done = (settle, value) => {
+      if (finished) return;
+      finished = true;
+      if (frameId !== null) cancelFrame(frameId);
+      signal?.removeEventListener?.('abort', onAbort);
+      try { cursor.setGrip?.(false); } catch { /* the claw is already gone */ }
+      settle(value);
+    };
+    const onAbort = () => done(reject, abortError(signal));
+    signal?.addEventListener?.('abort', onAbort, { once: true });
+
+    // Timeline in ms: approach, then per push: grip, push, release, lift back (not after the last one).
+    const approach = cursor.planApproach(surface, { cursor: { x: handX, y: handFrom } });
+    const approachMs = Math.max(0, Number(approach?.durationMs) || 0);
+    const room = Math.max(600, durationMs - approachMs);
+    const pushWeights = Array.from({ length: pushes }, () => 1);
+    const liftMs = 160;
+    const weightSum = pushWeights.reduce((sum, weight) => sum + weight, 0);
+    const pushBudget = Math.max(300, room - (pushes - 1) * liftMs);
+    const pushMs = pushWeights.map((weight) => Math.max(260, (pushBudget * weight) / weightSum));
+
+    let phase = 'approach';
+    let index = 0;
+    let phaseStart = null;
+    let covered = 0;
+    const step = (timestamp) => {
+      frameId = null;
+      if (finished) return;
+      if (signal?.aborted) return onAbort();
+      if (phaseStart === null) phaseStart = timestamp;
+      const elapsed = timestamp - phaseStart;
+      if (phase === 'approach') {
+        approach?.render?.(Math.min(elapsed, approachMs));
+        if (elapsed >= approachMs) { phase = 'push'; phaseStart = timestamp; cursor.setGrip(true); }
+      } else if (phase === 'push') {
+        const distance = stroke;
+        const progress = Math.min(1, elapsed / pushMs[index]);
+        const moved = distance * easeInOutSine(progress);
+        applyOffsets(rows, Math.min(1, (covered + moved) / total));
+        point(handFrom - direction * moved);
+        if (progress >= 1) {
+          covered += distance;
+          index += 1;
+          if (index >= pushes) return done(resolve);
+          cursor.setGrip(false);
+          phase = 'lift';
+          phaseStart = timestamp;
+        }
+      } else {
+        const progress = Math.min(1, elapsed / liftMs);
+        point(handFrom - direction * stroke * (1 - easeInOutSine(progress)));
+        if (progress >= 1) { phase = 'push'; phaseStart = timestamp; cursor.setGrip(true); }
+      }
+      frameId = requestFrame(step);
+    };
+    frameId = requestFrame(step);
+  }).then(() => {
+    applyOffsets(rows, 1);
+    try { void cursor.returnHome?.(); } catch { /* nothing to return */ }
+  });
+}

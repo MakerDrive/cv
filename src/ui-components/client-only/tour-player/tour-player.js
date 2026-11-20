@@ -1935,7 +1935,8 @@ export class PortfolioShowChat extends HTMLElement {
     const runRestore = () => {
       if (!restoreCue || restoreDone || requestId !== this.#requestId) return;
       restoreDone = true;
-      onCue(restoreCue);
+      // Instant: a restored page is simply there, nobody pushes it.
+      onCue({ ...restoreCue, budgetMs: 1 });
     };
     const startUnalignedPresentation = this.#alignment.available ? null : async () => {
       /** @type {(value?: any) => void} */

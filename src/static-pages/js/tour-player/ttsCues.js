@@ -23,7 +23,8 @@ export function buildTimedCues(directives) {
         ...timing,
         offsetMs: (scrollCell.timing.at?.offsetMs || 0) - (scrollCell.timing.leadMs || 0),
         directive: projectCvShowDirective(scrollCell, CV_SHOW_PRESENTATION_PROJECT),
-        budgetMs: Number(scrollCell.timing?.gestureDurationMs) || 0,
+        // The browser voice has no hard cell deadline: room enough for the hand to push the page.
+        budgetMs: Math.max(1_800, Number(scrollCell.timing?.gestureDurationMs) || 0),
         scroll: true,
       });
     }
