@@ -509,6 +509,89 @@ portfolio-workspace code-block .md-quote {
   font-style: normal;
 }
 
+/* The head of a document, written as plain markdown: the title, a period line and a bold kind line
+   become one mono meta row, and the first long paragraph is the lead. */
+portfolio-workspace code-block .md-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sn-step-3) var(--sn-step-8);
+  margin-block: var(--sn-step-4) var(--sn-step-6);
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+  font-size: var(--notchset-legend-size);
+  letter-spacing: var(--notchset-legend-tracking);
+  text-transform: uppercase;
+}
+
+portfolio-workspace code-block .md-meta-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sn-step-3);
+  color: var(--pulse-text);
+}
+
+portfolio-workspace code-block .md-meta-kind::before {
+  content: '';
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: var(--sn-portfolio-signal);
+}
+
+portfolio-workspace code-block .md-meta-period {
+  font-variant-numeric: tabular-nums;
+}
+
+portfolio-workspace code-block .md-lead {
+  margin-block: var(--sn-step-6) var(--sn-step-8);
+  max-inline-size: 62ch;
+  font-size: calc(1em * 1.18);
+  line-height: 1.5;
+}
+
+/* A list of links reads as rows with a hairline and an arrow, a lone link as a call to action. */
+portfolio-workspace code-block ul.md-links {
+  margin-block: var(--sn-step-6);
+  border-block-start: var(--notchset-rule-width) solid var(--pulse-text);
+}
+
+portfolio-workspace code-block ul.md-links li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sn-step-6);
+  margin: 0;
+  padding: var(--sn-step-4) var(--sn-step-2);
+  border-block-end: var(--notchset-rule-width) solid var(--pulse-outline);
+}
+
+portfolio-workspace code-block ul.md-links li::before {
+  content: none;
+}
+
+portfolio-workspace code-block ul.md-links li > a:first-child {
+  flex: 1 1 auto;
+  background-image: none;
+  text-decoration: none;
+}
+
+portfolio-workspace code-block ul.md-links li::after {
+  content: '↗';
+  flex: 0 0 auto;
+  color: var(--pulse-text-dim);
+  font-family: var(--sn-font-mono);
+}
+
+portfolio-workspace code-block ul.md-links li:is(:hover, :focus-within) {
+  background: color-mix(in srgb, var(--pulse-text) 4%, transparent);
+}
+
+portfolio-workspace code-block p.md-cta a::after {
+  content: ' →';
+  font-family: var(--sn-font-mono);
+}
+
 /* Update lists on project pages: the section title and subtitle follow the document headings, the
    updates are plain rows with hairlines (no box per item, no tree-branch marker). */
 portfolio-workspace code-block .pulse-project-updates {

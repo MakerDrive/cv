@@ -53,3 +53,26 @@ test('tables, pictures and code are numbered figures, and a second pass changes 
   transformMarkdownPatterns(root);
   assert.equal(root.innerHTML, before);
 });
+
+test('the lines after the title become a meta row and a lead, other pages\' text stays', () => {
+  const root = render('<h1 class="md-h">Agent Portal</h1><p class="md-p">2025-2026</p><p class="md-p"><strong>Featured project</strong></p><div class="cb-content-slot"></div><p class="md-p">An R&amp;D environment for engineering work with AI: project memory, context engineering and controlled delivery.</p><p class="md-p">Second paragraph stays plain and is long enough to be a lead too, but only the first one is.</p>');
+  const meta = root.querySelector('.md-meta');
+  assert.equal(meta.querySelector('.md-meta-period').textContent, '2025-2026');
+  assert.equal(meta.querySelector('.md-meta-kind').textContent, 'Featured project');
+  assert.equal(root.querySelectorAll('.md-lead').length, 1);
+  assert.match(root.querySelector('.md-lead').textContent, /^An R&D environment/);
+  assert.equal(root.querySelectorAll('p.md-p').length, 2);
+});
+
+test('a title with no meta lines still gets a lead, and a period inside prose is not meta', () => {
+  const root = render('<h1 class="md-h">T</h1><p class="md-p">A first paragraph that is clearly long enough to count as the lead of the page.</p><p class="md-p">2026</p>');
+  assert.equal(root.querySelectorAll('.md-meta').length, 0);
+  assert.equal(root.querySelectorAll('.md-lead').length, 1);
+});
+
+test('a list of links becomes link rows, a paragraph of one link becomes a call to action', () => {
+  const root = render('<ul class="md-list"><li><a href="#a">First</a></li><li><a href="#b">Second</a> — note</li></ul><ul class="md-list"><li>text <a href="#c">x</a></li></ul><p class="md-p"><a href="#d">Open the demo</a></p><p class="md-p">See <a href="#e">this</a> too</p>');
+  assert.equal(root.querySelectorAll('ul.md-links').length, 1);
+  assert.equal(root.querySelectorAll('ul.md-list').length, 2);
+  assert.equal(root.querySelectorAll('p.md-cta').length, 1);
+});
