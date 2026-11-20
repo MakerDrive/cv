@@ -25,6 +25,7 @@ import {
 } from '../../../static-pages/js/tour-player/presentationProjectAdapter.js';
 import { createTtsSpeechController } from '../../../static-pages/js/tour-player/ttsNarration.js';
 import { localizeShowStory } from '../../../static-pages/js/tour-player/showLocale.js';
+import { buildTimedCues } from '../../../static-pages/js/tour-player/ttsCues.js';
 import { CV_SHOW_LOCALES } from '../../../static-pages/data/cvShowLocales.js';
 import {
   CV_SHOW_RECOVERY,
@@ -593,7 +594,8 @@ export class PortfolioShowChat extends HTMLElement {
    * @returns {null | { words: ReadonlyArray<{ text: string, startMs: number, endMs: number }>, positionMs: number, playing: boolean }}
    */
   getSpeechClock() {
-    const track = this.#alignedEntry?.captionTrack;
+    const ttsClock = this.#browserVoiceClock();
+    const track = ttsClock?.words ?? this.#alignedEntry?.captionTrack;
     if (!Array.isArray(track) || !track.length) return null;
     const text = this.#playerEntry()?.subtitle || this.#currentScene()?.subtitle || '';
     if (this.#speechClockMemo?.track !== track || this.#speechClockMemo.text !== text) {
@@ -601,9 +603,45 @@ export class PortfolioShowChat extends HTMLElement {
     }
     return {
       words: this.#speechClockMemo.words,
-      positionMs: this.#presentationPositionMs(),
-      playing: this.#transportPlaying,
+      positionMs: ttsClock ? ttsClock.positionMs : this.#presentationPositionMs(),
+      playing: ttsClock ? ttsClock.playing : this.#transportPlaying,
     };
+  }
+
+  /** Estimated clock of the browser voice; null for recorded narration or when nothing is spoken. */
+  #browserVoiceClock() {
+    if (this.#alignedEntry?.captionTrack?.length) return null;
+    return this.#speech.clock?.() ?? null;
+  }
+
+  /** @type {any} */
+  #captionTicker = 0;
+
+  /** The browser voice has no media events: keep the caption highlight and the cloud moving on a timer. */
+  #startCaptionTicker() {
+    if (this.#captionTicker) return;
+    this.#captionTicker = globalThis.setInterval(() => {
+      if (!this.#browserVoiceClock()) {
+        globalThis.clearInterval(this.#captionTicker);
+        this.#captionTicker = 0;
+        return;
+      }
+      this.#syncPlayerCaption();
+    }, 140);
+  }
+
+  #syncPlayerCaption() {
+    const activeEntry = this.#playerEntry();
+    const clock = this.#browserVoiceClock();
+    if (!clock) return;
+    const caption = createCvShowCanonicalCaption(
+      activeEntry?.subtitle || this.#currentScene()?.subtitle || '',
+      clock.words,
+      clock.positionMs,
+    );
+    this.#showPlayer?.setState?.({
+      caption: { speaker: this.$.inBranch ? this.#message('tour.details') : 'CV', ...caption },
+    });
   }
 
   #presentationPositionMs(fallbackMs = this.#session.snapshot.playback.positionMs) {
@@ -1855,20 +1893,14 @@ export class PortfolioShowChat extends HTMLElement {
     // The Russian browser fallback keeps the older behaviour of running them all at the start.
     let setupFinished = null;
     let cueChain = Promise.resolve();
-    const timedCues = this.#alignment.available || this.#story.narrationLocale === 'ru' ? [] : visualDirectives.map((directive) => ({
-      id: directive.id,
-      quote: directive.timing?.quote || '',
-      occurrence: directive.timing?.occurrence || 1,
-      offsetMs: directive.timing?.offsetMs || 0,
-      directive,
-    }));
+    const timedCues = this.#alignment.available || this.#story.narrationLocale === 'ru' ? [] : buildTimedCues(visualDirectives);
     const onCue = (cue) => {
       cueChain = cueChain.then(async () => {
         await setupFinished;
         if (requestId !== this.#requestId) return;
         await new Promise((resolve) => {
           const detail = {
-            directives: [cue.directive], aligned: false, requestId, continuation: true, handled: false, complete: resolve,
+            directives: [cue.directive], aligned: false, requestId, continuation: true, scroll: cue.scroll === true, handled: false, complete: resolve,
           };
           this.dispatchEvent(new CustomEvent('portfolio-show-phase', { bubbles: true, composed: true, detail }));
           if (!detail.handled) resolve();
@@ -2434,6 +2466,7 @@ export class PortfolioShowChat extends HTMLElement {
       cues,
       onCue,
       onStart: () => {
+        if (cues.length) this.#startCaptionTicker();
         if (!this.#publishPhysicalStart(entry, requestId)) return;
         if (typeof onPhysicalStart !== 'function') return;
         void onPhysicalStart().catch((error) => {
@@ -2939,10 +2972,11 @@ export class PortfolioShowChat extends HTMLElement {
   #syncPlayer(terminalState = null) {
     const scene = this.#currentScene();
     const activeEntry = this.#playerEntry();
-    const captionPositionMs = this.#presentationPositionMsForUI();
+    const voiceClock = this.#browserVoiceClock();
+    const captionPositionMs = voiceClock ? voiceClock.positionMs : this.#presentationPositionMsForUI();
     const caption = createCvShowCanonicalCaption(
       activeEntry?.subtitle || scene?.subtitle || '',
-      this.#alignedEntry?.captionTrack,
+      voiceClock ? voiceClock.words : this.#alignedEntry?.captionTrack,
       captionPositionMs,
     );
     this.#showPlayer?.setState?.({

@@ -1040,6 +1040,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -6932,6 +6933,7 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -7121,6 +7123,7 @@ test('historical and terminal detail exits restore the interrupted Short checkpo
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -7281,6 +7284,7 @@ test('a seek back into a replaced segment runs the owner scene setup before the 
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -7434,6 +7438,7 @@ test('an interrupted owner scene setup is re-run when the same replaced segment 
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
