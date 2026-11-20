@@ -307,6 +307,46 @@ portfolio-graph-panel {
   position: relative;
 }
 
+/* Until the page has built its first screen, the raw static markup (unthemed header, the stretched graph
+   picture, the skeleton bars) is not shown: a calm loader stands in. If the app never reports ready (a script
+   failed or is blocked), the static page is revealed after a while anyway. */
+html:not([data-portfolio-ready]) body.pulse-body > header,
+html:not([data-portfolio-ready]) body.pulse-body > main {
+  animation: portfolio-reveal-fallback 0s 14s forwards;
+  visibility: hidden;
+}
+
+html:not([data-portfolio-ready]) body.pulse-body::after {
+  content: '';
+  position: fixed;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 30px;
+  block-size: 30px;
+  margin: -15px 0 0 -15px;
+  border: 2px solid color-mix(in oklab, var(--pulse-text) 22%, transparent);
+  border-block-start-color: var(--pulse-accent);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: portfolio-graph-loading-spin 0.72s linear infinite, portfolio-hide-loader 0s 14s forwards;
+}
+
+@keyframes portfolio-reveal-fallback {
+  to { visibility: visible; }
+}
+
+@keyframes portfolio-hide-loader {
+  to { opacity: 0; }
+}
+
+/* The icon font: .material-symbols-outlined can show its ligature name as words while the icon font is still loading: keep it
+   an empty, icon-sized box until the font is there. */
+html:not([data-icons-ready]) .material-symbols-outlined {
+  inline-size: 1em;
+  overflow: hidden;
+  color: transparent;
+}
+
 /* First paint: a quiet skeleton of the tree and article columns stands in for
    the workspace until it upgrades, so the page is not an empty gap next to the
    graph preview. */

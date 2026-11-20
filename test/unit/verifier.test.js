@@ -366,6 +366,7 @@ test('full verifier success and failure scenarios', async () => {
       await fs.mkdir(path.join(tmpDir, 'js/show-log'), { recursive: true });
       await fs.writeFile(path.join(tmpDir, 'js/show-log/index.js'), 'export const getShowLog = () => ({});');
       await fs.writeFile(path.join(tmpDir, 'js/ForceWorker.js'), 'console.log("hello worker");');
+      await fs.writeFile(path.join(tmpDir, 'js/icons-ready.js'), 'document.documentElement.setAttribute("data-icons-ready", "");');
       await fs.writeFile(path.join(tmpDir, 'js/material-symbols.css'), 'url("material-symbols-outlined-400.ttf")');
       await fs.writeFile(path.join(tmpDir, 'js/material-symbols-outlined-400.ttf'), 'fontdata');
       try {
@@ -469,7 +470,11 @@ test('build script hygiene and rename contracts', async () => {
       from: './node_modules/symbiote-ui/icons/material-symbols-outlined-400.ttf',
       to: './js/material-symbols-outlined-400.ttf',
     },
-  ], 'JSDA must copy Material Symbols assets for build and SSG preview');
+    {
+      from: './src/static-pages/icons-ready.js',
+      to: './js/icons-ready.js',
+    },
+  ], 'JSDA must copy Material Symbols assets (and the icon-ready marker) for build and SSG preview');
   // The social card render + copy are extracted into 'build:content' so the
   // publish chain can compose them with a single render pass.
   assert.match(pkg.scripts['build'], /npm run render-social-cards && npm run build:content$/, 'build = render then content');

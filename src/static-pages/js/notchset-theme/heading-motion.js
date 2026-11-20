@@ -1,5 +1,6 @@
 const GLYPHS = 'ABCDEFGHJKLMNPRSTUVWXYZ0123456789#/+=';
 const STILL = new Set([' ', '·', '/', '.', ':']);
+const STALL_MS = 120;
 
 /**
  * @param {string} text
@@ -52,15 +53,33 @@ export default function installHeadingMotion(doc) {
     let overlay = doc.createElement('span');
     overlay.className = 'notchset-heading-overlay';
     overlay.setAttribute('aria-hidden', 'true');
-    heading.setAttribute('data-notchset-decoding', '');
     heading.append(label, overlay);
-    let record = { label, overlay, frame: 0, start: view.performance.now(), sample: -1 };
+    let record = { label, overlay, frame: 0, start: 0, last: 0, sample: -1 };
     active.set(heading, record);
     let duration = 110 + Math.min(Array.from(text).length, 24) * 14;
+    // The scrambled text hides the real one, so it must never sit on screen while the page cannot animate
+    // it away: it is only put up from a frame that follows a smooth one, and any stalled frame (a busy
+    // main thread) ends the effect on the spot with the real heading.
     let draw = (timestamp) => {
       if (!heading.isConnected || motionOff()) {
         finish(heading);
         return;
+      }
+      if (record.last && timestamp - record.last > STALL_MS) {
+        finish(heading);
+        return;
+      }
+      const firstFrame = !record.last;
+      record.last = timestamp;
+      if (firstFrame) {
+        // One frame is only a measurement of how busy the page is; the effect begins with the next one.
+        record.frame = view.requestAnimationFrame(draw);
+        return;
+      }
+      if (!record.start) {
+        record.start = timestamp;
+        heading.setAttribute('data-notchset-decoding', '');
+        overlay.textContent = scrambleHeading(text, 0);
       }
       let elapsed = Math.max(0, (timestamp - record.start) / scale);
       if (elapsed >= duration) {
@@ -74,7 +93,6 @@ export default function installHeadingMotion(doc) {
       }
       record.frame = view.requestAnimationFrame(draw);
     };
-    overlay.textContent = scrambleHeading(text, 0);
     record.frame = view.requestAnimationFrame(draw);
   };
   let scan = (node) => {
