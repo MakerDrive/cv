@@ -28,8 +28,55 @@ import {
   resolveCvShowFailureSemantics,
   resolveFailureRecovery,
 } from './failurePolicy.js';
+import { getShowLog } from '../show-log/index.js';
 
 const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
+const CELL_TERMINAL_STATUSES = ['failed', 'rejected', 'cancelled', 'stale', 'skipped'];
+
+function finiteDifference(later, earlier) {
+  let a = Number(later);
+  let b = Number(earlier);
+  return Number.isFinite(a) && Number.isFinite(b) ? Math.round(a - b) : undefined;
+}
+
+function describeCellReason(reason) {
+  if (!reason || typeof reason !== 'object') return { code: String(reason || '') };
+  let details = reason.details && typeof reason.details === 'object' ? reason.details : {};
+  let observed = details.monotonicTimeMs ?? details.observedAt;
+  return {
+    code: String(reason.code || ''),
+    message: String(reason.message || ''),
+    budgetMs: details.budgetMs,
+    activeForMs: finiteDifference(observed, details.activatedAtMonotonicTimeMs),
+    lateByMs: finiteDifference(observed, details.deadlineMonotonicTimeMs),
+    admissionRequired: details.admissionRequired,
+    providerAdmission: details.providerAdmission,
+    reportedStatuses: details.reportedStatuses,
+    cause: details.cause,
+    expiryMs: details.expiryMs,
+  };
+}
+
+function describeMediaState(media) {
+  let buffered = media?.buffered;
+  let bufferedEndMs;
+  try {
+    if (buffered?.length) bufferedEndMs = Math.round(buffered.end(buffered.length - 1) * 1_000);
+  } catch {
+    bufferedEndMs = undefined;
+  }
+  return {
+    currentMs: Math.round(Number(media?.currentTime || 0) * 1_000),
+    paused: media?.paused,
+    seeking: media?.seeking,
+    ended: media?.ended,
+    readyState: media?.readyState,
+    networkState: media?.networkState,
+    playbackRate: media?.playbackRate,
+    bufferedEndMs,
+    visibility: globalThis.document?.visibilityState,
+  };
+}
 const MAX_PRESENTATION_PREROLL_MEDIA_DRIFT_MS = 50;
 const CV_SHOW_PRESENTATION_SAMPLE_INTERVAL_MS = 250;
 
@@ -418,8 +465,9 @@ export function createCvShowAlignmentController({
       const terminalReasonCode = (reason) => (
         typeof reason === 'string' ? reason : String(reason?.code || '')
       );
+      /** @returns {string} recovery class, '' when the receipt is not a classifiable failure */
       const classifiableFailedReceipt = (receipt) => {
-        if (receipt?.status !== 'failed' || !receipt?.cellId || !tuple) return false;
+        if (receipt?.status !== 'failed' || !receipt?.cellId || !tuple) return '';
         const projectCell = (tuple.project?.cells || [])
           .find((cell) => cell.id === receipt.cellId) || null;
         const layerId = cvShowCellLayerId(projectCell || receipt) || '';
@@ -442,14 +490,30 @@ export function createCvShowAlignmentController({
           narrationStarted: physicalPlaybackStarted === true,
           operationRole: cvShowOperationRole(projectCell, tuple.project),
         });
-        if (recovery !== 'degrade' && recovery !== 'skip') return false;
+        if (recovery !== 'degrade' && recovery !== 'skip') return recovery;
         toleratedFailedCells.add(receipt.cellId);
         cascadeTracker?.markFailure(receipt.cellId);
         degradedCellOutcomes.set(receipt.cellId, Object.freeze({
           outcome: terminalReasonCode(receipt.reason) || 'failed',
           fallback: 'none-skipped',
         }));
-        return true;
+        return recovery;
+      };
+      const logCellTerminal = (receipt, recovery) => {
+        let projectCell = (tuple?.project?.cells || [])
+          .find((cell) => cell.id === receipt.cellId) || null;
+        let level = receipt.status === 'failed' && !toleratedFailedCells.has(receipt.cellId)
+          ? 'warn'
+          : 'info';
+        getShowLog().log('cell', receipt.status, {
+          cellId: receipt.cellId,
+          kind: String(projectCell?.cue?.kind || projectCell?.kind || receipt.kind || ''),
+          layerId: cvShowCellLayerId(projectCell || receipt) || '',
+          mediaTimeMs: tuple?.execution?.snapshot?.mediaTimeMs,
+          recovery: recovery || undefined,
+          tolerated: toleratedFailedCells.has(receipt.cellId),
+          ...describeCellReason(receipt.reason),
+        }, level);
       };
       /**
        * Annotates an expiry skip that follows from a tolerated failed cell:
@@ -490,15 +554,12 @@ export function createCvShowAlignmentController({
           milestones.push(receipt);
           acceptedMilestones.set(receipt.cellId, milestones);
         }
-        if (
-          ['failed', 'rejected', 'cancelled', 'stale', 'skipped'].includes(receipt?.status)
-          && receipt?.cellId
-        ) {
+        if (CELL_TERMINAL_STATUSES.includes(receipt?.status) && receipt?.cellId) {
           terminalReasons.set(receipt.cellId, Object.freeze({
             status: receipt.status,
             code: terminalReasonCode(receipt.reason),
           }));
-          classifiableFailedReceipt(receipt);
+          logCellTerminal(receipt, classifiableFailedReceipt(receipt));
         }
         const outgoing = annotateCascadeSkip(receipt);
         onReceipt?.(outgoing);
@@ -517,9 +578,33 @@ export function createCvShowAlignmentController({
           source,
           providerState: { admissionReported: false },
         });
+        let log = getShowLog();
+        let cellId = String(operation.scheduleCell?.cellId || operation.projectCell?.id || '');
+        let startedAt = performance.now();
+        log.debug('cell', 'start', {
+          cellId,
+          kind,
+          cue: String(operation.projectCell?.cue?.kind || ''),
+          operationId: operation.operationId,
+          budgetMs: operation.budgetMs,
+          mediaTimeMs: tuple.execution.snapshot.mediaTimeMs,
+        });
         try {
-          return await runPresentationOperation(providerOperation);
+          let result = await runPresentationOperation(providerOperation);
+          log.debug('cell', 'done', {
+            cellId,
+            elapsedMs: Math.round(performance.now() - startedAt),
+          });
+          return result;
         } catch (error) {
+          log.warn('cell', 'operation-error', {
+            cellId,
+            kind,
+            elapsedMs: Math.round(performance.now() - startedAt),
+            aborted: operation.signal?.aborted === true,
+            mediaTimeMs: tuple.execution.snapshot.mediaTimeMs,
+            ...describeCellReason(error),
+          });
           const missing = (error?.result?.receipts || [])
             .filter(({ status }) => status === 'missing')
             .map(({ id, target, reason }) => `${target || id}:${reason}`);
@@ -660,6 +745,19 @@ export function createCvShowAlignmentController({
           }
           const terminalReason = terminalReasons.get(failedCellId);
           const operationCause = operationCauses.get(failedCellId);
+          getShowLog().error('pump', 'stopped', {
+            cellId: failedCellId,
+            terminal: terminalReason,
+            operationCause,
+            execution: {
+              state: tuple.execution.snapshot.state,
+              mediaTimeMs: tuple.execution.snapshot.mediaTimeMs,
+              activeCount: tuple.execution.snapshot.activeCount,
+              activeOperationId: tuple.execution.snapshot.activeOperationId,
+              lastSampleReason: tuple.execution.snapshot.lastSampleReason,
+            },
+            media: describeMediaState(media),
+          });
           onSeekFailure?.(Object.freeze({
             status: 'failed',
             reason: error?.code || 'presentation-playback-failed',
