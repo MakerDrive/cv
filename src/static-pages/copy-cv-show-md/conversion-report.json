@@ -1,0 +1,3154 @@
+{
+  "scenes": [
+    {
+      "id": "positioning",
+      "cues": 5,
+      "expressed": 5,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:positioning.tenure-marker:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.tenure-marker:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:positioning:01"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.tenure-marker",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.tenure-marker",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.tenure-marker",
+          "field": "dependsOn:settled:cv-show:cue:positioning.tenure-marker:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.workspace-transition:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.workspace-transition:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:positioning:02"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.workspace-transition",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.workspace-transition",
+          "field": "dependsOn:settled:cv-show:cue:positioning.workspace-transition:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:positioning.open",
+          "field": "timing.gestureDurationMs"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:positioning.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "positioning#1",
+          "quote": "Сейчас, в две тысячи двадцать шестом году",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "positioning#2",
+          "quote": "Сейчас, в две тысячи двадцать шестом году",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "symbiote-workspace",
+      "cues": 11,
+      "expressed": 11,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:workspace.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.intro-frame:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.intro-frame:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-workspace:01"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.intro-frame",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.intro-frame",
+          "field": "dependsOn:settled:cv-show:cue:workspace.intro-frame:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-workspace.illustration-task:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-workspace.illustration-task:scroll",
+          "field": "dependsOn:settled:cv-show:cue:workspace.open"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-workspace.illustration-task",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-workspace.illustration-task",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-workspace.illustration-task:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-workspace.video-agentic:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-workspace.video-agentic:scroll",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-workspace.illustration-task"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-workspace.video-agentic",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-workspace.video-agentic",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-workspace.video-agentic:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.portable-config:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.portable-config:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-workspace:02"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.portable-config",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.portable-config",
+          "field": "dependsOn:settled:cv-show:cue:workspace.portable-config:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.agent-portal-card:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.agent-portal-card:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-workspace:03"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.agent-portal-card",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace.agent-portal-card",
+          "field": "dependsOn:settled:cv-show:cue:workspace.agent-portal-card:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:workspace.open"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "symbiote-ui",
+      "cues": 13,
+      "expressed": 13,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:symbiote-ui.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.graph-tooling:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.graph-tooling:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-ui:01"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.graph-tooling",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.graph-tooling",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui.graph-tooling:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.illustration-components:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.illustration-components:scroll",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui.open"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.illustration-components",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.illustration-components",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui.illustration-components:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.current-show:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.current-show:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-ui:02"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.current-show",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.current-show",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui.current-show:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.show-player-pointer:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.show-player-pointer:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-ui:03"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.show-player-pointer",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.show-player-pointer",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui.show-player-pointer:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.github-link:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.github-link:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-ui:04"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.github-link",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.github-link",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui.github-link:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.details-pointer:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.details-pointer:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-ui:05"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.details-pointer",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui.details-pointer",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui.details-pointer:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:symbiote-ui.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "symbiote-ui#6",
+          "quote": "интерфейс этого си ви",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "symbiote-ui#7",
+          "quote": "интерфейс этого си ви",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "symbiote-engine",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:symbiote-engine.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.illustration-execution:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.illustration-execution:scroll",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-engine.open"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.illustration-execution",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.illustration-execution",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-engine.illustration-execution:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.intro:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.intro:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-engine:01"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.intro",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.intro",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-engine.intro:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.workspace-join:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.workspace-join:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-engine:02"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.workspace-join",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.workspace-join",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine.workspace-join",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-engine.workspace-join:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:symbiote-engine.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "symbiote-engine#6",
+          "quote": "Workspace связывает визуальную и исполнительную части",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "symbiote-engine#7",
+          "quote": "Workspace связывает визуальную и исполнительную части",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "agent-portal",
+      "cues": 13,
+      "expressed": 13,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:agent-portal.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.path:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.path:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-portal:01"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.path",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.path",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.path",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal.path:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.illustration-process:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.illustration-process:scroll",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal.open"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.illustration-process",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.illustration-process",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal.illustration-process:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.human-decision:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.human-decision:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-portal:02"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.human-decision",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.human-decision",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.human-decision",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal.human-decision:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.open-source:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.open-source:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-portal:03"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.open-source",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.open-source",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal.open-source:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.github-link:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.github-link:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-portal:04"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.github-link",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.github-link",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal.github-link:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.demo-link:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.demo-link:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-portal:05"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.demo-link",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal.demo-link",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal.demo-link:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:agent-portal.open"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "symbiote-video-studio",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:video-studio.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-video-studio.illustration-composition:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-video-studio.illustration-composition:scroll",
+          "field": "dependsOn:settled:cv-show:cue:video-studio.open"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-video-studio.illustration-composition",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-video-studio.illustration-composition",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-video-studio.illustration-composition:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio.visible-process:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio.visible-process:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-video-studio:01"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio.visible-process",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio.visible-process",
+          "field": "dependsOn:settled:cv-show:cue:video-studio.visible-process:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio.demo:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio.demo:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-video-studio:02"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio.demo",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio.demo",
+          "field": "dependsOn:settled:cv-show:cue:video-studio.demo:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:video-studio.open"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "adaptive-maximo-workbench",
+      "cues": 15,
+      "expressed": 15,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:maximo.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-context:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-context:scroll",
+          "field": "dependsOn:settled:cv-show:cue:maximo.open"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-context",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-context",
+          "field": "dependsOn:settled:cv-show:cue:adaptive-maximo-workbench.illustration-context:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.work-orders:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.work-orders:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:adaptive-maximo-workbench:01"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.work-orders",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.work-orders",
+          "field": "dependsOn:settled:cv-show:cue:maximo.work-orders:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-asset:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-asset:scroll",
+          "field": "dependsOn:settled:cv-show:cue:maximo.open"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-asset",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-asset",
+          "field": "dependsOn:settled:cv-show:cue:adaptive-maximo-workbench.illustration-asset:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.asset-context:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.asset-context:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:adaptive-maximo-workbench:02"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.asset-context",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.asset-context",
+          "field": "dependsOn:settled:cv-show:cue:maximo.asset-context:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.agentic-demo:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.agentic-demo:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:adaptive-maximo-workbench:03"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.agentic-demo",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.agentic-demo",
+          "field": "dependsOn:settled:cv-show:cue:maximo.agentic-demo:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.xr-demo:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.xr-demo:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:adaptive-maximo-workbench:04"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.xr-demo",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo.xr-demo",
+          "field": "dependsOn:settled:cv-show:cue:maximo.xr-demo:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-inspection:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-inspection:scroll",
+          "field": "dependsOn:settled:cv-show:cue:maximo.open"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-inspection",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:adaptive-maximo-workbench.illustration-inspection",
+          "field": "dependsOn:settled:cv-show:cue:adaptive-maximo-workbench.illustration-inspection:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:maximo.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "adaptive-maximo-workbench#12",
+          "quote": "А здесь я развиваю ту же идею в икс ар пространстве",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "adaptive-maximo-workbench#13",
+          "quote": "А здесь я развиваю ту же идею в икс ар пространстве",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "agent-pool-mcp",
+      "cues": 5,
+      "expressed": 5,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:agent-pool.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-mcp.illustration-dispatch:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-mcp.illustration-dispatch:scroll",
+          "field": "dependsOn:settled:cv-show:cue:agent-pool.open"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-mcp.illustration-dispatch",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-mcp.illustration-dispatch",
+          "field": "dependsOn:settled:cv-show:cue:agent-pool-mcp.illustration-dispatch:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool.flow:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool.flow:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-pool-mcp:01"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool.flow",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool.flow",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool.flow",
+          "field": "dependsOn:settled:cv-show:cue:agent-pool.flow:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:agent-pool.open"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "project-graph-mcp",
+      "cues": 11,
+      "expressed": 11,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:project-graph.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-repository:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-repository:scroll",
+          "field": "dependsOn:settled:cv-show:cue:project-graph.open"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-repository",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-repository",
+          "field": "dependsOn:settled:cv-show:cue:project-graph-mcp.illustration-repository:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.example:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.example:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:project-graph-mcp:01"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.example",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.example",
+          "field": "dependsOn:settled:cv-show:cue:project-graph.example:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-retrieval:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-retrieval:scroll",
+          "field": "dependsOn:settled:cv-show:cue:project-graph.open"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-retrieval",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-mcp.illustration-retrieval",
+          "field": "dependsOn:settled:cv-show:cue:project-graph-mcp.illustration-retrieval:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.context:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.context:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:project-graph-mcp:02"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.context",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.context",
+          "field": "dependsOn:settled:cv-show:cue:project-graph.context:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.node:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.node:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:project-graph-mcp:03"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.node",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph.node",
+          "field": "dependsOn:settled:cv-show:cue:project-graph.node:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:project-graph.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "project-graph-mcp#2",
+          "quote": "Project Graph MCP это опенсорс эм си пи сервер",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "project-graph-mcp#3",
+          "quote": "Project Graph MCP это опенсорс эм си пи сервер",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "lifecycle-messaging-platform",
+      "cues": 11,
+      "expressed": 11,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:lifecycle.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.scope:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.scope:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:lifecycle-messaging-platform:01"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.scope",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.scope",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle.scope:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.product-number:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.product-number:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:lifecycle-messaging-platform:02"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.product-number",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.product-number",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.product-number",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle.product-number:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-messaging-platform.illustration-delivery:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-messaging-platform.illustration-delivery:scroll",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle.open"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-messaging-platform.illustration-delivery",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-messaging-platform.illustration-delivery",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle-messaging-platform.illustration-delivery:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.runtime-number:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.runtime-number:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:lifecycle-messaging-platform:03"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.runtime-number",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.runtime-number",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.runtime-number",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle.runtime-number:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.digital-twin:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.digital-twin:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:lifecycle-messaging-platform:04"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.digital-twin",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.digital-twin",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle.digital-twin",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle.digital-twin:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:lifecycle.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "lifecycle-messaging-platform#4",
+          "quote": "сегментацию аудитории, управление кампаниями",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "lifecycle-messaging-platform#5",
+          "quote": "сегментацию аудитории, управление кампаниями",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "lifecycle-messaging-platform#6",
+          "quote": "Я проектировал эй пи ай, распределение заданий",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "lifecycle-messaging-platform#7",
+          "quote": "Я проектировал эй пи ай, распределение заданий",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "lifecycle-messaging-platform#8",
+          "quote": "распределение заданий, связь с удалёнными инстансами",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "lifecycle-messaging-platform#9",
+          "quote": "распределение заданий, связь с удалёнными инстансами",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "mobile-smm-platform",
+      "cues": 9,
+      "expressed": 9,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:mobile-smm.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.overview:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.overview:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:mobile-smm-platform:01"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.overview",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.overview",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm.overview:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.stable-path:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.stable-path:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:mobile-smm-platform:02"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.stable-path",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.stable-path",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.stable-path",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm.stable-path:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.agent-update:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.agent-update:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:mobile-smm-platform:03"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.agent-update",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.agent-update",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm.agent-update",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm.agent-update:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-platform.illustration-review:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-platform.illustration-review:scroll",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm.open"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-platform.illustration-review",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-platform.illustration-review",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm-platform.illustration-review:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:mobile-smm.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "mobile-smm-platform#4",
+          "quote": "Андроид устройства выполняли",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "mobile-smm-platform#5",
+          "quote": "Андроид устройства выполняли",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "f360-studio",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:f360.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:f360.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360-studio.illustration-capture:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360-studio.illustration-capture:scroll",
+          "field": "dependsOn:settled:cv-show:cue:f360.open"
+        },
+        {
+          "cellId": "cv-show:cue:f360-studio.illustration-capture",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360-studio.illustration-capture",
+          "field": "dependsOn:settled:cv-show:cue:f360-studio.illustration-capture:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:f360.process:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360.process:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:f360-studio:01"
+        },
+        {
+          "cellId": "cv-show:cue:f360.process",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360.process",
+          "field": "dependsOn:settled:cv-show:cue:f360.process:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:f360.result:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360.result:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:f360-studio:02"
+        },
+        {
+          "cellId": "cv-show:cue:f360.result",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360.result",
+          "field": "dependsOn:settled:cv-show:cue:f360.result:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:f360.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "f360-studio#2",
+          "quote": "Это была коммерческая студия высокоточного три дэ сканирования",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "f360-studio#3",
+          "quote": "Это была коммерческая студия высокоточного три дэ сканирования",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "autobox",
+      "cues": 23,
+      "expressed": 23,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:autobox.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.illustration-object:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.illustration-object:scroll",
+          "field": "dependsOn:settled:cv-show:cue:autobox.open"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.illustration-object",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.illustration-object",
+          "field": "dependsOn:settled:cv-show:cue:autobox.illustration-object:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.spinner:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.spinner:scroll",
+          "field": "dependsOn:settled:cv-show:cue:autobox.illustration-object"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.spinner",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.spinner",
+          "field": "dependsOn:settled:cv-show:cue:autobox.spinner:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-01:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-01:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox:01"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-01",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-01",
+          "field": "dependsOn:settled:cv-show:cue:autobox.video-01:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-02:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-02:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox:02"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-02",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-02",
+          "field": "dependsOn:settled:cv-show:cue:autobox.video-02:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-03:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-03:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox:03"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-03",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-03",
+          "field": "dependsOn:settled:cv-show:cue:autobox.video-03:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-04:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-04:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox:04"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-04",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-04",
+          "field": "dependsOn:settled:cv-show:cue:autobox.video-04:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-05:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-05:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox:05"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-05",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-05",
+          "field": "dependsOn:settled:cv-show:cue:autobox.video-05:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-06:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-06:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox:06"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-06",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-06",
+          "field": "dependsOn:settled:cv-show:cue:autobox.video-06:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-07:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-07:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox:07"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-07",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-07",
+          "field": "dependsOn:settled:cv-show:cue:autobox.video-07:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-08:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-08:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox:08"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-08",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-08",
+          "field": "dependsOn:settled:cv-show:cue:autobox.video-08:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-09:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-09:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox:09"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-09",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox.video-09",
+          "field": "dependsOn:settled:cv-show:cue:autobox.video-09:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:autobox.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "autobox#6",
+          "quote": "Ещё до изготовления установки я сделал её три дэ визуализацию",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "autobox#7",
+          "quote": "Ещё до изготовления установки я сделал её три дэ визуализацию",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "complexscan",
+      "cues": 19,
+      "expressed": 19,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:complexscan.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.line:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.line:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan:01"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.line",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.line",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.line:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.illustration-lighting:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.illustration-lighting:scroll",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.open"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.illustration-lighting",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.illustration-lighting",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.illustration-lighting:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.video-01:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.video-01:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan:02"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.video-01",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.video-01",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.video-01:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.video-02:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.video-02:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan:03"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.video-02",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.video-02",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.video-02:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.delivery:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.delivery:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan:04"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.delivery",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.delivery",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.delivery:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-open:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-open:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan:05"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-open",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.boothbot-open:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.illustration-warehouse:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.illustration-warehouse:scroll",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.open"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.illustration-warehouse",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.illustration-warehouse",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.illustration-warehouse:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-gallery:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-gallery:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan:06"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-gallery",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-gallery",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.boothbot-gallery:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-catalog-ready:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-catalog-ready:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan:07"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-catalog-ready",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-catalog-ready",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan.boothbot-catalog-ready",
+          "field": "dependsOn:settled:cv-show:cue:complexscan.boothbot-catalog-ready:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:complexscan.open"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "photopizza",
+      "cues": 31,
+      "expressed": 31,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:photopizza.open",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.origin:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.origin:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:01"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.origin",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.origin",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.origin:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-panorama:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-panorama:scroll",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.open"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-panorama",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-panorama",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.illustration-panorama:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.megavisor-promo:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.megavisor-promo:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:02"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.megavisor-promo",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.megavisor-promo",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.megavisor-promo:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-capture-team:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-capture-team:scroll",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.open"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-capture-team",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-capture-team",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.illustration-capture-team:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.page-open:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.page-open:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:03"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.page-open",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.page-open",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.page-open:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-01:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-01:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:04"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-01",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-01",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.video-01:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-02:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-02:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:05"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-02",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-02",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.video-02:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-portable-hardware:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-portable-hardware:scroll",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.open"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-portable-hardware",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-portable-hardware",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.illustration-portable-hardware:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.mechanics:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.mechanics:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:06"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.mechanics",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.mechanics",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.mechanics:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-controller:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-controller:scroll",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.open"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-controller",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.illustration-controller",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.illustration-controller:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.controller:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.controller:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:07"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.controller",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.controller",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.controller:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-03:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-03:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:08"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-03",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-03",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.video-03:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-04:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-04:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:09"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-04",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-04",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.video-04:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-05:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-05:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:10"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-05",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.video-05",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.video-05:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.spinner:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.spinner:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza:11"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.spinner",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza.spinner",
+          "field": "dependsOn:settled:cv-show:cue:photopizza.spinner:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:photopizza.open"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "photopizza#10",
+          "quote": "Так внутри Megavisor появилась PhotoPizza",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#11",
+          "quote": "PhotoPizza я начал развивать с две тысячи десятого года",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#16",
+          "quote": "После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#17",
+          "quote": "После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#2",
+          "quote": "Я отвечал за ар эн ди съёмочного направления",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#22",
+          "quote": "слайдером PhotoSnail и моторизированной панорамной головкой",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#23",
+          "quote": "слайдером PhotoSnail и моторизированной панорамной головкой",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#26",
+          "quote": "Позже PhotoPizza стала опенсорс проектом",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#27",
+          "quote": "Позже PhotoPizza стала опенсорс проектом",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#28",
+          "quote": "с телефона по вай фай можно было управлять",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#29",
+          "quote": "с телефона по вай фай можно было управлять",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "photopizza#3",
+          "quote": "Я отвечал за ар эн ди съёмочного направления",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "finale",
+      "cues": 11,
+      "expressed": 11,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:finale.map",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:finale.map",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.history:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.history:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:finale:01"
+        },
+        {
+          "cellId": "cv-show:cue:finale.history",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.history",
+          "field": "dependsOn:settled:cv-show:cue:finale.history:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:finale.scale-route:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.scale-route:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:finale:02"
+        },
+        {
+          "cellId": "cv-show:cue:finale.scale-route",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.scale-route",
+          "field": "dependsOn:settled:cv-show:cue:finale.scale-route:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:finale.workspace:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.workspace:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:finale:03"
+        },
+        {
+          "cellId": "cv-show:cue:finale.workspace",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.workspace",
+          "field": "dependsOn:settled:cv-show:cue:finale.workspace:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:finale.actions:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.actions:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:finale:04"
+        },
+        {
+          "cellId": "cv-show:cue:finale.actions",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.actions",
+          "field": "dependsOn:settled:cv-show:cue:finale.actions:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:finale.contacts:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.contacts:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:finale:04"
+        },
+        {
+          "cellId": "cv-show:cue:finale.contacts",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:finale.contacts",
+          "field": "dependsOn:settled:cv-show:cue:finale.contacts:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:finale.map"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "workspace-details",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:workspace-details.flow-frame",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.flow-frame",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.flow-frame",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.flow-route:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.flow-route:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:workspace-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.flow-route",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.flow-route",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.flow-route",
+          "field": "dependsOn:settled:cv-show:cue:workspace-details.flow-route:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.artifact:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.artifact:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:workspace-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.artifact",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.artifact",
+          "field": "dependsOn:settled:cv-show:cue:workspace-details.artifact:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.hosts:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.hosts:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:workspace-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.hosts",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:workspace-details.hosts",
+          "field": "dependsOn:settled:cv-show:cue:workspace-details.hosts:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:workspace-details.flow-frame"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "symbiote-ui-details",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.composition",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.composition",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.catalog:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.catalog:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-ui-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.catalog",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.catalog",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui-details.catalog:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.manifest:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.manifest:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-ui-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.manifest",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.manifest",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui-details.manifest:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.workspace-route:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.workspace-route:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-ui-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.workspace-route",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.workspace-route",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-ui-details.workspace-route",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-ui-details.workspace-route:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:symbiote-ui-details.composition"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "symbiote-engine-details",
+      "cues": 5,
+      "expressed": 5,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.layers",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.layers",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.layers",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.execution:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.execution:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-engine-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.execution",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.execution",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-engine-details.execution:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.demo:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.demo:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:symbiote-engine-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.demo",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:symbiote-engine-details.demo",
+          "field": "dependsOn:settled:cv-show:cue:symbiote-engine-details.demo:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:symbiote-engine-details.layers"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "agent-portal-details",
+      "cues": 9,
+      "expressed": 9,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:agent-portal-details.gallery",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.gallery",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.board:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.board:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-portal-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.board",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.board",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal-details.board:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.settings:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.settings:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-portal-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.settings",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.settings",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal-details.settings:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.architecture:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.architecture:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-portal-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.architecture",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.architecture",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal-details.architecture:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.resource-groups:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.resource-groups:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-portal-details:04"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.resource-groups",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-portal-details.resource-groups",
+          "field": "dependsOn:settled:cv-show:cue:agent-portal-details.resource-groups:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:agent-portal-details.gallery"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "video-studio-details",
+      "cues": 5,
+      "expressed": 5,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:video-studio-details.flow",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.flow",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.flow",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.route:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.route:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:video-studio-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.route",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.route",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.route",
+          "field": "dependsOn:settled:cv-show:cue:video-studio-details.route:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.demo:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.demo:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:video-studio-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.demo",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:video-studio-details.demo",
+          "field": "dependsOn:settled:cv-show:cue:video-studio-details.demo:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:video-studio-details.flow"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "maximo-workbench-details",
+      "cues": 9,
+      "expressed": 9,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:maximo-details.work-order",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.work-order",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.asset:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.asset:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:maximo-workbench-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.asset",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.asset",
+          "field": "dependsOn:settled:cv-show:cue:maximo-details.asset:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.actions:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.actions:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:maximo-workbench-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.actions",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.actions",
+          "field": "dependsOn:settled:cv-show:cue:maximo-details.actions:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.demo-1:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.demo-1:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:maximo-workbench-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.demo-1",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.demo-1",
+          "field": "dependsOn:settled:cv-show:cue:maximo-details.demo-1:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.demo-xr:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.demo-xr:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:maximo-workbench-details:04"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.demo-xr",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:maximo-details.demo-xr",
+          "field": "dependsOn:settled:cv-show:cue:maximo-details.demo-xr:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:maximo-details.work-order"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "maximo-workbench-details#6",
+          "quote": "Поэтому это демо для меня не только пример интерфейса",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "maximo-workbench-details#7",
+          "quote": "Поэтому это демо для меня не только пример интерфейса",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "maximo-workbench-details#8",
+          "quote": "Икс ар версия проверяет тот же принцип",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "maximo-workbench-details#9",
+          "quote": "Икс ар версия проверяет тот же принцип",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "agent-pool-details",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:agent-pool-details.runtime",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.runtime",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.runtime",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.work:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.work:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-pool-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.work",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.work",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.work",
+          "field": "dependsOn:settled:cv-show:cue:agent-pool-details.work:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.review:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.review:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-pool-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.review",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.review",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.review",
+          "field": "dependsOn:settled:cv-show:cue:agent-pool-details.review:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.result:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.result:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:agent-pool-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.result",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.result",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:agent-pool-details.result",
+          "field": "dependsOn:settled:cv-show:cue:agent-pool-details.result:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:agent-pool-details.runtime"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "project-graph-details",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:project-graph-details.root",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.root",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.root",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.skeleton:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.skeleton:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:project-graph-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.skeleton",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.skeleton",
+          "field": "dependsOn:settled:cv-show:cue:project-graph-details.skeleton:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.fact:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.fact:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:project-graph-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.fact",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.fact",
+          "field": "dependsOn:settled:cv-show:cue:project-graph-details.fact:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.focus:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.focus:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:project-graph-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.focus",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:project-graph-details.focus",
+          "field": "dependsOn:settled:cv-show:cue:project-graph-details.focus:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:project-graph-details.root"
+      ],
+      "anchorFallbacks": []
+    },
+    {
+      "id": "lifecycle-platform-details",
+      "cues": 9,
+      "expressed": 9,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:lifecycle-details.product",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.product",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.product",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.runtime:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.runtime:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:lifecycle-platform-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.runtime",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.runtime",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle-details.runtime:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.delivery:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.delivery:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:lifecycle-platform-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.delivery",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.delivery",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle-details.delivery:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.route:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.route:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:lifecycle-platform-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.route",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.route",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.route",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle-details.route:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.twin:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.twin:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:lifecycle-platform-details:04"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.twin",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.twin",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:lifecycle-details.twin",
+          "field": "dependsOn:settled:cv-show:cue:lifecycle-details.twin:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:lifecycle-details.product"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "lifecycle-platform-details#2",
+          "quote": "Эй пи ай и база PostgreSQL",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "lifecycle-platform-details#3",
+          "quote": "Эй пи ай и база PostgreSQL",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "lifecycle-platform-details#4",
+          "quote": "управляли пулами джи эс эм модемов",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "lifecycle-platform-details#5",
+          "quote": "управляли пулами джи эс эм модемов",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "mobile-smm-details",
+      "cues": 11,
+      "expressed": 11,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.gallery",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.gallery",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.gallery",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.schedule:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.schedule:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:mobile-smm-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.schedule",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.schedule",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm-details.schedule:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.queue:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.queue:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:mobile-smm-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.queue",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.queue",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm-details.queue:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.ui-change:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.ui-change:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:mobile-smm-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.ui-change",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.ui-change",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm-details.ui-change:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.draft:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.draft:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:mobile-smm-details:04"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.draft",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.draft",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm-details.draft:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.approval:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.approval:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:mobile-smm-details:05"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.approval",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:mobile-smm-details.approval",
+          "field": "dependsOn:settled:cv-show:cue:mobile-smm-details.approval:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:mobile-smm-details.gallery"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "mobile-smm-details#4",
+          "quote": "подготовленный сценарий в формате джейсон",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "mobile-smm-details#5",
+          "quote": "подготовленный сценарий в формате джейсон",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "f360-details",
+      "cues": 5,
+      "expressed": 5,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:f360-details.path",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.path",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.path",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.result-one:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.result-one:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:f360-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.result-one",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.result-one",
+          "field": "dependsOn:settled:cv-show:cue:f360-details.result-one:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.period:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.period:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:f360-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.period",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:f360-details.period",
+          "field": "dependsOn:settled:cv-show:cue:f360-details.period:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:f360-details.path"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "f360-details#4",
+          "quote": "Для меня F триста шестьдесят был ещё одним примером",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "f360-details#5",
+          "quote": "Для меня F триста шестьдесят был ещё одним примером",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "autobox-details",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:autobox-details.working-system",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.working-system",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.working-system",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.working-route:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.working-route:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.working-route",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.working-route",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.working-route",
+          "field": "dependsOn:settled:cv-show:cue:autobox-details.working-route:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.video:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.video:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.video",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.video",
+          "field": "dependsOn:settled:cv-show:cue:autobox-details.video:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.bronze:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.bronze:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:autobox-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.bronze",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:autobox-details.bronze",
+          "field": "dependsOn:settled:cv-show:cue:autobox-details.bronze:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:autobox-details.working-system"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "autobox-details#4",
+          "quote": "собственноручно сканировал японские нэцкэ",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "autobox-details#5",
+          "quote": "собственноручно сканировал японские нэцкэ",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "complexscan-details",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:complexscan-details.platform",
+          "field": "timing.until"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.platform",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.platform",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.light:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.light:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.light",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.light",
+          "field": "dependsOn:settled:cv-show:cue:complexscan-details.light:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.gallery:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.gallery:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.gallery",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.gallery",
+          "field": "dependsOn:settled:cv-show:cue:complexscan-details.gallery:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.autobox:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.autobox:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:complexscan-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.autobox",
+          "field": "annotation.series"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.autobox",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:complexscan-details.autobox",
+          "field": "dependsOn:settled:cv-show:cue:complexscan-details.autobox:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:complexscan-details.platform"
+      ],
+      "anchorFallbacks": [
+        {
+          "cueId": "complexscan-details#6",
+          "quote": "музейного направления Auto Box",
+          "reason": "word-anchor-missing"
+        },
+        {
+          "cueId": "complexscan-details#7",
+          "quote": "музейного направления Auto Box",
+          "reason": "word-anchor-missing"
+        }
+      ]
+    },
+    {
+      "id": "photopizza-details",
+      "cues": 7,
+      "expressed": 7,
+      "dropped": [
+        {
+          "cellId": "cv-show:cue:photopizza-details.origin",
+          "field": "timing.settleBy:anchor"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.origin",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.attribution:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.attribution:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza-details:01"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.attribution",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.attribution",
+          "field": "dependsOn:settled:cv-show:cue:photopizza-details.attribution:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.documentation:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.documentation:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza-details:02"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.documentation",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.documentation",
+          "field": "dependsOn:settled:cv-show:cue:photopizza-details.documentation:scroll"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.media:scroll",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.media:scroll",
+          "field": "dependsOn:ended:cv-show:audio-clip:photopizza-details:03"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.media",
+          "field": "timing.gestureDurationMs"
+        },
+        {
+          "cellId": "cv-show:cue:photopizza-details.media",
+          "field": "dependsOn:settled:cv-show:cue:photopizza-details.media:scroll"
+        }
+      ],
+      "unmapped": [],
+      "leadClamped": [
+        "cv-show:cue:photopizza-details.origin"
+      ],
+      "anchorFallbacks": []
+    }
+  ]
+}
