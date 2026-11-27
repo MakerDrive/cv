@@ -5,6 +5,8 @@ import {
   waitForShowVisualSettlement,
 } from 'symbiote-ui/chat/show-runtime';
 import { isCvShowDecorativeCell } from './failurePolicy.js';
+import { createNavigationBudget, runBudgetedNavigationGesture } from './navigationBudget.js';
+import { getShowLog } from '../show-log/index.js';
 
 export const CV_SHOW_DIRECTIVE_TYPES = Object.freeze([
   'navigate',
@@ -587,10 +589,11 @@ function createPresentationReporter(operation) {
     }));
   };
 
-  const reportStatus = (status, observedAt) => operation.reportReceipt(Object.freeze({
+  const reportStatus = (status, observedAt, evidence = null) => operation.reportReceipt(Object.freeze({
     status,
     observedAt,
     providerReceipt: Object.freeze({
+      ...(evidence || {}),
       version: CV_SHOW_NATIVE_PRESENTATION_RECEIPT_VERSION,
       effect: Object.freeze({
         kind: operation.kind,
@@ -710,6 +713,7 @@ function createPresentationReporter(operation) {
   return Object.freeze({
     kind: operation.kind,
     budgetMs: Number(operation.projectCell.timing?.gestureDurationMs) || 0,
+    activatedAt: Number(operation.activatedAt),
     requiresProviderAdmission: admissionRequired,
     decorative: isDecorativeCvShowOperation(operation),
     reportAdmission,
@@ -976,9 +980,9 @@ export function createCvShowDirectiveRunner(options = {}) {
           presentation.reportStatus('acted', observePerformance());
           interactionActed = true;
         };
-        const reportInteractionSettled = () => {
+        const reportInteractionSettled = (evidence = null) => {
           if (!actualInteraction) return;
-          presentation.reportStatus('settled', observePerformance());
+          presentation.reportStatus('settled', observePerformance(), evidence);
         };
         // Canonical `idle` cues are quiet narration dwell points, not chat status
         // messages and never a request for manual progression.
@@ -1072,6 +1076,10 @@ export function createCvShowDirectiveRunner(options = {}) {
                     : alreadySelected
                       ? 'already-selected'
                       : 'unavailable';
+                  const budget = createNavigationBudget({
+                    budgetMs: presentation?.budgetMs,
+                    activatedAt: presentation?.activatedAt,
+                  });
                   if (gesture === 'unavailable') {
                     // An authored scene transition shows exactly one honest
                     // gesture: the presenter cursor travels to the revealed
@@ -1080,20 +1088,16 @@ export function createCvShowDirectiveRunner(options = {}) {
                     // selection; the runner re-reads the live state afterwards
                     // and only programmatically selects what the click could
                     // not select — never stacking both for the same target.
-                    const presented = await Promise.resolve(
-                      presentNavigationGesture(source, {
-                        signal: controller.signal,
-                        budgetMs: presentation?.budgetMs,
+                    // The gesture only gets its share of the effect budget: a
+                    // gesture that cannot land in time is aborted first, then
+                    // the selection below completes the navigation.
+                    gesture = await runBudgetedNavigationGesture(
+                      (gestureSignal, gestureMs) => presentNavigationGesture(source, {
+                        signal: gestureSignal,
+                        budgetMs: gestureMs,
                       }),
-                    ).catch((error) => {
-                      // An aborted gesture is a cancellation, not a missing
-                      // row: propagate so the tour stops instead of navigating.
-                      if (error?.name === 'AbortError' || controller.signal.aborted) {
-                        throw error;
-                      }
-                      return false;
-                    });
-                    gesture = presented === true ? 'row-click' : 'unavailable';
+                      { signal: controller.signal, budget },
+                    );
                     // A cancelled tour must not navigate after the gesture was
                     // interrupted; an abort is an abort, not a plain miss.
                     throwIfAborted(controller.signal);
@@ -1105,29 +1109,55 @@ export function createCvShowDirectiveRunner(options = {}) {
                     if (selected === false) return { unavailable: true, reason: 'navigation-rejected' };
                   }
                   reportInteractionActed();
-                  await waitForReadiness({
-                    document,
-                    target: () => {
-                      if (runtime.selectedId !== source.target) return null;
-                      const viewer = runtime.viewer;
-                      return viewer?.getAttribute?.('aria-busy') === 'true'
-                        ? null
-                        : viewer || resolveTarget(source.target);
-                    },
-                    signal: controller.signal,
-                    timeoutMs,
-                    scroll: false,
-                  });
+                  let readiness = 'ready';
+                  try {
+                    await waitForReadiness({
+                      document,
+                      target: () => {
+                        if (runtime.selectedId !== source.target) return null;
+                        const viewer = runtime.viewer;
+                        return viewer?.getAttribute?.('aria-busy') === 'true'
+                          ? null
+                          : viewer || resolveTarget(source.target);
+                      },
+                      signal: controller.signal,
+                      timeoutMs: budget.bounded
+                        ? Math.max(1, Math.min(timeoutMs, budget.settleMs()))
+                        : timeoutMs,
+                      scroll: false,
+                    });
+                  } catch (error) {
+                    // The selection already happened; within a bounded effect a
+                    // slow article mount settles the navigation as pending
+                    // readiness instead of failing it at the engine deadline.
+                    if (controller.signal.aborted || !budget.bounded || error?.code !== 'timeout') {
+                      throw error;
+                    }
+                    readiness = 'pending';
+                  }
                   throwIfAborted(controller.signal);
                   // The navigation gesture above is the complete visual story
                   // of this cue (cursor → row click → article settles): the
                   // generic attention pass below must not repaint a second
                   // click on the opened article. Quiet restores and already
                   // reached states pass silently as well.
-                  reportInteractionSettled();
+                  const fallback = gesture === 'budget-expired' || gesture === 'budget-skipped';
+                  const degraded = fallback || readiness !== 'ready';
+                  if (degraded) {
+                    getShowLog().info('cell', 'navigation-fallback', {
+                      target: entryId,
+                      gesture,
+                      readiness,
+                      budgetMs: presentation?.budgetMs,
+                    });
+                  }
+                  reportInteractionSettled(degraded
+                    ? { navigation: Object.freeze({ gesture, readiness }) }
+                    : null);
                   return {
                     status: 'success',
                     gesture,
+                    readiness,
                     selectedId: runtime.selectedId,
                   };
                 }

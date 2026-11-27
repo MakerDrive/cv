@@ -566,6 +566,9 @@ export function createCvShowAlignmentController({
         for (const observer of [...receiptObservers]) observer(outgoing);
       };
       const adapterMethod = async (operation, kind) => {
+        // The engine activates the effect synchronously before this call, so
+        // this instant is the start of its hard deadline window.
+        let startedAt = performance.now();
         const source = projectCvShowDirective(operation.projectCell, tuple.project);
         // The engine input omits the operation kind (it is implied by the
         // adapter method that was selected) and the receipts the engine has
@@ -576,17 +579,17 @@ export function createCvShowAlignmentController({
           ...operation,
           kind,
           source,
+          activatedAt: startedAt,
           providerState: { admissionReported: false },
         });
         let log = getShowLog();
         let cellId = String(operation.scheduleCell?.cellId || operation.projectCell?.id || '');
-        let startedAt = performance.now();
         log.debug('cell', 'start', {
           cellId,
           kind,
           cue: String(operation.projectCell?.cue?.kind || ''),
           operationId: operation.operationId,
-          budgetMs: operation.budgetMs,
+          gestureMs: operation.projectCell?.timing?.gestureDurationMs,
           mediaTimeMs: tuple.execution.snapshot.mediaTimeMs,
         });
         try {
