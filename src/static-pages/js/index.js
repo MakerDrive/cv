@@ -4331,7 +4331,7 @@ class PortfolioWorkspace extends HTMLElement {
       };
       // The 1.9 MB Show runtime is not needed to read the page: it is fetched a few seconds after load and
       // only when the visitor is not saving data (a press or hover still loads it at once).
-      const saveData = globalThis.navigator?.connection?.saveData === true;
+      const saveData = /** @type {any} */ (globalThis.navigator)?.connection?.saveData === true;
       if (!saveData) {
         globalThis.setTimeout(() => {
           if (typeof globalThis.requestIdleCallback === 'function') {
