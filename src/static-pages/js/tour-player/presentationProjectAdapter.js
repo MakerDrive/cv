@@ -662,7 +662,12 @@ function selectedDirectiveProjection(project, sourceCellIds) {
     }));
 }
 
-function projectContinuousSpeechCells(project, cells, setupCellId) {
+function projectContinuousSpeechCells(
+  project,
+  cells,
+  setupCellId,
+  { decoupleMidSceneNavigation = false } = {},
+) {
   const cloned = cells.map(clone);
   const audioClips = cloned
     .filter(({ kind }) => kind === 'audio-clip')
@@ -687,13 +692,22 @@ function projectContinuousSpeechCells(project, cells, setupCellId) {
   const speechCells = cloned.filter((cell) => (
     cell.kind === 'cue' && cell.id !== setupCellId
   ));
+  let activeNavigationCellId = setupCellId;
   let previousVisualCellId = setupCellId;
   const projectedSpeechCells = speechCells.map((cell) => {
     if (cell.id.endsWith(':scroll')) {
-      const projected = {
+      return {
         ...cell,
         dependsOn: [{ cellId: previousVisualCellId, barrier: 'settled' }],
       };
+    }
+    if (decoupleMidSceneNavigation && cell.cue?.interaction?.type === 'navigate') {
+      let projected = {
+        ...cell,
+        dependsOn: [{ cellId: activeNavigationCellId, barrier: 'settled' }],
+      };
+      activeNavigationCellId = cell.id;
+      previousVisualCellId = cell.id;
       return projected;
     }
     const scrollCellId = `${cell.id}:scroll`;
@@ -724,6 +738,7 @@ function createEntrySelection(
     speechDirectiveIds = null,
     heldAttentionDirectiveIds = [],
     runtimeCellIds = null,
+    decoupleMidSceneNavigation = false,
   } = {},
 ) {
   let cvShow = metadata(project);
@@ -744,6 +759,7 @@ function createEntrySelection(
       project,
       source,
       setupCellId,
+      { decoupleMidSceneNavigation },
     );
     const narrationCell = selectedCells.find(({ kind }) => kind === 'narration');
     delete narrationCell.turn.replyTo;
@@ -783,6 +799,7 @@ function createEntrySelection(
       project,
       selectedCells,
       setupCellId,
+      { decoupleMidSceneNavigation },
     );
     delete selectedCells[0].turn.replyTo;
     return Object.freeze({
@@ -830,6 +847,7 @@ function createEntrySelection(
     project,
     selectedCells,
     setupCellId,
+    { decoupleMidSceneNavigation },
   );
   // The continuous narration is one cell in the slice, so the source cell ids
   // are read from the merged selection — the same contract the unfiltered
@@ -1371,6 +1389,7 @@ export function createCvShowEntryTuple(
   }
   let project = createCvShowEntryProjectFromMaster(master, entryId, {
     speechDirectiveIds,
+    decoupleMidSceneNavigation: true,
   });
   let alignedSequence = createSliceAlignment(project, sourceSequence);
   let schedule = createPresentationScheduleV2(project, alignedSequence);
@@ -1394,6 +1413,7 @@ export function createCvShowEntryTuple(
       speechDirectiveIds: includedSpeechDirectiveIds,
       heldAttentionDirectiveIds,
       runtimeCellIds: checkpointProjection.futureCellIds,
+      decoupleMidSceneNavigation: true,
     });
     alignedSequence = createSliceAlignment(project, sourceSequence);
     schedule = createPresentationScheduleV2(project, alignedSequence);
