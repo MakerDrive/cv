@@ -1040,6 +1040,7 @@ test('pending routed Show transport stops and restarts without stale lifecycle r
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -1468,6 +1469,7 @@ test('detail admission rejects stale live media before branch or presentation mu
   )));
   let dock = null;
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -1613,7 +1615,7 @@ test('detail admission rejects stale live media before branch or presentation mu
 
   assert.equal(player.$.inBranch, false);
   assert.equal(player.$.isError, true);
-  assert.equal(player.$.errorText, 'The CV Show data could not be loaded.');
+  assert.equal(player.$.errorText, 'Не удалось загрузить данные CV Show.');
   assert.equal(player.$.statusText, player.$.errorText);
   assert.deepEqual(sessionCalls, beforeStaleDetail.sessionCalls);
   assert.equal(mountCalls, beforeStaleDetail.mountCalls);
@@ -6814,7 +6816,7 @@ test('terminal narration errors keep the player controllable: Play repeats the s
   player.stopShow();
 });
 
-test('hiding the page pauses the show instead of burning cell deadlines', async (t) => {
+test('hiding the page does not pause the browser voice, which has no cell deadlines', async (t) => {
   const { parseHTML } = await import('linkedom');
   const { window } = parseHTML('<!doctype html><html lang="en"><body></body></html>');
   const globalKeys = [
@@ -6838,6 +6840,7 @@ test('hiding the page pauses the show instead of burning cell deadlines', async 
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -6894,7 +6897,7 @@ test('hiding the page pauses the show instead of burning cell deadlines', async 
     get: () => 'hidden',
   });
   document.dispatchEvent(new Event('visibilitychange'));
-  assert.equal(player.$.isPaused, true, 'hiding the page pauses the show');
+  assert.equal(player.$.isPaused, false, 'the browser voice keeps playing in a hidden page');
   assert.equal(player.$.isRunning, true);
   assert.equal(player.$.isError, false);
   assert.equal(player.$.errorText, '');
@@ -6904,7 +6907,7 @@ test('hiding the page pauses the show instead of burning cell deadlines', async 
     get: () => 'visible',
   });
   document.dispatchEvent(new Event('visibilitychange'));
-  assert.equal(player.$.isPaused, true, 'becoming visible again keeps the paused state');
+  assert.equal(player.$.isPaused, false, 'becoming visible again leaves the show playing');
   player.stopShow();
 });
 
@@ -6932,6 +6935,7 @@ test('a replaced Short segment stays the selected detail on manual Next, natural
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -7121,6 +7125,7 @@ test('historical and terminal detail exits restore the interrupted Short checkpo
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -7281,6 +7286,7 @@ test('a seek back into a replaced segment runs the owner scene setup before the 
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -7434,6 +7440,7 @@ test('an interrupted owner scene setup is re-run when the same replaced segment 
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -7681,6 +7688,7 @@ test('the Show transport starts a three-rate speed toggle that narration and the
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]
   )));
   for (const key of globalKeys.slice(0, -4)) globalThis[key] = window[key];
+  window.document.documentElement.lang = 'ru';
   globalThis.CSSStyleSheet = class CSSStyleSheet {
     replaceSync() {}
   };
@@ -7747,7 +7755,7 @@ test('the Show transport starts a three-rate speed toggle that narration and the
   assert.equal(spoken.at(-1)?.rate, 1.5, 'narration starts at 1.5x');
   assert.equal(
     speedButton.getAttribute('aria-label'),
-    'Playback speed 1.5×',
+    'Скорость воспроизведения 1,5×',
     'the toggle announces the speed it plays at',
   );
   assert.equal(
@@ -7763,7 +7771,7 @@ test('the Show transport starts a three-rate speed toggle that narration and the
   // rescales immediately so the total shown time shrinks with the speed.
   speedButton.dispatchEvent(new window.Event('click'));
   assert.equal(speedButton.textContent, '2x');
-  assert.equal(speedButton.getAttribute('aria-label'), 'Playback speed 2×');
+  assert.equal(speedButton.getAttribute('aria-label'), 'Скорость воспроизведения 2×');
   const fastConfig = showPlayer.configs.at(-1);
   assert.equal(
     fastConfig.timeline.totalMs,
@@ -7780,7 +7788,7 @@ test('the Show transport starts a three-rate speed toggle that narration and the
   // displayed clock reads composition time again.
   speedButton.dispatchEvent(new window.Event('click'));
   assert.equal(speedButton.textContent, '1x');
-  assert.equal(speedButton.getAttribute('aria-label'), 'Playback speed 1×');
+  assert.equal(speedButton.getAttribute('aria-label'), 'Скорость воспроизведения 1×');
   showPlayer.configs.at(-1).controller.seek(1, 0);
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(spoken.at(-1)?.rate, 1, 'narration after the toggle plays at 1x');

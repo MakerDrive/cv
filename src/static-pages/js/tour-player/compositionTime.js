@@ -44,7 +44,8 @@ function buildSegments(ids, branchIds, durations, sceneCount) {
  * @param {object} story CV Show story projection
  */
 export function createCvShowCompositionTimeline(story) {
-  const durations = CV_SHOW_SCHEDULE_DURATIONS.durations;
+  // A localized story (browser voice) carries the estimated lengths of its own narration.
+  const durations = story?.durations || CV_SHOW_SCHEDULE_DURATIONS.durations;
   const branchIds = new Set(Object.keys(story?.branches || {}));
   const scenes = (story?.short || []).map(String).filter(Boolean);
   if (!scenes.length) throw new TypeError('CV Show composition timeline requires story.short');

@@ -159,13 +159,13 @@ export async function getPortfolioPage({
     ? renderRetirementContent(metadata.retirementTargetUrl)
     : /*html*/ `
       <script type="application/json" id="pulse-projects-data">
-        ${JSON.stringify(projects).replace(/</g, '\\u003c')}
+        ${JSON.stringify(projects).replace(/</g, '\\u003c').replace(/&/g, '\\u0026')}
       </script>
       <script type="application/json" id="pulse-tour-story">
-        ${JSON.stringify(CV_SHOW_STORY).replace(/</g, '\\u003c')}
+        ${JSON.stringify(CV_SHOW_STORY).replace(/</g, '\\u003c').replace(/&/g, '\\u0026')}
       </script>
       <script type="application/json" id="pulse-show-config">
-        ${JSON.stringify(TOUR_LOCAL_AUDIO_CONFIG).replace(/</g, '\\u003c')}
+        ${JSON.stringify(TOUR_LOCAL_AUDIO_CONFIG).replace(/</g, '\\u003c').replace(/&/g, '\\u0026')}
       </script>
       <section class="pulse-screen" aria-label="Vladimir Matiasevich portfolio">
         <img
@@ -193,7 +193,9 @@ export async function getPortfolioPage({
     CANONICAL_URL: canonicalUrl,
     ROBOTS: robots,
     publicationId,
-    BODY_ATTRS: 'data-side-panel="off"',
+    // `pulse-body` stands for `body:has(.pulse-screen)`: a :has() on the body re-evaluates on every DOM change
+    // under it, which made the graph's layout passes recalculate styles thousands of times.
+    BODY_ATTRS: isRetired ? 'data-side-panel="off"' : 'class="pulse-body" data-side-panel="off"',
     HEADER_CONTENT: headerContent,
     CONTENT: content,
     FOOTER_CONTENT: /*html*/ `

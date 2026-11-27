@@ -767,3 +767,170 @@ export function animateCvShowScrollIntoView(
     frameId = requestFrame(step);
   });
 }
+
+
+const easeInOutSine = (progress) => -(Math.cos(Math.PI * progress) - 1) / 2;
+
+/**
+ * Scrolls a target into view the way a hand would: the claw lands on the page, closes, and pushes the
+ * content, so the page moves exactly as far as the hand does. A long way is covered in several pushes
+ * (push, let go, lift back, push again). Anything the hand cannot do (no presenter, reduced motion, a
+ * tiny distance) falls back to the plain animated scroll.
+ * @param {Element} target
+ * @param {{
+ *   document?: Document, signal?: AbortSignal, durationMs?: number,
+ *   cursor?: { planApproach?: Function, presentCursorFrame?: Function, setGrip?: Function } | null,
+ * }} [options] `durationMs` is the whole gesture: approach, pushes and lifts
+ * @returns {Promise<void>}
+ */
+export function animateCvShowScrollWithHand(target, { document, signal, durationMs = 1800, cursor = null } = {}) {
+  const plain = () => animateCvShowScrollIntoView(target, { document, signal, durationMs: Math.min(700, durationMs) });
+  if (!target?.scrollIntoView) return Promise.resolve();
+  if (signal?.aborted) return Promise.reject(abortError(signal));
+  const view = document?.defaultView || globalThis;
+  const requestFrame = view?.requestAnimationFrame?.bind(view);
+  const cancelFrame = view?.cancelAnimationFrame?.bind(view) || (() => {});
+  const reducedMotion = view?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
+  if (
+    !requestFrame || reducedMotion
+    || typeof cursor?.planApproach !== 'function'
+    || typeof cursor?.presentCursorFrame !== 'function'
+    || typeof cursor?.setGrip !== 'function'
+  ) return plain();
+
+  const anchor = resolveCvShowScrollAnchor(target);
+  const containers = scrollContainers(anchor, document);
+  const before = offsets(containers);
+  anchor.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+  const after = offsets(containers);
+  const rows = before.map((row, index) => ({
+    element: row.element,
+    startLeft: row.left,
+    startTop: row.top,
+    endLeft: after[index]?.left ?? row.left,
+    endTop: after[index]?.top ?? row.top,
+  }));
+  applyOffsets(rows, 0);
+  const primary = rows.reduce((best, row) => (
+    Math.abs(row.endTop - row.startTop) > Math.abs(best.endTop - best.startTop) ? row : best
+  ), rows[0]);
+  const delta = primary ? primary.endTop - primary.startTop : 0;
+  if (!primary || Math.abs(delta) < 48) {
+    applyOffsets(rows, 1);
+    return Promise.resolve();
+  }
+
+  const root = document?.scrollingElement || document?.documentElement;
+  const isPage = primary.element === root;
+  const box = isPage
+    ? { left: 0, top: 0, width: view.innerWidth, height: view.innerHeight }
+    : primary.element.getBoundingClientRect();
+  const direction = Math.sign(delta);
+  const handX = box.left + box.width * 0.5;
+  const total = Math.abs(delta);
+  // Comfortable pushes cover about 58% of the panel; a short slot takes fewer, longer ones (never frantic
+  // flailing: at least ~240 ms per push) as long as one push still fits inside the panel (90%).
+  const byReach = Math.ceil(total / (box.height * 0.9));
+  const comfortable = Math.ceil(total / (box.height * 0.58));
+  const byTime = Math.max(1, Math.floor((durationMs * 0.66) / 240));
+  const pushes = Math.max(byReach, Math.min(comfortable, byTime));
+  // Equal pushes: no tiny leftover nudge at the end.
+  const stroke = total / pushes;
+  const handFrom = direction > 0
+    ? Math.min(box.top + box.height * 0.96, box.top + box.height * 0.06 + stroke)
+    : Math.max(box.top + box.height * 0.04, box.bottom - box.height * 0.06 - stroke);
+  const surface = isPage ? anchor : primary.element;
+  const point = (y) => cursor.presentCursorFrame?.(surface, { point: { x: handX, y }, preserveInk: true });
+
+  return new Promise((resolve, reject) => {
+    let frameId = null;
+    let finished = false;
+    const done = (settle, value) => {
+      if (finished) return;
+      finished = true;
+      if (frameId !== null) cancelFrame(frameId);
+      signal?.removeEventListener?.('abort', onAbort);
+      try { cursor.setGrip?.(false); } catch { /* the claw is already gone */ }
+      settle(value);
+    };
+    const onAbort = () => done(reject, abortError(signal));
+    signal?.addEventListener?.('abort', onAbort, { once: true });
+
+    // Timeline in ms: approach, then per push: grip, push, release, lift back (not after the last one).
+    // A short slot does not change what the gesture is, only how fast it plays: the approach is
+    // compressed to at most a third of the slot and the pushes share what is left.
+    const approach = cursor.planApproach(surface, { cursor: { x: handX, y: handFrom } });
+    const naturalApproachMs = Math.max(0, Number(approach?.durationMs) || 0);
+    const approachMs = Math.min(naturalApproachMs, durationMs * 0.34);
+    const approachSpeed = approachMs > 0 ? naturalApproachMs / approachMs : 1;
+    const room = Math.max(160, durationMs - approachMs);
+    const pushWeights = Array.from({ length: pushes }, () => 1);
+    const liftMs = Math.min(160, durationMs * 0.1);
+    const weightSum = pushWeights.reduce((sum, weight) => sum + weight, 0);
+    const pushBudget = Math.max(150, room - (pushes - 1) * liftMs);
+    const pushMs = pushWeights.map((weight) => Math.max(120, (pushBudget * weight) / weightSum));
+
+    let phase = 'approach';
+    let index = 0;
+    let phaseStart = null;
+    let covered = 0;
+    const step = (timestamp) => {
+      frameId = null;
+      if (finished) return;
+      if (signal?.aborted) return onAbort();
+      if (phaseStart === null) phaseStart = timestamp;
+      const elapsed = timestamp - phaseStart;
+      if (phase === 'approach') {
+        approach?.render?.(Math.min(elapsed, approachMs) * approachSpeed);
+        if (elapsed >= approachMs) { phase = 'push'; phaseStart = timestamp; cursor.setGrip(true); }
+      } else if (phase === 'push') {
+        const distance = stroke;
+        const progress = Math.min(1, elapsed / pushMs[index]);
+        const moved = distance * easeInOutSine(progress);
+        applyOffsets(rows, Math.min(1, (covered + moved) / total));
+        point(handFrom - direction * moved);
+        if (progress >= 1) {
+          covered += distance;
+          index += 1;
+          if (index >= pushes) return done(resolve);
+          cursor.setGrip(false);
+          phase = 'lift';
+          phaseStart = timestamp;
+        }
+      } else {
+        const progress = Math.min(1, elapsed / liftMs);
+        point(handFrom - direction * stroke * (1 - easeInOutSine(progress)));
+        if (progress >= 1) { phase = 'push'; phaseStart = timestamp; cursor.setGrip(true); }
+      }
+      frameId = requestFrame(step);
+    };
+    frameId = requestFrame(step);
+  }).then(() => {
+    // The claw stays on the page: the gesture that follows (usually the frame on what was scrolled to)
+    // approaches from here. Sending it home first made the next gesture start while the arm was still
+    // retracting; an idle claw retracts on its own.
+    applyOffsets(rows, 1);
+  });
+}
+
+
+/**
+ * The one way the show brings anything into view, whatever scrolls (article, navigation tree, panels):
+ * the claw pushes the page, as fast as the slot allows (the plain animation only without a presenter or
+ * for a slot too short for any motion).
+ * @param {Element} target
+ * @param {{
+ *   document?: Document, signal?: AbortSignal, cursor?: any,
+ *   budgetMs?: number, durationMs?: number,
+ * }} [options] `budgetMs`: the room the gesture has; `durationMs`: the plain animation's length
+ * @returns {Promise<void>}
+ */
+export function scrollCvShowSpaceIntoView(target, {
+  document, signal, cursor = null, budgetMs = 0, durationMs = 300,
+} = {}) {
+  return Number(budgetMs) >= HAND_SCROLL_MIN_BUDGET_MS && cursor
+    ? animateCvShowScrollWithHand(target, { document, signal, cursor, durationMs: Math.max(360, budgetMs - 350) })
+    : animateCvShowScrollIntoView(target, { document, signal, durationMs });
+}
+
+export const HAND_SCROLL_MIN_BUDGET_MS = 600;

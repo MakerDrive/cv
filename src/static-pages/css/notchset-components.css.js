@@ -255,6 +255,68 @@ html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-header
   margin-inline-end: 0;
 }
 
+/* Subtitles break between words only: never inside a word, and never at a hyphen (a hyphenated word stays
+   whole and moves to the next line together). */
+html[data-portfolio-theme-mode] chat-show-player :is(.chat-show-caption-words, .chat-show-caption-text,
+  chat-show-caption-word-item, .chat-show-caption-word) {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+
+html[data-portfolio-theme-mode] chat-show-player :is(chat-show-caption-word-item, .chat-show-caption-word) {
+  white-space: nowrap;
+}
+
+/* Volume panels: hovering or focusing the music or effects switch slides a panel up over it, as wide
+   as the button, with a vertical slider in the inverted player colours. */
+html[data-portfolio-theme-mode] chat-show-player .chat-show-header {
+  position: relative;
+}
+
+/* The panel rises out of the header over the transcript above, so the player must not clip it. */
+html[data-portfolio-theme-mode] :is(chat-show-player, .agent-show-player-region) {
+  overflow: visible;
+}
+
+html[data-portfolio-theme-mode] .cv-show-volume {
+  position: absolute;
+  bottom: 100%;
+  z-index: 6;
+  box-sizing: border-box;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding-block: calc(var(--notchset-rule-width) * 8);
+  background: var(--sn-sys-surface-panel);
+  color: var(--sn-sys-on-surface);
+  border: var(--notchset-rule-width) solid var(--sn-layout-border);
+  border-bottom: 0;
+  pointer-events: auto;
+}
+
+html[data-portfolio-theme-mode] .cv-show-volume[data-open] {
+  display: flex;
+  animation: cv-show-volume-rise var(--sn-transition-fast) var(--notchset-ease-fade);
+}
+
+@keyframes cv-show-volume-rise {
+  from { transform: translateY(40%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+html[data-portfolio-theme-mode] .cv-show-volume-range {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  /* Vertical writing mode: the inline axis is the slider's height, the block axis its width. */
+  inline-size: calc(var(--notchset-rule-width) * 96);
+  block-size: 100%;
+  margin: 0;
+  background: transparent;
+  accent-color: var(--sn-sys-on-surface);
+  cursor: pointer;
+}
+
 html[data-portfolio-theme-mode] chat-show-player[panel-layout] .chat-show-controls {
   grid-row: 4;
   grid-column: 1 / -1;

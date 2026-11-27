@@ -74,11 +74,15 @@ export function createCvShowSound(source) {
     watchOverlay(overlay) {
       stopWatch?.();
       stopWatch = overlay ? watchPresenterCues(
-        overlay, (kind, detail) => sound.cue(kind, detail), (kind, value, detail) => sound.sustain(kind, value, detail),
+        overlay, (kind, detail) => sound.cue(kind, detail), (kind, value, detail) => sound.sustain(kind, value, detail), (kind, detail) => sound.release?.(kind, detail),
       ) : null;
     },
     isMusic: () => sound.isMusic(),
     isSounds: () => sound.isSounds(),
+    getMusicVolume: () => sound.getMusicVolume(),
+    setMusicVolume: (value) => sound.setMusicVolume(value),
+    getSoundsVolume: () => sound.getSoundsVolume(),
+    setSoundsVolume: (value) => sound.setSoundsVolume(value),
     toggleMusic() {
       sound.setMusic(!sound.isMusic());
       return sound.isMusic();

@@ -5,6 +5,7 @@ import { checkRigTrace } from './rigInvariants.js';
 const CHECK_EVERY_MS = 1000;
 const WINDOW_MS = 60_000;
 const DEDUPE_SLACK_MS = 600;
+const SLOW_TASK_WARN_MS = 250;
 
 let users = 0;
 let stop = null;
@@ -42,6 +43,28 @@ function start(doc) {
   });
   win.addEventListener('error', onError);
   win.addEventListener('unhandledrejection', onRejection);
+
+  // Presentation deadlines are measured on the monotonic clock, so a stalled
+  // main thread or a throttled hidden tab shows up as a missed deadline.
+  const onVisibility = () => log.info('page', 'visibility', { state: doc.visibilityState });
+  doc.addEventListener('visibilitychange', onVisibility);
+  let observers = [];
+  for (const type of ['longtask', 'long-animation-frame']) {
+    if (!win.PerformanceObserver?.supportedEntryTypes?.includes(type)) continue;
+    let observer = new win.PerformanceObserver((list) => {
+      for (const item of list.getEntries()) {
+        let durationMs = Math.round(item.duration);
+        let level = durationMs >= SLOW_TASK_WARN_MS ? 'warn' : 'debug';
+        let blockingMs = Number.isFinite(item.blockingDuration)
+          ? Math.round(item.blockingDuration)
+          : undefined;
+        let startMs = Math.round(item.startTime);
+        log.log('perf', type, { durationMs, blockingMs, startMs }, level);
+      }
+    });
+    observer.observe({ type, buffered: false });
+    observers.push(observer);
+  }
   log.info('debug', 'on', { checks: ['arm-flap', 'claw-leaves-frame', 'arm-short', 'body-in-frame'] });
 
   return () => {
@@ -49,6 +72,8 @@ function start(doc) {
     stopProbe();
     win.removeEventListener('error', onError);
     win.removeEventListener('unhandledrejection', onRejection);
+    doc.removeEventListener('visibilitychange', onVisibility);
+    for (const observer of observers) observer.disconnect();
     log.info('debug', 'off', {});
   };
 }

@@ -26,7 +26,7 @@ body {
   color: var(--pulse-text);
 }
 
-body:has(.pulse-screen) {
+body.pulse-body {
   padding-left: 0;
   --calc-top-pan-height: var(--sn-app-topbar-height, 40px);
   --pulse-workspace-block-size: calc(100vh - var(--calc-top-pan-height));
@@ -35,7 +35,7 @@ body:has(.pulse-screen) {
 }
 
 @supports (height: 100dvh) {
-  body:has(.pulse-screen) {
+  body.pulse-body {
     --pulse-workspace-block-size: calc(100dvh - var(--calc-top-pan-height));
   }
 }
@@ -45,7 +45,7 @@ side-panel[hidden] {
   display: none;
 }
 
-body:has(.pulse-screen) > footer {
+body.pulse-body > footer {
   display: none;
 }
 
@@ -56,7 +56,7 @@ body > footer {
   border-color: var(--pulse-outline);
 }
 
-body:has(.pulse-screen) > header {
+body.pulse-body > header {
   position: relative;
   top: auto;
   min-width: 0;
@@ -93,12 +93,6 @@ body:has(.pulse-screen) > header {
 
 .pulse-tour-button {
   display: inline-flex;
-}
-
-/* The Show is narrated in Russian only; keep the button out of other
-   locales from the first paint instead of hiding it after hydration. */
-html:not(:lang(ru)) .pulse-tour-button {
-  display: none;
 }
 
 /* Pressed before the Show runtime is ready: pulse until it starts. */
@@ -313,6 +307,46 @@ portfolio-graph-panel {
   position: relative;
 }
 
+/* Until the page has built its first screen, the raw static markup (unthemed header, the stretched graph
+   picture, the skeleton bars) is not shown: a calm loader stands in. If the app never reports ready (a script
+   failed or is blocked), the static page is revealed after a while anyway. */
+html:not([data-portfolio-ready]) body.pulse-body > header,
+html:not([data-portfolio-ready]) body.pulse-body > main {
+  animation: portfolio-reveal-fallback 0s 14s forwards;
+  visibility: hidden;
+}
+
+html:not([data-portfolio-ready]) body.pulse-body::after {
+  content: '';
+  position: fixed;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 30px;
+  block-size: 30px;
+  margin: -15px 0 0 -15px;
+  border: 2px solid color-mix(in oklab, var(--pulse-text) 22%, transparent);
+  border-block-start-color: var(--pulse-accent);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: portfolio-graph-loading-spin 0.72s linear infinite, portfolio-hide-loader 0s 14s forwards;
+}
+
+@keyframes portfolio-reveal-fallback {
+  to { visibility: visible; }
+}
+
+@keyframes portfolio-hide-loader {
+  to { opacity: 0; }
+}
+
+/* The icon font: .material-symbols-outlined can show its ligature name as words while the icon font is still loading: keep it
+   an empty, icon-sized box until the font is there. */
+html:not([data-icons-ready]) .material-symbols-outlined {
+  inline-size: 1em;
+  overflow: hidden;
+  color: transparent;
+}
+
 /* First paint: a quiet skeleton of the tree and article columns stands in for
    the workspace until it upgrades, so the page is not an empty gap next to the
    graph preview. */
@@ -386,6 +420,15 @@ portfolio-graph-panel > .portfolio-graph-snapshot {
 .portfolio-canvas[data-snapshot-pending] {
   opacity: 0;
   pointer-events: none;
+}
+
+/* The picture of the graph is a stand-in: soft until the live graph has taken its place. */
+portfolio-graph-panel > .portfolio-graph-snapshot {
+  transition: filter var(--sn-transition-slow, 0.45s) ease-out;
+}
+
+portfolio-graph-panel[data-loading] > .portfolio-graph-snapshot {
+  filter: blur(calc(var(--notchset-rule-width, 1px) * 3)) saturate(0.85);
 }
 
 portfolio-graph-panel[data-loading]::after {
@@ -736,11 +779,11 @@ body > footer a {
     font-size: 1rem;
   }
 
-  body:has(.pulse-screen) {
+  body.pulse-body {
     --calc-top-pan-height: var(--sn-app-topbar-mobile-height, 56px);
   }
 
-  body:has(.pulse-screen) > header {
+  body.pulse-body > header {
     block-size: var(--sn-app-topbar-mobile-height, 56px);
     min-block-size: var(--sn-app-topbar-mobile-height, 56px);
     box-sizing: border-box;

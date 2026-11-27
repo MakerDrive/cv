@@ -31,7 +31,9 @@ export const EXECUTABLE_ASSET_ALLOWLIST = Object.freeze([
   // Shared chunk of the Show log: the main bundle (console panel) and the lazy
   // Show runtime write to one log.
   'js/show-log/index.js',
-  'js/ForceWorker.js'
+  'js/ForceWorker.js',
+  // Eight lines, async: marks the icon font as loaded so ligature names never show as words.
+  'js/icons-ready.js'
 ]);
 
 // Budget raised 2026-09-06 (+0.3% raw, +0.5% gzip): the approved drawer rail

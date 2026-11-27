@@ -8,6 +8,7 @@
  */
 
 const LIMIT = 3000;
+const ERROR_CONTEXT_MS = 10_000;
 const GLOBAL_KEY = '__cvShowLog';
 const LEVELS = Object.freeze({ debug: 0, info: 1, warn: 2, error: 3 });
 
@@ -32,6 +33,7 @@ function createShowLog({ limit = LIMIT } = {}) {
   const listeners = new Set();
   const startedAt = Date.now();
   let sequence = 0;
+  let dropped = 0;
   let context = () => ({});
 
   const notify = (entry) => {
@@ -62,6 +64,7 @@ function createShowLog({ limit = LIMIT } = {}) {
       while (entries.length > limit) {
         const oldestDebug = entries.findIndex((item) => item.level === 'debug');
         entries.splice(oldestDebug >= 0 ? oldestDebug : 0, 1);
+        dropped += 1;
       }
       notify(entry);
       return entry;
@@ -71,25 +74,46 @@ function createShowLog({ limit = LIMIT } = {}) {
     warn(source, type, data) { return api.log(source, type, data, 'warn'); },
     error(source, type, data) { return api.log(source, type, data, 'error'); },
     entries() { return entries.slice(); },
-    clear() { entries.length = 0; notify(null); },
+    clear() { entries.length = 0; dropped = 0; notify(null); },
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    /** Plain-text report to paste into a bug conversation. */
+    /**
+     * Plain-text report to paste into a bug conversation. Besides the filtered
+     * tail it keeps every record, of any level, from the ERROR_CONTEXT_MS
+     * before each error, so a filtered view still explains the failure.
+     */
     report({ filter = () => true, tail = 400 } = {}) {
-      const rows = entries.filter(filter).slice(-tail).map((entry) => {
-        const time = (entry.at / 1000).toFixed(2).padStart(8);
-        const show = entry.showMs === null ? '' : ` show=${entry.showMs}`;
-        const where = entry.entry ? ` entry=${entry.entry}` : '';
-        return `${time}s ${entry.level.toUpperCase().padEnd(5)} ${entry.source}.${entry.type}${show}${where} ${JSON.stringify(entry.data ?? {})}`;
+      let errorTimes = entries.filter((entry) => entry.level === 'error').map((entry) => entry.at);
+      let nearError = (entry) => errorTimes.some((at) => (
+        entry.at <= at && entry.at >= at - ERROR_CONTEXT_MS
+      ));
+      let picked = new Set(entries.filter(filter).slice(-tail));
+      let context = 0;
+      for (const entry of entries) {
+        if (picked.has(entry) || !nearError(entry)) continue;
+        picked.add(entry);
+        context += 1;
+      }
+      let rows = entries.filter((entry) => picked.has(entry)).map((entry) => {
+        let time = (entry.at / 1000).toFixed(2).padStart(8);
+        let show = entry.showMs === null ? '' : ` show=${entry.showMs}`;
+        let where = entry.entry ? ` entry=${entry.entry}` : '';
+        let level = entry.level.toUpperCase().padEnd(5);
+        let data = JSON.stringify(entry.data ?? {});
+        return `${time}s ${level} ${entry.source}.${entry.type}${show}${where} ${data}`;
       });
-      const head = [
+      let doc = globalThis.document;
+      let head = [
         'CV Show report',
         `url: ${globalThis.location?.href || ''}`,
+        `build: ${doc?.querySelector?.('meta[name="cv-build-id"]')?.getAttribute('content') || ''}`,
+        `captured: ${new Date().toISOString()} (log started ${new Date(startedAt).toISOString()})`,
         `agent: ${globalThis.navigator?.userAgent || ''}`,
-        `viewport: ${globalThis.innerWidth}x${globalThis.innerHeight}`,
-        `records: ${rows.length}/${entries.length}`,
+        `viewport: ${globalThis.innerWidth}x${globalThis.innerHeight} dpr=${globalThis.devicePixelRatio}`,
+        `visibility: ${doc?.visibilityState || ''}`,
+        `records: ${rows.length}/${entries.length} (error context ${context}, dropped ${dropped})`,
         '',
       ];
       return head.concat(rows).join('\n');

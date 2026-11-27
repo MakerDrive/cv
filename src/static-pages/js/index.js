@@ -240,6 +240,11 @@ await Promise.all([
 // long synchronous start). Nothing on the first screen needs it, so it loads
 // off the critical path: immediately only for a Show deep link, otherwise when
 // the browser is idle or the visitor presses the tour button.
+// How long after the structured canvas appears the live graph waits before it is computed, so the first
+// screen, its data and the first interactions are not competing with it.
+const GRAPH_BINDING_DELAY_MS = 2_200;
+const TOUR_PRELOAD_DELAY_MS = 5_000;
+const GRAPH_BINDING_IDLE_TIMEOUT_MS = 3_000;
 const SHOW_ROUTE_PARAMS = ['showMode', 'showEntry', 'showTime', 'showDetail', 'showPlay', 'showCompleted'];
 let tourModulePromise = null;
 
@@ -264,7 +269,9 @@ function isShowDeepLink() {
   return SHOW_ROUTE_PARAMS.some((name) => params.has(name));
 }
 
-if (isShowDeepLink()) await loadTourModule();
+// A Show deep link starts fetching the runtime at once but no longer holds the whole page for it: the page
+// builds and paints meanwhile, and the Show installs the moment the module is there.
+if (isShowDeepLink()) void loadTourModule();
 
 registerMediaProvider('ims', createPortfolioImsMediaAdapter());
 
@@ -3476,11 +3483,14 @@ class PortfolioGraphPanel extends HTMLElement {
       this.queueStructuredGraphBinding({ immediate: true, allowHidden });
       return;
     }
+    // The live graph is computed only after the page itself is up: it is a multi-second synchronous task on
+    // a modest CPU, the static snapshot stands in for it meanwhile, and any real need (a Show target,
+    // a press on the graph) escalates it through the urgent paths above.
     this._structuredBindingTimer = globalThis.setTimeout(() => {
       this._structuredBindingTimer = 0;
       if (!this.structuredMode || !this.canvas || this._structuredBound) return;
       this.queueStructuredGraphBinding({ allowHidden });
-    }, 450);
+    }, GRAPH_BINDING_DELAY_MS);
   }
 
   queueStructuredGraphBinding({ immediate = false, allowHidden = false } = {}) {
@@ -3490,14 +3500,14 @@ class PortfolioGraphPanel extends HTMLElement {
     let callback = () => {
       this._structuredBindingFrame = 0;
       this._structuredBindingIdleFrame = 0;
-      this.bindStructuredGraphRenderer({ allowHidden });
+      this.bindStructuredGraphRenderer({ allowHidden, staged: !immediate });
     };
     if (immediate) {
       callback();
       return;
     }
     if (typeof globalThis.requestIdleCallback === 'function') {
-      this._structuredBindingIdleFrame = globalThis.requestIdleCallback(callback, { timeout: 600 });
+      this._structuredBindingIdleFrame = globalThis.requestIdleCallback(callback, { timeout: GRAPH_BINDING_IDLE_TIMEOUT_MS });
       return;
     }
     this._structuredBindingFrame = globalThis.setTimeout(callback, 0);
@@ -3518,21 +3528,46 @@ class PortfolioGraphPanel extends HTMLElement {
     }
   }
 
-  bindStructuredGraphRenderer({ allowHidden = false } = {}) {
+  /**
+   * Binds the live graph to the structured canvas in three stages (editor and connections, node
+   * positions, fit and adoption). Staged, each one runs in its own task, so the page stays responsive between
+   * them; urgent callers run all remaining stages at once. A stage done is never repeated.
+   */
+  bindStructuredGraphRenderer({ allowHidden = false, staged = false } = {}) {
     if (this._structuredBound || !this.structuredMode || !this.canvas) return;
     if (!allowHidden && !this.isGraphPanelVisible()) {
       this.setStructuredGraphLoading(false);
       return;
     }
     this.setStructuredGraphLoading(true);
+    let yielded = false;
+    // Hands the next stage to a fresh task (staged mode only); true when the caller must stop here.
+    const yieldToNextStage = () => {
+      if (!staged) return false;
+      yielded = true;
+      this._structuredBindingFrame = globalThis.setTimeout(() => {
+        this._structuredBindingFrame = 0;
+        this.bindStructuredGraphRenderer({ allowHidden, staged: true });
+      }, 0);
+      return true;
+    };
     try {
-      let editor = this._structuredEditor || createPortfolioEditor();
-      this._structuredEditor = editor;
-      this._graphSnapshotRuntime ||= createPortfolioGraphSnapshotRuntime(this, this.canvas, editor);
-      this._graphSnapshotRuntime.prepare();
-      this.graphController?.setStructuredEditor?.(editor);
-      setNodePositions(this.canvas, orderedPortfolioProjects);
-      this.canvas._layoutReleasedDom = false;
+      if (!this._bindStage) {
+        let editor = this._structuredEditor || createPortfolioEditor();
+        this._structuredEditor = editor;
+        this._graphSnapshotRuntime ||= createPortfolioGraphSnapshotRuntime(this, this.canvas, editor);
+        this._graphSnapshotRuntime.prepare();
+        this.graphController?.setStructuredEditor?.(editor);
+        this._bindStage = 1;
+        if (yieldToNextStage()) return;
+      }
+      if (this._bindStage < 2) {
+        setNodePositions(this.canvas, orderedPortfolioProjects);
+        this.canvas._layoutReleasedDom = false;
+        this._bindStage = 2;
+        if (yieldToNextStage()) return;
+      }
+      this._bindStage = 0;
       this._structuredBound = true;
       this._structuredBindingUrgent = false;
       this._structuredBindingAllowHidden = false;
@@ -3554,9 +3589,10 @@ class PortfolioGraphPanel extends HTMLElement {
     } catch (error) {
       this._graphSnapshotRuntime?.stop?.();
       this._structuredAdoptionPending = false;
+      this._bindStage = 0;
       throw error;
     } finally {
-      if (!this._structuredAdoptionPending) this.setStructuredGraphLoading(false);
+      if (!yielded && !this._structuredAdoptionPending) this.setStructuredGraphLoading(false);
     }
   }
 
@@ -3841,6 +3877,7 @@ class PortfolioGraphPanel extends HTMLElement {
       this.setStructuredGraphLoading(false);
       if (this.canvas?._layoutReleasedDom) {
         this._structuredBound = false;
+        this._bindStage = 0;
       }
     }
     portfolioRuntime.syncCanvas({ focus: true, focusScope: 'group' });
@@ -4281,7 +4318,9 @@ class PortfolioWorkspace extends HTMLElement {
       tourButton?.removeEventListener('focus', warmTour);
     };
     if (tourModule) installTour(tourModule);
-    else {
+    else if (isShowDeepLink()) {
+      void loadTourModule().then((module) => installTour(module));
+    } else {
       // Only download the Show runtime while the browser is idle; evaluating it
       // starts a long synchronous task, so it waits for a real press.
       const preloadTour = () => {
@@ -4290,9 +4329,16 @@ class PortfolioWorkspace extends HTMLElement {
         link.href = createRuntimeAssetUrl('js/tour-player/index.js').href;
         document.head.append(link);
       };
-      if (typeof globalThis.requestIdleCallback === 'function') {
-        globalThis.requestIdleCallback(preloadTour, { timeout: 6000 });
-      } else globalThis.setTimeout(preloadTour, 3000);
+      // The 1.9 MB Show runtime is not needed to read the page: it is fetched a few seconds after load and
+      // only when the visitor is not saving data (a press or hover still loads it at once).
+      const saveData = /** @type {any} */ (globalThis.navigator)?.connection?.saveData === true;
+      if (!saveData) {
+        globalThis.setTimeout(() => {
+          if (typeof globalThis.requestIdleCallback === 'function') {
+            globalThis.requestIdleCallback(preloadTour, { timeout: 6000 });
+          } else preloadTour();
+        }, TOUR_PRELOAD_DELAY_MS);
+      }
     }
     let themeOpenRequest = 0;
     this._onThemeOpenFull = async () => {
@@ -4333,6 +4379,10 @@ class PortfolioWorkspace extends HTMLElement {
     document.addEventListener('cascade-theme-open-full', this._onThemeOpenFull);
     document.addEventListener('portfolio-open-materials', this._onOpenMaterials);
     layout.setLayout(createPortfolioLayoutTree());
+    // The first screen is built: from here the loading placeholder (see index.css) gives way to it.
+    globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(() => {
+      document.documentElement.dataset.portfolioReady = '';
+    }));
     // Read-only live semantic observation (Slice A). Registration is a
     // no-op when the browser has no native WebMCP model context; the
     // handle stays reachable for tests via the workspace element.

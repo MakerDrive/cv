@@ -23,7 +23,10 @@ import {
 import {
   projectCvShowScheduleDuration,
 } from '../../../static-pages/js/tour-player/presentationProjectAdapter.js';
-import { createBrowserSpeechController } from '../../../static-pages/js/tour-player/speech.js';
+import { createTtsSpeechController } from '../../../static-pages/js/tour-player/ttsNarration.js';
+import { localizeShowStory } from '../../../static-pages/js/tour-player/showLocale.js';
+import { buildTimedCues, restoredScrollCue } from '../../../static-pages/js/tour-player/ttsCues.js';
+import { CV_SHOW_LOCALES } from '../../../static-pages/data/cvShowLocales.js';
 import {
   CV_SHOW_RECOVERY,
   createPresentationReceiptSummary,
@@ -311,7 +314,7 @@ export class PortfolioShowChat extends HTMLElement {
   #configured = false;
   #trustedContactAction = '';
   #speech = createCvShowNarrationController({
-    browserSpeech: createBrowserSpeechController(),
+    browserSpeech: createTtsSpeechController(),
     url: globalThis.location?.href,
     baseUrl: globalThis.document?.baseURI,
   });
@@ -388,6 +391,9 @@ export class PortfolioShowChat extends HTMLElement {
   /** @type {ReturnType<typeof globalThis.setTimeout> | null} */
   #sectionLinkFeedbackTimer = null;
   #playbackRate = CV_SHOW_DEFAULT_PLAYBACK_RATE;
+  // Set once the listener picks a speed themselves: from then on no default overrides it.
+  #playbackRateChosen = false;
+  #noVoiceReported = false;
 
   constructor() {
     super();
@@ -461,6 +467,7 @@ export class PortfolioShowChat extends HTMLElement {
     const { actionId, payload } = event.detail || {};
     const contactUrl = resolveTrustedCvContactAction(actionId, this.#trustedContactAction);
     this.#trustedContactAction = '';
+    getShowLog().info('player', 'action', { actionId, branchId: payload?.branchId });
     if (contactUrl) {
       globalThis.open?.(contactUrl, '_blank', 'noopener,noreferrer');
       return;
@@ -483,11 +490,15 @@ export class PortfolioShowChat extends HTMLElement {
    * Hidden pages freeze rAF-driven effects while the shared engine's
    * wall-clock operation deadline keeps running. Pausing on hide cancels the
    * active cells honestly (cancelled, replayable) instead of letting them
-   * expire into PRESENTATION_EFFECT_DEADLINE_MISSED on return.
+   * expire into PRESENTATION_EFFECT_DEADLINE_MISSED on return. Only the recorded (aligned) show has
+   * those deadlines.
    */
   #onDocumentVisibility = () => {
     if (globalThis.document?.visibilityState !== 'hidden') return;
     if (!this.$.isRunning || this.$.isPaused) return;
+    // The browser voice has no engine deadlines to miss: it keeps speaking in a hidden tab and its
+    // cues simply run when the page paints again.
+    if (!this.#alignment.available) return;
     this.pauseShow('page-hidden');
   };
 
@@ -591,7 +602,8 @@ export class PortfolioShowChat extends HTMLElement {
    * @returns {null | { words: ReadonlyArray<{ text: string, startMs: number, endMs: number }>, positionMs: number, playing: boolean }}
    */
   getSpeechClock() {
-    const track = this.#alignedEntry?.captionTrack;
+    const ttsClock = this.#browserVoiceClock();
+    const track = ttsClock?.words ?? this.#alignedEntry?.captionTrack;
     if (!Array.isArray(track) || !track.length) return null;
     const text = this.#playerEntry()?.subtitle || this.#currentScene()?.subtitle || '';
     if (this.#speechClockMemo?.track !== track || this.#speechClockMemo.text !== text) {
@@ -599,12 +611,79 @@ export class PortfolioShowChat extends HTMLElement {
     }
     return {
       words: this.#speechClockMemo.words,
-      positionMs: this.#presentationPositionMs(),
-      playing: this.#transportPlaying,
+      positionMs: ttsClock ? ttsClock.positionMs : this.#presentationPositionMs(),
+      playing: ttsClock ? ttsClock.playing : this.#transportPlaying,
     };
   }
 
+  /** Estimated clock of the browser voice; null for recorded narration or when nothing is spoken. */
+  #browserVoiceClock() {
+    if (this.#alignedEntry?.captionTrack?.length) return null;
+    return this.#speech.clock?.() ?? null;
+  }
+
+  /** @type {any} */
+  #captionTicker = 0;
+  #lastRouteReportAt = 0;
+
+  /** The browser voice has no media events: keep the caption highlight and the cloud moving on a timer. */
+  /**
+   * The words and the position the caption follows: the browser voice's own clock, or, for recorded
+   * narration, the exact narration position against its alignment track (the media element's coarse
+   * time updates trail the voice by up to a quarter of a second).
+   */
+  #captionSource() {
+    const voice = this.#browserVoiceClock();
+    if (voice) return { track: voice.words, positionMs: voice.positionMs, browser: true };
+    const track = this.#alignedEntry?.captionTrack;
+    if (Array.isArray(track) && track.length && this.#transportPlaying) {
+      return { track, positionMs: this.#presentationPositionMs(), browser: false };
+    }
+    return null;
+  }
+
+  /** Neither kind of narration emits per-word events: keep the caption highlight on a timer. */
+  #startCaptionTicker() {
+    if (this.#captionTicker) return;
+    this.#captionTicker = globalThis.setInterval(() => {
+      if (!this.#captionSource()) {
+        globalThis.clearInterval(this.#captionTicker);
+        this.#captionTicker = 0;
+        return;
+      }
+      this.#syncPlayerCaption();
+    }, 90);
+  }
+
+  #syncPlayerCaption() {
+    const activeEntry = this.#playerEntry();
+    const source = this.#captionSource();
+    if (!source) return;
+    const caption = createCvShowCanonicalCaption(
+      activeEntry?.subtitle || this.#currentScene()?.subtitle || '',
+      source.track,
+      source.positionMs,
+    );
+    this.#showPlayer?.setState?.({
+      progress: { positionMs: this.#displayPositionMs() },
+      caption: { speaker: this.$.inBranch ? this.#message('tour.details') : 'CV', ...caption },
+    });
+    if (!source.browser) return;
+    // The address carries the playhead: report the route about as often as recorded narration's time updates.
+    const now = globalThis.performance.now();
+    if (now - this.#lastRouteReportAt >= 250) {
+      this.#lastRouteReportAt = now;
+      this.dispatchEvent(new CustomEvent('portfolio-show-route-change', {
+        bubbles: true,
+        composed: true,
+        detail: { state: this.routeSnapshot, terminalState: null },
+      }));
+    }
+  }
+
   #presentationPositionMs(fallbackMs = this.#session.snapshot.playback.positionMs) {
+    const voiceClock = this.#browserVoiceClock();
+    if (voiceClock) return Math.max(0, voiceClock.positionMs);
     const projectPositionMs = Number(this.#alignedEntry?.runtime?.presentationPositionMs);
     if (Number.isFinite(projectPositionMs)) return Math.max(0, projectPositionMs);
     const legacyMediaPosition = Number(
@@ -1149,6 +1228,7 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   #togglePlaybackRate() {
+    this.#playbackRateChosen = true;
     const rates = CV_SHOW_PLAYBACK_RATE_CYCLE;
     const at = rates.indexOf(this.#playbackRate);
     this.#setPlaybackRate(rates[(at + 1) % rates.length] ?? CV_SHOW_DEFAULT_PLAYBACK_RATE);
@@ -1223,9 +1303,12 @@ export class PortfolioShowChat extends HTMLElement {
       const branchesValid = Object.values(story?.branches || {}).every((branch) => (
         sceneIds.has(branch.sceneId) && branch.return?.resume === 'paused'
       ));
+      const lang = String(document.documentElement.lang || 'ru').split('-')[0];
+      const locale = CV_SHOW_LOCALES[lang];
+      if (story && lang !== 'ru' && locale) story = localizeShowStory(story, lang, locale);
       this.#story = story;
       this.$.isReady = story?.version === 1
-        && story?.narrationLocale === 'ru'
+        && Boolean(story?.narrationLocale)
         && story.short?.length === 16
         && Object.keys(story.branches || {}).length === 14
         && story.short.every((id) => sceneIds.has(id))
@@ -1462,6 +1545,14 @@ export class PortfolioShowChat extends HTMLElement {
   async #prepareNarrationResources() {
     this.#narrationReady = this.#speech.prepare(this.#story).then((snapshot) => {
       this.dataset.narrationSource = snapshot.source;
+      // The generative (browser) voice of the languages without recorded audio is already quick and natural
+      // at its own pace: it starts at 1x, while the recorded narration keeps its 1.5x. A speed the listener
+      // picked is never overridden. (The Russian browser fallback keeps the recorded default.)
+      if (!this.#playbackRateChosen) {
+        const generative = snapshot.source === 'browser' && this.#story?.narrationLocale !== 'ru';
+        const wanted = generative ? CV_SHOW_PLAYBACK_RATE_NORMAL : CV_SHOW_DEFAULT_PLAYBACK_RATE;
+        if (wanted !== this.#playbackRate) this.#setPlaybackRate(wanted);
+      }
       return snapshot;
     });
     this.#alignmentReady = this.#narrationReady.then(async (snapshot) => {
@@ -1845,19 +1936,69 @@ export class PortfolioShowChat extends HTMLElement {
     const beforeDeferredPresentation = runPrecedingSetup && !this.#presentationAdmitted
       ? runPrecedingSetup
       : null;
+    // Localized narration has no recorded audio to align to: every directive fires at the moment its
+    // quote is estimated to be spoken (see ttsNarration.js), one after another once setup is done.
+    // The Russian browser fallback keeps the older behaviour of running them all at the start.
+    let setupFinished = null;
+    let rejectSetup = null;
+    let cueChain = Promise.resolve();
+    const timedCues = this.#alignment.available || this.#story.narrationLocale === 'ru' ? [] : buildTimedCues(visualDirectives);
+    const onCue = (cue) => {
+      let completion = cueChain.then(async () => {
+        await setupFinished;
+        if (requestId !== this.#requestId) return;
+        await new Promise((resolve) => {
+          const detail = {
+            directives: [cue.directive], aligned: false, requestId, continuation: true, scroll: cue.scroll === true, budgetMs: cue.budgetMs || 0, handled: false, complete: resolve,
+          };
+          this.dispatchEvent(new CustomEvent('portfolio-show-phase', { bubbles: true, composed: true, detail }));
+          if (!detail.handled) resolve();
+        });
+      });
+      cueChain = completion.catch(() => {});
+      return completion;
+    };
+    // A restored position skips the earlier cues: bring the page to where the narration left it. It goes
+    // through the cue chain, so it can never land after (and clear) a gesture that follows it.
+    const restoreCue = restoredScrollCue(entry.speech, timedCues, positionMs);
+    let restoreDone = false;
+    const runRestore = () => {
+      if (!restoreCue || restoreDone || requestId !== this.#requestId) return;
+      restoreDone = true;
+      // Instant: a restored page is simply there, nobody pushes it.
+      onCue({ ...restoreCue, budgetMs: 1 });
+    };
     const startUnalignedPresentation = this.#alignment.available ? null : async () => {
-      const receipt = precedingSetupEntry
-        ? await this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
-        : await this.#runSceneSetup(entry, requestId);
-      requireCvShowSceneSetupSuccess(receipt, entry.id);
-      if (requestId !== this.#requestId) return;
-      // The scene setup completed, so its content is physically presented.
-      this.#presentedSceneId = entry.sceneId || entry.id;
-      this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
-        bubbles: true,
-        composed: true,
-        detail: { directives: visualDirectives, aligned: false, requestId },
-      }));
+      /** @type {(value?: any) => void} */
+      let finishSetup = () => {};
+      setupFinished = new Promise((resolve, reject) => {
+        finishSetup = resolve;
+        rejectSetup = reject;
+      });
+      runRestore();
+      // Cue continuations observe setup failure when timed cues exist; the Russian
+      // browser fallback has no continuation and is handled by the start callback.
+      setupFinished.catch(() => {});
+      try {
+        const receipt = precedingSetupEntry
+          ? await this.#runPrecedingSceneSetup(precedingSetupEntry, entry, requestId)
+          : await this.#runSceneSetup(entry, requestId);
+        requireCvShowSceneSetupSuccess(receipt, entry.id);
+        if (requestId !== this.#requestId) {
+          finishSetup();
+          return;
+        }
+        this.#presentedSceneId = entry.sceneId || entry.id;
+        this.dispatchEvent(new CustomEvent('portfolio-show-phase', {
+          bubbles: true,
+          composed: true,
+          detail: { directives: timedCues.length ? [] : visualDirectives, aligned: false, requestId },
+        }));
+        finishSetup();
+      } catch (error) {
+        rejectSetup?.(error);
+        throw error;
+      }
     };
     this.#showPlayer?.bind?.(this.#showConfig());
     this.#syncPlayer();
@@ -1868,7 +2009,15 @@ export class PortfolioShowChat extends HTMLElement {
       beforeDeferredPresentation,
       restorePausedCheckpoint,
       onPhysicalStart: startUnalignedPresentation,
+      cues: timedCues,
+      onCue,
+      beforeEnd: timedCues.length ? async () => {
+        await cueChain;
+        await this.#alignedEntry?.runtime?.whenIdle?.();
+      } : undefined,
     });
+    // A paused restore shows the page where the narration left it right away; a playing one does it first thing.
+    if (startPaused && restoreCue) setTimeout(runRestore, 400);
   }
 
   #runSceneSetup(entry, requestId, { restorePausedCheckpoint = false } = {}) {
@@ -2115,6 +2264,17 @@ export class PortfolioShowChat extends HTMLElement {
     this.#lastAlignedGenerationReceipt = receipt;
     const input = this.#failurePolicyInput(receipt, entryId);
     const recovery = resolveFailureRecovery(input);
+    getShowLog().warn('player', 'seek-failure', {
+      recovery,
+      status: receipt?.status,
+      reason: receipt?.reason,
+      phase: receipt?.phase,
+      operationId: receipt?.operationId,
+      requestedMs: receipt?.requestedMs,
+      observedMs: receipt?.observedMs,
+      details: receipt?.details,
+      policyInput: input,
+    });
     if (
       recovery === CV_SHOW_RECOVERY.DEGRADE
       || recovery === CV_SHOW_RECOVERY.SKIP
@@ -2325,10 +2485,16 @@ export class PortfolioShowChat extends HTMLElement {
     beforeDeferredPresentation = null,
     restorePausedCheckpoint = false,
     onPhysicalStart = null,
+    cues = [],
+    onCue = null,
+    beforeEnd = null,
   } = {}) {
     if (!this.#speech.available) {
       this.pauseShow('narration-unavailable');
-      this.#appendSystemMessage(this.#message('tour.unavailable'));
+      // Only Russian has recorded narration: for another language the way out is to switch to it.
+      this.#appendSystemMessage(this.#message(
+        this.#story?.narrationLocale === 'ru' ? 'tour.unavailable' : 'tour.unavailable.switch',
+      ));
       return;
     }
     // Clear any previous seek failure so a retry attempt doesn't see stale state.
@@ -2387,13 +2553,27 @@ export class PortfolioShowChat extends HTMLElement {
       this.#activeSpeechEntry = null;
       if (activeToken) this.#audioArbiter?.release?.(activeToken);
     };
+    // A browser without a voice for the language is told once, in the chat, with the way out.
+    if (
+      !this.#noVoiceReported
+      && this.#story?.narrationLocale !== 'ru'
+      && this.#speech.snapshot.source === 'browser'
+      && this.#speech.hasVoice?.(this.#story.narrationLocale) === false
+    ) {
+      this.#noVoiceReported = true;
+      this.#appendSystemMessage(this.#message('tour.noVoice'));
+    }
     const startedInBranch = this.$.inBranch;
     const started = this.#speech.speak(entry.speech, {
       id: entry.id,
       lang: this.#story.narrationLocale,
       rate: this.#playbackRate,
       startPaused: effectiveStartPaused,
+      cues,
+      onCue,
+      startAtMs: cues.length ? positionMs : 0,
       onStart: () => {
+        this.#startCaptionTicker();
         if (!this.#publishPhysicalStart(entry, requestId)) return;
         if (typeof onPhysicalStart !== 'function') return;
         void onPhysicalStart().catch((error) => {
@@ -2414,7 +2594,7 @@ export class PortfolioShowChat extends HTMLElement {
         beforeDeferredPresentation,
         restorePausedCheckpoint,
       }),
-      beforeEnd: () => this.#alignedEntry?.runtime?.whenIdle?.(),
+      beforeEnd: beforeEnd || (() => this.#alignedEntry?.runtime?.whenIdle?.()),
       onEnd: () => {
         if (requestId !== this.#requestId) return;
         if (this.#lastAlignedSeekFailure) {
@@ -2707,6 +2887,14 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   async #resume() {
+    getShowLog().info('player', 'resume', {
+      running: this.$.isRunning,
+      paused: this.$.isPaused,
+      error: this.$.isError,
+      resumeRequired: this.$.resumeRequired,
+      mediaBlocksResume: this.$.mediaBlocksResume,
+      speechEntry: this.#activeSpeechEntry?.id || '',
+    });
     // Stale resume after the player was closed: the stopped show owns no
     // transport, so re-enter Short Show (remount + play) instead of no-op.
     if (resolveCvShowChatReentry({
@@ -2899,10 +3087,11 @@ export class PortfolioShowChat extends HTMLElement {
   #syncPlayer(terminalState = null) {
     const scene = this.#currentScene();
     const activeEntry = this.#playerEntry();
-    const captionPositionMs = this.#presentationPositionMsForUI();
+    const voiceClock = this.#browserVoiceClock();
+    const captionPositionMs = voiceClock ? voiceClock.positionMs : this.#presentationPositionMsForUI();
     const caption = createCvShowCanonicalCaption(
       activeEntry?.subtitle || scene?.subtitle || '',
-      this.#alignedEntry?.captionTrack,
+      voiceClock ? voiceClock.words : this.#alignedEntry?.captionTrack,
       captionPositionMs,
     );
     this.#showPlayer?.setState?.({

@@ -35,6 +35,7 @@ import {
 } from './compositionTime.js';
 import {
   animateCvShowScrollIntoView,
+  scrollCvShowSpaceIntoView,
   createCvShowTextMarkerTarget,
   ensureCvShowArticleProject,
   ensureCvShowMediaProject,
@@ -147,6 +148,27 @@ function resolveSpinnerMediaTarget(targetId) {
   } catch {
     return null;
   }
+}
+
+/**
+ * Whether most of an element is visible: inside the viewport and inside every scrolling ancestor.
+ * @param {Element} element
+ */
+function isElementInView(element) {
+  const rect = element.getBoundingClientRect();
+  if (!(rect.width > 0 || rect.height > 0)) return false;
+  let top = Math.max(0, rect.top);
+  let bottom = Math.min(globalThis.innerHeight, rect.bottom);
+  for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+    const overflowY = globalThis.getComputedStyle(parent).overflowY;
+    if (overflowY !== 'auto' && overflowY !== 'scroll') continue;
+    const box = parent.getBoundingClientRect();
+    top = Math.max(top, box.top);
+    bottom = Math.min(bottom, box.bottom);
+  }
+  const visible = Math.max(0, bottom - top);
+  // A block taller than the view only needs its top part showing.
+  return visible >= Math.min(rect.height, globalThis.innerHeight * 0.5) * 0.9;
 }
 
 function resolveTargetElement(workspace, runtime, targetId) {
@@ -425,9 +447,12 @@ async function presentNavigationGesture(workspace, runtime, entryId, {
   }).catch(() => null);
   const row = ready?.target;
   if (!row) return false;
-  await animateCvShowScrollIntoView(row, {
+  // The navigation tree scrolls like everything else: the claw pushes it when the row is off screen.
+  await scrollCvShowSpaceIntoView(row, {
     document,
     signal,
+    cursor,
+    budgetMs: 1_800,
     durationMs: 260,
   }).catch(() => {});
   await waitForShowVisualSettlement(row, {
@@ -467,6 +492,33 @@ async function presentNavigationGesture(workspace, runtime, entryId, {
     return receipt?.fired === true;
   }
   return false;
+}
+
+/**
+ * Opens a collapsed desktop panel the way a person would: the claw clicks its expand button. Resolves to
+ * whether the panel is open afterwards; false lets the caller expand it programmatically instead.
+ * @param {any} layout
+ * @param {string} panelId
+ * @param {string} panelType
+ * @param {any} cursor presenter cursor
+ * @param {AbortSignal} [signal]
+ */
+async function expandPanelWithClaw(layout, panelId, panelType, cursor, signal) {
+  if (typeof cursor?.clickElement !== 'function' || isCvShowQuietRestoreActive()) return false;
+  const node = findPanelElement(layout, panelId, panelType);
+  const button = visibleElement(node?.querySelector?.('.collapse-btn'));
+  if (!node || !button || !node.hasAttribute('collapsed')) return false;
+  try {
+    await cursor.clickElement(button, { gestureId: `cv-show-expand:${panelId}` });
+  } catch (error) {
+    if (signal?.aborted || error?.name === 'AbortError') throw error;
+    return false;
+  }
+  const deadline = Date.now() + 700;
+  while (node.hasAttribute('collapsed') && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 40));
+  }
+  return !node.hasAttribute('collapsed');
 }
 
 function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
@@ -531,9 +583,9 @@ function inspectTargetPanel(workspace, runtime, targetId, actionId = '') {
   });
 }
 
-export function createPanelActionAdapter(workspace, runtime, { prepareMedia = null } = {}) {
+export function createPanelActionAdapter(workspace, runtime, { prepareMedia = null, getCursor = () => null } = {}) {
   const inspect = ({ action }) => inspectTargetPanel(workspace, runtime, action.target, action.id);
-  const reveal = ({ action, inspected }) => {
+  const reveal = async ({ action, inspected, signal }) => {
     const layout = /** @type {any} */ (workspace.querySelector('.portfolio-layout'));
     const agentDock = /** @type {any} */ (workspace.querySelector('agent-dock-shell'));
     const railLayout = agentDock?.ref?.layout;
@@ -571,7 +623,10 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     if (innerChanged && inspected.mobile) {
       layout?.openDrawer?.(inspected.dock, inspected.panelId);
     } else if (innerChanged) {
-      setDesktopPanelCollapsed(layout, inspected.panelId, inspected.panelType, false);
+      // A person clicks the collapsed panel open; the claw does the same, and only if that cannot be
+      // done (no claw, quiet restore, no button) is the panel opened programmatically.
+      const opened = await expandPanelWithClaw(layout, inspected.panelId, inspected.panelType, getCursor(), signal);
+      if (!opened) setDesktopPanelCollapsed(layout, inspected.panelId, inspected.panelType, false);
     }
     // An authored navigation reveal opens (or keeps open) the start drawer:
     // cancel any stale deferred close so the reveal intent is never lost,
@@ -742,6 +797,16 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
     const scrollDurationMs = bypassScrollSettlement
       ? 0
       : resolveCvShowScrollDuration(context?.presentationBudgetMs);
+    // The hand pushes the page when the cell has room for it (the browser voice has no hard deadline, and
+    // a bare gesture is unbounded); a short recorded cell keeps the plain animated scroll.
+    const handBudgetMs = Number(context?.presentationBudgetMs) > 0 ? Number(context.presentationBudgetMs) : 2_200;
+    const scrollMotion = (durationMs) => scrollCvShowSpaceIntoView(ready.target, {
+      document,
+      signal,
+      cursor: bypassScrollSettlement ? null : getCursor(),
+      budgetMs: handBudgetMs,
+      durationMs,
+    });
     if (bypassScrollSettlement) {
       await animateCvShowScrollIntoView(ready.target, {
         document,
@@ -771,11 +836,7 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
         document,
         signal,
         inactivityMs: settleInactivityMs,
-        start: () => animateCvShowScrollIntoView(ready.target, {
-          document,
-          signal,
-          durationMs: scrollDurationMs,
-        }),
+        start: () => scrollMotion(scrollDurationMs),
       });
     } catch (evidenceError) {
       visualSettlement = Object.freeze({
@@ -1096,7 +1157,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       ? {
           avatarSrc: new URL('avatar/index.webp', document.baseURI).href,
           onTrace: (type, data) => {
-            getShowLog()[type === 'state' ? 'debug' : 'info']('rig', type, data);
+            let level = type === 'state' || type === 'free-arm' ? 'debug' : 'info';
+            getShowLog()[level]('rig', type, data);
             if (RIG_CUES[type]) showSound.cue(RIG_CUES[type], { pan: data?.arm === 0 ? -0.6 : 0.6 });
           },
           // The mouth follows the narration clock, not the coarse caption highlight.
@@ -1178,6 +1240,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         prepareMedia: (targetId, options) => (
           resolveShowMedia(targetId)?.prepareShowMedia?.(options)
         ),
+        getCursor: () => cursor,
       }),
       reportRuntimeError,
       gestureSeed,
@@ -1190,10 +1253,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
   const syncHeaderShowButton = (active = running || getChat()?.$?.isRunning === true) => {
     let button = /** @type {HTMLElement | null} */ (document.querySelector('.pulse-tour-button'));
     if (!button) return;
-    let locale = document.documentElement.lang || 'en';
-    let showAvailable = locale === 'ru';
-    button.hidden = !showAvailable;
-    if (!showAvailable) return;
+    button.hidden = false;
     let icon = button.querySelector('.material-symbols-outlined');
     let paused = active && getChat()?.$?.isPaused === true;
     if (icon) icon.textContent = active && !paused ? 'stop' : 'play_circle';
@@ -1542,6 +1602,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         presenterRigButton?.remove();
         soundButton?.remove();
         musicButton?.remove();
+        header.querySelectorAll('[data-cv-show-volume]').forEach((panel) => panel.remove());
         subtitlesButton?.remove();
         showLayoutPlayer = player;
       }
@@ -1604,13 +1665,53 @@ export function installPortfolioTour({ workspace, runtime, title }) {
         if (!button.isConnected) header.insertBefore(button, header.querySelector('[data-header-action="settings"]'));
         return button;
       };
+      // Hovering (or focusing) a sound switch slides a volume panel up over it, as wide as the button.
+      const volumePanel = (button, key, labelKey, get, set) => {
+        header.querySelector(`[data-cv-show-volume="${key}"]`)?.remove();
+        const panel = document.createElement('div');
+        panel.className = 'cv-show-volume';
+        panel.dataset.cvShowVolume = key;
+        const range = document.createElement('input');
+        range.type = 'range';
+        range.min = '0';
+        range.max = '100';
+        range.step = '1';
+        range.className = 'cv-show-volume-range';
+        range.setAttribute('aria-label', getLocaleMessage(labelKey));
+        range.title = getLocaleMessage(labelKey);
+        // The slider's middle (50%) is the designed level, so there is room to turn it up as well as down.
+        range.value = String(Math.round(get() * 50));
+        range.addEventListener('input', () => set(Number(range.value) / 50));
+        panel.append(range);
+        header.append(panel);
+        /** @type {any} */
+        let hideTimer = 0;
+        const place = () => {
+          panel.style.left = `${button.offsetLeft}px`;
+          panel.style.width = `${button.offsetWidth}px`;
+        };
+        const show = () => { clearTimeout(hideTimer); place(); range.value = String(Math.round(get() * 50)); panel.dataset.open = ''; };
+        const hide = () => { clearTimeout(hideTimer); hideTimer = setTimeout(() => { delete panel.dataset.open; }, 220); };
+        for (const element of [button, panel]) {
+          element.addEventListener('pointerenter', show);
+          element.addEventListener('pointerleave', hide);
+          element.addEventListener('focusin', show);
+          element.addEventListener('focusout', hide);
+        }
+        return panel;
+      };
+      // Music and effects sit side by side, each with its own volume.
       musicButton = soundSwitch(musicButton, 'data-cv-show-music', 'tour.music', ['music_note', 'music_off'],
         () => showSound.isMusic(), () => showSound.toggleMusic());
+      soundButton = soundSwitch(soundButton, 'data-cv-show-sound', 'tour.sound', ['volume_up', 'volume_off'],
+        () => showSound.isSounds(), () => showSound.toggleSounds());
       subtitlesButton = soundSwitch(subtitlesButton, 'data-cv-show-subtitle-toggle', 'tour.subtitles', ['subtitles', 'subtitles_off'],
         () => readSubtitles(), () => applySubtitles(!readSubtitles()));
       document.documentElement.dataset.cvShowSubtitles = readSubtitles() ? 'on' : 'off';
-      soundButton = soundSwitch(soundButton, 'data-cv-show-sound', 'tour.sound', ['volume_up', 'volume_off'],
-        () => showSound.isSounds(), () => showSound.toggleSounds());
+      volumePanel(musicButton, 'music', 'tour.musicVolume',
+        () => showSound.getMusicVolume(), (value) => showSound.setMusicVolume(value));
+      volumePanel(soundButton, 'sound', 'tour.soundVolume',
+        () => showSound.getSoundsVolume(), (value) => showSound.setSoundsVolume(value));
     });
   };
 
@@ -1663,14 +1764,51 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     const complete = event.detail?.complete;
     if (typeof complete === 'function') event.detail.handled = true;
     const { runner } = ensurePresenterLifecycle();
-    runner.beginPhase();
+    // A timed cue continues the phase its entry opened; only the opening event starts a new one.
+    if (event.detail?.continuation !== true) runner.beginPhase();
     const directives = event.detail?.directives || [];
     if (event.detail?.aligned && !directives.length) {
       complete?.(Object.freeze({ status: 'success', receipts: Object.freeze([]) }));
       return;
     }
     try {
-      const result = await runner.run(directives, { continuePhase: true });
+      // A timed cue of the browser voice carries its authored gesture slot like a recorded-show cell: the
+      // presenter plans the whole gesture inside it (planned admission), so the claw starts where it rests.
+      const budgetMs = Number(event.detail?.budgetMs) || 0;
+      const isScroll = event.detail?.scroll === true;
+      const slot = budgetMs > 0
+        ? {
+            kind: 'attention',
+            budgetMs,
+            requiresProviderAdmission: !isScroll,
+            decorative: false,
+            reportStatus() {},
+            reportAdmission() {},
+            reportMilestone() {},
+            reportDegraded() {},
+            acceptTerminal: (settlement) => settlement,
+            providerFailure: (reason) => new Error(`cue provider failure: ${reason}`),
+          }
+        : null;
+      // A gesture brings its own target into view: whatever the authored scroll cues did or did not do, a
+      // frame, marker or selection is never drawn on something hidden or off screen. The scroll operation
+      // runs the whole focus: it reveals what is collapsed (panel, branch, project) and then pushes the
+      // page to the target.
+      if (!isScroll && event.detail?.continuation === true) {
+        const subject = directives[0];
+        if (subject?.target && ['frame', 'marker', 'native-selection', 'activate'].includes(subject.type)) {
+          const element = resolveTargetElement(workspace, runtime, subject.target);
+          if (!element || !isElementInView(element)) {
+            // A target that cannot be focused must not hold the gesture back: it presents on its own.
+            await runner.scroll(subject).catch((error) => {
+              if (error?.name === 'AbortError') throw error;
+            });
+          }
+        }
+      }
+      const result = isScroll
+        ? await runner.scroll(directives[0], slot ? { presentation: slot } : undefined)
+        : await runner.run(directives, { continuePhase: true, ...(slot ? { presentation: slot } : {}) });
       if (getChat()?.$.isPaused === true) {
         void presenter?.cursor.returnHome();
       }
@@ -1999,6 +2137,7 @@ export function installPortfolioTour({ workspace, runtime, title }) {
     presenterRigButton?.remove();
     soundButton?.remove();
     musicButton?.remove();
+    document.querySelectorAll('[data-cv-show-volume]').forEach((panel) => panel.remove());
     subtitlesButton?.remove();
     showSound.dispose();
     workspace.removeEventListener('portfolio-show-seek', onSeek);

@@ -32,6 +32,10 @@ export default {
         from: './node_modules/symbiote-ui/icons/material-symbols-outlined-400.ttf',
         to: './js/material-symbols-outlined-400.ttf',
       },
+      {
+        from: './src/static-pages/icons-ready.js',
+        to: './js/icons-ready.js',
+      },
     ],
   },
   ssr: {
