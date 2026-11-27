@@ -1081,7 +1081,10 @@ export function createCvShowDirectiveRunner(options = {}) {
                     // and only programmatically selects what the click could
                     // not select — never stacking both for the same target.
                     const presented = await Promise.resolve(
-                      presentNavigationGesture(source, { signal: controller.signal }),
+                      presentNavigationGesture(source, {
+                        signal: controller.signal,
+                        budgetMs: presentation?.budgetMs,
+                      }),
                     ).catch((error) => {
                       // An aborted gesture is a cancellation, not a missing
                       // row: propagate so the tour stops instead of navigating.

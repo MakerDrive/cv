@@ -417,6 +417,15 @@ function expandTreeBranchTo(workspace, treeId) {
   return true;
 }
 
+const NAVIGATION_CLICK_RESERVE_MS = 1_200;
+const NAVIGATION_SCROLL_MAX_BUDGET_MS = 1_800;
+
+function resolveNavigationScrollBudget(budgetMs) {
+  let budget = Number(budgetMs);
+  if (!Number.isFinite(budget) || budget <= 0) return NAVIGATION_SCROLL_MAX_BUDGET_MS;
+  return Math.max(0, Math.min(NAVIGATION_SCROLL_MAX_BUDGET_MS, budget - NAVIGATION_CLICK_RESERVE_MS));
+}
+
 /**
  * Presents the authored navigation gesture: reveal/expansion already ran in
  * the action lifecycle; here the row is scrolled into the visible band, the
@@ -429,6 +438,7 @@ function expandTreeBranchTo(workspace, treeId) {
 async function presentNavigationGesture(workspace, runtime, entryId, {
   cursor = null,
   signal = null,
+  budgetMs = 0,
 } = {}) {
   if (signal?.aborted) return false;
   // Expanding only helps when the row was hidden by a collapsed branch; rows
@@ -447,20 +457,22 @@ async function presentNavigationGesture(workspace, runtime, entryId, {
   }).catch(() => null);
   const row = ready?.target;
   if (!row) return false;
-  // The navigation tree scrolls like everything else: the claw pushes it when the row is off screen.
+  let scrollBudgetMs = resolveNavigationScrollBudget(budgetMs);
   await scrollCvShowSpaceIntoView(row, {
     document,
     signal,
-    cursor,
-    budgetMs: 1_800,
-    durationMs: 260,
+    cursor: scrollBudgetMs > 0 ? cursor : null,
+    budgetMs: scrollBudgetMs,
+    durationMs: scrollBudgetMs > 0 ? Math.min(260, scrollBudgetMs) : 0,
   }).catch(() => {});
-  await waitForShowVisualSettlement(row, {
-    document,
-    signal,
-    inactivityMs: 250,
-    timeoutMs: 1_200,
-  }).catch(() => null);
+  if (scrollBudgetMs > 0) {
+    await waitForShowVisualSettlement(row, {
+      document,
+      signal,
+      inactivityMs: 250,
+      timeoutMs: 1_200,
+    }).catch(() => null);
+  }
   if (signal?.aborted) return false;
   const settledRow = visibleElement(findTreeRow(workspace, entryId, runtime));
   if (!settledRow) return false;
@@ -1224,12 +1236,12 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       resolveText: getLocaleMessage,
       resolveSelectionQuote: (source, target) => resolveCvShowSelectionQuote(target, source),
       activateTarget: (target, directive) => activateCvShowTarget(target, directive).handled,
-      /** @param {Record<string, any>} source @param {{ signal?: AbortSignal }} [options] */
-      presentNavigationGesture: (source, { signal } = {}) => presentNavigationGesture(
+      /** @param {Record<string, any>} source @param {{ signal?: AbortSignal, budgetMs?: number }} [options] */
+      presentNavigationGesture: (source, { signal, budgetMs } = {}) => presentNavigationGesture(
         workspace,
         runtime,
         source?.target,
-        { cursor, signal },
+        { cursor, signal, budgetMs },
       ),
       isQuietRestore: isCvShowQuietRestoreActive,
       emit: (directive) => {
