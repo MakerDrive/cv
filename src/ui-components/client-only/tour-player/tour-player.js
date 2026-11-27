@@ -467,6 +467,7 @@ export class PortfolioShowChat extends HTMLElement {
     const { actionId, payload } = event.detail || {};
     const contactUrl = resolveTrustedCvContactAction(actionId, this.#trustedContactAction);
     this.#trustedContactAction = '';
+    getShowLog().info('player', 'action', { actionId, branchId: payload?.branchId });
     if (contactUrl) {
       globalThis.open?.(contactUrl, '_blank', 'noopener,noreferrer');
       return;
@@ -2263,6 +2264,17 @@ export class PortfolioShowChat extends HTMLElement {
     this.#lastAlignedGenerationReceipt = receipt;
     const input = this.#failurePolicyInput(receipt, entryId);
     const recovery = resolveFailureRecovery(input);
+    getShowLog().warn('player', 'seek-failure', {
+      recovery,
+      status: receipt?.status,
+      reason: receipt?.reason,
+      phase: receipt?.phase,
+      operationId: receipt?.operationId,
+      requestedMs: receipt?.requestedMs,
+      observedMs: receipt?.observedMs,
+      details: receipt?.details,
+      policyInput: input,
+    });
     if (
       recovery === CV_SHOW_RECOVERY.DEGRADE
       || recovery === CV_SHOW_RECOVERY.SKIP
@@ -2875,6 +2887,14 @@ export class PortfolioShowChat extends HTMLElement {
   }
 
   async #resume() {
+    getShowLog().info('player', 'resume', {
+      running: this.$.isRunning,
+      paused: this.$.isPaused,
+      error: this.$.isError,
+      resumeRequired: this.$.resumeRequired,
+      mediaBlocksResume: this.$.mediaBlocksResume,
+      speechEntry: this.#activeSpeechEntry?.id || '',
+    });
     // Stale resume after the player was closed: the stopped show owns no
     // transport, so re-enter Short Show (remount + play) instead of no-op.
     if (resolveCvShowChatReentry({

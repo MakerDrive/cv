@@ -1157,7 +1157,8 @@ export function installPortfolioTour({ workspace, runtime, title }) {
       ? {
           avatarSrc: new URL('avatar/index.webp', document.baseURI).href,
           onTrace: (type, data) => {
-            getShowLog()[type === 'state' ? 'debug' : 'info']('rig', type, data);
+            let level = type === 'state' || type === 'free-arm' ? 'debug' : 'info';
+            getShowLog()[level]('rig', type, data);
             if (RIG_CUES[type]) showSound.cue(RIG_CUES[type], { pan: data?.arm === 0 ? -0.6 : 0.6 });
           },
           // The mouth follows the narration clock, not the coarse caption highlight.
