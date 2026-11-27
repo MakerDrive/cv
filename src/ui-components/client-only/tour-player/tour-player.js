@@ -481,7 +481,7 @@ export class PortfolioShowChat extends HTMLElement {
     });
     else if (actionId === 'return') this.#returnFromDetails();
     else if (actionId === 'resume') void this.#resume();
-    else if (actionId === 'show-retry') this.#repeatCurrentEntry();
+    else if (actionId === 'retry' || actionId === 'show-retry') this.#repeatCurrentEntry();
     else if (actionId === 'skip-media') this.#skipMedia();
     else if (['projects', 'resume', 'contact'].includes(actionId)) this.#emitProductAction(actionId);
   };

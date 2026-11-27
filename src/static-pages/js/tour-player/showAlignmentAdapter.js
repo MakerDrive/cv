@@ -692,6 +692,7 @@ export function createCvShowAlignmentController({
       }
       let disposed = false;
       let attentionGateInProgress = false;
+      let restoreInProgress = false;
       let physicalPlaybackStarted = false;
       let playbackRequested = false;
       let deferredPresentationStarted = false;
@@ -1091,54 +1092,68 @@ export function createCvShowAlignmentController({
           return Math.max(restoredProjectPositionMs, playbackPump.positionMs);
         },
         async loadAndRestorePlayback(snapshot, context) {
-          const requestedProjectTimeMs = Math.max(
-            0,
-            Math.round(Number(snapshot?.positionMs) || 0),
-          );
-          const checkpoint = tuple.playbackCheckpoint?.projectTimeMs === requestedProjectTimeMs
-            ? tuple.playbackCheckpoint
-            : projectCvShowPlaybackCheckpoint(tuple.playbackPlan, requestedProjectTimeMs);
-          const presentationComplete = checkpoint.phase === 'after'
-            && checkpoint.projectTimeMs >= tuple.projectDurationMs;
-          restoredProjectPositionMs = checkpoint.projectTimeMs;
-          deferredMediaStartSeconds = checkpoint.sourceTimeMs / 1_000;
-          if (!deferPresentation) {
-            await beforeDeferredPresentation?.();
-            await runSetup(checkpoint.projectTimeMs, {
-              quiet: restorePausedCheckpoint || checkpointMs !== null || requestedProjectTimeMs > 0,
-            });
-            await runHeldCheckpointAttention();
-            restoreGalleryCheckpoint(galleryCheckpoint(checkpoint.projectTimeMs));
-          }
-          await tuple.execution.pause();
-          if (presentationComplete) {
-            media.pause?.();
+          restoreInProgress = true;
+          try {
+            const requestedProjectTimeMs = Math.max(
+              0,
+              Math.round(Number(snapshot?.positionMs) || 0),
+            );
+            const checkpoint = tuple.playbackCheckpoint?.projectTimeMs === requestedProjectTimeMs
+              ? tuple.playbackCheckpoint
+              : projectCvShowPlaybackCheckpoint(tuple.playbackPlan, requestedProjectTimeMs);
+            const presentationComplete = checkpoint.phase === 'after'
+              && checkpoint.projectTimeMs >= tuple.projectDurationMs;
+            restoredProjectPositionMs = checkpoint.projectTimeMs;
+            deferredMediaStartSeconds = checkpoint.sourceTimeMs / 1_000;
+            if (!deferPresentation) {
+              await beforeDeferredPresentation?.();
+              await runSetup(checkpoint.projectTimeMs, {
+                quiet: restorePausedCheckpoint || checkpointMs !== null || requestedProjectTimeMs > 0,
+              });
+              await runHeldCheckpointAttention();
+              restoreGalleryCheckpoint(galleryCheckpoint(checkpoint.projectTimeMs));
+            }
+            await tuple.execution.pause();
+            if (presentationComplete) {
+              media.pause?.();
+              if (!deferPresentation) await runCrossBoundaryAttentionGate();
+              return Object.freeze({
+                status: 'completed',
+                reason: 'presentation-complete',
+                requestedMs: checkpoint.sourceTimeMs,
+                observedMs: checkpoint.sourceTimeMs,
+                presentationComplete: true,
+              });
+            }
+            const generation = await mediaRuntime.loadAndRestorePlayback({
+              ...snapshot,
+              positionMs: checkpoint.sourceTimeMs,
+            }, context);
+            if (generation?.status !== 'completed') return generation;
             if (!deferPresentation) await runCrossBoundaryAttentionGate();
+            restoreInProgress = false;
+            if (!disposed && playbackRequested) {
+              if (deferPresentation && !physicalPlaybackStarted) {
+                mediaRuntime.resume();
+              } else if (!deferPresentation) {
+                if (mutedAdmission) media.muted = false;
+                playbackPump.resume('restore-ready');
+              }
+            }
             return Object.freeze({
-              status: 'completed',
-              reason: 'presentation-complete',
-              requestedMs: checkpoint.sourceTimeMs,
-              observedMs: checkpoint.sourceTimeMs,
-              presentationComplete: true,
+              ...generation,
+              presentationComplete,
             });
+          } finally {
+            restoreInProgress = false;
           }
-          const generation = await mediaRuntime.loadAndRestorePlayback({
-            ...snapshot,
-            positionMs: checkpoint.sourceTimeMs,
-          }, context);
-          if (generation?.status !== 'completed') return generation;
-          if (!deferPresentation) await runCrossBoundaryAttentionGate();
-          return Object.freeze({
-            ...generation,
-            presentationComplete,
-          });
         },
         pause() {
           playbackRequested = false;
           return playbackPump.pause('runtime-pause');
         },
         resume() {
-          if (attentionGateInProgress) {
+          if (attentionGateInProgress || restoreInProgress) {
             playbackRequested = true;
             return true;
           }
