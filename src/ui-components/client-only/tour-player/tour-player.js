@@ -3,6 +3,7 @@ import 'symbiote-ui/chat/show-chat';
 import { ShowSessionState } from 'symbiote-ui/chat/show-runtime';
 import { TOUR_LOCALE_MESSAGES } from '../../../static-pages/data/tourTranslations.js';
 import { getCvShowRuntimeAuthority } from '../../../static-pages/js/tour-player/cvShowRuntimeAuthority.js';
+import { cvShowMdEnginePending } from '../../../static-pages/js/show-md/cvShowMdRuntimeSource.js';
 import {
   createCvShowMockAgentProvider,
   resolveTrustedCvContactAction,
@@ -1419,6 +1420,10 @@ export class PortfolioShowChat extends HTMLElement {
     transportRequestId = 0,
     allowCompletedReentry = false,
   } = {}) {
+    // `?showEngine=md` attaches the md-authored project asynchronously; starting before it lands would let the
+    // project swap stop the show. Without the flag nothing is pending and the start stays synchronous.
+    const mdEngine = cvShowMdEnginePending();
+    if (mdEngine) await mdEngine;
     if (!this.$.isReady) return false;
     // `isRunning` means a session exists (a paused preview or a paused route
     // restore both set it), not that a show was already started. A start intent

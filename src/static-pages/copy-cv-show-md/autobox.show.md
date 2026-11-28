@@ -11,26 +11,26 @@ revision: 121
 @audio ../copy-cv-show-audio/barzana-2/28e4b6f981c84e043c5bcdac434df78016e91cd38305cf80961a1e6eb8ad5bcd/clips/13-short-autobox-d8efc721155c.opus
 @align ../copy-cv-show-audio/barzana-2/28e4b6f981c84e043c5bcdac434df78016e91cd38305cf80961a1e6eb8ad5bcd/aligned/13-short-autobox.json
 С две тысячи девятнадцатого по две тысячи двадцать первый год внутри исследовательского направления Complex Scan я развивал Auto Box. Это был более сложный ар эн ди проект для автоматизации три дэ сканирования музейных объектов. В серийной предметной съёмке процесс можно заранее настроить под класс похожих товаров. Здесь почти каждый новый предмет создавал новую задачу. Своя геометрия. Свой материал. Свои поверхности. И отдельные требования по безопасности. Поэтому целью было постепенно автоматизировать уже не только движение оборудования, но и построение процесса съёмки под конкретный объект. Ещё до изготовления установки я сделал её три дэ визуализацию. До разработки сложной механики я отдельно проверял технологию фотограмметрии на более простом оборудовании. Здесь уже виден промежуточный результат одного из таких экспериментов. После этого я перешёл к физическому прототипу. А здесь первая рабочая версия Auto Box уже сканирует настоящий музейный объект в Эрмитаже. На этих примерах можно увидеть результат на позолоте, полированном металле, драгоценных камнях и сложной бронзовой поверхности.
-@navigate projects/autobox-v1 lead:6400
-@scroll media/autobox-v1/image/process-illustration at:"Здесь почти каждый новый предмет создавал новую задачу" lead:2500
-@focus media/autobox-v1/image/process-illustration at:"Здесь почти каждый новый предмет создавал новую задачу" lead:1500
-@scroll media/autobox-v1/ims/spinner at:"Поэтому целью было постепенно автоматизировать" lead:2500
-@focus media/autobox-v1/ims/spinner at:"Поэтому целью было постепенно автоматизировать" lead:1500
-@scroll media/autobox-v1/youtube/IPEY0yiVb-I at:"Ещё до изготовления установки я сделал её три дэ визуализацию" lead:2500
-@focus media/autobox-v1/youtube/IPEY0yiVb-I at:"Ещё до изготовления установки я сделал её три дэ визуализацию" lead:1450
-@scroll media/autobox-v1/youtube/NWpMtNZjrzI at:"проверял технологию фотограмметрии" lead:2500
-@focus media/autobox-v1/youtube/NWpMtNZjrzI at:"проверял технологию фотограмметрии" lead:1450
-@scroll media/autobox-v1/youtube/8XsSHyQFtV8 at:"промежуточный результат одного из таких экспериментов" lead:2500
-@focus media/autobox-v1/youtube/8XsSHyQFtV8 at:"промежуточный результат одного из таких экспериментов" lead:1450
-@scroll media/autobox-v1/youtube/zb47xAYQBcE at:"перешёл к физическому прототипу" lead:2500
-@focus media/autobox-v1/youtube/zb47xAYQBcE at:"перешёл к физическому прототипу" lead:1450
-@scroll media/autobox-v1/youtube/us3vQHuTYPw at:"сканирует настоящий музейный объект в Эрмитаже" lead:2500
-@focus media/autobox-v1/youtube/us3vQHuTYPw at:"сканирует настоящий музейный объект в Эрмитаже" lead:1450
-@scroll media/autobox-v1/youtube/FugBzpZqXZ0 at:"результат на позолоте" lead:2500
-@focus media/autobox-v1/youtube/FugBzpZqXZ0 at:"результат на позолоте" lead:1450
-@scroll media/autobox-v1/youtube/iNqxRJgrqM8 at:"полированном металле" lead:2500
-@focus media/autobox-v1/youtube/iNqxRJgrqM8 at:"полированном металле" lead:1450
-@scroll media/autobox-v1/youtube/M0cHqy3cScc at:"драгоценных камнях" lead:2500
-@focus media/autobox-v1/youtube/M0cHqy3cScc at:"драгоценных камнях" lead:1450
-@scroll media/autobox-v1/youtube/o4XzMKW8a2E at:"сложной бронзовой поверхности" lead:2500
-@focus media/autobox-v1/youtube/o4XzMKW8a2E at:"сложной бронзовой поверхности" lead:1450
+@navigate projects/autobox-v1 lead:6400 #autobox.open gesture:5800 settle:anchor policy:required
+@scroll media/autobox-v1/image/process-illustration at:"Здесь почти каждый новый предмет создавал новую задачу" lead:2500 #autobox.illustration-object:scroll gesture:800 after:autobox.open
+@focus media/autobox-v1/image/process-illustration at:"Здесь почти каждый новый предмет создавал новую задачу" lead:1500 #autobox.illustration-object gesture:1200 after:autobox.illustration-object:scroll policy:required
+@scroll media/autobox-v1/ims/spinner at:"Поэтому целью было постепенно автоматизировать" lead:2500 #autobox.spinner:scroll gesture:800 after:autobox.illustration-object
+@focus media/autobox-v1/ims/spinner at:"Поэтому целью было постепенно автоматизировать" lead:1500 #autobox.spinner gesture:1200 after:autobox.spinner:scroll policy:required
+@scroll media/autobox-v1/youtube/IPEY0yiVb-I at:"Ещё до изготовления установки я сделал её три дэ визуализацию" lead:2500 #autobox.video-01:scroll gesture:800 clip:01
+@focus media/autobox-v1/youtube/IPEY0yiVb-I at:"Ещё до изготовления установки я сделал её три дэ визуализацию" lead:1450 #autobox.video-01 gesture:1200 after:autobox.video-01:scroll policy:required
+@scroll media/autobox-v1/youtube/NWpMtNZjrzI at:"проверял технологию фотограмметрии" lead:2500 #autobox.video-02:scroll gesture:800 clip:02
+@focus media/autobox-v1/youtube/NWpMtNZjrzI at:"проверял технологию фотограмметрии" lead:1450 #autobox.video-02 gesture:1200 after:autobox.video-02:scroll policy:required
+@scroll media/autobox-v1/youtube/8XsSHyQFtV8 at:"промежуточный результат одного из таких экспериментов" lead:2500 #autobox.video-03:scroll gesture:800 clip:03
+@focus media/autobox-v1/youtube/8XsSHyQFtV8 at:"промежуточный результат одного из таких экспериментов" lead:1450 #autobox.video-03 gesture:1200 after:autobox.video-03:scroll policy:required
+@scroll media/autobox-v1/youtube/zb47xAYQBcE at:"перешёл к физическому прототипу" lead:2500 #autobox.video-04:scroll gesture:800 clip:04
+@focus media/autobox-v1/youtube/zb47xAYQBcE at:"перешёл к физическому прототипу" lead:1450 #autobox.video-04 gesture:1200 after:autobox.video-04:scroll policy:required
+@scroll media/autobox-v1/youtube/us3vQHuTYPw at:"сканирует настоящий музейный объект в Эрмитаже" lead:2500 #autobox.video-05:scroll gesture:800 clip:05
+@focus media/autobox-v1/youtube/us3vQHuTYPw at:"сканирует настоящий музейный объект в Эрмитаже" lead:1450 #autobox.video-05 gesture:1200 after:autobox.video-05:scroll policy:required
+@scroll media/autobox-v1/youtube/FugBzpZqXZ0 at:"результат на позолоте" lead:2500 #autobox.video-06:scroll gesture:800 clip:06
+@focus media/autobox-v1/youtube/FugBzpZqXZ0 at:"результат на позолоте" lead:1450 #autobox.video-06 gesture:1200 after:autobox.video-06:scroll policy:required
+@scroll media/autobox-v1/youtube/iNqxRJgrqM8 at:"полированном металле" lead:2500 #autobox.video-07:scroll gesture:800 clip:07
+@focus media/autobox-v1/youtube/iNqxRJgrqM8 at:"полированном металле" lead:1450 #autobox.video-07 gesture:1200 after:autobox.video-07:scroll policy:required
+@scroll media/autobox-v1/youtube/M0cHqy3cScc at:"драгоценных камнях" lead:2500 #autobox.video-08:scroll gesture:800 clip:08
+@focus media/autobox-v1/youtube/M0cHqy3cScc at:"драгоценных камнях" lead:1450 #autobox.video-08 gesture:1200 after:autobox.video-08:scroll policy:required
+@scroll media/autobox-v1/youtube/o4XzMKW8a2E at:"сложной бронзовой поверхности" lead:2500 #autobox.video-09:scroll gesture:800 clip:09
+@focus media/autobox-v1/youtube/o4XzMKW8a2E at:"сложной бронзовой поверхности" lead:1450 #autobox.video-09 gesture:1200 after:autobox.video-09:scroll policy:required

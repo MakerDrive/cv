@@ -68,8 +68,12 @@ import { createCvShowPauseGate } from './pauseGate.js';
 import { createYouTubeNoCookieEmbedUrl } from './youtubeEmbedUrl.js';
 import { resolveVisibleShowPlayer } from '../showPlayerResolver.js';
 import { resolvePortfolioTreeHighlightId } from '../portfolioPulseRuntime.js';
+import { attachCvShowMdEngine } from '../show-md/cvShowMdRuntimeSource.js';
 
 export const cvShowRuntimeAuthority = getCvShowRuntimeAuthority();
+
+// `?showEngine=md`: the `.show.md` scenes become the source of the Show (see cvShowMdRuntimeSource.js).
+void attachCvShowMdEngine({ authority: cvShowRuntimeAuthority });
 
 /** Keeps the real player visible while Show cues remain passive and never press Play. */
 export function configurePortfolioYouTubeIframe(iframe, videoId) {

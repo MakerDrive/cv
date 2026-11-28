@@ -103,7 +103,8 @@ test('every generated CV scene parses into one scene with its cues', async () =>
     assert.equal(doc.scenes.length, 1, file);
     let expected = reportById.get(doc.scenes[0].id);
     assert.ok(expected, `report entry for ${file}`);
-    assert.equal(doc.scenes[0].cues.length, expected.cues - expected.unmapped.length, file);
+    assert.equal(doc.scenes[0].cues.length, expected.cues, file);
+    assert.ok(doc.scenes[0].cues.every(({ cueId }) => !cueId.includes('#')), `${file}: every cue is named`);
     assert.ok(doc.scenes[0].speech.length > 0, file);
   }
 });

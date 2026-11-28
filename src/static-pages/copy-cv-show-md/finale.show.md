@@ -11,14 +11,14 @@ revision: 121
 @audio ../copy-cv-show-audio/barzana-2/28e4b6f981c84e043c5bcdac434df78016e91cd38305cf80961a1e6eb8ad5bcd/clips/16-short-finale-955a0926f66e.opus
 @align ../copy-cv-show-audio/barzana-2/28e4b6f981c84e043c5bcdac434df78016e91cd38305cf80961a1e6eb8ad5bcd/aligned/16-short-finale.json
 Все эти проекты находятся в разных предметных областях. Но для меня это один тип работы. Я нахожу проблемы и новые возможности. Придумываю и формирую проекты, продукты и технические решения. Запускаю их с нуля или развиваю новые направления внутри уже существующих систем. Проверяю идеи на практике и довожу их до работающего результата. Иногда работа начинается практически с чистого листа. Иногда новая идея появляется внутри уже существующего продукта и постепенно превращается в отдельное направление или отдельный проект. В зависимости от задачи это может быть программное обеспечение, искусственный интеллект, электроника, механика, компьютерное зрение или сочетание нескольких технологий. Сейчас мой основной фокус находится в области программных платформ и агентных систем. Один из текущих проектов в этом направлении это Symbiote Workspace. Но сама предметная область для меня не является ограничением. Мне интересны сложные проекты, где можно увидеть новую возможность, разобраться в проблеме и превратить идею в работающую систему. Здесь можно подробнее посмотреть мои проекты, открыть резюме, исходный код или связаться со мной.
-@navigate projects/index lead:6400
-@scroll project-preview.grid at:"Но для меня это один тип работы" lead:3150
-@focus project-preview.grid at:"Но для меня это один тип работы" lead:1450
-@scroll project-preview.grid at:"Проверяю идеи на практике" lead:3200
-@focus project-preview.grid at:"Проверяю идеи на практике" lead:1500
-@scroll project-preview.symbiote-workspace at:"это Symbiote Workspace" lead:2650
-@focus project-preview.symbiote-workspace at:"это Symbiote Workspace" lead:1450
-@scroll chat.actions.finale at:"Здесь можно подробнее посмотреть мои проекты" lead:3450
-@click chat.actions.finale at:"Здесь можно подробнее посмотреть мои проекты" lead:2050
-@scroll chat.actions.finale at:"Здесь можно подробнее посмотреть мои проекты" lead:1200
-@marker arrow chat.actions.finale at:"Здесь можно подробнее посмотреть мои проекты" lead:200
+@navigate projects/index lead:6400 #finale.map gesture:5800 settle:anchor policy:required
+@scroll project-preview.grid at:"Но для меня это один тип работы" lead:3150 #finale.history:scroll gesture:1500 clip:01
+@focus project-preview.grid at:"Но для меня это один тип работы" lead:1450 #finale.history gesture:1200 after:finale.history:scroll policy:required
+@scroll project-preview.grid at:"Проверяю идеи на практике" lead:3200 #finale.scale-route:scroll gesture:1500 clip:02
+@focus project-preview.grid at:"Проверяю идеи на практике" lead:1500 #finale.scale-route gesture:1200 after:finale.scale-route:scroll policy:required
+@scroll project-preview.symbiote-workspace at:"это Symbiote Workspace" lead:2650 #finale.workspace:scroll gesture:1000 clip:03
+@focus project-preview.symbiote-workspace at:"это Symbiote Workspace" lead:1450 #finale.workspace gesture:1200 after:finale.workspace:scroll policy:required
+@scroll chat.actions.finale at:"Здесь можно подробнее посмотреть мои проекты" lead:3450 #finale.actions:scroll gesture:1200 clip:04
+@click chat.actions.finale at:"Здесь можно подробнее посмотреть мои проекты" lead:2050 #finale.actions gesture:800 after:finale.actions:scroll policy:required
+@scroll chat.actions.finale at:"Здесь можно подробнее посмотреть мои проекты" lead:1200 #finale.contacts:scroll gesture:800 clip:04
+@marker arrow chat.actions.finale at:"Здесь можно подробнее посмотреть мои проекты" lead:200 #finale.contacts gesture:2000 after:finale.contacts:scroll policy:required

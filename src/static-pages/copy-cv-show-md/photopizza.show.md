@@ -11,34 +11,34 @@ revision: 121
 @audio ../copy-cv-show-audio/barzana-2/28e4b6f981c84e043c5bcdac434df78016e91cd38305cf80961a1e6eb8ad5bcd/clips/15-short-photopizza-2e4b5fe965f1.opus
 @align ../copy-cv-show-audio/barzana-2/28e4b6f981c84e043c5bcdac434df78016e91cd38305cf80961a1e6eb8ad5bcd/aligned/15-short-photopizza.json
 В начале две тысячи десятых годов одной из ключевых точек в моей истории стал Megavisor. Я был сооснователем проекта и техническим директором. Я отвечал за ар эн ди съёмочного направления и производство интерактивного контента. Megavisor был облачной платформой для фото на триста шестьдесят градусов, сферических три дэ панорам, видео и виртуальных туров. Я участвовал в проработке интерактивного плеера, который связывал эти форматы между собой. Например, из панорамы помещения можно было открыть находящийся внутри объект. Затем перейти к его вращению на триста шестьдесят градусов. А после этого открыть связанные фотографии и другие материалы. В этом ролике виден общий принцип платформы и то, как разные форматы могли работать внутри одного интерактивного пространства. В съёмочном направлении я руководил студией Gate Nine и выездным производством. Я организовывал съёмки, координировал фотографов и ретушёров, разрабатывал оборудование и выстраивал технологические процессы. Я также продюсировал промо и обучающие видеоматериалы, чтобы снизить порог входа в новый для рынка формат. Рост объёмов съёмки привёл к следующей инженерной задаче. Процесс нужно было автоматизировать. Так внутри Megavisor появилась PhotoPizza. PhotoPizza я начал развивать с две тысячи десятого года. Проект появился как решение конкретной производственной задачи. Съёмку объектов на триста шестьдесят градусов нужно было поставить на поток, чтобы она легко масштабировалась. Сначала я собрал прототип из доступных промышленных компонентов. Он позволил нам быстро проверить механику и саму технологию съёмки. На этом прототипе мы отработали основные принципы системы. После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение. Одной из ключевых задач было совместить небольшую массу с высокой грузоподъёмностью. Платформу можно было привезти на выездную съёмку и установить силами одного фотографа. При этом крупные версии выдерживали человека и позволяли снимать тяжёлые и габаритные предметы. В результате PhotoPizza выросла в целый модельный ряд. Появились и подвесные версии для люстр, украшений, велосипедов и других объектов. Система оставалась модульной. Один блок управления мог работать с платформами разных размеров, слайдером PhotoSnail и моторизированной панорамной головкой. Параллельно мы снижали порог входа в саму технологию. Например, я сделал простой вариант платформы из доступных деталей, чтобы фотограф мог сначала проверить сам формат почти без вложений. Позже PhotoPizza стала опенсорс проектом. Вместе с оборудованием развивалась и программная часть. В итоге с телефона по вай фай можно было управлять оборудованием и камерой через веб приложение. А это результат масштабирования технологии на крупные объекты. Интерактивную последовательность мотоцикла можно вращать и рассматривать со всех сторон.
-@navigate projects/megavisor lead:6400
-@scroll article.megavisor.capture-rnd at:"Я отвечал за ар эн ди съёмочного направления" lead:2500
-@select article.megavisor.capture-rnd at:"Я отвечал за ар эн ди съёмочного направления" lead:1050
-@scroll media/megavisor/image/process-illustration at:"Например, из панорамы помещения можно было открыть находящийся внутри объект" lead:2500
-@focus media/megavisor/image/process-illustration at:"Например, из панорамы помещения можно было открыть находящийся внутри объект" lead:1500
-@scroll media/megavisor/youtube/c3cCmDqO04c at:"В этом ролике виден общий принцип платформы" lead:2500
-@focus media/megavisor/youtube/c3cCmDqO04c at:"В этом ролике виден общий принцип платформы" lead:1450
-@scroll media/megavisor/image/process-illustration at:"Я организовывал съёмки, координировал фотографов и ретушёров" lead:2500
-@focus media/megavisor/image/process-illustration at:"Я организовывал съёмки, координировал фотографов и ретушёров" lead:1500
-@scroll projects/photopizza at:"Так внутри Megavisor появилась PhotoPizza" lead:2500
-@navigate projects/photopizza at:"PhotoPizza я начал развивать с две тысячи десятого года" lead:1150
-@scroll media/photopizza/youtube/2lO2VsZFAz0 at:"Сначала я собрал прототип из доступных промышленных компонентов" lead:2850
-@focus media/photopizza/youtube/2lO2VsZFAz0 at:"Сначала я собрал прототип из доступных промышленных компонентов" lead:1450
-@scroll media/photopizza/youtube/6CpdVcjtZoU at:"На этом прототипе мы отработали основные принципы системы" lead:2850
-@focus media/photopizza/youtube/6CpdVcjtZoU at:"На этом прототипе мы отработали основные принципы системы" lead:1450
-@scroll media/photopizza/image/process-illustration at:"После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение" lead:2500
-@focus media/photopizza/image/process-illustration at:"После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение" lead:1500
-@scroll article.photopizza.mechanics at:"совместить небольшую массу с высокой грузоподъёмностью" lead:2500
-@focus article.photopizza.mechanics at:"совместить небольшую массу с высокой грузоподъёмностью" lead:1450
-@scroll media/photopizza/image/process-illustration at:"Система оставалась модульной" lead:3900
-@focus media/photopizza/image/process-illustration at:"Система оставалась модульной" lead:2900
-@scroll article.photopizza.controller at:"слайдером PhotoSnail и моторизированной панорамной головкой" lead:2500
-@focus article.photopizza.controller at:"слайдером PhotoSnail и моторизированной панорамной головкой" lead:1450
-@scroll media/photopizza/youtube/f1cB4X1wI50 at:"простой вариант платформы из доступных деталей" lead:2850
-@focus media/photopizza/youtube/f1cB4X1wI50 at:"простой вариант платформы из доступных деталей" lead:1450
-@scroll media/photopizza/youtube/cFPJqtcWNSU at:"Позже PhotoPizza стала опенсорс проектом" lead:2850
-@focus media/photopizza/youtube/cFPJqtcWNSU at:"Позже PhotoPizza стала опенсорс проектом" lead:1450
-@scroll media/photopizza/youtube/HeLMIjuMZac at:"с телефона по вай фай можно было управлять" lead:2850
-@focus media/photopizza/youtube/HeLMIjuMZac at:"с телефона по вай фай можно было управлять" lead:1450
-@scroll media/photopizza/ims/spinner at:"результат масштабирования технологии на крупные объекты" lead:2850
-@focus media/photopizza/ims/spinner at:"результат масштабирования технологии на крупные объекты" lead:1450
+@navigate projects/megavisor lead:6400 #photopizza.open gesture:5800 settle:anchor policy:required
+@scroll article.megavisor.capture-rnd at:"Я отвечал за ар эн ди съёмочного направления" lead:2500 #photopizza.origin:scroll gesture:1200 clip:01
+@select article.megavisor.capture-rnd at:"Я отвечал за ар эн ди съёмочного направления" lead:1050 #photopizza.origin gesture:1600 after:photopizza.origin:scroll policy:required
+@scroll media/megavisor/image/process-illustration at:"Например, из панорамы помещения можно было открыть находящийся внутри объект" lead:2500 #photopizza.illustration-panorama:scroll gesture:800 after:photopizza.open
+@focus media/megavisor/image/process-illustration at:"Например, из панорамы помещения можно было открыть находящийся внутри объект" lead:1500 #photopizza.illustration-panorama gesture:1200 after:photopizza.illustration-panorama:scroll policy:required
+@scroll media/megavisor/youtube/c3cCmDqO04c at:"В этом ролике виден общий принцип платформы" lead:2500 #photopizza.megavisor-promo:scroll gesture:800 clip:02
+@focus media/megavisor/youtube/c3cCmDqO04c at:"В этом ролике виден общий принцип платформы" lead:1450 #photopizza.megavisor-promo gesture:1200 after:photopizza.megavisor-promo:scroll policy:required
+@scroll media/megavisor/image/process-illustration at:"Я организовывал съёмки, координировал фотографов и ретушёров" lead:2500 #photopizza.illustration-capture-team:scroll gesture:800 after:photopizza.open
+@focus media/megavisor/image/process-illustration at:"Я организовывал съёмки, координировал фотографов и ретушёров" lead:1500 #photopizza.illustration-capture-team gesture:1200 after:photopizza.illustration-capture-team:scroll policy:required
+@scroll projects/photopizza at:"Так внутри Megavisor появилась PhotoPizza" lead:2500 #photopizza.page-open:scroll gesture:800 clip:03
+@navigate projects/photopizza at:"PhotoPizza я начал развивать с две тысячи десятого года" lead:1150 #photopizza.page-open gesture:2600 after:photopizza.page-open:scroll policy:required
+@scroll media/photopizza/youtube/2lO2VsZFAz0 at:"Сначала я собрал прототип из доступных промышленных компонентов" lead:2850 #photopizza.video-01:scroll gesture:1200 clip:04
+@focus media/photopizza/youtube/2lO2VsZFAz0 at:"Сначала я собрал прототип из доступных промышленных компонентов" lead:1450 #photopizza.video-01 gesture:1200 after:photopizza.video-01:scroll policy:required
+@scroll media/photopizza/youtube/6CpdVcjtZoU at:"На этом прототипе мы отработали основные принципы системы" lead:2850 #photopizza.video-02:scroll gesture:1200 clip:05
+@focus media/photopizza/youtube/6CpdVcjtZoU at:"На этом прототипе мы отработали основные принципы системы" lead:1450 #photopizza.video-02 gesture:1200 after:photopizza.video-02:scroll policy:required
+@scroll media/photopizza/image/process-illustration at:"После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение" lead:2500 #photopizza.illustration-portable-hardware:scroll gesture:800 after:photopizza.open
+@focus media/photopizza/image/process-illustration at:"После этого я начал проектировать PhotoPizza как лёгкое, мобильное и доступное решение" lead:1500 #photopizza.illustration-portable-hardware gesture:1200 after:photopizza.illustration-portable-hardware:scroll policy:required
+@scroll article.photopizza.mechanics at:"совместить небольшую массу с высокой грузоподъёмностью" lead:2500 #photopizza.mechanics:scroll gesture:800 clip:06
+@focus article.photopizza.mechanics at:"совместить небольшую массу с высокой грузоподъёмностью" lead:1450 #photopizza.mechanics gesture:1200 after:photopizza.mechanics:scroll policy:required
+@scroll media/photopizza/image/process-illustration at:"Система оставалась модульной" lead:3900 #photopizza.illustration-controller:scroll gesture:800 after:photopizza.open
+@focus media/photopizza/image/process-illustration at:"Система оставалась модульной" lead:2900 #photopizza.illustration-controller gesture:1200 after:photopizza.illustration-controller:scroll policy:required
+@scroll article.photopizza.controller at:"слайдером PhotoSnail и моторизированной панорамной головкой" lead:2500 #photopizza.controller:scroll gesture:800 clip:07
+@focus article.photopizza.controller at:"слайдером PhotoSnail и моторизированной панорамной головкой" lead:1450 #photopizza.controller gesture:1200 after:photopizza.controller:scroll policy:required
+@scroll media/photopizza/youtube/f1cB4X1wI50 at:"простой вариант платформы из доступных деталей" lead:2850 #photopizza.video-03:scroll gesture:1200 clip:08
+@focus media/photopizza/youtube/f1cB4X1wI50 at:"простой вариант платформы из доступных деталей" lead:1450 #photopizza.video-03 gesture:1200 after:photopizza.video-03:scroll policy:required
+@scroll media/photopizza/youtube/cFPJqtcWNSU at:"Позже PhotoPizza стала опенсорс проектом" lead:2850 #photopizza.video-04:scroll gesture:1200 clip:09
+@focus media/photopizza/youtube/cFPJqtcWNSU at:"Позже PhotoPizza стала опенсорс проектом" lead:1450 #photopizza.video-04 gesture:1200 after:photopizza.video-04:scroll policy:required
+@scroll media/photopizza/youtube/HeLMIjuMZac at:"с телефона по вай фай можно было управлять" lead:2850 #photopizza.video-05:scroll gesture:1200 clip:10
+@focus media/photopizza/youtube/HeLMIjuMZac at:"с телефона по вай фай можно было управлять" lead:1450 #photopizza.video-05 gesture:1200 after:photopizza.video-05:scroll policy:required
+@scroll media/photopizza/ims/spinner at:"результат масштабирования технологии на крупные объекты" lead:2850 #photopizza.spinner:scroll gesture:1200 clip:11
+@focus media/photopizza/ims/spinner at:"результат масштабирования технологии на крупные объекты" lead:1450 #photopizza.spinner gesture:1200 after:photopizza.spinner:scroll policy:required

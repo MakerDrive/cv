@@ -11,8 +11,8 @@ revision: 121
 @audio ../copy-cv-show-audio/barzana-2/28e4b6f981c84e043c5bcdac434df78016e91cd38305cf80961a1e6eb8ad5bcd/clips/08-short-agent-pool-mcp-a41153178c78.opus
 @align ../copy-cv-show-audio/barzana-2/28e4b6f981c84e043c5bcdac434df78016e91cd38305cf80961a1e6eb8ad5bcd/aligned/08-short-agent-pool-mcp.json
 В начале две тысячи двадцать шестого года Agent Pool MCP оформился как самостоятельный эм си пи сервер. Его можно подключить непосредственно к агенту. В Agent Portal он работает как исполнительный слой. Он распределяет задачи между агентами, отслеживает состояние и владение задачей, передаёт сессии и маршрутизирует ресурсы.
-@navigate projects/agent-pool-mcp lead:6400
-@scroll media/agent-pool-mcp/image/process-illustration at:"Его можно подключить непосредственно к агенту" lead:2700
-@focus media/agent-pool-mcp/image/process-illustration at:"Его можно подключить непосредственно к агенту" lead:1500
-@scroll article.agent-pool-mcp.execution-flow at:"распределяет задачи между агентами" lead:2500
-@marker underline article.agent-pool-mcp.execution-flow at:"распределяет задачи между агентами" lead:1500
+@navigate projects/agent-pool-mcp lead:6400 #agent-pool.open gesture:5800 settle:anchor policy:required
+@scroll media/agent-pool-mcp/image/process-illustration at:"Его можно подключить непосредственно к агенту" lead:2700 #agent-pool-mcp.illustration-dispatch:scroll gesture:1000 after:agent-pool.open
+@focus media/agent-pool-mcp/image/process-illustration at:"Его можно подключить непосредственно к агенту" lead:1500 #agent-pool-mcp.illustration-dispatch gesture:1200 after:agent-pool-mcp.illustration-dispatch:scroll policy:required
+@scroll article.agent-pool-mcp.execution-flow at:"распределяет задачи между агентами" lead:2500 #agent-pool.flow:scroll gesture:800 clip:01
+@marker underline article.agent-pool-mcp.execution-flow series:agent-pool-flow quote:"tracks process state" at:"распределяет задачи между агентами" lead:1500 #agent-pool.flow gesture:1200 after:agent-pool.flow:scroll policy:required

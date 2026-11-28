@@ -23,7 +23,15 @@ export const CV_SHOW_MD_CUE_NAMES = Object.freeze([
   'media',
 ]);
 
-const PARAM_KEYS = new Set(['at', 'occ', 'edge', 'lead', 'quote', 'mode']);
+/**
+ * `at occ edge lead quote mode` drive the cue timing and directive. The rest carry the presentation project
+ * semantics of the cue (see cvShowMdProject.js): `gesture settle until after clip series label intent policy`.
+ * A `#<id>` token names the cue.
+ */
+const PARAM_KEYS = new Set([
+  'at', 'occ', 'edge', 'lead', 'quote', 'mode',
+  'gesture', 'settle', 'until', 'after', 'clip', 'series', 'label', 'intent', 'policy',
+]);
 const TOKEN_RE = /[a-z]+:"[^"]*"|"[^"]*"|\S+/gu;
 const STEP_HEADING_RE = /^##\s+\[([^\]]+)\]\s+(.+)$/u;
 
@@ -48,6 +56,11 @@ export function tokenizeCueLine(line, lineNumber = 0) {
   /** @type {Record<string, string>} */
   let params = {};
   for (let token of rest.match(TOKEN_RE) || []) {
+    if (/^#\S+$/u.test(token)) {
+      if (params.id !== undefined) throw new CvShowMdError(`cue has two ids: ${line}`, lineNumber);
+      params.id = token.slice(1);
+      continue;
+    }
     let paramMatch = /^([a-z]+):(.*)$/u.exec(token);
     if (paramMatch && PARAM_KEYS.has(paramMatch[1])) {
       params[paramMatch[1]] = paramMatch[2].replace(/^"(.*)"$/u, '$1');
@@ -200,7 +213,12 @@ export function parseCvShowMd(markdown) {
     } else if (line.startsWith('@align ')) {
       current.alignUrl = line.slice('@align '.length).trim();
     } else if (line.startsWith('@')) {
-      current.cues.push(compileCueLine(line, { cueId: `${current.id}#${current.cues.length + 1}`, lineNumber }));
+      let named = tokenizeCueLine(line, lineNumber).params.id;
+      let cueId = named || `${current.id}#${current.cues.length + 1}`;
+      if (current.cues.some((cue) => cue.cueId === cueId)) {
+        throw new CvShowMdError(`duplicate cue id "${cueId}"`, lineNumber);
+      }
+      current.cues.push(compileCueLine(line, { cueId, lineNumber }));
     } else {
       current.paragraphs.push(line);
     }

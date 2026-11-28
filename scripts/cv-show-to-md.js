@@ -6,81 +6,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { CV_SHOW_AUTHORING_PROJECT_INPUT } from '../src/static-pages/data/cvShowPresentationProject.js';
 import { CV_SHOW_WEB_AUDIO_RELEASE } from '../src/static-pages/data/cvShowWebAudioRelease.js';
 import { parseCvShowMd } from '../src/static-pages/js/show-md/cvShowMdFormat.js';
+import { cueCellToMdLine } from '../src/static-pages/js/show-md/cvShowMdProject.js';
 import { scheduleSceneCues } from '../src/static-pages/js/show-md/cvShowMdTiming.js';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const audioBase = path.join(rootDir, 'src/static-pages/copy-cv-show-audio');
 const outputBase = path.join(rootDir, 'src/static-pages/copy-cv-show-md');
-
-/** Canonical interaction types that map one-to-one onto md cue names. */
-const INTERACTION_NAMES = Object.freeze({
-  scroll: 'scroll',
-  navigate: 'navigate',
-  click: 'click',
-  select: 'select',
-});
-
-/**
- * @param {string} value
- * @param {string} cellId
- */
-function quoted(value, cellId) {
-  let text = String(value);
-  if (text.includes('"')) throw new Error(`cue ${cellId}: quote contains a double quote`);
-  return text;
-}
-
-/**
- * Converts one cue cell into an md cue line (or reports why it cannot be expressed).
- * @param {Record<string, any>} cell
- * Fields the md form cannot express are returned in `dropped`, so the report lists them instead of hiding them.
- * @returns {{ line: string | null, dropped: string[], unmapped: string | null, leadClamped: boolean }}
- */
-export function cueCellToMdLine(cell) {
-  let dropped = [];
-  let timing = cell.timing || {};
-  let at = timing.at || {};
-  let offsetMs = Number(at.offsetMs || 0);
-  let leadMs = Number(timing.leadMs || 0);
-  let lead = leadMs - offsetMs;
-
-  let name = null;
-  let target = cell.cue?.targetId;
-  if (cell.cue?.kind === 'focus') {
-    name = 'focus';
-  } else if (cell.cue?.kind === 'annotation') {
-    let marker = cell.cue.annotation?.marker;
-    if (!marker) return { line: null, dropped, unmapped: 'annotation without marker shape', leadClamped: false };
-    name = `marker ${marker}`;
-    if (cell.cue.annotation.series) dropped.push('annotation.series');
-  } else if (cell.cue?.kind === 'interaction') {
-    let type = cell.cue.interaction?.type;
-    if (!INTERACTION_NAMES[type]) {
-      return { line: null, dropped, unmapped: `interaction type "${type}" has no md cue`, leadClamped: false };
-    }
-    name = INTERACTION_NAMES[type];
-  } else {
-    return { line: null, dropped, unmapped: `cue kind "${cell.cue?.kind}" has no md cue`, leadClamped: false };
-  }
-
-  let parts = [`@${name}`, target];
-  if (at.anchor === 'speech') {
-    if (!at.quote) return { line: null, dropped, unmapped: 'speech anchor without quote', leadClamped: false };
-    parts.push(`at:"${quoted(at.quote, cell.id)}"`);
-    if (at.occurrence && at.occurrence !== 1) parts.push(`occ:${at.occurrence}`);
-    if (at.edge === 'end') parts.push('edge:end');
-  } else if (at.anchor !== 'turn-start') {
-    return { line: null, dropped, unmapped: `anchor "${at.anchor}" has no md form`, leadClamped: false };
-  }
-  // A turn-start cue with a lead resolves before the scene starts: the md runtime fires it at the scene start.
-  let leadClamped = at.anchor !== 'speech' && lead > 0;
-  if (lead > 0) parts.push(`lead:${lead}`);
-  if (timing.until) dropped.push('timing.until');
-  if (timing.settleBy && timing.settleBy !== 'none') dropped.push(`timing.settleBy:${timing.settleBy}`);
-  if (timing.gestureDurationMs !== undefined) dropped.push('timing.gestureDurationMs');
-  for (let entry of cell.dependsOn || []) dropped.push(`dependsOn:${entry.barrier}:${entry.cellId}`);
-  return { line: parts.join(' '), dropped, unmapped: null, leadClamped };
-}
 
 /**
  * @param {Record<string, any>} projectInput CV show authoring project input
@@ -99,20 +30,13 @@ export function convertCvShowProjectToMd(projectInput, { manifest, manifestDir, 
     let audioUrl = `${outputRelativeBase}/${manifestDir}/${clip.deliveryFile}`;
     let alignUrl = `${outputRelativeBase}/${manifestDir}/${clip.alignedSequenceFile}`;
 
-    let report = { id, cues: 0, expressed: 0, dropped: [], unmapped: [], leadClamped: [] };
+    let directives = projectInput.script.metadata.cvShow.directives;
+    let report = { id, cues: 0 };
     let lines = [];
     for (let cell of cells) {
       if (cell.kind !== 'cue' || cell.turnId !== id) continue;
       report.cues += 1;
-      let result = cueCellToMdLine(cell);
-      if (result.unmapped) {
-        report.unmapped.push({ cellId: cell.id, reason: result.unmapped });
-        continue;
-      }
-      report.expressed += 1;
-      if (result.leadClamped) report.leadClamped.push(cell.id);
-      for (let field of result.dropped) report.dropped.push({ cellId: cell.id, field });
-      lines.push(result.line);
+      lines.push(cueCellToMdLine(cell, directives[cell.id]));
     }
 
     let text = [
@@ -161,13 +85,10 @@ async function main() {
 
   let totals = reports.reduce((sum, item) => ({
     cues: sum.cues + item.cues,
-    expressed: sum.expressed + item.expressed,
-    unmapped: sum.unmapped + item.unmapped.length,
-    dropped: sum.dropped + item.dropped.length,
     fallbacks: sum.fallbacks + item.anchorFallbacks.length,
-  }), { cues: 0, expressed: 0, unmapped: 0, dropped: 0, fallbacks: 0 });
+  }), { cues: 0, fallbacks: 0 });
   process.stdout.write(`wrote ${files.length} scenes to ${path.relative(rootDir, outputBase)}\n`);
-  process.stdout.write(`cues ${totals.cues}: expressed ${totals.expressed}, unmapped ${totals.unmapped}; dropped fields ${totals.dropped}\n`);
+  process.stdout.write(`cues ${totals.cues}\n`);
   process.stdout.write(`anchors falling back to segment start: ${totals.fallbacks}\n`);
 }
 
