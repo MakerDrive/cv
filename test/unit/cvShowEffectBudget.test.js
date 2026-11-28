@@ -2,9 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   CV_SHOW_EFFECT_GRACE_MS,
+  CV_SHOW_SCROLL_GRACE_SHARE_MS,
   createNavigationBudget,
-} from '../../src/static-pages/js/tour-player/navigationBudget.js';
+} from '../../src/static-pages/js/tour-player/effectBudget.js';
 import { createCvShowDirectiveRunner } from '../../src/static-pages/js/tour-player/showAdapter.js';
+
+test('a scroll spends at most part of the engine grace on motion', () => {
+  assert.ok(CV_SHOW_SCROLL_GRACE_SHARE_MS > 0);
+  assert.ok(CV_SHOW_SCROLL_GRACE_SHARE_MS <= CV_SHOW_EFFECT_GRACE_MS / 2);
+});
 
 const NAVIGATE = Object.freeze({
   id: 'example.open',
