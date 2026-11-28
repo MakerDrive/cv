@@ -1017,6 +1017,66 @@ test('IMS Show gallery montage stops presenting clicks when the cell budget cann
   );
 });
 
+test('IMS Show gallery montage counts the cell time spent before it started', async () => {
+  const events = [];
+  const button = (name) => ({
+    localName: 'ims-button',
+    click() {
+      events.push(['click', name]);
+      gallery.hotspotState = { image: gallery.hotspotState.image + 1 };
+    },
+  });
+  const toolbar = {
+    localName: 'ims-gallery-toolbar',
+    shadowRoot: null,
+    querySelectorAll: (selector) => (selector === 'ims-button'
+      ? [button('prev'), button('next'), button('autoplay')]
+      : []),
+  };
+  const gallery = {
+    localName: 'ims-gallery',
+    hotspotState: { image: 0 },
+    shadowRoot: {
+      querySelector: (selector) => (selector === 'ims-gallery-toolbar' ? toolbar : null),
+    },
+    goTo(index) {
+      events.push(['goTo', index]);
+      this.hotspotState = { image: index };
+    },
+  };
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => gallery,
+    presentMediaControl: async () => {
+      events.push(['present']);
+      return true;
+    },
+    clock: {
+      wait: async (durationMs) => { events.push(['wait', durationMs]); },
+    },
+  });
+  // The cue was activated 9 s ago (player load and readiness took that). Its 9.5 s budget plus the 600 ms margin
+  // leaves 1.1 s, which cannot carry frame 2's click (1.4 s) and the two remaining holds (2 s).
+  target.setShowMediaBudget({ budgetMs: 9_500, activatedAt: performance.now() - 9_000 });
+
+  const result = await target.playShowMedia({
+    frames: [1, 2, 3],
+    frameHoldMs: 1_000,
+    finalFrame: 3,
+  }, { signal: new AbortController().signal });
+  await result.completion;
+
+  assert.deepEqual(events.filter(([kind]) => kind === 'click' || kind === 'present'), [],
+    'no click is presented once the activation-anchored budget cannot carry it');
+});
+
+test('a montage without an activation time keeps measuring from its own start', async () => {
+  const target = createImsShowMediaTarget({ localName: 'ims-viewer' }, {
+    resolvePlayer: async () => ({ localName: 'ims-gallery', hotspotState: { image: 0 }, goTo() {} }),
+  });
+  assert.equal(target.setShowMediaBudget({ budgetMs: 9_500 }), 9_500);
+  assert.equal(target.setShowMediaBudget({ budgetMs: 0, activatedAt: 1 }), 0);
+});
+
 test('IMS Show gallery falls back to programmatic goTo when controls cannot be presented', async () => {
   const events = [];
   const gallery = {

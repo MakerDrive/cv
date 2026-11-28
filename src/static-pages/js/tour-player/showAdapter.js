@@ -1470,7 +1470,11 @@ export function createCvShowDirectiveRunner(options = {}) {
             // The montage spends the authored cell budget on its frame holds and
             // its presented slideshow clicks; it needs that budget to know when
             // a click still fits.
-            mediaTarget.setShowMediaBudget?.(presentation?.budgetMs ?? 0);
+            // The budget runs from the cue's activation: readiness and resume waits above already spent part of it.
+            mediaTarget.setShowMediaBudget?.({
+              budgetMs: presentation?.budgetMs ?? 0,
+              activatedAt: presentation?.activatedAt,
+            });
             let result = await media.play(mediaTarget, adapted.directive);
             if (result?.completion) await result.completion;
             throwIfAborted(controller.signal);

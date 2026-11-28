@@ -357,6 +357,9 @@ export function createImsShowMediaTarget(root, {
   // remaining budget can no longer carry a click, the montage advances the
   // frame through the gallery API instead of overrunning the cell deadline.
   let montageBudgetMs = 0;
+  // Activation time of the cue (performance.now domain). The budget runs from here, not from the montage start:
+  // the player load, the readiness wait and the resume wait all come out of the same cell deadline.
+  let montageActivatedAt = null;
   const activateHost = () => {
     if (hostActivationRequested || typeof root.activate !== 'function') return;
     hostActivationRequested = true;
@@ -435,14 +438,16 @@ export function createImsShowMediaTarget(root, {
     element: root,
 
     /**
-     * Publishes the authored cell budget of the montage cue. The montage uses
-     * it to decide whether the next slideshow click still fits; without it a
-     * slow host would overrun the cell deadline and stop the show.
-     * @param {{ budgetMs?: number } | number} [budget]
+     * Publishes the authored cell budget of the montage cue and when the cue was activated. The montage uses it to
+     * decide whether the next slideshow click still fits; without it a slow host would overrun the cell deadline and
+     * stop the show. Each call replaces the previous cue's budget, so an unbounded cue never inherits a limit.
+     * @param {{ budgetMs?: number, activatedAt?: number } | number} [budget]
      */
     setShowMediaBudget(budget) {
       const value = typeof budget === 'number' ? budget : Number(budget?.budgetMs) || 0;
-      if (Number.isFinite(value) && value > 0) montageBudgetMs = value;
+      const activatedAt = typeof budget === 'number' ? null : Number(budget?.activatedAt);
+      montageBudgetMs = Number.isFinite(value) && value > 0 ? value : 0;
+      montageActivatedAt = montageBudgetMs > 0 && Number.isFinite(activatedAt) ? activatedAt : null;
       return montageBudgetMs;
     },
 
@@ -597,11 +602,10 @@ export function createImsShowMediaTarget(root, {
         // cell budget: a click is only presented while the remaining budget can
         // still carry it, so a slow host degrades to the gallery API instead of
         // overrunning the cell deadline and stopping the show.
-        const startedAtMs = globalThis.performance?.now?.() ?? Date.now();
-        const elapsedMs = () => Math.max(
-          0,
-          (globalThis.performance?.now?.() ?? Date.now()) - startedAtMs,
-        );
+        const now = () => globalThis.performance?.now?.() ?? Date.now();
+        // Without an activation time the montage measures from its own start, as before.
+        const startedAtMs = montageActivatedAt ?? now();
+        const elapsedMs = () => Math.max(0, now() - startedAtMs);
         let expectedClickCostMs = MONTOURGE_CLICK_COST_MS;
         const remainingHoldsMs = (fromIndex) => frames
           .slice(fromIndex)
