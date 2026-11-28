@@ -6,6 +6,12 @@
  */
 export const CV_SHOW_EFFECT_GRACE_MS = 1_000;
 
+/**
+ * Part of the engine grace a scroll may spend on slower motion. The rest stays
+ * for main-thread stalls, so a smoother push never turns into a missed deadline.
+ */
+export const CV_SHOW_SCROLL_GRACE_SHARE_MS = Math.round(CV_SHOW_EFFECT_GRACE_MS * 0.4);
+
 const OUTCOME_RESERVE_MS = 700;
 const SETTLE_MARGIN_MS = 150;
 const MIN_GESTURE_MS = 300;

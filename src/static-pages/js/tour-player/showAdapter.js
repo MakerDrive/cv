@@ -5,7 +5,7 @@ import {
   waitForShowVisualSettlement,
 } from 'symbiote-ui/chat/show-runtime';
 import { isCvShowDecorativeCell } from './failurePolicy.js';
-import { createNavigationBudget, runBudgetedNavigationGesture } from './navigationBudget.js';
+import { createNavigationBudget, runBudgetedNavigationGesture } from './effectBudget.js';
 import { getShowLog } from '../show-log/index.js';
 
 export const CV_SHOW_DIRECTIVE_TYPES = Object.freeze([

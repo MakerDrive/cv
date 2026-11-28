@@ -53,6 +53,7 @@ import {
   shouldDeferCvShowNavigationTarget,
   waitForPortfolioMapTargetVisualSettlement,
 } from './targetResolution.js';
+import { CV_SHOW_SCROLL_GRACE_SHARE_MS } from './effectBudget.js';
 import {
   CV_SHOW_SEEK_KEYS,
   pathMatchesSelector,
@@ -818,6 +819,7 @@ export function createPanelActionAdapter(workspace, runtime, { prepareMedia = nu
       cursor: bypassScrollSettlement ? null : getCursor(),
       budgetMs: handBudgetMs,
       durationMs,
+      overrunMs: Number(context?.presentationBudgetMs) > 0 ? CV_SHOW_SCROLL_GRACE_SHARE_MS : 0,
     });
     if (bypassScrollSettlement) {
       await animateCvShowScrollIntoView(ready.target, {

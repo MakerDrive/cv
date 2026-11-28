@@ -1,3 +1,5 @@
+import { getShowLog } from '../show-log/index.js';
+
 const PORTFOLIO_MAP_TARGET_PREFIX = 'portfolio.map.';
 
 /**
@@ -817,6 +819,7 @@ export function animateCvShowScrollWithHand(target, { document, signal, duration
   const delta = primary ? primary.endTop - primary.startTop : 0;
   if (!primary || Math.abs(delta) < 48) {
     applyOffsets(rows, 1);
+    getShowLog().debug('scroll', 'motion', { mode: 'none', distancePx: Math.round(delta) });
     return Promise.resolve();
   }
 
@@ -869,6 +872,15 @@ export function animateCvShowScrollWithHand(target, { document, signal, duration
     const weightSum = pushWeights.reduce((sum, weight) => sum + weight, 0);
     const pushBudget = Math.max(150, room - (pushes - 1) * liftMs);
     const pushMs = pushWeights.map((weight) => Math.max(120, (pushBudget * weight) / weightSum));
+    getShowLog().info('scroll', 'motion', {
+      mode: 'hand',
+      distancePx: Math.round(delta),
+      durationMs: Math.round(durationMs),
+      approachMs: Math.round(approachMs),
+      pushes,
+      pushMs: Math.round(pushMs[0]),
+      pxPerSecond: Math.round((stroke / pushMs[0]) * 1_000),
+    });
 
     let phase = 'approach';
     let index = 0;
@@ -921,16 +933,20 @@ export function animateCvShowScrollWithHand(target, { document, signal, duration
  * @param {Element} target
  * @param {{
  *   document?: Document, signal?: AbortSignal, cursor?: any,
- *   budgetMs?: number, durationMs?: number,
- * }} [options] `budgetMs`: the room the gesture has; `durationMs`: the plain animation's length
+ *   budgetMs?: number, durationMs?: number, overrunMs?: number,
+ * }} [options] `budgetMs`: the room the gesture has; `durationMs`: the plain animation's length;
+ *   `overrunMs`: deadline grace the push may also spend
  * @returns {Promise<void>}
  */
 export function scrollCvShowSpaceIntoView(target, {
-  document, signal, cursor = null, budgetMs = 0, durationMs = 300,
+  document, signal, cursor = null, budgetMs = 0, durationMs = 300, overrunMs = 0,
 } = {}) {
-  return Number(budgetMs) >= HAND_SCROLL_MIN_BUDGET_MS && cursor
-    ? animateCvShowScrollWithHand(target, { document, signal, cursor, durationMs: Math.max(360, budgetMs - 350) })
-    : animateCvShowScrollIntoView(target, { document, signal, durationMs });
+  let handMs = Math.max(360, budgetMs - 350 + Math.max(0, Number(overrunMs) || 0));
+  if (Number(budgetMs) >= HAND_SCROLL_MIN_BUDGET_MS && cursor) {
+    return animateCvShowScrollWithHand(target, { document, signal, cursor, durationMs: handMs });
+  }
+  getShowLog().info('scroll', 'motion', { mode: 'plain', durationMs, budgetMs, cursor: Boolean(cursor) });
+  return animateCvShowScrollIntoView(target, { document, signal, durationMs });
 }
 
 export const HAND_SCROLL_MIN_BUDGET_MS = 600;
